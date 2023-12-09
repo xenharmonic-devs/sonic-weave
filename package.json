@@ -1,0 +1,56 @@
+{
+  "name": "sonic-weave",
+  "version": "0.0.0",
+  "author": "Lumi Pakkanen",
+  "description": "The SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments",
+  "license": "MIT",
+  "main": "dist/index",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xenharmonic-devs/sonic-weave.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xenharmonic-devs/sonic-weave/issues"
+  },
+  "homepage": "https://github.com/xenharmonic-devs/sonic-weave#readme",
+  "keywords": [
+    "Microtonal",
+    "Music",
+    "Xenharmonic",
+    "Scales",
+    "Frequency",
+    "Equal Temperament",
+    "DSL"
+  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/frostburn"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile-parser": "peggy src/sw2.pegjs -o src/sw2-ast.js",
+    "precompile": "npm run compile-parser",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint",
+    "test": "vitest",
+    "doc": "typedoc src/index.ts . --name sonic-weave"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.2",
+    "gts": "^5.2.0",
+    "peggy": "^3.0.2",
+    "typedoc": "^0.25.4",
+    "typescript": "~5.2.0",
+    "vitest": "^1.0.2"
+  },
+  "dependencies": {
+    "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils"
+  }
+}

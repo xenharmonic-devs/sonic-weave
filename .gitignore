@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Typedoc
+
+docs/
+
+# Generated grammars
+
+src/sw2-ast.js
