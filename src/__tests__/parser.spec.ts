@@ -8,7 +8,7 @@ describe('SonicWeave parser', () => {
     expect(scale[0].value.toBigInteger()).toBe(3n);
   });
 
-  it.skip('evaluates zero', () => {
+  it('evaluates zero', () => {
     const scale = parseSource('0;');
     expect(scale).toHaveLength(1);
     expect(scale[0].value.toBigInteger()).toBe(0n);
