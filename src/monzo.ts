@@ -10,7 +10,11 @@ import {
   toMonzoAndResidual,
   valueToCents,
   mmod,
+  BIG_INT_PRIMES,
 } from 'xen-dev-utils';
+
+import {bigGcd} from './utils';
+import {NedoLiteral, Primary} from './expression';
 
 export type FractionalMonzo = Fraction[];
 
@@ -36,23 +40,6 @@ export function setNumberOfComponents(n: number) {
  */
 export function getNumberOfComponents() {
   return NUMBER_OF_COMPONENTS;
-}
-
-/**
- * Greatest common divisor of two integers.
- * @param a The first integer.
- * @param b The second integer.
- * @returns The largest integer that divides a and b.
- */
-export function bigGcd(a: bigint, b: bigint): bigint {
-  if (!a) return b;
-  if (!b) return a;
-  while (true) {
-    a %= b;
-    if (!a) return b;
-    b %= a;
-    if (!b) return a;
-  }
 }
 
 /**
@@ -322,14 +309,14 @@ export class TimeMonzo {
    * @returns Musical ratio as an integer in linear space corresponding to the unit of time.
    * @throws An error if the time monzo cannot be represented as an integer.
    */
-  toInteger() {
+  toBigInteger() {
     if (this.cents !== 0) {
       throw new Error('Unable to convert irrational number to integer');
     }
     if (this.residual.d !== 1) {
       throw new Error('Unable to convert fractional number to integer');
     }
-    let result = this.residual.n;
+    let result = BigInt(this.residual.n);
     this.primeExponents.forEach((component, i) => {
       if (component.d !== 1) {
         throw new Error('Unable to convert irrational number to integer');
@@ -337,7 +324,7 @@ export class TimeMonzo {
       if (component.s < 0) {
         throw new Error('Unable to convert fractional number to integer');
       }
-      result *= PRIMES[i] ** component.n;
+      result *= BIG_INT_PRIMES[i] ** BigInt(component.n);
     });
     return result;
   }
@@ -437,6 +424,21 @@ export class TimeMonzo {
    */
   isScalar() {
     return this.timeExponent.n === 0;
+  }
+
+  isIntegral() {
+    if (this.cents !== 0) {
+      return false;
+    }
+    if (this.residual.d !== 1) {
+      return false;
+    }
+    for (const component of this.primeExponents) {
+      if (component.s < 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -1052,5 +1054,58 @@ export class TimeMonzo {
       result = result.inverse().add(continuedFraction[i]);
     }
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
+  }
+
+  as(node: Primary): Primary | undefined {
+    switch (node.type) {
+      case 'PlainLiteral':
+        return {...node, value: this.toBigInteger()};
+      case 'NedoLiteral':
+        return this.asNedoLiteral(node);
+      default:
+        return undefined;
+    }
+  }
+
+  asNedoLiteral(node: NedoLiteral): NedoLiteral | undefined {
+    if (this.isEqualTemperament()) {
+      const {fractionOfEquave, equave} = this.toEqualTemperament();
+      if (equave.compare(2)) {
+        return undefined;
+      }
+      const denominator = lcm(fractionOfEquave.d, Number(node.denominator));
+      if (denominator === Number(node.denominator)) {
+        return {
+          ...node,
+          numerator: BigInt(
+            (denominator / fractionOfEquave.d) * fractionOfEquave.n
+          ),
+        };
+      }
+      return {
+        ...node,
+        numerator: BigInt(fractionOfEquave.n),
+        denominator: BigInt(fractionOfEquave.d),
+      };
+    }
+    return undefined;
+  }
+
+  toString(linear = true) {
+    if (linear) {
+      if (this.isIntegral()) {
+        return this.toBigInteger().toString();
+      }
+    } else {
+      if (this.isEqualTemperament()) {
+        const {fractionOfEquave, equave} = this.toEqualTemperament();
+        const backslashed = fractionOfEquave.toFraction().replace('/', '\\');
+        if (equave.compare(2) || !backslashed.includes('\\')) {
+          return `${backslashed}<${equave.toFraction()}>`;
+        }
+        return backslashed;
+      }
+    }
+    throw new Error('String conversion incomplete');
   }
 }

@@ -1,10 +1,12 @@
 {{
-  function BinaryExpression(operator, left, right) {
+  function BinaryExpression(operator, left, right, preferLeft, preferRight) {
     return {
       type: 'BinaryExpression',
       operator,
       left,
-      right
+      right,
+      preferLeft,
+      preferRight,
     }
   }
 
@@ -14,9 +16,9 @@
 
   function operatorReducer (result, element) {
     const left = result;
-    const [op, right] = element;
+    const [preferLeft, op, preferRight, right] = element;
 
-    return BinaryExpression(op, left, right);
+    return BinaryExpression(op, left, right, !!preferLeft, !!preferRight);
   }
 }}
 
@@ -48,13 +50,23 @@ ExpressionStatement
   }
 
 Expression
-  = head:Term tail:(_ @('+' / '-') _ @Term)* {
+  = head:Term tail:(_ @'~'? @('+' / '-') @'~'? _ @Term)* {
       return tail.reduce(operatorReducer, head);
     }
 
 Term
-  = PlainLiteral
+  = NedoLiteral
+  / PlainLiteral
   / ColorLiteral
+
+NedoLiteral
+  = numerator: Integer '\\' denominator: PositiveInteger {
+    return {
+      type: 'NedoLiteral',
+      numerator,
+      denominator,
+    }
+  }
 
 PlainLiteral
   = value: Integer {
@@ -74,6 +86,9 @@ ColorLiteral
 
 Integer
   = num:$("0" / ([1-9] [0-9]*)) { return BigInt(num) }
+
+PositiveInteger
+  = num:$([1-9] [0-9]*) { return BigInt(num) }
 
 HexDigit
   = [A-Fa-f0-9]

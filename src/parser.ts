@@ -1,4 +1,5 @@
-import {PlainLiteral, Primary} from './expression';
+import {Fraction} from 'xen-dev-utils';
+import {NedoLiteral, PlainLiteral, Primary} from './expression';
 import {Interval, Color} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
@@ -20,6 +21,8 @@ type BinaryExpression = {
   operator: '+' | '-';
   left: Expression;
   right: Expression;
+  preferLeft: boolean;
+  preferRight: boolean;
 };
 
 type Expression = BinaryExpression | Primary;
@@ -50,6 +53,8 @@ class ExpressionVisitor {
         return this.visitBinaryExpression(node);
       case 'PlainLiteral':
         return this.visitPlainLiteral(node);
+      case 'NedoLiteral':
+        return this.visitNedoLiteral(node);
       case 'ColorLiteral':
         return new Color(node.value);
     }
@@ -60,6 +65,21 @@ class ExpressionVisitor {
     const right = this.visit(node.right);
     if (left instanceof Color || right instanceof Color) {
       throw new Error('Cannot operate on colors');
+    }
+    if (node.preferLeft || node.preferRight) {
+      let value: TimeMonzo;
+      switch (node.operator) {
+        case '+':
+          value = left.value.add(right.value);
+          break;
+        case '-':
+          value = left.value.sub(right.value);
+          break;
+      }
+      if (node.preferLeft) {
+        return new Interval(value, left.domain, value.as(node.left as Primary));
+      }
+      return new Interval(value, right.domain, value.as(node.right as Primary));
     }
     switch (node.operator) {
       case '+':
@@ -72,6 +92,13 @@ class ExpressionVisitor {
   visitPlainLiteral(node: PlainLiteral): Interval {
     const value = TimeMonzo.fromBigInt(node.value);
     return new Interval(value, 'linear', node);
+  }
+
+  visitNedoLiteral(node: NedoLiteral): Interval {
+    const value = TimeMonzo.fromEqualTemperament(
+      new Fraction(Number(node.numerator), Number(node.denominator))
+    );
+    return new Interval(value, 'logarithmic', node);
   }
 }
 

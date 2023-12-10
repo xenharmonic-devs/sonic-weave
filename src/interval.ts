@@ -1,4 +1,4 @@
-import {Primary, addNodes, subNodes} from './expression';
+import {Primary, addNodes, subNodes, toString} from './expression';
 import {TimeMonzo} from './monzo';
 
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
@@ -44,5 +44,12 @@ export class Interval {
       return new Interval(this.value.sub(other.value), this.domain, node);
     }
     return new Interval(this.value.div(other.value), this.domain, node);
+  }
+
+  toString() {
+    if (this.node) {
+      return toString(this.node);
+    }
+    return this.value.toString(this.domain === 'linear');
   }
 }
