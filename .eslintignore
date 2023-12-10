@@ -1,3 +1,4 @@
 dist/
 docs/
+src/sonic-weave-ast.js
 src/scale-workshop-2-ast.js
