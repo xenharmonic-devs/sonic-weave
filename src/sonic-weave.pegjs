@@ -1,6 +1,22 @@
 {{
+  function BinaryExpression(operator, left, right) {
+    return {
+      type: 'BinaryExpression',
+      operator,
+      left,
+      right
+    }
+  }
+
   function prepend(head, tail) {
     return [head].concat(tail ?? []);
+  }
+
+  function operatorReducer (result, element) {
+    const left = result;
+    const [op, right] = element;
+
+    return BinaryExpression(op, left, right);
   }
 }}
 
@@ -32,6 +48,11 @@ ExpressionStatement
   }
 
 Expression
+  = head:Term tail:(_ @('+' / '-') _ @Term)* {
+      return tail.reduce(operatorReducer, head);
+    }
+
+Term
   = PlainLiteral
   / ColorLiteral
 
