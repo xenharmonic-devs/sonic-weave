@@ -32,7 +32,7 @@
   "scripts": {
     "lint": "gts lint",
     "clean": "gts clean",
-    "compile-parser": "peggy src/sw2.pegjs -o src/sw2-ast.js",
+    "compile-parser": "peggy src/scale-workshop-2.pegjs -o src/scale-workshop-2-ast.js",
     "precompile": "npm run compile-parser",
     "compile": "tsc",
     "fix": "gts fix",
@@ -52,5 +52,8 @@
   },
   "dependencies": {
     "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils"
+  },
+  "engines": {
+    "node": ">=10.6.0"
   }
 }
