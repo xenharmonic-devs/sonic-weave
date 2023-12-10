@@ -135,4 +135,4 @@ docs/
 
 # Generated grammars
 
-src/sw2-ast.js
+src/scale-workshop-2-ast.js

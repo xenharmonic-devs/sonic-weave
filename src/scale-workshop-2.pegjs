@@ -111,16 +111,20 @@ Primary
   / Monzo
   / PlainNumber
 
-Integer = num:$[0-9]+ { return parseInt(num, 10) }
+Integer
+  = num:$('0' / ([1-9] [0-9]*)) { return BigInt(num) }
+
+FractionalPart
+  = $[0-9]*
 
 SignedInteger
   = sign:'-'? value:Integer { return sign ? -value : value }
 
 DotDecimal
-  = whole:Integer? '.' fractional:$[0-9]* { return CentsLiteral(whole, fractional) }
+  = whole:Integer? '.' fractional:FractionalPart { return CentsLiteral(whole, fractional) }
 
 CommaDecimal
-  = whole:Integer? ',' fractional:$[0-9]* { return NumericLiteral(whole, fractional) }
+  = whole:Integer? ',' fractional:FractionalPart { return NumericLiteral(whole, fractional) }
 
 SlashFraction
   = numerator:Integer '/' denominator:Integer { return FractionLiteral(numerator, denominator) }
