@@ -109,4 +109,26 @@ describe('SonicWeave parser', () => {
     const interval = scale[0];
     expect(interval.value.totalCents()).toBeCloseTo(0.955);
   });
+
+  it('can parse otonal chords', () => {
+    const scale = parseSource('5:TAU:7:3\\1:9:10;');
+    expect(scale).toHaveLength(5);
+
+    expect(scale[0].domain).toBe('linear');
+    expect(scale[1].domain).toBe('linear');
+    expect(scale[2].domain).toBe('logarithmic');
+    expect(scale[3].domain).toBe('linear');
+    expect(scale[4].domain).toBe('linear');
+
+    expect(scale[0].value.valueOf()).toBeCloseTo((2 * Math.PI) / 5);
+    expect(scale[1].value.toFraction().equals('7/5')).toBe(true);
+    expect(scale[2].value.toFraction().equals('8/5')).toBe(true);
+    expect(scale[3].value.toFraction().equals('9/5')).toBe(true);
+    expect(scale[4].value.toBigInteger()).toBe(2n);
+  });
+
+  it('can parse harmonic series segments', () => {
+    const scale = parseSource('4 :: 8;');
+    expect(scale.map(i => i.toString()).join(';')).toBe('5/4;6/4;7/4;8/4');
+  });
 });

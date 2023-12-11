@@ -7,7 +7,7 @@ import {
   FractionLiteral,
   HertzLiteral,
 } from './expression';
-import {Interval, Color} from './interval';
+import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {BUILTIN_CONTEXT} from './builtin';
@@ -74,13 +74,26 @@ type ArrowFunction = {
   expression: Expression;
 };
 
+type OtonalChord = {
+  type: 'OtonalChord';
+  intervals: Expression[];
+};
+
+type HarmonicSegment = {
+  type: 'HarmonicSegment';
+  root: bigint;
+  end: bigint;
+};
+
 type Expression =
   | BinaryExpression
   | CallExpression
   | ArrowFunction
   | IntervalLiteral
   | ColorLiteral
-  | Identifier;
+  | Identifier
+  | OtonalChord
+  | HarmonicSegment;
 
 type SonicWeaveValue = Function | Interval | Interval[] | Color | string;
 
@@ -122,9 +135,14 @@ export class StatementVisitor {
       }
     } else if (value instanceof Interval) {
       this.scale.push(value);
-    } else if (typeof value === 'function') {
+    } else if (Array.isArray(value)) {
+      this.scale.push(...value);
+    } else if (value === undefined) {
+      /* Do nothing */
+    } else {
+      const bound = value.bind(this);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.scale = this.scale.map(value.bind(this) as any);
+      this.scale = this.scale.map(i => bound(i));
       this.context.set('$', this.scale);
     }
   }
@@ -145,7 +163,9 @@ class ExpressionVisitor {
     this.context = context;
   }
 
-  visit(node: Expression): Interval | Color | Function | undefined {
+  visit(
+    node: Expression
+  ): Interval | Interval[] | Color | Function | undefined {
     switch (node.type) {
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
@@ -169,6 +189,10 @@ class ExpressionVisitor {
         return new Color(node.value);
       case 'Identifier':
         return this.visitIdentifier(node);
+      case 'OtonalChord':
+        return this.visitOtonalChord(node);
+      case 'HarmonicSegment':
+        return this.visitHarmonicSegment(node);
     }
     node satisfies never;
   }
@@ -184,6 +208,9 @@ class ExpressionVisitor {
     }
     if (typeof left === 'function' || typeof right === 'function') {
       throw new Error('Cannot operate on functions');
+    }
+    if (Array.isArray(left) || Array.isArray(right)) {
+      throw new Error('Cannot operate on arrays');
     }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
@@ -290,6 +317,46 @@ class ExpressionVisitor {
       return this.context.get(node.id) as Interval;
     }
     throw new Error(`Reference error: ${node.id} is not defined`);
+  }
+
+  visitOtonalChord(node: OtonalChord): Interval[] {
+    const domains: Domain[] = [];
+    const monzos: TimeMonzo[] = [];
+    for (const expression of node.intervals) {
+      const interval = this.visit(expression);
+      if (interval instanceof Interval) {
+        monzos.push(interval.value);
+        domains.push(interval.domain);
+      } else {
+        throw new Error('Type error: Can only stack intervals in a chord');
+      }
+    }
+    domains.shift();
+    const root = monzos.shift()!;
+    const intervals: Interval[] = [];
+    for (let i = 0; i < monzos.length; ++i) {
+      intervals.push(new Interval(monzos[i].div(root), domains[i]));
+    }
+    return intervals;
+  }
+
+  visitHarmonicSegment(node: HarmonicSegment): Interval[] {
+    const intervals: Interval[] = [];
+    for (let n = node.root + 1n; n <= node.end; ++n) {
+      const syntheticNode: FractionLiteral = {
+        type: 'FractionLiteral',
+        numerator: n,
+        denominator: node.root,
+      };
+      intervals.push(
+        new Interval(
+          TimeMonzo.fromBigNumeratorDenominator(n, node.root),
+          'linear',
+          syntheticNode
+        )
+      );
+    }
+    return intervals;
   }
 }
 

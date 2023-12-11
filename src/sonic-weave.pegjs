@@ -78,7 +78,7 @@ Factor
     }
 
 Group
-  = _ @(UnaryExpression / Primary) _
+  = _ @(UnaryExpression / OtonalChord / Primary) _
 
 UnaryExpression
   = operator: ('+' / '-' / '%' / '÷') operand: Primary {
@@ -109,6 +109,7 @@ Primary
   / NedoLiteral
   / DotCentsLiteral
   / ColorLiteral
+  / HarmonicSegment
   / ArrowFunction
   / CallExpression
   / Identifier
@@ -183,6 +184,23 @@ ColorLiteral
     return {
       type: "ColorLiteral",
       value,
+    }
+  }
+
+HarmonicSegment
+  = root: PositiveInteger _ '::' _ end: PositiveInteger {
+    return {
+      type: 'HarmonicSegment',
+      root,
+      end,
+    }
+  }
+
+OtonalChord
+  = intervals: Primary|2.., _ ':' _| {
+    return {
+      type: 'OtonalChord',
+      intervals,
     }
   }
 

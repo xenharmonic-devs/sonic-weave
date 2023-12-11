@@ -59,6 +59,19 @@ export class Interval {
     return new Interval(this.value.mul(other.value), this.domain);
   }
 
+  div(other: Interval) {
+    if (other.domain === 'logarithmic') {
+      if (this.domain !== 'logarithmic') {
+        throw new Error('Domains must match in non-scalar division');
+      }
+      return new Interval(this.value.log(other.value), 'linear');
+    }
+    if (this.domain === 'logarithmic') {
+      return new Interval(this.value.pow(other.value.inverse()), this.domain);
+    }
+    return new Interval(this.value.div(other.value), this.domain);
+  }
+
   compare(other: Interval) {
     return this.value.valueOf() - other.value.valueOf();
   }
