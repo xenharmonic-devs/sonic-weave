@@ -46,6 +46,19 @@ export class Interval {
     return new Interval(this.value.div(other.value), this.domain, node);
   }
 
+  mul(other: Interval) {
+    if (this.domain !== 'linear' && other.domain !== 'linear') {
+      throw new Error('At least one domain must be linear in multiplication');
+    }
+    if (other.domain === 'logarithmic') {
+      return new Interval(other.value.pow(this.value), other.domain);
+    }
+    if (this.domain === 'logarithmic') {
+      return new Interval(this.value.pow(other.value), this.domain);
+    }
+    return new Interval(this.value.mul(other.value), this.domain);
+  }
+
   compare(other: Interval) {
     return this.value.valueOf() - other.value.valueOf();
   }

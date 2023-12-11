@@ -8,6 +8,10 @@ function d(thing: any) {
   console.dir(thing, {depth: null});
 }
 
+function parseSingle(source: string) {
+  return parse(source + ';').body[0];
+}
+
 describe('SonicWeave Abstract Syntax Tree parser', () => {
   it('parses a plain literal (single number)', () => {
     const ast = parse('5;');
@@ -16,7 +20,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       body: [
         {
           type: 'ExpressionStatement',
-          expression: {type: 'PlainLiteral', value: 5n},
+          expression: {type: 'IntegerLiteral', value: 5n},
         },
       ],
     });
@@ -42,7 +46,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       body: [
         {
           type: 'ExpressionStatement',
-          expression: {type: 'PlainLiteral', value: 7n},
+          expression: {type: 'IntegerLiteral', value: 7n},
         },
         {
           type: 'ExpressionStatement',
@@ -54,5 +58,43 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
 
   it('rejects a single comma', () => {
     expect(() => parse(',;')).toThrow();
+  });
+
+  it('parses kilohertz', () => {
+    const ast = parseSingle('kHz');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'HertzLiteral', prefix: 'k'},
+    });
+  });
+
+  it('parses hertz with implicit scalar multiplication', () => {
+    const ast = parseSingle('420.69 Hz');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '',
+        left: {type: 'DecimalLiteral', whole: 420n, fractional: '69'},
+        right: {type: 'HertzLiteral', prefix: ''},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('parses cents with implicit units', () => {
+    const ast = parseSingle('1.955');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '',
+        left: {type: 'DecimalLiteral', whole: 1n, fractional: '955'},
+        right: {type: 'CentLiteral'},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
   });
 });

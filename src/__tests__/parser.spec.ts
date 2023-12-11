@@ -26,7 +26,7 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.value.toBigInteger()).toBe(7n);
-    if (interval.node?.type === 'PlainLiteral') {
+    if (interval.node?.type === 'IntegerLiteral') {
       expect(interval.node.value).toBe(7n);
     } else {
       expect.fail();
@@ -94,5 +94,19 @@ describe('SonicWeave parser', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '8/7;4/3;8/5;2;8/3;4;8'
     );
+  });
+
+  it('adds hertz', () => {
+    const scale = parseSource('69 mHz + 420 Hz + 9 kHz;');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.toString()).toBe('9420.069 Hz');
+  });
+
+  it('subtracts cents', () => {
+    const scale = parseSource('1.955 - c;');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.value.totalCents()).toBeCloseTo(0.955);
   });
 });

@@ -1,19 +1,22 @@
 import {Fraction} from 'xen-dev-utils';
 import {
   NedoLiteral,
-  PlainLiteral,
+  IntegerLiteral,
   IntervalLiteral,
   DecimalLiteral,
   FractionLiteral,
+  HertzLiteral,
 } from './expression';
 import {Interval, Color} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {BUILTIN_CONTEXT} from './builtin';
+import {metricExponent} from './utils';
 
 type BinaryOperator =
   | '+'
   | '-'
+  | ''
   | '*'
   | '×'
   | '%'
@@ -127,6 +130,15 @@ export class StatementVisitor {
   }
 }
 
+const ZERO = new Fraction(0);
+const ONE = new Fraction(1);
+const NEGATIVE_ONE = new Fraction(-1);
+const CENT = new Interval(
+  new TimeMonzo(ZERO, [new Fraction(1, 1200)]),
+  'logarithmic',
+  {type: 'CentLiteral'}
+);
+
 class ExpressionVisitor {
   context: VisitorContext;
   constructor(context: VisitorContext) {
@@ -141,19 +153,24 @@ class ExpressionVisitor {
         return this.visitCallExpression(node);
       case 'ArrowFunction':
         return this.visitArrowFunction(node);
-      case 'PlainLiteral':
-        return this.visitPlainLiteral(node);
+      case 'IntegerLiteral':
+        return this.visitIntegerLiteral(node);
       case 'DecimalLiteral':
         return this.visitDecimalLiteral(node);
       case 'FractionLiteral':
         return this.visitFractionLiteral(node);
       case 'NedoLiteral':
         return this.visitNedoLiteral(node);
+      case 'CentLiteral':
+        return CENT;
+      case 'HertzLiteral':
+        return this.visitHertzLiteral(node);
       case 'ColorLiteral':
         return new Color(node.value);
       case 'Identifier':
         return this.visitIdentifier(node);
     }
+    node satisfies never;
   }
 
   visitBinaryExpression(node: BinaryExpression): Interval {
@@ -201,6 +218,10 @@ class ExpressionVisitor {
         return left.add(right);
       case '-':
         return left.sub(right);
+      case '×':
+      case '*':
+      case '':
+        return left.mul(right);
       default:
         throw new Error('Unimplemented');
     }
@@ -225,7 +246,7 @@ class ExpressionVisitor {
     return realization;
   }
 
-  visitPlainLiteral(node: PlainLiteral): Interval {
+  visitIntegerLiteral(node: IntegerLiteral): Interval {
     const value = TimeMonzo.fromBigInt(node.value);
     return new Interval(value, 'linear', node);
   }
@@ -254,6 +275,14 @@ class ExpressionVisitor {
       new Fraction(Number(node.numerator), Number(node.denominator))
     );
     return new Interval(value, 'logarithmic', node);
+  }
+
+  visitHertzLiteral(node: HertzLiteral): Interval {
+    const value = new TimeMonzo(ZERO, [ONE, ZERO, ONE]).pow(
+      metricExponent(node.prefix)
+    );
+    value.timeExponent = NEGATIVE_ONE;
+    return new Interval(value, 'linear', node);
   }
 
   visitIdentifier(node: Identifier): Interval {

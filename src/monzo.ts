@@ -441,6 +441,39 @@ export class TimeMonzo {
     return true;
   }
 
+  isDecimal() {
+    if (this.cents !== 0) {
+      return false;
+    }
+    let d = this.residual.d;
+    while (d % 2 === 0) {
+      d /= 2;
+    }
+    while (d % 5 === 0) {
+      d /= 5;
+    }
+    if (d !== 1) {
+      return false;
+    }
+    for (const component of this.primeExponents) {
+      if (component.d !== 1) {
+        return false;
+      }
+    }
+    if (this.primeExponents.length < 2) {
+      return true;
+    }
+    if (this.primeExponents[1].s < 0) {
+      return false;
+    }
+    for (let i = 3; i < this.primeExponents.length; ++i) {
+      if (this.primeExponents[i].s < 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Check if the time monzo represents a musical fraction or fractional amount of time/frequency.
    * @returns `true` if the time monzo can be interpreted as a ratio in frequency-space.
@@ -561,7 +594,7 @@ export class TimeMonzo {
   add(other: TimeMonzo): TimeMonzo {
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot add time monzos with disparate units. Have s**${this.timeExponent.toFraction()} + s**${other.timeExponent.toFraction()}`
+        `Cannot add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}`
       );
     }
     let result: TimeMonzo;
@@ -586,7 +619,7 @@ export class TimeMonzo {
   sub(other: TimeMonzo): TimeMonzo {
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot subtract time monzos with disparate units. Have s**${this.timeExponent.toFraction()} + s**${other.timeExponent.toFraction()}`
+        `Cannot subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}`
       );
     }
     let result: TimeMonzo;
@@ -906,7 +939,7 @@ export class TimeMonzo {
   mmod(other: TimeMonzo) {
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot mod time monzos with disparate units. Have s**${this.timeExponent.toFraction()} mod s**${other.timeExponent.toFraction()}`
+        `Cannot mod time monzos with disparate units. Have s^${this.timeExponent.toFraction()} mod s^${other.timeExponent.toFraction()}`
       );
     }
     let result: TimeMonzo;
@@ -1058,7 +1091,7 @@ export class TimeMonzo {
 
   as(node: IntervalLiteral): IntervalLiteral | undefined {
     switch (node.type) {
-      case 'PlainLiteral':
+      case 'IntegerLiteral':
         return {...node, value: this.toBigInteger()};
       case 'NedoLiteral':
         return this.asNedoLiteral(node);
@@ -1093,10 +1126,18 @@ export class TimeMonzo {
 
   toString(linear = true) {
     if (linear) {
-      if (this.isIntegral()) {
-        return this.toBigInteger().toString();
-      } else if (this.isFractional()) {
-        return this.toFraction().toFraction();
+      if (this.isScalar()) {
+        if (this.isIntegral()) {
+          return this.toBigInteger().toString();
+        } else if (this.isFractional()) {
+          return this.toFraction().toFraction();
+        }
+      } else {
+        if (this.isDecimal()) {
+          if (this.timeExponent.equals(NEGATIVE_ONE)) {
+            return `${this.toFraction().toString()} Hz`;
+          }
+        }
       }
       return this.valueOf().toString().replace('.', ',');
     } else {

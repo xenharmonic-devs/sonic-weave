@@ -1,7 +1,7 @@
-import {bigLcm} from './utils';
+import {MetricPrefix, bigLcm} from './utils';
 
-export type PlainLiteral = {
-  type: 'PlainLiteral';
+export type IntegerLiteral = {
+  type: 'IntegerLiteral';
   value: bigint;
 };
 
@@ -23,11 +23,22 @@ export type NedoLiteral = {
   denominator: bigint;
 };
 
+export type CentLiteral = {
+  type: 'CentLiteral';
+};
+
+export type HertzLiteral = {
+  type: 'HertzLiteral';
+  prefix: MetricPrefix;
+};
+
 export type IntervalLiteral =
-  | PlainLiteral
+  | IntegerLiteral
   | DecimalLiteral
   | FractionLiteral
-  | NedoLiteral;
+  | NedoLiteral
+  | CentLiteral
+  | HertzLiteral;
 
 export function addNodes(
   a?: IntervalLiteral,
@@ -36,7 +47,7 @@ export function addNodes(
   if (!a || !b) {
     return undefined;
   }
-  if (a.type === 'PlainLiteral' && b.type === 'PlainLiteral') {
+  if (a.type === 'IntegerLiteral' && b.type === 'IntegerLiteral') {
     return {
       type: a.type,
       value: a.value + b.value,
@@ -63,7 +74,7 @@ export function subNodes(
   if (!a || !b) {
     return undefined;
   }
-  if (a.type === 'PlainLiteral' && b.type === 'PlainLiteral') {
+  if (a.type === 'IntegerLiteral' && b.type === 'IntegerLiteral') {
     return {
       type: a.type,
       value: a.value - b.value,
@@ -91,6 +102,10 @@ export function toString(literal: IntervalLiteral) {
       return `${literal.numerator}/${literal.denominator}`;
     case 'DecimalLiteral':
       return `${literal.whole},${literal.fractional}`;
+    case 'CentLiteral':
+      return 'c';
+    case 'HertzLiteral':
+      return `${literal.prefix}Hz`;
     default:
       return literal.value.toString();
   }

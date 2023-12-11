@@ -73,14 +73,46 @@ Term
   }
 
 Factor
-  = NedoLiteral
+  = head:Group tail:(_ @'~'? @'^' @'~'? _ @Factor)* {
+      return tail.reduce(operatorReducer, head);
+    }
+
+Group
+  = _ @(UnaryExpression / Primary) _
+
+UnaryExpression
+  = operator: ('+' / '-' / '%' / '÷') operand: Primary {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+    }
+  }
+
+ScalarMultiple
+  = scalar: ScalarLike _ quantity: Quantity { return BinaryExpression('', scalar, quantity, false, false) }
+
+ScalarLike
+  = ParenthesizedExpression
+  / DotDecimal
   / CommaDecimal
   / FractionLiteral
-  / PlainLiteral
+  / IntegerLiteral
+
+Quantity
+  = HertzLiteral
+  / CentLiteral
+
+Primary
+  = ScalarMultiple
+  / Quantity
+  / NedoLiteral
+  / DotCentsLiteral
   / ColorLiteral
   / ArrowFunction
   / CallExpression
   / Identifier
+  / ScalarLike
 
 NedoLiteral
   = numerator: Integer '\\' denominator: PositiveInteger {
@@ -88,6 +120,16 @@ NedoLiteral
       type: 'NedoLiteral',
       numerator,
       denominator,
+    }
+  }
+
+DotDecimal
+  = !('.' [^0-9])
+  whole: Integer? '.' fractional: FractionalPart {
+    return {
+      type: 'DecimalLiteral',
+      whole: whole ?? 0n,
+      fractional: fractional,
     }
   }
 
@@ -110,11 +152,29 @@ FractionLiteral
     }
   }
 
-PlainLiteral
+IntegerLiteral
   = value: Integer {
     return {
-      type: "PlainLiteral",
+      type: "IntegerLiteral",
       value,
+    }
+  }
+
+DotCentsLiteral
+  = multiplier: DotDecimal {
+    return BinaryExpression('', multiplier, { type: 'CentLiteral' }, false, false);
+  }
+
+CentLiteral
+  = 'c' {
+    return { type: 'CentLiteral' };
+  }
+
+HertzLiteral
+  = prefix: MetricPrefix? 'Hz' {
+    return {
+      type: 'HertzLiteral',
+      prefix,
     }
   }
 
@@ -150,6 +210,12 @@ Identifier
       id,
     }
   }
+
+ParenthesizedExpression
+  = '(' _ @Expression _ ')'
+
+MetricPrefix
+  = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
 
 Integer
   = num:$("0" / ([1-9] [0-9]*)) { return BigInt(num) }
@@ -207,7 +273,7 @@ LineTerminator
 // Separator, Space
 Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c) }
 
-SourceCharacter
+SourceCharacter "any character"
   = SourceCharacterLow
   / SourceCharacterHigh
 
