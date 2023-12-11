@@ -9,6 +9,7 @@ import {
 import {Interval, Color} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
+import {BUILTIN_CONTEXT} from './builtin';
 
 type BinaryOperator =
   | '+'
@@ -64,17 +65,23 @@ type CallExpression = {
   callee: Identifier;
 };
 
+type ArrowFunction = {
+  type: 'ArrowFunction';
+  args: Identifier[];
+  expression: Expression;
+};
+
 type Expression =
   | BinaryExpression
   | CallExpression
+  | ArrowFunction
   | IntervalLiteral
   | ColorLiteral
   | Identifier;
 
-export type VisitorContext = Map<
-  string,
-  Function | Interval | Interval[] | Color | string
->;
+type SonicWeaveValue = Function | Interval | Interval[] | Color | string;
+
+export type VisitorContext = Map<string, SonicWeaveValue>;
 
 export class StatementVisitor {
   scale: Interval[];
@@ -112,6 +119,10 @@ export class StatementVisitor {
       }
     } else if (value instanceof Interval) {
       this.scale.push(value);
+    } else if (typeof value === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.scale = this.scale.map(value.bind(this) as any);
+      this.context.set('$', this.scale);
     }
   }
 }
@@ -122,12 +133,14 @@ class ExpressionVisitor {
     this.context = context;
   }
 
-  visit(node: Expression): Interval | Color | undefined {
+  visit(node: Expression): Interval | Color | Function | undefined {
     switch (node.type) {
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
       case 'CallExpression':
         return this.visitCallExpression(node);
+      case 'ArrowFunction':
+        return this.visitArrowFunction(node);
       case 'PlainLiteral':
         return this.visitPlainLiteral(node);
       case 'DecimalLiteral':
@@ -151,6 +164,9 @@ class ExpressionVisitor {
     }
     if (left === undefined || right === undefined) {
       throw new Error('Cannot operate on nothing');
+    }
+    if (typeof left === 'function' || typeof right === 'function') {
+      throw new Error('Cannot operate on functions');
     }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
@@ -192,9 +208,21 @@ class ExpressionVisitor {
 
   visitCallExpression(node: CallExpression) {
     if (this.context.has(node.callee.id)) {
-      return (this.context.get(node.callee.id) as Function)();
+      return (this.context.get(node.callee.id) as Function).bind(this)();
     }
     throw new Error(`Reference error: ${node.callee.id} is not defined`);
+  }
+
+  visitArrowFunction(node: ArrowFunction) {
+    function realization(...args: SonicWeaveValue[]) {
+      const localContext: VisitorContext = new Map(this.context);
+      for (let i = 0; i < Math.min(args.length, node.args.length); ++i) {
+        localContext.set(node.args[i].id, args[i]);
+      }
+      const localVisitor = new ExpressionVisitor(localContext);
+      return localVisitor.visit(node.expression);
+    }
+    return realization;
   }
 
   visitPlainLiteral(node: PlainLiteral): Interval {
@@ -243,14 +271,11 @@ export function parseAST(source: string): Program {
 export function parseSource(source: string): Interval[] {
   const program = parseAST(source);
   const visitor = new StatementVisitor();
-  visitor.context.set(
-    'TAU',
-    new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear')
-  );
-  visitor.context.set('sort', () => {
-    const scale = visitor.context.get('$') as Interval[];
-    scale.sort((a: Interval, b: Interval) => a.compare(b));
-  });
+  for (const name in BUILTIN_CONTEXT) {
+    const value = BUILTIN_CONTEXT[name];
+    visitor.context.set(name, value);
+  }
+
   for (const statement of program.body) {
     visitor.visit(statement);
   }

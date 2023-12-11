@@ -1095,6 +1095,8 @@ export class TimeMonzo {
     if (linear) {
       if (this.isIntegral()) {
         return this.toBigInteger().toString();
+      } else if (this.isFractional()) {
+        return this.toFraction().toFraction();
       }
       return this.valueOf().toString().replace('.', ',');
     } else {

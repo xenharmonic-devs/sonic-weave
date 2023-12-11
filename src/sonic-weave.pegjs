@@ -78,6 +78,7 @@ Factor
   / FractionLiteral
   / PlainLiteral
   / ColorLiteral
+  / ArrowFunction
   / CallExpression
   / Identifier
 
@@ -122,6 +123,15 @@ ColorLiteral
     return {
       type: "ColorLiteral",
       value,
+    }
+  }
+
+ArrowFunction
+  = args: Identifier|.., _ ','? _| _ '=>' _ expression: Expression {
+    return {
+      type: 'ArrowFunction',
+      args,
+      expression,
     }
   }
 
@@ -174,7 +184,7 @@ IdentifierPart
   / "\u200D"
 
 _ "whitespace"
-  = WhiteSpace*
+  = (WhiteSpace / Comment)*
 
 EOS = _ ";"
 
@@ -186,6 +196,13 @@ WhiteSpace
   / "\u00A0"
   / "u\FEFF"
   / Zs
+  / LineTerminator
+
+LineTerminator
+  = "\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
 
 // Separator, Space
 Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c) }
@@ -209,3 +226,15 @@ ID_Start
 
 ID_Continue
   = c:SourceCharacter &{ return /\p{ID_Continue}/u.test(c) }
+
+Comment
+  = MultiLineComment
+  / SingleLineComment
+
+MultiLineComment = "/*" $(!"*/" SourceCharacter)* "*/"
+
+SingleLineComment
+  = "//" $SingleLineCommentChar*
+
+SingleLineCommentChar
+  = !LineTerminator SourceCharacter

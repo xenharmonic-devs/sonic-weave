@@ -77,20 +77,22 @@ describe('SonicWeave parser', () => {
   });
 
   it('can declare variables', () => {
-    const ast = parseAST('i = 676/675;');
+    const ast = parseAST('i = 676/675 /* The Island comma */;');
     const visitor = new StatementVisitor();
     visitor.visit(ast.body[0]);
     expect(visitor.context.get('i')?.toString()).toBe('676/675');
   });
 
-  it.skip('can invert a scale', () => {
+  it('can invert a scale', () => {
     const scale = parseSource(`
-      2;3;4;5;6;7;8;
-      equave = pop();
-      i => equave %~ i;
-      reverse;
-      equave;
+      2;3;4;5;6;7;8; // Build scale
+      equave = pop(); // Pop from the scale
+      i => equave %~ i; // Functions map over the scale implicitly
+      reverse(); // Reverse the current scale
+      equave; // The default action is to push onto the current scale
     `);
-    console.log(scale);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '8/7;4/3;8/5;2;8/3;4;8'
+    );
   });
 });
