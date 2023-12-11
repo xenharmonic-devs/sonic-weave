@@ -39,7 +39,17 @@ Statements
   }
 
 Statement
-  = ExpressionStatement
+  = VariableDeclaration
+  / ExpressionStatement
+
+VariableDeclaration
+  = name: Identifier _ '=' _ value: Expression EOS {
+    return {
+      type: "VariableDeclaration",
+      name,
+      value,
+    }
+  }
 
 ExpressionStatement
   = expression: Expression EOS {
@@ -54,9 +64,18 @@ Expression
       return tail.reduce(operatorReducer, head);
     }
 
+MultiplicativeOperator
+  = $('*' / '×' / '%' / '÷' / 'mod' / 'reduce' / 'log' / 'dot')
+
 Term
+  = head:Factor tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @Factor)* {
+    return tail.reduce(operatorReducer, head);
+  }
+
+Factor
   = NedoLiteral
   / CommaDecimal
+  / FractionLiteral
   / PlainLiteral
   / ColorLiteral
   / CallExpression
@@ -78,6 +97,15 @@ CommaDecimal
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
+    }
+  }
+
+FractionLiteral
+  = numerator: Integer '/' denominator: PositiveInteger {
+    return {
+      type: 'FractionLiteral',
+      numerator,
+      denominator,
     }
   }
 

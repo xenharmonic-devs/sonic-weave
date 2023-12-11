@@ -11,13 +11,23 @@ export type DecimalLiteral = {
   fractional: string;
 };
 
+export type FractionLiteral = {
+  type: 'FractionLiteral';
+  numerator: bigint;
+  denominator: bigint;
+};
+
 export type NedoLiteral = {
   type: 'NedoLiteral';
   numerator: bigint;
   denominator: bigint;
 };
 
-export type IntervalLiteral = PlainLiteral | DecimalLiteral | NedoLiteral;
+export type IntervalLiteral =
+  | PlainLiteral
+  | DecimalLiteral
+  | FractionLiteral
+  | NedoLiteral;
 
 export function addNodes(
   a?: IntervalLiteral,
@@ -77,6 +87,8 @@ export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
       return `${literal.numerator}\\${literal.denominator}`;
+    case 'FractionLiteral':
+      return `${literal.numerator}/${literal.denominator}`;
     case 'DecimalLiteral':
       return `${literal.whole},${literal.fractional}`;
     default:

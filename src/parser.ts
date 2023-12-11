@@ -4,14 +4,33 @@ import {
   PlainLiteral,
   IntervalLiteral,
   DecimalLiteral,
+  FractionLiteral,
 } from './expression';
 import {Interval, Color} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 
+type BinaryOperator =
+  | '+'
+  | '-'
+  | '*'
+  | '×'
+  | '%'
+  | '÷'
+  | 'mod'
+  | 'reduce'
+  | 'log'
+  | 'dot';
+
 type Program = {
   type: 'Program';
   body: Statement[];
+};
+
+type VariableDeclaration = {
+  type: 'VariableDeclaration';
+  name: Identifier;
+  value: Expression;
 };
 
 type ExpressionStatement = {
@@ -19,11 +38,11 @@ type ExpressionStatement = {
   expression: Expression;
 };
 
-type Statement = ExpressionStatement;
+type Statement = VariableDeclaration | ExpressionStatement;
 
 type BinaryExpression = {
   type: 'BinaryExpression';
-  operator: '+' | '-';
+  operator: BinaryOperator;
   left: Expression;
   right: Expression;
   preferLeft: boolean;
@@ -52,12 +71,12 @@ type Expression =
   | ColorLiteral
   | Identifier;
 
-type VisitorContext = Map<
+export type VisitorContext = Map<
   string,
   Function | Interval | Interval[] | Color | string
 >;
 
-class StatementVisitor {
+export class StatementVisitor {
   scale: Interval[];
   context: VisitorContext;
   constructor() {
@@ -67,6 +86,24 @@ class StatementVisitor {
   }
 
   visit(node: Statement) {
+    switch (node.type) {
+      case 'VariableDeclaration':
+        return this.visitVariableDeclaration(node);
+      case 'ExpressionStatement':
+        return this.visitExpression(node);
+    }
+  }
+
+  visitVariableDeclaration(node: VariableDeclaration) {
+    const subVisitor = new ExpressionVisitor(this.context);
+    const value = subVisitor.visit(node.value);
+    if (!value) {
+      throw new Error('Cannot assign nothing');
+    }
+    this.context.set(node.name.id, value);
+  }
+
+  visitExpression(node: ExpressionStatement) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.expression);
     if (value instanceof Color) {
@@ -95,6 +132,8 @@ class ExpressionVisitor {
         return this.visitPlainLiteral(node);
       case 'DecimalLiteral':
         return this.visitDecimalLiteral(node);
+      case 'FractionLiteral':
+        return this.visitFractionLiteral(node);
       case 'NedoLiteral':
         return this.visitNedoLiteral(node);
       case 'ColorLiteral':
@@ -122,6 +161,11 @@ class ExpressionVisitor {
         case '-':
           value = left.value.sub(right.value);
           break;
+        case '%':
+          value = left.value.div(right.value);
+          break;
+        default:
+          throw new Error('Unimplemented');
       }
       if (node.preferLeft) {
         return new Interval(
@@ -141,6 +185,8 @@ class ExpressionVisitor {
         return left.add(right);
       case '-':
         return left.sub(right);
+      default:
+        throw new Error('Unimplemented');
     }
   }
 
@@ -164,6 +210,14 @@ class ExpressionVisitor {
       denominator *= 10n;
     }
     const value = TimeMonzo.fromBigNumeratorDenominator(numerator, denominator);
+    return new Interval(value, 'linear', node);
+  }
+
+  visitFractionLiteral(node: FractionLiteral): Interval {
+    const value = TimeMonzo.fromBigNumeratorDenominator(
+      node.numerator,
+      node.denominator
+    );
     return new Interval(value, 'linear', node);
   }
 

@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {parseSource} from '../parser';
+import {parseAST, parseSource, StatementVisitor} from '../parser';
 
 describe('SonicWeave parser', () => {
   it('evaluates a single number', () => {
@@ -74,5 +74,23 @@ describe('SonicWeave parser', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1;1\\2;2;6,283185307179587;7'
     );
+  });
+
+  it('can declare variables', () => {
+    const ast = parseAST('i = 676/675;');
+    const visitor = new StatementVisitor();
+    visitor.visit(ast.body[0]);
+    expect(visitor.context.get('i')?.toString()).toBe('676/675');
+  });
+
+  it.skip('can invert a scale', () => {
+    const scale = parseSource(`
+      2;3;4;5;6;7;8;
+      equave = pop();
+      i => equave %~ i;
+      reverse;
+      equave;
+    `);
+    console.log(scale);
   });
 });
