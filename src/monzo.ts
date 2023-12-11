@@ -14,7 +14,7 @@ import {
 } from 'xen-dev-utils';
 
 import {bigGcd} from './utils';
-import {NedoLiteral, Primary} from './expression';
+import {NedoLiteral, IntervalLiteral} from './expression';
 
 export type FractionalMonzo = Fraction[];
 
@@ -1056,7 +1056,7 @@ export class TimeMonzo {
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
   }
 
-  as(node: Primary): Primary | undefined {
+  as(node: IntervalLiteral): IntervalLiteral | undefined {
     switch (node.type) {
       case 'PlainLiteral':
         return {...node, value: this.toBigInteger()};
@@ -1096,6 +1096,7 @@ export class TimeMonzo {
       if (this.isIntegral()) {
         return this.toBigInteger().toString();
       }
+      return this.valueOf().toString().replace('.', ',');
     } else {
       if (this.isEqualTemperament()) {
         const {fractionOfEquave, equave} = this.toEqualTemperament();

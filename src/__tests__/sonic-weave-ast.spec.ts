@@ -51,4 +51,8 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       ],
     });
   });
+
+  it('rejects a single comma', () => {
+    expect(() => parse(',;')).toThrow();
+  });
 });

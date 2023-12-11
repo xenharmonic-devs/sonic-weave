@@ -5,20 +5,24 @@ export type PlainLiteral = {
   value: bigint;
 };
 
+export type DecimalLiteral = {
+  type: 'DecimalLiteral';
+  whole: bigint;
+  fractional: string;
+};
+
 export type NedoLiteral = {
   type: 'NedoLiteral';
   numerator: bigint;
   denominator: bigint;
 };
 
-export type ColorLiteral = {
-  type: 'ColorLiteral';
-  value: string;
-};
+export type IntervalLiteral = PlainLiteral | DecimalLiteral | NedoLiteral;
 
-export type Primary = PlainLiteral | NedoLiteral | ColorLiteral;
-
-export function addNodes(a?: Primary, b?: Primary): Primary | undefined {
+export function addNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
   }
@@ -42,7 +46,10 @@ export function addNodes(a?: Primary, b?: Primary): Primary | undefined {
   return undefined;
 }
 
-export function subNodes(a?: Primary, b?: Primary): Primary | undefined {
+export function subNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
   }
@@ -52,15 +59,27 @@ export function subNodes(a?: Primary, b?: Primary): Primary | undefined {
       value: a.value - b.value,
     };
   }
+  if (a.type === 'NedoLiteral' && b.type === 'NedoLiteral') {
+    const denominator = bigLcm(a.denominator, b.denominator);
+    return {
+      type: a.type,
+      numerator:
+        (denominator / a.denominator) * a.numerator -
+        (denominator / b.denominator) * b.numerator,
+      denominator,
+    };
+  }
 
   return undefined;
 }
 
-export function toString(primary: Primary) {
-  switch (primary.type) {
+export function toString(literal: IntervalLiteral) {
+  switch (literal.type) {
     case 'NedoLiteral':
-      return `${primary.numerator}\\${primary.denominator}`;
+      return `${literal.numerator}\\${literal.denominator}`;
+    case 'DecimalLiteral':
+      return `${literal.whole},${literal.fractional}`;
     default:
-      return primary.value.toString();
+      return literal.value.toString();
   }
 }

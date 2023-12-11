@@ -56,8 +56,11 @@ Expression
 
 Term
   = NedoLiteral
+  / CommaDecimal
   / PlainLiteral
   / ColorLiteral
+  / CallExpression
+  / Identifier
 
 NedoLiteral
   = numerator: Integer '\\' denominator: PositiveInteger {
@@ -65,6 +68,16 @@ NedoLiteral
       type: 'NedoLiteral',
       numerator,
       denominator,
+    }
+  }
+
+CommaDecimal
+  = !(',' [^0-9])
+  whole: Integer? ',' fractional: FractionalPart {
+    return {
+      type: 'DecimalLiteral',
+      whole: whole ?? 0n,
+      fractional: fractional,
     }
   }
 
@@ -84,11 +97,30 @@ ColorLiteral
     }
   }
 
+CallExpression
+  = callee: Identifier "()" {
+    return {
+      type: "CallExpression",
+      callee,
+    }
+  }
+
+Identifier
+  = id: IdentifierName {
+    return {
+      type: "Identifier",
+      id,
+    }
+  }
+
 Integer
   = num:$("0" / ([1-9] [0-9]*)) { return BigInt(num) }
 
 PositiveInteger
   = num:$([1-9] [0-9]*) { return BigInt(num) }
+
+FractionalPart
+  = $[0-9]*
 
 HexDigit
   = [A-Fa-f0-9]
@@ -98,6 +130,23 @@ RGB4
 
 RGB8
   = $("#" HexDigit|6|)
+
+IdentifierName
+  = $(IdentifierStart IdentifierPart*)
+
+IdentifierStart
+  = ID_Start
+  / "$"
+  / "_"
+
+IdentifierPart
+  = ID_Continue
+  / "$"
+  / "\u200C"
+  / "\u200D"
+
+_ "whitespace"
+  = WhiteSpace*
 
 EOS = _ ";"
 
@@ -127,4 +176,8 @@ SourceCharacterHigh
   / [\uD800-\uDBFF] // Lone first surrogate
   / [\uDC00-\uDFFF] // Lone second surrogate
 
-_ = WhiteSpace*
+ID_Start
+  = c:SourceCharacter &{ return /\p{ID_Start}/u.test(c) }
+
+ID_Continue
+  = c:SourceCharacter &{ return /\p{ID_Continue}/u.test(c) }

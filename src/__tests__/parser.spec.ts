@@ -60,4 +60,19 @@ describe('SonicWeave parser', () => {
     const interval = scale[0];
     expect(interval.toString()).toBe('1<3>'); // TODO: Parse PowjiLiterals
   });
+
+  it('accesses variables', () => {
+    const scale = parseSource('TAU;');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    // The correct value is actually 6,283185307179586, but it gets mushed a bit along the way.
+    expect(interval.toString()).toBe('6,283185307179587');
+  });
+
+  it('can call built-in functions', () => {
+    const scale = parseSource('7;1;2;TAU;1\\2;sort();');
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1;1\\2;2;6,283185307179587;7'
+    );
+  });
 });

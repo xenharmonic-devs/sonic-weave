@@ -1,4 +1,4 @@
-import {Primary, addNodes, subNodes, toString} from './expression';
+import {IntervalLiteral, addNodes, subNodes, toString} from './expression';
 import {TimeMonzo} from './monzo';
 
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
@@ -14,11 +14,11 @@ export class Color {
 export class Interval {
   value: TimeMonzo;
   domain: Domain;
-  node?: Primary;
+  node?: IntervalLiteral;
   color?: Color;
   label?: string;
 
-  constructor(value: TimeMonzo, domain: Domain, node?: Primary) {
+  constructor(value: TimeMonzo, domain: Domain, node?: IntervalLiteral) {
     this.value = value;
     this.domain = domain;
     this.node = node;
@@ -44,6 +44,10 @@ export class Interval {
       return new Interval(this.value.sub(other.value), this.domain, node);
     }
     return new Interval(this.value.div(other.value), this.domain, node);
+  }
+
+  compare(other: Interval) {
+    return this.value.valueOf() - other.value.valueOf();
   }
 
   toString() {
