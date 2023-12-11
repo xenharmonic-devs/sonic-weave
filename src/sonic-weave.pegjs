@@ -7,7 +7,7 @@
       right,
       preferLeft,
       preferRight,
-    }
+    };
   }
 
   function prepend(head, tail) {
@@ -28,9 +28,9 @@ Start
 Program
   = body: Statements? {
     return {
-      type: "Program",
+      type: 'Program',
       body: body ?? [],
-    }
+    };
   }
 
 Statements
@@ -47,10 +47,10 @@ Statement
 VariableDeclaration
   = name: Identifier _ '=' _ value: Expression EOS {
     return {
-      type: "VariableDeclaration",
+      type: 'VariableDeclaration',
       name,
       value,
-    }
+    };
   }
 
 FunctionDeclaration
@@ -60,7 +60,7 @@ FunctionDeclaration
       name,
       parameters,
       body: body.body,
-    }
+    };
   }
 
 Parameters
@@ -74,15 +74,15 @@ BlockStatement
     return {
       type: 'BlockStatement',
       body: body ?? [],
-    }
+    };
   }
 
 ExpressionStatement
   = expression: Expression EOS {
     return {
-      type: "ExpressionStatement",
+      type: 'ExpressionStatement',
       expression,
-    }
+    };
   }
 
 Expression
@@ -112,7 +112,7 @@ UnaryExpression
       type: 'UnaryExpression',
       operator,
       operand,
-    }
+    };
   }
 
 ScalarMultiple
@@ -147,7 +147,7 @@ NedoLiteral
       type: 'NedoLiteral',
       numerator,
       denominator,
-    }
+    };
   }
 
 DotDecimal
@@ -157,7 +157,7 @@ DotDecimal
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
-    }
+    };
   }
 
 CommaDecimal
@@ -167,7 +167,7 @@ CommaDecimal
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
-    }
+    };
   }
 
 FractionLiteral
@@ -176,15 +176,15 @@ FractionLiteral
       type: 'FractionLiteral',
       numerator,
       denominator,
-    }
+    };
   }
 
 IntegerLiteral
   = value: Integer {
     return {
-      type: "IntegerLiteral",
+      type: 'IntegerLiteral',
       value,
-    }
+    };
   }
 
 DotCentsLiteral
@@ -193,24 +193,22 @@ DotCentsLiteral
   }
 
 CentLiteral
-  = 'c' {
-    return { type: 'CentLiteral' };
-  }
+  = 'c' { return { type: 'CentLiteral' }; }
 
 HertzLiteral
   = prefix: MetricPrefix? 'Hz' {
     return {
       type: 'HertzLiteral',
       prefix,
-    }
+    };
   }
 
 ColorLiteral
   = value: (@RGB8 / @RGB4) {
     return {
-      type: "ColorLiteral",
+      type: 'ColorLiteral',
       value,
-    }
+    };
   }
 
 HarmonicSegment
@@ -219,7 +217,7 @@ HarmonicSegment
       type: 'HarmonicSegment',
       root,
       end,
-    }
+    };
   }
 
 OtonalChord
@@ -227,7 +225,7 @@ OtonalChord
     return {
       type: 'OtonalChord',
       intervals,
-    }
+    };
   }
 
 ArrowFunction
@@ -236,24 +234,24 @@ ArrowFunction
       type: 'ArrowFunction',
       parameters,
       expression,
-    }
+    };
   }
 
 CallExpression
   = callee: Identifier _ '(' _ args: ArgumentList _ ')' {
     return {
-      type: "CallExpression",
+      type: 'CallExpression',
       callee,
       args,
-    }
+    };
   }
 
 Identifier
   = id: IdentifierName {
     return {
-      type: "Identifier",
+      type: 'Identifier',
       id,
-    }
+    };
   }
 
 ParenthesizedExpression
@@ -263,10 +261,10 @@ MetricPrefix
   = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
 
 Integer
-  = num:$("0" / ([1-9] [0-9]*)) { return BigInt(num) }
+  = num:$('0' / ([1-9] [0-9]*)) { return BigInt(num); }
 
 PositiveInteger
-  = num:$([1-9] [0-9]*) { return BigInt(num) }
+  = num:$([1-9] [0-9]*) { return BigInt(num); }
 
 FractionalPart
   = $[0-9]*
@@ -275,50 +273,50 @@ HexDigit
   = [A-Fa-f0-9]
 
 RGB4
-  = $("#" HexDigit|3|)
+  = $('#' HexDigit|3|)
 
 RGB8
-  = $("#" HexDigit|6|)
+  = $('#' HexDigit|6|)
 
 IdentifierName
   = $(IdentifierStart IdentifierPart*)
 
 IdentifierStart
   = ID_Start
-  / "$"
-  / "_"
+  / '$'
+  / '_'
 
 IdentifierPart
   = ID_Continue
-  / "$"
-  / "\u200C"
-  / "\u200D"
+  / '$'
+  / '\u200C'
+  / '\u200D'
 
-_ "whitespace"
+_ 'whitespace'
   = (WhiteSpace / Comment)*
 
-EOS = _ ";"
+EOS = _ ';'
 
 WhiteSpace
-  = "\t"
-  / "\v"
-  / "\f"
-  / " "
-  / "\u00A0"
-  / "u\FEFF"
+  = '\t'
+  / '\v'
+  / '\f'
+  / ' '
+  / '\u00A0'
+  / 'u\FEFF'
   / Zs
   / LineTerminator
 
 LineTerminator
-  = "\n"
-  / "\r"
-  / "\u2028"
-  / "\u2029"
+  = '\n'
+  / '\r'
+  / '\u2028'
+  / '\u2029'
 
 // Separator, Space
-Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c) }
+Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c); }
 
-SourceCharacter "any character"
+SourceCharacter 'any character'
   = SourceCharacterLow
   / SourceCharacterHigh
 
@@ -333,19 +331,19 @@ SourceCharacterHigh
   / [\uDC00-\uDFFF] // Lone second surrogate
 
 ID_Start
-  = c:SourceCharacter &{ return /\p{ID_Start}/u.test(c) }
+  = c:SourceCharacter &{ return /\p{ID_Start}/u.test(c); }
 
 ID_Continue
-  = c:SourceCharacter &{ return /\p{ID_Continue}/u.test(c) }
+  = c:SourceCharacter &{ return /\p{ID_Continue}/u.test(c); }
 
 Comment
   = MultiLineComment
   / SingleLineComment
 
-MultiLineComment = "/*" $(!"*/" SourceCharacter)* "*/"
+MultiLineComment = '/*' $(!'*/' SourceCharacter)* '*/'
 
 SingleLineComment
-  = "//" $SingleLineCommentChar*
+  = '//' $SingleLineCommentChar*
 
 SingleLineCommentChar
   = !LineTerminator SourceCharacter
