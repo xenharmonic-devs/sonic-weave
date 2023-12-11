@@ -24,7 +24,8 @@ type BinaryOperator =
   | 'mod'
   | 'reduce'
   | 'log'
-  | 'dot';
+  | 'dot'
+  | '^';
 
 type Program = {
   type: 'Program';
@@ -37,12 +38,28 @@ type VariableDeclaration = {
   value: Expression;
 };
 
+type FunctionDeclaration = {
+  type: 'FunctionDeclaration';
+  name: Identifier;
+  parameters: Identifier[];
+  body: Statement[];
+};
+
+type BlockStatement = {
+  type: 'BlockStatement';
+  body: Statement[];
+};
+
 type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
 };
 
-type Statement = VariableDeclaration | ExpressionStatement;
+type Statement =
+  | VariableDeclaration
+  | ExpressionStatement
+  | FunctionDeclaration
+  | BlockStatement;
 
 type BinaryExpression = {
   type: 'BinaryExpression';
@@ -66,11 +83,12 @@ type Identifier = {
 type CallExpression = {
   type: 'CallExpression';
   callee: Identifier;
+  args: Expression[];
 };
 
 type ArrowFunction = {
   type: 'ArrowFunction';
-  args: Identifier[];
+  parameters: Identifier[];
   expression: Expression;
 };
 
@@ -114,7 +132,12 @@ export class StatementVisitor {
         return this.visitVariableDeclaration(node);
       case 'ExpressionStatement':
         return this.visitExpression(node);
+      case 'FunctionDeclaration':
+        return this.visitFunctionDeclaration(node);
+      case 'BlockStatement':
+        return this.visitBlockStatement(node);
     }
+    node satisfies never;
   }
 
   visitVariableDeclaration(node: VariableDeclaration) {
@@ -145,6 +168,43 @@ export class StatementVisitor {
       this.scale = this.scale.map(i => bound(i));
       this.context.set('$', this.scale);
     }
+  }
+
+  visitBlockStatement(node: BlockStatement) {
+    const subVisitor = new StatementVisitor();
+    for (const [name, value] of this.context) {
+      subVisitor.context.set(name, value);
+    }
+    subVisitor.context.set('$$', this.scale);
+    subVisitor.context.set('$', subVisitor.scale);
+    for (const statement of node.body) {
+      subVisitor.visit(statement);
+    }
+    this.scale.push(...subVisitor.scale);
+  }
+
+  visitFunctionDeclaration(node: FunctionDeclaration) {
+    function realization(...args: SonicWeaveValue[]) {
+      const localVisitor = new StatementVisitor();
+      for (const [name, value] of this.context) {
+        localVisitor.context.set(name, value);
+      }
+      localVisitor.context.set('$$', this.scale);
+      localVisitor.context.set('$', localVisitor.scale);
+
+      for (let i = 0; i < Math.min(args.length, node.parameters.length); ++i) {
+        localVisitor.context.set(node.parameters[i].id, args[i]);
+      }
+      for (const statement of node.body) {
+        localVisitor.visit(statement);
+      }
+      return localVisitor.scale;
+    }
+    Object.defineProperty(realization, 'name', {
+      value: node.name.id,
+      enumerable: false,
+    });
+    this.context.set(node.name.id, realization);
   }
 }
 
@@ -224,6 +284,9 @@ class ExpressionVisitor {
         case '%':
           value = left.value.div(right.value);
           break;
+        case '^':
+          value = left.value.pow(right.value);
+          break;
         default:
           throw new Error('Unimplemented');
       }
@@ -256,7 +319,8 @@ class ExpressionVisitor {
 
   visitCallExpression(node: CallExpression) {
     if (this.context.has(node.callee.id)) {
-      return (this.context.get(node.callee.id) as Function).bind(this)();
+      const args = node.args.map(arg => this.visit(arg));
+      return (this.context.get(node.callee.id) as Function).bind(this)(...args);
     }
     throw new Error(`Reference error: ${node.callee.id} is not defined`);
   }
@@ -264,12 +328,16 @@ class ExpressionVisitor {
   visitArrowFunction(node: ArrowFunction) {
     function realization(...args: SonicWeaveValue[]) {
       const localContext: VisitorContext = new Map(this.context);
-      for (let i = 0; i < Math.min(args.length, node.args.length); ++i) {
-        localContext.set(node.args[i].id, args[i]);
+      for (let i = 0; i < Math.min(args.length, node.parameters.length); ++i) {
+        localContext.set(node.parameters[i].id, args[i]);
       }
       const localVisitor = new ExpressionVisitor(localContext);
       return localVisitor.visit(node.expression);
     }
+    Object.defineProperty(realization, 'name', {
+      value: '(lambda)',
+      enumerable: false,
+    });
     return realization;
   }
 

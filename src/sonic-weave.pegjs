@@ -40,6 +40,8 @@ Statements
 
 Statement
   = VariableDeclaration
+  / FunctionDeclaration
+  / BlockStatement
   / ExpressionStatement
 
 VariableDeclaration
@@ -48,6 +50,30 @@ VariableDeclaration
       type: "VariableDeclaration",
       name,
       value,
+    }
+  }
+
+FunctionDeclaration
+  = 'riff ' _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
+    return {
+      type: 'FunctionDeclaration',
+      name,
+      parameters,
+      body: body.body,
+    }
+  }
+
+Parameters
+  = Identifier|.., _ ','? _|
+
+ArgumentList
+  = Expression|.., _ ','? _|
+
+BlockStatement
+  = '{' _ body: Statements? _ '}' _ {
+    return {
+      type: 'BlockStatement',
+      body: body ?? [],
     }
   }
 
@@ -205,19 +231,20 @@ OtonalChord
   }
 
 ArrowFunction
-  = args: Identifier|.., _ ','? _| _ '=>' _ expression: Expression {
+  = parameters: Parameters _ '=>' _ expression: Expression {
     return {
       type: 'ArrowFunction',
-      args,
+      parameters,
       expression,
     }
   }
 
 CallExpression
-  = callee: Identifier "()" {
+  = callee: Identifier _ '(' _ args: ArgumentList _ ')' {
     return {
       type: "CallExpression",
       callee,
+      args,
     }
   }
 

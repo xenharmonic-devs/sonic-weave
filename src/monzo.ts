@@ -434,7 +434,7 @@ export class TimeMonzo {
       return false;
     }
     for (const component of this.primeExponents) {
-      if (component.s < 0) {
+      if (component.s < 0 || component.d !== 1) {
         return false;
       }
     }
@@ -1131,6 +1131,9 @@ export class TimeMonzo {
           return this.toBigInteger().toString();
         } else if (this.isFractional()) {
           return this.toFraction().toFraction();
+        } else if (this.isEqualTemperament()) {
+          const {fractionOfEquave, equave} = this.toEqualTemperament();
+          return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
         }
       } else {
         if (this.isDecimal()) {

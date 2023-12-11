@@ -1,5 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {parseAST, parseSource, StatementVisitor} from '../parser';
+import {TimeMonzo} from '../monzo';
+import {Interval} from '../interval';
 
 describe('SonicWeave parser', () => {
   it('evaluates a single number', () => {
@@ -130,5 +132,28 @@ describe('SonicWeave parser', () => {
   it('can parse harmonic series segments', () => {
     const scale = parseSource('4 :: 8;');
     expect(scale.map(i => i.toString()).join(';')).toBe('5/4;6/4;7/4;8/4');
+  });
+
+  it('can declare functions', () => {
+    const ast = parseAST('riff plusOne x { x ~+ 1; }');
+    const visitor = new StatementVisitor();
+    visitor.visit(ast.body[0]);
+    expect(visitor.context.has('plusOne')).toBe(true);
+    const two = new Interval(TimeMonzo.fromBigInt(2n), 'linear');
+    expect(
+      (visitor.context.get('plusOne') as Function)
+        .bind(visitor)(two)[0]
+        .value.toBigInteger()
+    ).toBe(3n);
+  });
+
+  it('can call a custom function', () => {
+    const scale = parseSource(`
+      riff sqrt x { x ~^ 1/2; }
+      sqrt(3);
+    `);
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.toString()).toBe('3^1/2');
   });
 });
