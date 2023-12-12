@@ -167,21 +167,30 @@ describe('SonicWeave parser', () => {
     expect(interval.toString()).toBe('5');
   });
 
-  it('comes with a standard library (mtof)', () => {
+  it('parses hard decimals (reals)', () => {
+    const scale = parseSource('1.6180339887498948482!;');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.value.valueOf()).toBeCloseTo(Math.sqrt(1.25) + 0.5);
+  });
+});
+
+describe('SonicWeave standard library', () => {
+  it('converts MIDI note number to frequency', () => {
     const scale = parseSource('mtof(60);');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.toString()).toBe('4685120000^1/4 * Hz');
   });
 
-  it('comes with a standard library (ftom)', () => {
+  it('converts frequency to MIDI note number / MTS value', () => {
     const scale = parseSource('ftom(261.6 Hz);');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.value.valueOf()).toBeCloseTo(60);
   });
 
-  it('comes with a standard library (edo)', () => {
+  it('generates equal temperaments', () => {
     const scale = parseSource('edo(6);');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
@@ -189,10 +198,16 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('parses hard decimals (reals)', () => {
-    const scale = parseSource('1.6180339887498948482!;');
-    expect(scale).toHaveLength(1);
-    const interval = scale[0];
-    expect(interval.value.valueOf()).toBeCloseTo(Math.sqrt(1.25) + 0.5);
+  it('reduces scales by their equave', () => {
+    const scale = parseSource('3;5;7;11;13;2;reduce();');
+    expect(scale).toHaveLength(6);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '3/2;5/4;7/4;11/8;13/8;2'
+    );
+  });
+
+  it('has a nothing', () => {
+    const scale = parseSource('niente;');
+    expect(scale).toHaveLength(0);
   });
 });

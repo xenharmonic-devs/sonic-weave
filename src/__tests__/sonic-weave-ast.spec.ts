@@ -147,4 +147,19 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses a return statement', () => {
+    const ast = parse('riff foo{return;}');
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'FunctionDeclaration',
+          name: {type: 'Identifier', id: 'foo'},
+          parameters: [],
+          body: [{type: 'ReturnStatement'}],
+        },
+      ],
+    });
+  });
 });

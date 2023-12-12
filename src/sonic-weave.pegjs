@@ -38,7 +38,7 @@ DotToken    = 'dot'    !IdentifierPart
 HertzToken  = 'Hz'     !IdentifierPart
 LogToken    = 'log'    !IdentifierPart
 ModToken    = 'mod'    !IdentifierPart
-ReduceToken = 'reduce' !IdentifierPart
+ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
 
@@ -51,8 +51,8 @@ Statement
   = VariableDeclaration
   / FunctionDeclaration
   / BlockStatement
-  / ExpressionStatement
   / ReturnStatement
+  / ExpressionStatement
 
 VariableDeclaration
   = name: Identifier _ '=' _ value: Expression EOS {

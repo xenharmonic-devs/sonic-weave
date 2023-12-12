@@ -39,6 +39,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
 };
 
 export const PRELUDE_SOURCE = `
+riff niente { return; }
+niente = niente();
+
 riff sqrt x { return x ~^ 1/2; }
 riff cbrt x { return x ~^ 1/3; }
 
@@ -48,5 +51,13 @@ riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
 riff edo divisions {
   [1..divisions];
   step => step \\ divisions;
+}
+
+riff reduce {
+  $ = $$;
+  equave = pop();
+  i => i ~red equave;
+  equave;
+  return;
 }
 `;

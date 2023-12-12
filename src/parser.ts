@@ -23,7 +23,7 @@ type BinaryOperator =
   | '÷'
   | '\\'
   | 'mod'
-  | 'reduce'
+  | 'red'
   | 'log'
   | 'dot'
   | '^';
@@ -128,17 +128,21 @@ type Expression =
   | Range
   | HarmonicSegment;
 
-type SonicWeaveValue = Function | Interval | Interval[] | Color | string;
+type SonicWeaveValue =
+  | Function
+  | Interval
+  | Interval[]
+  | Color
+  | string
+  | undefined;
 
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
 export class StatementVisitor {
-  scale: Interval[];
   context: VisitorContext;
   constructor() {
-    this.scale = [];
     this.context = new Map();
-    this.context.set('$', this.scale);
+    this.context.set('$', []);
   }
 
   visit(node: Statement) {
@@ -160,30 +164,35 @@ export class StatementVisitor {
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.value);
-    if (!value) {
-      throw new Error('Cannot assign nothing');
-    }
     this.context.set(node.name.id, value);
   }
 
   visitExpression(node: ExpressionStatement) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.expression);
+    const scale = this.context.get('$');
+    if (!Array.isArray(scale)) {
+      throw new Error('Context corruption detected');
+    }
     if (value instanceof Color) {
-      if (this.scale.length) {
-        this.scale[this.scale.length - 1].color = value;
+      if (scale.length) {
+        scale[scale.length - 1].color = value;
       }
     } else if (value instanceof Interval) {
-      this.scale.push(value);
+      scale.push(value);
     } else if (Array.isArray(value)) {
-      this.scale.push(...value);
+      scale.push(...value);
     } else if (value === undefined) {
       /* Do nothing */
+    } else if (typeof value === 'string') {
+      if (scale.length) {
+        scale[scale.length - 1].label = value;
+      }
     } else {
       const bound = value.bind(this);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.scale = this.scale.map(i => bound(i));
-      this.context.set('$', this.scale);
+      const mapped = scale.map(i => bound(i));
+      scale.length = 0;
+      scale.push(...mapped);
     }
   }
 
@@ -192,12 +201,20 @@ export class StatementVisitor {
     for (const [name, value] of this.context) {
       subVisitor.context.set(name, value);
     }
-    subVisitor.context.set('$$', this.scale);
-    subVisitor.context.set('$', subVisitor.scale);
+    const scale = this.context.get('$')!;
+    if (!Array.isArray(scale)) {
+      throw new Error('Context corruption detected');
+    }
+    subVisitor.context.set('$$', scale);
+    subVisitor.context.set('$', []);
     for (const statement of node.body) {
       subVisitor.visit(statement);
     }
-    this.scale.push(...subVisitor.scale);
+    const subScale = subVisitor.context.get('$');
+    if (!Array.isArray(subScale)) {
+      throw new Error('Context corruption detected');
+    }
+    scale.push(...subScale);
   }
 
   visitFunctionDeclaration(node: FunctionDeclaration) {
@@ -206,8 +223,8 @@ export class StatementVisitor {
       for (const [name, value] of this.context) {
         localVisitor.context.set(name, value);
       }
-      localVisitor.context.set('$$', this.scale);
-      localVisitor.context.set('$', localVisitor.scale);
+      localVisitor.context.set('$$', this.context.get('$'));
+      localVisitor.context.set('$', []);
 
       for (let i = 0; i < Math.min(args.length, node.parameters.length); ++i) {
         localVisitor.context.set(node.parameters[i].id, args[i]);
@@ -222,7 +239,7 @@ export class StatementVisitor {
         }
         localVisitor.visit(statement);
       }
-      return localVisitor.scale;
+      return localVisitor.context.get('$');
     }
     Object.defineProperty(realization, 'name', {
       value: node.name.id,
@@ -251,9 +268,7 @@ class ExpressionVisitor {
     this.context = context;
   }
 
-  visit(
-    node: Expression
-  ): Interval | Interval[] | Color | Function | undefined {
+  visit(node: Expression): SonicWeaveValue {
     switch (node.type) {
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
@@ -302,6 +317,9 @@ class ExpressionVisitor {
     if (Array.isArray(left) || Array.isArray(right)) {
       throw new Error('Cannot operate on arrays');
     }
+    if (typeof left === 'string' || typeof right === 'string') {
+      throw new Error('Cannot operate on strings');
+    }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
       switch (node.operator) {
@@ -313,6 +331,9 @@ class ExpressionVisitor {
           break;
         case '%':
           value = left.value.div(right.value);
+          break;
+        case 'red':
+          value = left.value.reduce(right.value);
           break;
         case '^':
           value = left.value.pow(right.value);
@@ -530,5 +551,9 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
   for (const statement of program.body) {
     visitor.visit(statement);
   }
-  return visitor.scale;
+  const scale = visitor.context.get('$');
+  if (!Array.isArray(scale)) {
+    throw new Error('Context corruption detected');
+  }
+  return scale;
 }
