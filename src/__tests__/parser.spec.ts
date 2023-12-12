@@ -180,6 +180,16 @@ describe('SonicWeave parser', () => {
     const interval = scale[0];
     expect(interval.value.toBigInteger()).toBe(2n);
   });
+
+  it('can affect the outer context from inside a block statement', () => {
+    let i = 5;
+    while (i) {
+      i--;
+    }
+    const scale = parseSource('i = 5; while (i) { i--; }');
+    expect(scale).toHaveLength(5);
+    expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
+  });
 });
 
 describe('SonicWeave standard library', () => {

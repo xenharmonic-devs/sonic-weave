@@ -233,13 +233,24 @@ export class StatementVisitor {
     subVisitor.context.set('$$', scale);
     subVisitor.context.set('$', []);
     for (const statement of node.body) {
-      subVisitor.visit(statement);
+      const interrupt = subVisitor.visit(statement);
+      if (interrupt) {
+        return interrupt;
+      }
     }
     const subScale = subVisitor.context.get('$');
     if (!Array.isArray(subScale)) {
       throw new Error('Context corruption detected');
     }
     scale.push(...subScale);
+    for (const [name, value] of subVisitor.context) {
+      if (name === '$' || name === '$$') {
+        continue;
+      }
+      if (this.context.has(name)) {
+        this.context.set(name, value);
+      }
+    }
   }
 
   visitWhileStatement(node: WhileStatement) {
