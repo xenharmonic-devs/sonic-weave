@@ -95,6 +95,23 @@ export function subNodes(
   return undefined;
 }
 
+export function divNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!a || !b) {
+    return undefined;
+  }
+  if (a.type === 'IntegerLiteral' && b.type === 'IntegerLiteral') {
+    return {
+      type: 'FractionLiteral',
+      numerator: a.value,
+      denominator: b.value,
+    };
+  }
+  return undefined;
+}
+
 export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':

@@ -54,20 +54,29 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
 };
 
 export const PRELUDE_SOURCE = `
+// == Constants ==
 riff niente { return; }
 niente = niente();
 
+// == Functions ==
 riff sqrt x { return x ~^ 1/2; }
 riff cbrt x { return x ~^ 1/3; }
 
 riff mtof index { return 440 Hz * 2^((index - 69) % 12); }
 riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
 
+// == Scale generation ==
 riff edo divisions {
   [1..divisions];
   step => step \\ divisions;
 }
 
+riff subharmonics start end {
+  start::end;
+  invert();
+}
+
+// == Scale modification ==
 riff reduce {
   $ = $$;
   equave = pop();

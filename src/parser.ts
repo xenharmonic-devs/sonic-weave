@@ -120,15 +120,15 @@ type ArrowFunction = {
   expression: Expression;
 };
 
-type OtonalChord = {
-  type: 'OtonalChord';
+type EnumeratedChord = {
+  type: 'EnumeratedChord';
   intervals: Expression[];
 };
 
 type HarmonicSegment = {
   type: 'HarmonicSegment';
-  root: bigint;
-  end: bigint;
+  root: Expression;
+  end: Expression;
 };
 
 type Range = {
@@ -147,7 +147,7 @@ type Expression =
   | IntervalLiteral
   | ColorLiteral
   | Identifier
-  | OtonalChord
+  | EnumeratedChord
   | Range
   | HarmonicSegment;
 
@@ -354,8 +354,8 @@ class ExpressionVisitor {
         return new Color(node.value);
       case 'Identifier':
         return this.visitIdentifier(node);
-      case 'OtonalChord':
-        return this.visitOtonalChord(node);
+      case 'EnumeratedChord':
+        return this.visitEnumeratedChord(node);
       case 'Range':
         return this.visitRange(node);
       case 'HarmonicSegment':
@@ -574,7 +574,7 @@ class ExpressionVisitor {
     throw new Error(`Reference error: ${node.id} is not defined`);
   }
 
-  visitOtonalChord(node: OtonalChord): Interval[] {
+  visitEnumeratedChord(node: EnumeratedChord): Interval[] {
     const domains: Domain[] = [];
     const monzos: TimeMonzo[] = [];
     for (const expression of node.intervals) {
@@ -625,22 +625,18 @@ class ExpressionVisitor {
   }
 
   visitHarmonicSegment(node: HarmonicSegment): Interval[] {
-    const intervals: Interval[] = [];
-    for (let n = node.root + 1n; n <= node.end; ++n) {
-      const syntheticNode: FractionLiteral = {
-        type: 'FractionLiteral',
-        numerator: n,
-        denominator: node.root,
-      };
-      intervals.push(
-        new Interval(
-          TimeMonzo.fromBigNumeratorDenominator(n, node.root),
-          'linear',
-          syntheticNode
-        )
-      );
+    const root = this.visit(node.root);
+    const end = this.visit(node.end);
+    if (!(root instanceof Interval && end instanceof Interval)) {
+      throw new Error('Harmonic segments must be built from intervals');
     }
-    return intervals;
+    let next = root.add(LINEAR_UNITY);
+    const result: Interval[] = [];
+    while (next.compare(end) <= 0) {
+      result.push(next.div(root));
+      next = next.add(LINEAR_UNITY);
+    }
+    return result;
   }
 }
 
@@ -649,6 +645,7 @@ export function parseAST(source: string): Program {
 }
 
 export function parseSource(source: string, includePrelude = true): Interval[] {
+  // TODO: Cache on first intialization.
   const visitor = new StatementVisitor();
   for (const name in BUILTIN_CONTEXT) {
     const value = BUILTIN_CONTEXT[name];

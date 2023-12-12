@@ -215,6 +215,12 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('generates subharmonic segments', () => {
+    const scale = parseSource('subharmonics(4, 8);');
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;8/5;8/4');
+  });
+
   it('reduces scales by their equave', () => {
     const scale = parseSource('3;5;7;11;13;2;reduce();');
     expect(scale).toHaveLength(6);

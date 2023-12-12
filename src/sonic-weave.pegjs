@@ -170,7 +170,7 @@ ExponentiationExpression
     }
 
 Group
-  = _ @(UnaryExpression / Range / OtonalChord / ArrayAccess / Primary) _
+  = _ @(UnaryExpression / Range / HarmonicSegment / EnumeratedChord / ArrayAccess / Primary) _
 
 UnaryExpression
   = operator: ('--' / '++' / '+' / '-' / '%' / '÷') operand: Primary {
@@ -197,6 +197,44 @@ ArrayAccess
     }, head);
   }
 
+UnitStepRange
+  = '[' _ start: Primary _ '..' _ end: Primary _ ']' {
+    return {
+      type: 'Range',
+      start,
+      end,
+    };
+  }
+
+StepRange
+  = '[' _ start: Primary _ ',' _ second: Primary _ '..' _ end: Primary _ ']' {
+    return {
+      type: 'Range',
+      start,
+      second,
+      end,
+    };
+  }
+
+Range = StepRange / UnitStepRange
+
+HarmonicSegment
+  = root: Primary _ '::' _ end: Primary {
+    return {
+      type: 'HarmonicSegment',
+      root,
+      end,
+    };
+  }
+
+EnumeratedChord
+  = intervals: Primary|2.., _ ':' _| {
+    return {
+      type: 'EnumeratedChord',
+      intervals,
+    };
+  }
+
 ScalarMultiple
   = scalar: ScalarLike _ quantity: Quantity { return BinaryExpression('', scalar, quantity, false, false) }
 
@@ -218,7 +256,6 @@ Primary
   / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
-  / HarmonicSegment
   / ArrowFunction
   / CallExpression
   / Identifier
@@ -260,8 +297,7 @@ DotDecimal
   / HardDotDecimal
 
 CommaDecimal
-  = !(',' [^0-9])
-  whole: Integer? ',' fractional: FractionalPart hard: '!'? {
+  = whole: Integer ',' fractional: [0-9]+ hard: '!'? {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -308,44 +344,6 @@ ColorLiteral
     return {
       type: 'ColorLiteral',
       value,
-    };
-  }
-
-UnitStepRange
-  = '[' _ start: Primary _ '..' _ end: Primary _ ']' {
-    return {
-      type: 'Range',
-      start,
-      end,
-    };
-  }
-
-StepRange
-  = '[' _ start: Primary _ ',' _ second: Primary _ '..' _ end: Primary _ ']' {
-    return {
-      type: 'Range',
-      start,
-      second,
-      end,
-    };
-  }
-
-Range = StepRange / UnitStepRange
-
-HarmonicSegment
-  = root: PositiveInteger _ '::' _ end: PositiveInteger {
-    return {
-      type: 'HarmonicSegment',
-      root,
-      end,
-    };
-  }
-
-OtonalChord
-  = intervals: Primary|2.., _ ':' _| {
-    return {
-      type: 'OtonalChord',
-      intervals,
     };
   }
 

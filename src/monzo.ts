@@ -14,7 +14,7 @@ import {
 } from 'xen-dev-utils';
 
 import {bigGcd} from './utils';
-import {NedoLiteral, IntervalLiteral} from './expression';
+import {NedoLiteral, IntervalLiteral, FractionLiteral} from './expression';
 
 export type FractionalMonzo = Fraction[];
 
@@ -319,6 +319,31 @@ export class TimeMonzo {
   }
 
   /**
+   * Convert the time monzo to a BigInt numerator and denominator in linear space.
+   * @returns Musical ratio as a fraction in linear space corresponding to the unit of time.
+   * @throws An error if the time monzo cannot be represented as a ratio.
+   */
+  toBigNumeratorDenominator() {
+    if (this.cents !== 0) {
+      throw new Error('Unable to convert irrational number to fraction');
+    }
+    let numerator = BigInt(this.residual.n * this.residual.s);
+    let denominator = BigInt(this.residual.d);
+    this.primeExponents.forEach((component, i) => {
+      if (component.d !== 1) {
+        throw new Error('Unable to convert irrational number to fraction');
+      }
+      const n = BigInt(component.n);
+      if (component.s > 0) {
+        numerator *= BIG_INT_PRIMES[i] ** n;
+      } else if (component.s < 0) {
+        denominator *= BIG_INT_PRIMES[i] ** n;
+      }
+    });
+    return {numerator, denominator};
+  }
+
+  /**
    * Convert the time monzo to an integer in linear space.
    * @returns Musical ratio as an integer in linear space corresponding to the unit of time.
    * @throws An error if the time monzo cannot be represented as an integer.
@@ -330,7 +355,7 @@ export class TimeMonzo {
     if (this.residual.d !== 1) {
       throw new Error('Unable to convert fractional number to integer');
     }
-    let result = BigInt(this.residual.n);
+    let result = BigInt(this.residual.n * this.residual.s);
     this.primeExponents.forEach((component, i) => {
       if (component.d !== 1) {
         throw new Error('Unable to convert irrational number to integer');
@@ -340,9 +365,6 @@ export class TimeMonzo {
       }
       result *= BIG_INT_PRIMES[i] ** BigInt(component.n);
     });
-    if (this.residual.s < 0) {
-      return -result;
-    }
     return result;
   }
 
@@ -1110,6 +1132,8 @@ export class TimeMonzo {
     switch (node.type) {
       case 'IntegerLiteral':
         return this.asIntegerLiteral(node);
+      case 'FractionLiteral':
+        return this.asFractionLiteral(node);
       case 'NedoLiteral':
         return this.asNedoLiteral(node);
       default:
@@ -1120,6 +1144,19 @@ export class TimeMonzo {
   asIntegerLiteral(node: IntervalLiteral) {
     if (this.isIntegral()) {
       return {...node, value: this.toBigInteger()};
+    }
+    return undefined;
+  }
+
+  asFractionLiteral(node: FractionLiteral) {
+    if (this.isFractional()) {
+      const {numerator, denominator} = this.toBigNumeratorDenominator();
+      const factor = bigGcd(node.numerator, node.denominator);
+      return {
+        ...node,
+        numerator: numerator * factor,
+        denominator: denominator * factor,
+      };
     }
     return undefined;
   }
