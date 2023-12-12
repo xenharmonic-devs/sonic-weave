@@ -60,7 +60,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('1 +~ 3\\3;');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
-    expect(interval.toString()).toBe('1<3>'); // TODO: Parse PowjiLiterals
+    expect(interval.toString()).toBe('1\\1<3>');
   });
 
   it('accesses variables', () => {
@@ -209,5 +209,11 @@ describe('SonicWeave standard library', () => {
   it('has a nothing', () => {
     const scale = parseSource('niente;');
     expect(scale).toHaveLength(0);
+  });
+
+  it('inverts scales', () => {
+    const scale = parseSource('1\\6;2\\6;3\\6;6\\6;invert();');
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('3\\6;4\\6;5\\6;6\\6');
   });
 });

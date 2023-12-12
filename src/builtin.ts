@@ -60,4 +60,13 @@ riff reduce {
   equave;
   return;
 }
+
+riff invert {
+  $ = $$;
+  equave = pop();
+  i => equave %~ i;
+  reverse();
+  equave;
+  return;
+}
 `;

@@ -23,6 +23,7 @@ const MAX_POW_DENOMINATOR = 10000;
 const ZERO = new Fraction(0);
 const ONE = new Fraction(1);
 const NEGATIVE_ONE = new Fraction(-1);
+const TWO = new Fraction(2);
 
 let NUMBER_OF_COMPONENTS = 6; // Primes 2, 3, 5, 7, 11 and 13
 
@@ -1099,10 +1100,13 @@ export class TimeMonzo {
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
   }
 
-  as(node: IntervalLiteral): IntervalLiteral | undefined {
+  as(node: IntervalLiteral | undefined): IntervalLiteral | undefined {
+    if (!node) {
+      return undefined;
+    }
     switch (node.type) {
       case 'IntegerLiteral':
-        return {...node, value: this.toBigInteger()};
+        return this.asIntegerLiteral(node);
       case 'NedoLiteral':
         return this.asNedoLiteral(node);
       default:
@@ -1110,10 +1114,17 @@ export class TimeMonzo {
     }
   }
 
+  asIntegerLiteral(node: IntervalLiteral) {
+    if (this.isIntegral()) {
+      return {...node, value: this.toBigInteger()};
+    }
+    return undefined;
+  }
+
   asNedoLiteral(node: NedoLiteral): NedoLiteral | undefined {
     if (this.isEqualTemperament()) {
       const {fractionOfEquave, equave} = this.toEqualTemperament();
-      if (equave.compare(2)) {
+      if (equave.compare(TWO)) {
         return undefined;
       }
       const denominator = lcm(fractionOfEquave.d, Number(node.denominator));
@@ -1163,8 +1174,11 @@ export class TimeMonzo {
     } else {
       if (this.isEqualTemperament()) {
         const {fractionOfEquave, equave} = this.toEqualTemperament();
-        const backslashed = fractionOfEquave.toFraction().replace('/', '\\');
-        if (equave.compare(2) || !backslashed.includes('\\')) {
+        let backslashed = fractionOfEquave.toFraction().replace('/', '\\');
+        if (!backslashed.includes('\\')) {
+          backslashed += '\\1';
+        }
+        if (equave.compare(TWO)) {
           return `${backslashed}<${equave.toFraction()}>`;
         }
         return backslashed;

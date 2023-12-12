@@ -348,17 +348,9 @@ class ExpressionVisitor {
           );
       }
       if (node.preferLeft) {
-        return new Interval(
-          value,
-          left.domain,
-          value.as(node.left as IntervalLiteral)
-        );
+        return new Interval(value, left.domain, value.as(left.node));
       }
-      return new Interval(
-        value,
-        right.domain,
-        value.as(node.right as IntervalLiteral)
-      );
+      return new Interval(value, right.domain, value.as(right.node));
     }
     switch (node.operator) {
       case '+':
