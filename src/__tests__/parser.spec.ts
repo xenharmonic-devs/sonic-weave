@@ -173,6 +173,13 @@ describe('SonicWeave parser', () => {
     const interval = scale[0];
     expect(interval.value.valueOf()).toBeCloseTo(Math.sqrt(1.25) + 0.5);
   });
+
+  it('can return from inside nested statements', () => {
+    const scale = parseSource('riff foo { while(1) return 2; } foo();');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.value.toBigInteger()).toBe(2n);
+  });
 });
 
 describe('SonicWeave standard library', () => {

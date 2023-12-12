@@ -181,7 +181,7 @@ export class StatementVisitor {
       case 'WhileStatement':
         return this.visitWhileStatement(node);
       case 'ReturnStatement':
-        throw new Error('Illegal return statement');
+        return node;
     }
     node satisfies never;
   }
@@ -249,7 +249,10 @@ export class StatementVisitor {
       test = test.value.valueOf();
     }
     while (test) {
-      this.visit(node.body);
+      const interrupt = this.visit(node.body);
+      if (interrupt && interrupt.type === 'ReturnStatement') {
+        return interrupt;
+      }
       test = subVisitor.visit(node.test);
       if (test instanceof Interval) {
         test = test.value.valueOf();
@@ -274,14 +277,14 @@ export class StatementVisitor {
         }
       }
       for (const statement of node.body) {
-        if (statement.type === 'ReturnStatement') {
-          if (statement.argument === undefined) {
+        const interrupt = localVisitor.visit(statement);
+        if (interrupt && interrupt.type === 'ReturnStatement') {
+          if (interrupt.argument === undefined) {
             return;
           }
           const argumentVisitor = new ExpressionVisitor(localVisitor.context);
-          return argumentVisitor.visit(statement.argument);
+          return argumentVisitor.visit(interrupt.argument);
         }
-        localVisitor.visit(statement);
       }
       return localVisitor.context.get('$');
     }
@@ -650,7 +653,10 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
 
   const program = parseAST(source);
   for (const statement of program.body) {
-    visitor.visit(statement);
+    const interrupt = visitor.visit(statement);
+    if (interrupt) {
+      throw new Error('Illegal statement');
+    }
   }
   const scale = visitor.context.get('$');
   if (!Array.isArray(scale)) {
