@@ -1,4 +1,11 @@
-import {IntervalLiteral, addNodes, subNodes, toString} from './expression';
+import {Fraction} from 'xen-dev-utils';
+import {
+  IntervalLiteral,
+  NedoLiteral,
+  addNodes,
+  subNodes,
+  toString,
+} from './expression';
 import {TimeMonzo} from './monzo';
 
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
@@ -10,6 +17,8 @@ export class Color {
     this.value = value;
   }
 }
+
+const TWO = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
 
 export class Interval {
   value: TimeMonzo;
@@ -91,8 +100,27 @@ export class Interval {
     return new Interval(this.value.log(other.value), this.domain);
   }
 
+  backslash(other: Interval) {
+    if (!this.value.isScalar() || !other.value.isScalar()) {
+      throw new Error('Only scalars can be backslashed');
+    }
+    if (this.domain !== 'linear' || other.domain !== 'linear') {
+      throw new Error('Only linear backslashing implemented');
+    }
+    const value = TWO.pow(this.value.div(other.value));
+    let node: NedoLiteral | undefined;
+    if (this.value.isIntegral() && other.value.isIntegral()) {
+      node = {
+        type: 'NedoLiteral',
+        numerator: this.value.toBigInteger(),
+        denominator: other.value.toBigInteger(),
+      };
+    }
+    return new Interval(value, 'logarithmic', node);
+  }
+
   compare(other: Interval) {
-    return this.value.valueOf() - other.value.valueOf();
+    return this.value.compare(other.value);
   }
 
   toString() {

@@ -48,15 +48,20 @@ export function getNumberOfComponents() {
  * @param b The second monzo.
  * @returns `true` if the two values are equal.
  */
-function monzosEqual(a: FractionalMonzo, b: FractionalMonzo) {
+function monzosEqual(a: FractionalMonzo, b: FractionalMonzo): boolean {
   if (a === b) {
     return true;
   }
-  if (a.length !== b.length) {
-    return false;
+  if (a.length > b.length) {
+    return monzosEqual(b, a);
   }
   for (let i = 0; i < a.length; ++i) {
     if (!a[i].equals(b[i])) {
+      return false;
+    }
+  }
+  for (let i = a.length; i < b.length; ++i) {
+    if (b[i].n !== 0) {
       return false;
     }
   }
@@ -1029,7 +1034,7 @@ export class TimeMonzo {
    * @returns `true` if the time monzos are of equal size.
    */
   equals(other: TimeMonzo) {
-    return this.totalCents() === other.totalCents();
+    return this.valueOf() === other.valueOf();
   }
 
   /**
@@ -1038,6 +1043,9 @@ export class TimeMonzo {
    * @returns Result < 0 if other is larger than this. Result > 0 if other is smaller than this. Result == 0 if other is equal to this in size.
    */
   compare(other: TimeMonzo) {
+    if (this.strictEquals(other)) {
+      return 0;
+    }
     return this.valueOf() - other.valueOf();
   }
 

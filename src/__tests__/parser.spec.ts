@@ -181,6 +181,14 @@ describe('SonicWeave parser', () => {
     expect(interval.value.valueOf()).toBeCloseTo(60);
   });
 
+  it('comes with a standard library (edo)', () => {
+    const scale = parseSource('edo(6);');
+    expect(scale).toHaveLength(6);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1\\6;2\\6;3\\6;4\\6;5\\6;6\\6'
+    );
+  });
+
   it('parses hard decimals (reals)', () => {
     const scale = parseSource('1.6180339887498948482!;');
     expect(scale).toHaveLength(1);

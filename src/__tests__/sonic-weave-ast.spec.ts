@@ -120,4 +120,31 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('can treat \\ as an operator', () => {
+    const ast = parseSingle('7 \\ twelve');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '\\',
+        left: {type: 'IntegerLiteral', value: 7n},
+        right: {type: 'Identifier', id: 'twelve'},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('parses ranges', () => {
+    const ast = parseSingle('[1..10]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'Range',
+        start: {type: 'IntegerLiteral', value: 1n},
+        end: {type: 'IntegerLiteral', value: 10n},
+      },
+    });
+  });
 });

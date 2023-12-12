@@ -21,6 +21,7 @@ type BinaryOperator =
   | '×'
   | '%'
   | '÷'
+  | '\\'
   | 'mod'
   | 'reduce'
   | 'log'
@@ -109,6 +110,13 @@ type HarmonicSegment = {
   end: bigint;
 };
 
+type Range = {
+  type: 'Range';
+  start: Expression;
+  second?: Expression;
+  end: Expression;
+};
+
 type Expression =
   | BinaryExpression
   | CallExpression
@@ -117,6 +125,7 @@ type Expression =
   | ColorLiteral
   | Identifier
   | OtonalChord
+  | Range
   | HarmonicSegment;
 
 type SonicWeaveValue = Function | Interval | Interval[] | Color | string;
@@ -231,6 +240,10 @@ const CENT = new Interval(
   'logarithmic',
   {type: 'CentLiteral'}
 );
+const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
+  type: 'IntegerLiteral',
+  value: 1n,
+});
 
 class ExpressionVisitor {
   context: VisitorContext;
@@ -266,6 +279,8 @@ class ExpressionVisitor {
         return this.visitIdentifier(node);
       case 'OtonalChord':
         return this.visitOtonalChord(node);
+      case 'Range':
+        return this.visitRange(node);
       case 'HarmonicSegment':
         return this.visitHarmonicSegment(node);
     }
@@ -302,6 +317,8 @@ class ExpressionVisitor {
         case '^':
           value = left.value.pow(right.value);
           break;
+        case '\\':
+          throw new Error('Preference not supported with backslahes');
         default:
           throw new Error(
             `${node.preferLeft ? '~' : ''}${node.operator}${
@@ -338,6 +355,8 @@ class ExpressionVisitor {
         return left.pow(right);
       case 'log':
         return left.log(right);
+      case '\\':
+        return left.backslash(right);
       default:
         throw new Error(`${node.operator} unimplemented`);
     }
@@ -438,6 +457,35 @@ class ExpressionVisitor {
       intervals.push(new Interval(monzos[i].div(root), domains[i]));
     }
     return intervals;
+  }
+
+  visitRange(node: Range): Interval[] {
+    const start = this.visit(node.start);
+    const end = this.visit(node.end);
+    if (!(start instanceof Interval && end instanceof Interval)) {
+      throw new Error('Ranges must consist of intervals');
+    }
+
+    let step = LINEAR_UNITY;
+    if (node.second) {
+      const second = this.visit(node.second);
+      if (!(second instanceof Interval)) {
+        throw new Error('Ranges must consist of intervals');
+      }
+      if (second.compare(end) > 0) {
+        throw new Error('Empty range');
+      }
+      step = second.sub(start);
+    } else if (start.compare(end) > 0) {
+      throw new Error('Empty range');
+    }
+    const result = [start];
+    let next = start.add(step);
+    while (next.compare(end) <= 0) {
+      result.push(next);
+      next = next.add(step);
+    }
+    return result;
   }
 
   visitHarmonicSegment(node: HarmonicSegment): Interval[] {

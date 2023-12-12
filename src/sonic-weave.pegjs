@@ -109,7 +109,7 @@ Expression
     }
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / ModToken / ReduceToken / LogToken / DotToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / DotToken)
 
 Term
   = head:Factor tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @Factor)* {
@@ -122,7 +122,7 @@ Factor
     }
 
 Group
-  = _ @(UnaryExpression / OtonalChord / Primary) _
+  = _ @(UnaryExpression / Range / OtonalChord / Primary) _
 
 UnaryExpression
   = operator: ('+' / '-' / '%' / '÷') operand: Primary {
@@ -171,7 +171,7 @@ NedoLiteral
 
 SoftDotDecimal
   = !('.' [^0-9])
-  whole: Integer? '.' fractional: FractionalPart {
+  whole: Integer? '.' !'.' fractional: FractionalPart {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -182,7 +182,7 @@ SoftDotDecimal
 
 HardDotDecimal
   = !('.' [^0-9])
-  whole: Integer? '.' fractional: FractionalPart '!' {
+  whole: Integer? '.' !'.' fractional: FractionalPart '!' {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -246,6 +246,27 @@ ColorLiteral
       value,
     };
   }
+
+UnitStepRange
+  = '[' _ start: Primary _ '..' _ end: Primary _ ']' {
+    return {
+      type: 'Range',
+      start,
+      end,
+    };
+  }
+
+StepRange
+  = '[' _ start: Primary _ ',' _ second: Primary _ '..' _ end: Primary _ ']' {
+    return {
+      type: 'Range',
+      start,
+      second,
+      end,
+    };
+  }
+
+Range = StepRange / UnitStepRange
 
 HarmonicSegment
   = root: PositiveInteger _ '::' _ end: PositiveInteger {

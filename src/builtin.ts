@@ -44,4 +44,9 @@ riff cbrt x { return x ~^ 1/3; }
 
 riff mtof index { return 440 Hz * 2^((index - 69) % 12); }
 riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
+
+riff edo divisions {
+  [1..divisions];
+  step => step \\ divisions;
+}
 `;
