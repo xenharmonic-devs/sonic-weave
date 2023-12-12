@@ -89,14 +89,10 @@ riff rotate onto {
   onto ??= 1;
   $ = $$;
   equave = $[-1];
-  /*
-  while (--onto) { // TODO
-    equave *~ shift();
-  }
+  while (--onto) equave *~ shift();
   root = shift();
   i => i ~% root;
   equave;
-  */
   return;
 }
 `;

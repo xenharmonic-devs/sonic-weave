@@ -217,7 +217,15 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe('3\\6;4\\6;5\\6;6\\6');
   });
 
-  it.skip('rotates scales', () => {
+  it('rotates scales one step', () => {
     const scale = parseSource('1\\6;2\\6;6\\6;rotate();');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('1\\6;5\\6;6\\6');
+  });
+
+  it('rotates scales two steps', () => {
+    const scale = parseSource('1\\6;2\\6;6\\6;rotate(2);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('4\\6;5\\6;6\\6');
   });
 });

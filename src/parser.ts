@@ -57,6 +57,12 @@ type ReturnStatement = {
   argument?: Expression;
 };
 
+type WhileStatement = {
+  type: 'WhileStatement';
+  test: Expression;
+  body: Statement;
+};
+
 type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -67,6 +73,7 @@ type Statement =
   | ExpressionStatement
   | FunctionDeclaration
   | BlockStatement
+  | WhileStatement
   | ReturnStatement;
 
 type ArrayAccess = {
@@ -171,6 +178,8 @@ export class StatementVisitor {
         return this.visitFunctionDeclaration(node);
       case 'BlockStatement':
         return this.visitBlockStatement(node);
+      case 'WhileStatement':
+        return this.visitWhileStatement(node);
       case 'ReturnStatement':
         throw new Error('Illegal return statement');
     }
@@ -231,6 +240,21 @@ export class StatementVisitor {
       throw new Error('Context corruption detected');
     }
     scale.push(...subScale);
+  }
+
+  visitWhileStatement(node: WhileStatement) {
+    const subVisitor = new ExpressionVisitor(this.context);
+    let test: SonicWeaveValue | number = subVisitor.visit(node.test);
+    if (test instanceof Interval) {
+      test = test.value.valueOf();
+    }
+    while (test) {
+      this.visit(node.body);
+      test = subVisitor.visit(node.test);
+      if (test instanceof Interval) {
+        test = test.value.valueOf();
+      }
+    }
   }
 
   visitFunctionDeclaration(node: FunctionDeclaration) {
@@ -403,6 +427,11 @@ class ExpressionVisitor {
         case '-':
           value = left.value.sub(right.value);
           break;
+        case '×':
+        case '*':
+          value = left.value.mul(right.value);
+          break;
+        case '÷':
         case '%':
           value = left.value.div(right.value);
           break;
@@ -444,6 +473,8 @@ class ExpressionVisitor {
         return left.log(right);
       case '\\':
         return left.backslash(right);
+      case '??':
+        return left;
       default:
         throw new Error(`${node.operator} unimplemented`);
     }

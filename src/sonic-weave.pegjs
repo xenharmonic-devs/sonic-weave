@@ -48,6 +48,7 @@ ModToken    = 'mod'    !IdentifierPart
 ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
+WhileToken  = 'while'  !IdentifierPart
 
 Statements
   = head: Statement tail: (_ @Statement)* {
@@ -60,6 +61,7 @@ Statement
   / FunctionDeclaration
   / BlockStatement
   / ReturnStatement
+  / WhileStatement
   / ExpressionStatement
 
 VariableDeclaration
@@ -112,6 +114,15 @@ ReturnStatement
     return { type: 'ReturnStatement' };
   }
 
+WhileStatement
+  = WhileToken _ '(' _ test: Expression _ ')' _ body: Statement {
+    return {
+      type: 'WhileStatement',
+      test,
+      body,
+    };
+  }
+
 ExpressionStatement
   = expression: Expression EOS {
     return {
@@ -162,7 +173,7 @@ Group
   = _ @(UnaryExpression / Range / OtonalChord / ArrayAccess / Primary) _
 
 UnaryExpression
-  = operator: ('+' / '-' / '%' / '÷' / '--' / '++') operand: Primary {
+  = operator: ('--' / '++' / '+' / '-' / '%' / '÷') operand: Primary {
     return {
       type: 'UnaryExpression',
       operator,
