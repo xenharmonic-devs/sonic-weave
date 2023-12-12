@@ -156,4 +156,14 @@ describe('SonicWeave parser', () => {
     const interval = scale[0];
     expect(interval.toString()).toBe('3^1/2');
   });
+
+  it('can call custom functions as expressions', () => {
+    const scale = parseSource(`
+      riff cbrt x { return x ~^ 1/3; }
+      cbrt(5) * cbrt(5) * cbrt(5);
+    `);
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.toString()).toBe('5');
+  });
 });

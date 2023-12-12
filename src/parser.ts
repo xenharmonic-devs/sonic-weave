@@ -50,6 +50,11 @@ type BlockStatement = {
   body: Statement[];
 };
 
+type ReturnStatement = {
+  type: 'ReturnStatement';
+  argument?: Expression;
+};
+
 type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -59,7 +64,8 @@ type Statement =
   | VariableDeclaration
   | ExpressionStatement
   | FunctionDeclaration
-  | BlockStatement;
+  | BlockStatement
+  | ReturnStatement;
 
 type BinaryExpression = {
   type: 'BinaryExpression';
@@ -136,6 +142,8 @@ export class StatementVisitor {
         return this.visitFunctionDeclaration(node);
       case 'BlockStatement':
         return this.visitBlockStatement(node);
+      case 'ReturnStatement':
+        throw new Error('Illegal return statement');
     }
     node satisfies never;
   }
@@ -196,6 +204,13 @@ export class StatementVisitor {
         localVisitor.context.set(node.parameters[i].id, args[i]);
       }
       for (const statement of node.body) {
+        if (statement.type === 'ReturnStatement') {
+          if (statement.argument === undefined) {
+            return;
+          }
+          const argumentVisitor = new ExpressionVisitor(localVisitor.context);
+          return argumentVisitor.visit(statement.argument);
+        }
         localVisitor.visit(statement);
       }
       return localVisitor.scale;

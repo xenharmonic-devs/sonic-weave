@@ -33,6 +33,15 @@ Program
     };
   }
 
+CentToken   = 'c'      !IdentifierPart
+DotToken    = 'dot'    !IdentifierPart
+HertzToken  = 'Hz'     !IdentifierPart
+LogToken    = 'log'    !IdentifierPart
+ModToken    = 'mod'    !IdentifierPart
+ReduceToken = 'reduce' !IdentifierPart
+ReturnToken = 'return' !IdentifierPart
+RiffToken   = 'riff'   !IdentifierPart
+
 Statements
   = head: Statement tail: (_ @Statement)* {
     return prepend(head, tail);
@@ -43,6 +52,7 @@ Statement
   / FunctionDeclaration
   / BlockStatement
   / ExpressionStatement
+  / ReturnStatement
 
 VariableDeclaration
   = name: Identifier _ '=' _ value: Expression EOS {
@@ -54,7 +64,7 @@ VariableDeclaration
   }
 
 FunctionDeclaration
-  = 'riff ' _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
+  = RiffToken _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
     return {
       type: 'FunctionDeclaration',
       name,
@@ -77,6 +87,14 @@ BlockStatement
     };
   }
 
+ReturnStatement
+  = ReturnToken _ argument: Expression EOS {
+    return { type: 'ReturnStatement', argument };
+  }
+  / ReturnToken EOS {
+    return { type: 'ReturnStatement' };
+  }
+
 ExpressionStatement
   = expression: Expression EOS {
     return {
@@ -91,7 +109,7 @@ Expression
     }
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / 'mod' / 'reduce' / 'log' / 'dot')
+  = $('*' / '×' / '%' / '÷' / ModToken / ReduceToken / LogToken / DotToken)
 
 Term
   = head:Factor tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @Factor)* {
@@ -193,10 +211,10 @@ DotCentsLiteral
   }
 
 CentLiteral
-  = 'c' { return { type: 'CentLiteral' }; }
+  = CentToken { return { type: 'CentLiteral' }; }
 
 HertzLiteral
-  = prefix: MetricPrefix? 'Hz' {
+  = prefix: MetricPrefix? HertzToken {
     return {
       type: 'HertzLiteral',
       prefix,
