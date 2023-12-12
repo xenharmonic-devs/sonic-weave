@@ -20,6 +20,13 @@
 
     return BinaryExpression(op, left, right, !!preferLeft, !!preferRight);
   }
+
+  function operatorReducerLite (result, element) {
+    const left = result;
+    const [op, right] = element;
+
+    return BinaryExpression(op, left, right, false, false);
+  }
 }}
 
 Start
@@ -49,6 +56,7 @@ Statements
 
 Statement
   = VariableDeclaration
+  / ReassignmentStatement
   / FunctionDeclaration
   / BlockStatement
   / ReturnStatement
@@ -60,6 +68,15 @@ VariableDeclaration
       type: 'VariableDeclaration',
       name,
       value,
+    };
+  }
+
+ReassignmentStatement
+  = name: Identifier _ preferLeft: '~'? operator: AssigningOperator preferRight: '~'? '=' _ expression: Expression EOS {
+    return {
+      type: 'VariableDeclaration',
+      name,
+      value: BinaryExpression(operator, name, expression, !!preferLeft, !!preferRight),
     };
   }
 
@@ -103,21 +120,41 @@ ExpressionStatement
     };
   }
 
+AssigningOperator
+  = CoalescingOperator
+  / AdditiveOperator
+  / MultiplicativeOperator
+  / ExponentiationOperator
+
+CoalescingOperator
+  = '??'
+
 Expression
-  = head:Term tail:(_ @'~'? @('+' / '-') @'~'? _ @Term)* {
+  = head:AdditiveExpression tail:(_ @CoalescingOperator _ @AdditiveExpression)* {
+    return tail.reduce(operatorReducerLite, head);
+  }
+
+AdditiveOperator
+  = '+' / '-'
+
+AdditiveExpression
+  = head:MultiplicativeExpression tail:(_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)* {
       return tail.reduce(operatorReducer, head);
     }
 
 MultiplicativeOperator
   = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / DotToken)
 
-Term
-  = head:Factor tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @Factor)* {
+MultiplicativeExpression
+  = head:ExponentiationExpression tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
     return tail.reduce(operatorReducer, head);
   }
 
-Factor
-  = head:Group tail:(_ @'~'? @'^' @'~'? _ @Factor)* {
+ExponentiationOperator
+  = '^'
+
+ExponentiationExpression
+  = head:Group tail:(_ @'~'? @ExponentiationOperator @'~'? _ @ExponentiationExpression)* {
       return tail.reduce(operatorReducer, head);
     }
 

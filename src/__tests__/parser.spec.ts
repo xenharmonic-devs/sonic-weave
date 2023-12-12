@@ -216,4 +216,8 @@ describe('SonicWeave standard library', () => {
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('3\\6;4\\6;5\\6;6\\6');
   });
+
+  it.skip('rotates scales', () => {
+    const scale = parseSource('1\\6;2\\6;6\\6;rotate();');
+  });
 });

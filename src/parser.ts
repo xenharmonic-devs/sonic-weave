@@ -14,6 +14,7 @@ import {BUILTIN_CONTEXT, PRELUDE_SOURCE} from './builtin';
 import {metricExponent} from './utils';
 
 type BinaryOperator =
+  | '??'
   | '+'
   | '-'
   | ''
@@ -226,8 +227,12 @@ export class StatementVisitor {
       localVisitor.context.set('$$', this.context.get('$'));
       localVisitor.context.set('$', []);
 
-      for (let i = 0; i < Math.min(args.length, node.parameters.length); ++i) {
-        localVisitor.context.set(node.parameters[i].id, args[i]);
+      for (let i = 0; i < node.parameters.length; ++i) {
+        if (i < args.length) {
+          localVisitor.context.set(node.parameters[i].id, args[i]);
+        } else {
+          localVisitor.context.set(node.parameters[i].id, undefined);
+        }
       }
       for (const statement of node.body) {
         if (statement.type === 'ReturnStatement') {
@@ -302,14 +307,11 @@ class ExpressionVisitor {
     node satisfies never;
   }
 
-  visitBinaryExpression(node: BinaryExpression): Interval {
+  visitBinaryExpression(node: BinaryExpression): Interval | undefined {
     const left = this.visit(node.left);
     const right = this.visit(node.right);
     if (left instanceof Color || right instanceof Color) {
       throw new Error('Cannot operate on colors');
-    }
-    if (left === undefined || right === undefined) {
-      throw new Error('Cannot operate on nothing');
     }
     if (typeof left === 'function' || typeof right === 'function') {
       throw new Error('Cannot operate on functions');
@@ -319,6 +321,12 @@ class ExpressionVisitor {
     }
     if (typeof left === 'string' || typeof right === 'string') {
       throw new Error('Cannot operate on strings');
+    }
+    if (left === undefined || right === undefined) {
+      if (node.operator !== '??') {
+        throw new Error('Cannot operate on nothing');
+      }
+      return left ?? right;
     }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
@@ -386,8 +394,12 @@ class ExpressionVisitor {
   visitArrowFunction(node: ArrowFunction) {
     function realization(...args: SonicWeaveValue[]) {
       const localContext: VisitorContext = new Map(this.context);
-      for (let i = 0; i < Math.min(args.length, node.parameters.length); ++i) {
-        localContext.set(node.parameters[i].id, args[i]);
+      for (let i = 0; i < node.parameters.length; ++i) {
+        if (i < args.length) {
+          localContext.set(node.parameters[i].id, args[i]);
+        } else {
+          localContext.set(node.parameters[i].id, undefined);
+        }
       }
       const localVisitor = new ExpressionVisitor(localContext);
       return localVisitor.visit(node.expression);

@@ -162,4 +162,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       ],
     });
   });
+
+  it('parses coalescing reassignment', () => {
+    const ast = parseSingle('x ??= 42');
+    expect(ast).toEqual({
+      type: 'VariableDeclaration',
+      name: {type: 'Identifier', id: 'x'},
+      value: {
+        type: 'BinaryExpression',
+        operator: '??',
+        left: {type: 'Identifier', id: 'x'},
+        right: {type: 'IntegerLiteral', value: 42n},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
 });

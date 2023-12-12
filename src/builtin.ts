@@ -28,6 +28,19 @@ function push(interval: Interval) {
   scale.push(interval);
 }
 
+function shift() {
+  const scale = this.context.get('$') as Interval[];
+  if (!scale.length) {
+    throw new Error('Shift from an empty scale');
+  }
+  return scale.shift()!;
+}
+
+function unshift(interval: Interval) {
+  const scale = this.context.get('$') as Interval[];
+  scale.unshift(interval);
+}
+
 export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   E,
   PI,
@@ -36,6 +49,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   reverse,
   pop,
   push,
+  shift,
+  unshift,
 };
 
 export const PRELUDE_SOURCE = `
@@ -67,6 +82,21 @@ riff invert {
   i => equave %~ i;
   reverse();
   equave;
+  return;
+}
+
+riff rotate onto {
+  onto ??= 1;
+  $ = $$;
+  /*
+  equave = $[-1]; // TODO
+  while (--onto) { // TODO
+    equave *~ shift();
+  }
+  root = shift();
+  i => i ~% root;
+  equave;
+  */
   return;
 }
 `;
