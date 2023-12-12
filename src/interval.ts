@@ -33,6 +33,24 @@ export class Interval {
     this.node = node;
   }
 
+  neg() {
+    if (this.domain === 'linear') {
+      return new Interval(this.value.neg(), this.domain);
+    }
+    return new Interval(this.value.inverse(), this.domain);
+  }
+
+  inverse() {
+    if (this.domain === 'linear') {
+      return new Interval(this.value.inverse(), this.domain);
+    }
+    // This overload should be fine because multiplication is not implemented in the logarithmic domain.
+    return new Interval(
+      this.value.geometricInverse(),
+      this.domain === 'logarithmic' ? 'cologarithmic' : 'logarithmic'
+    );
+  }
+
   add(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in addition');

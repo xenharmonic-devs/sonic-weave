@@ -69,6 +69,19 @@ type Statement =
   | BlockStatement
   | ReturnStatement;
 
+type ArrayAccess = {
+  type: 'ArrayAccess';
+  object: Expression;
+  index: Expression;
+};
+
+type UnaryExpression = {
+  type: 'UnaryExpression';
+  operator: '+' | '-' | '%' | '÷' | '++' | '--';
+  operand: Expression;
+  prefix: boolean;
+};
+
 type BinaryExpression = {
   type: 'BinaryExpression';
   operator: BinaryOperator;
@@ -119,6 +132,8 @@ type Range = {
 };
 
 type Expression =
+  | ArrayAccess
+  | UnaryExpression
   | BinaryExpression
   | CallExpression
   | ArrowFunction
@@ -275,6 +290,10 @@ class ExpressionVisitor {
 
   visit(node: Expression): SonicWeaveValue {
     switch (node.type) {
+      case 'ArrayAccess':
+        return this.visitArrayAccess(node);
+      case 'UnaryExpression':
+        return this.visitUnaryExpression(node);
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
       case 'CallExpression':
@@ -305,6 +324,53 @@ class ExpressionVisitor {
         return this.visitHarmonicSegment(node);
     }
     node satisfies never;
+  }
+
+  visitArrayAccess(node: ArrayAccess): Interval {
+    const object = this.visit(node.object);
+    if (!Array.isArray(object)) {
+      throw new Error('Array access on non-array');
+    }
+    const index = this.visit(node.index);
+    if (!(index instanceof Interval)) {
+      throw new Error('Array access with a non-integer');
+    }
+    let i = Number(index.value.toBigInteger());
+    if (i < 0) {
+      i += object.length;
+    }
+    return object[i];
+  }
+
+  visitUnaryExpression(node: UnaryExpression): Interval {
+    const operand = this.visit(node.operand);
+    if (!(operand instanceof Interval)) {
+      throw new Error('Can only operate on intervals');
+    }
+    let newValue: Interval;
+    switch (node.operator) {
+      case '+':
+        return operand;
+      case '-':
+        return operand.neg();
+      case '%':
+      case '\u00F7':
+        return operand.inverse();
+      case '++':
+        newValue = operand.add(LINEAR_UNITY);
+        break;
+      case '--':
+        newValue = operand.sub(LINEAR_UNITY);
+        break;
+    }
+    if (node.operand.type !== 'Identifier') {
+      throw new Error('Cannot increment/decrement a value');
+    }
+    this.context.set(node.operand.id, newValue);
+    if (node.prefix) {
+      return newValue;
+    }
+    return operand;
   }
 
   visitBinaryExpression(node: BinaryExpression): Interval | undefined {

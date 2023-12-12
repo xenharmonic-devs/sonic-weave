@@ -88,8 +88,8 @@ riff invert {
 riff rotate onto {
   onto ??= 1;
   $ = $$;
+  equave = $[-1];
   /*
-  equave = $[-1]; // TODO
   while (--onto) { // TODO
     equave *~ shift();
   }

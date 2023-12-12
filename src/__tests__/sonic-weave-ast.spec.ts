@@ -178,4 +178,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses iterated array access', () => {
+    const ast = parseSingle('x[i][2]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArrayAccess',
+        object: {
+          type: 'ArrayAccess',
+          object: {type: 'Identifier', id: 'x'},
+          index: {type: 'Identifier', id: 'i'},
+        },
+        index: {type: 'IntegerLiteral', value: 2n},
+      },
+    });
+  });
 });

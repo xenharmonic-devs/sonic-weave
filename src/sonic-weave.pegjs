@@ -159,15 +159,31 @@ ExponentiationExpression
     }
 
 Group
-  = _ @(UnaryExpression / Range / OtonalChord / Primary) _
+  = _ @(UnaryExpression / Range / OtonalChord / ArrayAccess / Primary) _
 
 UnaryExpression
-  = operator: ('+' / '-' / '%' / '÷') operand: Primary {
+  = operator: ('+' / '-' / '%' / '÷' / '--' / '++') operand: Primary {
     return {
       type: 'UnaryExpression',
       operator,
       operand,
+      prefix: true,
     };
+  }
+  / operand: Primary operator: ('--' / '++') {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: false,
+    }
+  }
+
+ArrayAccess
+  = head: Primary tail: (_ '[' @Expression _ ']')* {
+    return tail.reduce( (object, index) => {
+      return { type: 'ArrayAccess', object, index };
+    }, head);
   }
 
 ScalarMultiple

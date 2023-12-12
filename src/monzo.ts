@@ -340,6 +340,9 @@ export class TimeMonzo {
       }
       result *= BIG_INT_PRIMES[i] ** BigInt(component.n);
     });
+    if (this.residual.s < 0) {
+      return -result;
+    }
     return result;
   }
 
