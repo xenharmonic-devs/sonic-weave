@@ -14,7 +14,12 @@ import {
 } from 'xen-dev-utils';
 
 import {bigGcd} from './utils';
-import {NedoLiteral, IntervalLiteral, FractionLiteral} from './expression';
+import {
+  NedoLiteral,
+  IntervalLiteral,
+  FractionLiteral,
+  CentsLiteral,
+} from './expression';
 
 export type FractionalMonzo = Fraction[];
 
@@ -540,37 +545,19 @@ export class TimeMonzo {
     return true;
   }
 
-  /**
-   * Check if the time monzo is pure cents.
-   * @returns `true` if the time monzo has no vector or residual.
-   */
-  isCents() {
+  isSoftCents() {
     if (this.timeExponent.n !== 0) {
       return false;
     }
-    for (let i = 0; i < this.numberOfComponents; ++i) {
-      if (!this.primeExponents[i].equals(ZERO)) {
+    if (this.numberOfComponents < 1) {
+      return false;
+    }
+    for (let i = 1; i < this.numberOfComponents; ++i) {
+      if (this.primeExponents[i].n) {
         return false;
       }
     }
     if (!this.residual.equals(ONE)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Check if the time monzo is combination of fractional, equal temperament or cents parts.
-   * @returns `true` if the time monzo is not simply fractional, equal temperament or pure cents.
-   */
-  isComposite() {
-    if (this.isFractional()) {
-      return false;
-    }
-    if (this.isEqualTemperament()) {
-      return false;
-    }
-    if (this.isCents()) {
       return false;
     }
     return true;
@@ -591,7 +578,7 @@ export class TimeMonzo {
       return false;
     }
     for (let i = 1; i < this.primeExponents.length; ++i) {
-      if (!this.primeExponents[i].equals(ZERO)) {
+      if (this.primeExponents[i].n) {
         return false;
       }
     }
@@ -791,13 +778,13 @@ export class TimeMonzo {
       }
       if (n < m) {
         for (let i = n; i < m; ++i) {
-          if (!other.primeExponents[i].equals(ZERO)) {
+          if (other.primeExponents[i].n) {
             throw new Error("Solution doesn't exist");
           }
         }
       } else if (n > m) {
         for (let i = m; i < n; ++i) {
-          if (!this.primeExponents[i].equals(ZERO)) {
+          if (this.primeExponents[i].n) {
             throw new Error("Solution doesn't exist");
           }
         }
@@ -819,13 +806,13 @@ export class TimeMonzo {
       const m = other.numberOfComponents;
       if (n < m) {
         for (let i = n; i < m; ++i) {
-          if (!other.primeExponents[i].equals(ZERO)) {
+          if (other.primeExponents[i].n) {
             return copout;
           }
         }
       } else if (n > m) {
         for (let i = m; i < n; ++i) {
-          if (!this.primeExponents[i].equals(ZERO)) {
+          if (this.primeExponents[i].n) {
             return copout;
           }
         }
@@ -840,7 +827,7 @@ export class TimeMonzo {
           ) {
             return copout;
           }
-        } else if (!other.primeExponents[i].equals(ZERO)) {
+        } else if (other.primeExponents[i].n) {
           solution = this.primeExponents[i].div(other.primeExponents[i]);
         }
       }
@@ -903,7 +890,7 @@ export class TimeMonzo {
    */
   geometricInverse(): TimeMonzo {
     const magnitude = this.dot(this);
-    if (magnitude.equals(ZERO)) {
+    if (magnitude.n === 0) {
       throw new Error('No geometric inverse exists');
     }
     return this.pow(magnitude.inverse());
@@ -1136,9 +1123,24 @@ export class TimeMonzo {
         return this.asFractionLiteral(node);
       case 'NedoLiteral':
         return this.asNedoLiteral(node);
+      case 'CentsLiteral':
+        return this.asCentsLiteral(node);
       default:
         return undefined;
     }
+  }
+
+  asCentsLiteral(node: CentsLiteral): CentsLiteral | undefined {
+    if (this.isSoftCents()) {
+      // eslint-disable-next-line prefer-const
+      let [whole, fractional] = this.primeExponents[0]
+        .mul(1200)
+        .toString()
+        .split('.');
+      fractional ??= '';
+      return {...node, whole: BigInt(whole), fractional};
+    }
+    return undefined;
   }
 
   asIntegerLiteral(node: IntervalLiteral) {

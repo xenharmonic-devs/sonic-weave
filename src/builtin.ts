@@ -41,6 +41,11 @@ function unshift(interval: Interval) {
   scale.unshift(interval);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function print(...args: any[]) {
+  console.log(...args);
+}
+
 export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   E,
   PI,
@@ -51,6 +56,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   push,
   shift,
   unshift,
+  print,
 };
 
 export const PRELUDE_SOURCE = `
@@ -74,6 +80,23 @@ riff edo divisions {
 riff subharmonics start end {
   start::end;
   invert();
+}
+
+riff rank2 generator period up down {
+  down ??= 0;
+  accumulator = 1;
+  while (up--) {
+    accumulator *~= generator;
+    accumulator;
+  }
+  accumulator = 1;
+  while (down--) {
+    accumulator %~= generator;
+    accumulator;
+  }
+  period;
+  reduce();
+  sort();
 }
 
 // == Scale modification ==
@@ -103,5 +126,16 @@ riff rotate onto {
   i => i ~% root;
   equave;
   return;
+}
+
+// TODO: Clear on zero
+riff repeat times {
+  times ??= 2;
+  scale = $$;
+  equave = $$[-1];
+  while (--times) {
+    scale;
+    i => i ~* equave ~^ times;
+  }
 }
 `;

@@ -92,19 +92,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     const ast = parseSingle('1.955');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
-      expression: {
-        type: 'BinaryExpression',
-        operator: '',
-        left: {
-          type: 'DecimalLiteral',
-          whole: 1n,
-          fractional: '955',
-          hard: false,
-        },
-        right: {type: 'CentLiteral'},
-        preferLeft: false,
-        preferRight: false,
-      },
+      expression: {type: 'CentsLiteral', whole: 1n, fractional: '955'},
     });
   });
 

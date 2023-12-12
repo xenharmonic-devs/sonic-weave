@@ -6,12 +6,13 @@ import {
   DecimalLiteral,
   FractionLiteral,
   HertzLiteral,
+  CentsLiteral,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {BUILTIN_CONTEXT, PRELUDE_SOURCE} from './builtin';
-import {metricExponent} from './utils';
+import {bigGcd, metricExponent} from './utils';
 
 type BinaryOperator =
   | '??'
@@ -346,6 +347,8 @@ class ExpressionVisitor {
         return this.visitFractionLiteral(node);
       case 'NedoLiteral':
         return this.visitNedoLiteral(node);
+      case 'CentsLiteral':
+        return this.visitCentsLiteral(node);
       case 'CentLiteral':
         return CENT;
       case 'HertzLiteral':
@@ -542,6 +545,25 @@ class ExpressionVisitor {
     }
     const value = TimeMonzo.fromBigNumeratorDenominator(numerator, denominator);
     return new Interval(value, 'linear', node);
+  }
+
+  visitCentsLiteral(node: CentsLiteral): Interval {
+    let numerator: bigint | number = node.whole;
+    let denominator: bigint | number = 1200n;
+    for (const c of node.fractional) {
+      numerator = 10n * numerator + BigInt(c);
+      denominator *= 10n;
+    }
+    const factor = bigGcd(numerator, denominator);
+    numerator = Number(numerator / factor);
+    denominator = Number(denominator / factor);
+    let value: TimeMonzo;
+    try {
+      value = new TimeMonzo(ZERO, [new Fraction(numerator, denominator)]);
+    } catch {
+      value = TimeMonzo.fromCents((1200 * numerator) / denominator);
+    }
+    return new Interval(value, 'logarithmic', node);
   }
 
   visitFractionLiteral(node: FractionLiteral): Interval {

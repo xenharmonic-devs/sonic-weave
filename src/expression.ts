@@ -24,6 +24,12 @@ export type NedoLiteral = {
   denominator: bigint;
 };
 
+export type CentsLiteral = {
+  type: 'CentsLiteral';
+  whole: bigint;
+  fractional: string;
+};
+
 export type CentLiteral = {
   type: 'CentLiteral';
 };
@@ -38,6 +44,7 @@ export type IntervalLiteral =
   | DecimalLiteral
   | FractionLiteral
   | NedoLiteral
+  | CentsLiteral
   | CentLiteral
   | HertzLiteral;
 
@@ -120,6 +127,8 @@ export function toString(literal: IntervalLiteral) {
       return `${literal.numerator}/${literal.denominator}`;
     case 'DecimalLiteral':
       return `${literal.whole},${literal.fractional}`;
+    case 'CentsLiteral':
+      return `${literal.whole}.${literal.fractional}`;
     case 'CentLiteral':
       return 'c';
     case 'HertzLiteral':

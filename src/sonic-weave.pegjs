@@ -324,8 +324,12 @@ IntegerLiteral
   }
 
 DotCentsLiteral
-  = multiplier: DotDecimal {
-    return BinaryExpression('', multiplier, { type: 'CentLiteral' }, false, false);
+  = multiplier: SoftDotDecimal {
+    return {
+      type: 'CentsLiteral',
+      whole: multiplier.whole,
+      fractional: multiplier.fractional,
+    };
   }
 
 CentLiteral

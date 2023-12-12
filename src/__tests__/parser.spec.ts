@@ -221,6 +221,14 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;8/5;8/4');
   });
 
+  it('generates rank-2 scales', () => {
+    const scale = parseSource('rank2(707.048, 600.0, 2, 2);repeat();');
+    expect(scale).toHaveLength(10);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
+    );
+  });
+
   it('reduces scales by their equave', () => {
     const scale = parseSource('3;5;7;11;13;2;reduce();');
     expect(scale).toHaveLength(6);
