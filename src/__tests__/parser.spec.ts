@@ -68,13 +68,13 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     // The correct value is actually 6,283185307179586, but it gets mushed a bit along the way.
-    expect(interval.toString()).toBe('6,283185307179587');
+    expect(interval.toString()).toBe('6,283185307179587!');
   });
 
   it('can call built-in functions', () => {
     const scale = parseSource('7;1;2;TAU;1\\2;sort();');
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1;1\\2;2;6,283185307179587;7'
+      '1;1\\2;2;6,283185307179587!;7'
     );
   });
 
@@ -165,5 +165,26 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.toString()).toBe('5');
+  });
+
+  it('comes with a standard library (mtof)', () => {
+    const scale = parseSource('mtof(60);');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.toString()).toBe('4685120000^1/4 * Hz');
+  });
+
+  it('comes with a standard library (ftom)', () => {
+    const scale = parseSource('ftom(261.6 Hz);');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.value.valueOf()).toBeCloseTo(60);
+  });
+
+  it('parses hard decimals (reals)', () => {
+    const scale = parseSource('1.6180339887498948482!;');
+    expect(scale).toHaveLength(1);
+    const interval = scale[0];
+    expect(interval.value.valueOf()).toBeCloseTo(Math.sqrt(1.25) + 0.5);
   });
 });

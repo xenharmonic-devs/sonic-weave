@@ -151,6 +151,7 @@ Primary
   = ScalarMultiple
   / Quantity
   / NedoLiteral
+  / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
   / HarmonicSegment
@@ -168,23 +169,40 @@ NedoLiteral
     };
   }
 
-DotDecimal
+SoftDotDecimal
   = !('.' [^0-9])
   whole: Integer? '.' fractional: FractionalPart {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
+      hard: false,
     };
   }
 
-CommaDecimal
-  = !(',' [^0-9])
-  whole: Integer? ',' fractional: FractionalPart {
+HardDotDecimal
+  = !('.' [^0-9])
+  whole: Integer? '.' fractional: FractionalPart '!' {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
+      hard: true,
+    };
+  }
+
+DotDecimal
+  = SoftDotDecimal
+  / HardDotDecimal
+
+CommaDecimal
+  = !(',' [^0-9])
+  whole: Integer? ',' fractional: FractionalPart hard: '!'? {
+    return {
+      type: 'DecimalLiteral',
+      whole: whole ?? 0n,
+      fractional: fractional,
+      hard: !!hard,
     };
   }
 

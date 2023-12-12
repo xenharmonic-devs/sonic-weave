@@ -194,7 +194,15 @@ export class TimeMonzo {
     while (vector.length < numberOfComponents) {
       vector.push(new Fraction(0));
     }
-    return new TimeMonzo(ZERO, vector, undefined, valueToCents(value));
+    if (value === 0) {
+      return new TimeMonzo(ZERO, vector, ZERO);
+    }
+    const residual = new Fraction(1);
+    if (value < 0) {
+      residual.s = -1;
+      value = -value;
+    }
+    return new TimeMonzo(ZERO, vector, residual, valueToCents(value));
   }
 
   static fromFractionalFrequency(
@@ -346,9 +354,6 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as an EDJI interval.
    */
   toEqualTemperament() {
-    if (this.timeExponent.n !== 0) {
-      throw new Error('Unable to convert a non-scalar to equal temperament');
-    }
     if (this.cents !== 0) {
       throw new Error(
         'Unable to convert non-algebraic number to equal temperament'
@@ -495,9 +500,6 @@ export class TimeMonzo {
    * @returns `true` if the time monzo can be interpreted as pitch-space fraction of a frequency-space fraction.
    */
   isEqualTemperament() {
-    if (this.timeExponent.n !== 0) {
-      return false;
-    }
     if (this.cents !== 0) {
       return false;
     }
@@ -1134,15 +1136,22 @@ export class TimeMonzo {
         } else if (this.isEqualTemperament()) {
           const {fractionOfEquave, equave} = this.toEqualTemperament();
           return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
+        } else {
+          return this.valueOf().toString().replace('.', ',') + '!';
         }
       } else {
-        if (this.isDecimal()) {
-          if (this.timeExponent.equals(NEGATIVE_ONE)) {
+        if (this.timeExponent.equals(NEGATIVE_ONE)) {
+          if (this.isDecimal()) {
             return `${this.toFraction().toString()} Hz`;
+          } else if (this.isFractional()) {
+            return `${this.toFraction().toFraction()} Hz`;
+          } else if (this.isEqualTemperament()) {
+            const {fractionOfEquave, equave} = this.toEqualTemperament();
+            return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * Hz`;
           }
+          return `${this.valueOf()}! Hz`;
         }
       }
-      return this.valueOf().toString().replace('.', ',');
     } else {
       if (this.isEqualTemperament()) {
         const {fractionOfEquave, equave} = this.toEqualTemperament();

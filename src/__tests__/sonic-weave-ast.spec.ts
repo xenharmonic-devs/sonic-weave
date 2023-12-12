@@ -75,7 +75,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'BinaryExpression',
         operator: '',
-        left: {type: 'DecimalLiteral', whole: 420n, fractional: '69'},
+        left: {
+          type: 'DecimalLiteral',
+          whole: 420n,
+          fractional: '69',
+          hard: false,
+        },
         right: {type: 'HertzLiteral', prefix: ''},
         preferLeft: false,
         preferRight: false,
@@ -90,10 +95,28 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'BinaryExpression',
         operator: '',
-        left: {type: 'DecimalLiteral', whole: 1n, fractional: '955'},
+        left: {
+          type: 'DecimalLiteral',
+          whole: 1n,
+          fractional: '955',
+          hard: false,
+        },
         right: {type: 'CentLiteral'},
         preferLeft: false,
         preferRight: false,
+      },
+    });
+  });
+
+  it('parses hard decimals over cents', () => {
+    const ast = parseSingle('1.955!');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'DecimalLiteral',
+        whole: 1n,
+        fractional: '955',
+        hard: true,
       },
     });
   });

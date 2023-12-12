@@ -10,7 +10,7 @@ import {
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
-import {BUILTIN_CONTEXT} from './builtin';
+import {BUILTIN_CONTEXT, PRELUDE_SOURCE} from './builtin';
 import {metricExponent} from './utils';
 
 type BinaryOperator =
@@ -303,7 +303,11 @@ class ExpressionVisitor {
           value = left.value.pow(right.value);
           break;
         default:
-          throw new Error('Unimplemented');
+          throw new Error(
+            `${node.preferLeft ? '~' : ''}${node.operator}${
+              node.preferRight ? '~' : ''
+            } unimplemented`
+          );
       }
       if (node.preferLeft) {
         return new Interval(
@@ -327,8 +331,15 @@ class ExpressionVisitor {
       case '*':
       case '':
         return left.mul(right);
+      case '÷':
+      case '%':
+        return left.div(right);
+      case '^':
+        return left.pow(right);
+      case 'log':
+        return left.log(right);
       default:
-        throw new Error('Unimplemented');
+        throw new Error(`${node.operator} unimplemented`);
     }
   }
 
@@ -362,6 +373,12 @@ class ExpressionVisitor {
   }
 
   visitDecimalLiteral(node: DecimalLiteral): Interval {
+    if (node.hard) {
+      const value = TimeMonzo.fromValue(
+        parseFloat(`${node.whole}.${node.fractional}`)
+      );
+      return new Interval(value, 'linear', node);
+    }
     let numerator = node.whole;
     let denominator = 1n;
     for (const c of node.fractional) {
@@ -447,14 +464,21 @@ export function parseAST(source: string): Program {
   return parse(source);
 }
 
-export function parseSource(source: string): Interval[] {
-  const program = parseAST(source);
+export function parseSource(source: string, includePrelude = true): Interval[] {
   const visitor = new StatementVisitor();
   for (const name in BUILTIN_CONTEXT) {
     const value = BUILTIN_CONTEXT[name];
     visitor.context.set(name, value);
   }
 
+  if (includePrelude) {
+    const prelude = parseAST(PRELUDE_SOURCE);
+    for (const statement of prelude.body) {
+      visitor.visit(statement);
+    }
+  }
+
+  const program = parseAST(source);
   for (const statement of program.body) {
     visitor.visit(statement);
   }

@@ -72,6 +72,25 @@ export class Interval {
     return new Interval(this.value.div(other.value), this.domain);
   }
 
+  pow(other: Interval) {
+    if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
+      throw new Error('Exponentiation not implemented in logarithmic domain');
+    }
+    if (!other.value.isScalar()) {
+      throw new Error('Only scalar exponentiation implemented');
+    }
+    return new Interval(this.value.pow(other.value), this.domain);
+  }
+
+  log(other: Interval) {
+    if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
+      throw new Error(
+        'Logarithm not implemented in the (already) logarithmic domain'
+      );
+    }
+    return new Interval(this.value.log(other.value), this.domain);
+  }
+
   compare(other: Interval) {
     return this.value.valueOf() - other.value.valueOf();
   }

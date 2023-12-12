@@ -9,6 +9,7 @@ export type DecimalLiteral = {
   type: 'DecimalLiteral';
   whole: bigint;
   fractional: string;
+  hard: boolean;
 };
 
 export type FractionLiteral = {
