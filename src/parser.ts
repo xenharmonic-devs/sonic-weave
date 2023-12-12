@@ -64,6 +64,13 @@ type WhileStatement = {
   body: Statement;
 };
 
+type IfStatement = {
+  type: 'IfStatement';
+  test: Expression;
+  consequent: Statement;
+  alternate?: Statement;
+};
+
 type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -75,6 +82,7 @@ type Statement =
   | FunctionDeclaration
   | BlockStatement
   | WhileStatement
+  | IfStatement
   | ReturnStatement;
 
 type ArrayAccess = {
@@ -85,7 +93,7 @@ type ArrayAccess = {
 
 type UnaryExpression = {
   type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | '++' | '--';
+  operator: '+' | '-' | '%' | '÷' | '!' | '++' | '--';
   operand: Expression;
   prefix: boolean;
 };
@@ -162,6 +170,24 @@ type SonicWeaveValue =
 
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
+function sonicTruth(test: SonicWeaveValue) {
+  if (test instanceof Interval) {
+    return test.value.residual.n;
+  } else if (Array.isArray(test)) {
+    return test.length;
+  }
+  return Number(Boolean(test));
+}
+
+class Interupt {
+  node: ReturnStatement;
+  value?: SonicWeaveValue;
+  constructor(node: ReturnStatement, value?: SonicWeaveValue) {
+    this.node = node;
+    this.value = value;
+  }
+}
+
 export class StatementVisitor {
   context: VisitorContext;
   constructor() {
@@ -169,7 +195,7 @@ export class StatementVisitor {
     this.context.set('$', []);
   }
 
-  visit(node: Statement) {
+  visit(node: Statement): Interupt | undefined {
     switch (node.type) {
       case 'VariableDeclaration':
         return this.visitVariableDeclaration(node);
@@ -181,16 +207,28 @@ export class StatementVisitor {
         return this.visitBlockStatement(node);
       case 'WhileStatement':
         return this.visitWhileStatement(node);
+      case 'IfStatement':
+        return this.visitIfStatement(node);
       case 'ReturnStatement':
-        return node;
+        return this.visitReturnStatement(node);
     }
     node satisfies never;
+  }
+
+  visitReturnStatement(node: ReturnStatement) {
+    let value: SonicWeaveValue;
+    if (node.argument) {
+      const subVisitor = new ExpressionVisitor(this.context);
+      value = subVisitor.visit(node.argument);
+    }
+    return new Interupt(node, value);
   }
 
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.value);
     this.context.set(node.name.id, value);
+    return undefined;
   }
 
   visitExpression(node: ExpressionStatement) {
@@ -220,6 +258,7 @@ export class StatementVisitor {
       scale.length = 0;
       scale.push(...mapped);
     }
+    return undefined;
   }
 
   visitBlockStatement(node: BlockStatement) {
@@ -256,19 +295,21 @@ export class StatementVisitor {
 
   visitWhileStatement(node: WhileStatement) {
     const subVisitor = new ExpressionVisitor(this.context);
-    let test: SonicWeaveValue | number = subVisitor.visit(node.test);
-    if (test instanceof Interval) {
-      test = test.value.valueOf();
-    }
-    while (test) {
+    while (sonicTruth(subVisitor.visit(node.test))) {
       const interrupt = this.visit(node.body);
-      if (interrupt && interrupt.type === 'ReturnStatement') {
+      if (interrupt) {
         return interrupt;
       }
-      test = subVisitor.visit(node.test);
-      if (test instanceof Interval) {
-        test = test.value.valueOf();
-      }
+    }
+  }
+
+  visitIfStatement(node: IfStatement) {
+    const subVisitor = new ExpressionVisitor(this.context);
+    if (sonicTruth(subVisitor.visit(node.test))) {
+      return this.visit(node.consequent);
+    }
+    if (node.alternate) {
+      return this.visit(node.alternate);
     }
   }
 
@@ -290,12 +331,8 @@ export class StatementVisitor {
       }
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
-        if (interrupt && interrupt.type === 'ReturnStatement') {
-          if (interrupt.argument === undefined) {
-            return;
-          }
-          const argumentVisitor = new ExpressionVisitor(localVisitor.context);
-          return argumentVisitor.visit(interrupt.argument);
+        if (interrupt && interrupt.node.type === 'ReturnStatement') {
+          return interrupt.value;
         }
       }
       return localVisitor.context.get('$');
@@ -305,6 +342,7 @@ export class StatementVisitor {
       enumerable: false,
     });
     this.context.set(node.name.id, realization);
+    return undefined;
   }
 }
 
@@ -316,6 +354,10 @@ const CENT = new Interval(
   'logarithmic',
   {type: 'CentLiteral'}
 );
+const LINEAR_ZERO = new Interval(new TimeMonzo(ZERO, [], ZERO), 'linear', {
+  type: 'IntegerLiteral',
+  value: 0n,
+});
 const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
   type: 'IntegerLiteral',
   value: 1n,
@@ -397,6 +439,8 @@ class ExpressionVisitor {
       case '%':
       case '\u00F7':
         return operand.inverse();
+      case '!':
+        return sonicTruth(operand) ? LINEAR_ZERO : LINEAR_UNITY;
       case '++':
         newValue = operand.add(LINEAR_UNITY);
         break;

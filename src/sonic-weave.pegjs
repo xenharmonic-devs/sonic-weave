@@ -42,7 +42,9 @@ Program
 
 CentToken   = 'c'      !IdentifierPart
 DotToken    = 'dot'    !IdentifierPart
+ElseToken   = 'else'   !IdentifierPart
 HertzToken  = 'Hz'     !IdentifierPart
+IfToken     = 'if'     !IdentifierPart
 LogToken    = 'log'    !IdentifierPart
 ModToken    = 'mod'    !IdentifierPart
 ReduceToken = 'red'    !IdentifierPart
@@ -62,6 +64,7 @@ Statement
   / BlockStatement
   / ReturnStatement
   / WhileStatement
+  / IfStatement
   / ExpressionStatement
 
 VariableDeclaration
@@ -123,6 +126,26 @@ WhileStatement
     };
   }
 
+IfStatement
+  = IfToken _ '(' _ test: Expression _ ')' _ consequent: Statement {
+    return {
+      type: 'IfStatement',
+      test,
+      consequent,
+    }
+  }
+  / IfToken _ '(' _ test: Expression _ ')' _
+    consequent: Statement _
+    ElseToken _
+    alternate: Statement {
+    return {
+      type: 'IfStatement',
+      test,
+      consequent,
+      alternate,
+    };
+  }
+
 ExpressionStatement
   = expression: Expression EOS {
     return {
@@ -173,7 +196,7 @@ Group
   = _ @(UnaryExpression / Range / HarmonicSegment / EnumeratedChord / ArrayAccess / Primary) _
 
 UnaryExpression
-  = operator: ('--' / '++' / '+' / '-' / '%' / '÷') operand: Primary {
+  = operator: ('--' / '++' / '+' / '-' / '%' / '÷' / '!') operand: Primary {
     return {
       type: 'UnaryExpression',
       operator,

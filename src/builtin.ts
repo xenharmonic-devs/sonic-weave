@@ -128,10 +128,22 @@ riff rotate onto {
   return;
 }
 
-// TODO: Clear on zero
+riff void _ {
+  return;
+}
+
+riff clear {
+  $ = $$;
+  while ($) void(pop());
+}
+
 riff repeat times {
   times ??= 2;
   scale = $$;
+  if (!times) {
+    $ = scale;
+    return clear();
+  }
   equave = $$[-1];
   while (--times) {
     scale;

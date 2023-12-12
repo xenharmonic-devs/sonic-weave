@@ -259,4 +259,14 @@ describe('SonicWeave standard library', () => {
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('4\\6;5\\6;6\\6');
   });
+
+  it('clears the scale', () => {
+    const scale = parseSource('2;clear();');
+    expect(scale).toHaveLength(0);
+  });
+
+  it('clears the scale (repeat(0))', () => {
+    const scale = parseSource('2;repeat(0);');
+    expect(scale).toHaveLength(0);
+  });
 });
