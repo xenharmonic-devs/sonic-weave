@@ -221,4 +221,28 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       ],
     });
   });
+
+  it('parses double-quoted string literals with escapes', () => {
+    const ast = parseSingle('"hello\\nworld"');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'StringLiteral', value: 'hello\nworld'},
+    });
+  });
+
+  it('parses single-quoted string literals with escapes', () => {
+    const ast = parseSingle("'hell\\u0000 world'");
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'StringLiteral', value: 'hell\x00 world'},
+    });
+  });
+
+  it.fails("accepts \\x escapes, but doesn't actually parse them", () => {
+    const ast = parseSingle('"hello w\\x00rld"');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'StringLiteral', value: 'hello w\x00rld'},
+    });
+  });
 });

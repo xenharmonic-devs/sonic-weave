@@ -165,6 +165,11 @@ type ArrayLiteral = {
   elements: Expression[];
 };
 
+type StringLiteral = {
+  type: 'StringLiteral';
+  value: string;
+};
+
 type Expression =
   | ArrayAccess
   | UnaryExpression
@@ -177,6 +182,7 @@ type Expression =
   | EnumeratedChord
   | Range
   | ArrayLiteral
+  | StringLiteral
   | HarmonicSegment;
 
 type SonicWeaveValue =
@@ -255,6 +261,11 @@ export class StatementVisitor {
   visitExpression(node: ExpressionStatement) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.expression);
+    this.handleValue(value);
+    return undefined;
+  }
+
+  handleValue(value: SonicWeaveValue) {
     const scale = this.context.get('$');
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption detected');
@@ -266,7 +277,9 @@ export class StatementVisitor {
     } else if (value instanceof Interval) {
       scale.push(value);
     } else if (Array.isArray(value)) {
-      scale.push(...value);
+      for (const subvalue of value) {
+        this.handleValue(subvalue);
+      }
     } else if (value === undefined) {
       /* Do nothing */
     } else if (typeof value === 'string') {
@@ -279,7 +292,6 @@ export class StatementVisitor {
       scale.length = 0;
       scale.push(...mapped);
     }
-    return undefined;
   }
 
   visitBlockStatement(node: BlockStatement) {
@@ -436,6 +448,8 @@ class ExpressionVisitor {
       case 'ArrayLiteral':
         // We cheat here to simplify the type hierarchy definition (no nested arrays).
         return node.elements.map(this.visit.bind(this)) as SonicWeaveValue;
+      case 'StringLiteral':
+        return node.value;
     }
     node satisfies never;
   }

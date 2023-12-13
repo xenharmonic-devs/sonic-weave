@@ -14,18 +14,26 @@
     return [head].concat(tail ?? []);
   }
 
-  function operatorReducer (result, element) {
+  function operatorReducer(result, element) {
     const left = result;
     const [preferLeft, op, preferRight, right] = element;
 
     return BinaryExpression(op, left, right, !!preferLeft, !!preferRight);
   }
 
-  function operatorReducerLite (result, element) {
+  function operatorReducerLite(result, element) {
     const left = result;
     const [op, right] = element;
 
     return BinaryExpression(op, left, right, false, false);
+  }
+
+  function swapQuotes(value) {
+    let i = 0;
+    while (value.includes(String.fromCharCode(i))) i++;
+    const temp = String.fromCharCode(i);
+    const re = RegExp(temp, 'g');
+    return value.replace(/"/g, temp).replace(/'/g, '"').replace(re, "'");
   }
 }}
 
@@ -298,6 +306,7 @@ Primary
   / Identifier
   / ScalarLike
   / ArrayLiteral
+  / StringLiteral
 
 NedoLiteral
   = numerator: Integer '\\' denominator: PositiveInteger {
@@ -335,7 +344,7 @@ DotDecimal
   / HardDotDecimal
 
 CommaDecimal
-  = whole: Integer ',' fractional: [0-9]+ hard: '!'? {
+  = whole: Integer ',' fractional: DecimalDigits hard: '!'? {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -430,16 +439,13 @@ MetricPrefix
   = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
 
 Integer
-  = num:$('0' / ([1-9] [0-9]*)) { return BigInt(num); }
+  = num:$('0' / ([1-9] DecimalDigit*)) { return BigInt(num); }
 
 PositiveInteger
-  = num:$([1-9] [0-9]*) { return BigInt(num); }
+  = num:$([1-9] DecimalDigit*) { return BigInt(num); }
 
 FractionalPart
-  = $[0-9]*
-
-HexDigit
-  = [A-Fa-f0-9]
+  = $(DecimalDigit*)
 
 RGB4
   = $('#' HexDigit|3|)
@@ -449,6 +455,89 @@ RGB8
 
 IdentifierName
   = $(IdentifierStart IdentifierPart*)
+
+StringLiteral
+  = '"' DoubleStringCharacter* '"' {
+    return {
+      type: 'StringLiteral',
+      value: JSON.parse(text()),
+    }
+  }
+  /  "'" SingleStringCharacter* "'" {
+    // A horrible hack...
+    const value = swapQuotes(JSON.parse(swapQuotes(text())));
+    return {
+      type: 'StringLiteral',
+      value
+    }
+  }
+
+DoubleStringCharacter
+  = !(["\\] / LineTerminator) SourceCharacter
+  / "\u2028"
+  / "\u2029"
+  / "\\" EscapeSequence
+  / LineContinuation
+
+SingleStringCharacter
+  = !(['\\] / LineTerminator) SourceCharacter
+  / "\u2028"
+  / "\u2029"
+  / "\\" EscapeSequence
+  / LineContinuation
+
+LineContinuation
+  = "\\" LineTerminatorSequence
+
+EscapeSequence
+  = CharacterEscapeSequence
+  / "0" !DecimalDigit
+  / HexEscapeSequence
+  / UnicodeEscapeSequence
+
+CharacterEscapeSequence
+  = SingleEscapeCharacter
+  / NonEscapeCharacter
+
+SingleEscapeCharacter
+  = ['"\\bfnrtv]
+
+NonEscapeCharacter
+  = !(EscapeCharacter / LineTerminator) SourceCharacter
+
+EscapeCharacter
+  = SingleEscapeCharacter
+  / DecimalDigit
+  / "x"
+  / "u"
+
+HexEscapeSequence
+  = "x" HexDigit HexDigit
+
+UnicodeEscapeSequence
+  = "u" Hex4Digits
+  / "u{" CodePoint "}"
+
+Hex4Digits
+  = HexDigit HexDigit HexDigit HexDigit
+
+DecimalDigits
+  = $(DecimalDigit+)
+
+DecimalDigit = [0-9]
+
+HexDigits
+  = $(HexDigit+)
+
+HexDigits_Sep
+  = HexDigit+ (NumericLiteralSeparator HexDigit+)*
+
+HexDigit = [0-9a-f]i
+
+NumericLiteralSeparator = "_"
+
+CodePoint
+   = HexDigits ?{ return parseInt(n, 16) <= 0x10FFFF }
 
 IdentifierStart
   = ID_Start
@@ -481,6 +570,13 @@ LineTerminator
   / '\r'
   / '\u2028'
   / '\u2029'
+
+LineTerminatorSequence
+  = "\n"
+  / "\r" !"\n"
+  / "\u2028"
+  / "\u2029"
+  / "\r\n"
 
 // Separator, Space
 Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c); }

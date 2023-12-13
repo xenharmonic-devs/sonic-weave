@@ -203,6 +203,14 @@ describe('SonicWeave parser', () => {
       '1;2;3;4;5;15;14;13;12;11'
     );
   });
+
+  it('can build scales from heterogenous arrays', () => {
+    const scale = parseSource('[2, #fae, 3, "three", [4, #dad]];');
+    expect(scale).toHaveLength(3);
+    expect(scale[0].color?.value).toBe('#fae');
+    expect(scale[1].label).toBe('three');
+    expect(scale[2].color?.value).toBe('#dad');
+  });
 });
 
 describe('SonicWeave standard library', () => {
