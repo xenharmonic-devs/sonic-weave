@@ -364,4 +364,10 @@ riff subset indices scale {
   scale ??= $$;
   distill(_, i => i of indices, scale);
 }
+
+riff toSubharmonics overtone scale {
+  $ = scale ?? $$;
+  i => %~(%~i to~ %~overtone);
+  return;
+}
 `;

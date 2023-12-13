@@ -330,4 +330,10 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('2;repeat(0);');
     expect(scale).toHaveLength(0);
   });
+
+  it('can round to nearest subharmonic', () => {
+    const scale = parseSource('1\\3;2\\3;3\\3;toSubharmonics(16);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('16/13;16/10;16/8');
+  });
 });

@@ -7,6 +7,7 @@ import {
   FractionLiteral,
   HertzLiteral,
   CentsLiteral,
+  uniformInvertNode,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
@@ -126,6 +127,7 @@ type UnaryExpression = {
   operator: '+' | '-' | '%' | '÷' | '!' | '++' | '--';
   operand: Expression;
   prefix: boolean;
+  uniform: boolean;
 };
 
 type BinaryExpression = {
@@ -512,6 +514,24 @@ class ExpressionVisitor {
     }
     if (!(operand instanceof Interval)) {
       throw new Error(`${node.operator} can only operate on intervals`);
+    }
+    if (node.uniform) {
+      let value: TimeMonzo;
+      let newNode = operand.node;
+      switch (node.operator) {
+        case '-':
+          value = operand.value.neg();
+          break;
+        case '%':
+        case '\u00F7':
+          value = operand.value.inverse();
+          newNode = uniformInvertNode(newNode);
+          break;
+        default:
+          // The grammar shouldn't let you get here.
+          throw new Error('Uniform operation not supported');
+      }
+      return new Interval(value, operand.domain, newNode);
     }
     let newValue: Interval;
     switch (node.operator) {

@@ -48,6 +48,29 @@ export type IntervalLiteral =
   | CentLiteral
   | HertzLiteral;
 
+export function uniformInvertNode(
+  node?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'IntegerLiteral':
+      return {
+        type: 'FractionLiteral',
+        numerator: 1n,
+        denominator: node.value,
+      };
+    case 'FractionLiteral':
+      return {
+        type: 'FractionLiteral',
+        numerator: node.denominator,
+        denominator: node.numerator,
+      };
+  }
+  return undefined;
+}
+
 export function addNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral

@@ -242,20 +242,32 @@ Group
   = _ @(Secondary / Primary) _
 
 Secondary
- = UnaryExpression
- / Range
- / HarmonicSegment
- / EnumeratedChord
- / ArrayAccess
+  = UnaryExpression
+  / Range
+  / HarmonicSegment
+  / EnumeratedChord
+  / ArrayAccess
 
-// TODO: Universality with ~
+UniformUnaryOperator
+  = '-' / '%' / '÷'
+
 UnaryExpression
-  = operator: ('--' / '++' / '+' / '-' / '%' / '÷' / '!') operand: Primary {
+  = operator: UniformUnaryOperator uniform: '~'? operand: Primary {
     return {
       type: 'UnaryExpression',
       operator,
       operand,
       prefix: true,
+      uniform: !!uniform,
+    };
+  }
+  / operator: ('--' / '++' / '+' / '!') operand: Primary {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
     };
   }
   / operand: Primary operator: ('--' / '++') {
@@ -264,6 +276,7 @@ UnaryExpression
       operator,
       operand,
       prefix: false,
+      uniform: false,
     }
   }
 
@@ -493,15 +506,15 @@ StringLiteral
     return {
       type: 'StringLiteral',
       value: JSON.parse(text()),
-    }
+    };
   }
   /  "'" SingleStringCharacter* "'" {
     // A horrible hack...
     const value = swapQuotes(JSON.parse(swapQuotes(text())));
     return {
       type: 'StringLiteral',
-      value
-    }
+      value,
+    };
   }
 
 DoubleStringCharacter

@@ -19,6 +19,7 @@ import {
   IntervalLiteral,
   FractionLiteral,
   CentsLiteral,
+  IntegerLiteral,
 } from './expression';
 
 export type FractionalMonzo = Fraction[];
@@ -1153,7 +1154,7 @@ export class TimeMonzo {
     return undefined;
   }
 
-  asIntegerLiteral(node: IntervalLiteral) {
+  asIntegerLiteral(node: IntegerLiteral): IntegerLiteral | undefined {
     if (this.isIntegral()) {
       return {...node, value: this.toBigInteger()};
     }
