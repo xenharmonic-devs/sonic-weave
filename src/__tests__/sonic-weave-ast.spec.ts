@@ -238,7 +238,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it.fails("accepts \\x escapes, but doesn't actually parse them", () => {
+  it('accepts \\x escapes', () => {
     const ast = parseSingle('"hello w\\x00rld"');
     expect(ast).toEqual({
       type: 'ExpressionStatement',

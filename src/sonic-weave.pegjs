@@ -27,14 +27,6 @@
 
     return BinaryExpression(op, left, right, false, false);
   }
-
-  function swapQuotes(value) {
-    let i = 0;
-    while (value.includes(String.fromCharCode(i))) i++;
-    const temp = String.fromCharCode(i);
-    const re = RegExp(temp, 'g');
-    return value.replace(/"/g, temp).replace(/'/g, '"').replace(re, "'");
-  }
 }}
 
 Start
@@ -389,7 +381,7 @@ DotDecimal
   / HardDotDecimal
 
 CommaDecimal
-  = whole: Integer ',' fractional: DecimalDigits hard: '!'? {
+  = whole: Integer ',' fractional: $(DecimalDigit+) hard: '!'? {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -502,41 +494,29 @@ IdentifierName
   = $(IdentifierStart IdentifierPart*)
 
 StringLiteral
-  = '"' DoubleStringCharacter* '"' {
-    return {
-      type: 'StringLiteral',
-      value: JSON.parse(text()),
-    };
-  }
-  /  "'" SingleStringCharacter* "'" {
-    // A horrible hack...
-    const value = swapQuotes(JSON.parse(swapQuotes(text())));
-    return {
-      type: 'StringLiteral',
-      value,
-    };
-  }
+  = '"' chars: DoubleStringCharacter* '"' { return { type: 'StringLiteral', value: chars.join('') }; }
+  / "'" chars: SingleStringCharacter* "'" { return { type: 'StringLiteral', value: chars.join('') }; }
 
 DoubleStringCharacter
-  = !(["\\] / LineTerminator) SourceCharacter
-  / "\u2028"
-  / "\u2029"
-  / "\\" EscapeSequence
+  = $(!(["\\] / LineTerminator) SourceCharacter)
+  / '\u2028'
+  / '\u2029'
+  / '\\' @EscapeSequence
   / LineContinuation
 
 SingleStringCharacter
-  = !(['\\] / LineTerminator) SourceCharacter
-  / "\u2028"
-  / "\u2029"
-  / "\\" EscapeSequence
+  = $(!(['\\] / LineTerminator) SourceCharacter)
+  / '\u2028'
+  / '\u2029'
+  / '\\' @EscapeSequence
   / LineContinuation
 
 LineContinuation
-  = "\\" LineTerminatorSequence
+  = '\\' LineTerminatorSequence { return ''; }
 
 EscapeSequence
   = CharacterEscapeSequence
-  / "0" !DecimalDigit
+  / '0' !DecimalDigit { return '\0'; }
   / HexEscapeSequence
   / UnicodeEscapeSequence
 
@@ -545,44 +525,40 @@ CharacterEscapeSequence
   / NonEscapeCharacter
 
 SingleEscapeCharacter
-  = ['"\\bfnrtv]
+  = "'"
+  / '"'
+  / '\\'
+  / 'b'  { return '\b'; }
+  / 'f'  { return '\f'; }
+  / 'n'  { return '\n'; }
+  / 'r'  { return '\r'; }
+  / 't'  { return '\t'; }
+  / 'v'  { return '\v'; }
 
 NonEscapeCharacter
-  = !(EscapeCharacter / LineTerminator) SourceCharacter
+  = $(!(EscapeCharacter / LineTerminator) SourceCharacter)
 
 EscapeCharacter
   = SingleEscapeCharacter
   / DecimalDigit
-  / "x"
-  / "u"
+  / 'x'
+  / 'u'
 
 HexEscapeSequence
-  = "x" HexDigit HexDigit
+  = 'x' digits:$(HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
 
 UnicodeEscapeSequence
-  = "u" Hex4Digits
-  / "u{" CodePoint "}"
+  = 'u' digits:$(HexDigit HexDigit HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
 
-Hex4Digits
-  = HexDigit HexDigit HexDigit HexDigit
+DecimalDigit
+  = [0-9]
 
-DecimalDigits
-  = $(DecimalDigit+)
-
-DecimalDigit = [0-9]
-
-HexDigits
-  = $(HexDigit+)
-
-HexDigits_Sep
-  = HexDigit+ (NumericLiteralSeparator HexDigit+)*
-
-HexDigit = [0-9a-f]i
-
-NumericLiteralSeparator = "_"
-
-CodePoint
-   = HexDigits ?{ return parseInt(n, 16) <= 0x10FFFF }
+HexDigit
+  = [0-9a-f]i
 
 IdentifierStart
   = ID_Start
@@ -617,11 +593,11 @@ LineTerminator
   / '\u2029'
 
 LineTerminatorSequence
-  = "\n"
-  / "\r" !"\n"
-  / "\u2028"
-  / "\u2029"
-  / "\r\n"
+  = '\n'
+  / '\r' !'\n'
+  / '\u2028'
+  / '\u2029'
+  / '\r\n'
 
 // Separator, Space
 Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c); }
