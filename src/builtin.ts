@@ -2,6 +2,8 @@ import {Fraction, kCombinations} from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo} from './monzo';
 
+// Runtime
+
 export type SonicWeaveValue =
   | Function
   | Interval
@@ -24,10 +26,6 @@ export const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
   value: 1n,
 });
 
-const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
-const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
-const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
-
 export function sonicTruth(test: SonicWeaveValue) {
   if (test instanceof Interval) {
     return test.value.residual.n;
@@ -39,6 +37,49 @@ export function sonicTruth(test: SonicWeaveValue) {
 
 export function sonicBool(b: boolean) {
   return b ? LINEAR_UNITY : LINEAR_ZERO;
+}
+
+// Library
+
+const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
+const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
+const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
+
+function random() {
+  const value = TimeMonzo.fromValue(Math.random());
+  return new Interval(value, 'linear');
+}
+
+function randomCents() {
+  const value = TimeMonzo.fromCents(Math.random());
+  return new Interval(value, 'logarithmic');
+}
+
+function floor(value: Interval) {
+  const n = Math.floor(value.value.valueOf());
+  return Interval.fromInteger(n);
+}
+
+function round(value: Interval) {
+  const n = Math.round(value.value.valueOf());
+  return Interval.fromInteger(n);
+}
+
+function ceil(value: Interval) {
+  const n = Math.ceil(value.value.valueOf());
+  return Interval.fromInteger(n);
+}
+
+function abs(value: Interval) {
+  return value.abs();
+}
+
+function min(...args: Interval[]) {
+  return args.slice(1).reduce((a, b) => (a.compare(b) <= 0 ? a : b), args[0]);
+}
+
+function max(...args: Interval[]) {
+  return args.slice(1).reduce((a, b) => (a.compare(b) >= 0 ? a : b), args[0]);
 }
 
 function sort(scale?: Interval[]) {
@@ -162,6 +203,14 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   TAU,
   true: LINEAR_UNITY,
   false: LINEAR_ZERO,
+  abs,
+  min,
+  max,
+  random,
+  randomCents,
+  floor,
+  round,
+  ceil,
   isArray,
   sort,
   reverse,

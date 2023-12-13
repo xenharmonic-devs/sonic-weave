@@ -1062,6 +1062,16 @@ export class TimeMonzo {
     return this.valueOf() - other.valueOf();
   }
 
+  roundTo(other: TimeMonzo) {
+    const multiplier = Math.round(this.div(other).valueOf());
+    return other.mul(TimeMonzo.fromFraction(multiplier));
+  }
+
+  pitchRoundTo(other: TimeMonzo) {
+    const multiplier = Math.round(this.log(other).valueOf());
+    return other.pow(multiplier);
+  }
+
   /**
    * Find the closest approximation of the time monzo in a harmonic series.
    * @param denominator Denominator of the harmonic series.
@@ -1153,7 +1163,10 @@ export class TimeMonzo {
   asFractionLiteral(node: FractionLiteral) {
     if (this.isFractional()) {
       const {numerator, denominator} = this.toBigNumeratorDenominator();
-      const factor = bigGcd(node.numerator, node.denominator);
+      let factor = bigGcd(node.numerator, node.denominator);
+      if (factor === 1n && node.denominator % denominator === 0n) {
+        factor = node.denominator / denominator;
+      }
       return {
         ...node,
         numerator: numerator * factor,

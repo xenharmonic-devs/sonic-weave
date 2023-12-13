@@ -38,6 +38,8 @@ type BinaryOperator =
   | '!~of'
   | '+'
   | '-'
+  | 'to'
+  | 'by'
   | ''
   | '*'
   | '×'
@@ -580,6 +582,12 @@ class ExpressionVisitor {
           break;
         case '-':
           value = left.value.sub(right.value);
+          break;
+        case 'to':
+          value = left.value.roundTo(right.value);
+          break;
+        case 'by':
+          value = left.value.pitchRoundTo(right.value);
           break;
         case '×':
         case '*':

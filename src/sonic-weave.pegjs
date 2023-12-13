@@ -48,6 +48,7 @@ Program
     };
   }
 
+ByToken     = 'by'     !IdentifierPart
 CentToken   = 'c'      !IdentifierPart
 DotToken    = 'dot'    !IdentifierPart
 ElseToken   = 'else'   !IdentifierPart
@@ -60,6 +61,7 @@ OfToken     = 'of'     !IdentifierPart
 ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
+ToToken     = 'to'     !IdentifierPart
 WhileToken  = 'while'  !IdentifierPart
 
 Statements
@@ -213,7 +215,7 @@ RelationalExpression
   }
 
 AdditiveOperator
-  = '+' / '-'
+  = $('+' / '-' / ToToken / ByToken)
 
 AdditiveExpression
   = head: MultiplicativeExpression tail: (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)* {

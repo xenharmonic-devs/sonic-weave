@@ -211,6 +211,18 @@ describe('SonicWeave parser', () => {
     expect(scale[1].label).toBe('three');
     expect(scale[2].color?.value).toBe('#dad');
   });
+
+  it('can round to nearest harmonic', () => {
+    const scale = parseSource('1\\3;2\\3;3\\3;i => i to~ 1/8;');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('10/8;13/8;16/8');
+  });
+
+  it('can approximate by equal temperament', () => {
+    const scale = parseSource('2;3;5;p => p by~ 1\\12;');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('12\\12;19\\12;28\\12');
+  });
 });
 
 describe('SonicWeave standard library', () => {

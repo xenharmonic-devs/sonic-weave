@@ -58,6 +58,13 @@ export class Interval {
     );
   }
 
+  abs() {
+    if (this.domain === 'linear') {
+      return new Interval(this.value.abs(), this.domain);
+    }
+    return new Interval(this.value.pitchAbs(), this.domain);
+  }
+
   add(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in addition');
@@ -78,6 +85,28 @@ export class Interval {
       return new Interval(this.value.sub(other.value), this.domain, node);
     }
     return new Interval(this.value.div(other.value), this.domain, node);
+  }
+
+  roundTo(other: Interval) {
+    if (this.domain !== other.domain) {
+      throw new Error('Domains must match in rounding');
+    }
+    if (this.domain === 'linear') {
+      return new Interval(this.value.roundTo(other.value), this.domain);
+    }
+    return new Interval(this.value.pitchRoundTo(other.value), this.domain);
+  }
+
+  pitchRoundTo(other: Interval) {
+    if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
+      throw new Error(
+        'Exponential rounding not implemented in logarithmic domain'
+      );
+    }
+    if (!other.value.isScalar()) {
+      throw new Error('Only scalar exponential rounding implemented');
+    }
+    return new Interval(this.value.pitchRoundTo(other.value), this.domain);
   }
 
   mul(other: Interval) {
