@@ -190,6 +190,19 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
   });
+
+  it('supports explicit arguments to builtin functions', () => {
+    const scale = parseSource(`
+      segment = [1..5];
+      segment;
+      reverse(segment);
+      map(i => i + 10, segment);
+    `);
+    expect(scale).toHaveLength(10);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1;2;3;4;5;15;14;13;12;11'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {

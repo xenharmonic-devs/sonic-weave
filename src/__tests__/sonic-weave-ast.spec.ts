@@ -3,7 +3,7 @@ import {describe, it, expect} from 'vitest';
 import {parse} from '../sonic-weave-ast';
 
 // Debug
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function d(thing: any) {
   console.dir(thing, {depth: null});
 }

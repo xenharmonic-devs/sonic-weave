@@ -458,9 +458,12 @@ class ExpressionVisitor {
     return operand;
   }
 
-  visitBinaryExpression(node: BinaryExpression): Interval | undefined {
+  visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const left = this.visit(node.left);
     const right = this.visit(node.right);
+    if (node.operator === '??') {
+      return left ?? right;
+    }
     if (left instanceof Color || right instanceof Color) {
       throw new Error('Cannot operate on colors');
     }
@@ -474,10 +477,7 @@ class ExpressionVisitor {
       throw new Error('Cannot operate on strings');
     }
     if (left === undefined || right === undefined) {
-      if (node.operator !== '??') {
-        throw new Error('Cannot operate on nothing');
-      }
-      return left ?? right;
+      throw new Error('Cannot operate on nothing');
     }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
@@ -534,8 +534,6 @@ class ExpressionVisitor {
         return left.log(right);
       case '\\':
         return left.backslash(right);
-      case '??':
-        return left;
       default:
         throw new Error(`${node.operator} unimplemented`);
     }
