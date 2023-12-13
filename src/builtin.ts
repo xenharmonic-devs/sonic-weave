@@ -1,5 +1,20 @@
+import {Fraction, kCombinations} from 'xen-dev-utils';
 import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
+
+const ZERO = new Fraction(0);
+export const LINEAR_ZERO = new Interval(
+  new TimeMonzo(ZERO, [], ZERO),
+  'linear',
+  {
+    type: 'IntegerLiteral',
+    value: 0n,
+  }
+);
+export const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
+  type: 'IntegerLiteral',
+  value: 1n,
+});
 
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
@@ -58,14 +73,40 @@ function map(
   return array.map(mapper);
 }
 
+function arrayReduce(
+  reducer: (
+    previousValue: any,
+    currentValue: any,
+    currentIndex: number,
+    array: any[]
+  ) => any,
+  initialValue: any,
+  array?: any[]
+) {
+  reducer = reducer.bind(this);
+  array ??= this.context.get('$') as Interval[];
+  return array.reduce(reducer, initialValue);
+}
+
+function isArray(value: any) {
+  return Array.isArray(value) ? LINEAR_UNITY : LINEAR_ZERO;
+}
+
 function print(...args: any[]) {
   console.log(...args);
+}
+
+function dir(arg: any) {
+  console.dir(arg, {depth: null});
 }
 
 export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   E,
   PI,
   TAU,
+  true: LINEAR_UNITY,
+  false: LINEAR_ZERO,
+  isArray,
   sort,
   reverse,
   pop,
@@ -73,8 +114,11 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   shift,
   unshift,
   print,
+  dir,
   remap,
   map,
+  arrayReduce,
+  kCombinations,
 };
 
 export const PRELUDE_SOURCE = `
@@ -91,6 +135,14 @@ riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
 
 riff void _ {
   return;
+}
+
+riff sum terms {
+  return arrayReduce(total, element => total +~ element, 0, terms);
+}
+
+riff prod factors {
+  return arrayReduce(total, element => total *~ element, 1, factors);
 }
 
 // == Scale generation ==
@@ -117,6 +169,17 @@ riff rank2 generator period up down {
     accumulator;
   }
   period;
+  reduce();
+  sort();
+}
+
+riff cps factors count equave withUnity {
+  equave ??= 2;
+  for (combination of kCombinations(factors, count))
+    prod(combination);
+  sort();
+  if (!withUnity) ground();
+  equave;
   reduce();
   sort();
 }
@@ -166,5 +229,12 @@ riff repeat times {
     scale;
     i => i ~* equave ~^ times;
   }
+}
+
+riff ground scale {
+  $ = scale ?? $$;
+  root = shift();
+  i => i ~% root;
+  return;
 }
 `;

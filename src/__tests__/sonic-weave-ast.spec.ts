@@ -182,4 +182,43 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses for..of', () => {
+    const ast = parse('for (foo of bar) foo;');
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'ForOfStatement',
+          element: {type: 'Identifier', id: 'foo'},
+          array: {type: 'Identifier', id: 'bar'},
+          body: {
+            type: 'ExpressionStatement',
+            expression: {type: 'Identifier', id: 'foo'},
+          },
+        },
+      ],
+    });
+  });
+
+  it('parses if..else', () => {
+    const ast = parse('if (foo) bar; else baz;');
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'IfStatement',
+          test: {type: 'Identifier', id: 'foo'},
+          consequent: {
+            type: 'ExpressionStatement',
+            expression: {type: 'Identifier', id: 'bar'},
+          },
+          alternate: {
+            type: 'ExpressionStatement',
+            expression: {type: 'Identifier', id: 'baz'},
+          },
+        },
+      ],
+    });
+  });
 });

@@ -43,10 +43,12 @@ Program
 CentToken   = 'c'      !IdentifierPart
 DotToken    = 'dot'    !IdentifierPart
 ElseToken   = 'else'   !IdentifierPart
+ForToken    = 'for'    !IdentifierPart
 HertzToken  = 'Hz'     !IdentifierPart
 IfToken     = 'if'     !IdentifierPart
 LogToken    = 'log'    !IdentifierPart
 ModToken    = 'mod'    !IdentifierPart
+OfToken     = 'of'     !IdentifierPart
 ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
@@ -65,6 +67,7 @@ Statement
   / ReturnStatement
   / WhileStatement
   / IfStatement
+  / ForOfStatement
   / ExpressionStatement
 
 VariableDeclaration
@@ -127,14 +130,7 @@ WhileStatement
   }
 
 IfStatement
-  = IfToken _ '(' _ test: Expression _ ')' _ consequent: Statement {
-    return {
-      type: 'IfStatement',
-      test,
-      consequent,
-    }
-  }
-  / IfToken _ '(' _ test: Expression _ ')' _
+  = IfToken _ '(' _ test: Expression _ ')' _
     consequent: Statement _
     ElseToken _
     alternate: Statement {
@@ -143,6 +139,23 @@ IfStatement
       test,
       consequent,
       alternate,
+    };
+  }
+  / IfToken _ '(' _ test: Expression _ ')' _ consequent: Statement {
+    return {
+      type: 'IfStatement',
+      test,
+      consequent,
+    }
+  }
+
+ForOfStatement
+  = ForToken _ '(' _ element: Identifier _ OfToken _ array: Expression _ ')' _ body: Statement {
+    return {
+      type: 'ForOfStatement',
+      element,
+      array,
+      body,
     };
   }
 
@@ -195,6 +208,7 @@ ExponentiationExpression
 Group
   = _ @(UnaryExpression / Range / HarmonicSegment / EnumeratedChord / ArrayAccess / Primary) _
 
+// TODO: Universality with ~
 UnaryExpression
   = operator: ('--' / '++' / '+' / '-' / '%' / '÷' / '!') operand: Primary {
     return {
@@ -283,6 +297,7 @@ Primary
   / CallExpression
   / Identifier
   / ScalarLike
+  / ArrayLiteral
 
 NedoLiteral
   = numerator: Integer '\\' denominator: PositiveInteger {
@@ -398,6 +413,14 @@ Identifier
       type: 'Identifier',
       id,
     };
+  }
+
+ArrayLiteral
+  = '[' _ elements: ArgumentList _ ']' {
+    return {
+      type: 'ArrayLiteral',
+      elements,
+    }
   }
 
 ParenthesizedExpression

@@ -242,6 +242,18 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('generates combination product sets (default params)', () => {
+    const scale = parseSource('cps([3, 5, 7], 2);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('7/6;7/5;2');
+  });
+
+  it('generates combination product sets (custom)', () => {
+    const scale = parseSource('cps([2, 5, 7], 2, 3, true);');
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('10/9;35/27;14/9;3');
+  });
+
   it('reduces scales by their equave', () => {
     const scale = parseSource('3;5;7;11;13;2;reduce();');
     expect(scale).toHaveLength(6);

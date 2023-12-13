@@ -11,7 +11,12 @@ import {
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
-import {BUILTIN_CONTEXT, PRELUDE_SOURCE} from './builtin';
+import {
+  BUILTIN_CONTEXT,
+  LINEAR_UNITY,
+  LINEAR_ZERO,
+  PRELUDE_SOURCE,
+} from './builtin';
 import {bigGcd, metricExponent} from './utils';
 
 type BinaryOperator =
@@ -71,6 +76,13 @@ type IfStatement = {
   alternate?: Statement;
 };
 
+type ForOfStatement = {
+  type: 'ForOfStatement';
+  element: Identifier;
+  array: Expression;
+  body: Statement;
+};
+
 type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -83,6 +95,7 @@ type Statement =
   | BlockStatement
   | WhileStatement
   | IfStatement
+  | ForOfStatement
   | ReturnStatement;
 
 type ArrayAccess = {
@@ -147,6 +160,11 @@ type Range = {
   end: Expression;
 };
 
+type ArrayLiteral = {
+  type: 'ArrayLiteral';
+  elements: Expression[];
+};
+
 type Expression =
   | ArrayAccess
   | UnaryExpression
@@ -158,6 +176,7 @@ type Expression =
   | Identifier
   | EnumeratedChord
   | Range
+  | ArrayLiteral
   | HarmonicSegment;
 
 type SonicWeaveValue =
@@ -209,6 +228,8 @@ export class StatementVisitor {
         return this.visitWhileStatement(node);
       case 'IfStatement':
         return this.visitIfStatement(node);
+      case 'ForOfStatement':
+        return this.visitForOfStatement(node);
       case 'ReturnStatement':
         return this.visitReturnStatement(node);
     }
@@ -303,6 +324,21 @@ export class StatementVisitor {
     }
   }
 
+  visitForOfStatement(node: ForOfStatement) {
+    const subVisitor = new ExpressionVisitor(this.context);
+    const array = subVisitor.visit(node.array);
+    if (!Array.isArray(array)) {
+      throw new Error('Can only iterate over arrays');
+    }
+    for (const value of array) {
+      this.context.set(node.element.id, value);
+      const interrupt = this.visit(node.body);
+      if (interrupt) {
+        return interrupt;
+      }
+    }
+  }
+
   visitIfStatement(node: IfStatement) {
     const subVisitor = new ExpressionVisitor(this.context);
     if (sonicTruth(subVisitor.visit(node.test))) {
@@ -354,14 +390,6 @@ const CENT = new Interval(
   'logarithmic',
   {type: 'CentLiteral'}
 );
-const LINEAR_ZERO = new Interval(new TimeMonzo(ZERO, [], ZERO), 'linear', {
-  type: 'IntegerLiteral',
-  value: 0n,
-});
-const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
-  type: 'IntegerLiteral',
-  value: 1n,
-});
 
 class ExpressionVisitor {
   context: VisitorContext;
@@ -405,6 +433,9 @@ class ExpressionVisitor {
         return this.visitRange(node);
       case 'HarmonicSegment':
         return this.visitHarmonicSegment(node);
+      case 'ArrayLiteral':
+        // We cheat here to simplify the type hierarchy definition (no nested arrays).
+        return node.elements.map(this.visit.bind(this)) as SonicWeaveValue;
     }
     node satisfies never;
   }
@@ -427,8 +458,11 @@ class ExpressionVisitor {
 
   visitUnaryExpression(node: UnaryExpression): Interval {
     const operand = this.visit(node.operand);
+    if (node.operator === '!') {
+      return sonicTruth(operand) ? LINEAR_ZERO : LINEAR_UNITY;
+    }
     if (!(operand instanceof Interval)) {
-      throw new Error('Can only operate on intervals');
+      throw new Error(`${node.operator} can only operate on intervals`);
     }
     let newValue: Interval;
     switch (node.operator) {
@@ -439,8 +473,6 @@ class ExpressionVisitor {
       case '%':
       case '\u00F7':
         return operand.inverse();
-      case '!':
-        return sonicTruth(operand) ? LINEAR_ZERO : LINEAR_UNITY;
       case '++':
         newValue = operand.add(LINEAR_UNITY);
         break;
