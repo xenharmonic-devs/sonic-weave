@@ -1,6 +1,14 @@
 import {Fraction, kCombinations} from 'xen-dev-utils';
-import {Interval} from './interval';
+import {Color, Interval} from './interval';
 import {TimeMonzo} from './monzo';
+
+export type SonicWeaveValue =
+  | Function
+  | Interval
+  | Interval[]
+  | Color
+  | string
+  | undefined;
 
 const ZERO = new Fraction(0);
 export const LINEAR_ZERO = new Interval(
@@ -19,6 +27,15 @@ export const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
+
+export function sonicTruth(test: SonicWeaveValue) {
+  if (test instanceof Interval) {
+    return test.value.residual.n;
+  } else if (Array.isArray(test)) {
+    return test.length;
+  }
+  return Number(Boolean(test));
+}
 
 function sort(scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
@@ -56,28 +73,71 @@ function unshift(interval: Interval, scale?: Interval[]) {
   scale.unshift(interval);
 }
 
-function remap(mapper: (i: Interval) => Interval, scale?: Interval[]) {
-  mapper = mapper.bind(this);
+function length(scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
-  const mapped = scale.map(i => mapper(i));
-  scale.length = 0;
-  scale.push(...mapped);
+  return Interval.fromInteger(scale.length);
 }
 
+// TODO: Strict inclusion.
+// TODO: Replace builtins with `in` and `~in~` operators.
+function includes(element: Interval, scale?: Interval[]) {
+  scale ??= this.context.get('$') as Interval[];
+  for (const existing of scale) {
+    if (existing.equals(element)) {
+      return LINEAR_UNITY;
+    }
+  }
+  return LINEAR_ZERO;
+}
+
+// TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
-  mapper: (value: any, index: number, array: any[]) => unknown,
+  mapper: (value: any, index: Interval, array: any[]) => unknown,
   array?: any[]
 ) {
   mapper = mapper.bind(this);
   array ??= this.context.get('$') as Interval[];
-  return array.map(mapper);
+  return array.map((value, index, arr) =>
+    mapper(value, Interval.fromInteger(index), arr)
+  );
+}
+
+function remap(
+  mapper: (value: any, index: Interval, array: any[]) => unknown,
+  array?: any[]
+) {
+  array ??= this.context.get('$') as Interval[];
+  const mapped = map.bind(this)(mapper, array);
+  array.length = 0;
+  array.push(...mapped);
+}
+
+function filter(
+  tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
+  array?: any[]
+) {
+  tester = tester.bind(this);
+  array ??= this.context.get('$') as Interval[];
+  return array.filter((value, index, arr) =>
+    sonicTruth(tester(value, Interval.fromInteger(index), arr))
+  );
+}
+
+function distill(
+  tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
+  array?: any[]
+) {
+  array ??= this.context.get('$') as Interval[];
+  const filtered = filter.bind(this)(tester, array);
+  array.length = 0;
+  array.push(...filtered);
 }
 
 function arrayReduce(
   reducer: (
     previousValue: any,
     currentValue: any,
-    currentIndex: number,
+    currentIndex: Interval,
     array: any[]
   ) => any,
   initialValue: any,
@@ -85,7 +145,11 @@ function arrayReduce(
 ) {
   reducer = reducer.bind(this);
   array ??= this.context.get('$') as Interval[];
-  return array.reduce(reducer, initialValue);
+  return array.reduce(
+    (value, currentValue, currentIndex, arr) =>
+      reducer(value, currentValue, Interval.fromInteger(currentIndex), arr),
+    initialValue
+  );
 }
 
 function isArray(value: any) {
@@ -113,10 +177,14 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   push,
   shift,
   unshift,
+  length,
+  includes,
   print,
   dir,
-  remap,
   map,
+  remap,
+  filter,
+  distill,
   arrayReduce,
   kCombinations,
 };
@@ -236,5 +304,10 @@ riff ground scale {
   root = shift();
   i => i ~% root;
   return;
+}
+
+riff subset indices scale {
+  scale ??= $$;
+  distill(_, i => includes(i, indices), scale);
 }
 `;

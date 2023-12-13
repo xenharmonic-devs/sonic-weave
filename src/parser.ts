@@ -12,6 +12,8 @@ import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {
+  SonicWeaveValue,
+  sonicTruth,
   BUILTIN_CONTEXT,
   LINEAR_UNITY,
   LINEAR_ZERO,
@@ -185,24 +187,7 @@ type Expression =
   | StringLiteral
   | HarmonicSegment;
 
-type SonicWeaveValue =
-  | Function
-  | Interval
-  | Interval[]
-  | Color
-  | string
-  | undefined;
-
 export type VisitorContext = Map<string, SonicWeaveValue>;
-
-function sonicTruth(test: SonicWeaveValue) {
-  if (test instanceof Interval) {
-    return test.value.residual.n;
-  } else if (Array.isArray(test)) {
-    return test.length;
-  }
-  return Number(Boolean(test));
-}
 
 class Interupt {
   node: ReturnStatement;

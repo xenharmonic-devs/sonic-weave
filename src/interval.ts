@@ -34,6 +34,12 @@ export class Interval {
     this.node = node;
   }
 
+  static fromInteger(value: number | bigint) {
+    value = BigInt(value);
+    const monzo = TimeMonzo.fromBigInt(value);
+    return new Interval(monzo, 'linear', {type: 'IntegerLiteral', value});
+  }
+
   neg() {
     if (this.domain === 'linear') {
       return new Interval(this.value.neg(), this.domain);
@@ -145,6 +151,10 @@ export class Interval {
 
   compare(other: Interval) {
     return this.value.compare(other.value);
+  }
+
+  equals(other: Interval) {
+    return this.value.equals(other.value);
   }
 
   toString() {
