@@ -18,11 +18,24 @@ import {
   LINEAR_UNITY,
   LINEAR_ZERO,
   PRELUDE_SOURCE,
+  sonicBool,
 } from './builtin';
 import {bigGcd, metricExponent} from './utils';
 
 type BinaryOperator =
   | '??'
+  | '==='
+  | '!=='
+  | '=='
+  | '!='
+  | '<='
+  | '>='
+  | '<'
+  | '>'
+  | 'of'
+  | '!of'
+  | '~of'
+  | '!~of'
   | '+'
   | '-'
   | ''
@@ -44,7 +57,7 @@ type Program = {
 
 type VariableDeclaration = {
   type: 'VariableDeclaration';
-  name: Identifier;
+  name: Identifier | ArrayAccess;
   value: Expression;
 };
 
@@ -187,6 +200,24 @@ type Expression =
   | StringLiteral
   | HarmonicSegment;
 
+function strictIncludes(element: Interval, scale: Interval[]) {
+  for (const existing of scale) {
+    if (existing.strictEquals(element)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function includes(element: Interval, scale: Interval[]) {
+  for (const existing of scale) {
+    if (existing.equals(element)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
 class Interupt {
@@ -239,7 +270,24 @@ export class StatementVisitor {
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.value);
-    this.context.set(node.name.id, value);
+    if (node.name.type === 'Identifier') {
+      this.context.set(node.name.id, value);
+    } else {
+      const object = subVisitor.visit(node.name.object);
+      if (!Array.isArray(object)) {
+        throw new Error('Array access on non-array');
+      }
+      const index = subVisitor.visit(node.name.index);
+      if (!(index instanceof Interval)) {
+        throw new Error('Array access with a non-integer');
+      }
+      let i = Number(index.value.toBigInteger());
+      if (i < 0) {
+        i += object.length;
+      }
+      // XXX: Abuses the type system.
+      object[i] = value as Interval;
+    }
     return undefined;
   }
 
@@ -501,7 +549,7 @@ class ExpressionVisitor {
     if (typeof left === 'function' || typeof right === 'function') {
       throw new Error('Cannot operate on functions');
     }
-    if (Array.isArray(left) || Array.isArray(right)) {
+    if (Array.isArray(left)) {
       throw new Error('Cannot operate on arrays');
     }
     if (typeof left === 'string' || typeof right === 'string') {
@@ -509,6 +557,20 @@ class ExpressionVisitor {
     }
     if (left === undefined || right === undefined) {
       throw new Error('Cannot operate on nothing');
+    }
+    if (Array.isArray(right)) {
+      switch (node.operator) {
+        case 'of':
+          return sonicBool(strictIncludes(left, right));
+        case '!of':
+          return sonicBool(!strictIncludes(left, right));
+        case '~of':
+          return sonicBool(includes(left, right));
+        case '!~of':
+          return sonicBool(!includes(left, right));
+        default:
+          throw new Error(`${node.operator} not supported with arrays`);
+      }
     }
     if (node.preferLeft || node.preferRight) {
       let value: TimeMonzo;
@@ -548,6 +610,22 @@ class ExpressionVisitor {
       return new Interval(value, right.domain, value.as(right.node));
     }
     switch (node.operator) {
+      case '===':
+        return sonicBool(left.strictEquals(right));
+      case '!==':
+        return sonicBool(!left.strictEquals(right));
+      case '==':
+        return sonicBool(left.equals(right));
+      case '!=':
+        return sonicBool(!left.equals(right));
+      case '<=':
+        return sonicBool(left.compare(right) <= 0);
+      case '>=':
+        return sonicBool(left.compare(right) >= 0);
+      case '<':
+        return sonicBool(left.compare(right) < 0);
+      case '>':
+        return sonicBool(left.compare(right) > 0);
       case '+':
         return left.add(right);
       case '-':

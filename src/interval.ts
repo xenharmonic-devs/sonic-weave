@@ -157,6 +157,10 @@ export class Interval {
     return this.value.equals(other.value);
   }
 
+  strictEquals(other: Interval) {
+    return this.domain === other.domain && this.value.strictEquals(other.value);
+  }
+
   toString() {
     if (this.node) {
       return toString(this.node);

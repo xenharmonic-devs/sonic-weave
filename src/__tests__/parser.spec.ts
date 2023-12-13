@@ -268,6 +268,16 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe('1\\7;2\\7;7\\7');
   });
 
+  it('can take relative edo subsets', () => {
+    const scale = parseSource(
+      'edo(12);subset(cumsum([2 - 1, 2, 1, 2, 2, 2, 1]));'
+    );
+    expect(scale).toHaveLength(7);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'
+    );
+  });
+
   it('reduces scales by their equave', () => {
     const scale = parseSource('3;5;7;11;13;2;reduce();');
     expect(scale).toHaveLength(6);

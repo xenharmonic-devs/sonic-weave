@@ -245,4 +245,21 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {type: 'StringLiteral', value: 'hello w\x00rld'},
     });
   });
+
+  it('parses array element assignment', () => {
+    const ast = parseSingle('arr[1] = 2');
+    expect(ast).toEqual({
+      type: 'VariableDeclaration',
+      name: {
+        type: 'ArrayAccess',
+        object: {type: 'Identifier', id: 'arr'},
+        index: {type: 'IntegerLiteral', value: 1n},
+      },
+      value: {type: 'IntegerLiteral', value: 2n},
+    });
+  });
+
+  it.fails("doesn't let you call functions from arrays yet", () => {
+    parseSingle('arr[1]()');
+  });
 });

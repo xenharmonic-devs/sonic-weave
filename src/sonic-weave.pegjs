@@ -78,8 +78,12 @@ Statement
   / ForOfStatement
   / ExpressionStatement
 
+LeftHandSideExpression
+  = ArrayAccess
+  / Identifier
+
 VariableDeclaration
-  = name: Identifier _ '=' _ value: Expression EOS {
+  = name: LeftHandSideExpression _ '=' _ value: Expression EOS {
     return {
       type: 'VariableDeclaration',
       name,
@@ -88,7 +92,7 @@ VariableDeclaration
   }
 
 ReassignmentStatement
-  = name: Identifier _ preferLeft: '~'? operator: AssigningOperator preferRight: '~'? '=' _ expression: Expression EOS {
+  = name: LeftHandSideExpression _ preferLeft: '~'? operator: AssigningOperator preferRight: '~'? '=' _ expression: Expression EOS {
     return {
       type: 'VariableDeclaration',
       name,
@@ -185,7 +189,26 @@ CoalescingOperator
   = '??'
 
 Expression
-  = head:AdditiveExpression tail:(_ @CoalescingOperator _ @AdditiveExpression)* {
+  = head: RelationalExpression tail: (_ @CoalescingOperator _ @RelationalExpression)* {
+    return tail.reduce(operatorReducerLite, head);
+  }
+
+RelationalOperator
+  = '==='
+  / '!=='
+  / '=='
+  / '!='
+  / '<='
+  / '>='
+  / '<'
+  / '>'
+  / $(OfToken)
+  / $('!' OfToken)
+  / $('~' OfToken)
+  / $('!~' OfToken)
+
+RelationalExpression
+  = head: AdditiveExpression tail: (_ @RelationalOperator _ @AdditiveExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
@@ -193,7 +216,7 @@ AdditiveOperator
   = '+' / '-'
 
 AdditiveExpression
-  = head:MultiplicativeExpression tail:(_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)* {
+  = head: MultiplicativeExpression tail: (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)* {
       return tail.reduce(operatorReducer, head);
     }
 
@@ -201,7 +224,7 @@ MultiplicativeOperator
   = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / DotToken)
 
 MultiplicativeExpression
-  = head:ExponentiationExpression tail:(_ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
+  = head: ExponentiationExpression tail: (_ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
     return tail.reduce(operatorReducer, head);
   }
 
@@ -209,12 +232,19 @@ ExponentiationOperator
   = '^'
 
 ExponentiationExpression
-  = head:Group tail:(_ @'~'? @ExponentiationOperator @'~'? _ @ExponentiationExpression)* {
+  = head: Group tail: (_ @'~'? @ExponentiationOperator @'~'? _ @ExponentiationExpression)* {
       return tail.reduce(operatorReducer, head);
     }
 
 Group
-  = _ @(UnaryExpression / Range / HarmonicSegment / EnumeratedChord / ArrayAccess / Primary) _
+  = _ @(Secondary / Primary) _
+
+Secondary
+ = UnaryExpression
+ / Range
+ / HarmonicSegment
+ / EnumeratedChord
+ / ArrayAccess
 
 // TODO: Universality with ~
 UnaryExpression

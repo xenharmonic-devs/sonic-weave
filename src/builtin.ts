@@ -37,6 +37,10 @@ export function sonicTruth(test: SonicWeaveValue) {
   return Number(Boolean(test));
 }
 
+export function sonicBool(b: boolean) {
+  return b ? LINEAR_UNITY : LINEAR_ZERO;
+}
+
 function sort(scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.sort((a, b) => a.compare(b));
@@ -76,18 +80,6 @@ function unshift(interval: Interval, scale?: Interval[]) {
 function length(scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   return Interval.fromInteger(scale.length);
-}
-
-// TODO: Strict inclusion.
-// TODO: Replace builtins with `in` and `~in~` operators.
-function includes(element: Interval, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
-  for (const existing of scale) {
-    if (existing.equals(element)) {
-      return LINEAR_UNITY;
-    }
-  }
-  return LINEAR_ZERO;
 }
 
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
@@ -153,7 +145,7 @@ function arrayReduce(
 }
 
 function isArray(value: any) {
-  return Array.isArray(value) ? LINEAR_UNITY : LINEAR_ZERO;
+  return sonicBool(Array.isArray(value));
 }
 
 function print(...args: any[]) {
@@ -178,7 +170,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   shift,
   unshift,
   length,
-  includes,
   print,
   dir,
   map,
@@ -201,7 +192,7 @@ riff cbrt x { return x ~^ 1/3; }
 riff mtof index { return 440 Hz * 2^((index - 69) % 12); }
 riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
 
-riff void _ {
+riff void {
   return;
 }
 
@@ -211,6 +202,20 @@ riff sum terms {
 
 riff prod factors {
   return arrayReduce(total, element => total *~ element, 1, factors);
+}
+
+riff cumsum array {
+  array;
+  i = 0;
+  while (++i < length($))
+    $[i] ~+= $[i-1];
+}
+
+riff cumprod array {
+  array;
+  i = 0;
+  while (++i < length($))
+    $[i] ~*= $[i-1];
 }
 
 // == Scale generation ==
@@ -308,6 +313,6 @@ riff ground scale {
 
 riff subset indices scale {
   scale ??= $$;
-  distill(_, i => includes(i, indices), scale);
+  distill(_, i => i of indices, scale);
 }
 `;
