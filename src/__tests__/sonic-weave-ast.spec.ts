@@ -259,7 +259,50 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it.fails("doesn't let you call functions from arrays yet", () => {
-    parseSingle('arr[1]()');
+  it('lets you call functions from arrays', () => {
+    const ast = parseSingle('arr[1]()');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {
+          type: 'ArrayAccess',
+          object: {type: 'Identifier', id: 'arr'},
+          index: {type: 'IntegerLiteral', value: 1n},
+        },
+        args: [],
+      },
+    });
+  });
+
+  it('prefers augmented fourth over the absolute pitch A4', () => {
+    const ast = parseSingle('A4');
+    expect(ast.expression.type).toBe('FJS');
+  });
+
+  it("has an alternative spelling for the absolute pitch nominal 'A'", () => {
+    const ast = parseSingle('a4');
+    expect(ast.expression.type).toBe('AbsoluteFJS');
+  });
+
+  it('prefers pitch assignment over variable declaration', () => {
+    const ast = parseSingle('A4 = 440 Hz');
+    expect(ast.expression.type).toBe('PitchAssignment');
+    expect(ast.expression.pitch.type).toBe('AbsoluteFJS');
+  });
+
+  it('is aware of interval qualities (no minor twelfth)', () => {
+    const ast = parseSingle('m12');
+    expect(ast.expression.type).toBe('Identifier');
+  });
+
+  it('differentiates natural accidentals from variable declaration', () => {
+    const ast = parseSingle('D=4');
+    expect(ast.expression.type).toBe('AbsoluteFJS');
+  });
+
+  it("still parses variable declaration when there's no conflict with FJS", () => {
+    const ast = parseSingle('d=4');
+    expect(ast.type).toBe('VariableDeclaration');
   });
 });

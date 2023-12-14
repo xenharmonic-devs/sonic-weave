@@ -3,6 +3,13 @@ import {parseAST, parseSource, StatementVisitor} from '../parser';
 import {TimeMonzo} from '../monzo';
 import {Interval} from '../interval';
 
+// TODO: Use this where relevant.
+function parseSingle(source: string) {
+  const scale = parseSource(source + ';');
+  expect(scale).toHaveLength(1);
+  return scale[0];
+}
+
 describe('SonicWeave parser', () => {
   it('evaluates a single number', () => {
     const scale = parseSource('3;');
@@ -222,6 +229,71 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('2;3;5;p => p by~ 1\\12;');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('12\\12;19\\12;28\\12');
+  });
+
+  it('can call functions from arrays', () => {
+    const scale = parseSource('[round, abs][0](3,14);');
+    expect(scale).toHaveLength(1);
+    expect(scale[0].toString()).toBe('3');
+  });
+
+  it('supports pythagorean relative notation', () => {
+    const sixth = parseSingle('M6');
+    expect(sixth.value.toFraction().toFraction()).toBe('27/16');
+    expect(sixth.toString()).toBe('M6');
+  });
+
+  it('supports pythagorean absolute notation', () => {
+    const scale = parseSource('C4 = 262 Hz; A=4;');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).toBe(262);
+    expect(scale[1].value.valueOf()).toBeCloseTo(442.12);
+  });
+
+  it('supports neutral intervals', () => {
+    const halfFifth = parseSingle('n3');
+    expect(halfFifth.value.valueOf()).toBeCloseTo(Math.sqrt(1.5));
+  });
+
+  it('supports quarter-augmented intervals', () => {
+    const fourthFifth = parseSingle('sM2');
+    expect(fourthFifth.value.valueOf()).toBeCloseTo(1.5 ** 0.25);
+  });
+
+  it('supports tone-splitter interordinal', () => {
+    const splitTone = parseSingle('n1.5');
+    expect(splitTone.value.valueOf()).toBeCloseTo(Math.sqrt(9 / 8));
+  });
+
+  it('supports semiquartal interordinals', () => {
+    const semifourth = parseSingle('m2.5');
+    expect(semifourth.value.valueOf()).toBeCloseTo(Math.sqrt(4 / 3));
+  });
+
+  it('supports interordinal nominals', () => {
+    const scale = parseSource('C6 = 1000 Hz; ζ6;');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).toBe(1000);
+    expect(scale[1].value.valueOf()).toBeCloseTo(1414.213562373095);
+  });
+
+  it('supports relative FJS', () => {
+    const third = parseSingle('M3^5');
+    expect(third.value.toFraction().toFraction()).toBe('5/4');
+    expect(third.toString()).toBe('M3^5');
+  });
+
+  it('supports absolute FJS', () => {
+    const scale = parseSource('C6 = 1kHz; Bb6^7;');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).toBe(1000);
+    expect(scale[1].value.valueOf()).toBeCloseTo(1750);
+  });
+
+  it('supports neutral FJS', () => {
+    const sixth = parseSingle('n6_11');
+    expect(sixth.value.toFraction().toFraction()).toBe('18/11');
+    expect(sixth.toString()).toBe('n6_11');
   });
 });
 

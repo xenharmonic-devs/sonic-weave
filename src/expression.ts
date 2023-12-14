@@ -1,4 +1,5 @@
 import {MetricPrefix, bigLcm} from './utils';
+import {Pythagorean, AbsolutePitch} from './pythagorean';
 
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
@@ -39,6 +40,20 @@ export type HertzLiteral = {
   prefix: MetricPrefix;
 };
 
+export type FJS = {
+  type: 'FJS';
+  pythagorean: Pythagorean;
+  superscripts: bigint[];
+  subscripts: bigint[];
+};
+
+export type AbsoluteFJS = {
+  type: 'AbsoluteFJS';
+  pitch: AbsolutePitch;
+  superscripts: bigint[];
+  subscripts: bigint[];
+};
+
 export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
@@ -46,6 +61,8 @@ export type IntervalLiteral =
   | NedoLiteral
   | CentsLiteral
   | CentLiteral
+  | FJS
+  | AbsoluteFJS
   | HertzLiteral;
 
 export function uniformInvertNode(
@@ -142,6 +159,17 @@ export function divNodes(
   return undefined;
 }
 
+function tailFJS(literal: FJS | AbsoluteFJS) {
+  let result = '';
+  if (literal.superscripts.length) {
+    result += '^' + literal.superscripts.join(',');
+  }
+  if (literal.subscripts.length) {
+    result += '_' + literal.subscripts.join(',');
+  }
+  return result;
+}
+
 export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
@@ -154,6 +182,18 @@ export function toString(literal: IntervalLiteral) {
       return `${literal.whole}.${literal.fractional}`;
     case 'CentLiteral':
       return 'c';
+    case 'FJS':
+      // eslint-disable-next-line no-case-declarations
+      const d = literal.pythagorean.degree;
+      return `${literal.pythagorean.quality}${d.negative ? '-' : ''}${
+        d.base + 7 * d.octaves
+      }${tailFJS(literal)}`;
+    case 'AbsoluteFJS':
+      // eslint-disable-next-line no-case-declarations
+      const p = literal.pitch;
+      return `${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
+        literal
+      )}`;
     case 'HertzLiteral':
       return `${literal.prefix}Hz`;
     default:
