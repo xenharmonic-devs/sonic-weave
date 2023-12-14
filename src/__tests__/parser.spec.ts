@@ -277,6 +277,22 @@ describe('SonicWeave parser', () => {
     expect(scale[1].value.valueOf()).toBeCloseTo(1414.213562373095);
   });
 
+  it('can spell the major scale in Latin', () => {
+    const scale = parseSource('C0=1/1;D0;E0;F0;G0;A0;B0;C1;');
+    expect(scale).toHaveLength(8);
+    expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
+      '1;9/8;81/64;4/3;3/2;27/16;243/128;2'
+    );
+  });
+
+  it('can spell the major scale in Greek', () => {
+    const scale = parseSource('γ0=1/1;δ0;ε0;ζ0;η0;α0;β0;γ1;');
+    expect(scale).toHaveLength(8);
+    expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
+      '1;9/8;81/64;4/3;3/2;27/16;243/128;2'
+    );
+  });
+
   it('supports relative FJS', () => {
     const third = parseSingle('M3^5');
     expect(third.value.toFraction().toFraction()).toBe('5/4');
