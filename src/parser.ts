@@ -8,6 +8,8 @@ import {
   HertzLiteral,
   CentsLiteral,
   uniformInvertNode,
+  AbsoluteFJS,
+  FJS,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
@@ -22,6 +24,8 @@ import {
   sonicBool,
 } from './builtin';
 import {bigGcd, metricExponent} from './utils';
+import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
+import {inflect} from './fjs';
 
 type BinaryOperator =
   | '??'
@@ -144,6 +148,12 @@ type ColorLiteral = {
   value: string;
 };
 
+type PitchAssignment = {
+  type: 'PitchAssignment';
+  pitch: AbsoluteFJS;
+  value: Expression;
+};
+
 type Identifier = {
   type: 'Identifier';
   id: string;
@@ -151,7 +161,7 @@ type Identifier = {
 
 type CallExpression = {
   type: 'CallExpression';
-  callee: Identifier;
+  callee: Identifier | ArrayAccess;
   args: Expression[];
 };
 
@@ -197,6 +207,7 @@ type Expression =
   | ArrowFunction
   | IntervalLiteral
   | ColorLiteral
+  | PitchAssignment
   | Identifier
   | EnumeratedChord
   | Range
@@ -470,6 +481,12 @@ class ExpressionVisitor {
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
         return CENT;
+      case 'PitchAssignment':
+        return this.visitPitchAssignment(node);
+      case 'FJS':
+        return this.visitFJS(node);
+      case 'AbsoluteFJS':
+        return this.visitAbsoluteFJS(node);
       case 'HertzLiteral':
         return this.visitHertzLiteral(node);
       case 'ColorLiteral':
@@ -491,7 +508,48 @@ class ExpressionVisitor {
     node satisfies never;
   }
 
-  visitArrayAccess(node: ArrayAccess): Interval {
+  visitPitchAssignment(node: PitchAssignment) {
+    const value = this.visit(node.value);
+    if (!(value instanceof Interval)) {
+      throw new Error('Pitch assignment must evaluate to an interval');
+    }
+    const relativeToC4 = inflect(
+      absoluteMonzo(node.pitch.pitch),
+      node.pitch.superscripts,
+      node.pitch.subscripts
+    );
+    this.context.set(
+      'C4',
+      value.value.div(relativeToC4) as unknown as Interval
+    );
+    return value;
+  }
+
+  visitFJS(node: FJS) {
+    const monzo = inflect(
+      pythagoreanMonzo(node.pythagorean),
+      node.superscripts,
+      node.subscripts
+    );
+    return new Interval(monzo, 'logarithmic', node);
+  }
+
+  visitAbsoluteFJS(node: AbsoluteFJS) {
+    if (!this.context.has('C4')) {
+      throw new Error(
+        'Absolute pitch must be assigned before use. Try A4 = 440 Hz'
+      );
+    }
+    const C4 = this.context.get('C4')! as unknown as TimeMonzo;
+    const relativeToC4 = inflect(
+      absoluteMonzo(node.pitch),
+      node.superscripts,
+      node.subscripts
+    );
+    return new Interval(C4.mul(relativeToC4), 'logarithmic', node);
+  }
+
+  visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
     const object = this.visit(node.object);
     if (!Array.isArray(object)) {
       throw new Error('Array access on non-array');
@@ -677,11 +735,19 @@ class ExpressionVisitor {
   }
 
   visitCallExpression(node: CallExpression) {
-    if (this.context.has(node.callee.id)) {
+    if (node.callee.type === 'Identifier') {
+      if (this.context.has(node.callee.id)) {
+        const args = node.args.map(arg => this.visit(arg));
+        return (this.context.get(node.callee.id) as Function).bind(this)(
+          ...args
+        );
+      }
+      throw new Error(`Reference error: ${node.callee.id} is not defined`);
+    } else {
+      const callee = this.visitArrayAccess(node.callee);
       const args = node.args.map(arg => this.visit(arg));
-      return (this.context.get(node.callee.id) as Function).bind(this)(...args);
+      return (callee as Function).bind(this)(...args);
     }
-    throw new Error(`Reference error: ${node.callee.id} is not defined`);
   }
 
   visitArrowFunction(node: ArrowFunction) {

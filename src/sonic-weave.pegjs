@@ -56,6 +56,23 @@ RiffToken   = 'riff'   !IdentifierPart
 ToToken     = 'to'     !IdentifierPart
 WhileToken  = 'while'  !IdentifierPart
 
+ReservedWord
+  = ByToken
+  / CentToken
+  / DotToken
+  / ElseToken
+  / ForToken
+  / HertzToken
+  / IfToken
+  / LogToken
+  / ModToken
+  / OfToken
+  / ReduceToken
+  / ReturnToken
+  / RiffToken
+  / ToToken
+  / WhileToken
+
 Statements
   = head: Statement tail: (_ @Statement)* {
     return prepend(head, tail);
@@ -238,6 +255,7 @@ Secondary
   / Range
   / HarmonicSegment
   / EnumeratedChord
+  / CallExpression
   / ArrayAccess
 
 UniformUnaryOperator
@@ -273,7 +291,7 @@ UnaryExpression
   }
 
 ArrayAccess
-  = head: Primary tail: (_ '[' @Expression _ ']')* {
+  = head: Primary tail: (_ '[' @Expression _ ']')+ {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
@@ -338,8 +356,10 @@ Primary
   / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
+  / PitchAssignment
+  / FJS
+  / AbsoluteFJS
   / ArrowFunction
-  / CallExpression
   / Identifier
   / ScalarLike
   / ArrayLiteral
@@ -435,6 +455,114 @@ ColorLiteral
     };
   }
 
+Demisemi
+  = $('¼' / 'q' / '½' / 's' / '¾' / 'Q')
+
+AugmentedQuality
+  = $(Demisemi? 'd'+) / $(Demisemi? 'A'+)
+
+ImperfectQuality
+  = 'm' / 'sm' / '½m' / 'n' / '½M' / 'sM' / 'M'
+
+PerfectQuality = 'P'
+
+Degree
+  = sign: '-'? num: PositiveInteger {
+    num = Number(num) - 1;
+    return {
+      negative: !!sign,
+      base: (num % 7) + 1,
+      octaves: Math.floor(num / 7),
+    };
+  }
+
+PerfectDegree
+  = degree: Degree &{ return [1, 4, 5].includes(degree.base); } {
+    return degree;
+  }
+
+ImperfectDegree
+  = degree: Degree &{ return [2, 3, 6, 7].includes(degree.base); } {
+    return degree;
+  }
+
+HalfDegree
+  = degree: Degree ('½' / '.5') {
+    return {...degree, base: degree.base + 0.5};
+  }
+
+SplitDemisemipythagorean
+  = quality: (AugmentedQuality / ImperfectQuality) degree: HalfDegree {
+    return {
+      type: 'Pythagorean',
+      quality,
+      degree,
+      imperfect: true,
+    };
+  }
+  / quality: (AugmentedQuality / ImperfectQuality) degree: ImperfectDegree {
+    return {
+      type: 'Pythagorean',
+      quality,
+      degree,
+      imperfect: true,
+    };
+  }
+  / quality: (AugmentedQuality / PerfectQuality) degree: PerfectDegree {
+    return {
+      type: 'Pythagorean',
+      quality,
+      degree,
+      imperfect: false,
+    };
+  }
+
+FJS
+  = pythagorean: SplitDemisemipythagorean
+    superscripts: ('^' @CommaJoinedIntegers)?
+    subscripts: ('_' @CommaJoinedIntegers)? {
+    return {
+      type: 'FJS',
+      pythagorean,
+      superscripts: superscripts ?? [],
+      subscripts: subscripts ?? [],
+    };
+  }
+
+Accidental
+  = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫] / (Demisemi [♯#♭b]) )
+
+AbsolutePitch
+  = nominal: [\u03B1-ηaA-G] accidentals: Accidental* octave: SignedInteger {
+    return {
+      type: 'AbsolutePitch',
+      nominal,
+      accidentals,
+      octave,
+    };
+  }
+
+AbsoluteFJS
+  = pitch: AbsolutePitch
+    superscripts: ('^' @CommaJoinedIntegers)?
+    subscripts: ('_' @CommaJoinedIntegers)? {
+    return {
+      type: 'AbsoluteFJS',
+      pitch,
+      superscripts: superscripts ?? [],
+      subscripts: subscripts ?? [],
+    };
+  }
+
+PitchAssignment
+  = pitch: AbsoluteFJS _ '=' _ value: Expression {
+    return {
+      type: 'PitchAssignment',
+      pitch,
+      value,
+    };
+  }
+
 ArrowFunction
   = parameters: Parameters _ '=>' _ expression: Expression {
     return {
@@ -445,7 +573,7 @@ ArrowFunction
   }
 
 CallExpression
-  = callee: Identifier _ '(' _ args: ArgumentList _ ')' {
+  = callee: LeftHandSideExpression _ '(' _ args: ArgumentList _ ')' {
     return {
       type: 'CallExpression',
       callee,
@@ -454,7 +582,7 @@ CallExpression
   }
 
 Identifier
-  = id: IdentifierName {
+  = !(ReservedWord / FJS / AbsoluteFJS) id: IdentifierName {
     return {
       type: 'Identifier',
       id,
@@ -481,8 +609,14 @@ Integer
 PositiveInteger
   = num:$([1-9] DecimalDigit*) { return BigInt(num); }
 
+SignedInteger
+  = num:$([+-]? Integer) { return BigInt(num); }
+
 FractionalPart
   = $(DecimalDigit*)
+
+CommaJoinedIntegers
+  = Integer|.., ','|
 
 RGB4
   = $('#' HexDigit|3|)
