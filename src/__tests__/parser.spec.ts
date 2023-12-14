@@ -317,6 +317,14 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(2);
     expect(scale.map(i => i.toString()).join(';')).toBe('4\\12;7\\12');
   });
+
+  it('has ups-and-downs', () => {
+    const scale = parseSource('C0=1/1;^C0;γ0;vD0;D0;22@;');
+    expect(scale).toHaveLength(5);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '0\\22;1\\22;2\\22;3\\22;4\\22'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {

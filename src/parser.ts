@@ -133,7 +133,7 @@ type ArrayAccess = {
 
 type UnaryExpression = {
   type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | '!' | '++' | '--';
+  operator: '+' | '-' | '%' | '÷' | '!' | '^' | '++' | '--';
   operand: Expression;
   prefix: boolean;
   uniform: boolean;
@@ -544,6 +544,8 @@ class ExpressionVisitor {
 
   visitWartsLiteral(node: WartsLiteral) {
     const val = wartsToVal(node);
+    // Rig ups-and-downs.
+    val.cents = 1;
     return new Interval(val, 'cologarithmic', node);
   }
 
@@ -570,6 +572,7 @@ class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
+    monzo.cents = -node.downs;
     return new Interval(monzo, 'logarithmic', node);
   }
 
@@ -585,6 +588,7 @@ class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
+    relativeToC4.cents = -node.downs;
     return new Interval(C4.mul(relativeToC4), 'logarithmic', node);
   }
 
@@ -639,6 +643,8 @@ class ExpressionVisitor {
       case '%':
       case '\u00F7':
         return operand.inverse();
+      case '^':
+        return operand.up();
       case '++':
         newValue = operand.add(LINEAR_UNITY);
         break;

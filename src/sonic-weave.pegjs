@@ -253,15 +253,19 @@ Group
   = _ @(Secondary / Primary) _
 
 Secondary
-  = UnaryExpression
+  = DownExpression
   / Range
   / HarmonicSegment
   / EnumeratedChord
   / CallExpression
   / ArrayAccess
+  / UnaryExpression
 
 UniformUnaryOperator
   = '-' / '%' / '÷'
+
+ChainableUnaryOperator
+  = '!' / '^'
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: Primary {
@@ -273,7 +277,16 @@ UnaryExpression
       uniform: !!uniform,
     };
   }
-  / operator: ('--' / '++' / '+' / '!') operand: Primary {
+  / operator: ChainableUnaryOperator operand: (Primary / UnaryExpression) {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
+    };
+  }
+  / operator: ('--' / '++' / '+') operand: Primary {
     return {
       type: 'UnaryExpression',
       operator,
@@ -290,6 +303,15 @@ UnaryExpression
       prefix: false,
       uniform: false,
     }
+  }
+
+DownExpression
+  = operators: 'v'+ '{' _ operand: Primary _ '}' {
+    return {
+      type: 'DownExpression',
+      count: operators.length,
+      operand,
+    };
   }
 
 ArrayAccess
@@ -534,11 +556,13 @@ SplitDemisemipythagorean
   }
 
 FJS
-  = pythagorean: SplitDemisemipythagorean
+  = downs: 'v'*
+    pythagorean: SplitDemisemipythagorean
     superscripts: ('^' @CommaJoinedIntegers)?
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'FJS',
+      downs: downs.length,
       pythagorean,
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
@@ -559,11 +583,13 @@ AbsolutePitch
   }
 
 AbsoluteFJS
-  = pitch: AbsolutePitch
+  = downs: 'v'*
+    pitch: AbsolutePitch
     superscripts: ('^' @CommaJoinedIntegers)?
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'AbsoluteFJS',
+      downs: downs.length,
       pitch,
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],

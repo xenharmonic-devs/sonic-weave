@@ -42,6 +42,7 @@ export type HertzLiteral = {
 
 export type FJS = {
   type: 'FJS';
+  downs: number;
   pythagorean: Pythagorean;
   superscripts: bigint[];
   subscripts: bigint[];
@@ -49,6 +50,7 @@ export type FJS = {
 
 export type AbsoluteFJS = {
   type: 'AbsoluteFJS';
+  downs: number;
   pitch: AbsolutePitch;
   superscripts: bigint[];
   subscripts: bigint[];

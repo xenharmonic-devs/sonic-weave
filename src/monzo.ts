@@ -875,7 +875,9 @@ export class TimeMonzo {
       return clone.mul(fix).dot(other);
     }
 
-    // Including cents doesn't really make sense. In any sensible context one of them is zero anyway.
+    // Including hard cents doesn't really make sense.
+    // In any sensible context one of them is zero anyway.
+    // Real cents are simply co-opted for ups-and-downs by giving vals a unity cents component.
     let result = new Fraction(this.cents * other.cents).simplify(1e-8);
     // Not sure if time should have zero metric or not.
     result.add(this.timeExponent.mul(other.timeExponent));

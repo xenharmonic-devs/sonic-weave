@@ -59,6 +59,12 @@ export class Interval {
     );
   }
 
+  up() {
+    const value = this.value.clone();
+    value.cents += 1;
+    return new Interval(value, this.domain);
+  }
+
   abs() {
     if (this.domain === 'linear') {
       return new Interval(this.value.abs(), this.domain);
