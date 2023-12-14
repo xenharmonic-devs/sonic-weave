@@ -128,6 +128,17 @@ function simplify(interval: Interval) {
   return new Interval(interval.value.clone(), interval.domain);
 }
 
+// TODO:
+// relin
+// ablin
+// ablog
+export function relog(interval: Interval) {
+  if (interval.value.timeExponent.n) {
+    throw new Error('Absolute to relative conversion not implemented yet');
+  }
+  return new Interval(interval.value.clone(), 'logarithmic');
+}
+
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
   mapper: (value: any, index: Interval, array: any[]) => unknown,
@@ -225,6 +236,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   unshift,
   length,
   simplify,
+  relog,
   print,
   dir,
   map,

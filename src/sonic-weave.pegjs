@@ -348,7 +348,8 @@ ScalarLike
   / IntegerLiteral
 
 Quantity
-  = HertzLiteral
+  = WartsLiteral
+  / HertzLiteral
   / CentLiteral
 
 Primary
@@ -437,6 +438,19 @@ DotCentsLiteral
       fractional: multiplier.fractional,
     };
   }
+
+WartsLiteral
+  = equave: [a-z]i? divisions: PositiveInteger warts: [a-z]i* '@' basis: DotJoinedRationals {
+    return {
+      type: 'WartsLiteral',
+      equave: (equave ?? '').toLowerCase(),
+      divisions,
+      warts: warts.map(w => w.toLowerCase()),
+      basis,
+    };
+  }
+
+DotJoinedRationals = ($(PositiveInteger ('/' PositiveInteger)?))|.., '.'|
 
 CentLiteral
   = CentToken { return { type: 'CentLiteral' }; }

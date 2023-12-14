@@ -10,6 +10,7 @@ import {
   uniformInvertNode,
   AbsoluteFJS,
   FJS,
+  WartsLiteral,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
@@ -22,10 +23,12 @@ import {
   LINEAR_ZERO,
   PRELUDE_SOURCE,
   sonicBool,
+  relog,
 } from './builtin';
 import {bigGcd, metricExponent} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
+import {inferEquave, wartsToVal} from './warts';
 
 type BinaryOperator =
   | '??'
@@ -325,7 +328,34 @@ export class StatementVisitor {
         scale[scale.length - 1].color = value;
       }
     } else if (value instanceof Interval) {
-      scale.push(value);
+      if (value.domain === 'cologarithmic') {
+        let divisions = value.value.primeExponents[0];
+        let equave = new Fraction(2);
+        if (value?.node?.type === 'WartsLiteral') {
+          divisions = new Fraction(Number(value.node.divisions));
+          const equave_ = inferEquave(value.node);
+          if (!equave_) {
+            throw new Error('Invalid warts equave');
+          }
+          equave = equave_;
+          // TODO: Nedji node
+        }
+        const step = new Interval(
+          TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
+          'logarithmic',
+          {
+            type: 'NedoLiteral',
+            numerator: BigInt(divisions.d),
+            denominator: BigInt(divisions.n),
+          }
+        );
+        const rl = relog.bind(this);
+        const mapped = scale.map(i => rl(i).dot(value).mul(step));
+        scale.length = 0;
+        scale.push(...mapped);
+      } else {
+        scale.push(value);
+      }
     } else if (Array.isArray(value)) {
       for (const subvalue of value) {
         this.handleValue(subvalue);
@@ -491,6 +521,8 @@ class ExpressionVisitor {
         return this.visitAbsoluteFJS(node);
       case 'HertzLiteral':
         return this.visitHertzLiteral(node);
+      case 'WartsLiteral':
+        return this.visitWartsLiteral(node);
       case 'ColorLiteral':
         return new Color(node.value);
       case 'Identifier':
@@ -508,6 +540,11 @@ class ExpressionVisitor {
         return node.value;
     }
     node satisfies never;
+  }
+
+  visitWartsLiteral(node: WartsLiteral) {
+    const val = wartsToVal(node);
+    return new Interval(val, 'cologarithmic', node);
   }
 
   visitPitchAssignment(node: PitchAssignment) {

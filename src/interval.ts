@@ -4,6 +4,7 @@ import {
   NedoLiteral,
   addNodes,
   divNodes,
+  mulNodes,
   subNodes,
   toString,
 } from './expression';
@@ -113,13 +114,14 @@ export class Interval {
     if (this.domain !== 'linear' && other.domain !== 'linear') {
       throw new Error('At least one domain must be linear in multiplication');
     }
+    const node = mulNodes(this.node, other.node);
     if (other.domain === 'logarithmic') {
-      return new Interval(other.value.pow(this.value), other.domain);
+      return new Interval(other.value.pow(this.value), other.domain, node);
     }
     if (this.domain === 'logarithmic') {
-      return new Interval(this.value.pow(other.value), this.domain);
+      return new Interval(this.value.pow(other.value), this.domain, node);
     }
-    return new Interval(this.value.mul(other.value), this.domain);
+    return new Interval(this.value.mul(other.value), this.domain, node);
   }
 
   div(other: Interval) {
@@ -138,6 +140,18 @@ export class Interval {
       );
     }
     return new Interval(this.value.div(other.value), this.domain, node);
+  }
+
+  dot(other: Interval) {
+    const product = this.value.dot(other.value);
+    if (product.d === 1) {
+      const value = BigInt(product.s * product.n);
+      return new Interval(TimeMonzo.fromBigInt(value), 'linear', {
+        type: 'IntegerLiteral',
+        value,
+      });
+    }
+    return new Interval(TimeMonzo.fromFraction(product), 'linear');
   }
 
   pow(other: Interval) {

@@ -54,6 +54,14 @@ export type AbsoluteFJS = {
   subscripts: bigint[];
 };
 
+export type WartsLiteral = {
+  type: 'WartsLiteral';
+  equave: string;
+  divisions: bigint;
+  warts: string[];
+  basis: string[];
+};
+
 export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
@@ -63,7 +71,8 @@ export type IntervalLiteral =
   | CentLiteral
   | FJS
   | AbsoluteFJS
-  | HertzLiteral;
+  | HertzLiteral
+  | WartsLiteral;
 
 export function uniformInvertNode(
   node?: IntervalLiteral
@@ -159,6 +168,23 @@ export function divNodes(
   return undefined;
 }
 
+export function mulNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!a || !b) {
+    return undefined;
+  }
+  if (a.type === 'IntegerLiteral' && b.type === 'NedoLiteral') {
+    return {
+      type: 'NedoLiteral',
+      numerator: a.value * b.numerator,
+      denominator: b.denominator,
+    };
+  }
+  return undefined;
+}
+
 function tailFJS(literal: FJS | AbsoluteFJS) {
   let result = '';
   if (literal.superscripts.length) {
@@ -194,6 +220,10 @@ export function toString(literal: IntervalLiteral) {
       return `${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
         literal
       )}`;
+    case 'WartsLiteral':
+      return `${literal.equave}${literal.divisions}${literal.warts.join(
+        ''
+      )}@${literal.basis.join('.')}`;
     case 'HertzLiteral':
       return `${literal.prefix}Hz`;
     default:

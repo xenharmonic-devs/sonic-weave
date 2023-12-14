@@ -1123,6 +1123,7 @@ export class TimeMonzo {
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
   }
 
+  // TODO: Make sure that this is idempotent.
   as(node: IntervalLiteral | undefined): IntervalLiteral | undefined {
     if (!node) {
       return undefined;

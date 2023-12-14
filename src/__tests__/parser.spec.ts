@@ -295,6 +295,12 @@ describe('SonicWeave parser', () => {
     expect(sixth.value.toFraction().toFraction()).toBe('18/11');
     expect(sixth.toString()).toBe('n6_11');
   });
+
+  it('can implicitly temper a major chord in 12edo', () => {
+    const scale = parseSource('5/4;3/2;12@;');
+    expect(scale).toHaveLength(2);
+    expect(scale.map(i => i.toString()).join(';')).toBe('4\\12;7\\12');
+  });
 });
 
 describe('SonicWeave standard library', () => {
