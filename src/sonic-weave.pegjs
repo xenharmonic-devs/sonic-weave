@@ -198,6 +198,8 @@ AssigningOperator
 
 CoalescingOperator
   = '??'
+  / '||'
+  / '&&'
 
 Expression
   = head: RelationalExpression tail: (_ @CoalescingOperator _ @RelationalExpression)* {

@@ -123,6 +123,11 @@ function length(scale?: Interval[]) {
   return Interval.fromInteger(scale.length);
 }
 
+// Get rid of formatting.
+function simplify(interval: Interval) {
+  return new Interval(interval.value.clone(), interval.domain);
+}
+
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
   mapper: (value: any, index: Interval, array: any[]) => unknown,
@@ -219,6 +224,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   shift,
   unshift,
   length,
+  simplify,
   print,
   dir,
   map,
@@ -368,6 +374,40 @@ riff subset indices scale {
 riff toSubharmonics overtone scale {
   $ = scale ?? $$;
   i => %~(%~i to~ %~overtone);
+  return;
+}
+
+// Assumes a sorted scale
+riff keepUnique scale {
+  scale ??= $$;
+  last = niente;
+  i = length(scale);
+  while (i--) {
+    current = shift(scale);
+    if (last != current) {
+      current;
+      last = current;
+    }
+  }
+  i => push(i, scale);
+  return;
+}
+
+riff mergeOffset offset overflow scale {
+  overflow ??= 'drop';
+  $ = scale ?? $$;
+  equave = pop();
+  copy = map(i => i ~* offset, $);
+  unshift(offset, copy);
+  if (overflow === 'drop') {
+    distill(i => i > 1 && i < equave, copy);
+  } else if (overflow === 'wrap') {
+    remap(i => i ~red equave, copy);
+  }
+  copy;
+  sort();
+  equave;
+  keepUnique();
   return;
 }
 `;

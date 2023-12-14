@@ -408,4 +408,33 @@ describe('SonicWeave standard library', () => {
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('16/13;16/10;16/8');
   });
+
+  it('can merge offset copies', () => {
+    const zarlino = parseSource(
+      'rank2(3/2, 2/1, 3); mergeOffset(5/4); rotate(4); simplify;'
+    );
+    expect(zarlino).toHaveLength(7);
+    expect(zarlino.map(i => i.toString()).join(';')).toBe(
+      '9/8;5/4;4/3;3/2;5/3;15/8;2'
+    );
+  });
+
+  it('can merge offset copies with overflow preferences', () => {
+    const scale = parseSource(
+      'rank2(3/2, 2/1, 3); mergeOffset(5/4, "wrap"); rotate(2); simplify;'
+    );
+    expect(scale).toHaveLength(8);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '10/9;5/4;4/3;3/2;5/3;16/9;15/8;2'
+    );
+  });
+
+  it('makes sense of negative offsets', () => {
+    const drop = parseSource('2;mergeOffset(1/3, "drop");');
+    expect(drop.map(i => i.toString()).join(';')).toBe('2');
+    const wrap = parseSource('2;mergeOffset(1/3, "wrap");');
+    expect(wrap.map(i => i.toString()).join(';')).toBe('4/3;2');
+    const keep = parseSource('2;mergeOffset(1/3, "keep");');
+    expect(keep.map(i => i.toString()).join(';')).toBe('1/3;2');
+  });
 });

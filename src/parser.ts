@@ -29,6 +29,8 @@ import {inflect} from './fjs';
 
 type BinaryOperator =
   | '??'
+  | '||'
+  | '&&'
   | '==='
   | '!=='
   | '=='
@@ -619,10 +621,127 @@ class ExpressionVisitor {
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const left = this.visit(node.left);
-    const right = this.visit(node.right);
     if (node.operator === '??') {
-      return left ?? right;
+      if (left !== undefined) {
+        return left;
+      }
+      return this.visit(node.right);
     }
+    if (node.operator === '||') {
+      if (sonicTruth(left)) {
+        return left;
+      }
+      return this.visit(node.right);
+    }
+    if (node.operator === '&&') {
+      if (!sonicTruth(left)) {
+        return left;
+      }
+      return this.visit(node.right);
+    }
+    const right = this.visit(node.right);
+    if (left instanceof Interval && right instanceof Interval) {
+      if (node.preferLeft || node.preferRight) {
+        let value: TimeMonzo;
+        switch (node.operator) {
+          case '+':
+            value = left.value.add(right.value);
+            break;
+          case '-':
+            value = left.value.sub(right.value);
+            break;
+          case 'to':
+            value = left.value.roundTo(right.value);
+            break;
+          case 'by':
+            value = left.value.pitchRoundTo(right.value);
+            break;
+          case '×':
+          case '*':
+            value = left.value.mul(right.value);
+            break;
+          case '÷':
+          case '%':
+            value = left.value.div(right.value);
+            break;
+          case 'red':
+            value = left.value.reduce(right.value);
+            break;
+          case '^':
+            value = left.value.pow(right.value);
+            break;
+          case '\\':
+            throw new Error('Preference not supported with backslahes');
+          default:
+            throw new Error(
+              `${node.preferLeft ? '~' : ''}${node.operator}${
+                node.preferRight ? '~' : ''
+              } unimplemented`
+            );
+        }
+        if (node.preferLeft && node.preferRight) {
+          let domain = left.domain;
+          if (right.domain === 'linear') {
+            domain = 'linear';
+          }
+          return new Interval(value, domain);
+        }
+        if (node.preferLeft) {
+          return new Interval(value, left.domain, value.as(left.node));
+        }
+        return new Interval(value, right.domain, value.as(right.node));
+      }
+      switch (node.operator) {
+        case '===':
+          return sonicBool(left.strictEquals(right));
+        case '!==':
+          return sonicBool(!left.strictEquals(right));
+        case '==':
+          return sonicBool(left.equals(right));
+        case '!=':
+          return sonicBool(!left.equals(right));
+        case '<=':
+          return sonicBool(left.compare(right) <= 0);
+        case '>=':
+          return sonicBool(left.compare(right) >= 0);
+        case '<':
+          return sonicBool(left.compare(right) < 0);
+        case '>':
+          return sonicBool(left.compare(right) > 0);
+        case '+':
+          return left.add(right);
+        case '-':
+          return left.sub(right);
+        case '×':
+        case '*':
+        case '':
+          return left.mul(right);
+        case '÷':
+        case '%':
+          return left.div(right);
+        case '^':
+          return left.pow(right);
+        case 'log':
+          return left.log(right);
+        case '\\':
+          return left.backslash(right);
+        default:
+          throw new Error(`${node.operator} unimplemented`);
+      }
+    }
+    switch (node.operator) {
+      case '===':
+        return sonicBool(left === right);
+      case '!==':
+        return sonicBool(left !== right);
+      case '==':
+        // eslint-disable-next-line eqeqeq
+        return sonicBool(left == right);
+      case '!=':
+        // eslint-disable-next-line eqeqeq
+        return sonicBool(left != right);
+    }
+
     if (left instanceof Color || right instanceof Color) {
       throw new Error('Cannot operate on colors');
     }
@@ -651,86 +770,6 @@ class ExpressionVisitor {
         default:
           throw new Error(`${node.operator} not supported with arrays`);
       }
-    }
-    if (node.preferLeft || node.preferRight) {
-      let value: TimeMonzo;
-      switch (node.operator) {
-        case '+':
-          value = left.value.add(right.value);
-          break;
-        case '-':
-          value = left.value.sub(right.value);
-          break;
-        case 'to':
-          value = left.value.roundTo(right.value);
-          break;
-        case 'by':
-          value = left.value.pitchRoundTo(right.value);
-          break;
-        case '×':
-        case '*':
-          value = left.value.mul(right.value);
-          break;
-        case '÷':
-        case '%':
-          value = left.value.div(right.value);
-          break;
-        case 'red':
-          value = left.value.reduce(right.value);
-          break;
-        case '^':
-          value = left.value.pow(right.value);
-          break;
-        case '\\':
-          throw new Error('Preference not supported with backslahes');
-        default:
-          throw new Error(
-            `${node.preferLeft ? '~' : ''}${node.operator}${
-              node.preferRight ? '~' : ''
-            } unimplemented`
-          );
-      }
-      if (node.preferLeft) {
-        return new Interval(value, left.domain, value.as(left.node));
-      }
-      return new Interval(value, right.domain, value.as(right.node));
-    }
-    switch (node.operator) {
-      case '===':
-        return sonicBool(left.strictEquals(right));
-      case '!==':
-        return sonicBool(!left.strictEquals(right));
-      case '==':
-        return sonicBool(left.equals(right));
-      case '!=':
-        return sonicBool(!left.equals(right));
-      case '<=':
-        return sonicBool(left.compare(right) <= 0);
-      case '>=':
-        return sonicBool(left.compare(right) >= 0);
-      case '<':
-        return sonicBool(left.compare(right) < 0);
-      case '>':
-        return sonicBool(left.compare(right) > 0);
-      case '+':
-        return left.add(right);
-      case '-':
-        return left.sub(right);
-      case '×':
-      case '*':
-      case '':
-        return left.mul(right);
-      case '÷':
-      case '%':
-        return left.div(right);
-      case '^':
-        return left.pow(right);
-      case 'log':
-        return left.log(right);
-      case '\\':
-        return left.backslash(right);
-      default:
-        throw new Error(`${node.operator} unimplemented`);
     }
   }
 
