@@ -25,7 +25,7 @@ import {
   sonicBool,
   relog,
 } from './builtin';
-import {bigGcd, metricExponent} from './utils';
+import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
 import {inferEquave, wartsToVal} from './warts';
@@ -80,6 +80,13 @@ type FunctionDeclaration = {
   body: Statement[];
 };
 
+type PitchDeclaration = {
+  type: 'PitchDeclaration';
+  left: Expression;
+  middle?: Expression;
+  right: Expression;
+};
+
 type BlockStatement = {
   type: 'BlockStatement';
   body: Statement[];
@@ -119,6 +126,7 @@ type Statement =
   | VariableDeclaration
   | ExpressionStatement
   | FunctionDeclaration
+  | PitchDeclaration
   | BlockStatement
   | WhileStatement
   | IfStatement
@@ -151,12 +159,6 @@ type BinaryExpression = {
 type ColorLiteral = {
   type: 'ColorLiteral';
   value: string;
-};
-
-type PitchAssignment = {
-  type: 'PitchAssignment';
-  pitch: AbsoluteFJS;
-  value: Expression;
 };
 
 type Identifier = {
@@ -212,7 +214,6 @@ type Expression =
   | ArrowFunction
   | IntervalLiteral
   | ColorLiteral
-  | PitchAssignment
   | Identifier
   | EnumeratedChord
   | Range
@@ -256,6 +257,14 @@ export class StatementVisitor {
     this.context.set('$', []);
   }
 
+  // TODO: Deep cloning
+  clone() {
+    const result = new StatementVisitor();
+    result.context = new Map(this.context);
+    result.context.set('$', []);
+    return result;
+  }
+
   visit(node: Statement): Interupt | undefined {
     switch (node.type) {
       case 'VariableDeclaration':
@@ -264,6 +273,8 @@ export class StatementVisitor {
         return this.visitExpression(node);
       case 'FunctionDeclaration':
         return this.visitFunctionDeclaration(node);
+      case 'PitchDeclaration':
+        return this.visitPitchDeclaration(node);
       case 'BlockStatement':
         return this.visitBlockStatement(node);
       case 'WhileStatement':
@@ -308,6 +319,56 @@ export class StatementVisitor {
       // XXX: Abuses the type system.
       object[i] = value as Interval;
     }
+    return undefined;
+  }
+
+  visitPitchDeclaration(node: PitchDeclaration) {
+    if (
+      node.middle?.type === 'AbsoluteFJS' ||
+      node.right.type === 'AbsoluteFJS'
+    ) {
+      throw new Error('Declared pitch must be on the left');
+    }
+
+    const subVisitor = new ExpressionVisitor(this.context);
+
+    if (node.left.type === 'AbsoluteFJS') {
+      const value = subVisitor.visit(node.middle ?? node.right);
+      if (!(value instanceof Interval)) {
+        throw new Error('Pitch declaration must evaluate to an interval');
+      }
+
+      const pitch = subVisitor.visit(node.left) as Interval;
+
+      const C4: TimeMonzo =
+        (this.context.get('C4') as unknown as TimeMonzo) ?? UNITY_MONZO;
+
+      this.context.set(
+        'C4',
+        C4.mul(value.value).div(pitch.value) as unknown as Interval
+      );
+      if (!node.middle) {
+        return undefined;
+      }
+    }
+    const left = subVisitor.visit(node.middle ?? node.left);
+    const right = subVisitor.visit(node.right);
+    if (!(left instanceof Interval && right instanceof Interval)) {
+      throw new Error('Pitch declaration must evaluato an interval');
+    }
+    let absolute: TimeMonzo;
+    let relative: TimeMonzo;
+    if (left.value.timeExponent.n) {
+      absolute = left.value;
+      if (right.value.timeExponent.n) {
+        throw new Error('Cannot assign absolute pitch to absolute pitch');
+      }
+      relative = right.value;
+    } else {
+      absolute = right.value;
+      relative = left.value;
+    }
+    this.context.set('1', absolute.div(relative) as unknown as Interval);
     return undefined;
   }
 
@@ -474,9 +535,7 @@ export class StatementVisitor {
   }
 }
 
-const ZERO = new Fraction(0);
-const ONE = new Fraction(1);
-const NEGATIVE_ONE = new Fraction(-1);
+const UNITY_MONZO = new TimeMonzo(ZERO, []);
 const CENT = new Interval(
   new TimeMonzo(ZERO, [new Fraction(1, 1200)]),
   'logarithmic',
@@ -513,8 +572,6 @@ class ExpressionVisitor {
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
         return CENT;
-      case 'PitchAssignment':
-        return this.visitPitchAssignment(node);
       case 'FJS':
         return this.visitFJS(node);
       case 'AbsoluteFJS':
@@ -549,23 +606,6 @@ class ExpressionVisitor {
     return new Interval(val, 'cologarithmic', node);
   }
 
-  visitPitchAssignment(node: PitchAssignment) {
-    const value = this.visit(node.value);
-    if (!(value instanceof Interval)) {
-      throw new Error('Pitch assignment must evaluate to an interval');
-    }
-    const relativeToC4 = inflect(
-      absoluteMonzo(node.pitch.pitch),
-      node.pitch.superscripts,
-      node.pitch.subscripts
-    );
-    this.context.set(
-      'C4',
-      value.value.div(relativeToC4) as unknown as Interval
-    );
-    return value;
-  }
-
   visitFJS(node: FJS) {
     const monzo = inflect(
       pythagoreanMonzo(node.pythagorean),
@@ -577,12 +617,8 @@ class ExpressionVisitor {
   }
 
   visitAbsoluteFJS(node: AbsoluteFJS) {
-    if (!this.context.has('C4')) {
-      throw new Error(
-        'Absolute pitch must be assigned before use. Try A4 = 440 Hz'
-      );
-    }
-    const C4 = this.context.get('C4')! as unknown as TimeMonzo;
+    const C4: TimeMonzo =
+      (this.context.get('C4') as unknown as TimeMonzo) ?? UNITY_MONZO;
     const relativeToC4 = inflect(
       absoluteMonzo(node.pitch),
       node.superscripts,
@@ -993,18 +1029,28 @@ export function parseAST(source: string): Program {
   return parse(source);
 }
 
-export function parseSource(source: string, includePrelude = true): Interval[] {
-  // TODO: Cache on first intialization.
-  const visitor = new StatementVisitor();
-  for (const name in BUILTIN_CONTEXT) {
-    const value = BUILTIN_CONTEXT[name];
-    visitor.context.set(name, value);
-  }
+// Cached globally on first initialization.
+let SOURCE_VISITOR: StatementVisitor | null = null;
 
-  if (includePrelude) {
-    const prelude = parseAST(PRELUDE_SOURCE);
-    for (const statement of prelude.body) {
-      visitor.visit(statement);
+export function parseSource(source: string, includePrelude = true): Interval[] {
+  let visitor: StatementVisitor;
+  if (SOURCE_VISITOR) {
+    visitor = SOURCE_VISITOR.clone();
+  } else {
+    visitor = new StatementVisitor();
+    for (const name in BUILTIN_CONTEXT) {
+      const value = BUILTIN_CONTEXT[name];
+      visitor.context.set(name, value);
+    }
+
+    if (includePrelude) {
+      const prelude = parseAST(PRELUDE_SOURCE);
+      for (const statement of prelude.body) {
+        visitor.visit(statement);
+      }
+      SOURCE_VISITOR = visitor.clone();
+    } else {
+      throw new Error('Sdtlib is mandatory for now');
     }
   }
 

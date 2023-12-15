@@ -245,9 +245,8 @@ describe('SonicWeave parser', () => {
 
   it('supports pythagorean absolute notation', () => {
     const scale = parseSource('C4 = 262 Hz; A=4;');
-    expect(scale).toHaveLength(2);
-    expect(scale[0].value.valueOf()).toBe(262);
-    expect(scale[1].value.valueOf()).toBeCloseTo(442.12);
+    expect(scale).toHaveLength(1);
+    expect(scale[0].value.valueOf()).toBeCloseTo(442.12);
   });
 
   it('supports neutral intervals', () => {
@@ -272,24 +271,54 @@ describe('SonicWeave parser', () => {
 
   it('supports interordinal nominals', () => {
     const scale = parseSource('C6 = 1000 Hz; ζ6;');
-    expect(scale).toHaveLength(2);
-    expect(scale[0].value.valueOf()).toBe(1000);
-    expect(scale[1].value.valueOf()).toBeCloseTo(1414.213562373095);
+    expect(scale).toHaveLength(1);
+    expect(scale[0].value.valueOf()).toBeCloseTo(1414.213562373095);
   });
 
   it('can spell the major scale in Latin', () => {
     const scale = parseSource('C0=1/1;D0;E0;F0;G0;A0;B0;C1;');
-    expect(scale).toHaveLength(8);
+    expect(scale).toHaveLength(7);
     expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
-      '1;9/8;81/64;4/3;3/2;27/16;243/128;2'
+      '9/8;81/64;4/3;3/2;27/16;243/128;2'
     );
   });
 
   it('can spell the major scale in Greek', () => {
-    const scale = parseSource('γ0=1/1;δ0;ε0;ζ0;η0;α0;β0;γ1;');
-    expect(scale).toHaveLength(8);
+    const scale = parseSource('ζ0=1/1;η0;α0;β0;γ1;δ1;ε1;ζ1;');
+    expect(scale).toHaveLength(7);
     expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
-      '1;9/8;81/64;4/3;3/2;27/16;243/128;2'
+      '9/8;81/64;4/3;3/2;27/16;243/128;2'
+    );
+  });
+
+  it('can spell diaschismic antisymmetrically', () => {
+    const scale = parseSource(`
+      // Scale Workshop 3 will add this line automatically.
+      // Declare base nominal and frequency.
+      C0 = 1/1 = 261.6 Hz;
+
+      // First cycle (Greek - Latin - Greek...)
+      gamma0; // Or γ0 if you want to get fancy.
+      D0;
+      delta0;
+      E0;
+      epsilon0; // Or F0 depending on taste.
+      zeta0; // Period
+
+      // Second cycle (Latin - Greek - Latin ...)
+      G0;
+      eta0;
+      A0;
+      alpha0;
+      B0; // Or beta0 depending on taste.
+      C1; // Equave = 2 * period
+
+      // Temperament
+      12@;
+    `);
+    expect(scale).toHaveLength(12);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1\\12;2\\12;3\\12;4\\12;5\\12;6\\12;7\\12;8\\12;9\\12;10\\12;11\\12;12\\12'
     );
   });
 
@@ -301,9 +330,8 @@ describe('SonicWeave parser', () => {
 
   it('supports absolute FJS', () => {
     const scale = parseSource('C6 = 1kHz; Bb6^7;');
-    expect(scale).toHaveLength(2);
-    expect(scale[0].value.valueOf()).toBe(1000);
-    expect(scale[1].value.valueOf()).toBeCloseTo(1750);
+    expect(scale).toHaveLength(1);
+    expect(scale[0].value.valueOf()).toBeCloseTo(1750);
   });
 
   it('supports neutral FJS', () => {
@@ -320,9 +348,9 @@ describe('SonicWeave parser', () => {
 
   it('has ups-and-downs', () => {
     const scale = parseSource('C0=1/1;^C0;γ0;vD0;D0;22@;');
-    expect(scale).toHaveLength(5);
+    expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '0\\22;1\\22;2\\22;3\\22;4\\22'
+      '1\\22;2\\22;3\\22;4\\22'
     );
   });
 });

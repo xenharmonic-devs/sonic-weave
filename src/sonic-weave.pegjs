@@ -82,6 +82,7 @@ Statement
   = VariableDeclaration
   / ReassignmentStatement
   / FunctionDeclaration
+  / PitchDeclaration
   / BlockStatement
   / ReturnStatement
   / WhileStatement
@@ -118,6 +119,23 @@ FunctionDeclaration
       name,
       parameters,
       body: body.body,
+    };
+  }
+
+PitchDeclaration
+  = left: Expression _ '=' _ middle: Expression _ '=' _ right: Expression EOS {
+    return {
+      type: 'PitchDeclaration',
+      left,
+      middle,
+      right,
+    };
+  }
+  / left: Expression _ '=' _ right: Expression EOS {
+    return {
+      type: 'PitchDeclaration',
+      left,
+      right,
     };
   }
 
@@ -381,7 +399,6 @@ Primary
   / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
-  / PitchAssignment
   / FJS
   / AbsoluteFJS
   / ArrowFunction
@@ -572,8 +589,11 @@ FJS
 Accidental
   = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫] / (Demisemi [♯#♭b]) )
 
+Nominal
+  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / [\u03B1-ηaA-G])
+
 AbsolutePitch
-  = nominal: [\u03B1-ηaA-G] accidentals: Accidental* octave: SignedInteger {
+  = nominal: Nominal accidentals: Accidental* octave: SignedInteger {
     return {
       type: 'AbsolutePitch',
       nominal,
@@ -593,15 +613,6 @@ AbsoluteFJS
       pitch,
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
-    };
-  }
-
-PitchAssignment
-  = pitch: AbsoluteFJS _ '=' _ value: Expression {
-    return {
-      type: 'PitchAssignment',
-      pitch,
-      value,
     };
   }
 

@@ -285,10 +285,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast.expression.type).toBe('AbsoluteFJS');
   });
 
-  it('prefers pitch assignment over variable declaration', () => {
-    const ast = parseSingle('A4 = 440 Hz');
-    expect(ast.expression.type).toBe('PitchAssignment');
-    expect(ast.expression.pitch.type).toBe('AbsoluteFJS');
+  it('prefers pitch declaration over variable declaration', () => {
+    const ast = parseSingle('a4 = 440 Hz');
+    expect(ast.type).toBe('PitchDeclaration');
+    expect(ast.left.type).toBe('AbsoluteFJS');
   });
 
   it('is aware of interval qualities (no minor twelfth)', () => {
