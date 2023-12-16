@@ -420,25 +420,29 @@ NedoLiteral
   }
 
 SoftDotDecimal
-  = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart {
+  = whole: Integer exponent: ExponentPart {
+    return {
+      type: 'DecimalLiteral',
+      whole,
+      fractional: '',
+      exponent,
+      hard: false,
+    };
+  }
+  / !('.' [^0-9])
+  whole: Integer? '.' !'.' fractional: FractionalPart exponent: ExponentPart?  {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
+      exponent,
       hard: false,
     };
   }
 
 HardDotDecimal
-  = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart '!' {
-    return {
-      type: 'DecimalLiteral',
-      whole: whole ?? 0n,
-      fractional: fractional,
-      hard: true,
-    };
+  = soft: SoftDotDecimal '!' {
+    return {...soft, hard: true};
   }
 
 DotDecimal
@@ -446,11 +450,12 @@ DotDecimal
   / HardDotDecimal
 
 CommaDecimal
-  = whole: Integer ',' fractional: $(DecimalDigit+) hard: '!'? {
+  = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? hard: '!'? {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
+      exponent,
       hard: !!hard,
     };
   }
@@ -473,11 +478,12 @@ IntegerLiteral
   }
 
 DotCentsLiteral
-  = multiplier: SoftDotDecimal {
+  = !('.' [^0-9])
+  whole: Integer? '.' !'.' fractional: FractionalPart  {
     return {
       type: 'CentsLiteral',
-      whole: multiplier.whole,
-      fractional: multiplier.fractional,
+      whole: whole,
+      fractional: fractional,
     };
   }
 
@@ -675,6 +681,12 @@ PositiveInteger
 
 SignedInteger
   = num:$([+-]? Integer) { return BigInt(num); }
+
+ExponentPart
+  = ExponentIndicator exponent: SignedInteger { return exponent; }
+
+ExponentIndicator
+  = "e"i
 
 FractionalPart
   = $(DecimalDigit*)

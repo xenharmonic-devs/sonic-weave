@@ -10,6 +10,7 @@ export type DecimalLiteral = {
   type: 'DecimalLiteral';
   whole: bigint;
   fractional: string;
+  exponent: bigint | null;
   hard: boolean;
 };
 
@@ -204,6 +205,20 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
   return result;
 }
 
+function formatDecimal(literal: DecimalLiteral) {
+  let result = literal.whole.toString();
+  if (literal.fractional) {
+    result += ',' + literal.fractional;
+  }
+  if (literal.exponent === null) {
+    if (!literal.fractional) {
+      return result + ',';
+    }
+    return result;
+  }
+  return `${result}e${literal.exponent}`;
+}
+
 export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
@@ -211,7 +226,7 @@ export function toString(literal: IntervalLiteral) {
     case 'FractionLiteral':
       return `${literal.numerator}/${literal.denominator}`;
     case 'DecimalLiteral':
-      return `${literal.whole},${literal.fractional}`;
+      return formatDecimal(literal);
     case 'CentsLiteral':
       return `${literal.whole}.${literal.fractional}`;
     case 'CentLiteral':

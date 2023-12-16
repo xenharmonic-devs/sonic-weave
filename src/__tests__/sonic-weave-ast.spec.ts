@@ -79,11 +79,62 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           type: 'DecimalLiteral',
           whole: 420n,
           fractional: '69',
+          exponent: null,
           hard: false,
         },
         right: {type: 'HertzLiteral', prefix: ''},
         preferLeft: false,
         preferRight: false,
+      },
+    });
+  });
+
+  it('parses exaseconds', () => {
+    const ast = parseSingle('420Es');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '',
+        left: {type: 'IntegerLiteral', value: 420n},
+        right: {type: 'SecondLiteral', prefix: 'E'},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('parses scientific notation in scalar multipliers', () => {
+    const ast = parseSingle('420E69s');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '',
+        left: {
+          type: 'DecimalLiteral',
+          whole: 420n,
+          fractional: '',
+          exponent: 69n,
+          hard: false,
+        },
+        right: {type: 'SecondLiteral', prefix: ''},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('parses scientific notation in comma decimals', () => {
+    const ast = parseSingle('42,0e-69');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'DecimalLiteral',
+        whole: 42n,
+        fractional: '0',
+        exponent: -69n,
+        hard: false,
       },
     });
   });
@@ -104,6 +155,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         type: 'DecimalLiteral',
         whole: 1n,
         fractional: '955',
+        exponent: null,
         hard: true,
       },
     });

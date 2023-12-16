@@ -358,6 +358,12 @@ describe('SonicWeave parser', () => {
     const freq = parseSingle('ablin(2ms)');
     expect(freq.value.valueOf()).toBe(500);
   });
+
+  it('parses the cursed tritone', () => {
+    const tritone = parseSingle('14E-1');
+    expect(tritone.value.toFraction().toFraction()).toBe('7/5');
+    expect(tritone.toString()).toBe('14e-1');
+  });
 });
 
 describe('SonicWeave standard library', () => {

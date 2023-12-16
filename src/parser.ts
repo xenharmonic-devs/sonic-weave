@@ -905,12 +905,18 @@ class ExpressionVisitor {
   visitDecimalLiteral(node: DecimalLiteral): Interval {
     if (node.hard) {
       const value = TimeMonzo.fromValue(
-        parseFloat(`${node.whole}.${node.fractional}`)
+        parseFloat(`${node.whole}.${node.fractional}e${node.exponent ?? '0'}`)
       );
       return new Interval(value, 'linear', node);
     }
     let numerator = node.whole;
     let denominator = 1n;
+    const exponent = node.exponent || 0n;
+    if (exponent > 0) {
+      numerator *= 10n ** exponent;
+    } else if (exponent < 0) {
+      denominator *= 10n ** -exponent;
+    }
     for (const c of node.fractional) {
       numerator = 10n * numerator + BigInt(c);
       denominator *= 10n;
