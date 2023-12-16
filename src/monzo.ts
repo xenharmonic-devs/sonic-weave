@@ -287,6 +287,24 @@ export class TimeMonzo {
     return this.primeExponents.length;
   }
 
+  get octaves() {
+    if (this.numberOfComponents > 0) {
+      return this.primeExponents[0];
+    }
+    let result = new Fraction(0);
+    let n = this.residual.n;
+    while (n % 2) {
+      n /= 2;
+      result = result.add(1);
+    }
+    let d = this.residual.d;
+    while (d % 2) {
+      d /= 2;
+      result = result.sub(1);
+    }
+    return result;
+  }
+
   /**
    * Create a deep copy of this time monzo.
    * @returns A clone with independent vector part.

@@ -249,9 +249,19 @@ AdditiveOperator
   = $('+' / '-' / ToToken / ByToken)
 
 AdditiveExpression
-  = head: MultiplicativeExpression tail: (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)* {
-      return tail.reduce(operatorReducer, head);
+  = head: MultiplicativeExpression tail: (NedjiProjector / AdditiveTail) {
+      if (Array.isArray(tail)) {
+        return tail.reduce(operatorReducer, head);
+      }
+      return {
+        type: 'NedjiProjection',
+        octaves: head,
+        base: tail.base,
+      };
     }
+
+AdditiveTail
+  = (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
 
 MultiplicativeOperator
   = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / DotToken)
@@ -416,6 +426,15 @@ NedoLiteral
       type: 'NedoLiteral',
       numerator,
       denominator,
+    };
+  }
+
+// TODO: Primary support
+NedjiProjector
+  = '<' _ base: Expression _'>' {
+    return {
+      type: 'NedjiProjector',
+      base,
     };
   }
 

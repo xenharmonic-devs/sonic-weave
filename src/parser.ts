@@ -157,6 +157,12 @@ type BinaryExpression = {
   preferRight: boolean;
 };
 
+type NedjiProjection = {
+  type: 'NedjiProjection';
+  octaves: Expression;
+  base: Expression;
+};
+
 type ColorLiteral = {
   type: 'ColorLiteral';
   value: string;
@@ -211,6 +217,7 @@ type Expression =
   | ArrayAccess
   | UnaryExpression
   | BinaryExpression
+  | NedjiProjection
   | CallExpression
   | ArrowFunction
   | IntervalLiteral
@@ -563,6 +570,8 @@ class ExpressionVisitor {
         return this.visitUnaryExpression(node);
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
+      case 'NedjiProjection':
+        return this.visitNedjiProjection(node);
       case 'CallExpression':
         return this.visitCallExpression(node);
       case 'ArrowFunction':
@@ -606,6 +615,19 @@ class ExpressionVisitor {
         return node.value;
     }
     node satisfies never;
+  }
+
+  visitNedjiProjection(node: NedjiProjection) {
+    const octaves = this.visit(node.octaves);
+    if (!(octaves instanceof Interval)) {
+      throw new Error('Nedji steps must evaluate to an interval');
+    }
+    const base = this.visit(node.base);
+    if (!(base instanceof Interval)) {
+      throw new Error('Nedji base must evaluate to an interval');
+    }
+    // TODO: Preserve formatting by implementing Interval.project().
+    return new Interval(base.value.pow(octaves.value.octaves), 'logarithmic');
   }
 
   visitWartsLiteral(node: WartsLiteral) {

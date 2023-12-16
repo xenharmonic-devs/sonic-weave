@@ -327,6 +327,37 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('parses N-steps-of-M-equal-divisions-of-just-intonation (literal)', () => {
+    const ast = parseSingle('7\\13<3>');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'NedjiProjection',
+        octaves: {type: 'NedoLiteral', numerator: 7n, denominator: 13n},
+        base: {type: 'IntegerLiteral', value: 3n},
+      },
+    });
+  });
+
+  it('parses N-steps-of-equal-divisions-of-just-intonation (binary expression)', () => {
+    const ast = parseSingle('n\\m<ji>');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'NedjiProjection',
+        octaves: {
+          type: 'BinaryExpression',
+          operator: '\\',
+          left: {type: 'Identifier', id: 'n'},
+          right: {type: 'Identifier', id: 'm'},
+          preferLeft: false,
+          preferRight: false,
+        },
+        base: {type: 'Identifier', id: 'ji'},
+      },
+    });
+  });
+
   it('prefers augmented fourth over the absolute pitch A4', () => {
     const ast = parseSingle('A4');
     expect(ast.expression.type).toBe('FJS');

@@ -364,6 +364,14 @@ describe('SonicWeave parser', () => {
     expect(tritone.value.toFraction().toFraction()).toBe('7/5');
     expect(tritone.toString()).toBe('14e-1');
   });
+
+  it('parses nedji', () => {
+    const darkFifth = parseSingle('7\\5<4/3>');
+    const {fractionOfEquave, equave} = darkFifth.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('7/5');
+    expect(equave.toFraction()).toBe('4/3');
+    expect(darkFifth.toString()).toBe('7\\5<4/3>');
+  });
 });
 
 describe('SonicWeave standard library', () => {
