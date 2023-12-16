@@ -11,6 +11,7 @@ import {
   AbsoluteFJS,
   FJS,
   WartsLiteral,
+  SecondLiteral,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
@@ -368,7 +369,12 @@ export class StatementVisitor {
       absolute = right.value;
       relative = left.value;
     }
-    this.context.set('1', absolute.div(relative) as unknown as Interval);
+    this.context.set(
+      '1',
+      absolute
+        .pow(absolute.timeExponent.inverse().neg())
+        .div(relative) as unknown as Interval
+    );
     return undefined;
   }
 
@@ -536,6 +542,7 @@ export class StatementVisitor {
 }
 
 const UNITY_MONZO = new TimeMonzo(ZERO, []);
+const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
 const CENT = new Interval(
   new TimeMonzo(ZERO, [new Fraction(1, 1200)]),
   'logarithmic',
@@ -578,6 +585,8 @@ class ExpressionVisitor {
         return this.visitAbsoluteFJS(node);
       case 'HertzLiteral':
         return this.visitHertzLiteral(node);
+      case 'SecondLiteral':
+        return this.visitSecondLiteral(node);
       case 'WartsLiteral':
         return this.visitWartsLiteral(node);
       case 'ColorLiteral':
@@ -945,10 +954,14 @@ class ExpressionVisitor {
   }
 
   visitHertzLiteral(node: HertzLiteral): Interval {
-    const value = new TimeMonzo(ZERO, [ONE, ZERO, ONE]).pow(
-      metricExponent(node.prefix)
-    );
+    const value = TEN_MONZO.pow(metricExponent(node.prefix));
     value.timeExponent = NEGATIVE_ONE;
+    return new Interval(value, 'linear', node);
+  }
+
+  visitSecondLiteral(node: SecondLiteral): Interval {
+    const value = TEN_MONZO.pow(metricExponent(node.prefix));
+    value.timeExponent = ONE;
     return new Interval(value, 'linear', node);
   }
 

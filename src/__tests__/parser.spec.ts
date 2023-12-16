@@ -353,6 +353,11 @@ describe('SonicWeave parser', () => {
       '1\\22;2\\22;3\\22;4\\22'
     );
   });
+
+  it('can convert time to frequency', () => {
+    const freq = parseSingle('ablin(2ms)');
+    expect(freq.value.valueOf()).toBe(500);
+  });
 });
 
 describe('SonicWeave standard library', () => {

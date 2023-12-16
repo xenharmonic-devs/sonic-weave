@@ -53,6 +53,7 @@ OfToken     = 'of'     !IdentifierPart
 ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
+SecondToken = 's'      !IdentifierPart
 ToToken     = 'to'     !IdentifierPart
 WhileToken  = 'while'  !IdentifierPart
 
@@ -70,6 +71,7 @@ ReservedWord
   / ReduceToken
   / ReturnToken
   / RiffToken
+  / SecondToken
   / ToToken
   / WhileToken
 
@@ -390,6 +392,7 @@ ScalarLike
 Quantity
   = WartsLiteral
   / HertzLiteral
+  / SecondLiteral
   / CentLiteral
 
 Primary
@@ -498,6 +501,14 @@ HertzLiteral
   = prefix: MetricPrefix? HertzToken {
     return {
       type: 'HertzLiteral',
+      prefix,
+    };
+  }
+
+SecondLiteral
+  = prefix: MetricPrefix? SecondToken {
+    return {
+      type: 'SecondLiteral',
       prefix,
     };
   }

@@ -41,6 +41,14 @@ export class Interval {
     return new Interval(monzo, 'linear', {type: 'IntegerLiteral', value});
   }
 
+  isRelative() {
+    return !this.value.timeExponent.n;
+  }
+
+  isAbsolute() {
+    return !!this.value.timeExponent.n;
+  }
+
   neg() {
     if (this.domain === 'linear') {
       return new Interval(this.value.neg(), this.domain);

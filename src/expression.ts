@@ -40,6 +40,11 @@ export type HertzLiteral = {
   prefix: MetricPrefix;
 };
 
+export type SecondLiteral = {
+  type: 'SecondLiteral';
+  prefix: MetricPrefix;
+};
+
 export type FJS = {
   type: 'FJS';
   downs: number;
@@ -74,6 +79,7 @@ export type IntervalLiteral =
   | FJS
   | AbsoluteFJS
   | HertzLiteral
+  | SecondLiteral
   | WartsLiteral;
 
 export function uniformInvertNode(
@@ -228,6 +234,8 @@ export function toString(literal: IntervalLiteral) {
       )}@${literal.basis.join('.')}`;
     case 'HertzLiteral':
       return `${literal.prefix}Hz`;
+    case 'SecondLiteral':
+      return `${literal.prefix}s`;
     default:
       return literal.value.toString();
   }

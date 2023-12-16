@@ -128,15 +128,44 @@ function simplify(interval: Interval) {
   return new Interval(interval.value.clone(), interval.domain);
 }
 
-// TODO:
-// relin
-// ablin
-// ablog
-export function relog(interval: Interval) {
-  if (interval.value.timeExponent.n) {
-    throw new Error('Absolute to relative conversion not implemented yet');
+export function ablin(interval: Interval) {
+  if (interval.isAbsolute()) {
+    const te = interval.value.timeExponent;
+    return new Interval(interval.value.pow(te.inverse().neg()), 'linear');
   }
-  return new Interval(interval.value.clone(), 'logarithmic');
+  if (!this.context.has('1')) {
+    throw new Error(
+      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
+    );
+  }
+  const referenceFrequency = this.context.get('1') as TimeMonzo;
+  return new Interval(interval.value.mul(referenceFrequency), 'linear');
+}
+
+export function relin(interval: Interval) {
+  if (interval.isRelative()) {
+    return new Interval(interval.value.clone(), 'linear');
+  }
+  if (!this.context.has('1')) {
+    throw new Error(
+      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
+    );
+  }
+  const referenceFrequency = this.context.get('1') as TimeMonzo;
+  const absoluteLinear = ablin(interval);
+  return new Interval(absoluteLinear.value.div(referenceFrequency), 'linear');
+}
+
+export function ablog(interval: Interval) {
+  const converted = ablin(interval);
+  converted.domain = 'logarithmic';
+  return converted;
+}
+
+export function relog(interval: Interval) {
+  const converted = relin(interval);
+  converted.domain = 'logarithmic';
+  return converted;
 }
 
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
@@ -236,7 +265,10 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   unshift,
   length,
   simplify,
+  relin,
+  ablin,
   relog,
+  ablog,
   print,
   dir,
   map,
