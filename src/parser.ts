@@ -12,6 +12,10 @@ import {
   FJS,
   WartsLiteral,
   SecondLiteral,
+  MonzoLiteral,
+  VectorComponent,
+  formatComponent,
+  ValLiteral,
 } from './expression';
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
@@ -588,6 +592,10 @@ class ExpressionVisitor {
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
         return CENT;
+      case 'MonzoLiteral':
+        return this.visitMonzoLiteral(node);
+      case 'ValLiteral':
+        return this.visitValLiteral(node);
       case 'FJS':
         return this.visitFJS(node);
       case 'AbsoluteFJS':
@@ -615,6 +623,25 @@ class ExpressionVisitor {
         return node.value;
     }
     node satisfies never;
+  }
+
+  visitComponent(component: VectorComponent) {
+    // XXX: This is so backwards...
+    return new Fraction(formatComponent(component));
+  }
+
+  visitMonzoLiteral(node: MonzoLiteral) {
+    const primeExponents = node.components.map(this.visitComponent);
+    const value = new TimeMonzo(ZERO, primeExponents);
+    return new Interval(value, 'logarithmic', node);
+  }
+
+  visitValLiteral(node: ValLiteral) {
+    const primeExponents = node.components.map(this.visitComponent);
+    const value = new TimeMonzo(ZERO, primeExponents);
+    // Rig ups-and-downs.
+    value.cents = 1;
+    return new Interval(value, 'cologarithmic', node);
   }
 
   visitNedjiProjection(node: NedjiProjection) {

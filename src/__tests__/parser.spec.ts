@@ -412,6 +412,28 @@ describe('SonicWeave parser', () => {
   it("doesn't have '~8' like ups-and-downs doesn't", () => {
     expect(() => parseSingle('n8')).toThrow();
   });
+
+  it('parses monzos', () => {
+    const monzo = parseSingle('[+7, 11e-1, 1.4>');
+    expect(monzo.domain).toBe('logarithmic');
+    const pe = monzo.value.primeExponents;
+    expect(pe[0].toFraction()).toBe('7');
+    expect(pe[1].toFraction()).toBe('11/10');
+    expect(pe[2].toFraction()).toBe('7/5');
+    expect(monzo.toString()).toBe('[7 11e-1 1.4>');
+  });
+
+  it('parses vals', () => {
+    const ast = parseAST('val = <5/3 , -1.001e1];');
+    const visitor = new StatementVisitor();
+    visitor.visit(ast.body[0]);
+    const val = visitor.context.get('val') as Interval;
+    expect(val.domain).toBe('cologarithmic');
+    const pe = val.value.primeExponents;
+    expect(pe[0].toFraction()).toBe('5/3');
+    expect(pe[1].toFraction()).toBe('-1001/100');
+    expect(val.toString()).toBe('<5/3 -1.001e1]');
+  });
 });
 
 describe('SonicWeave standard library', () => {

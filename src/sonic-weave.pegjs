@@ -404,6 +404,8 @@ Quantity
   / HertzLiteral
   / SecondLiteral
   / CentLiteral
+  / MonzoLiteral
+  / ValLiteral
 
 Primary
   = ScalarMultiple
@@ -503,6 +505,36 @@ DotCentsLiteral
       type: 'CentsLiteral',
       whole: whole,
       fractional: fractional,
+    };
+  }
+
+VectorComponent
+  = sign: SignPart left: Integer separator: '/' right: $(PositiveInteger) {
+    return {sign, left, separator, right, exponent: null};
+  }
+  / sign: SignPart left: Integer separator: '.' right: FractionalPart exponent: ExponentPart? {
+    return {sign, left, separator, right, exponent};
+  }
+  / sign: SignPart left: Integer exponent: ExponentPart? {
+    return {sign, left, separator: '', right: '', exponent};
+  }
+
+VectorComponents
+  = VectorComponent|.., _ ','? _|
+
+MonzoLiteral
+  = '[' _ components: VectorComponents _ '>' {
+    return {
+      type: 'MonzoLiteral',
+      components,
+    };
+  }
+
+ValLiteral
+  = '<' _ components: VectorComponents _ ']' {
+    return {
+      type: 'ValLiteral',
+      components,
     };
   }
 
@@ -715,7 +747,10 @@ PositiveInteger
   = num:$([1-9] DecimalDigit*) { return BigInt(num); }
 
 SignedInteger
-  = num:$([+-]? Integer) { return BigInt(num); }
+  = num:$(SignPart Integer) { return BigInt(num); }
+
+SignPart
+  = $([+-]?)
 
 ExponentPart
   = ExponentIndicator exponent: SignedInteger { return exponent; }

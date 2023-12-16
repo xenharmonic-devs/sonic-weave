@@ -70,6 +70,24 @@ export type WartsLiteral = {
   basis: string[];
 };
 
+export type VectorComponent = {
+  sign: '' | '+' | '-';
+  left: bigint;
+  separator?: '/' | '.';
+  right: string;
+  exponent: bigint | null;
+};
+
+export type MonzoLiteral = {
+  type: 'MonzoLiteral';
+  components: VectorComponent[];
+};
+
+export type ValLiteral = {
+  type: 'ValLiteral';
+  components: VectorComponent[];
+};
+
 export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
@@ -81,6 +99,8 @@ export type IntervalLiteral =
   | AbsoluteFJS
   | HertzLiteral
   | SecondLiteral
+  | MonzoLiteral
+  | ValLiteral
   | WartsLiteral;
 
 export function uniformInvertNode(
@@ -219,6 +239,16 @@ function formatDecimal(literal: DecimalLiteral) {
   return `${result}e${literal.exponent}`;
 }
 
+export function formatComponent(component: VectorComponent) {
+  const {sign, left, separator, right, exponent} = component;
+  const exponentPart = exponent ? `e${exponent}` : '';
+  return `${sign === '-' ? '-' : ''}${left}${separator}${right}${exponentPart}`;
+}
+
+function formatComponents(components: VectorComponent[]) {
+  return components.map(formatComponent).join(' ');
+}
+
 export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
@@ -251,6 +281,10 @@ export function toString(literal: IntervalLiteral) {
       return `${literal.prefix}Hz`;
     case 'SecondLiteral':
       return `${literal.prefix}s`;
+    case 'MonzoLiteral':
+      return `[${formatComponents(literal.components)}>`;
+    case 'ValLiteral':
+      return `<${formatComponents(literal.components)}]`;
     default:
       return literal.value.toString();
   }
