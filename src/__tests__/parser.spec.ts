@@ -500,4 +500,29 @@ describe('SonicWeave standard library', () => {
     const keep = parseSource('2;mergeOffset(1/3, "keep");');
     expect(keep.map(i => i.toString()).join(';')).toBe('1/3;2');
   });
+
+  it('can compress a scale', () => {
+    const scale = parseSource('3/2;2;stretch(0,99);');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).toBeCloseTo(1.494);
+    expect(scale[1].value.valueOf()).toBeCloseTo(1.986);
+  });
+
+  it('can randomize a scale (stable equave)', () => {
+    const scale = parseSource('4/3;2;randomVariance(10.0);');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).greaterThan(1.32);
+    expect(scale[0].value.valueOf()).lessThan(1.342);
+    expect(scale[1].value.valueOf()).toBe(2);
+  });
+
+  it('can randomize a scale (unstable equave)', () => {
+    const scale = parseSource('4/3;2;randomVariance(10.0, true);');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].value.valueOf()).greaterThan(1.32);
+    expect(scale[0].value.valueOf()).lessThan(1.342);
+    expect(scale[1].value.valueOf()).not.toBe(2); // There's like a one in a quadrillion chance that this fails.
+    expect(scale[1].value.valueOf()).greaterThan(1.98);
+    expect(scale[1].value.valueOf()).lessThan(2.02);
+  });
 });

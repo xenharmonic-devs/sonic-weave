@@ -454,4 +454,18 @@ riff mergeOffset offset overflow scale {
   keepUnique();
   return;
 }
+
+riff stretch amount scale {
+  $ = scale ?? $$;
+  i => i ~^ amount;
+  return;
+}
+
+riff randomVariance amount varyEquave scale {
+  $ = scale ?? $$;
+  if (!varyEquave) equave = pop();
+  i => i ~* (amount ~^ (2 * random() - 1));
+  if (!varyEquave) equave;
+  return;
+}
 `;
