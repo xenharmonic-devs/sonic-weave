@@ -555,6 +555,9 @@ AugmentedQuality
 ImperfectQuality
   = 'm' / 'sm' / '½m' / 'n' / '½M' / 'sM' / 'M'
 
+// Neutral is mid or ~ from ups-and-downs
+MidQuality = 'P' / 'n'
+
 PerfectQuality = 'P'
 
 Degree
@@ -568,7 +571,12 @@ Degree
   }
 
 PerfectDegree
-  = degree: Degree &{ return [1, 4, 5].includes(degree.base); } {
+  = degree: Degree &{ degree.base === 1; } {
+    return degree;
+  }
+
+MidDegree
+  = degree: Degree &{ return [4, 5].includes(degree.base); } {
     return degree;
   }
 
@@ -597,6 +605,14 @@ SplitDemisemipythagorean
       quality,
       degree,
       imperfect: true,
+    };
+  }
+  / quality: (AugmentedQuality / MidQuality) degree: MidDegree {
+    return {
+      type: 'Pythagorean',
+      quality,
+      degree,
+      imperfect: false,
     };
   }
   / quality: (AugmentedQuality / PerfectQuality) degree: PerfectDegree {

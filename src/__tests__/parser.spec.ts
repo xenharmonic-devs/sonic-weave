@@ -401,6 +401,17 @@ describe('SonicWeave parser', () => {
       '91.5283295833232842!c;196.08999826922536158!c;294.13499740383849712!c;392.17999653845072316!c;498.04499913461268079!c;590.8766626281940262!c;698.04499913461268079!c;792.17999653845072316!c;894.13499740383849712!c;996.08999826922536158!c;1090.2249956730629492!c;1200.'
     );
   });
+
+  it("has mid from ups-and-downs but it's spelled 'n' and mixes with NFJS", () => {
+    const undecimalMidFourth = parseSingle('n4^11');
+    expect(undecimalMidFourth.value.toFraction().toFraction()).toBe('11/8');
+    const undecimalMidFifth = parseSingle('n5_11');
+    expect(undecimalMidFifth.value.toFraction().toFraction()).toBe('16/11');
+  });
+
+  it("doesn't have '~8' like ups-and-downs doesn't", () => {
+    expect(() => parseSingle('n8')).toThrow();
+  });
 });
 
 describe('SonicWeave standard library', () => {

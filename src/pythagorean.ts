@@ -49,6 +49,9 @@ const PYTH_VECTORS: number[][] = [
   [-1.5, 1.5],
 ];
 
+const MID_FOURTH = [-3.5, 2.5];
+const MID_FIFTH = [4.5, -2.5];
+
 // Exponents for "neutral" interordinal intervals related to Pythagoras by a semioctave.
 // Splits the whole tone in half precisely in the middle.
 // Implicitly define semiquartal intervals.
@@ -157,6 +160,14 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     } else if (last === 'd') {
       vector[0] += 5.5;
       vector[1] -= 3.5;
+    }
+  } else {
+    if (quality === 'n') {
+      if (node.degree.base === 4) {
+        vector = MID_FOURTH;
+      } else {
+        vector = MID_FIFTH;
+      }
     }
   }
 
