@@ -168,6 +168,16 @@ export function relog(interval: Interval) {
   return converted;
 }
 
+export function cents(interval: Interval) {
+  const converted = relog(interval);
+  converted.node = converted.value.as({
+    type: 'CentsLiteral',
+    whole: 0n,
+    fractional: '',
+  });
+  return converted;
+}
+
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
   mapper: (value: any, index: Interval, array: any[]) => unknown,
@@ -269,6 +279,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   ablin,
   relog,
   ablog,
+  cents,
   print,
   dir,
   map,
@@ -328,8 +339,9 @@ riff subharmonics start end {
   invert();
 }
 
-riff rank2 generator period up down {
+riff rank2 generator up down period {
   down ??= 0;
+  period ??= 2;
   accumulator = 1;
   while (up--) {
     accumulator *~= generator;
@@ -352,6 +364,31 @@ riff cps factors count equave withUnity {
   sort();
   if (!withUnity) ground();
   equave;
+  reduce();
+  sort();
+}
+
+riff wellTemperament commaFractions comma up down generator period {
+  comma ??= 81/80;
+  up ??= 11;
+  down ??= 11 - up;
+  generator ??= 3/2;
+  period ??= 2;
+
+  accumulator = 1;
+  i = 0;
+  while (i < up) {
+    accumulator *~= generator ~* comma ~^ commaFractions[down + i++];
+    accumulator;
+  }
+
+  accumulator = 1;
+  i = 0;
+  while (i < down) {
+    accumulator %~= generator ~* comma ~^ commaFractions[down - 1 - i++];
+    accumulator;
+  }
+  period;
   reduce();
   sort();
 }

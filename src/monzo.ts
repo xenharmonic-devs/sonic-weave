@@ -87,6 +87,17 @@ function isPowerOfTwo(n: number) {
   return Math.log2(n) % 1 === 0;
 }
 
+function isDecimal(fraction: Fraction) {
+  let d = fraction.d;
+  while (d % 2 === 0) {
+    d /= 2;
+  }
+  while (d % 5 === 0) {
+    d /= 5;
+  }
+  return d === 1;
+}
+
 /**
  * Fractional monzo with multiplicative residue and arbitrary cents offset measured in time-related units (usually Hz).
  *
@@ -505,14 +516,7 @@ export class TimeMonzo {
     if (this.cents !== 0) {
       return false;
     }
-    let d = this.residual.d;
-    while (d % 2 === 0) {
-      d /= 2;
-    }
-    while (d % 5 === 0) {
-      d /= 5;
-    }
-    if (d !== 1) {
+    if (!isDecimal(this.residual)) {
       return false;
     }
     for (const component of this.primeExponents) {
@@ -557,24 +561,6 @@ export class TimeMonzo {
   isEqualTemperament() {
     if (this.cents !== 0) {
       return false;
-    }
-    if (!this.residual.equals(ONE)) {
-      return false;
-    }
-    return true;
-  }
-
-  isSoftCents() {
-    if (this.timeExponent.n !== 0) {
-      return false;
-    }
-    if (this.numberOfComponents < 1) {
-      return false;
-    }
-    for (let i = 1; i < this.numberOfComponents; ++i) {
-      if (this.primeExponents[i].n) {
-        return false;
-      }
     }
     if (!this.residual.equals(ONE)) {
       return false;
@@ -1162,17 +1148,21 @@ export class TimeMonzo {
     }
   }
 
-  asCentsLiteral(node: CentsLiteral): CentsLiteral | undefined {
-    if (this.isSoftCents()) {
-      // eslint-disable-next-line prefer-const
-      let [whole, fractional] = this.primeExponents[0]
-        .mul(1200)
-        .toString()
-        .split('.');
-      fractional ??= '';
-      return {...node, whole: BigInt(whole), fractional};
+  asCentsLiteral(node: CentsLiteral): CentsLiteral {
+    if (this.isPowerOfTwo()) {
+      const cents = this.octaves.mul(1200);
+      if (isDecimal(cents)) {
+        // eslint-disable-next-line prefer-const
+        let [whole, fractional] = cents.toString().split('.');
+        fractional ??= '';
+        return {...node, whole: BigInt(whole), fractional};
+      }
     }
-    return undefined;
+    const cents = this.totalCents();
+    const whole = Math.floor(cents);
+    // Note: This abuses the grammar
+    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + '!c';
+    return {...node, whole: BigInt(whole), fractional};
   }
 
   asIntegerLiteral(node: IntegerLiteral): IntegerLiteral | undefined {

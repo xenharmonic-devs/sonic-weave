@@ -372,6 +372,35 @@ describe('SonicWeave parser', () => {
     expect(equave.toFraction()).toBe('4/3');
     expect(darkFifth.toString()).toBe('7\\5<4/3>');
   });
+
+  it('can construct well-temperaments (manual)', () => {
+    const scale = parseSource(`
+      // Bach / Louie 2018
+      g = relog(3/2);
+      p = relog(531441/524288);
+      // Down
+      -g;
+      $[-1] - g;
+      $[-1] - g;
+      $[-1] - g;
+      // Up
+      g - p % 6;
+      $[-1] + g - p % 6;
+      $[-1] + g - p % 6;
+      $[-1] + g - p % 6;
+      $[-1] + g - p % 6;
+      $[-1] + g - p % 18;
+      $[-1] + g - p % 18;
+      // Equave
+      2;
+      reduce();
+      sort();
+      cents;
+    `);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '91.5283295833232842!c;196.08999826922536158!c;294.13499740383849712!c;392.17999653845072316!c;498.04499913461268079!c;590.8766626281940262!c;698.04499913461268079!c;792.17999653845072316!c;894.13499740383849712!c;996.08999826922536158!c;1090.2249956730629492!c;1200.'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {
@@ -404,7 +433,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates rank-2 scales', () => {
-    const scale = parseSource('rank2(707.048, 600.0, 2, 2);repeat();');
+    const scale = parseSource('rank2(707.048, 2, 2, 600.0);repeat();');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
@@ -421,6 +450,16 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('cps([2, 5, 7], 2, 3, true);');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('10/9;35/27;14/9;3');
+  });
+
+  it('generates well-temperaments', () => {
+    const werckmeister3 = parseSource(
+      'wellTemperament([0, 0, 0, -1/4, -1/4, -1/4, 0, 0, -1/4, 0, 0], 81/80, 8);cents;'
+    );
+    expect(werckmeister3).toHaveLength(12);
+    expect(werckmeister3.map(i => i.toString()).join(';')).toBe(
+      '92.17871646099638383!c;193.15685693241744048!c;294.13499740383849712!c;391.6902862640135936!c;498.04499913461268079!c;590.22371559560951937!c;696.5784284662087202!c;794.1337173263841578!c;889.7352853986262744!c;996.08999826922536158!c;1093.6452871294009128!c;1200.'
+    );
   });
 
   it('can take edo subsets', () => {
@@ -488,7 +527,7 @@ describe('SonicWeave standard library', () => {
 
   it('can merge offset copies', () => {
     const zarlino = parseSource(
-      'rank2(3/2, 2/1, 3); mergeOffset(5/4); rotate(4); simplify;'
+      'rank2(3/2, 3); mergeOffset(5/4); rotate(4); simplify;'
     );
     expect(zarlino).toHaveLength(7);
     expect(zarlino.map(i => i.toString()).join(';')).toBe(
@@ -498,7 +537,7 @@ describe('SonicWeave standard library', () => {
 
   it('can merge offset copies with overflow preferences', () => {
     const scale = parseSource(
-      'rank2(3/2, 2/1, 3); mergeOffset(5/4, "wrap"); rotate(2); simplify;'
+      'rank2(3/2, 3); mergeOffset(5/4, "wrap"); rotate(2); simplify;'
     );
     expect(scale).toHaveLength(8);
     expect(scale.map(i => i.toString()).join(';')).toBe(

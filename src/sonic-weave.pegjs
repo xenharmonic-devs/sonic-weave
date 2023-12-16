@@ -465,8 +465,8 @@ HardDotDecimal
   }
 
 DotDecimal
-  = SoftDotDecimal
-  / HardDotDecimal
+  = HardDotDecimal
+  / SoftDotDecimal
 
 CommaDecimal
   = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? hard: '!'? {
