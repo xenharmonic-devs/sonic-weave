@@ -440,6 +440,13 @@ describe('SonicWeave parser', () => {
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
   });
+
+  it('has CSS colors', () => {
+    const scale = parseSource('C4 = 1/1; C#4; black; D4; white;');
+    expect(scale).toHaveLength(2);
+    expect(scale[0].color?.value).toBe('#000000');
+    expect(scale[1].color?.value).toBe('#FFFFFF');
+  });
 });
 
 describe('SonicWeave standard library', () => {

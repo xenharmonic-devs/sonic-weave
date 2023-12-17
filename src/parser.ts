@@ -20,6 +20,7 @@ import {
 import {Interval, Color, Domain} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
+import {CSS_COLOR_CONTEXT} from './css-colors';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -1207,6 +1208,9 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
     visitor = SOURCE_VISITOR.clone();
   } else {
     visitor = new StatementVisitor();
+    for (const [name, color] of CSS_COLOR_CONTEXT) {
+      visitor.context.set(name, color);
+    }
     for (const name in BUILTIN_CONTEXT) {
       const value = BUILTIN_CONTEXT[name];
       visitor.context.set(name, value);
