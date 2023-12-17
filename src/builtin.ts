@@ -495,6 +495,25 @@ riff eulerGenus guide root equave {
   equave;
 }
 
+riff octaplex b0 b1 b2 b3 equave withUnity {
+  equave ??= 2;
+  for (s1 of [-1, 1]) {
+    for (s2 of [-1, 1]) {
+      b0 ~^ s1 ~* b1 ~^ s2;
+      b0 ~^ s1 ~* b2 ~^ s2;
+      b0 ~^ s1 ~* b3 ~^ s2;
+      b1 ~^ s1 ~* b3 ~^ s2;
+      b2 ~^ s1 ~* b3 ~^ s2;
+      b1 ~^ s1 ~* b2 ~^ s2;
+    }
+  }
+  sort();
+  if (!withUnity) ground();
+  equave;
+  reduce();
+  sort();
+}
+
 // == Scale modification ==
 riff reduce scale {
   $ = scale ?? $$;

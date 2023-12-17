@@ -541,6 +541,11 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('generates the Easter egg', () => {
+    const scale = parseSource('octaplex(3, 5, 7, 11);');
+    expect(scale).toHaveLength(24);
+  });
+
   it('can take edo subsets', () => {
     const scale = parseSource('ed(7);subset([0, 1, 6]);');
     expect(scale).toHaveLength(3);
