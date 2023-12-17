@@ -1,4 +1,4 @@
-import {Fraction, kCombinations} from 'xen-dev-utils';
+import {Fraction, kCombinations, mmod} from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo} from './monzo';
 
@@ -44,6 +44,41 @@ export function sonicBool(b: boolean) {
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
+
+// TODO: Import from moment-of-symmetry
+function mos(
+  numberOfLargeSteps: number,
+  numberOfSmallSteps: number,
+  sizeOfLargeStep = 2,
+  sizeOfSmallStep = 1,
+  brightGeneratorsDown = 1
+) {
+  if (numberOfLargeSteps !== 5 || numberOfSmallSteps !== 2) {
+    throw new Error('This is just a placeholder');
+  }
+  const period = numberOfLargeSteps + numberOfSmallSteps;
+  const g = 3 * sizeOfLargeStep + sizeOfSmallStep;
+  const p =
+    numberOfLargeSteps * sizeOfLargeStep + numberOfSmallSteps * sizeOfSmallStep;
+  const d = brightGeneratorsDown;
+
+  const result: number[] = [];
+  for (let i = 0; i < period; ++i) {
+    result.push(mmod((i - d) * g, p));
+  }
+  result.sort((a, b) => a - b);
+  result.shift();
+  result.push(p);
+  return result;
+}
+
+function mosSubset(...args: (Interval | undefined)[]) {
+  const iargs = args.map(i =>
+    i === undefined ? undefined : Math.round(i.value.valueOf())
+  );
+  const result = mos(...(iargs as [number, number]));
+  return result.map(Interval.fromInteger);
+}
 
 function random() {
   const value = TimeMonzo.fromValue(Math.random());
@@ -258,6 +293,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   TAU,
   true: LINEAR_UNITY,
   false: LINEAR_ZERO,
+  mosSubset,
   abs,
   min,
   max,
@@ -329,14 +365,22 @@ riff cumprod array {
 }
 
 // == Scale generation ==
-riff edo divisions {
+riff ed divisions equave {
   [1..divisions];
-  step => step \\ divisions;
+  if (equave === niente) step => step \\ divisions;
+  else step => step \\ divisions < equave >;
 }
 
 riff subharmonics start end {
   start::end;
   invert();
+}
+
+riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep brightGeneratorsDown equave {
+  mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, brightGeneratorsDown);
+  divisions = $[-1];
+  if (equave === niente) step => step \\ divisions;
+  else step => step \\ divisions < equave >;
 }
 
 riff rank2 generator up down period {

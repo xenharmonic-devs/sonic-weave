@@ -465,10 +465,27 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates equal temperaments', () => {
-    const scale = parseSource('edo(6);');
+    const scale = parseSource('ed(6);');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\6;2\\6;3\\6;4\\6;5\\6;6\\6'
+    );
+  });
+
+  it('generates tritave equivalent equal temperaments', () => {
+    const scale = parseSource('ed(3, 3);');
+    expect(scale).toHaveLength(3);
+    // TODO: Synthetic NedjiLiterals
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1\\3<3>;2\\3<3>;1\\1<3>'
+    );
+  });
+
+  it('generates MOS scales', () => {
+    const scale = parseSource('mos(5, 2);');
+    expect(scale).toHaveLength(7);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'
     );
   });
 
@@ -517,14 +534,14 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can take edo subsets', () => {
-    const scale = parseSource('edo(7);subset([0, 1, 6]);');
+    const scale = parseSource('ed(7);subset([0, 1, 6]);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('1\\7;2\\7;7\\7');
   });
 
   it('can take relative edo subsets', () => {
     const scale = parseSource(
-      'edo(12);subset(cumsum([2 - 1, 2, 1, 2, 2, 2, 1]));'
+      'ed(12);subset(cumsum([2 - 1, 2, 1, 2, 2, 2, 1]));'
     );
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
