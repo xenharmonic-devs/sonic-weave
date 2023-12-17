@@ -92,6 +92,7 @@ Statement
   / ForOfStatement
   / ExpressionStatement
 
+// TODO: Slice assignment with broadcasting
 LeftHandSideExpression
   = ArrayAccess
   / Identifier
@@ -210,6 +211,23 @@ ExpressionStatement
     };
   }
 
+Expression
+  = ConditionalExpression
+
+ConditionalExpression
+  = consequent: CoalescingExpression tail: (IfToken @CoalescingExpression ElseToken @CoalescingExpression)? {
+    if (tail) {
+      const [test, alternate] = tail;
+      return {
+        type: 'ConditionalExpression',
+        test,
+        consequent,
+        alternate,
+      };
+    }
+    return consequent;
+  }
+
 AssigningOperator
   = CoalescingOperator
   / AdditiveOperator
@@ -221,7 +239,7 @@ CoalescingOperator
   / '||'
   / '&&'
 
-Expression
+CoalescingExpression
   = head: RelationalExpression tail: (_ @CoalescingOperator _ @RelationalExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
@@ -289,6 +307,7 @@ Secondary
   / EnumeratedChord
   / CallExpression
   / ArrayAccess
+  / ArraySlice
   / UnaryExpression
 
 UniformUnaryOperator
@@ -345,9 +364,22 @@ DownExpression
   }
 
 ArrayAccess
-  = head: Primary tail: (_ '[' @Expression _ ']')+ {
+  = head: Primary tail: (_ '[' @Expression ']')+ {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
+    }, head);
+  }
+
+// TODO: Disallow literals with trailing commas from comma-separated lists
+ArraySlice
+  = head: Primary tail: (_ '[' @Expression ',' @Expression '..' @Expression? ']')+ {
+    return tail.reduce( (object, [start, second, end]) => {
+      return { type: 'ArraySlice', object, start, second, end };
+    }, head);
+  }
+  / head: Primary tail: (_ '[' @Expression? '..' @Expression? ']')+ {
+    return tail.reduce( (object, [start, end]) => {
+      return { type: 'ArraySlice', object, start, second: null, end };
     }, head);
   }
 

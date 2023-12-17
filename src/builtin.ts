@@ -393,6 +393,43 @@ riff wellTemperament commaFractions comma up down generator period {
   sort();
 }
 
+riff spanLattice basis ups downs equave {
+  basis = basis[..];
+  ups = ups[..] if ups else [];
+  downs = downs[..] if downs else [];
+  equave ??= 2;
+  while (length(ups) < length(basis)) push(1, ups);
+  while (length(downs) < length(basis)) push(0, downs);
+
+  1;
+
+  while (basis) {
+    generator = pop(basis);
+    up = pop(ups);
+    down = pop(downs);
+
+    for (root of $$) {
+      accumulator = root;
+      u = up;
+      while (u--) {
+        accumulator *~= generator;
+        accumulator;
+      }
+      accumulator = root;
+      d = down;
+      while (d--) {
+        accumulator %~= generator;
+        accumulator;
+      }
+    }
+  }
+
+  void(shift());
+  equave;
+  reduce();
+  sort();
+}
+
 // == Scale modification ==
 riff reduce scale {
   $ = scale ?? $$;

@@ -138,10 +138,25 @@ type Statement =
   | ForOfStatement
   | ReturnStatement;
 
+type ConditionalExpression = {
+  type: 'ConditionalExpression';
+  test: Expression;
+  consequent: Expression;
+  alternate: Expression;
+};
+
 type ArrayAccess = {
   type: 'ArrayAccess';
   object: Expression;
   index: Expression;
+};
+
+type ArraySlice = {
+  type: 'ArraySlice';
+  object: Expression;
+  start: Expression | null;
+  second: Expression | null;
+  end: Expression | null;
 };
 
 type UnaryExpression = {
@@ -218,7 +233,9 @@ type StringLiteral = {
 };
 
 type Expression =
+  | ConditionalExpression
   | ArrayAccess
+  | ArraySlice
   | UnaryExpression
   | BinaryExpression
   | NedjiProjection
@@ -568,8 +585,12 @@ class ExpressionVisitor {
 
   visit(node: Expression): SonicWeaveValue {
     switch (node.type) {
+      case 'ConditionalExpression':
+        return this.visitConditionalExpression(node);
       case 'ArrayAccess':
         return this.visitArrayAccess(node);
+      case 'ArraySlice':
+        return this.visitArraySlice(node);
       case 'UnaryExpression':
         return this.visitUnaryExpression(node);
       case 'BinaryExpression':
@@ -623,6 +644,14 @@ class ExpressionVisitor {
         return node.value;
     }
     node satisfies never;
+  }
+
+  visitConditionalExpression(node: ConditionalExpression) {
+    const test = this.visit(node.test);
+    if (sonicTruth(test)) {
+      return this.visit(node.consequent);
+    }
+    return this.visit(node.alternate);
   }
 
   visitComponent(component: VectorComponent) {
@@ -700,6 +729,66 @@ class ExpressionVisitor {
       i += object.length;
     }
     return object[i];
+  }
+
+  visitArraySlice(node: ArraySlice): Interval[] {
+    const object = this.visit(node.object);
+    if (!Array.isArray(object)) {
+      throw new Error('Array slice on non-array');
+    }
+    let start = 0;
+    let step = 1;
+    let end = object.length - 1;
+
+    if (node.start) {
+      const interval = this.visit(node.start);
+      if (!(interval instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals');
+      }
+      start = Number(interval.value.toBigInteger());
+    }
+
+    if (node.end) {
+      const interval = this.visit(node.end);
+      if (!(interval instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals');
+      }
+      end = Number(interval.value.toBigInteger());
+    }
+
+    if (node.second) {
+      const second = this.visit(node.second);
+      if (!(second instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals');
+      }
+      step = Number(second.value.toBigInteger()) - start;
+    }
+    if (step > 0) {
+      if (start > end) {
+        return [];
+      }
+
+      const result = [object[start]];
+      let next = start + step;
+      while (next <= end) {
+        result.push(object[next]);
+        next += step;
+      }
+      return result;
+    } else if (step < 0) {
+      if (start < end) {
+        return [];
+      }
+
+      const result = [object[start]];
+      let next = start + step;
+      while (next >= end) {
+        result.push(object[next]);
+        next += step;
+      }
+      return result;
+    }
+    throw new Error('Slice step must not be zero');
   }
 
   visitUnaryExpression(node: UnaryExpression): Interval {
@@ -1061,20 +1150,32 @@ class ExpressionVisitor {
       if (!(second instanceof Interval)) {
         throw new Error('Ranges must consist of intervals');
       }
-      if (second.compare(end) > 0) {
-        throw new Error('Empty range');
-      }
       step = second.sub(start);
-    } else if (start.compare(end) > 0) {
-      throw new Error('Empty range');
     }
-    const result = [start];
-    let next = start.add(step);
-    while (next.compare(end) <= 0) {
-      result.push(next);
-      next = next.add(step);
+    if (step.value.residual.s > 0) {
+      if (start.compare(end) > 0) {
+        return [];
+      }
+      const result = [start];
+      let next = start.add(step);
+      while (next.compare(end) <= 0) {
+        result.push(next);
+        next = next.add(step);
+      }
+      return result;
+    } else if (step.value.residual.s < 0) {
+      if (start.compare(end) < 0) {
+        return [];
+      }
+      const result = [start];
+      let next = start.add(step);
+      while (next.compare(end) >= 0) {
+        result.push(next);
+        next = next.add(step);
+      }
+      return result;
     }
-    return result;
+    throw new Error('Range step must not be zero');
   }
 
   visitHarmonicSegment(node: HarmonicSegment): Interval[] {

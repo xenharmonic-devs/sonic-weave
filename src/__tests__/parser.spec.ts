@@ -434,6 +434,12 @@ describe('SonicWeave parser', () => {
     expect(pe[1].toFraction()).toBe('-1001/100');
     expect(val.toString()).toBe('<5/3 -1.001e1]');
   });
+
+  it('has reversed ranges', () => {
+    const scale = parseSource('[5, 4..1];');
+    expect(scale).toHaveLength(5);
+    expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
+  });
 });
 
 describe('SonicWeave standard library', () => {
@@ -492,6 +498,14 @@ describe('SonicWeave standard library', () => {
     expect(werckmeister3).toHaveLength(12);
     expect(werckmeister3.map(i => i.toString()).join(';')).toBe(
       '92.17871646099638383!c;193.15685693241744048!c;294.13499740383849712!c;391.6902862640135936!c;498.04499913461268079!c;590.22371559560951937!c;696.5784284662087202!c;794.1337173263841578!c;889.7352853986262744!c;996.08999826922536158!c;1093.6452871294009128!c;1200.'
+    );
+  });
+
+  it('generates a cube', () => {
+    const scale = parseSource('spanLattice([3, 5, 7]);');
+    expect(scale).toHaveLength(8);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '35/32;5/4;21/16;3/2;105/64;7/4;15/8;2'
     );
   });
 
