@@ -54,6 +54,7 @@ ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
 SecondToken = 's'      !IdentifierPart
+ThrowToken  = 'throw'  !IdentifierPart
 ToToken     = 'to'     !IdentifierPart
 WhileToken  = 'while'  !IdentifierPart
 
@@ -72,6 +73,7 @@ ReservedWord
   / ReturnToken
   / RiffToken
   / SecondToken
+  / ThrowToken
   / ToToken
   / WhileToken
 
@@ -86,6 +88,7 @@ Statement
   / FunctionDeclaration
   / PitchDeclaration
   / BlockStatement
+  / ThrowStatement
   / ReturnStatement
   / WhileStatement
   / IfStatement
@@ -154,6 +157,11 @@ BlockStatement
       type: 'BlockStatement',
       body: body ?? [],
     };
+  }
+
+ThrowStatement
+  = ThrowToken _ argument: Expression EOS {
+    return { type: 'ThrowStatement', argument };
   }
 
 ReturnStatement

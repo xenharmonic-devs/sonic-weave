@@ -533,6 +533,14 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('generates Euler-Fokker genera', () => {
+    const scale = parseSource('eulerGenus(45);');
+    expect(scale).toHaveLength(6);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '9/8;5/4;45/32;3/2;15/8;2'
+    );
+  });
+
   it('can take edo subsets', () => {
     const scale = parseSource('ed(7);subset([0, 1, 6]);');
     expect(scale).toHaveLength(3);

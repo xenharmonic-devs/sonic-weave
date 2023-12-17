@@ -112,6 +112,16 @@ export class Interval {
     return new Interval(this.value.pitchRoundTo(other.value), this.domain);
   }
 
+  mmod(other: Interval) {
+    if (this.domain !== other.domain) {
+      throw new Error('Domains must match in modulo');
+    }
+    if (this.domain === 'linear') {
+      return new Interval(this.value.mmod(other.value), this.domain);
+    }
+    return new Interval(this.value.reduce(other.value), this.domain);
+  }
+
   pitchRoundTo(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(

@@ -103,6 +103,11 @@ type ReturnStatement = {
   argument?: Expression;
 };
 
+type ThrowStatement = {
+  type: 'ThrowStatement';
+  argument: Expression;
+};
+
 type WhileStatement = {
   type: 'WhileStatement';
   test: Expression;
@@ -137,6 +142,7 @@ type Statement =
   | WhileStatement
   | IfStatement
   | ForOfStatement
+  | ThrowStatement
   | ReturnStatement;
 
 type ConditionalExpression = {
@@ -315,6 +321,8 @@ export class StatementVisitor {
         return this.visitForOfStatement(node);
       case 'ReturnStatement':
         return this.visitReturnStatement(node);
+      case 'ThrowStatement':
+        throw this.visitThrowStatement(node);
     }
     node satisfies never;
   }
@@ -326,6 +334,15 @@ export class StatementVisitor {
       value = subVisitor.visit(node.argument);
     }
     return new Interupt(node, value);
+  }
+
+  visitThrowStatement(node: ThrowStatement) {
+    const subVisitor = new ExpressionVisitor(this.context);
+    const value = subVisitor.visit(node.argument);
+    if (typeof value === 'string') {
+      throw new Error(value);
+    }
+    throw value;
   }
 
   visitVariableDeclaration(node: VariableDeclaration) {
@@ -897,6 +914,9 @@ class ExpressionVisitor {
           case '^':
             value = left.value.pow(right.value);
             break;
+          case 'mod':
+            value = left.value.mmod(right.value);
+            break;
           case '\\':
             throw new Error('Preference not supported with backslahes');
           default:
@@ -952,6 +972,8 @@ class ExpressionVisitor {
           return left.log(right);
         case '\\':
           return left.backslash(right);
+        case 'mod':
+          return left.mmod(right);
         default:
           throw new Error(`${node.operator} unimplemented`);
       }

@@ -975,8 +975,9 @@ export class TimeMonzo {
         this.toFraction().mmod(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
+    } else {
+      result = TimeMonzo.fromValue(mmod(this.valueOf(), other.valueOf()));
     }
-    result = TimeMonzo.fromValue(mmod(this.valueOf(), other.valueOf()));
     result.timeExponent = this.timeExponent;
     return result;
   }

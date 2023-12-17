@@ -280,7 +280,7 @@ function isArray(value: any) {
 }
 
 function print(...args: any[]) {
-  console.log(...args);
+  console.log(...args.map(a => a.toString()));
 }
 
 function dir(arg: any) {
@@ -472,6 +472,27 @@ riff spanLattice basis ups downs equave {
   equave;
   reduce();
   sort();
+}
+
+riff eulerGenus guide root equave {
+  root ??= 1;
+  equave ??= 2;
+  if (guide ~mod root) {
+    throw "Root must divide the guide tone";
+  }
+
+  remainder = 0;
+  while (++remainder < equave) {
+    n = remainder;
+    while (n <= guide) {
+      if (!(guide ~mod n)) n;
+      n ~+= equave;
+    }
+  }
+  i => i ~% root ~red equave;
+  sort();
+  void(shift());
+  equave;
 }
 
 // == Scale modification ==
