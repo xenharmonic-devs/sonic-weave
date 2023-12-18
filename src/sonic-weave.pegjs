@@ -40,24 +40,24 @@ Program
     };
   }
 
-ByToken     = 'by'     !IdentifierPart
-CentToken   = 'c'      !IdentifierPart
-DotToken    = 'dot'    !IdentifierPart
-ElseToken   = 'else'   !IdentifierPart
-ForToken    = 'for'    !IdentifierPart
-HertzToken  = 'Hz'     !IdentifierPart
-IfToken     = 'if'     !IdentifierPart
-LogToken    = 'log'    !IdentifierPart
-ModToken    = 'mod'    !IdentifierPart
-OfToken     = 'of'     !IdentifierPart
-ReduceToken = 'red'    !IdentifierPart
-ReturnToken = 'return' !IdentifierPart
-RiffToken   = 'riff'   !IdentifierPart
-SecondToken = 's'      !IdentifierPart
-TensorToken = 'tns'    !IdentifierPart
-ThrowToken  = 'throw'  !IdentifierPart
-ToToken     = 'to'     !IdentifierPart
-WhileToken  = 'while'  !IdentifierPart
+ByToken       = 'by'     !IdentifierPart
+CentToken     = 'c'      !IdentifierPart
+DotToken      = 'dot'    !IdentifierPart
+ElseToken     = 'else'   !IdentifierPart
+ForToken      = 'for'    !IdentifierPart
+HertzToken    = 'Hz'     !IdentifierPart
+IfToken       = 'if'     !IdentifierPart
+LogToken      = 'log'    !IdentifierPart
+ModToken      = 'mod'    !IdentifierPart
+OfToken       = 'of'     !IdentifierPart
+ReduceToken   = 'red'    !IdentifierPart
+ReturnToken   = 'return' !IdentifierPart
+FunctionToken = 'riff'   !IdentifierPart
+SecondToken   = 's'      !IdentifierPart
+TensorToken   = 'tns'    !IdentifierPart
+ThrowToken    = 'throw'  !IdentifierPart
+ToToken       = 'to'     !IdentifierPart
+WhileToken    = 'while'  !IdentifierPart
 
 ReservedWord
   = ByToken
@@ -72,7 +72,7 @@ ReservedWord
   / OfToken
   / ReduceToken
   / ReturnToken
-  / RiffToken
+  / FunctionToken
   / SecondToken
   / TensorToken
   / ThrowToken
@@ -121,7 +121,7 @@ ReassignmentStatement
   }
 
 FunctionDeclaration
-  = RiffToken _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
+  = FunctionToken _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
     return {
       type: 'FunctionDeclaration',
       name,
@@ -214,7 +214,7 @@ ForOfStatement
   }
 
 ExpressionStatement
-  = expression: Expression EOS {
+  = !("{" / FunctionToken) expression: Expression EOS {
     return {
       type: 'ExpressionStatement',
       expression,
@@ -308,7 +308,7 @@ ExponentiationExpression
     }
 
 Group
-  = _ @(UnaryExpression / Secondary / Primary) _
+  = __ @(UnaryExpression / Secondary / Primary) __
 
 Secondary
   = DownExpression
@@ -909,9 +909,19 @@ IdentifierPart
   / '\u200D'
 
 _ 'whitespace'
-  = (WhiteSpace / Comment)*
+  = (WhiteSpace / LineTerminatorSequence / Comment)*
 
+__ 'inline whitespace'
+  = (WhiteSpace / MultiLineCommentNoLineTerminator)*
+
+// Automatic Semicolon Insertion
 EOS = _ ';'
+  / __ SingleLineComment? LineTerminatorSequence
+  / __ &"}"
+  / _ EOF
+
+EOF
+  = !.
 
 WhiteSpace
   = '\t'
@@ -919,9 +929,8 @@ WhiteSpace
   / '\f'
   / ' '
   / '\u00A0'
-  / 'u\FEFF'
+  / '\uFEFF'
   / Zs
-  / LineTerminator
 
 LineTerminator
   = '\n'
@@ -964,6 +973,9 @@ Comment
   / SingleLineComment
 
 MultiLineComment = '/*' $(!'*/' SourceCharacter)* '*/'
+
+MultiLineCommentNoLineTerminator
+  = "/*" (!("*/" / LineTerminator) SourceCharacter)* "*/"
 
 SingleLineComment
   = '//' $SingleLineCommentChar*
