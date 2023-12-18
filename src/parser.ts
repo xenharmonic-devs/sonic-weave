@@ -465,7 +465,7 @@ export class StatementVisitor {
             denominator: BigInt(divisions.n),
           }
         );
-        const rl = relog.bind(this);
+        const rl = relog.bind(this as unknown as ExpressionVisitor);
         const mapped = scale.map(i => rl(i).dot(value).mul(step));
         scale.length = 0;
         scale.push(...mapped);
@@ -481,6 +481,8 @@ export class StatementVisitor {
     } else if (typeof value === 'string') {
       if (scale.length) {
         scale[scale.length - 1].label = value;
+      } else {
+        this.context.set('"', value);
       }
     } else {
       const bound = value.bind(this);
@@ -520,6 +522,7 @@ export class StatementVisitor {
         this.context.set(name, value);
       }
     }
+    return undefined;
   }
 
   visitWhileStatement(node: WhileStatement) {
@@ -530,6 +533,7 @@ export class StatementVisitor {
         return interrupt;
       }
     }
+    return undefined;
   }
 
   visitForOfStatement(node: ForOfStatement) {
@@ -545,6 +549,7 @@ export class StatementVisitor {
         return interrupt;
       }
     }
+    return undefined;
   }
 
   visitIfStatement(node: IfStatement) {
@@ -555,10 +560,11 @@ export class StatementVisitor {
     if (node.alternate) {
       return this.visit(node.alternate);
     }
+    return undefined;
   }
 
   visitFunctionDeclaration(node: FunctionDeclaration) {
-    function realization(...args: SonicWeaveValue[]) {
+    function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor();
       for (const [name, value] of this.context) {
         localVisitor.context.set(name, value);
@@ -622,7 +628,7 @@ function resolvePreference(
   return new Interval(value, right.domain, value.as(right.node));
 }
 
-class ExpressionVisitor {
+export class ExpressionVisitor {
   context: VisitorContext;
   constructor(context: VisitorContext) {
     this.context = context;
@@ -1073,6 +1079,7 @@ class ExpressionVisitor {
           throw new Error(`${node.operator} not supported with arrays`);
       }
     }
+    throw new Error('Unhandled binary operation');
   }
 
   visitCallExpression(node: CallExpression) {
@@ -1092,7 +1099,7 @@ class ExpressionVisitor {
   }
 
   visitArrowFunction(node: ArrowFunction) {
-    function realization(...args: SonicWeaveValue[]) {
+    function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localContext: VisitorContext = new Map(this.context);
       for (let i = 0; i < node.parameters.length; ++i) {
         if (i < args.length) {
@@ -1303,7 +1310,7 @@ function getSourceVisitor(includePrelude: boolean) {
   }
 }
 
-export function parseSource(source: string, includePrelude = true): Interval[] {
+export function evaluateSource(source: string, includePrelude = true) {
   const visitor = getSourceVisitor(includePrelude);
 
   const program = parseAST(source);
@@ -1313,11 +1320,10 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
       throw new Error('Illegal statement');
     }
   }
-  const scale = visitor.context.get('$');
-  if (!Array.isArray(scale)) {
+  if (!Array.isArray(visitor.context.get('$'))) {
     throw new Error('Context corruption detected');
   }
-  return scale;
+  return visitor;
 }
 
 export function evaluateExpression(

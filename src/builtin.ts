@@ -1,6 +1,7 @@
 import {Fraction, kCombinations, mmod} from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo} from './monzo';
+import {ExpressionVisitor} from './parser';
 
 // Runtime
 
@@ -117,17 +118,17 @@ function max(...args: Interval[]) {
   return args.slice(1).reduce((a, b) => (a.compare(b) >= 0 ? a : b), args[0]);
 }
 
-function sort(scale?: Interval[]) {
+function sort(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.sort((a, b) => a.compare(b));
 }
 
-function reverse(scale?: Interval[]) {
+function reverse(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.reverse();
 }
 
-function pop(scale?: Interval[]) {
+function pop(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   if (!scale.length) {
     throw new Error('Pop from an empty scale');
@@ -135,12 +136,12 @@ function pop(scale?: Interval[]) {
   return scale.pop()!;
 }
 
-function push(interval: Interval, scale?: Interval[]) {
+function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.push(interval);
 }
 
-function shift(scale?: Interval[]) {
+function shift(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   if (!scale.length) {
     throw new Error('Shift from an empty scale');
@@ -148,22 +149,28 @@ function shift(scale?: Interval[]) {
   return scale.shift()!;
 }
 
-function unshift(interval: Interval, scale?: Interval[]) {
+function unshift(
+  this: ExpressionVisitor,
+  interval: Interval,
+  scale?: Interval[]
+) {
   scale ??= this.context.get('$') as Interval[];
   scale.unshift(interval);
 }
 
-function length(scale?: Interval[]) {
+function length(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   return Interval.fromInteger(scale.length);
 }
+
+// TODO: Preserve colors and labels
 
 // Get rid of formatting.
 function simplify(interval: Interval) {
   return new Interval(interval.value.clone(), interval.domain);
 }
 
-export function ablin(interval: Interval) {
+export function ablin(this: ExpressionVisitor, interval: Interval) {
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
     return new Interval(interval.value.pow(te.inverse().neg()), 'linear');
@@ -173,11 +180,11 @@ export function ablin(interval: Interval) {
       'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
     );
   }
-  const referenceFrequency = this.context.get('1') as TimeMonzo;
+  const referenceFrequency = this.context.get('1') as unknown as TimeMonzo;
   return new Interval(interval.value.mul(referenceFrequency), 'linear');
 }
 
-export function relin(interval: Interval) {
+export function relin(this: ExpressionVisitor, interval: Interval) {
   if (interval.isRelative()) {
     return new Interval(interval.value.clone(), 'linear');
   }
@@ -186,25 +193,25 @@ export function relin(interval: Interval) {
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
     );
   }
-  const referenceFrequency = this.context.get('1') as TimeMonzo;
-  const absoluteLinear = ablin(interval);
+  const referenceFrequency = this.context.get('1') as unknown as TimeMonzo;
+  const absoluteLinear = ablin.bind(this)(interval);
   return new Interval(absoluteLinear.value.div(referenceFrequency), 'linear');
 }
 
-export function ablog(interval: Interval) {
-  const converted = ablin(interval);
+export function ablog(this: ExpressionVisitor, interval: Interval) {
+  const converted = ablin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
 }
 
-export function relog(interval: Interval) {
-  const converted = relin(interval);
+export function relog(this: ExpressionVisitor, interval: Interval) {
+  const converted = relin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
 }
 
-export function cents(interval: Interval) {
-  const converted = relog(interval);
+export function cents(this: ExpressionVisitor, interval: Interval) {
+  const converted = relog.bind(this)(interval);
   converted.node = converted.value.as({
     type: 'CentsLiteral',
     whole: 0n,
@@ -215,6 +222,7 @@ export function cents(interval: Interval) {
 
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
+  this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
   array?: any[]
 ) {
@@ -226,6 +234,7 @@ function map(
 }
 
 function remap(
+  this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
   array?: any[]
 ) {
@@ -236,6 +245,7 @@ function remap(
 }
 
 function filter(
+  this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
   array?: any[]
 ) {
@@ -247,6 +257,7 @@ function filter(
 }
 
 function distill(
+  this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
   array?: any[]
 ) {
@@ -257,6 +268,7 @@ function distill(
 }
 
 function arrayReduce(
+  this: ExpressionVisitor,
   reducer: (
     previousValue: any,
     currentValue: any,

@@ -2,7 +2,7 @@ import {describe, it, expect} from 'vitest';
 import {
   evaluateExpression,
   parseAST,
-  parseSource,
+  evaluateSource,
   StatementVisitor,
 } from '../parser';
 import {TimeMonzo} from '../monzo';
@@ -12,6 +12,11 @@ function parseSingle(source: string) {
   const value = evaluateExpression(source);
   expect(value).toBeInstanceOf(Interval);
   return value as Interval;
+}
+
+function parseSource(source: string) {
+  const visitor = evaluateSource(source);
+  return visitor.context.get('$') as Interval[];
 }
 
 describe('SonicWeave expression evaluator', () => {

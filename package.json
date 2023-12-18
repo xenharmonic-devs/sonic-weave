@@ -27,8 +27,12 @@
     "url": "https://github.com/sponsors/frostburn"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
+  "bin": {
+    "sonic-weave": "bin/sonic-weave.js"
+  },
   "scripts": {
     "lint": "gts lint",
     "clean": "gts clean",
