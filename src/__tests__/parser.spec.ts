@@ -378,6 +378,7 @@ describe('SonicWeave parser', () => {
       // Bach / Louie 2018
       g = relog(3/2);
       p = relog(531441/524288);
+      equave = relog(2);
       // Down
       -g;
       $[-1] - g;
@@ -391,10 +392,11 @@ describe('SonicWeave parser', () => {
       $[-1] + g - p % 6;
       $[-1] + g - p % 18;
       $[-1] + g - p % 18;
-      // Equave
-      2;
-      reduce();
+      // Reduce
+      i => i mod equave;
       sort();
+      // Equave
+      equave;
       cents;
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
@@ -636,6 +638,14 @@ describe('SonicWeave standard library', () => {
     expect(wrap.map(i => i.toString()).join(';')).toBe('4/3;2');
     const keep = parseSource('2;mergeOffset(1/3, "keep");');
     expect(keep.map(i => i.toString()).join(';')).toBe('1/3;2');
+  });
+
+  it('can merge polyoffsets', () => {
+    const scale = parseSource('2:3:4; mergeOffset(4:5:7, "wrap");');
+    expect(scale).toHaveLength(6);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '5/4;21/16;3/2;7/4;15/8;2'
+    );
   });
 
   it('can compress a scale', () => {

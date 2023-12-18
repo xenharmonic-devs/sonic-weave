@@ -595,18 +595,23 @@ riff keepUnique scale {
   return;
 }
 
-riff mergeOffset offset overflow scale {
+riff mergeOffset offsets overflow scale {
   overflow ??= 'drop';
+  if (!isArray(offsets)) offsets = [offsets];
   $ = scale ?? $$;
   equave = pop();
-  copy = map(i => i ~* offset, $);
-  unshift(offset, copy);
+
+  unshift(equave ~^ 0);
+  copies = $ ~tns offsets;
+  void(shift());
+
   if (overflow === 'drop') {
-    distill(i => i > 1 && i < equave, copy);
+    remap(copy => filter(i => i > 1 && i < equave, copy), copies);
   } else if (overflow === 'wrap') {
-    remap(i => i ~red equave, copy);
+    remap(copy => map(i => i ~red equave, copy), copies);
   }
-  copy;
+
+  copies;
   sort();
   equave;
   keepUnique();

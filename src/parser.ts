@@ -65,7 +65,10 @@ type BinaryOperator =
   | 'mod'
   | 'red'
   | 'log'
+  | '·'
   | 'dot'
+  | '⊗'
+  | 'tns'
   | '^';
 
 type Program = {
@@ -595,6 +598,25 @@ const CENT = new Interval(
   {type: 'CentLiteral'}
 );
 
+function resolvePreference(
+  value: TimeMonzo,
+  left: Interval,
+  right: Interval,
+  node: BinaryExpression
+) {
+  if (node.preferLeft && node.preferRight) {
+    let domain = left.domain;
+    if (right.domain === 'linear') {
+      domain = 'linear';
+    }
+    return new Interval(value, domain);
+  }
+  if (node.preferLeft) {
+    return new Interval(value, left.domain, value.as(left.node));
+  }
+  return new Interval(value, right.domain, value.as(right.node));
+}
+
 class ExpressionVisitor {
   context: VisitorContext;
   constructor(context: VisitorContext) {
@@ -884,6 +906,24 @@ class ExpressionVisitor {
       return this.visit(node.right);
     }
     const right = this.visit(node.right);
+    if (node.operator === 'tns') {
+      if (!Array.isArray(left) || !Array.isArray(right)) {
+        throw new Error('Tensor product is only defined on arrays');
+      }
+      const result: any[] = [];
+      if (node.preferLeft || node.preferRight) {
+        for (const l of left) {
+          const row: Interval[] = [];
+          for (const r of right) {
+            const value = l.value.mul(r.value);
+            row.push(resolvePreference(value, l, r, node));
+          }
+          result.push(row);
+        }
+        return result;
+      }
+      throw new Error('Unimplemented');
+    }
     if (left instanceof Interval && right instanceof Interval) {
       if (node.preferLeft || node.preferRight) {
         let value: TimeMonzo;
@@ -926,17 +966,7 @@ class ExpressionVisitor {
               } unimplemented`
             );
         }
-        if (node.preferLeft && node.preferRight) {
-          let domain = left.domain;
-          if (right.domain === 'linear') {
-            domain = 'linear';
-          }
-          return new Interval(value, domain);
-        }
-        if (node.preferLeft) {
-          return new Interval(value, left.domain, value.as(left.node));
-        }
-        return new Interval(value, right.domain, value.as(right.node));
+        return resolvePreference(value, left, right, node);
       }
       switch (node.operator) {
         case '===':

@@ -388,4 +388,36 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     const ast = parseSingle('d=4');
     expect(ast.type).toBe('VariableDeclaration');
   });
+
+  it('supports unary expressions applied to call expressions', () => {
+    const ast = parseSingle('!foo()');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'UnaryExpression',
+        operator: '!',
+        operand: {
+          type: 'CallExpression',
+          callee: {type: 'Identifier', id: 'foo'},
+          args: [],
+        },
+        prefix: true,
+        uniform: false,
+      },
+    });
+  });
+
+  it('prioritizes unary expression over plain', () => {
+    const ast = parseSingle('i--');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'UnaryExpression',
+        operator: '--',
+        operand: {type: 'Identifier', id: 'i'},
+        prefix: false,
+        uniform: false,
+      },
+    });
+  });
 });

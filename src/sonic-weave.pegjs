@@ -54,6 +54,7 @@ ReduceToken = 'red'    !IdentifierPart
 ReturnToken = 'return' !IdentifierPart
 RiffToken   = 'riff'   !IdentifierPart
 SecondToken = 's'      !IdentifierPart
+TensorToken = 'tns'    !IdentifierPart
 ThrowToken  = 'throw'  !IdentifierPart
 ToToken     = 'to'     !IdentifierPart
 WhileToken  = 'while'  !IdentifierPart
@@ -73,6 +74,7 @@ ReservedWord
   / ReturnToken
   / RiffToken
   / SecondToken
+  / TensorToken
   / ThrowToken
   / ToToken
   / WhileToken
@@ -290,7 +292,7 @@ AdditiveTail
   = (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / DotToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
   = head: ExponentiationExpression tail: (_ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
@@ -306,7 +308,7 @@ ExponentiationExpression
     }
 
 Group
-  = _ @(Secondary / Primary) _
+  = _ @(UnaryExpression / Secondary / Primary) _
 
 Secondary
   = DownExpression
@@ -316,7 +318,6 @@ Secondary
   / CallExpression
   / ArrayAccess
   / ArraySlice
-  / UnaryExpression
 
 UniformUnaryOperator
   = '-' / '%' / '÷'
@@ -325,7 +326,7 @@ ChainableUnaryOperator
   = '!' / '^'
 
 UnaryExpression
-  = operator: UniformUnaryOperator uniform: '~'? operand: Primary {
+  = operator: UniformUnaryOperator uniform: '~'? operand: (Secondary / Primary) {
     return {
       type: 'UnaryExpression',
       operator,
@@ -334,7 +335,7 @@ UnaryExpression
       uniform: !!uniform,
     };
   }
-  / operator: ChainableUnaryOperator operand: (Primary / UnaryExpression) {
+  / operator: ChainableUnaryOperator operand: (Secondary / Primary / UnaryExpression) {
     return {
       type: 'UnaryExpression',
       operator,
@@ -343,7 +344,7 @@ UnaryExpression
       uniform: false,
     };
   }
-  / operator: ('--' / '++' / '+') operand: Primary {
+  / operator: ('--' / '++' / '+') operand: (Secondary / Primary) {
     return {
       type: 'UnaryExpression',
       operator,
@@ -352,7 +353,8 @@ UnaryExpression
       uniform: false,
     };
   }
-  / operand: Primary operator: ('--' / '++') {
+  / operand: (Primary) operator: ('--' / '++') {
+    // TODO: Adjust flow to allow secondaries here without a huge performance hit
     return {
       type: 'UnaryExpression',
       operator,
