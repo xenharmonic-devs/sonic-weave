@@ -597,6 +597,11 @@ const CENT = new Interval(
   'logarithmic',
   {type: 'CentLiteral'}
 );
+const RECIPROCAL_CENT = new Interval(
+  new TimeMonzo(ZERO, [new Fraction(1200)]),
+  'cologarithmic',
+  {type: 'ReciprocalCentLiteral'}
+);
 
 function resolvePreference(
   value: TimeMonzo,
@@ -653,6 +658,8 @@ class ExpressionVisitor {
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
         return CENT;
+      case 'ReciprocalCentLiteral':
+        return RECIPROCAL_CENT;
       case 'MonzoLiteral':
         return this.visitMonzoLiteral(node);
       case 'ValLiteral':
@@ -957,6 +964,10 @@ class ExpressionVisitor {
           case 'mod':
             value = left.value.mmod(right.value);
             break;
+          case '·':
+          case 'dot':
+            value = left.dot(right).value;
+            break;
           case '\\':
             throw new Error('Preference not supported with backslahes');
           default:
@@ -1004,6 +1015,9 @@ class ExpressionVisitor {
           return left.backslash(right);
         case 'mod':
           return left.mmod(right);
+        case '·':
+        case 'dot':
+          return left.dot(right);
         default:
           throw new Error(`${node.operator} unimplemented`);
       }

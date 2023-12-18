@@ -725,7 +725,10 @@ export class TimeMonzo {
       if (other.isFractional()) {
         other = other.toFraction();
       } else {
-        other = other.valueOf();
+        if (this.timeExponent.n !== 0) {
+          throw new Error('Cannot raise time units to an irrational power');
+        }
+        return TimeMonzo.fromCents(this.totalCents() * other.valueOf());
       }
     }
     const scalar = new Fraction(other);

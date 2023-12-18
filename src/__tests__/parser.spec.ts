@@ -449,6 +449,35 @@ describe('SonicWeave parser', () => {
     expect(scale[0].color?.value).toBe('#000000');
     expect(scale[1].color?.value).toBe('#FFFFFF');
   });
+
+  it('has a reciprocal cent', () => {
+    const one = parseSingle('c dot €');
+    expect(one.toString()).toBe('1');
+  });
+
+  it('can rig ups-and-downs', () => {
+    const scale = parseSource(`
+      riff rig i {
+        ups = round(1!€ dot i);
+        return i ~% (1!c * ups) ~* 81/80 ^ ups;
+      }
+      vM3;P5;P8;
+      rig;
+      relin;
+    `);
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('5/4;3/2;2');
+  });
+
+  it('can construct the hard cotritave', () => {
+    const scale = parseSource(`
+      tritave = 1! * relog(3);
+      cotritave = %tritave;
+      tritave dot cotritave;
+    `);
+    expect(scale).toHaveLength(1);
+    expect(scale.map(i => i.toString()).join(';')).toBe('1');
+  });
 });
 
 describe('SonicWeave standard library', () => {

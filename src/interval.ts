@@ -22,6 +22,29 @@ export class Color {
 
 const TWO = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
 
+function logLinMul(
+  logarithmic: Interval,
+  linear: Interval,
+  node?: IntervalLiteral
+) {
+  if (linear.node?.type === 'DecimalLiteral' && linear.node.hard) {
+    let size = logarithmic.value.totalCents();
+    if (logarithmic.domain === 'cologarithmic') {
+      size *= 1200 ** -2;
+    }
+    return new Interval(
+      TimeMonzo.fromCents(size * linear.value.valueOf()),
+      logarithmic.domain,
+      node
+    );
+  }
+  return new Interval(
+    logarithmic.value.pow(linear.value),
+    logarithmic.domain,
+    node
+  );
+}
+
 export class Interval {
   value: TimeMonzo;
   domain: Domain;
@@ -139,11 +162,11 @@ export class Interval {
       throw new Error('At least one domain must be linear in multiplication');
     }
     const node = mulNodes(this.node, other.node);
-    if (other.domain === 'logarithmic') {
-      return new Interval(other.value.pow(this.value), other.domain, node);
+    if (other.domain === 'logarithmic' || other.domain === 'cologarithmic') {
+      return logLinMul(other, this, node);
     }
-    if (this.domain === 'logarithmic') {
-      return new Interval(this.value.pow(other.value), this.domain, node);
+    if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
+      return logLinMul(this, other, node);
     }
     return new Interval(this.value.mul(other.value), this.domain, node);
   }

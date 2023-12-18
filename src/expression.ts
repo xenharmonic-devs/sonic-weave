@@ -36,6 +36,10 @@ export type CentLiteral = {
   type: 'CentLiteral';
 };
 
+export type ReciprocalCentLiteral = {
+  type: 'ReciprocalCentLiteral';
+};
+
 export type HertzLiteral = {
   type: 'HertzLiteral';
   prefix: MetricPrefix;
@@ -95,6 +99,7 @@ export type IntervalLiteral =
   | NedoLiteral
   | CentsLiteral
   | CentLiteral
+  | ReciprocalCentLiteral
   | FJS
   | AbsoluteFJS
   | HertzLiteral
@@ -261,6 +266,8 @@ export function toString(literal: IntervalLiteral) {
       return `${literal.whole}.${literal.fractional}`;
     case 'CentLiteral':
       return 'c';
+    case 'ReciprocalCentLiteral':
+      return '€';
     case 'FJS':
       // eslint-disable-next-line no-case-declarations
       const d = literal.pythagorean.degree;

@@ -446,6 +446,7 @@ Quantity
   / HertzLiteral
   / SecondLiteral
   / CentLiteral
+  / ReciprocalCentLiteral
   / MonzoLiteral
   / ValLiteral
 
@@ -506,6 +507,14 @@ SoftDotDecimal
 HardDotDecimal
   = soft: SoftDotDecimal '!' {
     return {...soft, hard: true};
+  }
+  / whole: Integer '!' {
+    return {
+      type: 'DecimalLiteral',
+      whole,
+      fractional: '',
+      hard: true,
+    };
   }
 
 DotDecimal
@@ -612,6 +621,9 @@ SecondLiteral
     };
   }
 
+ReciprocalCentLiteral
+  = '€' { return { type: 'ReciprocalCentLiteral' }; }
+
 ColorLiteral
   = value: (@RGB8 / @RGB4) {
     return {
@@ -645,7 +657,7 @@ Degree
   }
 
 PerfectDegree
-  = degree: Degree &{ degree.base === 1; } {
+  = degree: Degree &{ return degree.base === 1; } {
     return degree;
   }
 
