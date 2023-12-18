@@ -1268,12 +1268,11 @@ export function parseAST(source: string): Program {
 // Cached globally on first initialization.
 let SOURCE_VISITOR: StatementVisitor | null = null;
 
-export function parseSource(source: string, includePrelude = true): Interval[] {
-  let visitor: StatementVisitor;
+function getSourceVisitor(includePrelude: boolean) {
   if (SOURCE_VISITOR) {
-    visitor = SOURCE_VISITOR.clone();
+    return SOURCE_VISITOR.clone();
   } else {
-    visitor = new StatementVisitor();
+    const visitor = new StatementVisitor();
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.context.set(name, color);
     }
@@ -1288,10 +1287,15 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
         visitor.visit(statement);
       }
       SOURCE_VISITOR = visitor.clone();
+      return visitor;
     } else {
       throw new Error('Sdtlib is mandatory for now');
     }
   }
+}
+
+export function parseSource(source: string, includePrelude = true): Interval[] {
+  const visitor = getSourceVisitor(includePrelude);
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -1305,4 +1309,25 @@ export function parseSource(source: string, includePrelude = true): Interval[] {
     throw new Error('Context corruption detected');
   }
   return scale;
+}
+
+export function evaluateExpression(
+  source: string,
+  includePrelude = true
+): SonicWeaveValue {
+  const visitor = getSourceVisitor(includePrelude);
+  // TODO: Automatic semicolon insertion at grammar level.
+  const program = parseAST(source + ';');
+  for (const statement of program.body.slice(0, -1)) {
+    const interrupt = visitor.visit(statement);
+    if (interrupt) {
+      throw new Error('Illegal statement');
+    }
+  }
+  const finalStatement = program.body[program.body.length - 1];
+  if (finalStatement.type !== 'ExpressionStatement') {
+    throw new Error(`Expected expression. Got ${finalStatement.type}`);
+  }
+  const subVisitor = new ExpressionVisitor(visitor.context);
+  return subVisitor.visit(finalStatement.expression);
 }

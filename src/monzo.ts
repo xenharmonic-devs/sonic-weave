@@ -1227,7 +1227,7 @@ export class TimeMonzo {
           const {fractionOfEquave, equave} = this.toEqualTemperament();
           return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
         } else {
-          return this.valueOf().toString().replace('.', ',') + '!';
+          return this.valueOf().toString() + '!';
         }
       } else {
         if (this.timeExponent.equals(NEGATIVE_ONE)) {
