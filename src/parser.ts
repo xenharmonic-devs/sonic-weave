@@ -186,6 +186,12 @@ type BinaryExpression = {
   preferRight: boolean;
 };
 
+type LabeledExpression = {
+  type: 'LabeledExpression';
+  object: Expression;
+  labels: (Identifier | ColorLiteral | StringLiteral)[];
+};
+
 type NedjiProjection = {
   type: 'NedjiProjection';
   octaves: Expression;
@@ -248,6 +254,7 @@ type Expression =
   | ArraySlice
   | UnaryExpression
   | BinaryExpression
+  | LabeledExpression
   | NedjiProjection
   | CallExpression
   | ArrowFunction
@@ -646,6 +653,8 @@ export class ExpressionVisitor {
         return this.visitUnaryExpression(node);
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
+      case 'LabeledExpression':
+        return this.visitLabeledExpression(node);
       case 'NedjiProjection':
         return this.visitNedjiProjection(node);
       case 'CallExpression':
@@ -697,6 +706,24 @@ export class ExpressionVisitor {
         return node.value;
     }
     node satisfies never;
+  }
+
+  visitLabeledExpression(node: LabeledExpression) {
+    const object = this.visit(node.object);
+    if (!(object instanceof Interval)) {
+      throw new Error('Labels can only be applied to intervals');
+    }
+    for (const label of node.labels) {
+      const l = this.visit(label);
+      if (typeof l === 'string') {
+        object.label = l;
+      } else if (l instanceof Color) {
+        object.color = l;
+      } else {
+        throw new Error('Labels must be strings or colors');
+      }
+    }
+    return object;
   }
 
   visitConditionalExpression(node: ConditionalExpression) {

@@ -172,6 +172,12 @@ describe('SonicWeave expression evaluator', () => {
     const deeSemiAt = parseSingle('C0 = 1/1; D½@0');
     expect(deeSemiAt.value.pow(4).toFraction().toFraction()).toBe('4/3');
   });
+
+  it('can color and label an interval directly', () => {
+    const greenFifth = parseSingle('1,5 green "fifth"');
+    expect(greenFifth.color?.value).toBe('#008000');
+    expect(greenFifth.label).toBe('fifth');
+  });
 });
 
 describe('SonicWeave parser', () => {

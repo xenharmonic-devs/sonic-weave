@@ -303,9 +303,21 @@ ExponentiationOperator
   = '^'
 
 ExponentiationExpression
-  = head: Group tail: (_ @'~'? @ExponentiationOperator @'~'? _ @ExponentiationExpression)* {
+  = head: LabeledExpression tail: (_ @'~'? @ExponentiationOperator @'~'? _ @ExponentiationExpression)* {
       return tail.reduce(operatorReducer, head);
     }
+
+LabeledExpression
+  = object: Group labels: (Identifier / ColorLiteral / StringLiteral)|.., _| __ {
+    if (labels.length) {
+      return {
+        type: 'LabeledExpression',
+        object,
+        labels,
+      };
+    }
+    return object;
+  }
 
 Group
   = __ @(UnaryExpression / Secondary / Primary) __
