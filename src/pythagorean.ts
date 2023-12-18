@@ -136,6 +136,10 @@ const ACCIDENTAL_VECTORS = new Map([
   // Semiquartal Diamond-MOS accidentals
   ['&', [-7, 4.5]],
   ['@', [7, -4.5]],
+
+  // Demisemiquartal Diamond-MOS accidentals
+  ['e', [-3.5, 2.25]],
+  ['a', [3.5, -2.25]],
 ]);
 
 for (const accidental of '♯#♭b') {

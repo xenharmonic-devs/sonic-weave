@@ -508,9 +508,9 @@ describe('SonicWeave parser', () => {
       χ0;
       F0;
       F½&0;
-      G½@0;
+      Ga0;
       G0;
-      G½&0;
+      Ge0;
       A½@0;
       A0;
       ψ0;
