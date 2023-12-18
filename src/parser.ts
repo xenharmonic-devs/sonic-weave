@@ -927,9 +927,16 @@ class ExpressionVisitor {
           }
           result.push(row);
         }
-        return result;
+      } else {
+        for (const l of left) {
+          const row: Interval[] = [];
+          for (const r of right) {
+            row.push(l.mul(r));
+          }
+          result.push(row);
+        }
       }
-      throw new Error('Unimplemented');
+      return result;
     }
     if (left instanceof Interval && right instanceof Interval) {
       if (node.preferLeft || node.preferRight) {
@@ -1018,6 +1025,8 @@ class ExpressionVisitor {
         case '·':
         case 'dot':
           return left.dot(right);
+        case 'red':
+          return left.reduce(right);
         default:
           throw new Error(`${node.operator} unimplemented`);
       }

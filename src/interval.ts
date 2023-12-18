@@ -220,6 +220,13 @@ export class Interval {
     return new Interval(this.value.log(other.value), this.domain);
   }
 
+  reduce(other: Interval) {
+    if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
+      throw new Error('Reduction not implemented in logarithmic domain');
+    }
+    return new Interval(this.value.reduce(other.value), this.domain);
+  }
+
   backslash(other: Interval) {
     if (!this.value.isScalar() || !other.value.isScalar()) {
       throw new Error('Only scalars can be backslashed');

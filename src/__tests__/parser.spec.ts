@@ -475,6 +475,16 @@ describe('SonicWeave parser', () => {
     expect(scale[0].color?.value).toBe('#000000');
     expect(scale[1].color?.value).toBe('#FFFFFF');
   });
+
+  it('does polyoffsets as tensor products', () => {
+    const scale = parseSource(
+      '2:3:4; $ tns 4:5:7; i => i red 2; sort(); shift() * 2;'
+    );
+    expect(scale).toHaveLength(6);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '5/4;21/16;3/2;7/4;15/8;2'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {
