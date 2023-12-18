@@ -632,6 +632,9 @@ ColorLiteral
     };
   }
 
+Semi
+  = $('½' / 's')
+
 Demisemi
   = $('¼' / 'q' / '½' / 's' / '¾' / 'Q')
 
@@ -725,10 +728,10 @@ FJS
   }
 
 Accidental
-  = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫] / (Demisemi [♯#♭b]) )
+  = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫&@] / (Demisemi [♯#♭b]) / (Semi [&@]))
 
 Nominal
-  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / [\u03B1-ηaA-G])
+  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωaA-G])
 
 AbsolutePitch
   = nominal: Nominal accidentals: Accidental* octave: SignedInteger {

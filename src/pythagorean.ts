@@ -75,6 +75,7 @@ const NOMINAL_VECTORS = new Map([
   ['E', [-6, 4]],
   ['B', [-7, 5]],
 
+  // Tone-splitters
   ['beta', [2.5, -1]],
   ['β', [2.5, -1]],
 
@@ -95,6 +96,19 @@ const NOMINAL_VECTORS = new Map([
 
   ['epsilon', [-7.5, 5]],
   ['ε', [-7.5, 5]],
+
+  // Semiquartals
+  ['phi', [1, -0.5]],
+  ['φ', [1, -0.5]],
+
+  ['chi', [-2, 1.5]],
+  ['χ', [-2, 1.5]],
+
+  ['psi', [0, 0.5]],
+  ['ψ', [0, 0.5]],
+
+  ['omega', [-3, 2.5]],
+  ['ω', [-3, 2.5]],
 ]);
 
 const ACCIDENTAL_VECTORS = new Map([
@@ -118,6 +132,10 @@ const ACCIDENTAL_VECTORS = new Map([
 
   ['𝄳', [5.5, -3.5]],
   ['d', [5.5, -3.5]],
+
+  // Semiquartal Diamond-MOS accidentals
+  ['&', [-7, 4.5]],
+  ['@', [7, -4.5]],
 ]);
 
 for (const accidental of '♯#♭b') {
@@ -138,6 +156,16 @@ for (const accidental of '♯#♭b') {
     vector[0] *= 0.75;
     vector[1] *= 0.75;
     ACCIDENTAL_VECTORS.set(sesqui + accidental, vector);
+  }
+}
+
+// The generator of 5L 4s is a 2-mosstep so the accidental can be split once without introducing new nominals
+for (const accidental of '&@') {
+  for (const semi of '½s') {
+    const vector = [...ACCIDENTAL_VECTORS.get(accidental)!];
+    vector[0] *= 0.5;
+    vector[1] *= 0.5;
+    ACCIDENTAL_VECTORS.set(semi + accidental, vector);
   }
 }
 

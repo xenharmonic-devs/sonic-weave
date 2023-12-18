@@ -162,6 +162,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(equave.toFraction()).toBe('4/3');
     expect(darkFifth.toString()).toBe('7\\5<4/3>');
   });
+
+  it('has a nominal for a fourth split in four', () => {
+    const deeSemiAt = parseSingle('C0 = 1/1; D½@0');
+    expect(deeSemiAt.value.pow(4).toFraction().toFraction()).toBe('4/3');
+  });
 });
 
 describe('SonicWeave parser', () => {
@@ -484,6 +489,37 @@ describe('SonicWeave parser', () => {
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
       '5/4;21/16;3/2;7/4;15/8;2'
     );
+  });
+
+  it('has demisemiquartal notation for 19edo', () => {
+    const scale = parseSource(`
+      C0 = 1/1;
+      C½&0;
+      D½@0;
+      D0;
+      φ0;
+      φ½&0;
+      χ½@0;
+      χ0;
+      F0;
+      F½&0;
+      G½@0;
+      G0;
+      G½&0;
+      A½@0;
+      A0;
+      ψ0;
+      ψ½&0;
+      ω½@0;
+      ω0;
+      C1;
+      19@;
+    `);
+    expect(
+      (scale as Interval[]).map(i =>
+        i.value.toEqualTemperament().fractionOfEquave.mul(19).valueOf()
+      )
+    ).toEqual([...Array(20).keys()].slice(1));
   });
 });
 
