@@ -9,7 +9,7 @@ function d(thing: any) {
 }
 
 function parseSingle(source: string) {
-  return parse(source + ';').body[0];
+  return parse(source).body[0];
 }
 
 describe('SonicWeave Abstract Syntax Tree parser', () => {
@@ -419,5 +419,22 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         uniform: false,
       },
     });
+  });
+});
+
+describe('Automatic semicolon insertion', () => {
+  it('works with return statements', () => {
+    const ast = parse('return\nreturn');
+    expect(ast.body).toHaveLength(2);
+  });
+
+  it('works with throw statements', () => {
+    const ast = parse('throw "this"\nthrow "that"');
+    expect(ast.body).toHaveLength(2);
+  });
+
+  it('works with identifiers', () => {
+    const ast = parse('foo\nbar');
+    expect(ast.body).toHaveLength(2);
   });
 });

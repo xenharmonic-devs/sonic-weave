@@ -1331,8 +1331,7 @@ export function evaluateExpression(
   includePrelude = true
 ): SonicWeaveValue {
   const visitor = getSourceVisitor(includePrelude);
-  // TODO: Automatic semicolon insertion at grammar level.
-  const program = parseAST(source + ';');
+  const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
     if (interrupt) {

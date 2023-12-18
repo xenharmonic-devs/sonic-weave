@@ -526,6 +526,21 @@ describe('SonicWeave parser', () => {
       )
     ).toEqual([...Array(20).keys()].slice(1));
   });
+
+  it('has automatic semicolon insertion', () => {
+    const scale = parseSource(`
+      9/8
+      1 +
+       1/2
+      P8
+    `);
+    expect(scale).toHaveLength(3);
+    expect(
+      (scale as Interval[])
+        .map(i => i.value.toFraction().toFraction())
+        .join(';')
+    ).toBe('9/8;3/2;2');
+  });
 });
 
 describe('SonicWeave standard library', () => {
