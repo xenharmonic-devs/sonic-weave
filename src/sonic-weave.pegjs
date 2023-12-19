@@ -406,7 +406,7 @@ ArraySlice
   }
 
 UnitStepRange
-  = '[' _ start: Primary _ '..' _ end: Primary _ ']' {
+  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,
@@ -415,7 +415,7 @@ UnitStepRange
   }
 
 StepRange
-  = '[' _ start: Primary _ ',' _ second: Primary _ '..' _ end: Primary _ ']' {
+  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,

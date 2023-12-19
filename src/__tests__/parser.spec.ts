@@ -569,6 +569,19 @@ describe('SonicWeave parser', () => {
       '3;5;7;11;13;17;19'
     );
   });
+
+  it('supports expressions inside ranges', () => {
+    const scale = parseSource(`
+      factors = [1, 3, 5, 7]
+      for (i of [0 .. length(factors)-1]) {
+        factors[i] + i
+      }
+    `);
+    expect(scale).toHaveLength(4);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '1;4;7;10'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {
