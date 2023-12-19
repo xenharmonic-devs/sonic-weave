@@ -4,6 +4,8 @@ import {ExpressionVisitor, evaluateSource} from './parser';
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
+  const keyColors = [];
+  let useColors = false;
   const lines = ['!Created using SonicWeave v0.0.0 alpha', '!'];
   lines.push((visitor.context.get('"') as string) || 'Untitled tuning');
   const scale = visitor.context.get('$') as Interval[];
@@ -11,6 +13,12 @@ export function toScalaScl(source: string) {
   lines.push('!');
   const rel = relin.bind(visitor as unknown as ExpressionVisitor);
   for (const interval of scale) {
+    if (interval.color) {
+      keyColors.push(interval.color.value);
+      useColors = true;
+    } else {
+      keyColors.push('#808080');
+    }
     const relative = rel(interval);
     const value = relative.value;
     let sclValue: string;
@@ -21,6 +29,11 @@ export function toScalaScl(source: string) {
     }
     const label = interval.label ? ' ' + interval.label : '';
     lines.push(` ${sclValue}${label}`);
+  }
+  if (useColors) {
+    keyColors.unshift(keyColors.pop());
+    lines.push('! A list of key colors, ascending from 1/1');
+    lines.push('! ' + keyColors.join(' '));
   }
   lines.push('');
   return lines.join('\n');
