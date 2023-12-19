@@ -40,6 +40,14 @@ export type ReciprocalCentLiteral = {
   type: 'ReciprocalCentLiteral';
 };
 
+export type TrueLiteral = {
+  type: 'TrueLiteral';
+};
+
+export type FalseLiteral = {
+  type: 'FalseLiteral';
+};
+
 export type HertzLiteral = {
   type: 'HertzLiteral';
   prefix: MetricPrefix;
@@ -100,6 +108,8 @@ export type IntervalLiteral =
   | CentsLiteral
   | CentLiteral
   | ReciprocalCentLiteral
+  | TrueLiteral
+  | FalseLiteral
   | FJS
   | AbsoluteFJS
   | HertzLiteral
@@ -268,6 +278,10 @@ export function toString(literal: IntervalLiteral) {
       return 'c';
     case 'ReciprocalCentLiteral':
       return '€';
+    case 'TrueLiteral':
+      return 'true';
+    case 'FalseLiteral':
+      return 'false';
     case 'FJS':
       // eslint-disable-next-line no-case-declarations
       const d = literal.pythagorean.degree;

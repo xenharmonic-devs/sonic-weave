@@ -14,30 +14,26 @@ export type SonicWeaveValue =
   | undefined;
 
 const ZERO = new Fraction(0);
-export const LINEAR_ZERO = new Interval(
-  new TimeMonzo(ZERO, [], ZERO),
-  'linear',
-  {
-    type: 'IntegerLiteral',
-    value: 0n,
-  }
-);
-export const LINEAR_UNITY = new Interval(new TimeMonzo(ZERO, []), 'linear', {
-  type: 'IntegerLiteral',
-  value: 1n,
-});
+const ZERO_MONZO = new TimeMonzo(ZERO, [], ZERO);
+const ONE_MONZO = new TimeMonzo(ZERO, []);
 
 export function sonicTruth(test: SonicWeaveValue) {
   if (test instanceof Interval) {
-    return test.value.residual.n;
+    return Boolean(test.value.residual.n);
   } else if (Array.isArray(test)) {
-    return test.length;
+    return Boolean(test.length);
   }
-  return Number(Boolean(test));
+  return Boolean(test);
 }
 
 export function sonicBool(b: boolean) {
-  return b ? LINEAR_UNITY : LINEAR_ZERO;
+  return b
+    ? new Interval(ONE_MONZO, 'linear', {type: 'TrueLiteral'})
+    : new Interval(ZERO_MONZO, 'linear', {type: 'FalseLiteral'});
+}
+
+export function linearOne() {
+  return new Interval(ONE_MONZO, 'linear', {type: 'IntegerLiteral', value: 1n});
 }
 
 // Library
@@ -89,6 +85,24 @@ function mosSubset(...args: (Interval | undefined)[]) {
   );
   const result = mos(...(iargs as [number, number]));
   return result.map(Interval.fromInteger);
+}
+
+function zip(...args: any[][]) {
+  const minLength = Math.min(...args.map(a => a.length));
+  const result: any[][] = [];
+  for (let i = 0; i < minLength; ++i) {
+    result.push(args.map(a => a[i]));
+  }
+  return result;
+}
+
+function zipLongest(...args: any[][]) {
+  const maxLength = Math.max(...args.map(a => a.length));
+  const result: any[][] = [];
+  for (let i = 0; i < maxLength; ++i) {
+    result.push(args.map(a => a[i]));
+  }
+  return result;
 }
 
 function random() {
@@ -313,11 +327,11 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   E,
   PI,
   TAU,
-  true: LINEAR_UNITY,
-  false: LINEAR_ZERO,
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  zip,
+  zipLongest,
   abs,
   min,
   max,
@@ -388,6 +402,13 @@ riff cumprod array {
     $[i] ~*= $[i-1];
 }
 
+riff label labels scale {
+  scale ??= $$;
+  for ([i, l] of zip(scale, labels)) {
+    void(i l);
+  }
+}
+
 // == Scale generation ==
 riff ed divisions equave {
   [1..divisions];
@@ -407,7 +428,7 @@ riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep b
   else step => step \\ divisions < equave >;
 }
 
-riff rank2 generator up down period {
+riff rank2 generator up down period numPeriods {
   down ??= 0;
   period ??= 2;
   accumulator = 1;
@@ -423,6 +444,7 @@ riff rank2 generator up down period {
   period;
   reduce();
   sort();
+  repeat(numPeriods ?? 1);
 }
 
 riff cps factors count equave withUnity {

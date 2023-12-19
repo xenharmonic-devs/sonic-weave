@@ -44,6 +44,7 @@ ByToken       = 'by'     !IdentifierPart
 CentToken     = 'c'      !IdentifierPart
 DotToken      = 'dot'    !IdentifierPart
 ElseToken     = 'else'   !IdentifierPart
+FalseToken    = 'false'  !IdentifierPart
 ForToken      = 'for'    !IdentifierPart
 HertzToken    = 'Hz'     !IdentifierPart
 IfToken       = 'if'     !IdentifierPart
@@ -57,6 +58,7 @@ SecondToken   = 's'      !IdentifierPart
 TensorToken   = 'tns'    !IdentifierPart
 ThrowToken    = 'throw'  !IdentifierPart
 ToToken       = 'to'     !IdentifierPart
+TrueToken     = 'true'   !IdentifierPart
 WhileToken    = 'while'  !IdentifierPart
 
 ReservedWord
@@ -64,6 +66,7 @@ ReservedWord
   / CentToken
   / DotToken
   / ElseToken
+  / FalseToken
   / ForToken
   / HertzToken
   / IfToken
@@ -77,6 +80,7 @@ ReservedWord
   / TensorToken
   / ThrowToken
   / ToToken
+  / TrueToken
   / WhileToken
 
 Statements
@@ -101,6 +105,7 @@ Statement
 LeftHandSideExpression
   = ArrayAccess
   / Identifier
+  / IdentifierArray
 
 VariableDeclaration
   = name: LeftHandSideExpression _ '=' _ value: Expression EOS {
@@ -153,6 +158,9 @@ Parameters
 ArgumentList
   = Expression|.., _ ','? _|
 
+IdentifierArray
+  = '[' _ @Parameters _ ']'
+
 BlockStatement
   = '{' _ body: Statements? _ '}' _ {
     return {
@@ -204,7 +212,7 @@ IfStatement
   }
 
 ForOfStatement
-  = ForToken _ '(' _ element: Identifier _ OfToken _ array: Expression _ ')' _ body: Statement {
+  = ForToken _ '(' _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
     return {
       type: 'ForOfStatement',
       element,
@@ -465,6 +473,8 @@ Quantity
 Primary
   = ScalarMultiple
   / Quantity
+  / TrueLiteral
+  / FalseLiteral
   / NedoLiteral
   / HardDotDecimal
   / DotCentsLiteral
@@ -635,6 +645,12 @@ SecondLiteral
 
 ReciprocalCentLiteral
   = '€' { return { type: 'ReciprocalCentLiteral' }; }
+
+TrueLiteral
+  = TrueToken { return { type: 'TrueLiteral' }; }
+
+FalseLiteral
+  = FalseToken { return { type: 'FalseLiteral' }; }
 
 ColorLiteral
   = value: (@RGB8 / @RGB4) {

@@ -25,11 +25,10 @@ import {
   SonicWeaveValue,
   sonicTruth,
   BUILTIN_CONTEXT,
-  LINEAR_UNITY,
-  LINEAR_ZERO,
   PRELUDE_SOURCE,
   sonicBool,
   relog,
+  linearOne,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -78,7 +77,7 @@ type Program = {
 
 type VariableDeclaration = {
   type: 'VariableDeclaration';
-  name: Identifier | ArrayAccess;
+  name: Identifier | Identifier[] | ArrayAccess;
   value: Expression;
 };
 
@@ -126,7 +125,7 @@ type IfStatement = {
 
 type ForOfStatement = {
   type: 'ForOfStatement';
-  element: Identifier;
+  element: Identifier | Identifier[];
   array: Expression;
   body: Statement;
 };
@@ -358,7 +357,14 @@ export class StatementVisitor {
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = new ExpressionVisitor(this.context);
     const value = subVisitor.visit(node.value);
-    if (node.name.type === 'Identifier') {
+    if (Array.isArray(node.name)) {
+      if (!Array.isArray(value)) {
+        throw new Error('Destructuring declaration must assign an array');
+      }
+      for (let i = 0; i < node.name.length; ++i) {
+        this.context.set(node.name[i].id, value[i]);
+      }
+    } else if (node.name.type === 'Identifier') {
       this.context.set(node.name.id, value);
     } else {
       const object = subVisitor.visit(node.name.object);
@@ -550,7 +556,16 @@ export class StatementVisitor {
       throw new Error('Can only iterate over arrays');
     }
     for (const value of array) {
-      this.context.set(node.element.id, value);
+      if (Array.isArray(node.element)) {
+        if (!Array.isArray(value)) {
+          throw new Error('Must iterate over arrays when destructuring');
+        }
+        for (let i = 0; i < node.element.length; ++i) {
+          this.context.set(node.element[i].id, value[i]);
+        }
+      } else {
+        this.context.set(node.element.id, value);
+      }
       const interrupt = this.visit(node.body);
       if (interrupt) {
         return interrupt;
@@ -605,16 +620,8 @@ export class StatementVisitor {
 
 const UNITY_MONZO = new TimeMonzo(ZERO, []);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
-const CENT = new Interval(
-  new TimeMonzo(ZERO, [new Fraction(1, 1200)]),
-  'logarithmic',
-  {type: 'CentLiteral'}
-);
-const RECIPROCAL_CENT = new Interval(
-  new TimeMonzo(ZERO, [new Fraction(1200)]),
-  'cologarithmic',
-  {type: 'ReciprocalCentLiteral'}
-);
+const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
+const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
 
 function resolvePreference(
   value: TimeMonzo,
@@ -672,9 +679,15 @@ export class ExpressionVisitor {
       case 'CentsLiteral':
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
-        return CENT;
+        return new Interval(CENT_MONZO, 'logarithmic', {type: 'CentLiteral'});
       case 'ReciprocalCentLiteral':
-        return RECIPROCAL_CENT;
+        return new Interval(RECIPROCAL_CENT_MONZO, 'cologarithmic', {
+          type: 'ReciprocalCentLiteral',
+        });
+      case 'TrueLiteral':
+        return sonicBool(true);
+      case 'FalseLiteral':
+        return sonicBool(false);
       case 'MonzoLiteral':
         return this.visitMonzoLiteral(node);
       case 'ValLiteral':
@@ -874,7 +887,7 @@ export class ExpressionVisitor {
   visitUnaryExpression(node: UnaryExpression): Interval {
     const operand = this.visit(node.operand);
     if (node.operator === '!') {
-      return sonicTruth(operand) ? LINEAR_ZERO : LINEAR_UNITY;
+      return sonicBool(!sonicTruth(operand));
     }
     if (!(operand instanceof Interval)) {
       throw new Error(`${node.operator} can only operate on intervals`);
@@ -909,10 +922,10 @@ export class ExpressionVisitor {
       case '^':
         return operand.up();
       case '++':
-        newValue = operand.add(LINEAR_UNITY);
+        newValue = operand.add(linearOne());
         break;
       case '--':
-        newValue = operand.sub(LINEAR_UNITY);
+        newValue = operand.sub(linearOne());
         break;
     }
     if (node.operand.type !== 'Identifier') {
@@ -1254,7 +1267,7 @@ export class ExpressionVisitor {
       throw new Error('Ranges must consist of intervals');
     }
 
-    let step = LINEAR_UNITY;
+    let step = linearOne();
     if (node.second) {
       const second = this.visit(node.second);
       if (!(second instanceof Interval)) {
@@ -1294,11 +1307,12 @@ export class ExpressionVisitor {
     if (!(root instanceof Interval && end instanceof Interval)) {
       throw new Error('Harmonic segments must be built from intervals');
     }
-    let next = root.add(LINEAR_UNITY);
+    const one = linearOne();
+    let next = root.add(one);
     const result: Interval[] = [];
     while (next.compare(end) <= 0) {
       result.push(next.div(root));
-      next = next.add(LINEAR_UNITY);
+      next = next.add(one);
     }
     return result;
   }

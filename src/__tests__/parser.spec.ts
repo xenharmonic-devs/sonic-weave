@@ -558,7 +558,7 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(4);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '0;1;0;1'
+      'false;true;false;true'
     );
   });
 
@@ -581,6 +581,19 @@ describe('SonicWeave parser', () => {
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
       '1;4;7;10'
     );
+  });
+
+  it('can label intervals after generating', () => {
+    const scale = parseSource(`
+      4/3
+      3/2
+      2
+      label(["fourth", "fifth", "octave"])
+    `);
+    expect(scale).toHaveLength(3);
+    expect(scale[0].label).toBe('fourth');
+    expect(scale[1].label).toBe('fifth');
+    expect(scale[2].label).toBe('octave');
   });
 });
 
@@ -631,7 +644,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates rank-2 scales', () => {
-    const scale = parseSource('rank2(707.048, 2, 2, 600.0);repeat();');
+    const scale = parseSource('rank2(707.048, 2, 2, 600.0, 2);');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
