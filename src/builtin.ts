@@ -1,4 +1,4 @@
-import {Fraction, kCombinations, mmod} from 'xen-dev-utils';
+import {Fraction, kCombinations, mmod, isPrime, primes} from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ExpressionVisitor} from './parser';
@@ -71,6 +71,16 @@ function mos(
   result.shift();
   result.push(p);
   return result;
+}
+
+function isPrime_(n: Interval) {
+  return sonicBool(isPrime(n.valueOf()));
+}
+
+function primes_(start: Interval, end?: Interval) {
+  return primes(start.valueOf(), end ? end.valueOf() : undefined).map(
+    Interval.fromInteger
+  );
 }
 
 function mosSubset(...args: (Interval | undefined)[]) {
@@ -306,6 +316,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   true: LINEAR_UNITY,
   false: LINEAR_ZERO,
   mosSubset,
+  isPrime: isPrime_,
+  primes: primes_,
   abs,
   min,
   max,

@@ -547,6 +547,28 @@ describe('SonicWeave parser', () => {
         .join(';')
     ).toBe('9/8;3/2;2');
   });
+
+  it('can detect primality', () => {
+    const scale = parseSource(`
+      -1;
+      2;
+      6;
+      11;
+      isPrime
+    `);
+    expect(scale).toHaveLength(4);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '0;1;0;1'
+    );
+  });
+
+  it('can list primes', () => {
+    const scale = parseSource('primes(3, 22)');
+    expect(scale).toHaveLength(7);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '3;5;7;11;13;17;19'
+    );
+  });
 });
 
 describe('SonicWeave standard library', () => {

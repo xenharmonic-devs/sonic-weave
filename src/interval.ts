@@ -264,4 +264,11 @@ export class Interval {
     }
     return this.value.toString(this.domain === 'linear');
   }
+
+  valueOf() {
+    if (this.value.isIntegral()) {
+      return Number(this.value.toBigInteger());
+    }
+    return this.value.valueOf();
+  }
 }
