@@ -5,9 +5,7 @@ import {ExpressionVisitor, evaluateSource} from './parser';
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
   const lines = ['!Created using SonicWeave v0.0.0 alpha', '!'];
-  if (visitor.context.has('"')) {
-    lines.push(visitor.context.get('"') as string);
-  }
+  lines.push((visitor.context.get('"') as string) || 'Untitled tuning');
   const scale = visitor.context.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');
