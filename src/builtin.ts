@@ -87,6 +87,14 @@ function mosSubset(...args: (Interval | undefined)[]) {
   return result.map(Interval.fromInteger);
 }
 
+function toString(interval: Interval) {
+  return interval.toString();
+}
+
+function slice(str: string, indexStart: number, indexEnd?: number) {
+  return str.slice(indexStart, indexEnd);
+}
+
 function upsAs(comma: Interval) {
   const inflection = comma.value;
   function upRigger(interval: Interval) {
@@ -345,6 +353,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  toString,
+  slice,
   upsAs,
   zip,
   zipLongest,
