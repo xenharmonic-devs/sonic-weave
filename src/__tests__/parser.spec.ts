@@ -199,6 +199,15 @@ describe('SonicWeave expression evaluator', () => {
     const thirdFifth = parseSingle('P5 % 3');
     expect(thirdFifth.toString()).toBe('1\\3<3/2>');
   });
+
+  it('has a constant structure calculator', () => {
+    // 6\12 is ambiguous as a fourth and a fifth
+    const no = parseSingle('hasConstantStructure(mos(5, 2))');
+    expect(no.toString()).toBe('false');
+    // Augmented fourth and diminished fifth are distinct in 19 edo
+    const yes = parseSingle('hasConstantStructure(mos(5, 2, 3, 2))');
+    expect(yes.toString()).toBe('true');
+  });
 });
 
 describe('SonicWeave parser', () => {
@@ -849,5 +858,29 @@ describe('SonicWeave standard library', () => {
     expect(scale[1].value.valueOf()).not.toBe(2); // There's like a one in a quadrillion chance that this fails.
     expect(scale[1].value.valueOf()).greaterThan(1.98);
     expect(scale[1].value.valueOf()).lessThan(2.02);
+  });
+
+  it('can generate alternating generator sequences (diasem #1)', () => {
+    const scale = parseSource('ags([8/7, 7/6]);');
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;2');
+  });
+
+  it('can generate alternating generator sequences (diasem #2)', () => {
+    const scale = parseSource('ags([8/7, 7/6], 2);');
+    expect(scale).toHaveLength(5);
+    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;16/9;2');
+  });
+
+  it('can generate alternating generator sequences (diasem #3)', () => {
+    const scale = parseSource('ags([8/7, 7/6], 3);');
+    expect(scale).toHaveLength(9);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '64/63;8/7;32/27;8/6;256/189;32/21;128/81;16/9;2'
+    );
+  });
+
+  it('throws for ags with no constant structure', () => {
+    expect(() => parseSource('ags([8/7, 7/6, 8/7], 3);')).toThrow();
   });
 });
