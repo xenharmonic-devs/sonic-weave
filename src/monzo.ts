@@ -16,7 +16,6 @@ import {
 import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd} from './utils';
 import {
   NedjiLiteral,
-  IntervalLiteral,
   FractionLiteral,
   CentsLiteral,
   IntegerLiteral,
@@ -1126,25 +1125,6 @@ export class TimeMonzo {
       result = result.inverse().add(continuedFraction[i]);
     }
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
-  }
-
-  // TODO: Make sure that this is idempotent.
-  as(node: IntervalLiteral | undefined): IntervalLiteral | undefined {
-    if (!node) {
-      return undefined;
-    }
-    switch (node.type) {
-      case 'IntegerLiteral':
-        return this.asIntegerLiteral(node);
-      case 'FractionLiteral':
-        return this.asFractionLiteral(node);
-      case 'NedoLiteral':
-        return this.asNedjiLiteral(node);
-      case 'CentsLiteral':
-        return this.asCentsLiteral(node);
-      default:
-        return undefined;
-    }
   }
 
   asCentsLiteral(node: CentsLiteral): CentsLiteral {

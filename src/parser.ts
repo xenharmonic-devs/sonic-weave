@@ -17,7 +17,7 @@ import {
   formatComponent,
   ValLiteral,
 } from './expression';
-import {Interval, Color, Domain} from './interval';
+import {Interval, Color, Domain, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from './css-colors';
@@ -644,9 +644,9 @@ function resolvePreference(
     return new Interval(value, domain);
   }
   if (node.preferLeft) {
-    return new Interval(value, left.domain, value.as(left.node));
+    return new Interval(value, left.domain, timeMonzoAs(value, left.node));
   }
-  return new Interval(value, right.domain, value.as(right.node));
+  return new Interval(value, right.domain, timeMonzoAs(value, right.node));
 }
 
 export class ExpressionVisitor {

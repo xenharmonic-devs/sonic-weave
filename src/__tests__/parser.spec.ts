@@ -178,6 +178,26 @@ describe('SonicWeave expression evaluator', () => {
     expect(greenFifth.color?.value).toBe('#008000');
     expect(greenFifth.label).toBe('fifth');
   });
+
+  it('can format the half eleventh', () => {
+    const neutralSixth = parseSingle('P11 % 2');
+    expect(neutralSixth.toString()).toBe('n6');
+  });
+
+  it('can format the double tone', () => {
+    const majorThird = parseSingle('M2 * 2');
+    expect(majorThird.toString()).toBe('M3');
+  });
+
+  it('can format the half twelfth', () => {
+    const majorSixAndAHalfth = parseSingle('P12 % 2');
+    expect(majorSixAndAHalfth.toString()).toBe('M6.5');
+  });
+
+  it("bails out when there's no Pythagorean to match", () => {
+    const thirdFifth = parseSingle('P5 % 3');
+    expect(thirdFifth.toString()).toBe('1\\3<3/2>');
+  });
 });
 
 describe('SonicWeave parser', () => {
@@ -461,7 +481,19 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('can rig ups-and-downs', () => {
+  it('can rig ups-and-downs (builtin)', () => {
+    const scale = parseSource(`
+      vM3
+      P5
+      ^m6
+      P8
+      upsAs(81/80)
+    `);
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('M3^5;P5;m6_5;P8');
+  });
+
+  it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig i {
         ups = round(1!€ dot i);

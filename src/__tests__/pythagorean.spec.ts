@@ -4,7 +4,9 @@ import {
   absoluteMonzo,
   Pythagorean,
   AbsolutePitch,
+  monzoToNode,
 } from '../pythagorean';
+import {TimeMonzo} from '../monzo';
 
 describe('Pythagorean interval construction from parts', () => {
   it.each([
@@ -143,5 +145,67 @@ describe('Absolute Pythagorean interval construction from parts', () => {
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
     expect(monzo.cents).toBeCloseTo(0);
+  });
+});
+
+describe('Monzo -> node converter', () => {
+  it('converts a perfect fifth', () => {
+    const node = monzoToNode(TimeMonzo.fromFraction('3/2'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'P',
+      imperfect: false,
+      degree: {base: 5, negative: false, octaves: 0},
+    });
+  });
+
+  it('converts a major third', () => {
+    const node = monzoToNode(TimeMonzo.fromFraction('81/64'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'M',
+      imperfect: true,
+      degree: {base: 3, negative: false, octaves: 0},
+    });
+  });
+
+  it('converts a doubly augmented octave', () => {
+    const node = monzoToNode(TimeMonzo.fromFraction('4782969/2097152'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'AA',
+      imperfect: false,
+      degree: {base: 1, negative: false, octaves: 1},
+    });
+  });
+
+  it('converts a doubly diminished seventh', () => {
+    const node = monzoToNode(TimeMonzo.fromFraction('67108864/43046721'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'dd',
+      imperfect: true,
+      degree: {base: 7, negative: false, octaves: 0},
+    });
+  });
+
+  it('converts a neutral third', () => {
+    const node = monzoToNode(TimeMonzo.fromEqualTemperament('1/2', '3/2'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'n',
+      imperfect: true,
+      degree: {base: 3, negative: false, octaves: 0},
+    });
+  });
+
+  it('converts a half-octave', () => {
+    const node = monzoToNode(TimeMonzo.fromEqualTemperament('1/2'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'n',
+      imperfect: true,
+      degree: {base: 4.5, negative: false, octaves: 0},
+    });
   });
 });
