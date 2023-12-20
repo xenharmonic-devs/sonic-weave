@@ -1,4 +1,4 @@
-import {Fraction} from 'xen-dev-utils';
+import {Fraction, mmod} from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
 
 const ZERO = new Fraction(0);
@@ -175,10 +175,10 @@ for (const accidental of '&@') {
 
 export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   let vector: number[];
-  if (node.degree.base % 1) {
-    vector = [...TONESPLITTER_VECTORS[node.degree.base - 1.5]];
-  } else {
+  if (Number.isInteger(node.degree.base)) {
     vector = [...PYTH_VECTORS[node.degree.base - 1]];
+  } else {
+    vector = [...TONESPLITTER_VECTORS[node.degree.base - 1.5]];
   }
 
   let quality = node.quality;
@@ -303,4 +303,82 @@ export function absoluteMonzo(node: AbsolutePitch) {
     ZERO,
     vector.map(c => new Fraction(c))
   );
+}
+
+const IMPERFECT_QUALITY_SPECTRUM = [
+  'd',
+  'Qd',
+  'sd',
+  'qd',
+  'm',
+  'sm',
+  'n',
+  'sM',
+  'M',
+  'qA',
+  'sA',
+  'Qa',
+  'A',
+];
+
+const PERFECT_QUALITY_SPECTRUM = [
+  'd',
+  'Qd',
+  'sd',
+  'qd',
+  'P',
+  'qA',
+  'sA',
+  'Qa',
+  'A',
+];
+
+export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
+  const twos = monzo.primeExponents[0].valueOf();
+  const threes = monzo.primeExponents[1].valueOf();
+  const stepspan = twos * 7 + threes * 11;
+  const base = mmod(stepspan, 7) + 1;
+  const negative = stepspan < 0;
+  const octaves = Math.floor(Math.abs(stepspan) / 7);
+  let offCenter: number;
+  if (Number.isInteger(stepspan)) {
+    offCenter = (threes - PYTH_VECTORS[base - 1][1]) / 1.75;
+  } else if (mmod(stepspan, 1) === 0.5) {
+    offCenter = (threes - TONESPLITTER_VECTORS[base - 1.5][1]) / 1.75;
+  } else {
+    return undefined;
+  }
+  const imperfect = ![1, 4, 5].includes(base);
+  let quality = '';
+  if (imperfect) {
+    while (offCenter < -6) {
+      quality += 'd';
+      offCenter += 4;
+    }
+    while (offCenter > 6) {
+      quality += 'A';
+      offCenter -= 4;
+    }
+    quality += IMPERFECT_QUALITY_SPECTRUM[offCenter + 6];
+  } else {
+    while (offCenter < -4) {
+      quality += 'd';
+      offCenter += 4;
+    }
+    while (offCenter > 4) {
+      quality += 'A';
+      offCenter -= 4;
+    }
+    quality += PERFECT_QUALITY_SPECTRUM[offCenter + 4];
+  }
+  return {
+    type: 'Pythagorean',
+    quality,
+    imperfect,
+    degree: {
+      base,
+      negative,
+      octaves,
+    },
+  };
 }

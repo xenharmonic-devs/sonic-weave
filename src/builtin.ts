@@ -1,5 +1,5 @@
 import {Fraction, kCombinations, mmod, isPrime, primes} from 'xen-dev-utils';
-import {Color, Interval} from './interval';
+import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {ExpressionVisitor} from './parser';
 
@@ -85,6 +85,21 @@ function mosSubset(...args: (Interval | undefined)[]) {
   );
   const result = mos(...(iargs as [number, number]));
   return result.map(Interval.fromInteger);
+}
+
+function upsAs(comma: Interval) {
+  const inflection = comma.value;
+  function upRigger(interval: Interval) {
+    const ups = Math.round(interval.value.cents);
+    const value = interval.value.mul(inflection.pow(ups));
+    value.cents = 0;
+    return new Interval(
+      value,
+      interval.domain,
+      timeMonzoAs(value, interval.node)
+    );
+  }
+  return upRigger;
 }
 
 function zip(...args: any[][]) {
@@ -236,7 +251,7 @@ export function relog(this: ExpressionVisitor, interval: Interval) {
 
 export function cents(this: ExpressionVisitor, interval: Interval) {
   const converted = relog.bind(this)(interval);
-  converted.node = converted.value.as({
+  converted.node = timeMonzoAs(converted.value, {
     type: 'CentsLiteral',
     whole: 0n,
     fractional: '',
@@ -330,6 +345,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  upsAs,
   zip,
   zipLongest,
   abs,

@@ -144,6 +144,20 @@ export function uniformInvertNode(
   return undefined;
 }
 
+export function upNode(node?: IntervalLiteral): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'FJS':
+      return {
+        ...node,
+        downs: node.downs - 1,
+      };
+  }
+  return undefined;
+}
+
 export function addNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -272,6 +286,19 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
   return result;
 }
 
+function formatFJS(literal: FJS) {
+  let ups: string;
+  if (literal.downs > 0) {
+    ups = 'v'.repeat(literal.downs);
+  } else {
+    ups = '^'.repeat(-literal.downs);
+  }
+  const d = literal.pythagorean.degree;
+  return `${ups}${literal.pythagorean.quality}${d.negative ? '-' : ''}${
+    d.base + 7 * d.octaves
+  }${tailFJS(literal)}`;
+}
+
 function formatDecimal(literal: DecimalLiteral) {
   let result = literal.whole.toString();
   if (literal.fractional) {
@@ -326,11 +353,7 @@ export function toString(literal: IntervalLiteral) {
     case 'FalseLiteral':
       return 'false';
     case 'FJS':
-      // eslint-disable-next-line no-case-declarations
-      const d = literal.pythagorean.degree;
-      return `${literal.pythagorean.quality}${d.negative ? '-' : ''}${
-        d.base + 7 * d.octaves
-      }${tailFJS(literal)}`;
+      return formatFJS(literal);
     case 'AbsoluteFJS':
       // eslint-disable-next-line no-case-declarations
       const p = literal.pitch;

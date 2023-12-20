@@ -8,8 +8,10 @@ import {
   projectNodes,
   subNodes,
   toString,
+  upNode,
 } from './expression';
 import {TimeMonzo} from './monzo';
+import {asFJS} from './fjs';
 
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
 
@@ -39,11 +41,11 @@ function logLinMul(
       node
     );
   }
-  return new Interval(
-    logarithmic.value.pow(linear.value),
-    logarithmic.domain,
-    node
-  );
+  const value = logarithmic.value.pow(linear.value);
+  if (logarithmic.node?.type === 'FJS') {
+    node = asFJS(value, logarithmic.node);
+  }
+  return new Interval(value, logarithmic.domain, node);
 }
 
 export class Interval {
@@ -94,7 +96,7 @@ export class Interval {
   up() {
     const value = this.value.clone();
     value.cents += 1;
-    return new Interval(value, this.domain);
+    return new Interval(value, this.domain, upNode(this.node));
   }
 
   abs() {
@@ -182,7 +184,7 @@ export class Interval {
   }
 
   div(other: Interval) {
-    const node = divNodes(this.node, other.node);
+    let node = divNodes(this.node, other.node);
     if (other.domain === 'logarithmic') {
       if (this.domain !== 'logarithmic') {
         throw new Error('Domains must match in non-scalar division');
@@ -190,11 +192,11 @@ export class Interval {
       return new Interval(this.value.log(other.value), 'linear', node);
     }
     if (this.domain === 'logarithmic') {
-      return new Interval(
-        this.value.pow(other.value.inverse()),
-        this.domain,
-        node
-      );
+      const value = this.value.pow(other.value.inverse());
+      if (this.node?.type === 'FJS') {
+        node = asFJS(value, this.node);
+      }
+      return new Interval(value, this.domain, node);
     }
     return new Interval(this.value.div(other.value), this.domain, node);
   }
@@ -280,5 +282,28 @@ export class Interval {
       return Number(this.value.toBigInteger());
     }
     return this.value.valueOf();
+  }
+}
+
+export function timeMonzoAs(
+  monzo: TimeMonzo,
+  node: IntervalLiteral | undefined
+): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'IntegerLiteral':
+      return monzo.asIntegerLiteral(node);
+    case 'FractionLiteral':
+      return monzo.asFractionLiteral(node);
+    case 'NedoLiteral':
+      return monzo.asNedjiLiteral(node);
+    case 'CentsLiteral':
+      return monzo.asCentsLiteral(node);
+    case 'FJS':
+      return asFJS(monzo, node);
+    default:
+      return undefined;
   }
 }
