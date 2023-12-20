@@ -13,9 +13,9 @@ import {
   BIG_INT_PRIMES,
 } from 'xen-dev-utils';
 
-import {bigGcd} from './utils';
+import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd} from './utils';
 import {
-  NedoLiteral,
+  NedjiLiteral,
   IntervalLiteral,
   FractionLiteral,
   CentsLiteral,
@@ -25,11 +25,6 @@ import {
 export type FractionalMonzo = Fraction[];
 
 const MAX_POW_DENOMINATOR = 10000;
-
-const ZERO = new Fraction(0);
-const ONE = new Fraction(1);
-const NEGATIVE_ONE = new Fraction(-1);
-const TWO = new Fraction(2);
 
 let NUMBER_OF_COMPONENTS = 6; // Primes 2, 3, 5, 7, 11 and 13
 
@@ -1144,7 +1139,7 @@ export class TimeMonzo {
       case 'FractionLiteral':
         return this.asFractionLiteral(node);
       case 'NedoLiteral':
-        return this.asNedoLiteral(node);
+        return this.asNedjiLiteral(node);
       case 'CentsLiteral':
         return this.asCentsLiteral(node);
       default:
@@ -1192,10 +1187,17 @@ export class TimeMonzo {
     return undefined;
   }
 
-  asNedoLiteral(node: NedoLiteral): NedoLiteral | undefined {
+  asNedjiLiteral(node: NedjiLiteral): NedjiLiteral | undefined {
     if (this.isEqualTemperament()) {
       const {fractionOfEquave, equave} = this.toEqualTemperament();
-      if (equave.compare(TWO)) {
+      if (node.equaveNumerator === undefined) {
+        if (equave.compare(TWO)) {
+          return undefined;
+        }
+      } else if (
+        equave.n !== node.equaveNumerator ||
+        equave.d !== (node.equaveDenominator ?? 1)
+      ) {
         return undefined;
       }
       const denominator = lcm(fractionOfEquave.d, Number(node.denominator));

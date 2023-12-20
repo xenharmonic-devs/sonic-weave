@@ -623,9 +623,8 @@ describe('SonicWeave standard library', () => {
   it('generates tritave equivalent equal temperaments', () => {
     const scale = parseSource('ed(3, 3);');
     expect(scale).toHaveLength(3);
-    // TODO: Synthetic NedjiLiterals
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\3<3>;2\\3<3>;1\\1<3>'
+      '1\\3<3>;2\\3<3>;3\\3<3>'
     );
   });
 

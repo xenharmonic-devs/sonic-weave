@@ -1,6 +1,6 @@
 import {Fraction} from 'xen-dev-utils';
 import {
-  NedoLiteral,
+  NedjiLiteral,
   IntegerLiteral,
   IntervalLiteral,
   DecimalLiteral,
@@ -30,7 +30,7 @@ import {
   relog,
   linearOne,
 } from './builtin';
-import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE} from './utils';
+import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
 import {inferEquave, wartsToVal} from './warts';
@@ -460,6 +460,8 @@ export class StatementVisitor {
       if (value.domain === 'cologarithmic') {
         let divisions = value.value.primeExponents[0];
         let equave = new Fraction(2);
+        let equaveNumerator: number | undefined = undefined;
+        let equaveDenominator: number | undefined = undefined;
         if (value?.node?.type === 'WartsLiteral') {
           divisions = new Fraction(Number(value.node.divisions));
           const equave_ = inferEquave(value.node);
@@ -467,7 +469,10 @@ export class StatementVisitor {
             throw new Error('Invalid warts equave');
           }
           equave = equave_;
-          // TODO: Nedji node
+          if (equave.compare(TWO)) {
+            equaveNumerator = equave.n;
+            equaveDenominator = equave.d;
+          }
         }
         const step = new Interval(
           TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
@@ -476,6 +481,8 @@ export class StatementVisitor {
             type: 'NedoLiteral',
             numerator: BigInt(divisions.d),
             denominator: BigInt(divisions.n),
+            equaveNumerator,
+            equaveDenominator,
           }
         );
         const rl = relog.bind(this as unknown as ExpressionVisitor);
@@ -775,8 +782,7 @@ export class ExpressionVisitor {
     if (!(base instanceof Interval)) {
       throw new Error('Nedji base must evaluate to an interval');
     }
-    // TODO: Preserve formatting by implementing Interval.project().
-    return new Interval(base.value.pow(octaves.value.octaves), 'logarithmic');
+    return octaves.project(base);
   }
 
   visitWartsLiteral(node: WartsLiteral) {
@@ -1213,7 +1219,10 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitNedoLiteral(node: NedoLiteral): Interval {
+  visitNedoLiteral(node: NedjiLiteral): Interval {
+    if (node.equaveNumerator !== undefined) {
+      throw new Error('Unexpected nedji equave in AST');
+    }
     const value = TimeMonzo.fromEqualTemperament(
       new Fraction(Number(node.numerator), Number(node.denominator))
     );

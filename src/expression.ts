@@ -20,10 +20,13 @@ export type FractionLiteral = {
   denominator: bigint;
 };
 
-export type NedoLiteral = {
+export type NedjiLiteral = {
   type: 'NedoLiteral';
   numerator: bigint;
   denominator: bigint;
+  // These synthetic fields are not found in the AST
+  equaveNumerator?: number;
+  equaveDenominator?: number;
 };
 
 export type CentsLiteral = {
@@ -104,7 +107,7 @@ export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
   | FractionLiteral
-  | NedoLiteral
+  | NedjiLiteral
   | CentsLiteral
   | CentLiteral
   | ReciprocalCentLiteral
@@ -155,6 +158,12 @@ export function addNodes(
     };
   }
   if (a.type === 'NedoLiteral' && b.type === 'NedoLiteral') {
+    if (
+      a.equaveNumerator !== b.equaveNumerator ||
+      a.equaveDenominator !== b.equaveDenominator
+    ) {
+      return undefined;
+    }
     const denominator = bigLcm(a.denominator, b.denominator);
     return {
       type: a.type,
@@ -162,6 +171,8 @@ export function addNodes(
         (denominator / a.denominator) * a.numerator +
         (denominator / b.denominator) * b.numerator,
       denominator,
+      equaveNumerator: a.equaveNumerator,
+      equaveDenominator: a.equaveDenominator,
     };
   }
 
@@ -182,14 +193,9 @@ export function subNodes(
     };
   }
   if (a.type === 'NedoLiteral' && b.type === 'NedoLiteral') {
-    const denominator = bigLcm(a.denominator, b.denominator);
-    return {
-      type: a.type,
-      numerator:
-        (denominator / a.denominator) * a.numerator -
-        (denominator / b.denominator) * b.numerator,
-      denominator,
-    };
+    const negB = {...b};
+    negB.numerator = -b.numerator;
+    return addNodes(a, negB);
   }
 
   return undefined;
@@ -224,7 +230,33 @@ export function mulNodes(
       type: 'NedoLiteral',
       numerator: a.value * b.numerator,
       denominator: b.denominator,
+      equaveNumerator: b.equaveNumerator,
+      equaveDenominator: b.equaveDenominator,
     };
+  }
+  return undefined;
+}
+
+export function projectNodes(
+  octaves?: IntervalLiteral,
+  base?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!octaves || !base) {
+    return undefined;
+  }
+  if (octaves.type === 'NedoLiteral' && octaves.equaveNumerator === undefined) {
+    if (base.type === 'IntegerLiteral') {
+      return {
+        ...octaves,
+        equaveNumerator: Number(base.value),
+      };
+    } else if (base.type === 'FractionLiteral') {
+      return {
+        ...octaves,
+        equaveNumerator: Number(base.numerator),
+        equaveDenominator: Number(base.denominator),
+      };
+    }
   }
   return undefined;
 }
@@ -264,10 +296,21 @@ function formatComponents(components: VectorComponent[]) {
   return components.map(formatComponent).join(' ');
 }
 
+function formatNedji(literal: NedjiLiteral) {
+  if (literal.equaveNumerator === undefined) {
+    return `${literal.numerator}\\${literal.denominator}`;
+  }
+  let equave = literal.equaveNumerator.toString();
+  if (literal.equaveDenominator !== undefined) {
+    equave += '/' + literal.equaveDenominator.toString();
+  }
+  return `${literal.numerator}\\${literal.denominator}<${equave}>`;
+}
+
 export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
-      return `${literal.numerator}\\${literal.denominator}`;
+      return formatNedji(literal);
     case 'FractionLiteral':
       return `${literal.numerator}/${literal.denominator}`;
     case 'DecimalLiteral':

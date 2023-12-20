@@ -1,10 +1,11 @@
 import {Fraction} from 'xen-dev-utils';
 import {
   IntervalLiteral,
-  NedoLiteral,
+  NedjiLiteral,
   addNodes,
   divNodes,
   mulNodes,
+  projectNodes,
   subNodes,
   toString,
 } from './expression';
@@ -101,6 +102,15 @@ export class Interval {
       return new Interval(this.value.abs(), this.domain);
     }
     return new Interval(this.value.pitchAbs(), this.domain);
+  }
+
+  project(base: Interval) {
+    const node = projectNodes(this.node, base.node);
+    return new Interval(
+      base.value.pow(this.value.octaves),
+      'logarithmic',
+      node
+    );
   }
 
   add(other: Interval) {
@@ -235,7 +245,7 @@ export class Interval {
       throw new Error('Only linear backslashing implemented');
     }
     const value = TWO.pow(this.value.div(other.value));
-    let node: NedoLiteral | undefined;
+    let node: NedjiLiteral | undefined;
     if (this.value.isIntegral() && other.value.isIntegral()) {
       node = {
         type: 'NedoLiteral',

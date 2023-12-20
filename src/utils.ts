@@ -3,6 +3,7 @@ import {Fraction} from 'xen-dev-utils';
 export const ZERO = new Fraction(0);
 export const ONE = new Fraction(1);
 export const NEGATIVE_ONE = new Fraction(-1);
+export const TWO = new Fraction(2);
 
 /**
  * Greatest common divisor of two integers.
