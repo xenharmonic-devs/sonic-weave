@@ -7,6 +7,7 @@ import {
 } from '../parser';
 import {TimeMonzo} from '../monzo';
 import {Color, Interval} from '../interval';
+import {RootContext} from '../context';
 
 function parseSingle(source: string) {
   const value = evaluateExpression(source);
@@ -235,7 +236,7 @@ describe('SonicWeave parser', () => {
 
   it('can declare variables', () => {
     const ast = parseAST('i = 676/675 /* The Island comma */;');
-    const visitor = new StatementVisitor();
+    const visitor = new StatementVisitor(new RootContext());
     visitor.visit(ast.body[0]);
     expect(visitor.context.get('i')?.toString()).toBe('676/675');
   });
@@ -277,7 +278,7 @@ describe('SonicWeave parser', () => {
 
   it('can declare functions', () => {
     const ast = parseAST('riff plusOne x { x ~+ 1; }');
-    const visitor = new StatementVisitor();
+    const visitor = new StatementVisitor(new RootContext());
     visitor.visit(ast.body[0]);
     expect(visitor.context.has('plusOne')).toBe(true);
     const two = new Interval(TimeMonzo.fromBigInt(2n), 'linear');

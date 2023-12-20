@@ -34,6 +34,7 @@ import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
 import {inferEquave, wartsToVal} from './warts';
+import {RootContext} from './context';
 
 type BinaryOperator =
   | '??'
@@ -296,18 +297,24 @@ class Interupt {
 }
 
 export class StatementVisitor {
+  rootContext: RootContext;
   context: VisitorContext;
-  constructor() {
+  constructor(rootContext: RootContext) {
+    this.rootContext = rootContext;
     this.context = new Map();
     this.context.set('$', []);
   }
 
   // TODO: Deep cloning
   clone() {
-    const result = new StatementVisitor();
+    const result = new StatementVisitor(this.rootContext);
     result.context = new Map(this.context);
     result.context.set('$', []);
     return result;
+  }
+
+  createExpressionVisitor() {
+    return new ExpressionVisitor(this.rootContext, this.context);
   }
 
   visit(node: Statement): Interupt | undefined {
@@ -339,14 +346,14 @@ export class StatementVisitor {
   visitReturnStatement(node: ReturnStatement) {
     let value: SonicWeaveValue;
     if (node.argument) {
-      const subVisitor = new ExpressionVisitor(this.context);
+      const subVisitor = this.createExpressionVisitor();
       value = subVisitor.visit(node.argument);
     }
     return new Interupt(node, value);
   }
 
   visitThrowStatement(node: ThrowStatement) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.argument);
     if (typeof value === 'string') {
       throw new Error(value);
@@ -355,7 +362,7 @@ export class StatementVisitor {
   }
 
   visitVariableDeclaration(node: VariableDeclaration) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (Array.isArray(node.name)) {
       if (!Array.isArray(value)) {
@@ -393,7 +400,7 @@ export class StatementVisitor {
       throw new Error('Declared pitch must be on the left');
     }
 
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
 
     if (node.left.type === 'AbsoluteFJS') {
       const value = subVisitor.visit(node.middle ?? node.right);
@@ -403,13 +410,9 @@ export class StatementVisitor {
 
       const pitch = subVisitor.visit(node.left) as Interval;
 
-      const C4: TimeMonzo =
-        (this.context.get('C4') as unknown as TimeMonzo) ?? UNITY_MONZO;
+      const C4: TimeMonzo = this.rootContext.C4;
 
-      this.context.set(
-        'C4',
-        C4.mul(value.value).div(pitch.value) as unknown as Interval
-      );
+      this.rootContext.C4 = C4.mul(value.value).div(pitch.value);
       if (!node.middle) {
         return undefined;
       }
@@ -431,17 +434,14 @@ export class StatementVisitor {
       absolute = right.value;
       relative = left.value;
     }
-    this.context.set(
-      '1',
-      absolute
-        .pow(absolute.timeExponent.inverse().neg())
-        .div(relative) as unknown as Interval
-    );
+    this.rootContext.unisonFrequency = absolute
+      .pow(absolute.timeExponent.inverse().neg())
+      .div(relative);
     return undefined;
   }
 
   visitExpression(node: ExpressionStatement) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.expression);
     this.handleValue(value);
     return undefined;
@@ -485,7 +485,7 @@ export class StatementVisitor {
             equaveDenominator,
           }
         );
-        const rl = relog.bind(this as unknown as ExpressionVisitor);
+        const rl = relog.bind(this);
         const mapped = scale.map(i => rl(i).dot(value).mul(step));
         scale.length = 0;
         scale.push(...mapped);
@@ -502,7 +502,7 @@ export class StatementVisitor {
       if (scale.length) {
         scale[scale.length - 1].label = value;
       } else {
-        this.context.set('"', value);
+        this.rootContext.title = value;
       }
     } else {
       const bound = value.bind(this);
@@ -513,7 +513,7 @@ export class StatementVisitor {
   }
 
   visitBlockStatement(node: BlockStatement) {
-    const subVisitor = new StatementVisitor();
+    const subVisitor = new StatementVisitor(this.rootContext);
     for (const [name, value] of this.context) {
       subVisitor.context.set(name, value);
     }
@@ -546,7 +546,7 @@ export class StatementVisitor {
   }
 
   visitWhileStatement(node: WhileStatement) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     while (sonicTruth(subVisitor.visit(node.test))) {
       const interrupt = this.visit(node.body);
       if (interrupt) {
@@ -557,7 +557,7 @@ export class StatementVisitor {
   }
 
   visitForOfStatement(node: ForOfStatement) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     const array = subVisitor.visit(node.array);
     if (!Array.isArray(array)) {
       throw new Error('Can only iterate over arrays');
@@ -582,7 +582,7 @@ export class StatementVisitor {
   }
 
   visitIfStatement(node: IfStatement) {
-    const subVisitor = new ExpressionVisitor(this.context);
+    const subVisitor = this.createExpressionVisitor();
     if (sonicTruth(subVisitor.visit(node.test))) {
       return this.visit(node.consequent);
     }
@@ -594,7 +594,7 @@ export class StatementVisitor {
 
   visitFunctionDeclaration(node: FunctionDeclaration) {
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localVisitor = new StatementVisitor();
+      const localVisitor = new StatementVisitor(this.rootContext);
       for (const [name, value] of this.context) {
         localVisitor.context.set(name, value);
       }
@@ -625,7 +625,6 @@ export class StatementVisitor {
   }
 }
 
-const UNITY_MONZO = new TimeMonzo(ZERO, []);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
 const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
@@ -650,8 +649,10 @@ function resolvePreference(
 }
 
 export class ExpressionVisitor {
+  rootContext: RootContext;
   context: VisitorContext;
-  constructor(context: VisitorContext) {
+  constructor(rootContext: RootContext, context: VisitorContext) {
+    this.rootContext = rootContext;
     this.context = context;
   }
 
@@ -803,15 +804,17 @@ export class ExpressionVisitor {
   }
 
   visitAbsoluteFJS(node: AbsoluteFJS) {
-    const C4: TimeMonzo =
-      (this.context.get('C4') as unknown as TimeMonzo) ?? UNITY_MONZO;
     const relativeToC4 = inflect(
       absoluteMonzo(node.pitch),
       node.superscripts,
       node.subscripts
     );
     relativeToC4.cents = -node.downs;
-    return new Interval(C4.mul(relativeToC4), 'logarithmic', node);
+    return new Interval(
+      this.rootContext.C4.mul(relativeToC4),
+      'logarithmic',
+      node
+    );
   }
 
   visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
@@ -1154,7 +1157,10 @@ export class ExpressionVisitor {
           localContext.set(node.parameters[i].id, undefined);
         }
       }
-      const localVisitor = new ExpressionVisitor(localContext);
+      const localVisitor = new ExpressionVisitor(
+        this.rootContext,
+        localContext
+      );
       return localVisitor.visit(node.expression);
     }
     Object.defineProperty(realization, 'name', {
@@ -1335,10 +1341,13 @@ export function parseAST(source: string): Program {
 let SOURCE_VISITOR: StatementVisitor | null = null;
 
 function getSourceVisitor(includePrelude: boolean) {
+  const rootContext = new RootContext();
   if (SOURCE_VISITOR) {
-    return SOURCE_VISITOR.clone();
+    const visitor = SOURCE_VISITOR.clone();
+    visitor.rootContext = rootContext;
+    return visitor;
   } else {
-    const visitor = new StatementVisitor();
+    const visitor = new StatementVisitor(rootContext);
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.context.set(name, color);
     }
@@ -1392,6 +1401,6 @@ export function evaluateExpression(
   if (finalStatement.type !== 'ExpressionStatement') {
     throw new Error(`Expected expression. Got ${finalStatement.type}`);
   }
-  const subVisitor = new ExpressionVisitor(visitor.context);
+  const subVisitor = visitor.createExpressionVisitor();
   return subVisitor.visit(finalStatement.expression);
 }

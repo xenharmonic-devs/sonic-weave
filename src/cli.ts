@@ -7,7 +7,7 @@ export function toScalaScl(source: string) {
   const keyColors = [];
   let useColors = false;
   const lines = ['!Created using SonicWeave v0.0.0 alpha', '!'];
-  lines.push((visitor.context.get('"') as string) || 'Untitled tuning');
+  lines.push(visitor.rootContext.title || 'Untitled tuning');
   const scale = visitor.context.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');

@@ -1,7 +1,7 @@
 import {Fraction, kCombinations, mmod, isPrime, primes} from 'xen-dev-utils';
 import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
-import {ExpressionVisitor} from './parser';
+import {type ExpressionVisitor, type StatementVisitor} from './parser';
 
 // Runtime
 
@@ -217,41 +217,57 @@ function simplify(interval: Interval) {
   return new Interval(interval.value.clone(), interval.domain);
 }
 
-export function ablin(this: ExpressionVisitor, interval: Interval) {
+export function ablin(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
     return new Interval(interval.value.pow(te.inverse().neg()), 'linear');
   }
-  if (!this.context.has('1')) {
+  if (this.rootContext.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
     );
   }
-  const referenceFrequency = this.context.get('1') as unknown as TimeMonzo;
-  return new Interval(interval.value.mul(referenceFrequency), 'linear');
+  return new Interval(
+    interval.value.mul(this.rootContext.unisonFrequency),
+    'linear'
+  );
 }
 
-export function relin(this: ExpressionVisitor, interval: Interval) {
+export function relin(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
   if (interval.isRelative()) {
     return new Interval(interval.value.clone(), 'linear');
   }
-  if (!this.context.has('1')) {
+  if (this.rootContext.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
     );
   }
-  const referenceFrequency = this.context.get('1') as unknown as TimeMonzo;
   const absoluteLinear = ablin.bind(this)(interval);
-  return new Interval(absoluteLinear.value.div(referenceFrequency), 'linear');
+  return new Interval(
+    absoluteLinear.value.div(this.rootContext.unisonFrequency),
+    'linear'
+  );
 }
 
-export function ablog(this: ExpressionVisitor, interval: Interval) {
+export function ablog(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
   const converted = ablin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
 }
 
-export function relog(this: ExpressionVisitor, interval: Interval) {
+export function relog(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
   const converted = relin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
