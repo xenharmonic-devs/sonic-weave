@@ -87,6 +87,39 @@ function mosSubset(...args: (Interval | undefined)[]) {
   return result.map(Interval.fromInteger);
 }
 
+function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.context.get('$') as Interval[];
+  if (scale.length < 1) {
+    return sonicBool(false);
+  }
+  const rl = relin.bind(this);
+  const monzos = scale.map(i => rl(i).value);
+  const equave = monzos.pop()!;
+  monzos.unshift(equave.pow(0));
+  const subtensions: [TimeMonzo, number][] = [];
+  for (let i = 0; i < monzos.length; ++i) {
+    for (let j = 0; j < monzos.length; ++j) {
+      let width = monzos[mmod(i + j, monzos.length)].div(monzos[i]);
+      if (i + j >= monzos.length) {
+        width = width.mul(equave);
+      }
+      let unique = true;
+      for (const [existing, subtension] of subtensions) {
+        if (width.strictEquals(existing)) {
+          if (subtension !== j) {
+            return sonicBool(false);
+          }
+          unique = false;
+        }
+      }
+      if (unique) {
+        subtensions.push([width, j]);
+      }
+    }
+  }
+  return sonicBool(true);
+}
+
 function toString(interval: Interval) {
   return interval.toString();
 }
@@ -369,6 +402,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  hasConstantStructure,
   toString,
   slice,
   upsAs,
@@ -473,6 +507,7 @@ riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep b
 riff rank2 generator up down period numPeriods {
   down ??= 0;
   period ??= 2;
+  numPeriods ??= 1;
   accumulator = 1;
   while (up--) {
     accumulator *~= generator;
@@ -486,7 +521,7 @@ riff rank2 generator up down period numPeriods {
   period;
   reduce();
   sort();
-  repeat(numPeriods ?? 1);
+  repeat(numPeriods);
 }
 
 riff cps factors count equave withUnity {
@@ -600,6 +635,31 @@ riff octaplex b0 b1 b2 b3 equave withUnity {
   equave;
   reduce();
   sort();
+}
+
+riff ags generators ordinal period numPeriods maxSize {
+  ordinal ??= 1;
+  period ??= 2;
+  numPeriods ??= 1;
+  maxSize ??= 100;
+  cumprod(generators);
+  accumulator = $[-1];
+  period;
+  reduce();
+  sort();
+  i = 0;
+  while (ordinal) {
+    accumulator *~= generators[i++ mod length(generators)];
+    push(accumulator red period, $$);
+    if (length($$) > maxSize) {
+      throw "No constant structure found before reaching maximum size";
+    }
+    sort($$);
+    if (hasConstantStructure($$)) {
+      void(ordinal--);
+    }
+  }
+  repeat(numPeriods);
 }
 
 // == Scale modification ==
