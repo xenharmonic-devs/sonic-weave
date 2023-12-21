@@ -67,6 +67,10 @@ export class Interval {
     return new Interval(monzo, 'linear', {type: 'IntegerLiteral', value});
   }
 
+  toInteger(): number {
+    return Number(this.value.toBigInteger());
+  }
+
   isRelative() {
     return !this.value.timeExponent.n;
   }

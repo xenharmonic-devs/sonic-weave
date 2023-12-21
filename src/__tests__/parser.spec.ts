@@ -671,7 +671,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates MOS scales', () => {
-    const scale = parseSource('mos(5, 2);');
+    const scale = parseSource('mos(5, 2, niente, niente, 5);');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'

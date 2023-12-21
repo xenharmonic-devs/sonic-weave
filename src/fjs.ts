@@ -2,7 +2,7 @@ import {
   BIG_INT_PRIMES,
   Fraction,
   PRIME_CENTS,
-  mmod,
+  circleDistance,
   toMonzo,
   valueToCents,
 } from 'xen-dev-utils';
@@ -18,24 +18,20 @@ const NFJS_RADIUS = 13.5 * PRIME_CENTS[0] - 8.5 * PRIME_CENTS[1];
 
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
-function distance(a: number, b: number) {
-  return Math.abs(mmod(a - b + 600, 1200) - 600);
-}
-
 function masterAlgorithm(primeCents: number) {
   let pythagoras = 0;
   let k = 0;
-  if (distance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
+  if (circleDistance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
     return k;
   }
   // eslint-disable-next-line no-constant-condition
   while (true) {
     pythagoras += FIFTH;
     k++;
-    if (distance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
+    if (circleDistance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
       return k;
     }
-    if (distance(primeCents, -pythagoras) < RADIUS_OF_TOLERANCE) {
+    if (circleDistance(primeCents, -pythagoras) < RADIUS_OF_TOLERANCE) {
       return -k;
     }
   }
@@ -43,24 +39,24 @@ function masterAlgorithm(primeCents: number) {
 
 function neutralMaster(primeCents: number) {
   let pythagoras = 0;
-  if (distance(primeCents, pythagoras) < NFJS_RADIUS) {
+  if (circleDistance(primeCents, pythagoras) < NFJS_RADIUS) {
     return 0;
   }
   for (let k = 1; k <= 6; ++k) {
     pythagoras += FIFTH;
-    if (distance(primeCents, pythagoras) < NFJS_RADIUS) {
+    if (circleDistance(primeCents, pythagoras) < NFJS_RADIUS) {
       return k;
     }
-    if (distance(primeCents, -pythagoras) < NFJS_RADIUS) {
+    if (circleDistance(primeCents, -pythagoras) < NFJS_RADIUS) {
       return -k;
     }
   }
   pythagoras = 0.5 * FIFTH;
   for (let k = 1; k <= 6; ++k) {
-    if (distance(primeCents, pythagoras) < NFJS_RADIUS) {
+    if (circleDistance(primeCents, pythagoras) < NFJS_RADIUS) {
       return k - 0.5;
     }
-    if (distance(primeCents, -pythagoras) < NFJS_RADIUS) {
+    if (circleDistance(primeCents, -pythagoras) < NFJS_RADIUS) {
       return 0.5 - k;
     }
     pythagoras += FIFTH;

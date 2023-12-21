@@ -55,7 +55,8 @@
     "vitest": "^1.0.2"
   },
   "dependencies": {
-    "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils"
+    "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils",
+    "moment-of-symmetry": "github:xenharmonic-devs/moment-of-symmetry#home-mode"
   },
   "engines": {
     "node": ">=10.6.0"

@@ -2,6 +2,7 @@ import {Fraction, kCombinations, mmod, isPrime, primes} from 'xen-dev-utils';
 import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
+import {MosOptions, mos} from 'moment-of-symmetry';
 
 // Runtime
 
@@ -42,33 +43,6 @@ const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 
-// TODO: Import from moment-of-symmetry
-function mos(
-  numberOfLargeSteps: number,
-  numberOfSmallSteps: number,
-  sizeOfLargeStep = 2,
-  sizeOfSmallStep = 1,
-  brightGeneratorsDown = 1
-) {
-  if (numberOfLargeSteps !== 5 || numberOfSmallSteps !== 2) {
-    throw new Error('This is just a placeholder');
-  }
-  const period = numberOfLargeSteps + numberOfSmallSteps;
-  const g = 3 * sizeOfLargeStep + sizeOfSmallStep;
-  const p =
-    numberOfLargeSteps * sizeOfLargeStep + numberOfSmallSteps * sizeOfSmallStep;
-  const d = brightGeneratorsDown;
-
-  const result: number[] = [];
-  for (let i = 0; i < period; ++i) {
-    result.push(mmod((i - d) * g, p));
-  }
-  result.sort((a, b) => a - b);
-  result.shift();
-  result.push(p);
-  return result;
-}
-
 function isPrime_(n: Interval) {
   return sonicBool(isPrime(n.valueOf()));
 }
@@ -79,11 +53,32 @@ function primes_(start: Interval, end?: Interval) {
   );
 }
 
-function mosSubset(...args: (Interval | undefined)[]) {
-  const iargs = args.map(i =>
-    i === undefined ? undefined : Math.round(i.value.valueOf())
+function mosSubset(
+  numberOfLargeSteps: Interval,
+  numberOfSmallSteps: Interval,
+  sizeOfLargeStep?: Interval,
+  sizeOfSmallStep?: Interval,
+  up?: Interval,
+  down?: Interval
+) {
+  const options: MosOptions = {};
+  if (sizeOfLargeStep !== undefined) {
+    options.sizeOfLargeStep = sizeOfLargeStep.toInteger();
+  }
+  if (sizeOfSmallStep !== undefined) {
+    options.sizeOfSmallStep = sizeOfSmallStep.toInteger();
+  }
+  if (up !== undefined) {
+    options.up = up.toInteger();
+  }
+  if (down !== undefined) {
+    options.down = down.toInteger();
+  }
+  const result = mos(
+    numberOfLargeSteps.toInteger(),
+    numberOfSmallSteps.toInteger(),
+    options
   );
-  const result = mos(...(iargs as [number, number]));
   return result.map(Interval.fromInteger);
 }
 
@@ -497,8 +492,8 @@ riff subharmonics start end {
   invert();
 }
 
-riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep brightGeneratorsDown equave {
-  mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, brightGeneratorsDown);
+riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep up down equave {
+  mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   divisions = $[-1];
   if (equave === niente) step => step \\ divisions;
   else step => step \\ divisions < equave >;
