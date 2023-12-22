@@ -33,7 +33,11 @@ export type AbsolutePitch = {
     | 'δ'
     | 'ε'
     | 'ζ'
-    | 'η';
+    | 'η'
+    | 'φ'
+    | 'χ'
+    | 'ψ'
+    | 'ω';
   accidentals: string[];
   octave: bigint;
 };
@@ -380,5 +384,124 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
       negative,
       octaves,
     },
+  };
+}
+
+const PURE_NOMINALS: AbsolutePitch['nominal'][] = [
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'A',
+  'B',
+];
+
+const TONESPLITTER_NOMINALS: AbsolutePitch['nominal'][] = [
+  'γ',
+  'δ',
+  'ε',
+  'ζ',
+  'η',
+  'α',
+  'β',
+];
+
+const SEMIQUARTAL_NOMINALS: AbsolutePitch['nominal'][] = [
+  'C',
+  'D',
+  'φ',
+  'χ',
+  'F',
+  'G',
+  'A',
+  'ψ',
+  'ω',
+];
+
+const ACCIDENTAL_SPECTRUM = [
+  ['𝄫'],
+  ['¾♭', '♭'],
+  ['d♭'],
+  ['¼♭', '♭'],
+  ['♭'],
+  ['¾♭'],
+  ['d'],
+  ['¼♭'],
+  [],
+  ['¼♯'],
+  ['‡'],
+  ['¾♯'],
+  ['♯'],
+  ['¼♯', '♯'],
+  ['‡', '♯'],
+  ['¾♯', '♯'],
+  ['𝄪'],
+];
+
+const SEMIQUARTAL_SPECTRUM = [['@'], ['a'], [], ['e'], ['&']];
+
+export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
+  const twos = monzo.primeExponents[0].valueOf();
+  const threes = monzo.primeExponents[1].valueOf();
+  const stepspan = twos * 7 + threes * 11;
+  const octave = BigInt(Math.floor(Math.abs(stepspan) / 7) + 4);
+
+  const spanRemainder = mmod(stepspan, 1);
+
+  let nominal: AbsolutePitch['nominal'];
+  if (spanRemainder === 0) {
+    nominal = PURE_NOMINALS[mmod(stepspan, 7)];
+  } else if (spanRemainder === 0.5) {
+    nominal = TONESPLITTER_NOMINALS[mmod(stepspan - 0.5, 7)];
+  } else if (spanRemainder === 0.25 || spanRemainder === 0.75) {
+    const semiquartalSpan = twos * 9 + threes * 14;
+    nominal = SEMIQUARTAL_NOMINALS[mmod(semiquartalSpan, 9)];
+    let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 2.25;
+    const accidentals: string[] = [];
+    while (offCenter < -2) {
+      accidentals.push('@');
+      offCenter += 2;
+    }
+    while (offCenter > 2) {
+      accidentals.push('&');
+      offCenter -= 2;
+    }
+    accidentals.push(...SEMIQUARTAL_SPECTRUM[offCenter + 2]);
+    if (!accidentals.length) {
+      accidentals.push('♮');
+    }
+    return {
+      type: 'AbsolutePitch',
+      nominal,
+      accidentals: accidentals,
+      octave,
+    };
+  } else {
+    return undefined;
+  }
+
+  let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 1.75;
+
+  const accidentals: string[] = [];
+  while (offCenter < -8) {
+    accidentals.push('𝄫');
+    offCenter += 8;
+  }
+  while (offCenter > 8) {
+    accidentals.push('𝄪');
+    offCenter -= 8;
+  }
+  accidentals.push(...ACCIDENTAL_SPECTRUM[offCenter + 8]);
+
+  if (!accidentals.length) {
+    accidentals.push('♮');
+  }
+
+  return {
+    type: 'AbsolutePitch',
+    nominal,
+    accidentals: accidentals,
+    octave,
   };
 }

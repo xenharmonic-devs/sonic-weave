@@ -11,7 +11,7 @@ import {
   upNode,
 } from './expression';
 import {TimeMonzo} from './monzo';
-import {asFJS} from './fjs';
+import {asAbsoluteFJS, asFJS} from './fjs';
 
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
 
@@ -43,7 +43,7 @@ function logLinMul(
   }
   const value = logarithmic.value.pow(linear.value);
   if (logarithmic.node?.type === 'FJS') {
-    node = asFJS(value, logarithmic.node);
+    node = asFJS(value);
   }
   return new Interval(value, logarithmic.domain, node);
 }
@@ -198,7 +198,7 @@ export class Interval {
     if (this.domain === 'logarithmic') {
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS') {
-        node = asFJS(value, this.node);
+        node = asFJS(value);
       }
       return new Interval(value, this.domain, node);
     }
@@ -306,7 +306,9 @@ export function timeMonzoAs(
     case 'CentsLiteral':
       return monzo.asCentsLiteral(node);
     case 'FJS':
-      return asFJS(monzo, node);
+      return asFJS(monzo);
+    case 'AbsoluteFJS':
+      return asAbsoluteFJS(monzo);
     default:
       return undefined;
   }

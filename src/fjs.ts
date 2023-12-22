@@ -7,8 +7,8 @@ import {
   valueToCents,
 } from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
-import {FJS} from './expression';
-import {monzoToNode} from './pythagorean';
+import {AbsoluteFJS, FJS} from './expression';
+import {absoluteToNode, monzoToNode} from './pythagorean';
 
 const ZERO = new Fraction(0);
 
@@ -196,7 +196,7 @@ export function uninflect(monzo: TimeMonzo) {
 
 // TODO: Use node to uninflect smarter
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function asFJS(monzo: TimeMonzo, node: FJS): FJS | undefined {
+export function asFJS(monzo: TimeMonzo): FJS | undefined {
   const downs = -monzo.cents;
   if (!Number.isInteger(downs)) {
     return undefined;
@@ -216,6 +216,31 @@ export function asFJS(monzo: TimeMonzo, node: FJS): FJS | undefined {
     type: 'FJS',
     downs,
     pythagorean,
+    superscripts,
+    subscripts,
+  };
+}
+
+export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
+  const downs = -monzo.cents;
+  if (!Number.isInteger(downs)) {
+    return undefined;
+  }
+  const pe = monzo.primeExponents;
+  for (let i = 2; i < pe.length; ++i) {
+    if (pe[i].d > 1) {
+      return undefined;
+    }
+  }
+  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo);
+  const pitch = absoluteToNode(pythagoreanMonzo);
+  if (!pitch) {
+    return undefined;
+  }
+  return {
+    type: 'AbsoluteFJS',
+    downs,
+    pitch,
     superscripts,
     subscripts,
   };

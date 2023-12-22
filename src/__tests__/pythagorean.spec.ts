@@ -5,8 +5,10 @@ import {
   Pythagorean,
   AbsolutePitch,
   monzoToNode,
+  absoluteToNode,
 } from '../pythagorean';
 import {TimeMonzo} from '../monzo';
+import {Fraction} from 'xen-dev-utils';
 
 describe('Pythagorean interval construction from parts', () => {
   it.each([
@@ -206,6 +208,78 @@ describe('Monzo -> node converter', () => {
       quality: 'n',
       imperfect: true,
       degree: {base: 4.5, negative: false, octaves: 0},
+    });
+  });
+});
+
+describe('Absolute monzo -> node converter', () => {
+  it('converts D4', () => {
+    const node = absoluteToNode(TimeMonzo.fromFraction('9/8'));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'D',
+      accidentals: ['♮'],
+      octave: 4n,
+    });
+  });
+
+  it('converts zeta4', () => {
+    const node = absoluteToNode(TimeMonzo.fromEqualTemperament('1/2'));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'ζ',
+      accidentals: ['♮'],
+      octave: 4n,
+    });
+  });
+
+  it('converts alphad4', () => {
+    const node = absoluteToNode(TimeMonzo.fromEqualTemperament('1/2', 3));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'α',
+      accidentals: ['d'],
+      octave: 4n,
+    });
+  });
+
+  it('converts Ed4', () => {
+    const node = absoluteToNode(TimeMonzo.fromEqualTemperament('1/2', '3/2'));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'E',
+      accidentals: ['d'],
+      octave: 4n,
+    });
+  });
+
+  it('converts Ca4', () => {
+    const node = absoluteToNode(
+      new TimeMonzo(new Fraction(0), [
+        new Fraction('7/2'),
+        new Fraction('-9/4'),
+      ])
+    );
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'C',
+      accidentals: ['a'],
+      octave: 4n,
+    });
+  });
+
+  it('converts ψe4', () => {
+    const node = absoluteToNode(
+      new TimeMonzo(new Fraction(0), [
+        new Fraction('-7/2'),
+        new Fraction('11/4'),
+      ])
+    );
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'ψ',
+      accidentals: ['e'],
+      octave: 4n,
     });
   });
 });

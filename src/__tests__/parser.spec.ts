@@ -208,6 +208,11 @@ describe('SonicWeave expression evaluator', () => {
     const yes = parseSingle('hasConstantStructure(mos(5, 2, 3, 2))');
     expect(yes.toString()).toBe('true');
   });
+
+  it('can average absolute pitches', () => {
+    const thing = parseSingle('C4 = 261Hz; absoluteFJS((B4 + Bb4) % 2)');
+    expect(thing.toString()).toBe('Bd4');
+  });
 });
 
 describe('SonicWeave parser', () => {
