@@ -4,6 +4,7 @@ import {TimeMonzo} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS} from './fjs';
+import {inspect} from 'node:util';
 
 // Runtime
 
@@ -126,10 +127,6 @@ function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
     }
   }
   return sonicBool(true);
-}
-
-function toString(interval: Interval) {
-  return interval.toString();
 }
 
 function slice(str: string, indexStart: number, indexEnd?: number) {
@@ -395,8 +392,31 @@ function isArray(value: any) {
   return sonicBool(Array.isArray(value));
 }
 
+function toString_(value: SonicWeaveValue | null, depth = 2): string {
+  if (value === null) {
+    return '';
+  }
+  if (value === undefined) {
+    return 'niente';
+  }
+  if (value instanceof Interval) {
+    return value.toString();
+  }
+  if (Array.isArray(value)) {
+    if (depth < 0) {
+      return '[Array]';
+    }
+    return '[' + value.map(e => toString_(e, depth - 1)).join(', ') + ']';
+  }
+  return inspect(value, {depth});
+}
+
+export function toString(value: SonicWeaveValue) {
+  return toString_(value);
+}
+
 function print(...args: any[]) {
-  console.log(...args.map(a => a.toString()));
+  console.log(...args.map(a => toString(a)));
 }
 
 function dir(arg: any) {
@@ -703,6 +723,7 @@ riff rotate onto scale {
 riff clear scale {
   $ = scale ?? $$;
   while ($) void(pop());
+  return;
 }
 
 riff repeat times {

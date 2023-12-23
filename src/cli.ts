@@ -1,6 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {REPLServer} from 'repl';
 import {relin} from './builtin';
 import {Interval} from './interval';
-import {ExpressionVisitor, evaluateSource} from './parser';
+import {
+  ExpressionVisitor,
+  evaluateSource,
+  getSourceVisitor,
+  parseAST,
+} from './parser';
+import nodeRepl = require('repl');
+import {Context} from 'node:vm';
+import {toString} from './builtin';
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
@@ -37,4 +47,53 @@ export function toScalaScl(source: string) {
   }
   lines.push('');
   return lines.join('\n');
+}
+
+const prompt = '𝄞 ';
+
+export function repl() {
+  const visitor = getSourceVisitor();
+
+  function evaluateStatement(
+    this: REPLServer,
+    evalCmd: string,
+    context: Context,
+    file: string,
+    cb: (err: Error | null, result: any) => void
+  ) {
+    try {
+      const program = parseAST(evalCmd);
+      for (const statement of program.body.slice(0, -1)) {
+        const interrupt = visitor.visit(statement);
+        if (interrupt) {
+          throw new Error('Illegal statement');
+        }
+      }
+      const finalStatement = program.body[program.body.length - 1];
+      if (finalStatement.type === 'ExpressionStatement') {
+        const subVisitor = visitor.createExpressionVisitor();
+        const value = subVisitor.visit(finalStatement.expression);
+        visitor.handleValue(value);
+        cb(null, value);
+      } else {
+        const interrupt = visitor.visit(finalStatement);
+        if (interrupt) {
+          throw new Error('Illegal statement');
+        }
+        cb(null, null);
+      }
+    } catch (e) {
+      if (typeof e === 'string') {
+        // eslint-disable-next-line no-ex-assign
+        e = new Error(e);
+      }
+      if (e instanceof Error) {
+        cb(e, undefined);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  nodeRepl.start({prompt, eval: evaluateStatement, writer: toString});
 }

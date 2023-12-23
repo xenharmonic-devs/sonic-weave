@@ -492,13 +492,21 @@ export class StatementVisitor {
           }
         );
         const rl = relog.bind(this);
-        const mapped = scale.map(i => rl(i).dot(value).mul(step));
+        const mapped = scale.map(i =>
+          rl(i)
+            .dot(value as Interval)
+            .mul(step)
+        );
         scale.length = 0;
         scale.push(...mapped);
       } else {
         scale.push(value);
       }
     } else if (Array.isArray(value)) {
+      // Prevent scale from growing recursively on itself
+      if (value === scale) {
+        value = [...value];
+      }
       for (const subvalue of value) {
         this.handleValue(subvalue);
       }
@@ -1361,7 +1369,7 @@ export function parseAST(source: string): Program {
 // Cached globally on first initialization.
 let SOURCE_VISITOR: StatementVisitor | null = null;
 
-function getSourceVisitor(includePrelude: boolean) {
+export function getSourceVisitor(includePrelude = true) {
   const rootContext = new RootContext();
   if (SOURCE_VISITOR) {
     const visitor = SOURCE_VISITOR.clone();
