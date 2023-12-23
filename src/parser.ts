@@ -267,22 +267,28 @@ type Expression =
   | StringLiteral
   | HarmonicSegment;
 
-function strictIncludes(element: Interval, scale: Interval[]) {
-  for (const existing of scale) {
-    if (existing.strictEquals(element)) {
-      return true;
+function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
+  if (element instanceof Interval) {
+    for (const existing of scale) {
+      if (existing instanceof Interval && existing.strictEquals(element)) {
+        return true;
+      }
     }
+    return false;
   }
-  return false;
+  return scale.includes(element);
 }
 
-function includes(element: Interval, scale: Interval[]) {
-  for (const existing of scale) {
-    if (existing.equals(element)) {
-      return true;
+function includes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
+  if (element instanceof Interval) {
+    for (const existing of scale) {
+      if (existing instanceof Interval && existing.equals(element)) {
+        return true;
+      }
     }
+    return false;
   }
-  return false;
+  return scale.includes(element);
 }
 
 export type VisitorContext = Map<string, SonicWeaveValue>;
@@ -948,27 +954,28 @@ export class ExpressionVisitor {
   }
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
+    const operator = node.operator;
     const left = this.visit(node.left);
-    if (node.operator === '??') {
+    if (operator === '??') {
       if (left !== undefined) {
         return left;
       }
       return this.visit(node.right);
     }
-    if (node.operator === '||') {
+    if (operator === '||') {
       if (sonicTruth(left)) {
         return left;
       }
       return this.visit(node.right);
     }
-    if (node.operator === '&&') {
+    if (operator === '&&') {
       if (!sonicTruth(left)) {
         return left;
       }
       return this.visit(node.right);
     }
     const right = this.visit(node.right);
-    if (node.operator === 'tns') {
+    if (operator === 'tns' || operator === '⊗') {
       if (!Array.isArray(left) || !Array.isArray(right)) {
         throw new Error('Tensor product is only defined on arrays');
       }
@@ -993,10 +1000,32 @@ export class ExpressionVisitor {
       }
       return result;
     }
+    if (
+      operator === 'of' ||
+      operator === '!of' ||
+      operator === '~of' ||
+      operator === '!~of'
+    ) {
+      if (Array.isArray(right)) {
+        switch (operator) {
+          case 'of':
+            return sonicBool(strictIncludes(left, right));
+          case '!of':
+            return sonicBool(!strictIncludes(left, right));
+          case '~of':
+            return sonicBool(includes(left, right));
+          case '!~of':
+            return sonicBool(!includes(left, right));
+        }
+      } else {
+        throw new Error("Target of 'of' must be an array");
+      }
+      operator satisfies never;
+    }
     if (left instanceof Interval && right instanceof Interval) {
       if (node.preferLeft || node.preferRight) {
         let value: TimeMonzo;
-        switch (node.operator) {
+        switch (operator) {
           case '+':
             value = left.value.add(right.value);
             break;
@@ -1030,6 +1059,9 @@ export class ExpressionVisitor {
           case 'dot':
             value = left.dot(right).value;
             break;
+          case 'log':
+            value = left.value.log(right.value);
+            break;
           case '\\':
             throw new Error('Preference not supported with backslahes');
           default:
@@ -1041,7 +1073,7 @@ export class ExpressionVisitor {
         }
         return resolvePreference(value, left, right, node);
       }
-      switch (node.operator) {
+      switch (operator) {
         case '===':
           return sonicBool(left.strictEquals(right));
         case '!==':
@@ -1082,9 +1114,12 @@ export class ExpressionVisitor {
           return left.dot(right);
         case 'red':
           return left.reduce(right);
-        default:
-          throw new Error(`${node.operator} unimplemented`);
+        case 'to':
+          return left.roundTo(right);
+        case 'by':
+          return left.pitchRoundTo(right);
       }
+      operator satisfies never;
     }
     switch (node.operator) {
       case '===':
@@ -1105,7 +1140,7 @@ export class ExpressionVisitor {
     if (typeof left === 'function' || typeof right === 'function') {
       throw new Error('Cannot operate on functions');
     }
-    if (Array.isArray(left)) {
+    if (Array.isArray(left) || Array.isArray(right)) {
       throw new Error('Cannot operate on arrays');
     }
     if (typeof left === 'string' || typeof right === 'string') {
@@ -1113,20 +1148,6 @@ export class ExpressionVisitor {
     }
     if (left === undefined || right === undefined) {
       throw new Error('Cannot operate on nothing');
-    }
-    if (Array.isArray(right)) {
-      switch (node.operator) {
-        case 'of':
-          return sonicBool(strictIncludes(left, right));
-        case '!of':
-          return sonicBool(!strictIncludes(left, right));
-        case '~of':
-          return sonicBool(includes(left, right));
-        case '!~of':
-          return sonicBool(!includes(left, right));
-        default:
-          throw new Error(`${node.operator} not supported with arrays`);
-      }
     }
     throw new Error('Unhandled binary operation');
   }
