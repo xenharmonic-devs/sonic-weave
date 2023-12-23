@@ -3,6 +3,7 @@ import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
+import {asAbsoluteFJS} from './fjs';
 
 // Runtime
 
@@ -80,6 +81,18 @@ function mosSubset(
     options
   );
   return result.map(Interval.fromInteger);
+}
+
+function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
+  const C4 = this.rootContext.C4;
+  let monzo: TimeMonzo;
+  if (C4.timeExponent.n === 0) {
+    monzo = relog.bind(this)(interval).value;
+  } else {
+    monzo = ablog.bind(this)(interval).value;
+  }
+  const node = asAbsoluteFJS(monzo.div(C4));
+  return new Interval(monzo, 'logarithmic', node);
 }
 
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
@@ -397,6 +410,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  absoluteFJS,
   hasConstantStructure,
   toString,
   slice,
