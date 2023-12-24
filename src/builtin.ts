@@ -194,6 +194,30 @@ function bool(this: ExpressionVisitor, interval: Interval) {
   return b;
 }
 
+function fraction(
+  this: ExpressionVisitor,
+  interval: Interval,
+  epsilon?: Interval
+) {
+  const converted = relin.bind(this)(interval);
+  let eps = 1e-4;
+  if (epsilon === undefined) {
+    if (converted.value.isFractional()) {
+      return new Interval(
+        converted.value,
+        'linear',
+        converted.value.asFractionLiteral(),
+        interval
+      );
+    }
+  } else {
+    eps = epsilon.value.valueOf();
+  }
+  const frac = new Fraction(converted.value.valueOf()).simplify(eps);
+  const value = TimeMonzo.fromFraction(frac);
+  return new Interval(value, 'linear', value.asFractionLiteral(), interval);
+}
+
 export function cents(
   this: ExpressionVisitor,
   interval: Interval,
@@ -521,6 +545,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   // Type conversion
   bool,
   int: trunc,
+  fraction,
   cents,
   absoluteFJS,
   FJS,

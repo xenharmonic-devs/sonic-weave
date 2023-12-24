@@ -231,6 +231,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(three.toString()).toBe('3');
   });
 
+  it('converts pi to a fraction', () => {
+    const approximant = parseSingle('fraction(PI)');
+    expect(approximant.toString()).toBe('333/106');
+  });
+
   it('converts pi to soft cents', () => {
     const approximant = parseSingle('cents(PI, 3)');
     expect(approximant.toString()).toBe('1981.795');

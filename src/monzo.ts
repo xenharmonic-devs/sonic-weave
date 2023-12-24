@@ -1154,9 +1154,16 @@ export class TimeMonzo {
     return undefined;
   }
 
-  asFractionLiteral(node: FractionLiteral) {
+  asFractionLiteral(node?: FractionLiteral): FractionLiteral | undefined {
     if (this.isFractional()) {
       const {numerator, denominator} = this.toBigNumeratorDenominator();
+      if (node === undefined) {
+        return {
+          type: 'FractionLiteral',
+          numerator,
+          denominator,
+        };
+      }
       let factor = bigGcd(node.numerator, node.denominator);
       if (factor === 1n && node.denominator % denominator === 0n) {
         factor = node.denominator / denominator;
