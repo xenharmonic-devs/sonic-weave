@@ -596,10 +596,11 @@ VectorComponents
   = VectorComponent|.., _ ','? _|
 
 MonzoLiteral
-  = '[' _ components: VectorComponents _ '>' {
+  = downs: 'v'* '[' _ components: VectorComponents _ '>' {
     return {
       type: 'MonzoLiteral',
       components,
+      downs: downs.length,
     };
   }
 

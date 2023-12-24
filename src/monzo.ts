@@ -19,6 +19,8 @@ import {
   FractionLiteral,
   CentsLiteral,
   IntegerLiteral,
+  MonzoLiteral,
+  VectorComponent,
 } from './expression';
 
 export type FractionalMonzo = Fraction[];
@@ -1197,6 +1199,34 @@ export class TimeMonzo {
       };
     }
     return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  asMonzoLiteral(node?: MonzoLiteral): MonzoLiteral | undefined {
+    const downs = -this.cents;
+    if (!Number.isInteger(downs)) {
+      return undefined;
+    }
+    if (this.residual.compare(ONE)) {
+      return undefined;
+    }
+    const components: VectorComponent[] = [];
+    for (const pe of this.primeExponents) {
+      const right = pe.d === 1 ? '' : pe.d.toString();
+      const separator = pe.d === 1 ? undefined : '/';
+      const component: VectorComponent = {
+        sign: pe.s < 0 ? '-' : '',
+        left: BigInt(pe.n),
+        right,
+        separator,
+        exponent: null,
+      };
+      components.push(component);
+    }
+    while (components.length && components[components.length - 1].left === 0n) {
+      components.pop();
+    }
+    return {type: 'MonzoLiteral', components, downs};
   }
 
   toString(linear = true) {

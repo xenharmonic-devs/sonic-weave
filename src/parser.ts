@@ -777,6 +777,7 @@ export class ExpressionVisitor {
   visitMonzoLiteral(node: MonzoLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
     const value = new TimeMonzo(ZERO, primeExponents);
+    value.cents = -node.downs;
     return new Interval(value, 'logarithmic', node);
   }
 

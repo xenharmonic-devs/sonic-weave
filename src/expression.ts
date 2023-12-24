@@ -96,6 +96,7 @@ export type VectorComponent = {
 export type MonzoLiteral = {
   type: 'MonzoLiteral';
   components: VectorComponent[];
+  downs: number;
 };
 
 export type ValLiteral = {
@@ -286,17 +287,28 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
   return result;
 }
 
-function formatFJS(literal: FJS) {
-  let ups: string;
+function formatUps(literal: FJS | AbsoluteFJS | MonzoLiteral) {
   if (literal.downs > 0) {
-    ups = 'v'.repeat(literal.downs);
+    return 'v'.repeat(literal.downs);
   } else {
-    ups = '^'.repeat(-literal.downs);
+    return '^'.repeat(-literal.downs);
   }
+}
+
+function formatFJS(literal: FJS) {
+  const ups = formatUps(literal);
   const d = literal.pythagorean.degree;
   return `${ups}${literal.pythagorean.quality}${d.negative ? '-' : ''}${
     d.base + 7 * d.octaves
   }${tailFJS(literal)}`;
+}
+
+function formatAbsoluteFJS(literal: AbsoluteFJS) {
+  const ups = formatUps(literal);
+  const p = literal.pitch;
+  return `${ups}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
+    literal
+  )}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {
@@ -316,7 +328,9 @@ function formatDecimal(literal: DecimalLiteral) {
 export function formatComponent(component: VectorComponent) {
   const {sign, left, separator, right, exponent} = component;
   const exponentPart = exponent ? `e${exponent}` : '';
-  return `${sign === '-' ? '-' : ''}${left}${separator}${right}${exponentPart}`;
+  return `${sign === '-' ? '-' : ''}${left}${
+    separator ?? ''
+  }${right}${exponentPart}`;
 }
 
 function formatComponents(components: VectorComponent[]) {
@@ -355,11 +369,7 @@ export function toString(literal: IntervalLiteral) {
     case 'FJS':
       return formatFJS(literal);
     case 'AbsoluteFJS':
-      // eslint-disable-next-line no-case-declarations
-      const p = literal.pitch;
-      return `${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
-        literal
-      )}`;
+      return formatAbsoluteFJS(literal);
     case 'WartsLiteral':
       return `${literal.equave}${literal.divisions}${literal.warts.join(
         ''
@@ -369,7 +379,7 @@ export function toString(literal: IntervalLiteral) {
     case 'SecondLiteral':
       return `${literal.prefix}s`;
     case 'MonzoLiteral':
-      return `[${formatComponents(literal.components)}>`;
+      return `${formatUps(literal)}[${formatComponents(literal.components)}>`;
     case 'ValLiteral':
       return `<${formatComponents(literal.components)}]`;
     default:

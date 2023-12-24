@@ -55,10 +55,19 @@ export class Interval {
   color?: Color;
   label?: string;
 
-  constructor(value: TimeMonzo, domain: Domain, node?: IntervalLiteral) {
+  constructor(
+    value: TimeMonzo,
+    domain: Domain,
+    node?: IntervalLiteral,
+    convert?: Interval
+  ) {
     this.value = value;
     this.domain = domain;
     this.node = node;
+    if (convert !== undefined) {
+      this.color = convert.color;
+      this.label = convert.label;
+    }
   }
 
   static fromInteger(value: number | bigint) {
@@ -305,6 +314,8 @@ export function timeMonzoAs(
       return monzo.asNedjiLiteral(node);
     case 'CentsLiteral':
       return monzo.asCentsLiteral(node);
+    case 'MonzoLiteral':
+      return monzo.asMonzoLiteral(node);
     case 'FJS':
       return asFJS(monzo);
     case 'AbsoluteFJS':

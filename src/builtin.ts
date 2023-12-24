@@ -3,7 +3,7 @@ import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
-import {asAbsoluteFJS} from './fjs';
+import {asAbsoluteFJS, asFJS} from './fjs';
 import {inspect} from 'node:util';
 
 // Runtime
@@ -39,12 +39,14 @@ export function linearOne() {
   return new Interval(ONE_MONZO, 'linear', {type: 'IntegerLiteral', value: 1n});
 }
 
-// Library
+// === Library ===
 
+// == Constants
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 
+// == Second-party wrappers ==
 function isPrime_(n: Interval) {
   return sonicBool(isPrime(n.valueOf()));
 }
@@ -84,6 +86,8 @@ function mosSubset(
   return result.map(Interval.fromInteger);
 }
 
+// == Conversion ==
+
 function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
@@ -93,8 +97,22 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
     monzo = ablog.bind(this)(interval).value;
   }
   const node = asAbsoluteFJS(monzo.div(C4));
-  return new Interval(monzo, 'logarithmic', node);
+  return new Interval(monzo, 'logarithmic', node, interval);
 }
+
+function FJS(this: ExpressionVisitor, interval: Interval) {
+  const monzo = relog.bind(this)(interval).value;
+  const node = asFJS(monzo);
+  return new Interval(monzo, 'logarithmic', node, interval);
+}
+
+function toMonzo(this: ExpressionVisitor, interval: Interval) {
+  const monzo = relog.bind(this)(interval).value;
+  const node = monzo.asMonzoLiteral();
+  return new Interval(monzo, 'logarithmic', node, interval);
+}
+
+// == Other ==
 
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
@@ -431,6 +449,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   isPrime: isPrime_,
   primes: primes_,
   absoluteFJS,
+  FJS,
+  monzo: toMonzo,
   hasConstantStructure,
   toString,
   slice,
