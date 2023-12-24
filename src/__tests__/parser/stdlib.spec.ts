@@ -31,7 +31,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates tritave equivalent equal temperaments', () => {
-    const scale = parseSource('ed(3, 3);');
+    const scale = parseSource('ed(3,3);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\3<3>;2\\3<3>;3\\3<3>'
@@ -204,7 +204,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can compress a scale', () => {
-    const scale = parseSource('3/2;2;stretch(0,99);');
+    const scale = parseSource('3/2;2;stretch(99e-2);');
     expect(scale).toHaveLength(2);
     expect(scale[0].value.valueOf()).toBeCloseTo(1.494);
     expect(scale[1].value.valueOf()).toBeCloseTo(1.986);

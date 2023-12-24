@@ -314,15 +314,9 @@ function formatAbsoluteFJS(literal: AbsoluteFJS) {
 function formatDecimal(literal: DecimalLiteral) {
   let result = literal.whole.toString();
   if (literal.fractional) {
-    result += ',' + literal.fractional;
+    result += '.' + literal.fractional;
   }
-  if (literal.exponent === null) {
-    if (!literal.fractional) {
-      return result + ',';
-    }
-    return result;
-  }
-  return `${result}e${literal.exponent}`;
+  return `${result}e${literal.exponent ?? '0'}`;
 }
 
 export function formatComponent(component: VectorComponent) {

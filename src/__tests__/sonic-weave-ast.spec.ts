@@ -139,6 +139,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('parses scientific notation in dot decimals', () => {
+    const ast = parseSingle('42.0e-69');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'DecimalLiteral',
+        whole: 42n,
+        fractional: '0',
+        exponent: -69n,
+        hard: false,
+      },
+    });
+  });
+
   it('parses cents with implicit units', () => {
     const ast = parseSingle('1.955');
     expect(ast).toEqual({
@@ -417,6 +431,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         operand: {type: 'Identifier', id: 'i'},
         prefix: false,
         uniform: false,
+      },
+    });
+  });
+
+  it('parses a lone comma-decimal', () => {
+    const ast = parseSingle('3,14');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'DecimalLiteral',
+        whole: 3n,
+        fractional: '14',
+        exponent: null,
+        hard: false,
       },
     });
   });

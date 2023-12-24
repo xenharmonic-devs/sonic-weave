@@ -163,7 +163,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can color and label an interval directly', () => {
-    const greenFifth = parseSingle('1,5 green "fifth"');
+    const greenFifth = parseSingle('1.5e0 green "fifth"');
     expect(greenFifth.color?.value).toBe('#008000');
     expect(greenFifth.label).toBe('fifth');
   });
@@ -186,6 +186,11 @@ describe('SonicWeave expression evaluator', () => {
   it("bails out when there's no Pythagorean to match", () => {
     const thirdFifth = parseSingle('P5 % 3');
     expect(thirdFifth.toString()).toBe('1\\3<3/2>');
+  });
+
+  it('can format a decimal', () => {
+    const minorThird = parseSingle('1,2');
+    expect(minorThird.toString()).toBe('1.2e0');
   });
 
   it('has a constant structure calculator', () => {

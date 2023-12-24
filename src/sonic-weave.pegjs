@@ -222,7 +222,7 @@ ForOfStatement
   }
 
 ExpressionStatement
-  = !("{" / FunctionToken) expression: Expression EOS {
+  = !("{" / FunctionToken) expression: (CommaDecimal / Expression) EOS {
     return {
       type: 'ExpressionStatement',
       expression,
@@ -457,7 +457,6 @@ ScalarMultiple
 ScalarLike
   = ParenthesizedExpression
   / DotDecimal
-  / CommaDecimal
   / FractionLiteral
   / IntegerLiteral
 
@@ -476,6 +475,7 @@ Primary
   / TrueLiteral
   / FalseLiteral
   / NedoLiteral
+  / SoftDotDecimalWithExponent
   / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
@@ -505,18 +505,9 @@ NedjiProjector
     };
   }
 
-SoftDotDecimal
-  = whole: Integer exponent: ExponentPart {
-    return {
-      type: 'DecimalLiteral',
-      whole,
-      fractional: '',
-      exponent,
-      hard: false,
-    };
-  }
-  / !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart exponent: ExponentPart?  {
+SoftDotDecimalWithExponent
+  = !('.' [^0-9])
+  whole: Integer? '.' !'.' fractional: FractionalPart exponent: ExponentPart  {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -525,9 +516,30 @@ SoftDotDecimal
       hard: false,
     };
   }
+  / whole: Integer exponent: ExponentPart {
+    return {
+      type: 'DecimalLiteral',
+      whole,
+      fractional: '',
+      exponent,
+      hard: false,
+    };
+  }
+
+SoftDotDecimal
+  = !('.' [^0-9])
+  whole: Integer? '.' !'.' fractional: FractionalPart {
+    return {
+      type: 'DecimalLiteral',
+      whole: whole ?? 0n,
+      fractional: fractional,
+      exponent: null,
+      hard: false,
+    };
+  }
 
 HardDotDecimal
-  = soft: SoftDotDecimal '!' {
+  = soft: (SoftDotDecimalWithExponent / SoftDotDecimal) '!' {
     return {...soft, hard: true};
   }
   / whole: Integer '!' {
@@ -541,6 +553,7 @@ HardDotDecimal
 
 DotDecimal
   = HardDotDecimal
+  / SoftDotDecimalWithExponent
   / SoftDotDecimal
 
 CommaDecimal
