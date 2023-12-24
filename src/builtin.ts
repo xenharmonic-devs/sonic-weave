@@ -86,7 +86,119 @@ function mosSubset(
   return result.map(Interval.fromInteger);
 }
 
-// == Conversion ==
+// == Domain conversion ==
+
+// Get rid of formatting.
+function simplify(interval: Interval) {
+  return new Interval(
+    interval.value.clone(),
+    interval.domain,
+    undefined,
+    interval
+  );
+}
+
+function linear(interval: Interval) {
+  return new Interval(interval.value.clone(), 'linear', undefined, interval);
+}
+
+function logarithmic(interval: Interval) {
+  return new Interval(
+    interval.value.clone(),
+    'logarithmic',
+    undefined,
+    interval
+  );
+}
+
+function cologarithmic(interval: Interval) {
+  return new Interval(
+    interval.value.clone(),
+    'cologarithmic',
+    undefined,
+    interval
+  );
+}
+
+export function ablin(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
+  if (interval.isAbsolute()) {
+    const te = interval.value.timeExponent;
+    return new Interval(
+      interval.value.pow(te.inverse().neg()),
+      'linear',
+      undefined,
+      interval
+    );
+  }
+  if (this.rootContext.unisonFrequency === undefined) {
+    throw new Error(
+      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
+    );
+  }
+  return new Interval(
+    interval.value.mul(this.rootContext.unisonFrequency),
+    'linear',
+    undefined,
+    interval
+  );
+}
+
+export function relin(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
+  if (interval.isRelative()) {
+    return new Interval(interval.value.clone(), 'linear', undefined, interval);
+  }
+  if (this.rootContext.unisonFrequency === undefined) {
+    throw new Error(
+      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
+    );
+  }
+  const absoluteLinear = ablin.bind(this)(interval);
+  return new Interval(
+    absoluteLinear.value.div(this.rootContext.unisonFrequency),
+    'linear',
+    undefined,
+    interval
+  );
+}
+
+export function ablog(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
+  const converted = ablin.bind(this)(interval);
+  converted.domain = 'logarithmic';
+  return converted;
+}
+
+export function relog(
+  this: ExpressionVisitor | StatementVisitor,
+  interval: Interval
+) {
+  const converted = relin.bind(this)(interval);
+  converted.domain = 'logarithmic';
+  return converted;
+}
+
+// == Type conversion ==
+
+export function cents(this: ExpressionVisitor, interval: Interval) {
+  const converted = relog.bind(this)(interval);
+  converted.node = converted.value.asCentsLiteral();
+  return converted;
+}
+
+function bool(this: ExpressionVisitor, interval: Interval) {
+  const b = sonicBool(sonicTruth(relin.bind(this)(interval)));
+  b.color = interval.color;
+  b.label = interval.label;
+  return b;
+}
 
 function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   const C4 = this.rootContext.C4;
@@ -266,79 +378,6 @@ function length(this: ExpressionVisitor, scale?: Interval[]) {
   return Interval.fromInteger(scale.length);
 }
 
-// TODO: Preserve colors and labels
-
-// Get rid of formatting.
-function simplify(interval: Interval) {
-  return new Interval(interval.value.clone(), interval.domain);
-}
-
-export function ablin(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
-  if (interval.isAbsolute()) {
-    const te = interval.value.timeExponent;
-    return new Interval(interval.value.pow(te.inverse().neg()), 'linear');
-  }
-  if (this.rootContext.unisonFrequency === undefined) {
-    throw new Error(
-      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
-    );
-  }
-  return new Interval(
-    interval.value.mul(this.rootContext.unisonFrequency),
-    'linear'
-  );
-}
-
-export function relin(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
-  if (interval.isRelative()) {
-    return new Interval(interval.value.clone(), 'linear');
-  }
-  if (this.rootContext.unisonFrequency === undefined) {
-    throw new Error(
-      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
-    );
-  }
-  const absoluteLinear = ablin.bind(this)(interval);
-  return new Interval(
-    absoluteLinear.value.div(this.rootContext.unisonFrequency),
-    'linear'
-  );
-}
-
-export function ablog(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
-  const converted = ablin.bind(this)(interval);
-  converted.domain = 'logarithmic';
-  return converted;
-}
-
-export function relog(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
-  const converted = relin.bind(this)(interval);
-  converted.domain = 'logarithmic';
-  return converted;
-}
-
-export function cents(this: ExpressionVisitor, interval: Interval) {
-  const converted = relog.bind(this)(interval);
-  converted.node = timeMonzoAs(converted.value, {
-    type: 'CentsLiteral',
-    whole: 0n,
-    fractional: '',
-  });
-  return converted;
-}
-
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
   this: ExpressionVisitor,
@@ -442,15 +481,30 @@ function dir(arg: any) {
 }
 
 export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
+  // Constants
   E,
   PI,
   TAU,
+  // Second-party wrappers
   mosSubset,
   isPrime: isPrime_,
   primes: primes_,
+  // Domain conversion
+  simplify,
+  linear,
+  logarithmic,
+  cologarithmic,
+  relin,
+  ablin,
+  relog,
+  ablog,
+  // Type conversion
+  bool,
+  cents,
   absoluteFJS,
   FJS,
   monzo: toMonzo,
+  // Other
   hasConstantStructure,
   toString,
   slice,
@@ -473,12 +527,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   shift,
   unshift,
   length,
-  simplify,
-  relin,
-  ablin,
-  relog,
-  ablog,
-  cents,
   print,
   dir,
   map,

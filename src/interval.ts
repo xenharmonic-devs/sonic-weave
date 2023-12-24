@@ -307,15 +307,15 @@ export function timeMonzoAs(
   }
   switch (node.type) {
     case 'IntegerLiteral':
-      return monzo.asIntegerLiteral(node);
+      return monzo.asIntegerLiteral();
     case 'FractionLiteral':
       return monzo.asFractionLiteral(node);
     case 'NedoLiteral':
       return monzo.asNedjiLiteral(node);
     case 'CentsLiteral':
-      return monzo.asCentsLiteral(node);
+      return monzo.asCentsLiteral();
     case 'MonzoLiteral':
-      return monzo.asMonzoLiteral(node);
+      return monzo.asMonzoLiteral();
     case 'FJS':
       return asFJS(monzo);
     case 'AbsoluteFJS':

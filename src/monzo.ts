@@ -1130,26 +1130,26 @@ export class TimeMonzo {
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
   }
 
-  asCentsLiteral(node: CentsLiteral): CentsLiteral {
+  asCentsLiteral(): CentsLiteral {
     if (this.isPowerOfTwo()) {
       const cents = this.octaves.mul(1200);
       if (isDecimal(cents)) {
         // eslint-disable-next-line prefer-const
         let [whole, fractional] = cents.toString().split('.');
         fractional ??= '';
-        return {...node, whole: BigInt(whole), fractional};
+        return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
       }
     }
     const cents = this.totalCents();
     const whole = Math.floor(cents);
     // Note: This abuses the grammar
     const fractional = ((cents - whole).toString().split('.')[1] ?? '') + '!c';
-    return {...node, whole: BigInt(whole), fractional};
+    return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
   }
 
-  asIntegerLiteral(node: IntegerLiteral): IntegerLiteral | undefined {
+  asIntegerLiteral(): IntegerLiteral | undefined {
     if (this.isIntegral()) {
-      return {...node, value: this.toBigInteger()};
+      return {type: 'IntegerLiteral', value: this.toBigInteger()};
     }
     return undefined;
   }
@@ -1201,8 +1201,7 @@ export class TimeMonzo {
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  asMonzoLiteral(node?: MonzoLiteral): MonzoLiteral | undefined {
+  asMonzoLiteral(): MonzoLiteral | undefined {
     const downs = -this.cents;
     if (!Number.isInteger(downs)) {
       return undefined;

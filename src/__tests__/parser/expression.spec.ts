@@ -213,4 +213,16 @@ describe('SonicWeave expression evaluator', () => {
     const monzo = parseSingle('monzo(vm6_5)');
     expect(monzo.toString()).toBe('v[3 0 -1>');
   });
+
+  it('can convert cents to boolean', () => {
+    const yes = parseSingle('bool(0.0 red_)');
+    expect(yes.color?.value).toBe('#FF0000');
+    expect(yes.toString()).toBe('true');
+  });
+
+  it('can convert boolean to cents', () => {
+    const zeroCents = parseSingle('cents(true "yes")');
+    expect(zeroCents.label).toBe('yes');
+    expect(zeroCents.toString()).toBe('0.');
+  });
 });
