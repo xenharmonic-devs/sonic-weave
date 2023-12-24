@@ -226,6 +226,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(zeroCents.toString()).toBe('0.');
   });
 
+  it('converts pi to an integer', () => {
+    const three = parseSingle('int(PI)');
+    expect(three.toString()).toBe('3');
+  });
+
   it('converts pi to soft cents', () => {
     const approximant = parseSingle('cents(PI, 3)');
     expect(approximant.toString()).toBe('1981.795');

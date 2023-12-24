@@ -70,10 +70,15 @@ export class Interval {
     }
   }
 
-  static fromInteger(value: number | bigint) {
+  static fromInteger(value: number | bigint, convert?: Interval) {
     value = BigInt(value);
     const monzo = TimeMonzo.fromBigInt(value);
-    return new Interval(monzo, 'linear', {type: 'IntegerLiteral', value});
+    return new Interval(
+      monzo,
+      'linear',
+      {type: 'IntegerLiteral', value},
+      convert
+    );
   }
 
   toInteger(): number {

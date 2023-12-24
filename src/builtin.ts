@@ -52,8 +52,8 @@ function isPrime_(n: Interval) {
 }
 
 function primes_(start: Interval, end?: Interval) {
-  return primes(start.valueOf(), end ? end.valueOf() : undefined).map(
-    Interval.fromInteger
+  return primes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
+    Interval.fromInteger(p)
   );
 }
 
@@ -83,7 +83,7 @@ function mosSubset(
     numberOfSmallSteps.toInteger(),
     options
   );
-  return result.map(Interval.fromInteger);
+  return result.map(s => Interval.fromInteger(s));
 }
 
 // == Domain conversion ==
@@ -187,6 +187,13 @@ export function relog(
 
 // == Type conversion ==
 
+function bool(this: ExpressionVisitor, interval: Interval) {
+  const b = sonicBool(sonicTruth(relin.bind(this)(interval)));
+  b.color = interval.color;
+  b.label = interval.label;
+  return b;
+}
+
 export function cents(
   this: ExpressionVisitor,
   interval: Interval,
@@ -202,13 +209,6 @@ export function cents(
   }
   converted.node = converted.value.asCentsLiteral();
   return converted;
-}
-
-function bool(this: ExpressionVisitor, interval: Interval) {
-  const b = sonicBool(sonicTruth(relin.bind(this)(interval)));
-  b.color = interval.color;
-  b.label = interval.label;
-  return b;
 }
 
 function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
@@ -317,19 +317,28 @@ function randomCents() {
   return new Interval(value, 'logarithmic');
 }
 
-function floor(value: Interval) {
+function floor(this: ExpressionVisitor, value: Interval) {
+  value = relin.bind(this)(value);
   const n = Math.floor(value.value.valueOf());
-  return Interval.fromInteger(n);
+  return Interval.fromInteger(n, value);
 }
 
-function round(value: Interval) {
+function round(this: ExpressionVisitor, value: Interval) {
+  value = relin.bind(this)(value);
   const n = Math.round(value.value.valueOf());
-  return Interval.fromInteger(n);
+  return Interval.fromInteger(n, value);
 }
 
-function ceil(value: Interval) {
+function trunc(this: ExpressionVisitor, value: Interval) {
+  value = relin.bind(this)(value);
+  const n = Math.trunc(value.value.valueOf());
+  return Interval.fromInteger(n, value);
+}
+
+function ceil(this: ExpressionVisitor, value: Interval) {
+  value = relin.bind(this)(value);
   const n = Math.ceil(value.value.valueOf());
-  return Interval.fromInteger(n);
+  return Interval.fromInteger(n, value);
 }
 
 function abs(value: Interval) {
@@ -511,10 +520,16 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   ablog,
   // Type conversion
   bool,
+  int: trunc,
   cents,
   absoluteFJS,
   FJS,
   monzo: toMonzo,
+  // Integer conversion
+  floor,
+  round,
+  trunc,
+  ceil,
   // Other
   hasConstantStructure,
   toString,
@@ -527,9 +542,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   max,
   random,
   randomCents,
-  floor,
-  round,
-  ceil,
   isArray,
   sort,
   reverse,
