@@ -187,8 +187,19 @@ export function relog(
 
 // == Type conversion ==
 
-export function cents(this: ExpressionVisitor, interval: Interval) {
+export function cents(
+  this: ExpressionVisitor,
+  interval: Interval,
+  fractionDigits?: Interval
+) {
   const converted = relog.bind(this)(interval);
+  if (fractionDigits !== undefined) {
+    const denominator = 10 ** fractionDigits.toInteger();
+    const numerator = Math.round(converted.value.totalCents() * denominator);
+    converted.value = new TimeMonzo(ZERO, [
+      new Fraction(numerator, denominator * 1200),
+    ]);
+  }
   converted.node = converted.value.asCentsLiteral();
   return converted;
 }

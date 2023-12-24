@@ -225,4 +225,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(zeroCents.label).toBe('yes');
     expect(zeroCents.toString()).toBe('0.');
   });
+
+  it('converts pi to soft cents', () => {
+    const approximant = parseSingle('cents(PI, 3)');
+    expect(approximant.toString()).toBe('1981.795');
+  });
 });
