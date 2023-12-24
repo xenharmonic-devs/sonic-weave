@@ -21,6 +21,7 @@ import {
   IntegerLiteral,
   MonzoLiteral,
   VectorComponent,
+  DecimalLiteral,
 } from './expression';
 
 export type FractionalMonzo = Fraction[];
@@ -1128,6 +1129,34 @@ export class TimeMonzo {
       result = result.inverse().add(continuedFraction[i]);
     }
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
+  }
+
+  asDecimalLiteral(): DecimalLiteral {
+    if (this.isDecimal()) {
+      // eslint-disable-next-line prefer-const
+      let [whole, fractional] = this.toFraction().toString().split('.');
+      fractional ??= '';
+      return {
+        type: 'DecimalLiteral',
+        whole: BigInt(whole),
+        fractional,
+        exponent: null,
+        hard: false,
+      };
+    }
+    // eslint-disable-next-line prefer-const
+    let [numeric, exponent] = this.valueOf().toString().split('e');
+    exponent ??= '0';
+    // eslint-disable-next-line prefer-const
+    let [whole, fractional] = numeric.split('.');
+    fractional ??= '';
+    return {
+      type: 'DecimalLiteral',
+      whole: BigInt(whole),
+      fractional,
+      exponent: BigInt(exponent),
+      hard: true,
+    };
   }
 
   asCentsLiteral(): CentsLiteral {

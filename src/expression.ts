@@ -316,7 +316,12 @@ function formatDecimal(literal: DecimalLiteral) {
   if (literal.fractional) {
     result += '.' + literal.fractional;
   }
-  return `${result}e${literal.exponent ?? '0'}`;
+  const exponent = literal.exponent
+    ? 'e' + literal.exponent.toString()
+    : literal.hard
+    ? ''
+    : 'e0';
+  return `${result}${exponent}${literal.hard ? '!' : ''}`;
 }
 
 export function formatComponent(component: VectorComponent) {

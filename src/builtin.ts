@@ -194,6 +194,23 @@ function bool(this: ExpressionVisitor, interval: Interval) {
   return b;
 }
 
+function decimal(
+  this: ExpressionVisitor,
+  interval: Interval,
+  fractionDigits?: Interval
+) {
+  const converted = relin.bind(this)(interval);
+  if (fractionDigits !== undefined) {
+    const denominator = 10 ** fractionDigits.toInteger();
+    const numerator = Math.round(converted.value.valueOf() * denominator);
+    converted.value = TimeMonzo.fromFraction(
+      new Fraction(numerator, denominator)
+    );
+  }
+  converted.node = converted.value.asDecimalLiteral();
+  return converted;
+}
+
 function fraction(
   this: ExpressionVisitor,
   interval: Interval,
@@ -545,6 +562,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   // Type conversion
   bool,
   int: trunc,
+  decimal,
   fraction,
   cents,
   absoluteFJS,
