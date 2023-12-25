@@ -247,12 +247,22 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to a fraction', () => {
-    const approximant = parseSingle('fraction(PI)');
-    expect(approximant.toString()).toBe('333/106');
+    const approximation = parseSingle('fraction(PI)');
+    expect(approximation.toString()).toBe('333/106');
+  });
+
+  it('converts pi to a radical (outside of prime limit)', () => {
+    const approximation = parseSingle('radical(PI)');
+    expect(approximation.toString()).toBe('355/113');
+  });
+
+  it('converts pi to a radical (within prime limit)', () => {
+    const approximation = parseSingle('radical(PI, 10, 1000)');
+    expect(approximation.toString()).toBe('306^1/5');
   });
 
   it('converts pi to soft cents', () => {
-    const approximant = parseSingle('cents(PI, 3)');
-    expect(approximant.toString()).toBe('1981.795');
+    const approximation = parseSingle('cents(PI, 3)');
+    expect(approximation.toString()).toBe('1981.795');
   });
 });

@@ -1,5 +1,6 @@
 import {MetricPrefix, bigLcm} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
+import {Fraction} from 'xen-dev-utils';
 
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
@@ -18,6 +19,13 @@ export type FractionLiteral = {
   type: 'FractionLiteral';
   numerator: bigint;
   denominator: bigint;
+};
+
+// Not found in the AST
+export type RadicalLiteral = {
+  type: 'RadicalLiteral';
+  argument: Fraction;
+  exponent: Fraction;
 };
 
 export type NedjiLiteral = {
@@ -108,6 +116,7 @@ export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
   | FractionLiteral
+  | RadicalLiteral
   | NedjiLiteral
   | CentsLiteral
   | CentLiteral
@@ -353,6 +362,8 @@ export function toString(literal: IntervalLiteral) {
       return formatNedji(literal);
     case 'FractionLiteral':
       return `${literal.numerator}/${literal.denominator}`;
+    case 'RadicalLiteral':
+      return `${literal.argument.toFraction()}^${literal.exponent.toFraction()}`;
     case 'DecimalLiteral':
       return formatDecimal(literal);
     case 'CentsLiteral':

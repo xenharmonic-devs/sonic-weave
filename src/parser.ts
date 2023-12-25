@@ -739,6 +739,8 @@ export class ExpressionVisitor {
         return node.elements.map(this.visit.bind(this)) as SonicWeaveValue;
       case 'StringLiteral':
         return node.value;
+      case 'RadicalLiteral':
+        throw new Error('Unexpected radical literal');
     }
     node satisfies never;
   }

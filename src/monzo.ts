@@ -22,13 +22,14 @@ import {
   MonzoLiteral,
   VectorComponent,
   DecimalLiteral,
+  RadicalLiteral,
 } from './expression';
 
 export type FractionalMonzo = Fraction[];
 
 const MAX_POW_DENOMINATOR = 10000;
 
-let NUMBER_OF_COMPONENTS = 6; // Primes 2, 3, 5, 7, 11 and 13
+let NUMBER_OF_COMPONENTS = 9; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
 
 /**
  * Set the default number of components in the vector part of extended monzos.
@@ -1156,6 +1157,18 @@ export class TimeMonzo {
       fractional,
       exponent: BigInt(exponent),
       hard: true,
+    };
+  }
+
+  asRadicalLiteral(): RadicalLiteral | undefined {
+    if (!this.isEqualTemperament()) {
+      return undefined;
+    }
+    const {fractionOfEquave, equave} = this.toEqualTemperament();
+    return {
+      type: 'RadicalLiteral',
+      argument: equave,
+      exponent: fractionOfEquave,
     };
   }
 

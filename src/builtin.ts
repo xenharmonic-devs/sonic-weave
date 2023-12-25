@@ -1,4 +1,11 @@
-import {Fraction, kCombinations, mmod, isPrime, primes} from 'xen-dev-utils';
+import {
+  Fraction,
+  kCombinations,
+  mmod,
+  isPrime,
+  primes,
+  approximateRadical,
+} from 'xen-dev-utils';
 import {Color, Interval, timeMonzoAs} from './interval';
 import {TimeMonzo} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
@@ -233,6 +240,48 @@ function fraction(
   const frac = new Fraction(converted.value.valueOf()).simplify(eps);
   const value = TimeMonzo.fromFraction(frac);
   return new Interval(value, 'linear', value.asFractionLiteral(), interval);
+}
+
+function radical(
+  this: ExpressionVisitor,
+  interval: Interval,
+  maxIndex: Interval,
+  maxHeight: Interval
+) {
+  const converted = relin.bind(this)(interval);
+  if (converted.value.isEqualTemperament()) {
+    return new Interval(
+      converted.value,
+      'linear',
+      converted.value.asRadicalLiteral(),
+      interval
+    );
+  }
+  const {index, radicant} = approximateRadical(
+    converted.value.valueOf(),
+    maxIndex === undefined ? undefined : maxHeight.toInteger(),
+    maxHeight === undefined ? undefined : maxHeight.toInteger()
+  );
+  const value = TimeMonzo.fromFraction(radicant).pow(
+    new Fraction(index).inverse()
+  );
+  const node = value.asRadicalLiteral();
+  if (node !== undefined) {
+    return new Interval(value, 'linear', node, interval);
+  } else {
+    const frac = approximateRadical(
+      converted.value.valueOf(),
+      1,
+      maxHeight === undefined ? undefined : maxHeight.toInteger()
+    ).radicant;
+    const rational = TimeMonzo.fromFraction(frac);
+    return new Interval(
+      rational,
+      'linear',
+      rational.asFractionLiteral(),
+      interval
+    );
+  }
 }
 
 export function cents(
@@ -564,6 +613,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   int: trunc,
   decimal,
   fraction,
+  radical,
   cents,
   absoluteFJS,
   FJS,
