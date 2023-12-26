@@ -7,7 +7,7 @@ import {
   toMonzo,
   valueToCents,
 } from 'xen-dev-utils';
-import {TimeMonzo, getNumberOfComponents} from './monzo';
+import {TimeMonzo} from './monzo';
 import {AbsoluteFJS, FJS} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
 
@@ -84,7 +84,6 @@ function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
       new Fraction(twos),
       new Fraction(threes),
     ]);
-    timeMonzo.numberOfComponents = getNumberOfComponents();
     yield timeMonzo.mul(TimeMonzo.fromFraction(PRIMES[i]));
     i++;
   }

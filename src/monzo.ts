@@ -686,7 +686,6 @@ export class TimeMonzo {
     return result;
   }
 
-  // TODO: Promote to same number of components
   /**
    * Multiply the time monzo with another in linear space i.e. add in logarithmic space.
    * @param other Another time monzo.
@@ -695,6 +694,10 @@ export class TimeMonzo {
   mul(other: TimeMonzo): TimeMonzo {
     if (this.primeExponents.length < other.primeExponents.length) {
       return other.mul(this);
+    }
+    if (other.primeExponents.length < this.primeExponents.length) {
+      other = other.clone();
+      other.numberOfComponents = this.primeExponents.length;
     }
     const vector = [];
     for (let i = 0; i < other.primeExponents.length; ++i) {
@@ -718,28 +721,25 @@ export class TimeMonzo {
    * @returns This monzo divided by the other monzo in linear space.
    */
   div(other: TimeMonzo) {
-    const vector = [];
-    if (this.primeExponents.length <= other.primeExponents.length) {
-      for (let i = 0; i < this.primeExponents.length; ++i) {
-        vector.push(this.primeExponents[i].sub(other.primeExponents[i]));
-      }
-      while (vector.length < other.primeExponents.length) {
-        vector.push(other.primeExponents[vector.length].neg());
-      }
-    } else {
-      for (let i = 0; i < other.primeExponents.length; ++i) {
-        vector.push(this.primeExponents[i].sub(other.primeExponents[i]));
-      }
-      while (vector.length < this.primeExponents.length) {
-        vector.push(new Fraction(this.primeExponents[vector.length]));
-      }
+    let self = this as TimeMonzo;
+    if (self.primeExponents.length < other.primeExponents.length) {
+      self = self.clone();
+      self.numberOfComponents = other.primeExponents.length;
     }
-    const residual = this.residual.div(other.residual);
+    if (other.primeExponents.length < self.primeExponents.length) {
+      other = other.clone();
+      other.numberOfComponents = self.primeExponents.length;
+    }
+    const vector = [];
+    for (let i = 0; i < other.primeExponents.length; ++i) {
+      vector.push(self.primeExponents[i].sub(other.primeExponents[i]));
+    }
+    const residual = self.residual.div(other.residual);
     return new TimeMonzo(
-      this.timeExponent.sub(other.timeExponent),
+      self.timeExponent.sub(other.timeExponent),
       vector,
       residual,
-      this.cents - other.cents
+      self.cents - other.cents
     );
   }
 
