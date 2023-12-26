@@ -348,8 +348,20 @@ describe('Extended Monzo', () => {
       new Fraction(31, 23),
       1.25
     );
-    expect(value.toString(false)).toBe(
+    expect(value.toString('logarithmic')).toBe(
       '-3/2*logarithmic(s)+^[3/2 -5/3>+relog(31/23)+0.25!c'
+    );
+  });
+
+  it('has a generic representation for cologarithmic quantities', () => {
+    const value = new TimeMonzo(
+      new Fraction(-3, 2),
+      [new Fraction(3, 2), new Fraction(-5, 3)],
+      new Fraction(31, 23),
+      2.25
+    );
+    expect(value.toString('cologarithmic')).toBe(
+      '-3/2*cologarithmic(s)+^<3/2 -5/3]+cologarithmic(31/23)+0.25!€'
     );
   });
 });

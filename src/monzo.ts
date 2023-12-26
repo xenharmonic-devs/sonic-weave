@@ -28,6 +28,8 @@ import {
 
 export type FractionalMonzo = Fraction[];
 
+export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
+
 const MAX_POW_DENOMINATOR = 10000;
 
 let NUMBER_OF_COMPONENTS = 9; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
@@ -1280,11 +1282,11 @@ export class TimeMonzo {
 
   /**
    * Faithful string representation of the monzo.
-   * @param linear If true, obtain a linear representation.
+   * @param domain Domain of representation.
    * @returns String that evaluates to the same value as this monzo.
    */
-  toString(linear = true) {
-    if (linear) {
+  toString(domain: Domain = 'linear') {
+    if (domain === 'linear') {
       if (this.isScalar()) {
         if (this.isIntegral()) {
           return this.toBigInteger().toString();
@@ -1325,7 +1327,7 @@ export class TimeMonzo {
         factors.push(`s^${this.timeExponent.toFraction()}`);
       }
       return factors.join('*');
-    } else {
+    } else if (domain === 'logarithmic') {
       if (this.isScalar()) {
         if (this.isEqualTemperament()) {
           const {fractionOfEquave, equave} = this.toEqualTemperament();
@@ -1363,5 +1365,28 @@ export class TimeMonzo {
       }
       return result;
     }
+    let result = '';
+    if (this.timeExponent.equals(NEGATIVE_ONE)) {
+      result = 'cologarithmic(Hz)+';
+    } else if (this.timeExponent.n) {
+      result = `${this.timeExponent.toFraction()}*cologarithmic(s)+`;
+    }
+    const ups = clamp(-10, 10, Math.round(this.cents) - 1);
+    if (ups > 0) {
+      result += '^'.repeat(ups);
+    } else {
+      result += 'v'.repeat(-ups);
+    }
+    result +=
+      '<' + this.primeExponents.map(f => f.toFraction()).join(' ') + ']';
+    if (this.residual.compare(ONE)) {
+      result += `+cologarithmic(${this.residual.toFraction()})`;
+    }
+    const cents = this.cents - ups - 1;
+    if (cents) {
+      const sign = cents >= 0 ? '+' : '-';
+      result += `${sign}${Math.abs(cents)}!€`;
+    }
+    return result;
   }
 }

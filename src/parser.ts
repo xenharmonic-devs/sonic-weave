@@ -17,8 +17,8 @@ import {
   formatComponent,
   ValLiteral,
 } from './expression';
-import {Interval, Color, Domain, timeMonzoAs} from './interval';
-import {TimeMonzo} from './monzo';
+import {Interval, Color, timeMonzoAs} from './interval';
+import {TimeMonzo, Domain} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from './css-colors';
 import {
@@ -787,7 +787,7 @@ export class ExpressionVisitor {
     const primeExponents = node.components.map(this.visitComponent);
     const value = new TimeMonzo(ZERO, primeExponents);
     // Rig ups-and-downs.
-    value.cents = 1;
+    value.cents = 1 - node.downs;
     return new Interval(value, 'cologarithmic', node);
   }
 

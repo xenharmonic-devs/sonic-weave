@@ -110,6 +110,7 @@ export type MonzoLiteral = {
 export type ValLiteral = {
   type: 'ValLiteral';
   components: VectorComponent[];
+  downs: number;
 };
 
 export type IntervalLiteral =
@@ -296,7 +297,7 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
   return result;
 }
 
-function formatUps(literal: FJS | AbsoluteFJS | MonzoLiteral) {
+function formatUps(literal: FJS | AbsoluteFJS | MonzoLiteral | ValLiteral) {
   if (literal.downs > 0) {
     return 'v'.repeat(literal.downs);
   } else {
@@ -391,7 +392,7 @@ export function toString(literal: IntervalLiteral) {
     case 'MonzoLiteral':
       return `${formatUps(literal)}[${formatComponents(literal.components)}>`;
     case 'ValLiteral':
-      return `<${formatComponents(literal.components)}]`;
+      return `${formatUps(literal)}<${formatComponents(literal.components)}]`;
     default:
       return literal.value.toString();
   }

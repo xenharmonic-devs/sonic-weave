@@ -10,10 +10,8 @@ import {
   toString,
   upNode,
 } from './expression';
-import {TimeMonzo} from './monzo';
+import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
-
-export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
 
 export class Color {
   value: string;
@@ -292,7 +290,7 @@ export class Interval {
     if (this.node) {
       return toString(this.node);
     }
-    return this.value.toString(this.domain === 'linear');
+    return this.value.toString(this.domain);
   }
 
   valueOf() {

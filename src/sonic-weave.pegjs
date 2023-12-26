@@ -618,10 +618,11 @@ MonzoLiteral
   }
 
 ValLiteral
-  = '<' _ components: VectorComponents _ ']' {
+  = downs: 'v'* '<' _ components: VectorComponents _ ']' {
     return {
       type: 'ValLiteral',
       components,
+      downs: downs.length,
     };
   }
 
