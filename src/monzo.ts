@@ -299,6 +299,30 @@ export class TimeMonzo {
     return this.primeExponents.length;
   }
 
+  set numberOfComponents(value: number) {
+    while (this.primeExponents.length > value) {
+      const index = this.primeExponents.length;
+      const pe = this.primeExponents.pop()!;
+      if (pe.d === 1) {
+        this.residual = this.residual.mul(new Fraction(PRIMES[index]).pow(pe)!);
+      } else {
+        this.cents += PRIME_CENTS[index];
+      }
+    }
+    if (this.primeExponents.length < value) {
+      const [residualMonzo, newResidual] = toMonzoAndResidual(
+        this.residual,
+        value
+      );
+      while (this.primeExponents.length < value) {
+        this.primeExponents.push(
+          new Fraction(residualMonzo[this.primeExponents.length])
+        );
+      }
+      this.residual = newResidual;
+    }
+  }
+
   get octaves() {
     if (this.numberOfComponents > 0) {
       return this.primeExponents[0];
@@ -662,6 +686,7 @@ export class TimeMonzo {
     return result;
   }
 
+  // TODO: Promote to same number of components
   /**
    * Multiply the time monzo with another in linear space i.e. add in logarithmic space.
    * @param other Another time monzo.
@@ -1340,6 +1365,15 @@ export class TimeMonzo {
           }
           return backslashed;
         }
+        if (
+          this.residual.equals(ONE) &&
+          this.primeExponents.every(pe => !pe.n)
+        ) {
+          if (this.cents) {
+            return this.cents.toString() + '!c';
+          }
+          return '0c';
+        }
       }
       let result = '';
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
@@ -1353,8 +1387,11 @@ export class TimeMonzo {
       } else {
         result += 'v'.repeat(-ups);
       }
-      result +=
-        '[' + this.primeExponents.map(f => f.toFraction()).join(' ') + '>';
+      const pe = [...this.primeExponents];
+      while (pe.length && !pe[pe.length - 1].n) {
+        pe.pop();
+      }
+      result += '[' + pe.map(f => f.toFraction()).join(' ') + '>';
       if (this.residual.compare(ONE)) {
         result += `+relog(${this.residual.toFraction()})`;
       }
@@ -1377,8 +1414,11 @@ export class TimeMonzo {
     } else {
       result += 'v'.repeat(-ups);
     }
-    result +=
-      '<' + this.primeExponents.map(f => f.toFraction()).join(' ') + ']';
+    const pe = [...this.primeExponents];
+    while (pe.length && !pe[pe.length - 1].n) {
+      pe.pop();
+    }
+    result += '<' + pe.map(f => f.toFraction()).join(' ') + ']';
     if (this.residual.compare(ONE)) {
       result += `+cologarithmic(${this.residual.toFraction()})`;
     }

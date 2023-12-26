@@ -1,12 +1,13 @@
 import {
   BIG_INT_PRIMES,
   Fraction,
+  PRIMES,
   PRIME_CENTS,
   circleDistance,
   toMonzo,
   valueToCents,
 } from 'xen-dev-utils';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo, getNumberOfComponents} from './monzo';
 import {AbsoluteFJS, FJS} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
 
@@ -79,14 +80,12 @@ function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
       commaCents += PRIME_CENTS[0];
       twos++;
     }
-    const monzo = Array(i + 1).fill(0);
-    monzo[0] = twos;
-    monzo[1] = threes;
-    monzo[i] = 1;
-    yield new TimeMonzo(
-      ZERO,
-      monzo.map(c => new Fraction(c))
-    );
+    const timeMonzo = new TimeMonzo(ZERO, [
+      new Fraction(twos),
+      new Fraction(threes),
+    ]);
+    timeMonzo.numberOfComponents = getNumberOfComponents();
+    yield timeMonzo.mul(TimeMonzo.fromFraction(PRIMES[i]));
     i++;
   }
 }
@@ -183,6 +182,19 @@ export function uninflect(monzo: TimeMonzo) {
     for (let j = 0; pe[i].compare(-j) < 0; ++j) {
       subscripts.push(BIG_INT_PRIMES[i]);
     }
+  }
+  try {
+    const rpe = toMonzo(monzo.residual);
+    for (let i = 2; i < rpe.length; ++i) {
+      for (let j = 0; j < rpe[i]; ++j) {
+        superscripts.push(BIG_INT_PRIMES[i]);
+      }
+      for (let j = 0; j > rpe[i]; --j) {
+        subscripts.push(BIG_INT_PRIMES[i]);
+      }
+    }
+  } catch (e) {
+    /* empty */
   }
   const pythagoreanMonzo = monzo.div(
     formalInflection(superscripts, subscripts)

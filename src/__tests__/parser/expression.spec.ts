@@ -265,4 +265,36 @@ describe('SonicWeave expression evaluator', () => {
     const approximation = parseSingle('cents(PI, 3)');
     expect(approximation.toString()).toBe('1981.795');
   });
+
+  it.each([
+    'bool',
+    'int',
+    'decimal',
+    'fraction',
+    'radical',
+    'cents',
+    'FJS',
+    'absoluteFJS',
+    'monzo',
+  ])('has a string representation for variants of %s(pi)', (tier: string) => {
+    for (const hz of ['', 'Hz']) {
+      for (const conversion of [
+        'simplify',
+        'relin',
+        'relog',
+        'ablin',
+        'ablog',
+        'cologarithmic',
+      ]) {
+        const value = parseSingle(
+          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793!${hz}))`
+        );
+        const iterated = parseSingle(
+          `A=4 = 440Hz = 27/16; ${value.toString()}`
+        );
+        expect(iterated.domain).toBe(value.domain);
+        expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
+      }
+    }
+  });
 });

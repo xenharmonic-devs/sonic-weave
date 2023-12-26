@@ -309,18 +309,39 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   } else {
     monzo = ablog.bind(this)(interval).value;
   }
-  const node = asAbsoluteFJS(monzo.div(C4));
-  return new Interval(monzo, 'logarithmic', node, interval);
+  let relativeToC4 = monzo.div(C4);
+  const node = asAbsoluteFJS(relativeToC4);
+  if (node) {
+    return new Interval(monzo, 'logarithmic', node, interval);
+  }
+  relativeToC4 = relativeToC4.approximateSimple();
+  return new Interval(
+    C4.mul(relativeToC4),
+    'logarithmic',
+    asAbsoluteFJS(relativeToC4),
+    interval
+  );
 }
 
 function FJS(this: ExpressionVisitor, interval: Interval) {
   const monzo = relog.bind(this)(interval).value;
   const node = asFJS(monzo);
-  return new Interval(monzo, 'logarithmic', node, interval);
+  if (node) {
+    return new Interval(monzo, 'logarithmic', node, interval);
+  }
+  const approximation = monzo.approximateSimple();
+  return new Interval(
+    approximation,
+    'logarithmic',
+    asFJS(approximation),
+    interval
+  );
 }
 
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const monzo = relog.bind(this)(interval).value;
+  monzo.cents = Math.round(monzo.cents);
+  monzo.residual = new Fraction(1);
   const node = monzo.asMonzoLiteral();
   return new Interval(monzo, 'logarithmic', node, interval);
 }
