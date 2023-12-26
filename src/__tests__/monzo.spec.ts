@@ -323,4 +323,33 @@ describe('Extended Monzo', () => {
     const six = TimeMonzo.fromFraction(6, 2);
     expect(six.isPowerOfTwo()).toBeFalsy();
   });
+
+  it('has a generic representation for linear quantities', () => {
+    const value = new TimeMonzo(
+      new Fraction(1, 2),
+      [
+        new Fraction(2),
+        new Fraction(3, 2),
+        new Fraction(0),
+        new Fraction(-5, 3),
+      ],
+      new Fraction(-31, 23),
+      -1.25
+    );
+    expect(value.toString()).toBe(
+      '2^2*3^3/2*7^-5/3*-31/23*0.9992782322866353!*s^1/2'
+    );
+  });
+
+  it('has a generic representation for logarithmic quantities', () => {
+    const value = new TimeMonzo(
+      new Fraction(-3, 2),
+      [new Fraction(3, 2), new Fraction(-5, 3)],
+      new Fraction(31, 23),
+      1.25
+    );
+    expect(value.toString(false)).toBe(
+      '-3/2*logarithmic(s)+^[3/2 -5/3>+relog(31/23)+0.25!c'
+    );
+  });
 });

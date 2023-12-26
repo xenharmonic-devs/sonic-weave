@@ -11,6 +11,7 @@ import {
   valueToCents,
   mmod,
   BIG_INT_PRIMES,
+  clamp,
 } from 'xen-dev-utils';
 
 import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd} from './utils';
@@ -1277,6 +1278,11 @@ export class TimeMonzo {
     return {type: 'MonzoLiteral', components, downs};
   }
 
+  /**
+   * Faithful string representation of the monzo.
+   * @param linear If true, obtain a linear representation.
+   * @returns String that evaluates to the same value as this monzo.
+   */
   toString(linear = true) {
     if (linear) {
       if (this.isScalar()) {
@@ -1287,8 +1293,6 @@ export class TimeMonzo {
         } else if (this.isEqualTemperament()) {
           const {fractionOfEquave, equave} = this.toEqualTemperament();
           return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
-        } else {
-          return this.valueOf().toString() + '!';
         }
       } else {
         if (this.timeExponent.equals(NEGATIVE_ONE)) {
@@ -1300,22 +1304,64 @@ export class TimeMonzo {
             const {fractionOfEquave, equave} = this.toEqualTemperament();
             return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * Hz`;
           }
-          return `${this.valueOf()}! Hz`;
         }
       }
+      const factors = [];
+      for (let i = 0; i < this.primeExponents.length; ++i) {
+        const pe = this.primeExponents[i];
+        if (pe.n) {
+          factors.push(`${PRIMES[i]}^${pe.toFraction()}`);
+        }
+      }
+      if (this.residual.compare(ONE)) {
+        factors.push(this.residual.toFraction());
+      }
+      if (this.cents) {
+        factors.push(centsToValue(this.cents) + '!');
+      }
+      if (this.timeExponent.equals(NEGATIVE_ONE)) {
+        factors.push('Hz');
+      } else if (this.timeExponent.n) {
+        factors.push(`s^${this.timeExponent.toFraction()}`);
+      }
+      return factors.join('*');
     } else {
-      if (this.isEqualTemperament()) {
-        const {fractionOfEquave, equave} = this.toEqualTemperament();
-        let backslashed = fractionOfEquave.toFraction().replace('/', '\\');
-        if (!backslashed.includes('\\')) {
-          backslashed += '\\1';
+      if (this.isScalar()) {
+        if (this.isEqualTemperament()) {
+          const {fractionOfEquave, equave} = this.toEqualTemperament();
+          let backslashed = fractionOfEquave.toFraction().replace('/', '\\');
+          if (!backslashed.includes('\\')) {
+            backslashed += '\\1';
+          }
+          if (equave.compare(TWO)) {
+            return `${backslashed}<${equave.toFraction()}>`;
+          }
+          return backslashed;
         }
-        if (equave.compare(TWO)) {
-          return `${backslashed}<${equave.toFraction()}>`;
-        }
-        return backslashed;
       }
+      let result = '';
+      if (this.timeExponent.equals(NEGATIVE_ONE)) {
+        result = 'logarithmic(Hz)+';
+      } else if (this.timeExponent.n) {
+        result = `${this.timeExponent.toFraction()}*logarithmic(s)+`;
+      }
+      const ups = clamp(-10, 10, Math.round(this.cents));
+      if (ups > 0) {
+        result += '^'.repeat(ups);
+      } else {
+        result += 'v'.repeat(-ups);
+      }
+      result +=
+        '[' + this.primeExponents.map(f => f.toFraction()).join(' ') + '>';
+      if (this.residual.compare(ONE)) {
+        result += `+relog(${this.residual.toFraction()})`;
+      }
+      const cents = this.cents - ups;
+      if (cents) {
+        const sign = cents >= 0 ? '+' : '-';
+        result += `${sign}${Math.abs(cents)}!c`;
+      }
+      return result;
     }
-    throw new Error('String conversion incomplete');
   }
 }
