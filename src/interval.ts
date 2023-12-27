@@ -4,6 +4,7 @@ import {
   NedjiLiteral,
   addNodes,
   divNodes,
+  downNode,
   mulNodes,
   projectNodes,
   subNodes,
@@ -113,6 +114,12 @@ export class Interval {
     const value = this.value.clone();
     value.cents += 1;
     return new Interval(value, this.domain, upNode(this.node));
+  }
+
+  down() {
+    const value = this.value.clone();
+    value.cents -= 1;
+    return new Interval(value, this.domain, downNode(this.node));
   }
 
   abs() {

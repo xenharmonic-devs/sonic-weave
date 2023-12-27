@@ -313,12 +313,12 @@ function radical(
       interval
     );
   }
-  const {index, radicant} = approximateRadical(
+  const {index, radicand} = approximateRadical(
     converted.value.valueOf(),
     maxIndex === undefined ? undefined : maxIndex.toInteger(),
     maxHeight === undefined ? undefined : maxHeight.toInteger()
   );
-  const value = TimeMonzo.fromFraction(radicant).pow(
+  const value = TimeMonzo.fromFraction(radicand).pow(
     new Fraction(index).inverse()
   );
   const node = value.asRadicalLiteral();
@@ -329,7 +329,7 @@ function radical(
       converted.value.valueOf(),
       1,
       maxHeight === undefined ? undefined : maxHeight.toInteger()
-    ).radicant;
+    ).radicand;
     const rational = TimeMonzo.fromFraction(frac);
     return new Interval(
       rational,

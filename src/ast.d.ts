@@ -141,6 +141,12 @@ export type UnaryExpression = {
   uniform: boolean;
 };
 
+export type DownExpression = {
+  type: 'DownExpression';
+  count: number;
+  operand: Expression;
+};
+
 export type BinaryExpression = {
   type: 'BinaryExpression';
   operator: BinaryOperator;
@@ -221,6 +227,7 @@ export type Expression =
   | ArrayAccess
   | ArraySlice
   | UnaryExpression
+  | DownExpression
   | BinaryExpression
   | LabeledExpression
   | NedjiProjection

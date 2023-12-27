@@ -137,6 +137,10 @@ const ACCIDENTAL_VECTORS = new Map([
   ['𝄳', [5.5, -3.5]],
   ['d', [5.5, -3.5]],
 
+  // Soft-jaric accidentals
+  ['r', [-9.5, 6]],
+  ['p', [9.5, -6]],
+
   // Semiquartal Diamond-MOS accidentals
   ['&', [-7, 4.5]],
   ['@', [7, -4.5]],

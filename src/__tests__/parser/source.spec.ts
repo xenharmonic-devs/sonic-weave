@@ -259,6 +259,14 @@ describe('SonicWeave parser', () => {
     );
   });
 
+  it('has soft-jaric accidentals', () => {
+    const scale = parseSource('C0=1/1;Cr0;γ0;Dp0;D0;22@;');
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1\\22;2\\22;3\\22;4\\22'
+    );
+  });
+
   it('can construct well-temperaments (manual)', () => {
     const scale = parseSource(`
       // Bach / Louie 2018
