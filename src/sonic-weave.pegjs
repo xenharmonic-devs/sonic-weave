@@ -50,6 +50,7 @@ HertzToken    = 'Hz'     !IdentifierPart
 IfToken       = 'if'     !IdentifierPart
 LogToken      = 'log'    !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
+NoneToken     = 'niente' !IdentifierPart
 OfToken       = 'of'     !IdentifierPart
 ReduceToken   = 'red'    !IdentifierPart
 ReturnToken   = 'return' !IdentifierPart
@@ -72,6 +73,7 @@ ReservedWord
   / IfToken
   / LogToken
   / ModToken
+  / NoneToken
   / OfToken
   / ReduceToken
   / ReturnToken
@@ -472,6 +474,7 @@ Quantity
 Primary
   = ScalarMultiple
   / Quantity
+  / NoneLiteral
   / TrueLiteral
   / FalseLiteral
   / NedoLiteral
@@ -660,6 +663,9 @@ SecondLiteral
 
 ReciprocalCentLiteral
   = '€' { return { type: 'ReciprocalCentLiteral' }; }
+
+NoneLiteral
+  = NoneToken { return { type: 'NoneLiteral' }; }
 
 TrueLiteral
   = TrueToken { return { type: 'TrueLiteral' }; }

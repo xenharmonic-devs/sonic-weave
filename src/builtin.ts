@@ -675,10 +675,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
 };
 
 export const PRELUDE_SOURCE = `
-// == Constants ==
-riff niente { return; }
-niente = niente();
-
 // == Functions ==
 riff sqrt x { return x ~^ 1/2; }
 riff cbrt x { return x ~^ 1/3; }

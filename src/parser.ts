@@ -198,6 +198,10 @@ type NedjiProjection = {
   base: Expression;
 };
 
+type NoneLiteral = {
+  type: 'NoneLiteral';
+};
+
 type ColorLiteral = {
   type: 'ColorLiteral';
   value: string;
@@ -259,6 +263,7 @@ type Expression =
   | CallExpression
   | ArrowFunction
   | IntervalLiteral
+  | NoneLiteral
   | ColorLiteral
   | Identifier
   | EnumeratedChord
@@ -739,6 +744,8 @@ export class ExpressionVisitor {
         return node.elements.map(this.visit.bind(this)) as SonicWeaveValue;
       case 'StringLiteral':
         return node.value;
+      case 'NoneLiteral':
+        return undefined;
       case 'RadicalLiteral':
         throw new Error('Unexpected radical literal');
     }
