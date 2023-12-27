@@ -74,7 +74,7 @@ describe('SonicWeave standard library', () => {
 
   it('generates well-temperaments', () => {
     const werckmeister3 = parseSource(
-      'wellTemperament([0, 0, 0, -1/4, -1/4, -1/4, 0, 0, -1/4, 0, 0], 81/80, 8);cents;'
+      'wellTemperament([0, 0, 0, -1/4, -1/4, -1/4, 0, 0, -1/4, 0, 0], 81/80, 3);cents;'
     );
     expect(werckmeister3).toHaveLength(12);
     expect(werckmeister3.map(i => i.toString()).join(';')).toBe(
