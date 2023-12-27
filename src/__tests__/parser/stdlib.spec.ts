@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateSource} from '../../parser';
+import {evaluateExpression, evaluateSource} from '../../parser';
 import {Interval} from '../../interval';
 
 function parseSource(source: string) {
@@ -250,5 +250,12 @@ describe('SonicWeave standard library', () => {
 
   it('throws for ags with no constant structure', () => {
     expect(() => parseSource('ags([8/7, 7/6, 8/7], 3);')).toThrow();
+  });
+
+  it('can access docstrings', () => {
+    const doc = evaluateExpression('doc(void)');
+    expect(doc).toBe(
+      "Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale."
+    );
   });
 });

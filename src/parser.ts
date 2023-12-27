@@ -2,7 +2,6 @@ import {Fraction} from 'xen-dev-utils';
 import {
   NedjiLiteral,
   IntegerLiteral,
-  IntervalLiteral,
   DecimalLiteral,
   FractionLiteral,
   HertzLiteral,
@@ -29,248 +28,41 @@ import {
   sonicBool,
   relog,
   linearOne,
+  SonicWeaveFunction,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
 import {inferEquave, wartsToVal} from './warts';
 import {RootContext} from './context';
-
-type BinaryOperator =
-  | '??'
-  | '||'
-  | '&&'
-  | '==='
-  | '!=='
-  | '=='
-  | '!='
-  | '<='
-  | '>='
-  | '<'
-  | '>'
-  | 'of'
-  | '!of'
-  | '~of'
-  | '!~of'
-  | '+'
-  | '-'
-  | 'to'
-  | 'by'
-  | ''
-  | '*'
-  | '×'
-  | '%'
-  | '÷'
-  | '\\'
-  | 'mod'
-  | 'red'
-  | 'log'
-  | '·'
-  | 'dot'
-  | '⊗'
-  | 'tns'
-  | '^';
-
-type Program = {
-  type: 'Program';
-  body: Statement[];
-};
-
-type VariableDeclaration = {
-  type: 'VariableDeclaration';
-  name: Identifier | Identifier[] | ArrayAccess;
-  value: Expression;
-};
-
-type FunctionDeclaration = {
-  type: 'FunctionDeclaration';
-  name: Identifier;
-  parameters: Identifier[];
-  body: Statement[];
-};
-
-type PitchDeclaration = {
-  type: 'PitchDeclaration';
-  left: Expression;
-  middle?: Expression;
-  right: Expression;
-};
-
-type BlockStatement = {
-  type: 'BlockStatement';
-  body: Statement[];
-};
-
-type ReturnStatement = {
-  type: 'ReturnStatement';
-  argument?: Expression;
-};
-
-type ThrowStatement = {
-  type: 'ThrowStatement';
-  argument: Expression;
-};
-
-type WhileStatement = {
-  type: 'WhileStatement';
-  test: Expression;
-  body: Statement;
-};
-
-type IfStatement = {
-  type: 'IfStatement';
-  test: Expression;
-  consequent: Statement;
-  alternate?: Statement;
-};
-
-type ForOfStatement = {
-  type: 'ForOfStatement';
-  element: Identifier | Identifier[];
-  array: Expression;
-  body: Statement;
-};
-
-type ExpressionStatement = {
-  type: 'ExpressionStatement';
-  expression: Expression;
-};
-
-type Statement =
-  | VariableDeclaration
-  | ExpressionStatement
-  | FunctionDeclaration
-  | PitchDeclaration
-  | BlockStatement
-  | WhileStatement
-  | IfStatement
-  | ForOfStatement
-  | ThrowStatement
-  | ReturnStatement;
-
-type ConditionalExpression = {
-  type: 'ConditionalExpression';
-  test: Expression;
-  consequent: Expression;
-  alternate: Expression;
-};
-
-type ArrayAccess = {
-  type: 'ArrayAccess';
-  object: Expression;
-  index: Expression;
-};
-
-type ArraySlice = {
-  type: 'ArraySlice';
-  object: Expression;
-  start: Expression | null;
-  second: Expression | null;
-  end: Expression | null;
-};
-
-type UnaryExpression = {
-  type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | '!' | '^' | '++' | '--';
-  operand: Expression;
-  prefix: boolean;
-  uniform: boolean;
-};
-
-type BinaryExpression = {
-  type: 'BinaryExpression';
-  operator: BinaryOperator;
-  left: Expression;
-  right: Expression;
-  preferLeft: boolean;
-  preferRight: boolean;
-};
-
-type LabeledExpression = {
-  type: 'LabeledExpression';
-  object: Expression;
-  labels: (Identifier | ColorLiteral | StringLiteral)[];
-};
-
-type NedjiProjection = {
-  type: 'NedjiProjection';
-  octaves: Expression;
-  base: Expression;
-};
-
-type NoneLiteral = {
-  type: 'NoneLiteral';
-};
-
-type ColorLiteral = {
-  type: 'ColorLiteral';
-  value: string;
-};
-
-type Identifier = {
-  type: 'Identifier';
-  id: string;
-};
-
-type CallExpression = {
-  type: 'CallExpression';
-  callee: Identifier | ArrayAccess;
-  args: Expression[];
-};
-
-type ArrowFunction = {
-  type: 'ArrowFunction';
-  parameters: Identifier[];
-  expression: Expression;
-};
-
-type EnumeratedChord = {
-  type: 'EnumeratedChord';
-  intervals: Expression[];
-};
-
-type HarmonicSegment = {
-  type: 'HarmonicSegment';
-  root: Expression;
-  end: Expression;
-};
-
-type Range = {
-  type: 'Range';
-  start: Expression;
-  second?: Expression;
-  end: Expression;
-};
-
-type ArrayLiteral = {
-  type: 'ArrayLiteral';
-  elements: Expression[];
-};
-
-type StringLiteral = {
-  type: 'StringLiteral';
-  value: string;
-};
-
-type Expression =
-  | ConditionalExpression
-  | ArrayAccess
-  | ArraySlice
-  | UnaryExpression
-  | BinaryExpression
-  | LabeledExpression
-  | NedjiProjection
-  | CallExpression
-  | ArrowFunction
-  | IntervalLiteral
-  | NoneLiteral
-  | ColorLiteral
-  | Identifier
-  | EnumeratedChord
-  | Range
-  | ArrayLiteral
-  | StringLiteral
-  | HarmonicSegment;
+import {
+  ArrayAccess,
+  ArraySlice,
+  ArrowFunction,
+  BinaryExpression,
+  BlockStatement,
+  CallExpression,
+  ConditionalExpression,
+  EnumeratedChord,
+  Expression,
+  ExpressionStatement,
+  ForOfStatement,
+  FunctionDeclaration,
+  HarmonicSegment,
+  Identifier,
+  IfStatement,
+  LabeledExpression,
+  NedjiProjection,
+  PitchDeclaration,
+  Program,
+  Range,
+  ReturnStatement,
+  Statement,
+  ThrowStatement,
+  UnaryExpression,
+  VariableDeclaration,
+  WhileStatement,
+} from './ast';
 
 function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
   if (element instanceof Interval) {
@@ -612,6 +404,19 @@ export class StatementVisitor {
   }
 
   visitFunctionDeclaration(node: FunctionDeclaration) {
+    // Extract docstring
+    node = {...node};
+    node.body = [...node.body];
+    let docstring: string | undefined = undefined;
+    if (
+      node.body.length &&
+      node.body[0].type === 'ExpressionStatement' &&
+      node.body[0].expression.type === 'StringLiteral'
+    ) {
+      docstring = node.body[0].expression.value;
+      node.body.shift();
+    }
+
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor(this.rootContext);
       for (const [name, value] of this.context) {
@@ -639,6 +444,8 @@ export class StatementVisitor {
       value: node.name.id,
       enumerable: false,
     });
+    realization.__doc__ = docstring;
+    realization.__node__ = node;
     this.context.set(node.name.id, realization);
     return undefined;
   }
@@ -1206,7 +1013,9 @@ export class ExpressionVisitor {
       value: '(lambda)',
       enumerable: false,
     });
-    return realization;
+    realization.__doc__ = undefined;
+    realization.__node__ = node;
+    return realization as SonicWeaveFunction;
   }
 
   visitIntegerLiteral(node: IntegerLiteral): Interval {
