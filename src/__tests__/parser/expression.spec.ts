@@ -297,4 +297,11 @@ describe('SonicWeave expression evaluator', () => {
       }
     }
   });
+
+  it('can access builtin docs', () => {
+    const doc = evaluateExpression('doc(primes)');
+    expect(doc).toBe(
+      'Obtain an array of prime numbers such that start <= p <= end.'
+    );
+  });
 });

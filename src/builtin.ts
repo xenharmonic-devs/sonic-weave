@@ -1,9 +1,9 @@
 import {
   Fraction,
-  kCombinations,
+  kCombinations as xduKCombinations,
   mmod,
-  isPrime,
-  primes,
+  isPrime as xduIsPrime,
+  primes as xduPrimes,
   approximateRadical,
 } from 'xen-dev-utils';
 import {Color, Interval, timeMonzoAs} from './interval';
@@ -12,11 +12,17 @@ import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {inspect} from 'node:util';
+import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
 
 // Runtime
 
+export interface SonicWeaveFunction extends Function {
+  __doc__: string | undefined;
+  __node__: FunctionDeclaration | ArrowFunction;
+}
+
 export type SonicWeaveValue =
-  | Function
+  | SonicWeaveFunction
   | Interval
   | Interval[]
   | Color
@@ -46,6 +52,21 @@ export function linearOne() {
   return new Interval(ONE_MONZO, 'linear', {type: 'IntegerLiteral', value: 1n});
 }
 
+function builtinNode(builtin: Function): FunctionDeclaration {
+  const parameters: Identifier[] = builtin
+    .toString()
+    .split('(', 2)[1]
+    .split(')', 2)[0]
+    .split(',')
+    .map(p => ({type: 'Identifier', id: p.trim()}));
+  return {
+    type: 'FunctionDeclaration',
+    name: {type: 'Identifier', id: builtin.name},
+    parameters,
+    body: [],
+  };
+}
+
 // === Library ===
 
 // == Constants
@@ -54,15 +75,26 @@ const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 
 // == Second-party wrappers ==
-function isPrime_(n: Interval) {
-  return sonicBool(isPrime(n.valueOf()));
+function kCombinations(set: any[], k: Interval) {
+  return xduKCombinations(set, k.toInteger());
 }
+kCombinations.__doc__ = 'Obtain all k-sized combinations in a set';
+kCombinations.__node__ = builtinNode(kCombinations);
 
-function primes_(start: Interval, end?: Interval) {
-  return primes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
+function isPrime(n: Interval) {
+  return sonicBool(xduIsPrime(n.valueOf()));
+}
+isPrime.__doc__ = 'Return `true` if `n` is a prime number, `false` otherwise.';
+isPrime.__node__ = builtinNode(isPrime);
+
+function primes(start: Interval, end?: Interval) {
+  return xduPrimes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
     Interval.fromInteger(p)
   );
 }
+primes.__doc__ =
+  'Obtain an array of prime numbers such that start <= p <= end.';
+primes.__node__ = builtinNode(primes);
 
 function mosSubset(
   numberOfLargeSteps: Interval,
@@ -92,22 +124,23 @@ function mosSubset(
   );
   return result.map(s => Interval.fromInteger(s));
 }
+mosSubset.__doc__ =
+  'Calculate a subset of equally tempered degrees with maximum variety two per scale degree.';
+mosSubset.__node__ = builtinNode(mosSubset);
 
 // == Domain conversion ==
 
-// Get rid of formatting.
 function simplify(interval: Interval) {
-  return new Interval(
-    interval.value.clone(),
-    interval.domain,
-    undefined,
-    interval
-  );
+  return new Interval(interval.value.clone(), interval.domain, undefined);
 }
+simplify.__doc__ = 'Get rid of interval formatting, coloring and label.';
+simplify.__node__ = builtinNode(simplify);
 
 function linear(interval: Interval) {
   return new Interval(interval.value.clone(), 'linear', undefined, interval);
 }
+linear.__doc__ = 'Convert interval to linear representation.';
+linear.__node__ = builtinNode(linear);
 
 function logarithmic(interval: Interval) {
   return new Interval(
@@ -117,6 +150,8 @@ function logarithmic(interval: Interval) {
     interval
   );
 }
+logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
+logarithmic.__node__ = builtinNode(logarithmic);
 
 function cologarithmic(interval: Interval) {
   return new Interval(
@@ -126,6 +161,8 @@ function cologarithmic(interval: Interval) {
     interval
   );
 }
+cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
+cologarithmic.__node__ = builtinNode(cologarithmic);
 
 export function ablin(
   this: ExpressionVisitor | StatementVisitor,
@@ -152,6 +189,8 @@ export function ablin(
     interval
   );
 }
+ablin.__doc__ = 'Convert interval to absolute linear representation.';
+ablin.__node__ = builtinNode(ablin);
 
 export function relin(
   this: ExpressionVisitor | StatementVisitor,
@@ -173,6 +212,8 @@ export function relin(
     interval
   );
 }
+relin.__doc__ = 'Convert interval to relative linear representation.';
+relin.__node__ = builtinNode(relin);
 
 export function ablog(
   this: ExpressionVisitor | StatementVisitor,
@@ -182,6 +223,8 @@ export function ablog(
   converted.domain = 'logarithmic';
   return converted;
 }
+ablog.__doc__ = 'Convert interval to absolute logarithmic representation.';
+ablog.__node__ = builtinNode(ablog);
 
 export function relog(
   this: ExpressionVisitor | StatementVisitor,
@@ -191,15 +234,22 @@ export function relog(
   converted.domain = 'logarithmic';
   return converted;
 }
+relog.__doc__ = 'Convert interval to relative logarithmic representation.';
+relog.__node__ = builtinNode(relog);
 
 // == Type conversion ==
 
-function bool(this: ExpressionVisitor, interval: Interval) {
-  const b = sonicBool(sonicTruth(relin.bind(this)(interval)));
-  b.color = interval.color;
-  b.label = interval.label;
-  return b;
+function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
+  if (value instanceof Interval) {
+    const b = sonicBool(sonicTruth(relin.bind(this)(value)));
+    b.color = value.color;
+    b.label = value.label;
+    return b;
+  }
+  return sonicBool(sonicTruth(value));
 }
+bool.__doc__ = 'Convert value to a boolean.';
+bool.__node__ = builtinNode(bool);
 
 function decimal(
   this: ExpressionVisitor,
@@ -217,6 +267,8 @@ function decimal(
   converted.node = converted.value.asDecimalLiteral();
   return converted;
 }
+decimal.__doc__ = 'Convert interval to a decimal number.';
+decimal.__node__ = builtinNode(decimal);
 
 function fraction(
   this: ExpressionVisitor,
@@ -241,12 +293,14 @@ function fraction(
   const value = TimeMonzo.fromFraction(frac);
   return new Interval(value, 'linear', value.asFractionLiteral(), interval);
 }
+fraction.__doc__ = 'Convert interval to a fraction.';
+fraction.__node__ = builtinNode(fraction);
 
 function radical(
   this: ExpressionVisitor,
   interval: Interval,
-  maxIndex: Interval,
-  maxHeight: Interval
+  maxIndex?: Interval,
+  maxHeight?: Interval
 ) {
   const converted = relin.bind(this)(interval);
   if (converted.value.isEqualTemperament()) {
@@ -259,7 +313,7 @@ function radical(
   }
   const {index, radicant} = approximateRadical(
     converted.value.valueOf(),
-    maxIndex === undefined ? undefined : maxHeight.toInteger(),
+    maxIndex === undefined ? undefined : maxIndex.toInteger(),
     maxHeight === undefined ? undefined : maxHeight.toInteger()
   );
   const value = TimeMonzo.fromFraction(radicant).pow(
@@ -283,6 +337,8 @@ function radical(
     );
   }
 }
+radical.__doc__ = 'Convert interval to a radical expression.';
+radical.__node__ = builtinNode(radical);
 
 export function cents(
   this: ExpressionVisitor,
@@ -300,6 +356,8 @@ export function cents(
   converted.node = converted.value.asCentsLiteral();
   return converted;
 }
+cents.__doc__ = 'Convert interval to cents.';
+cents.__node__ = builtinNode(cents);
 
 function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   const C4 = this.rootContext.C4;
@@ -322,6 +380,8 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
     interval
   );
 }
+absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
+absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 function FJS(this: ExpressionVisitor, interval: Interval) {
   const monzo = relog.bind(this)(interval).value;
@@ -337,6 +397,8 @@ function FJS(this: ExpressionVisitor, interval: Interval) {
     interval
   );
 }
+FJS.__doc__ = 'Convert interval to (relative) FJS.';
+FJS.__node__ = builtinNode(FJS);
 
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const monzo = relog.bind(this)(interval).value;
@@ -345,6 +407,9 @@ function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const node = monzo.asMonzoLiteral();
   return new Interval(monzo, 'logarithmic', node, interval);
 }
+Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});
+toMonzo.__doc__ = 'Convert interval to a prime count vector a.k.a. monzo.';
+toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Other ==
 
@@ -380,10 +445,23 @@ function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
   }
   return sonicBool(true);
 }
+hasConstantStructure.__doc__ =
+  'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
+hasConstantStructure.__node__ = builtinNode(hasConstantStructure);
 
-function slice(str: string, indexStart: number, indexEnd?: number) {
-  return str.slice(indexStart, indexEnd);
+function slice(
+  array: string | Interval[],
+  indexStart: Interval,
+  indexEnd?: Interval
+) {
+  return array.slice(
+    indexStart.toInteger(),
+    indexEnd === undefined ? undefined : indexEnd?.toInteger()
+  );
 }
+slice.__doc__ =
+  'Obtain a slice of a string or scale between the given indices.';
+slice.__node__ = builtinNode(slice);
 
 function upsAs(comma: Interval) {
   const inflection = comma.value;
@@ -397,8 +475,12 @@ function upsAs(comma: Interval) {
       timeMonzoAs(value, interval.node)
     );
   }
+  upRigger.__doc__ = `Change up arrows to ${comma.toString()}`;
+  upRigger.__node__ = builtinNode(upRigger);
   return upRigger;
 }
+upsAs.__doc__ = 'Change up arrows to the given interval (mapping comma).';
+upsAs.__node__ = builtinNode(upsAs);
 
 function zip(...args: any[][]) {
   const minLength = Math.min(...args.map(a => a.length));
@@ -408,6 +490,9 @@ function zip(...args: any[][]) {
   }
   return result;
 }
+zip.__doc__ =
+  'Combine elements of each array into tuples until one of them is exhausted.';
+zip.__node__ = builtinNode(zip);
 
 function zipLongest(...args: any[][]) {
   const maxLength = Math.max(...args.map(a => a.length));
@@ -417,62 +502,88 @@ function zipLongest(...args: any[][]) {
   }
   return result;
 }
+zipLongest.__doc__ =
+  'Combine elements of each array into tuples until all of them are exhausted. Pads missing values with `niente`.';
+zipLongest.__node__ = builtinNode(zipLongest);
 
 function random() {
   const value = TimeMonzo.fromValue(Math.random());
   return new Interval(value, 'linear');
 }
+random.__doc__ = 'Obtain a random value between (linear) 0 and 1.';
+random.__node__ = builtinNode(random);
 
 function randomCents() {
   const value = TimeMonzo.fromCents(Math.random());
   return new Interval(value, 'logarithmic');
 }
+randomCents.__doc__ =
+  'Obtain random cents between (logarithmic) 0.0c and 1.0c.';
+randomCents.__node__ = builtinNode(randomCents);
 
 function floor(this: ExpressionVisitor, value: Interval) {
   value = relin.bind(this)(value);
   const n = Math.floor(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
+floor.__doc__ = 'Round value down to the nearest integer.';
+floor.__node__ = builtinNode(floor);
 
 function round(this: ExpressionVisitor, value: Interval) {
   value = relin.bind(this)(value);
   const n = Math.round(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
+round.__doc__ = 'Round value to the nearest integer.';
+round.__node__ = builtinNode(round);
 
 function trunc(this: ExpressionVisitor, value: Interval) {
   value = relin.bind(this)(value);
   const n = Math.trunc(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
+trunc.__doc__ = 'Truncate value towards zero to the nearest integer.';
+trunc.__node__ = builtinNode(trunc);
 
 function ceil(this: ExpressionVisitor, value: Interval) {
   value = relin.bind(this)(value);
   const n = Math.ceil(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
+ceil.__doc__ = 'Round value up to the nearest integer.';
+ceil.__node__ = builtinNode(ceil);
 
 function abs(value: Interval) {
   return value.abs();
 }
+abs.__doc__ = 'Calculate the absolute value of the interval.';
+abs.__node__ = builtinNode(abs);
 
 function min(...args: Interval[]) {
   return args.slice(1).reduce((a, b) => (a.compare(b) <= 0 ? a : b), args[0]);
 }
+min.__doc__ = 'Obtain the argument with the minimum value.';
+min.__node__ = builtinNode(min);
 
 function max(...args: Interval[]) {
   return args.slice(1).reduce((a, b) => (a.compare(b) >= 0 ? a : b), args[0]);
 }
+max.__doc__ = 'Obtain the argument with the maximum value.';
+max.__node__ = builtinNode(max);
 
 function sort(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.sort((a, b) => a.compare(b));
 }
+sort.__doc__ = 'Sort the current/given scale in ascending order.';
+sort.__node__ = builtinNode(sort);
 
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.reverse();
 }
+reverse.__doc__ = 'Reverse the order of the current/given scale.';
+reverse.__node__ = builtinNode(reverse);
 
 function pop(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
@@ -481,11 +592,15 @@ function pop(this: ExpressionVisitor, scale?: Interval[]) {
   }
   return scale.pop()!;
 }
+pop.__doc__ = 'Remove and return the last interval in the current/given scale.';
+pop.__node__ = builtinNode(pop);
 
 function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.push(interval);
 }
+push.__doc__ = 'Append an interval onto the current/given scale.';
+push.__node__ = builtinNode(push);
 
 function shift(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
@@ -494,6 +609,9 @@ function shift(this: ExpressionVisitor, scale?: Interval[]) {
   }
   return scale.shift()!;
 }
+shift.__doc__ =
+  'Remove and return the first interval in the current/given scale.';
+shift.__node__ = builtinNode(shift);
 
 function unshift(
   this: ExpressionVisitor,
@@ -503,11 +621,16 @@ function unshift(
   scale ??= this.context.get('$') as Interval[];
   scale.unshift(interval);
 }
+unshift.__doc__ =
+  'Prepend an interval at the beginning of the current/given scale.';
+unshift.__node__ = builtinNode(unshift);
 
 function length(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   return Interval.fromInteger(scale.length);
 }
+length.__doc__ = 'Return the number of intervals in the scale.';
+length.__node__ = builtinNode(length);
 
 // TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
@@ -521,6 +644,8 @@ function map(
     mapper(value, Interval.fromInteger(index), arr)
   );
 }
+map.__doc__ = 'Map a riff over the given/current scale producing a new scale.';
+map.__node__ = builtinNode(map);
 
 function remap(
   this: ExpressionVisitor,
@@ -532,6 +657,9 @@ function remap(
   array.length = 0;
   array.push(...mapped);
 }
+remap.__doc__ =
+  'Map a riff over the given/current scale replacing the content.';
+remap.__node__ = builtinNode(remap);
 
 function filter(
   this: ExpressionVisitor,
@@ -544,6 +672,9 @@ function filter(
     sonicTruth(tester(value, Interval.fromInteger(index), arr))
   );
 }
+filter.__doc__ =
+  'Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.';
+filter.__node__ = builtinNode(filter);
 
 function distill(
   this: ExpressionVisitor,
@@ -555,6 +686,9 @@ function distill(
   array.length = 0;
   array.push(...filtered);
 }
+distill.__doc__ =
+  'Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.';
+distill.__node__ = builtinNode(distill);
 
 function arrayReduce(
   this: ExpressionVisitor,
@@ -575,10 +709,15 @@ function arrayReduce(
     initialValue
   );
 }
+arrayReduce.__doc__ =
+  'Reduce the given/current scale to a single value by `reducer` riff.';
+arrayReduce.__node__ = builtinNode(arrayReduce);
 
 function isArray(value: any) {
   return sonicBool(Array.isArray(value));
 }
+isArray.__doc__ = 'Return `true` if the value is an array.';
+isArray.__node__ = builtinNode(isArray);
 
 function toString_(value: SonicWeaveValue | null, depth = 2): string {
   if (value === null) {
@@ -602,24 +741,50 @@ function toString_(value: SonicWeaveValue | null, depth = 2): string {
 export function toString(value: SonicWeaveValue) {
   return toString_(value);
 }
+toString.__doc__ = 'Obtain a string representation of the value.';
+toString.__node__ = builtinNode(toString);
 
 function print(...args: any[]) {
   console.log(...args.map(a => toString(a)));
 }
+print.__doc__ = 'Print the arguments to the console.';
+print.__node__ = builtinNode(print);
 
 function dir(arg: any) {
   console.dir(arg, {depth: null});
 }
+dir.__doc__ = 'Obtain the javascript representation of the value.';
+dir.__node__ = builtinNode(dir);
 
-export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
+function doc(riff: SonicWeaveFunction) {
+  return riff.__doc__;
+}
+doc.__doc__ = 'Obtain the docstring of the given riff.';
+doc.__node__ = builtinNode(doc);
+
+function help(riff: SonicWeaveFunction) {
+  console.log(`Help on ${riff.name}`);
+  console.log(riff.__doc__);
+  const params = riff.__node__.parameters;
+  if (params.length) {
+    console.log('Parameters:');
+    console.log(params.map(p => p.id).join(', '));
+  } else {
+    console.log('(No parameters)');
+  }
+}
+help.__doc__ = 'Print information about the given riff to the console.';
+help.__node__ = builtinNode(help);
+
+export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // Constants
   E,
   PI,
   TAU,
   // Second-party wrappers
   mosSubset,
-  isPrime: isPrime_,
-  primes: primes_,
+  isPrime,
+  primes,
   // Domain conversion
   simplify,
   linear,
@@ -666,6 +831,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | Function> = {
   length,
   print,
   dir,
+  doc,
+  help,
   map,
   remap,
   filter,
@@ -683,6 +850,7 @@ riff mtof index { return 440 Hz * 2^((index - 69) % 12); }
 riff ftom freq { return freq % 440 Hz log 2 * 12 + 69; }
 
 riff void {
+  "Get rid of expression results. \`void(i++)\` increments the value but doesn't push anything onto the scale."
   return;
 }
 
