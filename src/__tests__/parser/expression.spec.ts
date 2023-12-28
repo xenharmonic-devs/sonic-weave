@@ -208,9 +208,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert monzo to absolute FJS', () => {
-    const downMajorSixth = parseSingle(
-      'C4 = 261Hz = 1/1; absoluteFJS(v[0 -1 1>)'
-    );
+    const downMajorSixth = parseSingle('C4 = 261Hz; absoluteFJS(v[0 -1 1>)');
     expect(downMajorSixth.toString()).toBe('vA♮4^5');
   });
 
@@ -303,5 +301,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(doc).toBe(
       'Obtain an array of prime numbers such that start <= p <= end.'
     );
+  });
+
+  it('sets implicit 1/1 on pitch declaration', () => {
+    const freq = parseSingle('Bb5 = 100 Hz; ablin(2)');
+    expect(freq.value.timeExponent.equals(-1)).toBe(true);
+    expect(freq.value.valueOf()).toBeCloseTo(200);
   });
 });

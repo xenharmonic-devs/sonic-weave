@@ -217,6 +217,13 @@ export class StatementVisitor {
 
       this.rootContext.C4 = C4.mul(value.value).div(pitch.value);
       if (!node.middle) {
+        // Implicit 1/1
+        if (value.value.timeExponent.n) {
+          const absolute = value.value;
+          this.rootContext.unisonFrequency = absolute.pow(
+            absolute.timeExponent.inverse().neg()
+          );
+        }
         return undefined;
       }
     }
