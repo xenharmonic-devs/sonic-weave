@@ -189,11 +189,18 @@ Use square brackets to access array elements. Indexing starts from zero. Negativ
 ### Slices
 Range syntax inside array access gets a copy of a subset the array e.g. `[1, 2, 3, 4][2..3]` evaluates to `[3, 4]`.
 
+In slice syntax the end points are optional e.g. `[1, 2, 3][..]` evaluates to `[1, 2, 3]` (a new copy).
+
 ## Metric prefixes
 Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`.
 
 ## Truth values
 Unlike Javascript the empty array `[]` is *falsy* similar to Python.
+
+## Comments
+Everything after two slashes (`//`) is ignored until the end of the line.
+
+Everything after a slash and an asterisk (`/*`) is ignored until an asterisk and a slash (`*/`) is encountered.
 
 ## Functional Just System
 [FJS](https://en.xen.wiki/w/Functional_Just_System) uses Pythagorean relative interval notation for powers of 2 and 3 e.g. `P5` is (logarithmic) `3/2` or `M6` corresponds to `27/16`.
@@ -316,28 +323,144 @@ for (i of [1..5]) {
 results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
 ### If...else
-TODO
+Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
+```sw
+if (3/2 > 700.) {
+  print("The Pythagorean fifth is larger than the perfect fifth of 12-TET")
+} else {
+  print("This won't print")
+}
+```
+#### Ternary expressions
+Conditional expressions look similar but work inline e.g. `3 if true else 5` evaluates to `3` while `3 if false else 5` evaluates to `5`.
 
 ### Function declaration
-TODO
+Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
+```sw
+riff subharmonics start end {
+  return inverted(start::end)
+}
+```
+Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
+
+#### Calling functions
+Once declared, functions can be called:`subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`.
 
 #### Lambda expressions
-TODO
+Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start, end => inverted(start::end))`.
 
 ### Throwing
-TODO
+To interupt execution you can throw string messages.
+```sw
+if (2 < 1) {
+  print("This won't print")
+} else {
+  throw "This will be thrown"
+}
+```
 
 ### Implicit mapping
-TODO
+The default action when encountering a function is to remap the current scale using it.
+```sw
+primes(3, 17)
+prime => prime red 2
+2
+sort()
+```
+First results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
 
 ### Tempering
-TODO
+In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
+
+Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
+
+First we'll measure out the primes:
+```sw
+2^-2 * 3^0 * 5^1
+2^-1 * 3^1 * 5^0
+2^+1 * 3^0 * 5^0
+```
+
+Then we replace every prime with their closest approximation:
+```sw
+st = 2^1/12 // One semitone
+
+(2 by st)^-2 * (3 by st)^0 * (5 by st)^1
+(2 by st)^-1 * (3 by st)^1 * (5 by st)^0
+(2 by st)^+1 * (3 by st)^0 * (5 by st)^0
+```
+Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
 
 #### Implicit tempering
-TODO
+The above could've been achieved by
+```sw
+[5/4, 3/2, 2]
+i => 12@ dot i \ 12
+```
+The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
 
-#### Tweaking ups/downs
-TODO
+The default action when encountering a val (`12@` is shorthand for `<12 19 28]`) is to temper the current scale with it.
+
+The above reduces to
+```sw
+[5/4, 3/2, 2]
+12@
+```
+
+#### Using ups and downs
+By default the up inflection (`^`) corresponds to one step upwards irregardless of the equal temperament while the down inflection (`v`) corresponds to one step downwards.
+
+This can make notation shorter. The 5-limit major scale in 22-tone equal temperament is:
+```sw
+M2
+M3^5
+P4
+P5
+M6^5
+M7^5
+P8
+22@
+```
+
+Using downs the direction of inflection is more clear:
+```sw
+M2
+vM3
+P4
+P5
+vM6
+vM7
+P8
+22@
+```
+
+#### Tweaking ups and downs
+To control what ups and downs correspond to, you can use the `upsAs` built-in function:
+```sw
+M2
+vM3
+P4
+P5
+vM6
+vM7
+P8
+
+upsAs(81/80)
+311@
+```
+
+Or simply increase to _"upness"_ of `311@` by five:
+```sw
+M2
+vM3
+P4
+P5
+vM6
+vM7
+P8
+
+^^^^^311@
+```
 
 ### Stdlib
 SonicWeave comes with batteries included.
@@ -366,6 +489,9 @@ TODO
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. e.g. you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
 
 #### Quarter-augmented Pythagorean notation
+TODO
+
+#### Mids
 TODO
 
 ### True tone-splitters

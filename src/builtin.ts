@@ -580,6 +580,16 @@ function sort(this: ExpressionVisitor, scale?: Interval[]) {
 sort.__doc__ = 'Sort the current/given scale in ascending order.';
 sort.__node__ = builtinNode(sort);
 
+function sorted(this: ExpressionVisitor, scale?: Interval[]) {
+  scale = scale ?? (this.context.get('$') as Interval[]);
+  scale = [...scale];
+  scale.sort((a, b) => a.compare(b));
+  return scale;
+}
+sorted.__doc__ =
+  'Obtain a sorted copy of the current/given scale in ascending order.';
+sorted.__node__ = builtinNode(sorted);
+
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.reverse();
@@ -737,6 +747,10 @@ function toString_(value: SonicWeaveValue | null, depth = 2): string {
     }
     return '[' + value.map(e => toString_(e, depth - 1)).join(', ') + ']';
   }
+  if (typeof value === 'function') {
+    // Don't stringify __doc__ and __node__
+    return `[Function: ${value.name}]`;
+  }
   return inspect(value, {depth});
 }
 
@@ -825,6 +839,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   randomCents,
   isArray,
   sort,
+  sorted,
   reverse,
   pop,
   push,
@@ -912,8 +927,7 @@ riff ed divisions equave {
 
 riff subharmonics start end {
   "Generate a subharmonic segment including the given start and end points.";
-  start::end;
-  invert();
+  inverted(start::end);
 }
 
 riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep up down equave {
@@ -1112,6 +1126,12 @@ riff invert scale {
   reverse();
   equave;
   return;
+}
+
+riff inverted scale {
+  "Obtain an inverted copy of the current/given scale (negative harmony).";
+  $ = (scale ?? $$)[..];
+  invert();
 }
 
 riff rotate onto scale {

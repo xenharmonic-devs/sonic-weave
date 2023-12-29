@@ -80,6 +80,10 @@ export function repl() {
     try {
       const program = parseAST(currentCmd);
       currentCmd = '';
+      if (!program.body.length) {
+        cb(null, null);
+        return;
+      }
       for (const statement of program.body.slice(0, -1)) {
         const interrupt = visitor.visit(statement);
         if (interrupt) {
@@ -100,6 +104,7 @@ export function repl() {
         cb(null, null);
       }
     } catch (e) {
+      currentCmd = '';
       if (typeof e === 'string') {
         // eslint-disable-next-line no-ex-assign
         e = new Error(e);
