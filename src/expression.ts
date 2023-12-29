@@ -169,6 +169,20 @@ export function upNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   return undefined;
 }
 
+export function downNode(node?: IntervalLiteral): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'FJS':
+      return {
+        ...node,
+        downs: node.downs + 1,
+      };
+  }
+  return undefined;
+}
+
 export function addNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -200,6 +214,7 @@ export function addNodes(
       equaveDenominator: a.equaveDenominator,
     };
   }
+  // TODO: FJS, AbsoluteFJS
 
   return undefined;
 }

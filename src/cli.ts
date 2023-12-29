@@ -54,6 +54,9 @@ const prompt = '𝄞 ';
 export function repl() {
   const visitor = getSourceVisitor();
 
+  let numCurlies = 0;
+  let currentCmd = '';
+
   function evaluateStatement(
     this: REPLServer,
     evalCmd: string,
@@ -61,8 +64,22 @@ export function repl() {
     file: string,
     cb: (err: Error | null, result: any) => void
   ) {
+    currentCmd += evalCmd;
+
+    // TODO: Ignore curly braces inside strings
+    numCurlies += (evalCmd.match(/{/g) ?? []).length;
+    numCurlies -= (evalCmd.match(/}/g) ?? []).length;
+    if (numCurlies < 0) {
+      currentCmd = '';
+      cb(new Error('Unmatched closing curly bracket'), undefined);
+      return;
+    }
+    if (numCurlies > 0) {
+      return;
+    }
     try {
-      const program = parseAST(evalCmd);
+      const program = parseAST(currentCmd);
+      currentCmd = '';
       for (const statement of program.body.slice(0, -1)) {
         const interrupt = visitor.visit(statement);
         if (interrupt) {

@@ -777,7 +777,7 @@ FJS
   }
 
 Accidental
-  = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫&ea@] / (Demisemi [♯#♭b]) / (Semi [&@]))
+  = $([𝄪x♯#𝄲‡t♮=𝄳d♭b𝄫&ea@rp] / (Demisemi [♯#♭b]) / (Semi [&@]))
 
 Nominal
   = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωaA-G])

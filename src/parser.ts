@@ -43,6 +43,7 @@ import {
   BlockStatement,
   CallExpression,
   ConditionalExpression,
+  DownExpression,
   EnumeratedChord,
   Expression,
   ExpressionStatement,
@@ -560,10 +561,20 @@ export class ExpressionVisitor {
         return node.value;
       case 'NoneLiteral':
         return undefined;
+      case 'DownExpression':
+        return this.visitDownExpression(node);
       case 'RadicalLiteral':
         throw new Error('Unexpected radical literal');
     }
     node satisfies never;
+  }
+
+  visitDownExpression(node: DownExpression) {
+    const operand = this.visit(node.operand);
+    if (!(operand instanceof Interval)) {
+      throw new Error('Can only apply down arrows to intervals');
+    }
+    return operand.down();
   }
 
   visitLabeledExpression(node: LabeledExpression) {
