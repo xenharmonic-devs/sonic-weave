@@ -207,32 +207,32 @@ Everything after a slash and an asterisk (`/*`) is ignored until an asterisk and
 
 The octave `2/1` is divided into 7 degrees.
 
-| Name(s)             | Literal(s) | Value(s)          |
-| ------------------- | ---------- | ----------------- |
-| (Perfect) unison    | `P1`       | `1/1`             |
-| Minor/major second  | `m2`, `M2` | `256/243`, `9/8`  |
-| Minor/major third   | `m3`, `M3` | `32/27`, `81/64`  |
-| Perfect fourth      | `P4`       | `4/3`             |
-| Perfect fifth       | `P5`       | `3/2`             |
-| Minor/major sixth   | `m6`, `M6` | `128/81`, `27/16` |
-| Minor/major seventh | `m7`, `M7` | `16/9`, `243/128` |
+| Name(s)             | Literal(s) | Value(s)          | Size(s) in cents      |
+| ------------------- | ---------- | ----------------- | --------------------- |
+| (Perfect) unison    | `P1`       | `1/1`             | `0.000`               |
+| Minor/major second  | `m2`, `M2` | `256/243`, `9/8`  | `90.225`, `203.910`   |
+| Minor/major third   | `m3`, `M3` | `32/27`, `81/64`  | `294.135`, `407.820`  |
+| Perfect fourth      | `P4`       | `4/3`             | `498.045`             |
+| Perfect fifth       | `P5`       | `3/2`             | `701.955`             |
+| Minor/major sixth   | `m6`, `M6` | `128/81`, `27/16` | `792.180`, `905.865`  |
+| Minor/major seventh | `m7`, `M7` | `16/9`, `243/128` | `996.090`, `1109.775` |
 
-The cycle repeats at the perfect octave `P8` e.g. `9/4` is a major ninth `M9`.
+The cycle repeats at the perfect octave `P8` (exactly `1200.000` in size) e.g. `9/4` is a major ninth `M9` (or `1403.910`).
 
-Augmented intervals are `2187/2048` higher than their perfect/major counterparts e.g. `A4` is `729/512`. Diminished intervals are correspondingly lower than their perfect/minor counterparts e.g. `d3` is `65536/59049`.
+Augmented intervals are `2187/2048` (or `113.685`) higher than their perfect/major counterparts e.g. `A4` is `729/512` (or `611.730`). Diminished intervals are correspondingly lower than their perfect/minor counterparts e.g. `d3` is `65536/59049` (or `180.450`).
 
 Each prime number is associated with a comma which is chosen based on simplicity rather than direction. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. `M6^5` is the same as (logarithmic) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`.
 
 The first few commas are:
-| Prime `p` | `P1^p`      | Reduced harmonic | Value   |
-| --------- | ----------- | ---------------- | ------- |
-| `5`       | `80/81`     | `M3^5`           | `5/4`   |
-| `7`       | `63/64`     | `m7^7`           | `7/4`   |
-| `11`      | `33/32`     | `P4^11`          | `11/8`  |
-| `13`      | `1053/1024` | `m6^13`          | `13/8`  |
-| `17`      | `4131/4096` | `m2^17`          | `17/16` |
-| `19`      | `513/512`   | `m3^19`          | `19/16` |
-| `23`      | `736/729`   | `A4^23`          | `23/16` |
+| Prime `p` | `P1^p`      | Size in cents  | Reduced harmonic | Value   |
+| --------- | ----------- | -------------- | ---------------- | ------- |
+| `5`       | `80/81`     | `-21.506`      | `M3^5`           | `5/4`   |
+| `7`       | `63/64`     | `-27.264`      | `m7^7`           | `7/4`   |
+| `11`      | `33/32`     | `+53.273`      | `P4^11`          | `11/8`  |
+| `13`      | `1053/1024` | `+48.348`      | `m6^13`          | `13/8`  |
+| `17`      | `4131/4096` | `+14.73`       | `m2^17`          | `17/16` |
+| `19`      | `513/512`   | `+3.378`       | `m3^19`          | `19/16` |
+| `23`      | `736/729`   | `+16.544`      | `A4^23`          | `23/16` |
 
 ### Absolute FJS
 The absolute version of FJS is rooted on (relative) `C4 = 1/1` by default, but it is recommended that you set an absolute frequency like `C4 = mtof(60)` or `C4 = 261.6 Hz`.
@@ -256,6 +256,14 @@ The sharp signs (`#` and `♯`) correspond to the augmented unison e.g. `F#4` is
 The flat signs (`b` and `♭`) correspond to the diminished unison e.g. `Eb4` is `E4 + d1` or `32/27` relative to `C4`.
 
 FJS accidentals come after the octave number e.g. the fifth harmonic relative to `C4` is `E6^5`.
+
+| Accidental | Size in cents |
+| ---------- | ------------- |
+| `=`, `♮`   | `0.000`       |
+| `#`, `♯`   | `+113.685`    |
+| `x`, `𝄪`   | `+227.370`    |
+| `b`, `♭`   | `-113.685`    |
+| `𝄫`        | `-227.370`    |
 
 ## Interval type system
 The interval type system is fairly complex in order to accomodate all types of quantities that can refer to musical pitch or frequency.
@@ -491,13 +499,13 @@ Ordinal notation* hides the fact that the perfect fifth spans four steps. This m
 *) `P1 + P1` evaluates to `P1` while `1 + 1` evaluates to `2`.
 
 Notable neutral intervals include:
-| Name            | Logarithmic      | Linear       |
-| --------------- | ---------------- | ------------ |
-| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  |
-| Neutral third   | `n3`, `P5 % 2`   | `sqrt(3/2)`  |
-| Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` |
+| Name            | Logarithmic      | Linear       | Size in cents |
+| --------------- | ---------------- | ------------ | ------------- |
+| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
+| Neutral third   | `n3`, `P5 % 2`   | `sqrt(3/2)`  | `350.978`     |
+| Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
 
-The major intervals are one semiaugmented unison above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t neutral e.g. `m3` is `m3 + sd1`.
+The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t neutral e.g. `m3` is `m3 + sd1`.
 
 Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sA4` is simply `P4 + sA1` or `32/27^3/2` if expressed linearly.
 
@@ -506,17 +514,22 @@ The accidental associated with `sA1` is the semisharp (`s#`, `½♯`, `𝄲`, `�
 
 For example the neutral third above `C4` is `Ed4`.
 
+| Accidental                            | Size in cents |
+| ------------------------------------- | ------------- |
+| `s#`, `½#`, `s♯`, `½♯`, `𝄲`, `‡`, `t` | `+56.843`     |
+| `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `-56.843`     |
+
 #### Neutral FJS
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
 
 The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
-| Prime | Comma                 | Size in cents |
-| ----- | --------------------- | ------------- |
-| 11    | sqrt(242/243)         | -3.570        |
-| 13    | sqrt(507/512)         | -8.495        |
-| 29    | sqrt(864/841)         | -23.355       |
-| 31    | sqrt(2101707/2097152) | +1.878        |
-| 37    | sqrt(175232/177147)   | -9.408        |
+| Prime | Comma                   | Size in cents |
+| ----- | ----------------------- | ------------- |
+| `11`  | `sqrt(242/243)`         | `-3.570`      |
+| `13`  | `sqrt(507/512)`         | `-8.495`      |
+| `29`  | `sqrt(864/841)`         | `-23.355`     |
+| `31`  | `sqrt(2101707/2097152)` | `+1.878`      |
+| `37`  | `sqrt(175232/177147)`   | `-9.408`      |
 
 #### Quarter-augmented Pythagorean notation
 TODO
@@ -558,6 +571,18 @@ G4
 C5
 ```
 `χ` or `chi` is equal to `F@` while `ω` or `omega` is equal to `C@` of the next octave.
+
+| Nominal        | Meaning     |
+| -------------- | ----------- |
+| `φ4`, `phi4`   | `C4 + m2.5` |
+| `χ4`, `chi4`   | `C4 + M3.5` |
+| `ψ4`, `psi4`   | `C4 + M6.5` |
+| `ω4`, `omega4` | `C4 + M7.5` |
+
+| Accidental  | Size in cents |
+| ----------- | ------------- |
+| `&`         | `+45.112`     |
+| `@`         | `-45.112`     |
 
 ### Obscure types
 
