@@ -351,26 +351,26 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('has demisemiquartal notation for 19edo', () => {
+  it('has manual/semiquartal notation for 19edo', () => {
     const scale = parseSource(`
       C0 = 1/1;
-      C½&0;
-      D½@0;
+      C&0;
+      D@0;
       D0;
       φ0;
-      φ½&0;
-      χ½@0;
+      φ&0;
+      χ@0;
       χ0;
       F0;
-      F½&0;
-      Ga0;
+      F&0;
+      G@0;
       G0;
-      Ge0;
-      A½@0;
+      G&0;
+      A@0;
       A0;
       ψ0;
-      ψ½&0;
-      ω½@0;
+      ψ&0;
+      ω@0;
       ω0;
       C1;
       19@;

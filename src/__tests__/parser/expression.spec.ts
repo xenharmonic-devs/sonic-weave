@@ -157,11 +157,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(darkFifth.toString()).toBe('7\\5<4/3>');
   });
 
-  it('has a nominal for a fourth split in four', () => {
-    const deeSemiAt = parseSingle('C0 = 1/1; D½@0');
-    expect(deeSemiAt.value.pow(4).toFraction().toFraction()).toBe('4/3');
-  });
-
   it('can color and label an interval directly', () => {
     const greenFifth = parseSingle('1.5e0 green "fifth"');
     expect(greenFifth.color?.value).toBe('#008000');

@@ -101,7 +101,7 @@ const NOMINAL_VECTORS = new Map([
   ['epsilon', [-7.5, 5]],
   ['ε', [-7.5, 5]],
 
-  // Semiquartals
+  // Manual / semiquartal
   ['phi', [1, -0.5]],
   ['φ', [1, -0.5]],
 
@@ -141,13 +141,9 @@ const ACCIDENTAL_VECTORS = new Map([
   ['r', [-9.5, 6]],
   ['p', [9.5, -6]],
 
-  // Semiquartal Diamond-MOS accidentals
-  ['&', [-7, 4.5]],
-  ['@', [7, -4.5]],
-
-  // Demisemiquartal Diamond-MOS accidentals
-  ['e', [-3.5, 2.25]],
-  ['a', [3.5, -2.25]],
+  // Manual Diamond-MOS accidentals
+  ['&', [4, -2.5]],
+  ['@', [-4, 2.5]],
 ]);
 
 for (const accidental of '♯#♭b') {
@@ -168,16 +164,6 @@ for (const accidental of '♯#♭b') {
     vector[0] *= 0.75;
     vector[1] *= 0.75;
     ACCIDENTAL_VECTORS.set(sesqui + accidental, vector);
-  }
-}
-
-// The generator of 5L 4s is a 2-mosstep so the accidental can be split once without introducing new nominals
-for (const accidental of '&@') {
-  for (const semi of '½s') {
-    const vector = [...ACCIDENTAL_VECTORS.get(accidental)!];
-    vector[0] *= 0.5;
-    vector[1] *= 0.5;
-    ACCIDENTAL_VECTORS.set(semi + accidental, vector);
   }
 }
 
@@ -411,18 +397,6 @@ const TONESPLITTER_NOMINALS: AbsolutePitch['nominal'][] = [
   'β',
 ];
 
-const SEMIQUARTAL_NOMINALS: AbsolutePitch['nominal'][] = [
-  'C',
-  'D',
-  'φ',
-  'χ',
-  'F',
-  'G',
-  'A',
-  'ψ',
-  'ω',
-];
-
 const ACCIDENTAL_SPECTRUM = [
   ['𝄫'],
   ['¾♭', '♭'],
@@ -443,8 +417,6 @@ const ACCIDENTAL_SPECTRUM = [
   ['𝄪'],
 ];
 
-const SEMIQUARTAL_SPECTRUM = [['@'], ['a'], [], ['e'], ['&']];
-
 export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   const twos = monzo.primeExponents[0].valueOf();
   const threes = monzo.primeExponents[1].valueOf();
@@ -458,29 +430,6 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
     nominal = PURE_NOMINALS[mmod(stepspan, 7)];
   } else if (spanRemainder === 0.5) {
     nominal = TONESPLITTER_NOMINALS[mmod(stepspan - 0.5, 7)];
-  } else if (spanRemainder === 0.25 || spanRemainder === 0.75) {
-    const semiquartalSpan = twos * 9 + threes * 14;
-    nominal = SEMIQUARTAL_NOMINALS[mmod(semiquartalSpan, 9)];
-    let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 2.25;
-    const accidentals: string[] = [];
-    while (offCenter < -2) {
-      accidentals.push('@');
-      offCenter += 2;
-    }
-    while (offCenter > 2) {
-      accidentals.push('&');
-      offCenter -= 2;
-    }
-    accidentals.push(...SEMIQUARTAL_SPECTRUM[offCenter + 2]);
-    if (!accidentals.length) {
-      accidentals.push('♮');
-    }
-    return {
-      type: 'AbsolutePitch',
-      nominal,
-      accidentals: accidentals,
-      octave,
-    };
   } else {
     return undefined;
   }

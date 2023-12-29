@@ -357,7 +357,7 @@ See [BUILTIN.md](BUILTIN.md#built-in-functions).
 See [BUILTIN.md](BUILTIN.md#prelude-functions).
 
 ## Odds and ends
-Most of these features were implemented for their own sake. N
+Most of these features were implemented for their own sake.
 
 #### Neutral Pythagorean notation
 TODO
@@ -371,17 +371,37 @@ TODO
 ### True tone-splitters
 TODO
 
-### Absolute half-octave notation
+### Absolute semioctave dodecanominal notation
 TODO
 
-### Semiquartals
+### The interordinal semifourth
 TODO
 
-### Absolute enneanominal notation
-TODO
+### Absolute semifourth pentanominal notation
+The split fourth spans a pentatonic (4L 1s "manual") scale:
+```sw
+C4 = mtof(60)
+φ4
+F4
+G4
+ψ4
+C5
+```
 
-### Demisemiquartal accidentals
-TODO
+The accidental *em* (`&`) denotes the difference between a semifourth and a whole tone: `C&4` is `C4 + (P4%2 - M2)`. The accidental *at* (`@`) is the opposite.
+
+As with semioctave nominals `φ` can be spelled in ASCII as `phi` and `ψ` as `psi`. *Phi* was chosen due to similarity to *F* and *psi* comes from the full enneatonic (5L 4s "semiquartal") scale:
+```sw
+C4 = mtof(60)
+φ4
+χ4
+F4
+G4
+ψ4
+ω4
+C5
+```
+`χ` or `chi` is equal to `F@` while `ω` or `omega` is equal to `C@` of the next octave.
 
 ### Obscure types
 

@@ -8,7 +8,6 @@ import {
   absoluteToNode,
 } from '../pythagorean';
 import {TimeMonzo} from '../monzo';
-import {Fraction} from 'xen-dev-utils';
 
 describe('Pythagorean interval construction from parts', () => {
   it.each([
@@ -249,36 +248,6 @@ describe('Absolute monzo -> node converter', () => {
       type: 'AbsolutePitch',
       nominal: 'E',
       accidentals: ['d'],
-      octave: 4n,
-    });
-  });
-
-  it('converts Ca4', () => {
-    const node = absoluteToNode(
-      new TimeMonzo(new Fraction(0), [
-        new Fraction('7/2'),
-        new Fraction('-9/4'),
-      ])
-    );
-    expect(node).toEqual({
-      type: 'AbsolutePitch',
-      nominal: 'C',
-      accidentals: ['a'],
-      octave: 4n,
-    });
-  });
-
-  it('converts ψe4', () => {
-    const node = absoluteToNode(
-      new TimeMonzo(new Fraction(0), [
-        new Fraction('-7/2'),
-        new Fraction('11/4'),
-      ])
-    );
-    expect(node).toEqual({
-      type: 'AbsolutePitch',
-      nominal: 'ψ',
-      accidentals: ['e'],
       octave: 4n,
     });
   });
