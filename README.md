@@ -482,11 +482,41 @@ See [BUILTIN.md](BUILTIN.md#prelude-functions).
 ## Odds and ends
 Most of these features were implemented for their own sake.
 
-#### Neutral Pythagorean notation
-TODO
+### Extended Pythagorean notation
+The Pythagorean notation can be extended in many ways.
 
-### Neutral FJS
-[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. e.g. you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
+#### Neutral Pythagorean
+Ordinal notation* hides the fact that the perfect fifth spans four steps. This means that it can be divided into two thirds without issue. Usually these are the minor and major thirds but we can introduce a neutral third between them that divides the fifth exactly: `n3` is exactly `P5 % 2` or `sqrt(3/2)` if expressed linearly.
+
+*) `P1 + P1` evaluates to `P1` while `1 + 1` evaluates to `2`.
+
+Notable neutral intervals include:
+| Name            | Logarithmic      | Linear       |
+| --------------- | ---------------- | ------------ |
+| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  |
+| Neutral third   | `n3`, `P5 % 2`   | `sqrt(3/2)`  |
+| Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` |
+
+The major intervals are one semiaugmented unison above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t neutral e.g. `m3` is `m3 + sd1`.
+
+Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sA4` is simply `P4 + sA1` or `32/27^3/2` if expressed linearly.
+
+#### Semisharps and semiflats
+The accidental associated with `sA1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "quarter-tones".)
+
+For example the neutral third above `C4` is `Ed4`.
+
+#### Neutral FJS
+[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
+
+The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
+| Prime | Comma                 | Size in cents |
+| ----- | --------------------- | ------------- |
+| 11    | sqrt(242/243)         | -3.570        |
+| 13    | sqrt(507/512)         | -8.495        |
+| 29    | sqrt(864/841)         | -23.355       |
+| 31    | sqrt(2101707/2097152) | +1.878        |
+| 37    | sqrt(175232/177147)   | -9.408        |
 
 #### Quarter-augmented Pythagorean notation
 TODO

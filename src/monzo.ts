@@ -1211,7 +1211,7 @@ export class TimeMonzo {
       }
     }
     const cents = this.totalCents();
-    const whole = Math.floor(cents);
+    const whole = Math.trunc(cents);
     // Note: This abuses the grammar
     const fractional = ((cents - whole).toString().split('.')[1] ?? '') + '!c';
     return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
