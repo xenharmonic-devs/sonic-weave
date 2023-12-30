@@ -724,7 +724,7 @@ function isArray(value: any) {
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
-function toString_(value: SonicWeaveValue | null, depth = 2): string {
+function str_(value: SonicWeaveValue | null, depth = 2): string {
   if (value === null) {
     return '';
   }
@@ -738,7 +738,7 @@ function toString_(value: SonicWeaveValue | null, depth = 2): string {
     if (depth < 0) {
       return '[Array]';
     }
-    return '[' + value.map(e => toString_(e, depth - 1)).join(', ') + ']';
+    return '[' + value.map(e => str_(e, depth - 1)).join(', ') + ']';
   }
   if (typeof value === 'function') {
     // Don't stringify __doc__ and __node__
@@ -747,14 +747,14 @@ function toString_(value: SonicWeaveValue | null, depth = 2): string {
   return inspect(value, {depth});
 }
 
-export function toString(value: SonicWeaveValue) {
-  return toString_(value);
+export function str(value: SonicWeaveValue) {
+  return str_(value);
 }
-toString.__doc__ = 'Obtain a string representation of the value.';
-toString.__node__ = builtinNode(toString);
+str.__doc__ = 'Obtain a string representation of the value.';
+str.__node__ = builtinNode(str);
 
 function print(...args: any[]) {
-  console.log(...args.map(a => toString(a)));
+  console.log(...args.map(a => str(a)));
 }
 print.__doc__ = 'Print the arguments to the console.';
 print.__node__ = builtinNode(print);
@@ -822,7 +822,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   ceil,
   // Other
   hasConstantStructure,
-  toString,
+  str,
   slice,
   zip,
   zipLongest,

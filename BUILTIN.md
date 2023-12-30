@@ -291,7 +291,7 @@ Obtain a sorted copy of the current/given scale in ascending order.
 
 `scale`
 
-### toString
+### str
 Obtain a string representation of the value.
 #### Parameters:
 
@@ -314,12 +314,6 @@ Prepend an interval at the beginning of the current/given scale.
 #### Parameters:
 
 `interval`, `scale`
-
-### upsAs
-Change up arrows to the given interval (mapping comma).
-#### Parameters:
-
-`comma`
 
 ### zip
 Combine elements of each array into tuples until one of them is exhausted.

@@ -598,7 +598,7 @@ The basic tone-splitters are as follows:
 ### Absolute semioctave dodecanominal notation
 When stacked against the semioctave the fifth spans a dodecatonal scale inside the octave (10L 2s "soft-jaric" a.k.a. "jaramechromic").
 
-The scale is are nominated such that the Greek nominals form the Ionian mode starting from the semioctave.
+The scale is nominated such that the Greek nominals form the Ionian mode starting from the semioctave.
 
 | Nominal | ASCII    | Meaning     |
 | ------- | -------- | ----------- |
@@ -616,14 +616,14 @@ The scale is are nominated such that the Greek nominals form the Ionian mode sta
 | `β4`    | `beta4`  | `C4 + n7½`  |
 | `C5`    |          | `C4 + P8`   |
 
-Notice how the notation is antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode.
+Notice how the notation is half-way antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode.
 
 The accidentals associated with this bihexatonic scale are `r` and `p`.
 
-| Accidental | Monzo       | Size in cents | Mnemonics                 |
-| ---------- | ----------- | ------------- | ------------------------- |
-| `r`        | `[-19/2 6>` | `+11.730`     | **r**aise, paja**r**a     |
-| `p`        | `[19/2 -6>` | `-11.730`     | (flipped `b`), **p**ajara |
+| Accidental | Monzo       | Size in cents | Mnemonics                   |
+| ---------- | ----------- | ------------- | --------------------------- |
+| `r`        | `[-19/2 6>` | `+11.730`     | **r**_aise_, _paja_**r**_a_ |
+| `p`        | `[19/2 -6>` | `-11.730`     | (flipped `b`), **p**_ajara_ |
 
 ### The interordinal semifourth
 When combined with neutral inflections the true tone-splitters induce the notation `m2.5` for the semifourth `P4 % 2` basically for free.
