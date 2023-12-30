@@ -321,4 +321,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(seven.value.cents).toBe(7);
     expect(seven.value.totalCents()).toBe(7);
   });
+
+  it('has gcd', () => {
+    const six = parseSingle('gcd(30, 84)');
+    expect(six.toString()).toBe('6');
+  });
+
+  it('has lcm', () => {
+    const fourTwenty = parseSingle('lcm(30, 84)');
+    expect(fourTwenty.toString()).toBe('420');
+  });
 });

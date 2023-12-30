@@ -427,6 +427,22 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Other ==
 
+function gcd(a: Interval, b: Interval) {
+  const value = a.value.gcd(b.value);
+  return new Interval(value, 'linear');
+}
+gcd.__doc__ =
+  'Obtain the largest (linear) multiplicative factor shared by both intervals.';
+gcd.__node__ = builtinNode(gcd);
+
+function lcm(a: Interval, b: Interval) {
+  const value = a.value.lcm(b.value);
+  return new Interval(value, 'linear');
+}
+lcm.__doc__ =
+  'Obtain the smallest (linear) interval that shares both intervals as multiplicative factors.';
+lcm.__node__ = builtinNode(lcm);
+
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   if (scale.length < 1) {
@@ -821,6 +837,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  gcd,
+  lcm,
   hasConstantStructure,
   str,
   slice,

@@ -98,6 +98,20 @@ function isDecimal(fraction: Fraction) {
   return d === 1;
 }
 
+function max(a: Fraction, b: Fraction) {
+  if (a.compare(b) < 0) {
+    return b;
+  }
+  return a;
+}
+
+function min(a: Fraction, b: Fraction) {
+  if (a.compare(b) > 0) {
+    return b;
+  }
+  return a;
+}
+
 /**
  * Fractional monzo with multiplicative residue and arbitrary cents offset measured in time-related units (usually Hz).
  *
@@ -707,15 +721,64 @@ export class TimeMonzo {
     for (let i = 0; i < other.primeExponents.length; ++i) {
       vector.push(this.primeExponents[i].add(other.primeExponents[i]));
     }
-    while (vector.length < this.primeExponents.length) {
-      vector.push(new Fraction(this.primeExponents[vector.length]));
-    }
     const residual = this.residual.mul(other.residual);
     return new TimeMonzo(
       this.timeExponent.add(other.timeExponent),
       vector,
       residual,
       this.cents + other.cents
+    );
+  }
+
+  /**
+   * Compute the greatest common divisor between this and another time monzo.
+   * @param other Another time monzo.
+   * @returns The largest multiplicative factor shared by both monzos.
+   */
+  gcd(other: TimeMonzo): TimeMonzo {
+    if (this.primeExponents.length < other.primeExponents.length) {
+      return other.gcd(this);
+    }
+    if (other.primeExponents.length < this.primeExponents.length) {
+      other = other.clone();
+      other.numberOfComponents = this.primeExponents.length;
+    }
+    const vector = [];
+    for (let i = 0; i < other.primeExponents.length; ++i) {
+      vector.push(min(this.primeExponents[i], other.primeExponents[i]));
+    }
+    const residual = this.residual.gcd(other.residual);
+    return new TimeMonzo(
+      min(this.timeExponent, other.timeExponent),
+      vector,
+      residual,
+      Math.min(this.cents, other.cents)
+    );
+  }
+
+  /**
+   * Compute the least common multiple between this and another time monzo.
+   * @param other Another time monzo.
+   * @returns The smallest monzo that has both monzos as factors.
+   */
+  lcm(other: TimeMonzo): TimeMonzo {
+    if (this.primeExponents.length < other.primeExponents.length) {
+      return other.lcm(this);
+    }
+    if (other.primeExponents.length < this.primeExponents.length) {
+      other = other.clone();
+      other.numberOfComponents = this.primeExponents.length;
+    }
+    const vector = [];
+    for (let i = 0; i < other.primeExponents.length; ++i) {
+      vector.push(max(this.primeExponents[i], other.primeExponents[i]));
+    }
+    const residual = this.residual.lcm(other.residual);
+    return new TimeMonzo(
+      max(this.timeExponent, other.timeExponent),
+      vector,
+      residual,
+      Math.max(this.cents, other.cents)
     );
   }
 
