@@ -1,5 +1,7 @@
 # sonic-weave
-The SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments
+SonicWeave is a Domain Specific Language for manipulating musical frequencies, ratios and equal temperaments.
+
+Not to be confused with the Sweave flexible framework for mixing text and R code for automatic document generation.
 
 ## Type system
 SonicWeave comes with some basic types.
@@ -39,7 +41,7 @@ SonicWeave is intended for designing musical scales so a fundamental concept is 
 The current scale starts empty (`$ = []`) and the basic action is to push intervals onto the scale.
 
 Statements can be separated with semicolons `;` or newlines. After these instructions ...
-```sw
+```javascript
 5/4
 3/2
 2/1
@@ -48,7 +50,7 @@ Statements can be separated with semicolons `;` or newlines. After these instruc
 
 ### Unrolling
 Sub-scales are automatically unrolled onto the current scale.
-```sw
+```javascript
 4\12
 [7\12, 12\12]
 ```
@@ -56,7 +58,7 @@ Results in the scale `$ = [4\12, 7\12, 12\12]`.
 
 ### Coloring
 If an expression evaluates to a color it is attached to the last interval in the scale.
-```sw
+```javascript
 3/2
 green
 2/1
@@ -68,7 +70,7 @@ It is up to a user interface to interprete colors. The original intent is to col
 
 ### Labeling
 If an expression evaluates to a string it is attached to the last interval in the scale.
-```sw
+```javascript
 4/3
 "My P4"
 2/1
@@ -134,7 +136,7 @@ Increment/decrement assumes that `i = 2` originally.
 Inclusion is similar to Python's `in` operator e.g. `2 of [1, 2, 3]` evaluates to `true`.
 
 Outer product a.k.a. tensoring expands all possible products in two arrays into an array of arrays e.g. `[2, 3, 5] tns [7, 11]` evaluates to
-```sw
+```javascript
 [
   [14, 22],
   [21, 33],
@@ -325,7 +327,7 @@ The current scale of the parent block can be accessed using `$$`.
 
 ### While
 While loops repeat a statement until the test becames *falsy* e.g.
-```sw
+```javascript
 i = 5
 while (--i) {
   i
@@ -335,7 +337,7 @@ results in `$ = [4, 3, 2, 1]`.
 
 ### For...of
 For loops iterate over array contents e.g.
-```sw
+```javascript
 for (i of [1..5]) {
   2 ^ (i % 5)
 }
@@ -344,7 +346,7 @@ results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
 ### If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
-```sw
+```javascript
 if (3/2 > 700.) {
   print("The Pythagorean fifth is larger than the perfect fifth of 12-TET")
 } else {
@@ -356,7 +358,7 @@ Conditional expressions look similar but work inline e.g. `3 if true else 5` eva
 
 ### Function declaration
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
-```sw
+```javascript
 riff subharmonics start end {
   return inverted(start::end)
 }
@@ -371,7 +373,7 @@ Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (st
 
 ### Throwing
 To interupt execution you can throw string messages.
-```sw
+```javascript
 if (2 < 1) {
   print("This won't print")
 } else {
@@ -381,7 +383,7 @@ if (2 < 1) {
 
 ### Implicit mapping
 The default action when encountering a function is to remap the current scale using it.
-```sw
+```javascript
 primes(3, 17)
 prime => prime red 2
 2
@@ -395,14 +397,14 @@ In SonicWeave tempering refers to measuring the prime counts of intervals and re
 Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
 
 First we'll measure out the primes:
-```sw
+```javascript
 2^-2 * 3^0 * 5^1
 2^-1 * 3^1 * 5^0
 2^+1 * 3^0 * 5^0
 ```
 
 Then we replace each prime with their closest approximation:
-```sw
+```javascript
 st = 2^1/12 // One semitone
 
 (2 by st)^-2 * (3 by st)^0 * (5 by st)^1
@@ -413,7 +415,7 @@ Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
 
 #### Implicit tempering
 The above could've been achieved by
-```sw
+```javascript
 [5/4, 3/2, 2]
 i => 12@ dot i \ 12
 ```
@@ -422,7 +424,7 @@ The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
 The default action when encountering a val (`12@` is shorthand for `<12 19 28]`) is to temper the current scale with it.
 
 The above reduces to
-```sw
+```javascript
 [5/4, 3/2, 2]
 12@
 ```
@@ -431,7 +433,7 @@ The above reduces to
 By default the up inflection (`^`) corresponds to one step upwards irregardless of the equal temperament while the down inflection (`v`) corresponds to one step downwards.
 
 This can make notation shorter. The 5-limit major scale in 22-tone equal temperament is:
-```sw
+```javascript
 M2
 M3^5
 P4
@@ -443,7 +445,7 @@ P8
 ```
 
 Using downs the direction of inflection is more clear:
-```sw
+```javascript
 M2
 vM3
 P4
@@ -456,7 +458,7 @@ P8
 
 #### Tweaking ups and downs
 To control what ups and downs correspond to, you can use the `upsAs` built-in function:
-```sw
+```javascript
 M2
 vM3
 P4
@@ -470,7 +472,7 @@ upsAs(81/80)
 ```
 
 Or simply increase to _"upness"_ of `311@` by five:
-```sw
+```javascript
 M2
 vM3
 P4
@@ -629,7 +631,7 @@ Notable semiquartal intervals include:
 
 ### Absolute semifourth pentanominal notation
 The split fourth spans a pentatonic (4L 1s "manual") scale:
-```sw
+```javascript
 C4 = mtof(60)
 φ4
 F4
@@ -639,7 +641,7 @@ C5
 ```
 
 As with semioctave nominals `φ` can be spelled in ASCII as `phi` and `ψ` as `psi`. *Phi* was chosen due to similarity to *F* and *psi* comes from the full enneatonic (5L 4s "semiquartal") scale:
-```sw
+```javascript
 C4 = mtof(60)
 φ4
 χ4
