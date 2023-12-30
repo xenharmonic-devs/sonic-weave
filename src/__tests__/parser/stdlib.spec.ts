@@ -258,4 +258,15 @@ describe('SonicWeave standard library', () => {
       "Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale."
     );
   });
+
+  it('can generate the marveldene without irrational stretching', () => {
+    const scale = parseSource(`
+      eulerGenus(675, 15)
+      166@
+      stretch(10005e-4)
+    `);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '2001\\20750;14007\\83000;22011\\83000;106053\\332000;138069\\332000;162081\\332000;194097\\332000;226113\\332000;122061\\166000;282141\\332000;6003\\6640;2001\\2000'
+    );
+  });
 });

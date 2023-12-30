@@ -461,6 +461,11 @@ export class TimeMonzo {
         equave: new Fraction(1),
       };
     }
+    // Shortcut for edos
+    if (this.primeExponents.slice(1).every(pe => !pe.n)) {
+      return {fractionOfEquave: this.primeExponents[0], equave: TWO};
+    }
+
     let denominator = 1;
     for (const component of this.primeExponents) {
       denominator = lcm(denominator, component.d);
@@ -1248,31 +1253,35 @@ export class TimeMonzo {
 
   asNedjiLiteral(node: NedjiLiteral): NedjiLiteral | undefined {
     if (this.isEqualTemperament()) {
-      const {fractionOfEquave, equave} = this.toEqualTemperament();
-      if (node.equaveNumerator === undefined) {
-        if (equave.compare(TWO)) {
+      try {
+        const {fractionOfEquave, equave} = this.toEqualTemperament();
+        if (node.equaveNumerator === undefined) {
+          if (equave.compare(TWO)) {
+            return undefined;
+          }
+        } else if (
+          equave.n !== node.equaveNumerator ||
+          equave.d !== (node.equaveDenominator ?? 1)
+        ) {
           return undefined;
         }
-      } else if (
-        equave.n !== node.equaveNumerator ||
-        equave.d !== (node.equaveDenominator ?? 1)
-      ) {
-        return undefined;
-      }
-      const denominator = lcm(fractionOfEquave.d, Number(node.denominator));
-      if (denominator === Number(node.denominator)) {
+        const denominator = lcm(fractionOfEquave.d, Number(node.denominator));
+        if (denominator === Number(node.denominator)) {
+          return {
+            ...node,
+            numerator: BigInt(
+              (denominator / fractionOfEquave.d) * fractionOfEquave.n
+            ),
+          };
+        }
         return {
           ...node,
-          numerator: BigInt(
-            (denominator / fractionOfEquave.d) * fractionOfEquave.n
-          ),
+          numerator: BigInt(fractionOfEquave.n),
+          denominator: BigInt(fractionOfEquave.d),
         };
+      } catch {
+        return undefined;
       }
-      return {
-        ...node,
-        numerator: BigInt(fractionOfEquave.n),
-        denominator: BigInt(fractionOfEquave.d),
-      };
     }
     return undefined;
   }
@@ -1316,8 +1325,12 @@ export class TimeMonzo {
         } else if (this.isFractional()) {
           return this.toFraction().toFraction();
         } else if (this.isEqualTemperament()) {
-          const {fractionOfEquave, equave} = this.toEqualTemperament();
-          return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
+          try {
+            const {fractionOfEquave, equave} = this.toEqualTemperament();
+            return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
+          } catch {
+            /* Fall through */
+          }
         }
       } else {
         if (this.timeExponent.equals(NEGATIVE_ONE)) {
@@ -1326,8 +1339,12 @@ export class TimeMonzo {
           } else if (this.isFractional()) {
             return `${this.toFraction().toFraction()} Hz`;
           } else if (this.isEqualTemperament()) {
-            const {fractionOfEquave, equave} = this.toEqualTemperament();
-            return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * Hz`;
+            try {
+              const {fractionOfEquave, equave} = this.toEqualTemperament();
+              return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * Hz`;
+            } catch {
+              /* Fall through */
+            }
           }
         }
       }
@@ -1355,17 +1372,20 @@ export class TimeMonzo {
     } else if (domain === 'logarithmic') {
       if (this.isScalar()) {
         if (this.isEqualTemperament()) {
-          const {fractionOfEquave, equave} = this.toEqualTemperament();
-          let backslashed = fractionOfEquave.toFraction().replace('/', '\\');
-          if (!backslashed.includes('\\')) {
-            backslashed += '\\1';
+          try {
+            const {fractionOfEquave, equave} = this.toEqualTemperament();
+            let backslashed = fractionOfEquave.toFraction().replace('/', '\\');
+            if (!backslashed.includes('\\')) {
+              backslashed += '\\1';
+            }
+            if (equave.compare(TWO)) {
+              return `${backslashed}<${equave.toFraction()}>`;
+            }
+            return backslashed;
+          } catch {
+            /* Fall through */
           }
-          if (equave.compare(TWO)) {
-            return `${backslashed}<${equave.toFraction()}>`;
-          }
-          return backslashed;
-        }
-        if (
+        } else if (
           this.residual.equals(ONE) &&
           this.primeExponents.every(pe => !pe.n)
         ) {
