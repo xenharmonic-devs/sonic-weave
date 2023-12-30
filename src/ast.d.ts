@@ -2,8 +2,8 @@ import {IntervalLiteral} from './expression';
 
 export type BinaryOperator =
   | '??'
-  | '||'
-  | '&&'
+  | 'or'
+  | 'and'
   | '==='
   | '!=='
   | '=='

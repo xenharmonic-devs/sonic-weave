@@ -105,8 +105,8 @@ Increment/decrement assumes that `i = 2` originally.
 ### Coalescing
 | Name               | Example       | Result |
 | ------------------ | ------------- | ------ |
-| Logical AND        | `2 && 0`      | `0`    |
-| Logical OR         | `0 \|\| 2`    | `2`    |
+| Logical AND        | `2 and 0`      | `0`    |
+| Logical OR         | `0 or 2`    | `2`    |
 | Nullish coalescing | `niente ?? 2` | `2`    |
 
 ### Boolean

@@ -40,6 +40,7 @@ Program
     };
   }
 
+AndToken      = 'and'    !IdentifierPart
 ByToken       = 'by'     !IdentifierPart
 CentToken     = 'c'      !IdentifierPart
 DotToken      = 'dot'    !IdentifierPart
@@ -52,6 +53,7 @@ LogToken      = 'log'    !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
 NoneToken     = 'niente' !IdentifierPart
 OfToken       = 'of'     !IdentifierPart
+OrToken       = 'or'     !IdentifierPart
 ReduceToken   = 'red'    !IdentifierPart
 ReturnToken   = 'return' !IdentifierPart
 FunctionToken = 'riff'   !IdentifierPart
@@ -63,7 +65,8 @@ TrueToken     = 'true'   !IdentifierPart
 WhileToken    = 'while'  !IdentifierPart
 
 ReservedWord
-  = ByToken
+  = AndToken
+  / ByToken
   / CentToken
   / DotToken
   / ElseToken
@@ -75,6 +78,7 @@ ReservedWord
   / ModToken
   / NoneToken
   / OfToken
+  / OrToken
   / ReduceToken
   / ReturnToken
   / FunctionToken
@@ -256,8 +260,8 @@ AssigningOperator
 
 CoalescingOperator
   = '??'
-  / '||'
-  / '&&'
+  / $(OrToken)
+  / $(AndToken)
 
 CoalescingExpression
   = head: RelationalExpression tail: (_ @CoalescingOperator _ @RelationalExpression)* {

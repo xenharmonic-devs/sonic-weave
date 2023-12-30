@@ -1231,7 +1231,7 @@ riff mergeOffset offsets overflow scale {
   void(shift());
 
   if (overflow === 'drop') {
-    remap(copy => filter(i => i > 1 && i < equave, copy), copies);
+    remap(copy => filter(i => i > 1 and i < equave, copy), copies);
   } else if (overflow === 'wrap') {
     remap(copy => map(i => i ~red equave, copy), copies);
   }

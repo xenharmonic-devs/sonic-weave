@@ -805,13 +805,13 @@ export class ExpressionVisitor {
       }
       return this.visit(node.right);
     }
-    if (operator === '||') {
+    if (operator === 'or') {
       if (sonicTruth(left)) {
         return left;
       }
       return this.visit(node.right);
     }
-    if (operator === '&&') {
+    if (operator === 'and') {
       if (!sonicTruth(left)) {
         return left;
       }
