@@ -175,7 +175,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can format the half twelfth', () => {
     const majorSixAndAHalfth = parseSingle('P12 % 2');
-    expect(majorSixAndAHalfth.toString()).toBe('M6.5');
+    expect(majorSixAndAHalfth.toString()).toBe('m6.5');
   });
 
   it("bails out when there's no Pythagorean to match", () => {

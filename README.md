@@ -513,8 +513,8 @@ Ordinal notation* hides the fact that the perfect fifth spans four steps. This m
 Notable neutral intervals include:
 | Name            | Logarithmic      | Linear       | Size in cents |
 | --------------- | ---------------- | ------------ | ------------- |
-| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
 | Neutral third   | `n3`, `P5 % 2`   | `sqrt(3/2)`  | `350.978`     |
+| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
 | Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
 
 The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `m3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sA6` is `M6 + sA1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
@@ -544,19 +544,88 @@ The first few NFJS commas are. To bridge from irrational to rational the commas 
 | `37`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
 
 #### Quarter-augmented Pythagorean notation
-TODO
+As mentioned above the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.
+
+It does require an intermediary quality between major and neutral called _semimajor_ and correspondingly between neutral and minor called _semiminor_.
+
+The quarter fifth `P5 % 4` is a semimajor second `sM2` (or `½M2`).
+
+The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-diminished (`qd`, `¼d`). Quarter-augmented plus semiaugmented is sesqui-quarter-augmented (`QA`, `¾A`) and correspondingly sesqui-quarter-diminished (`Qd`, `¾d`).
+
+| Accidental             | Monzo          | Size in cents |
+| ---------------------- | -------------- | ------------- |
+| `q#`, `¼#`, `q♯`, `¼♯` | `[-11/4 7/4>`  | `+28.421`     |
+| `qb`, `¼b`, `q♭`, `¼♭` | `[11/4 -7/4>`  | `-28.421`     |
+| `Q#`, `¾#`, `Q♯`, `¾♯` | `[-33/4 21/4>` | `+85.264`     |
+| `Qb`, `¾b`, `Q♭`, `¾♭` | `[33/4 -21/4>` | `-85.264`     |
 
 #### Mids
-TODO
+[Ups and downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) comes with a mid (~) quality that doesn't always fall in between augmented and diminished. These exceptions are as follows:
+
+| Name           | Literal |  Recommended name    | Literal | Monzo        | Size in cents |
+| -------------- | ------- | -------------------- | ------- | ------------ | ------------- |
+| Neutral fourth | `n4`    | Semiaugmented fourth | `sA4`   | `[-7/2 5/2>` | `554.888`     |
+| Neutral fifth  | `n5`    | Semidiminished fifth | `sd5`   | `[9/2 -5/2>` | `645.112`     |
+
+They are octave complements of each other: `n4` is `P8 - n5`.
 
 ### True tone-splitters
-TODO
+Technically the term _semitone_ is a misnomer because `m2` doesn't split the tone `M2` in half with mathematical precission. The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
+
+The difference `n1.5 - m2` is only `11.730c` so true tone-splitters are not very useful in their untempered form, but they do provide the notation `n4.5` for the semioctave `P8 % 2` which is stable in all even equal divisions of the octave.
+
+The basic tone-splitters are as follows:
+| Name                         | Logarithmic        | Linear            | Size in cents |
+| ---------------------------- | ------------------ | ----------------- | ------------- |
+| Neutral sesquith             | `n1.5`, `M2 % 2`   | `sqrt(9/8)`       | `101.955`     |
+| Neutral second-and-a-halfth  | `n2.5`, `M2 * 3/2` | `sqrt(729/512)`   | `305.865`     |
+| Neutral third-and-a-halfth   | `n3.5`, `M2 * 5/2` | `9/8 ^ 5/2`       | `509.775`     |
+| Neutral fourth-and-a-halfth  | `n4.5`, `P8 % 2`   | `sqrt(2)`         | `600.000`     |
+| Neutral fifth-and-a-halfth   | `n5.5`, `M10 % 2`  | `sqrt(81/32)`     | `803.910`     |
+| Neutral sixth-and-a-halfth   | `n6.5`, `A12 % 2`  | `sqrt(6561/2048)` | `1007.82`     |
+| Neutral seventh-and-a-halfth | `n7.5`, `m14 % 2`  | `sqrt(32/9)`      | `1098.045`    |
 
 ### Absolute semioctave dodecanominal notation
-TODO
+When stacked against the semioctave the fifth spans a dodecatonal scale inside the octave (10L 2s "soft-jaric" a.k.a. "jaramechromic").
+
+The scale is are nominated such that the Greek nominals form the Ionian mode starting from the semioctave.
+
+| Nominal | ASCII    | Meaning     |
+| ------- | -------- | ----------- |
+| `C4`    |          | `C4 + P1`   |
+| `γ4`    | `gamma4` | `C4 + n1½`  |
+| `D4`    |          | `C4 + M2`   |
+| `δ4`    | `delta4` | `C4 + n2½`  |
+| `E4`    |          | `C4 + M3`   |
+| `F4`    |          | `C4 + P4`   |
+| `ζ4`    | `zeta4`  | `C4 + n4½`  |
+| `G4`    |          | `C4 + P5`   |
+| `η4`    | `eta4`   | `C4 + n5½`  |
+| `a4`    |          | `C4 + M6`   |
+| `α4`    | `alpha4` | `C4 + n6½`  |
+| `β4`    | `beta4`  | `C4 + n7½`  |
+| `C5`    |          | `C4 + P8`   |
+
+Notice how the notation is antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode.
+
+The accidentals associated with this bihexatonic scale are `r` and `p`.
+
+| Accidental | Monzo       | Size in cents | Mnemonics                 |
+| ---------- | ----------- | ------------- | ------------------------- |
+| `r`        | `[-19/2 6>` | `+11.730`     | **r**aise, paja**r**a     |
+| `p`        | `[19/2 -6>` | `-11.730`     | (flipped `b`), **p**ajara |
 
 ### The interordinal semifourth
-TODO
+When combined with neutral inflections the true tone-splitters induce the notation `m2.5` for the semifourth `P4 % 2` basically for free.
+
+Notable semiquartal intervals include:
+| Name                       | Logarithmic       | Linear         | Size in cents |
+| -------------------------- | ----------------- | -------------- | ------------- |
+| Minor second-and-a-halfth  | `m2½`, `P4 % 2`   | `sqrt(4/3)`    | `249.022`     |
+| Minor third-and-a-halfth   | `m3½`, `M6 % 2`   | `sqrt(27/16)`  | `452.933`     |
+| Minor fifth-and-a-halfth   | `m5½`, `P4 * 3/2` | `sqrt(64/27) ` | `747.067`     |
+| Minor sixth-and-a-halfth   | `m6½`, `P12 % 2`  | `sqrt(3)`      | `950.978`     |
+| Major seventh-and-a-halfth | `M7½`, `M14 % 2`  | `sqrt(243/64)` | `1154.888`    |
 
 ### Absolute semifourth pentanominal notation
 The split fourth spans a pentatonic (4L 1s "manual") scale:
@@ -569,8 +638,6 @@ G4
 C5
 ```
 
-The accidental *em* (`&`) denotes the difference between a semifourth and a whole tone: `C&4` is `C4 + (P4%2 - M2)`. The accidental *at* (`@`) is the opposite.
-
 As with semioctave nominals `φ` can be spelled in ASCII as `phi` and `ψ` as `psi`. *Phi* was chosen due to similarity to *F* and *psi* comes from the full enneatonic (5L 4s "semiquartal") scale:
 ```sw
 C4 = mtof(60)
@@ -582,29 +649,33 @@ G4
 ω4
 C5
 ```
-`χ` or `chi` is equal to `F@` while `ω` or `omega` is equal to `C@` of the next octave.
 
-| Nominal        | Meaning     |
-| -------------- | ----------- |
-| `φ4`, `phi4`   | `C4 + m2.5` |
-| `χ4`, `chi4`   | `C4 + M3.5` |
-| `ψ4`, `psi4`   | `C4 + M6.5` |
-| `ω4`, `omega4` | `C4 + M7.5` |
+| Nominal | ASCII    | Meaning     |
+| ------- | -------- | ----------- |
+| `φ4`    | `phi4`   | `C4 + m2.5` |
+| `χ4`    | `chi4`   | `C4 + m3.5` |
+| `ψ4`    | `psi4`   | `C4 + m6.5` |
+| `ω4`    | `omega4` | `C4 + M7.5` |
 
-| Accidental  | Size in cents |
-| ----------- | ------------- |
-| `&`         | `+45.112`     |
-| `@`         | `-45.112`     |
+The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the difference between a semifourth and a whole tone: `C&4` is `C4 + (P4%2 - M2)`. The accidental *at* (`@`) is the opposite.
+
+`χ` is equal to `F@` while `ω` is equal to `C@` of the next octave.
+
+| Accidental  | Monzo      | Size in cents |
+| ----------- | ---------- | ------------- |
+| `&`         | `[4 -5/2>` | `+45.112`     |
+| `@`         | `[-4 5/2>` | `-45.112`     |
 
 ### Obscure types
-
 | Type   | Literal | Meaning |
 | ------ | ------- | ------- |
 | Second | `s`     | Inverse of `Hz` i.e. `s * Hz` evaluates to `1` |
 | Jorp   | `€`     | Geometric inverse of `c` i.e. `€` is equal to `v<1200]` |
 
-## Acknowledgments / inspiration
+## Future work
+The syntax could be extended to cover movement in time i.e. to become a full textual music notation vis-à-vis Xenpaper.
 
+## Acknowledgments / inspiration
 SonicWeave looks like Javascript with Python semantics, has Haskell ranges and operates similar to xen-calc.
 
 * ECMAScript - Brendan Eich et. al.
