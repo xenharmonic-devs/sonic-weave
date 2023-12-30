@@ -52,7 +52,7 @@ export class Interval {
   domain: Domain;
   node?: IntervalLiteral;
   color?: Color;
-  label?: string;
+  label: string;
 
   constructor(
     value: TimeMonzo,
@@ -66,6 +66,8 @@ export class Interval {
     if (convert !== undefined) {
       this.color = convert.color;
       this.label = convert.label;
+    } else {
+      this.label = '';
     }
   }
 
@@ -293,11 +295,27 @@ export class Interval {
     return this.domain === other.domain && this.value.strictEquals(other.value);
   }
 
-  toString() {
+  _toString() {
     if (this.node) {
       return toString(this.node);
     }
     return this.value.toString(this.domain);
+  }
+
+  toString() {
+    const base = this._toString();
+    const color = this.color ? this.color.value : '';
+    if (this.color || this.label) {
+      let result = '(' + base;
+      if (color) {
+        result += ' ' + color;
+      }
+      if (this.label) {
+        result += ' ' + JSON.stringify(this.label);
+      }
+      return result + ')';
+    }
+    return base;
   }
 
   valueOf() {

@@ -215,13 +215,13 @@ describe('SonicWeave expression evaluator', () => {
   it('can convert cents to boolean', () => {
     const yes = parseSingle('bool(0.0 red_)');
     expect(yes.color?.value).toBe('#FF0000');
-    expect(yes.toString()).toBe('true');
+    expect(yes.toString()).toBe('(true #FF0000)');
   });
 
   it('can convert boolean to cents', () => {
     const zeroCents = parseSingle('cents(true "yes")');
     expect(zeroCents.label).toBe('yes');
-    expect(zeroCents.toString()).toBe('0.');
+    expect(zeroCents.toString()).toBe('(0. "yes")');
   });
 
   it('converts pi to an integer', () => {

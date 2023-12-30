@@ -11,7 +11,7 @@ SonicWeave comes with some basic types.
 | Color    | `#ff00ff`                | CSS colors, short hexadecimal, and long hexadecimal colors supported. Used for note colors. |
 | Interval | `7/5`                    | There are many types of intervals with their own operator semantics. |
 | Scale    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals. |
-| Function | `riff plusOne x {x + 1}` | _Riff_ is a music term for a short repeated phrase. |
+| Function | `riff plusOne x {x+1}` | _Riff_ is a music term for a short repeated phrase. |
 
 ### Basic interval types
 You can read more about domains and echelons [below](#interval-type-system).
@@ -25,9 +25,9 @@ You can read more about domains and echelons [below](#interval-type-system).
 | N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative | `n/m` means `n` steps of `m` equal divisions of the octave `2/1`. |
 | N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative | `n/m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative | One centisemitone `1.0` is equal to `1\1200`. |
-| Monzo        | `[-4 4 -1>`, `[1 -1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
+| Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
-| Frequency    | `440Hz`, `2.2 kHz`      | Linear        | Absolute | Absolute frequency of oscillation. |
+| Frequency    | `440 Hz`, `2.2kHz`      | Linear        | Absolute | Absolute frequency of oscillation. |
 | Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System).
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative | Used to temper scales. |
 | Warts        | `12@`, `29@2.3.13/5`    | Cologarithmic | Relative | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
