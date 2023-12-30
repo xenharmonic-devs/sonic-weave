@@ -465,4 +465,9 @@ describe('Automatic semicolon insertion', () => {
     const ast = parse('foo\nbar');
     expect(ast.body).toHaveLength(2);
   });
+
+  it('works with unary minus', () => {
+    const ast = parse('foo\n-bar');
+    expect(ast.body).toHaveLength(2);
+  });
 });

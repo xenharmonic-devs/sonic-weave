@@ -26,6 +26,7 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Fraction     | `4/3`, `10/7`           | Linear        | Relative | |
 | N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative | `n/m` means `n` steps of `m` equal divisions of the octave `2/1`. |
 | N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative | `n/m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
+| Step         | `7\`, `13\`             | Logarithmic   | Relative | Correspond to edo-steps after tempering is applied. |
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative | One centisemitone `1.0` is equal to `1\1200`. |
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
@@ -94,14 +95,18 @@ SonicWeave comes with some operators.
 | Inversion     | `÷3/2` | `2/3`       | `-P5`       | `P-5`      |
 | Geom. inverse | _N/A_  |             | `%P8`       | `v<1]`     |
 | Logical NOT   | `!2`   | `false`     | `!P8`       | `false`    |
-| Up-shimmer*   | `^2`   | `2*1.0006!` | `^P8`       | `P8 + 1!c` |
-| Down-shimmer* | `v{2}` | `2*0.9994!` | `vP8`       | `P8 - 1!c` |
+| Up-shimmer*   | `^2`   | `2*1.0006!` | `^P8`       | `P8 + 1\`  |
+| Down-shimmer* | `v{2}` | `2*0.9994!` | `vP8`       | `P8 - 1\`  |
+| Lift-shimmer* | `/2`   | `2*1.0029!` | `/P8`       | `P8 + 5\`  |
+| Drop-shimmer* | `\2`   | `2*0.9971!` | `\P8`       | `P8 - 5\`  |
 | Increment     | `++i`  | `3`         | _N/A_       |            |
 | Increment     | `i++`  | `2`         | _N/A_       |            |
 | Decrement     | `--i`  | `1`         | _N/A_       |            |
 | Decrement     | `i--`  | `2`         | _N/A_       |            |
 
-*) Shimmer is meant to be used with tempering and always corresponds to one edji-step.
+*) Shimmer is meant to be used with tempering and corresponds to edo-steps unless otherwise declared.
+
+Down-shimmer sometimes requires curly brackets due to `v` colliding with the Latin alphabet.
 
 Increment/decrement assumes that `i = 2` originally.
 ### Coalescing
@@ -457,8 +462,10 @@ P8
 ```
 
 #### Tweaking ups and downs
-To control what ups and downs correspond to, you can use the `upsAs` built-in function:
+To control what ups and downs correspond to, you can use an up declaration:
 ```javascript
+^ = 81/80
+
 M2
 vM3
 P4
@@ -467,21 +474,22 @@ vM6
 vM7
 P8
 
-upsAs(81/80)
 311@
 ```
 
-Or simply increase to _"upness"_ of `311@` by five:
+In this case we could've also set lifts to equal six steps of 311edo.
 ```javascript
+/ = 6\
+
 M2
-vM3
+\M3
 P4
 P5
-vM6
-vM7
+\M6
+\M7
 P8
 
-^^^^^311@
+311@
 ```
 
 ### Stdlib

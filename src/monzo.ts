@@ -11,7 +11,6 @@ import {
   valueToCents,
   mmod,
   BIG_INT_PRIMES,
-  clamp,
 } from 'xen-dev-utils';
 
 import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd} from './utils';
@@ -1279,8 +1278,7 @@ export class TimeMonzo {
   }
 
   asMonzoLiteral(): MonzoLiteral | undefined {
-    const downs = -this.cents;
-    if (!Number.isInteger(downs)) {
+    if (this.cents) {
       return undefined;
     }
     if (this.residual.compare(ONE)) {
@@ -1302,7 +1300,7 @@ export class TimeMonzo {
     while (components.length && components[components.length - 1].left === 0n) {
       components.pop();
     }
-    return {type: 'MonzoLiteral', components, downs};
+    return {type: 'MonzoLiteral', components, downs: 0};
   }
 
   /**
@@ -1336,7 +1334,9 @@ export class TimeMonzo {
       const factors = [];
       for (let i = 0; i < this.primeExponents.length; ++i) {
         const pe = this.primeExponents[i];
-        if (pe.n) {
+        if (pe.equals(ONE)) {
+          factors.push(`${PRIMES[i]}`);
+        } else if (pe.n) {
           factors.push(`${PRIMES[i]}^${pe.toFraction()}`);
         }
       }
@@ -1375,58 +1375,56 @@ export class TimeMonzo {
           return '0c';
         }
       }
-      let result = '';
+      const terms: string[] = [];
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
-        result = 'logarithmic(Hz)+';
+        terms.push('logarithmic(Hz)');
       } else if (this.timeExponent.n) {
-        result = `${this.timeExponent.toFraction()}*logarithmic(s)+`;
-      }
-      const ups = clamp(-10, 10, Math.round(this.cents));
-      if (ups > 0) {
-        result += '^'.repeat(ups);
-      } else {
-        result += 'v'.repeat(-ups);
+        terms.push(`${this.timeExponent.toFraction()}*logarithmic(s)`);
       }
       const pe = [...this.primeExponents];
       while (pe.length && !pe[pe.length - 1].n) {
         pe.pop();
       }
-      result += '[' + pe.map(f => f.toFraction()).join(' ') + '>';
+      terms.push('[' + pe.map(f => f.toFraction()).join(' ') + '>');
       if (this.residual.compare(ONE)) {
-        result += `+relog(${this.residual.toFraction()})`;
+        terms.push(`relog(${this.residual.toFraction()})`);
       }
-      const cents = this.cents - ups;
+      const steps = Math.round(this.cents);
+      if (steps) {
+        terms.push(`${steps}\\`);
+      }
+      const cents = this.cents - steps;
       if (cents) {
-        const sign = cents >= 0 ? '+' : '-';
-        result += `${sign}${Math.abs(cents)}!c`;
+        terms.push(`${cents}!c`);
       }
-      return result;
+      return [terms[0]]
+        .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
+        .join('');
     }
-    let result = '';
+    const terms: string[] = [];
     if (this.timeExponent.equals(NEGATIVE_ONE)) {
-      result = 'cologarithmic(Hz)+';
+      terms.push('cologarithmic(Hz)');
     } else if (this.timeExponent.n) {
-      result = `${this.timeExponent.toFraction()}*cologarithmic(s)+`;
-    }
-    const ups = clamp(-10, 10, Math.round(this.cents) - 1);
-    if (ups > 0) {
-      result += '^'.repeat(ups);
-    } else {
-      result += 'v'.repeat(-ups);
+      terms.push(`${this.timeExponent.toFraction()}*cologarithmic(s)`);
     }
     const pe = [...this.primeExponents];
     while (pe.length && !pe[pe.length - 1].n) {
       pe.pop();
     }
-    result += '<' + pe.map(f => f.toFraction()).join(' ') + ']';
+    terms.push('<' + pe.map(f => f.toFraction()).join(' ') + ']');
     if (this.residual.compare(ONE)) {
-      result += `+cologarithmic(${this.residual.toFraction()})`;
+      terms.push(`cologarithmic(${this.residual.toFraction()})`);
     }
-    const cents = this.cents - ups - 1;
+    const steps = Math.round(this.cents - 1);
+    if (steps) {
+      terms.push(`cologarithmic(${steps}\\)`);
+    }
+    const cents = this.cents - 1 - steps;
     if (cents) {
-      const sign = cents >= 0 ? '+' : '-';
-      result += `${sign}${Math.abs(cents)}!€`;
+      terms.push(`${cents}!€`);
     }
-    return result;
+    return [terms[0]]
+      .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
+      .join('');
   }
 }

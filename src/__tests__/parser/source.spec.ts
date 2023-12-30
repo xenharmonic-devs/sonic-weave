@@ -298,13 +298,31 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('can rig ups-and-downs (builtin)', () => {
+  it('can rig ups-and-downs', () => {
     const scale = parseSource(`
+      ^ = 81/80
+
       vM3
       P5
       ^m6
       P8
-      upsAs(81/80)
+
+      FJS
+    `);
+    expect(scale).toHaveLength(4);
+    expect(scale.map(i => i.toString()).join(';')).toBe('M3^5;P5;m6_5;P8');
+  });
+
+  it('can rig lifts-and-drops', () => {
+    const scale = parseSource(`
+      / = 81/80
+
+      \\M3
+      P5
+      /m6
+      P8
+
+      FJS
     `);
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('M3^5;P5;m6_5;P8');

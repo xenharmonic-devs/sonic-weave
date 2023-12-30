@@ -28,6 +28,11 @@ export type RadicalLiteral = {
   exponent: Fraction;
 };
 
+export type StepLiteral = {
+  type: 'StepLiteral';
+  count: bigint;
+};
+
 export type NedjiLiteral = {
   type: 'NedoLiteral';
   numerator: bigint;
@@ -118,6 +123,7 @@ export type IntervalLiteral =
   | DecimalLiteral
   | FractionLiteral
   | RadicalLiteral
+  | StepLiteral
   | NedjiLiteral
   | CentsLiteral
   | CentLiteral
@@ -150,34 +156,6 @@ export function uniformInvertNode(
         type: 'FractionLiteral',
         numerator: node.denominator,
         denominator: node.numerator,
-      };
-  }
-  return undefined;
-}
-
-export function upNode(node?: IntervalLiteral): IntervalLiteral | undefined {
-  if (!node) {
-    return undefined;
-  }
-  switch (node.type) {
-    case 'FJS':
-      return {
-        ...node,
-        downs: node.downs - 1,
-      };
-  }
-  return undefined;
-}
-
-export function downNode(node?: IntervalLiteral): IntervalLiteral | undefined {
-  if (!node) {
-    return undefined;
-  }
-  switch (node.type) {
-    case 'FJS':
-      return {
-        ...node,
-        downs: node.downs + 1,
       };
   }
   return undefined;
@@ -312,28 +290,22 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
   return result;
 }
 
-function formatUps(literal: FJS | AbsoluteFJS | MonzoLiteral | ValLiteral) {
-  if (literal.downs > 0) {
-    return 'v'.repeat(literal.downs);
-  } else {
-    return '^'.repeat(-literal.downs);
-  }
-}
-
 function formatFJS(literal: FJS) {
-  const ups = formatUps(literal);
+  if (literal.downs) {
+    throw new Error('The meaning of downs depends on context');
+  }
   const d = literal.pythagorean.degree;
-  return `${ups}${literal.pythagorean.quality}${d.negative ? '-' : ''}${
+  return `${literal.pythagorean.quality}${d.negative ? '-' : ''}${
     d.base + 7 * d.octaves
   }${tailFJS(literal)}`;
 }
 
 function formatAbsoluteFJS(literal: AbsoluteFJS) {
-  const ups = formatUps(literal);
+  if (literal.downs) {
+    throw new Error('The meaning of downs depends on context');
+  }
   const p = literal.pitch;
-  return `${ups}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
-    literal
-  )}`;
+  return `${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(literal)}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {
@@ -376,6 +348,8 @@ export function toString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
       return formatNedji(literal);
+    case 'StepLiteral':
+      return `${literal.count}\\`;
     case 'FractionLiteral':
       return `${literal.numerator}/${literal.denominator}`;
     case 'RadicalLiteral':
@@ -405,9 +379,15 @@ export function toString(literal: IntervalLiteral) {
     case 'SecondLiteral':
       return `${literal.prefix}s`;
     case 'MonzoLiteral':
-      return `${formatUps(literal)}[${formatComponents(literal.components)}>`;
+      if (literal.downs) {
+        throw new Error('The meaning of downs depends on context');
+      }
+      return `[${formatComponents(literal.components)}>`;
     case 'ValLiteral':
-      return `${formatUps(literal)}<${formatComponents(literal.components)}]`;
+      if (literal.downs) {
+        throw new Error('The meaning of downs depends on context');
+      }
+      return `<${formatComponents(literal.components)}]`;
     default:
       return literal.value.toString();
   }

@@ -60,6 +60,16 @@ export type PitchDeclaration = {
   right: Expression;
 };
 
+export type UpDeclaration = {
+  type: 'UpDeclaration';
+  value: Expression;
+};
+
+export type LiftDeclaration = {
+  type: 'LiftDeclaration';
+  value: Expression;
+};
+
 export type BlockStatement = {
   type: 'BlockStatement';
   body: Statement[];
@@ -105,6 +115,8 @@ export type Statement =
   | ExpressionStatement
   | FunctionDeclaration
   | PitchDeclaration
+  | UpDeclaration
+  | LiftDeclaration
   | BlockStatement
   | WhileStatement
   | IfStatement
@@ -135,7 +147,7 @@ export type ArraySlice = {
 
 export type UnaryExpression = {
   type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | '!' | '^' | '++' | '--';
+  operator: '+' | '-' | '%' | '÷' | '!' | '^' | '/' | '\\' | '++' | '--';
   operand: Expression;
   prefix: boolean;
   uniform: boolean;

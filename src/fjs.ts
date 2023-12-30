@@ -208,8 +208,7 @@ export function uninflect(monzo: TimeMonzo) {
 // TODO: Use node to uninflect smarter
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function asFJS(monzo: TimeMonzo): FJS | undefined {
-  const downs = -monzo.cents;
-  if (!Number.isInteger(downs)) {
+  if (monzo.cents) {
     return undefined;
   }
   const pe = monzo.primeExponents;
@@ -225,7 +224,7 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
   }
   return {
     type: 'FJS',
-    downs,
+    downs: 0,
     pythagorean,
     superscripts,
     subscripts,
@@ -233,8 +232,7 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
 }
 
 export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
-  const downs = -monzo.cents;
-  if (!Number.isInteger(downs)) {
+  if (monzo.cents) {
     return undefined;
   }
   const pe = monzo.primeExponents;
@@ -250,7 +248,7 @@ export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
   }
   return {
     type: 'AbsoluteFJS',
-    downs,
+    downs: 0,
     pitch,
     superscripts,
     subscripts,

@@ -6,7 +6,7 @@ import {
   primes as xduPrimes,
   approximateRadical,
 } from 'xen-dev-utils';
-import {Color, Interval, timeMonzoAs} from './interval';
+import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
@@ -477,25 +477,6 @@ slice.__doc__ =
   'Obtain a slice of a string or scale between the given indices.';
 slice.__node__ = builtinNode(slice);
 
-function upsAs(comma: Interval) {
-  const inflection = comma.value;
-  function upRigger(interval: Interval) {
-    const ups = Math.round(interval.value.cents);
-    const value = interval.value.mul(inflection.pow(ups));
-    value.cents = 0;
-    return new Interval(
-      value,
-      interval.domain,
-      timeMonzoAs(value, interval.node)
-    );
-  }
-  upRigger.__doc__ = `Change up arrows to ${comma.toString()}`;
-  upRigger.__node__ = builtinNode(upRigger);
-  return upRigger;
-}
-upsAs.__doc__ = 'Change up arrows to the given interval (mapping comma).';
-upsAs.__node__ = builtinNode(upsAs);
-
 function zip(...args: any[][]) {
   const minLength = Math.min(...args.map(a => a.length));
   const result: any[][] = [];
@@ -843,7 +824,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   hasConstantStructure,
   toString,
   slice,
-  upsAs,
   zip,
   zipLongest,
   abs,

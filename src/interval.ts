@@ -4,12 +4,10 @@ import {
   NedjiLiteral,
   addNodes,
   divNodes,
-  downNode,
   mulNodes,
   projectNodes,
   subNodes,
   toString,
-  upNode,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -110,18 +108,6 @@ export class Interval {
       this.value.geometricInverse(),
       this.domain === 'logarithmic' ? 'cologarithmic' : 'logarithmic'
     );
-  }
-
-  up() {
-    const value = this.value.clone();
-    value.cents += 1;
-    return new Interval(value, this.domain, upNode(this.node));
-  }
-
-  down() {
-    const value = this.value.clone();
-    value.cents -= 1;
-    return new Interval(value, this.domain, downNode(this.node));
   }
 
   abs() {

@@ -203,13 +203,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert monzo to absolute FJS', () => {
-    const downMajorSixth = parseSingle('C4 = 261Hz; absoluteFJS(v[0 -1 1>)');
-    expect(downMajorSixth.toString()).toBe('vA♮4^5');
+    const pitch = parseSingle('C4 = 261Hz; absoluteFJS([0 -1 1>)');
+    expect(pitch.toString()).toBe('A♮4^5');
   });
 
   it('can convert FJS to monzo', () => {
     const monzo = parseSingle('monzo(vm6_5)');
-    expect(monzo.toString()).toBe('v[3 0 -1>');
+    expect(monzo.toString()).toBe('[3 0 -1>-1\\');
   });
 
   it('can convert cents to boolean', () => {
@@ -302,5 +302,23 @@ describe('SonicWeave expression evaluator', () => {
     const freq = parseSingle('Bb5 = 100 Hz; ablin(2)');
     expect(freq.value.timeExponent.equals(-1)).toBe(true);
     expect(freq.value.valueOf()).toBeCloseTo(200);
+  });
+
+  it('has lifts', () => {
+    const liftUnison = parseSingle('/P1');
+    expect(liftUnison.value.cents).toBe(5);
+    expect(liftUnison.value.totalCents()).toBe(5);
+  });
+
+  it('has drops', () => {
+    const liftUnison = parseSingle('\\P1');
+    expect(liftUnison.value.cents).toBe(-5);
+    expect(liftUnison.value.totalCents()).toBe(-5);
+  });
+
+  it('has steps', () => {
+    const seven = parseSingle('7\\');
+    expect(seven.value.cents).toBe(7);
+    expect(seven.value.totalCents()).toBe(7);
   });
 });

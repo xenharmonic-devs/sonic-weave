@@ -15,6 +15,7 @@ import {
   VectorComponent,
   formatComponent,
   ValLiteral,
+  StepLiteral,
 } from './expression';
 import {Interval, Color, timeMonzoAs} from './interval';
 import {TimeMonzo, Domain} from './monzo';
@@ -53,6 +54,7 @@ import {
   Identifier,
   IfStatement,
   LabeledExpression,
+  LiftDeclaration,
   NedjiProjection,
   PitchDeclaration,
   Program,
@@ -61,6 +63,7 @@ import {
   Statement,
   ThrowStatement,
   UnaryExpression,
+  UpDeclaration,
   VariableDeclaration,
   WhileStatement,
 } from './ast';
@@ -131,6 +134,10 @@ export class StatementVisitor {
         return this.visitFunctionDeclaration(node);
       case 'PitchDeclaration':
         return this.visitPitchDeclaration(node);
+      case 'UpDeclaration':
+        return this.visitUpDeclaration(node);
+      case 'LiftDeclaration':
+        return this.visitLiftDeclaration(node);
       case 'BlockStatement':
         return this.visitBlockStatement(node);
       case 'WhileStatement':
@@ -248,6 +255,26 @@ export class StatementVisitor {
     this.rootContext.unisonFrequency = absolute
       .pow(absolute.timeExponent.inverse().neg())
       .div(relative);
+    return undefined;
+  }
+
+  visitUpDeclaration(node: UpDeclaration) {
+    const subVisitor = this.createExpressionVisitor();
+    const value = subVisitor.visit(node.value);
+    if (!(value instanceof Interval)) {
+      throw new Error('Up declaration must evaluate to an interval');
+    }
+    this.rootContext.up = value.value;
+    return undefined;
+  }
+
+  visitLiftDeclaration(node: LiftDeclaration) {
+    const subVisitor = this.createExpressionVisitor();
+    const value = subVisitor.visit(node.value);
+    if (!(value instanceof Interval)) {
+      throw new Error('Lift declaration must evaluate to an interval');
+    }
+    this.rootContext.lift = value.value;
     return undefined;
   }
 
@@ -563,10 +590,17 @@ export class ExpressionVisitor {
         return undefined;
       case 'DownExpression':
         return this.visitDownExpression(node);
+      case 'StepLiteral':
+        return this.visitStepLiteral(node);
       case 'RadicalLiteral':
         throw new Error('Unexpected radical literal');
     }
     node satisfies never;
+  }
+
+  visitStepLiteral(node: StepLiteral) {
+    const value = new TimeMonzo(ZERO, [], undefined, Number(node.count));
+    return new Interval(value, 'logarithmic', node);
   }
 
   visitDownExpression(node: DownExpression) {
@@ -574,7 +608,12 @@ export class ExpressionVisitor {
     if (!(operand instanceof Interval)) {
       throw new Error('Can only apply down arrows to intervals');
     }
-    return operand.down();
+    return new Interval(
+      operand.value.div(this.rootContext.up),
+      operand.domain,
+      undefined,
+      operand
+    );
   }
 
   visitLabeledExpression(node: LabeledExpression) {
@@ -608,18 +647,27 @@ export class ExpressionVisitor {
     return new Fraction(formatComponent(component));
   }
 
+  down(monzo: TimeMonzo, node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
+    return monzo.div(this.rootContext.up.pow(node.downs));
+  }
+
   visitMonzoLiteral(node: MonzoLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
-    const value = new TimeMonzo(ZERO, primeExponents);
-    value.cents = -node.downs;
+    const value = this.down(new TimeMonzo(ZERO, primeExponents), node);
+    if (node.downs) {
+      return new Interval(value, 'logarithmic');
+    }
     return new Interval(value, 'logarithmic', node);
   }
 
   visitValLiteral(node: ValLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
-    const value = new TimeMonzo(ZERO, primeExponents);
+    const value = this.down(new TimeMonzo(ZERO, primeExponents), node);
     // Rig ups-and-downs.
-    value.cents = 1 - node.downs;
+    value.cents += 1;
+    if (node.downs) {
+      return new Interval(value, 'cologarithmic');
+    }
     return new Interval(value, 'cologarithmic', node);
   }
 
@@ -648,7 +696,9 @@ export class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
-    monzo.cents = -node.downs;
+    if (node.downs) {
+      return new Interval(this.down(monzo, node), 'logarithmic');
+    }
     return new Interval(monzo, 'logarithmic', node);
   }
 
@@ -658,11 +708,10 @@ export class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
-    relativeToC4.cents = -node.downs;
     return new Interval(
-      this.rootContext.C4.mul(relativeToC4),
+      this.rootContext.C4.mul(this.down(relativeToC4, node)),
       'logarithmic',
-      node
+      node.downs ? undefined : node
     );
   }
 
@@ -778,7 +827,26 @@ export class ExpressionVisitor {
       case '\u00F7':
         return operand.inverse();
       case '^':
-        return operand.up();
+        return new Interval(
+          operand.value.mul(this.rootContext.up),
+          operand.domain,
+          undefined,
+          operand
+        );
+      case '/':
+        return new Interval(
+          operand.value.mul(this.rootContext.lift),
+          operand.domain,
+          undefined,
+          operand
+        );
+      case '\\':
+        return new Interval(
+          operand.value.div(this.rootContext.lift),
+          operand.domain,
+          undefined,
+          operand
+        );
       case '++':
         newValue = operand.add(linearOne());
         break;

@@ -99,6 +99,8 @@ Statement
   / ReassignmentStatement
   / FunctionDeclaration
   / PitchDeclaration
+  / UpDeclaration
+  / LiftDeclaration
   / BlockStatement
   / ThrowStatement
   / ReturnStatement
@@ -155,6 +157,22 @@ PitchDeclaration
       type: 'PitchDeclaration',
       left,
       right,
+    };
+  }
+
+UpDeclaration
+  = '^' _ '=' _ value: Expression EOS {
+    return {
+      type: 'UpDeclaration',
+      value,
+    };
+  }
+
+LiftDeclaration
+  = '/' _ '=' _ value: Expression EOS {
+    return {
+      type: 'LiftDeclaration',
+      value,
     };
   }
 
@@ -303,13 +321,13 @@ AdditiveExpression
     }
 
 AdditiveTail
-  = (_ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
+  = (__ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
 
 MultiplicativeOperator
   = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
-  = head: ExponentiationExpression tail: (_ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
+  = head: ExponentiationExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
     return tail.reduce(operatorReducer, head);
   }
 
@@ -349,7 +367,7 @@ UniformUnaryOperator
   = '-' / '%' / '÷'
 
 ChainableUnaryOperator
-  = '!' / '^'
+  = '!' / '^' / '/' / '\\'
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: (Secondary / Primary) {
@@ -482,6 +500,7 @@ Primary
   / TrueLiteral
   / FalseLiteral
   / NedoLiteral
+  / StepLiteral
   / SoftDotDecimalWithExponent
   / HardDotDecimal
   / DotCentsLiteral
@@ -493,6 +512,14 @@ Primary
   / ScalarLike
   / ArrayLiteral
   / StringLiteral
+
+StepLiteral
+  = count: Integer '\\' {
+    return {
+      type: 'StepLiteral',
+      count,
+    };
+  }
 
 NedoLiteral
   = numerator: Integer '\\' denominator: PositiveInteger {
