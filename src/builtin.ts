@@ -7,7 +7,7 @@ import {
   approximateRadical,
 } from 'xen-dev-utils';
 import {Color, Interval, timeMonzoAs} from './interval';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -76,7 +76,19 @@ const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 
-// == Second-party wrappers ==
+// == First-party wrappers ==
+function numComponents(value?: Interval) {
+  if (value === undefined) {
+    return Interval.fromInteger(getNumberOfComponents());
+  }
+  setNumberOfComponents(value.toInteger());
+  return;
+}
+numComponents.__doc__ =
+  'Get/set the number of prime exponents to support in monzos. Also sets the length of vals.';
+numComponents.__node__ = builtinNode(numComponents);
+
+// == Third-party wrappers ==
 function kCombinations(set: any[], k: Interval) {
   return xduKCombinations(set, k.toInteger());
 }
@@ -797,7 +809,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   E,
   PI,
   TAU,
-  // Second-party wrappers
+  // First-party wrappers
+  numComponents,
+  // Third-party wrappers
   mosSubset,
   isPrime,
   primes,

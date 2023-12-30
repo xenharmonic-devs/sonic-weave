@@ -187,6 +187,12 @@ Calculate a subset of equally tempered degrees with maximum variety two per scal
 
 `numberOfLargeSteps`, `numberOfSmallSteps`, `sizeOfLargeStep`, `sizeOfSmallStep`, `up`, `down`
 
+### numComponents
+Get/set the number of prime exponents to support in monzos. Also sets the length of vals.
+#### Parameters:
+
+`value`
+
 ### pop
 Remove and return the last interval in the current/given scale.
 #### Parameters:
@@ -275,6 +281,12 @@ Obtain a slice of a string or scale between the given indices.
 
 ### sort
 Sort the current/given scale in ascending order.
+#### Parameters:
+
+`scale`
+
+### sorted
+Obtain a sorted copy of the current/given scale in ascending order.
 #### Parameters:
 
 `scale`
@@ -384,6 +396,12 @@ Use the first interval in the current/given scale as the implicit unison.
 
 ### invert
 Invert the current/given scale (negative harmony).
+#### Parameters:
+
+`scale`
+
+### inverted
+Obtain an inverted copy of the current/given scale (negative harmony).
 #### Parameters:
 
 `scale`

@@ -145,7 +145,7 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Name                   | Linear       | Result   | Logarithmic      | Result  |
 | ---------------------- | ------------ | -------- | ---------------- | ------- |
 | Addition               | `3 + 5`      | `8`      | _N/A_            |         |
-| Subtration             | `5 - 3`      | `2`      | _N/A_            |         |
+| Subtraction            | `5 - 3`      | `2`      | _N/A_            |         |
 | Modulo                 | `5 mod 3`    | `2`      | _N/A_            |         |
 | Round (to multiple of) | `5 to 3`     | `6`      | _N/A_            |         |
 | Multiplication         | `2 * 3`      | `6`      | `P8 + P12`       | `P19`   |
@@ -202,10 +202,8 @@ Everything after two slashes (`//`) is ignored until the end of the line.
 
 Everything after a slash and an asterisk (`/*`) is ignored until an asterisk and a slash (`*/`) is encountered.
 
-## Functional Just System
-[FJS](https://en.xen.wiki/w/Functional_Just_System) uses Pythagorean relative interval notation for powers of 2 and 3 e.g. `P5` is (logarithmic) `3/2` or `M6` corresponds to `27/16`.
-
-The octave `2/1` is divided into 7 degrees.
+## Pythagorean notation
+The octave `2/1` is divided into 7 degrees, some of which have two basic qualities.
 
 | Name(s)             | Literal(s) | Value(s)          | Size(s) in cents      |
 | ------------------- | ---------- | ----------------- | --------------------- |
@@ -221,21 +219,8 @@ The cycle repeats at the perfect octave `P8` (exactly `1200.000` in size) e.g. `
 
 Augmented intervals are `2187/2048` (or `113.685`) higher than their perfect/major counterparts e.g. `A4` is `729/512` (or `611.730`). Diminished intervals are correspondingly lower than their perfect/minor counterparts e.g. `d3` is `65536/59049` (or `180.450`).
 
-Each prime number is associated with a comma which is chosen based on simplicity rather than direction. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. `M6^5` is the same as (logarithmic) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`.
-
-The first few commas are:
-| Prime `p` | `P1^p`      | Size in cents  | Reduced harmonic | Value   |
-| --------- | ----------- | -------------- | ---------------- | ------- |
-| `5`       | `80/81`     | `-21.506`      | `M3^5`           | `5/4`   |
-| `7`       | `63/64`     | `-27.264`      | `m7^7`           | `7/4`   |
-| `11`      | `33/32`     | `+53.273`      | `P4^11`          | `11/8`  |
-| `13`      | `1053/1024` | `+48.348`      | `m6^13`          | `13/8`  |
-| `17`      | `4131/4096` | `+14.73`       | `m2^17`          | `17/16` |
-| `19`      | `513/512`   | `+3.378`       | `m3^19`          | `19/16` |
-| `23`      | `736/729`   | `+16.544`      | `A4^23`          | `23/16` |
-
-### Absolute FJS
-The absolute version of FJS is rooted on (relative) `C4 = 1/1` by default, but it is recommended that you set an absolute frequency like `C4 = mtof(60)` or `C4 = 261.6 Hz`.
+### Absolute notation
+Absolute notation is rooted on (relative) `C4 = 1/1` by default, but it is recommended that you set an absolute frequency like `C4 = mtof(60)` or `C4 = 261.6 Hz`.
 
 The Pythagorean nominals from unison to the first octave are.
 | Nominal | Meaning   |
@@ -255,15 +240,42 @@ The sharp signs (`#` and `♯`) correspond to the augmented unison e.g. `F#4` is
 
 The flat signs (`b` and `♭`) correspond to the diminished unison e.g. `Eb4` is `E4 + d1` or `32/27` relative to `C4`.
 
-FJS accidentals come after the octave number e.g. the fifth harmonic relative to `C4` is `E6^5`.
+| Accidental | Monzo      | Size in cents |
+| ---------- | ---------- | ------------- |
+| `=`, `♮`   | `[0 0>`    | `0.000`       |
+| `#`, `♯`   | `[-11 7>`  | `+113.685`    |
+| `x`, `𝄪`   | `[-22 14>` | `+227.370`    |
+| `b`, `♭`   | `[11 -7>`  | `-113.685`    |
+| `𝄫`        | `[22 -14>` | `-227.370`    |
 
-| Accidental | Size in cents |
-| ---------- | ------------- |
-| `=`, `♮`   | `0.000`       |
-| `#`, `♯`   | `+113.685`    |
-| `x`, `𝄪`   | `+227.370`    |
-| `b`, `♭`   | `-113.685`    |
-| `𝄫`        | `-227.370`    |
+### Functional Just System
+[FJS](https://en.xen.wiki/w/Functional_Just_System) uses Pythagorean notation for powers of 2 and 3.
+
+Each higher prime number is associated with a comma which is chosen based on simplicity and otonality (the prime being in the numerator) rather than direction. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. The (logarithmic) `M6^5` is the same as (linear) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`.
+
+In absolute notation FJS accidentals come after the octave number e.g. the fifth harmonic relative to `C4` is `E6^5`.
+
+The first few commas are:
+| Prime `p` | `P1^p`      | Monzo                  | Size in cents  |
+| --------- | ----------- | ---------------------- | -------------- |
+| `5`       | `80/81`     | `[4 -4 1>`             | `-21.506`      |
+| `7`       | `63/64`     | `[-6 2 0 1>`           | `-27.264`      |
+| `11`      | `33/32`     | `[-5 1 0 0 1>`         | `+53.273`      |
+| `13`      | `1053/1024` | `[-10 4 0 0 0 1>`      | `+48.348`      |
+| `17`      | `4131/4096` | `[-12 5 0 0 0 0 1>`    | `+14.73`       |
+| `19`      | `513/512`   | `[-9 3 0 0 0 0 0 1>`   | `+3.378`       |
+| `23`      | `736/729`   | `[5 -6 0 0 0 0 0 0 1>` | `+16.544`      |
+
+The first few prime harmonics in FJS are:
+|  Reduced harmonic | FJS     | Absolute FJS |
+| ----------------- | ------- | ------------ |
+| `5/4`             | `M3^5`  | `E♮4^5`      |
+| `7/4`             | `m7^7`  | `B♭4^7`      |
+| `11/8`            | `P4^11` | `F♮4^11`     |
+| `13/8`            | `m6^13` | `A♭4^13`     |
+| `17/16`           | `m2^17` | `D♭4^17`     |
+| `19/16`           | `m3^19` | `E♭4^19`     |
+| `23/16`           | `A4^23` | `F♯4^23`     |
 
 ## Interval type system
 The interval type system is fairly complex in order to accomodate all types of quantities that can refer to musical pitch or frequency.
@@ -389,7 +401,7 @@ First we'll measure out the primes:
 2^+1 * 3^0 * 5^0
 ```
 
-Then we replace every prime with their closest approximation:
+Then we replace each prime with their closest approximation:
 ```sw
 st = 2^1/12 // One semitone
 
@@ -478,7 +490,7 @@ SonicWeave comes with batteries included.
 | Name  | Value                | Meaning                   |
 | ----- | -------------------- | ------------------------- |
 | `E`   | `2.718281828459045!` | Base of natural logarithm |
-| `PI`  | `3.141592653589793!` | Ratio of circles circumference to its diameter |
+| `PI`  | `3.141592653589793!` | Ratio of a circle's circumference to its diameter |
 | `TAU` | `6.283185307179586!` | The [superior circle constant](https://tauday.com/tau-manifesto) |
 
 #### Built-in functions
@@ -505,31 +517,31 @@ Notable neutral intervals include:
 | Neutral third   | `n3`, `P5 % 2`   | `sqrt(3/2)`  | `350.978`     |
 | Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
 
-The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t neutral e.g. `m3` is `m3 + sd1`.
+The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `m3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sA6` is `M6 + sA1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
 
 Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sA4` is simply `P4 + sA1` or `32/27^3/2` if expressed linearly.
 
 #### Semisharps and semiflats
-The accidental associated with `sA1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "quarter-tones".)
+The accidental associated with `sA1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
 
 For example the neutral third above `C4` is `Ed4`.
 
-| Accidental                            | Size in cents |
-| ------------------------------------- | ------------- |
-| `s#`, `½#`, `s♯`, `½♯`, `𝄲`, `‡`, `t` | `+56.843`     |
-| `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `-56.843`     |
+| Accidental                            | Monzo         | Size in cents |
+| ------------------------------------- | ------------- | ------------- |
+| `s#`, `½#`, `s♯`, `½♯`, `𝄲`, `‡`, `t` | `[-11/2 7/2>` | `+56.843`     |
+| `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `[11/2 -7/2>` | `-56.843`     |
 
 #### Neutral FJS
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
 
 The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
-| Prime | Comma                   | Size in cents |
-| ----- | ----------------------- | ------------- |
-| `11`  | `sqrt(242/243)`         | `-3.570`      |
-| `13`  | `sqrt(507/512)`         | `-8.495`      |
-| `29`  | `sqrt(864/841)`         | `-23.355`     |
-| `31`  | `sqrt(2101707/2097152)` | `+1.878`      |
-| `37`  | `sqrt(175232/177147)`   | `-9.408`      |
+| Prime | Comma                   | Monzo                             | Size in cents |
+| ----- | ----------------------- | --------------------------------- | ------------- |
+| `11`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`                | `-3.570`      |
+| `13`  | `sqrt(507/512)`         | `[-9/2 1/2 0 0 0 1>`              | `-8.495`      |
+| `29`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
+| `31`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
+| `37`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
 
 #### Quarter-augmented Pythagorean notation
 TODO
