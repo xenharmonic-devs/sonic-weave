@@ -329,6 +329,10 @@ export class StatementVisitor {
             .dot(value as Interval)
             .mul(step)
         );
+        for (let i = 0; i < scale.length; ++i) {
+          mapped[i].color = scale[i].color;
+          mapped[i].label = scale[i].label;
+        }
         scale.length = 0;
         scale.push(...mapped);
       } else {
