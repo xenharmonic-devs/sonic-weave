@@ -470,4 +470,9 @@ describe('Automatic semicolon insertion', () => {
     const ast = parse('foo\n-bar');
     expect(ast.body).toHaveLength(2);
   });
+
+  it('works with repeated ups', () => {
+    const ast = parse('^B4\n^^B4');
+    expect(ast.body).toHaveLength(2);
+  });
 });

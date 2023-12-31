@@ -335,7 +335,7 @@ ExponentiationOperator
   = '^'
 
 ExponentiationExpression
-  = head: LabeledExpression tail: (_ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
+  = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
       return tail.reduce(operatorReducer, head);
     }
 
