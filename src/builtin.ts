@@ -5,6 +5,9 @@ import {
   isPrime as xduIsPrime,
   primes as xduPrimes,
   approximateRadical,
+  PRIME_CENTS,
+  dot,
+  valueToCents,
 } from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
@@ -427,6 +430,52 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Other ==
 
+function JIP(this: ExpressionVisitor, interval: Interval) {
+  const monzo = relog.bind(this)(interval).value;
+  const pe = monzo.primeExponents.map(e => e.valueOf());
+  const value = TimeMonzo.fromCents(
+    dot(PRIME_CENTS, pe) +
+      valueToCents(Math.abs(monzo.residual.valueOf())) +
+      monzo.cents
+  );
+  if (monzo.residual.s < 0) {
+    value.residual.s = -1;
+  }
+  return new Interval(value, 'logarithmic', undefined, interval);
+}
+JIP.__doc__ = 'The Just Intonation Point. Converts intervals to hard cents.';
+JIP.__node__ = builtinNode(JIP);
+
+function PrimeMapping(this: ExpressionVisitor, ...primeCents: Interval[]) {
+  const rl = relog.bind(this);
+  const pc = primeCents.map(p => rl(p).value.totalCents());
+
+  function mapper(this: ExpressionVisitor, interval: Interval) {
+    const monzo = relog.bind(this)(interval).value;
+    monzo.numberOfComponents = pc.length;
+    const pe = monzo.primeExponents.map(e => e.valueOf());
+    const value = TimeMonzo.fromCents(
+      dot(pc, pe) +
+        valueToCents(Math.abs(monzo.residual.valueOf())) +
+        monzo.cents
+    );
+    if (monzo.residual.s < 0) {
+      value.residual.s = -1;
+    }
+    return new Interval(value, 'logarithmic', undefined, interval);
+  }
+  Object.defineProperty(mapper, 'name', {
+    value: `PrimeMapping${pc.map(p => p.toString() + 'c').join(', ')}`,
+    enumerable: false,
+  });
+  mapper.__doc__ = 'Prime mapper. Temperes intervals to hard cents.';
+  mapper.__node__ = builtinNode(mapper);
+  return mapper;
+}
+PrimeMapping.__doc__ =
+  'Construct a prime mapping for tempering intervals to hard cents. Remaining primes are converted to hard cents without tempering.';
+PrimeMapping.__node__ = builtinNode(PrimeMapping);
+
 function gcd(a: Interval, b: Interval) {
   const value = a.value.gcd(b.value);
   return new Interval(value, 'linear');
@@ -837,6 +886,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  JIP,
+  PrimeMapping,
   gcd,
   lcm,
   hasConstantStructure,

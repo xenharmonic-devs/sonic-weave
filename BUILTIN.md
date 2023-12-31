@@ -139,6 +139,12 @@ Return `true` if `n` is a prime number, `false` otherwise.
 
 `n`
 
+### JIP
+The Just Intonation Point. Converts intervals to hard cents.
+#### Parameters:
+
+`interval`
+
 ### kCombinations
 Obtain all k-sized combinations in a set
 #### Parameters:
@@ -210,6 +216,12 @@ Remove and return the last interval in the current/given scale.
 #### Parameters:
 
 `scale`
+
+### PrimeMapping
+Construct a prime mapping for tempering intervals to hard cents. Remaining primes are converted to hard cents without tempering.
+#### Parameters:
+
+`...primeCents`
 
 ### primes
 Obtain an array of prime numbers such that start <= p <= end.

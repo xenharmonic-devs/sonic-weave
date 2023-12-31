@@ -341,4 +341,9 @@ describe('SonicWeave expression evaluator', () => {
     const fourTwenty = parseSingle('lcm(30, 84)');
     expect(fourTwenty.toString()).toBe('420');
   });
+
+  it('has a just intonation point', () => {
+    const marvelCents = parseSingle('JIP(225/224)');
+    expect(marvelCents.toString()).toBe('7.711522991319271!c');
+  });
 });
