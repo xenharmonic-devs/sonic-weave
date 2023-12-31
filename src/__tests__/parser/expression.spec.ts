@@ -138,6 +138,16 @@ describe('SonicWeave expression evaluator', () => {
     expect(sixth.toString()).toBe('n6_11');
   });
 
+  it('has access to NFJS accidentals on rationals (relative)', () => {
+    const flatFifth = parseSingle('P5n^121');
+    expect(flatFifth.value.toFraction().toFraction()).toBe('121/81');
+  });
+
+  it('has access to NFJS accidentals on rationals (absolute)', () => {
+    const flatFifth = parseSingle('G4n_11,11');
+    expect(flatFifth.value.toFraction().toFraction()).toBe('729/484');
+  });
+
   it('can convert time to frequency', () => {
     const freq = parseSingle('ablin(2ms)');
     expect(freq.value.valueOf()).toBe(500);

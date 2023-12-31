@@ -8,7 +8,7 @@ import {
   valueToCents,
 } from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
-import {AbsoluteFJS, FJS} from './expression';
+import {AbsoluteFJS, FJS, FJSFlavor} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
 
 const ZERO = new Fraction(0);
@@ -159,11 +159,13 @@ export function neutralInflection(
 export function inflect(
   pythagorean: TimeMonzo,
   superscripts: bigint[],
-  subscripts: bigint[]
+  subscripts: bigint[],
+  flavor: FJSFlavor
 ) {
   if (
-    pythagorean.primeExponents[0].d === 2 &&
-    pythagorean.primeExponents[1].d === 2
+    (pythagorean.primeExponents[0].d === 2 &&
+      pythagorean.primeExponents[1].d === 2) ||
+    flavor === 'n'
   ) {
     return neutralInflection(superscripts, subscripts).mul(pythagorean);
   }
@@ -225,6 +227,7 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
   return {
     type: 'FJS',
     downs: 0,
+    flavor: '',
     pythagorean,
     superscripts,
     subscripts,
@@ -249,6 +252,7 @@ export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
   return {
     type: 'AbsoluteFJS',
     downs: 0,
+    flavor: '',
     pitch,
     superscripts,
     subscripts,

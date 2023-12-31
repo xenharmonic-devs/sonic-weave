@@ -542,7 +542,7 @@ For example the neutral third above `C4` is `Ed4`.
 | `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `[11/2 -7/2>` | `-56.843`     |
 
 #### Neutral FJS
-[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/11` as `n3_11`.
+[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/22` as `n3_11`.
 
 The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
 | Prime | Comma                   | Monzo                             | Size in cents |
@@ -552,6 +552,8 @@ The first few NFJS commas are. To bridge from irrational to rational the commas 
 | `29`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
 | `31`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
 | `37`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
+
+Sometimes you may need access to the NFJS commas on rationals. In that case you need to be explicit about the flavor with an `n` tag before the super/subscripts e.g. `n3^11 + n3^11` is `P5n^11,11` (or `121/81`).
 
 #### Quarter-augmented Pythagorean notation
 As mentioned above the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.

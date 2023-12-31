@@ -2,6 +2,8 @@ import {MetricPrefix, bigLcm} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction} from 'xen-dev-utils';
 
+export type FJSFlavor = '' | 'n';
+
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
   value: bigint;
@@ -78,6 +80,7 @@ export type FJS = {
   type: 'FJS';
   downs: number;
   pythagorean: Pythagorean;
+  flavor: FJSFlavor;
   superscripts: bigint[];
   subscripts: bigint[];
 };
@@ -86,6 +89,7 @@ export type AbsoluteFJS = {
   type: 'AbsoluteFJS';
   downs: number;
   pitch: AbsolutePitch;
+  flavor: FJSFlavor;
   superscripts: bigint[];
   subscripts: bigint[];
 };
@@ -280,7 +284,7 @@ export function projectNodes(
 }
 
 function tailFJS(literal: FJS | AbsoluteFJS) {
-  let result = '';
+  let result = literal.flavor;
   if (literal.superscripts.length) {
     result += '^' + literal.superscripts.join(',');
   }

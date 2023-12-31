@@ -796,11 +796,13 @@ SplitDemisemipythagorean
 FJS
   = downs: 'v'*
     pythagorean: SplitDemisemipythagorean
+    flavor: 'n'?
     superscripts: ('^' @CommaJoinedIntegers)?
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'FJS',
       downs: downs.length,
+      flavor: flavor ?? '',
       pythagorean,
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
@@ -826,12 +828,14 @@ AbsolutePitch
 AbsoluteFJS
   = downs: 'v'*
     pitch: AbsolutePitch
+    flavor: 'n'?
     superscripts: ('^' @CommaJoinedIntegers)?
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'AbsoluteFJS',
       downs: downs.length,
       pitch,
+      flavor: flavor ?? '',
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
     };

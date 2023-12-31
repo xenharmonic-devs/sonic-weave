@@ -694,7 +694,8 @@ export class ExpressionVisitor {
     const monzo = inflect(
       pythagoreanMonzo(node.pythagorean),
       node.superscripts,
-      node.subscripts
+      node.subscripts,
+      node.flavor
     );
     if (node.downs) {
       return new Interval(this.down(monzo, node), 'logarithmic');
@@ -706,7 +707,8 @@ export class ExpressionVisitor {
     const relativeToC4 = inflect(
       absoluteMonzo(node.pitch),
       node.superscripts,
-      node.subscripts
+      node.subscripts,
+      node.flavor
     );
     return new Interval(
       this.rootContext.C4.mul(this.down(relativeToC4, node)),
