@@ -653,10 +653,12 @@ C5
 As with semioctave nominals `φ` can be spelled in ASCII as `phi` and `ψ` as `psi`. *Phi* was chosen due to similarity to *F* and *psi* comes from the full enneatonic (5L 4s "semiquartal") scale:
 ```javascript
 C4 = mtof(60)
+D4
 φ4
 χ4
 F4
 G4
+a4
 ψ4
 ω4
 C5
