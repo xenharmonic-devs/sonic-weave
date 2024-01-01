@@ -448,6 +448,11 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses FJS in array literals', () => {
+    const ast = parseSingle('[C#4^11_5,7,P5^77_25]');
+    expect(ast.expression.elements).toHaveLength(2);
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

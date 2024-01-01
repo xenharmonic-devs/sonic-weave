@@ -109,7 +109,6 @@ Statement
   / ForOfStatement
   / ExpressionStatement
 
-// TODO: Slice assignment with broadcasting
 LeftHandSideExpression
   = ArrayAccess
   / Identifier
@@ -424,7 +423,6 @@ ArrayAccess
     }, head);
   }
 
-// TODO: Disallow literals with trailing commas from comma-separated lists
 ArraySlice
   = head: Primary tail: (_ '[' @Expression ',' @Expression '..' @Expression? ']')+ {
     return tail.reduce( (object, [start, second, end]) => {
@@ -530,7 +528,6 @@ NedoLiteral
     };
   }
 
-// TODO: Primary support
 NedjiProjector
   = '<' _ base: Expression _'>' {
     return {
