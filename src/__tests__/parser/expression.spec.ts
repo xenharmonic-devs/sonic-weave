@@ -346,4 +346,14 @@ describe('SonicWeave expression evaluator', () => {
     const marvelCents = parseSingle('JIP(225/224)');
     expect(marvelCents.toString()).toBe('7.711522991319271!c');
   });
+
+  it('parses negative intervals correctly', () => {
+    const interval = parseSingle('AA-2');
+    expect(interval.value.totalCents()).toBeCloseTo(-431.28);
+  });
+
+  it('converts negative intervals correctly', () => {
+    const interval = parseSingle('FJS([25 -16>)');
+    expect(interval.toString()).toBe('AA-2');
+  });
 });

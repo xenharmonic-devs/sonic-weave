@@ -207,8 +207,6 @@ export function uninflect(monzo: TimeMonzo) {
   };
 }
 
-// TODO: Use node to uninflect smarter
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function asFJS(monzo: TimeMonzo): FJS | undefined {
   if (monzo.cents) {
     return undefined;

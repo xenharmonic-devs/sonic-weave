@@ -211,6 +211,16 @@ describe('Monzo -> node converter', () => {
       degree: {base: 4.5, negative: false, octaves: 0},
     });
   });
+
+  it('converts negative intervals', () => {
+    const node = monzoToNode(TimeMonzo.fromFraction('129140163/134217728'));
+    expect(node).toEqual({
+      type: 'Pythagorean',
+      quality: 'dd',
+      imperfect: true,
+      degree: {base: 3, negative: true, octaves: 0},
+    });
+  });
 });
 
 describe('Absolute monzo -> node converter', () => {

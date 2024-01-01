@@ -328,12 +328,17 @@ const PERFECT_QUALITY_SPECTRUM = [
 ];
 
 export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
-  const twos = monzo.primeExponents[0].valueOf();
-  const threes = monzo.primeExponents[1].valueOf();
-  const stepspan = twos * 7 + threes * 11;
-  const base = mmod(stepspan, 7) + 1;
+  let twos = monzo.primeExponents[0].valueOf();
+  let threes = monzo.primeExponents[1].valueOf();
+  let stepspan = twos * 7 + threes * 11;
   const negative = stepspan < 0;
-  const octaves = Math.floor(Math.abs(stepspan) / 7);
+  if (negative) {
+    stepspan = -stepspan;
+    twos = -twos;
+    threes = -threes;
+  }
+  const base = mmod(stepspan, 7) + 1;
+  const octaves = Math.floor(stepspan / 7);
   let offCenter: number;
   if (Number.isInteger(stepspan)) {
     offCenter = (threes - PYTH_VECTORS[base - 1][1]) / 1.75;
