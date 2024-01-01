@@ -671,7 +671,7 @@ WartsLiteral
 DotJoinedRationals = ($(PositiveInteger ('/' PositiveInteger)?))|.., '.'|
 
 CentLiteral
-  = CentToken { return { type: 'CentLiteral' }; }
+  = (CentToken / '¢') { return { type: 'CentLiteral' }; }
 
 HertzLiteral
   = prefix: MetricPrefix? HertzToken {

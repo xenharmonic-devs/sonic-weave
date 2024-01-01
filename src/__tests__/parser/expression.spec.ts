@@ -356,4 +356,9 @@ describe('SonicWeave expression evaluator', () => {
     const str = evaluateExpression('str(\\^^E#7)');
     expect(str).toBe('\\^^E♯7');
   });
+
+  it('has a fancy cent', () => {
+    const centisemioctave = parseSingle('¢');
+    expect(centisemioctave.toString()).toBe('c');
+  });
 });
