@@ -207,16 +207,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(yes.toString()).toBe('true');
   });
 
-  it('can average absolute pitches', () => {
-    const beeSemiflat = parseSingle('C4 = 261Hz; absoluteFJS((B4 + Bb4) % 2)');
-    expect(beeSemiflat.toString()).toBe('Bd4');
-  });
-
-  it('can convert monzo to absolute FJS', () => {
-    const pitch = parseSingle('C4 = 261Hz; absoluteFJS([0 -1 1>)');
-    expect(pitch.toString()).toBe('A♮4^5');
-  });
-
   it('can convert FJS to monzo', () => {
     const monzo = parseSingle('monzo(vm6_5)');
     expect(monzo.toString()).toBe('[3 0 -1>-1\\');

@@ -117,5 +117,5 @@ export function repl() {
     }
   }
 
-  nodeRepl.start({prompt, eval: evaluateStatement, writer: str});
+  nodeRepl.start({prompt, eval: evaluateStatement, writer: str.bind(visitor)});
 }

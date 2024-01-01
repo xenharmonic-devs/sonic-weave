@@ -387,13 +387,18 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   let relativeToC4 = monzo.div(C4);
   const node = asAbsoluteFJS(relativeToC4);
   if (node) {
-    return new Interval(monzo, 'logarithmic', node, interval);
+    return new Interval(
+      monzo,
+      'logarithmic',
+      {type: 'AspiringAbsoluteFJS'},
+      interval
+    );
   }
   relativeToC4 = relativeToC4.approximateSimple();
   return new Interval(
     C4.mul(relativeToC4),
     'logarithmic',
-    asAbsoluteFJS(relativeToC4),
+    {type: 'AspiringAbsoluteFJS'},
     interval
   );
 }
@@ -789,7 +794,11 @@ function isArray(value: any) {
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
-function str_(value: SonicWeaveValue | null, depth = 2): string {
+function str_(
+  this: ExpressionVisitor | StatementVisitor,
+  value: SonicWeaveValue | null,
+  depth = 2
+): string {
   if (value === null) {
     return '';
   }
@@ -797,13 +806,14 @@ function str_(value: SonicWeaveValue | null, depth = 2): string {
     return 'niente';
   }
   if (value instanceof Interval) {
-    return value.toString();
+    return value.toString(this.rootContext);
   }
   if (Array.isArray(value)) {
     if (depth < 0) {
       return '[Array]';
     }
-    return '[' + value.map(e => str_(e, depth - 1)).join(', ') + ']';
+    const s = str_.bind(this);
+    return '[' + value.map(e => s(e, depth - 1)).join(', ') + ']';
   }
   if (typeof value === 'function') {
     // Don't stringify __doc__ and __node__
@@ -812,14 +822,18 @@ function str_(value: SonicWeaveValue | null, depth = 2): string {
   return inspect(value, {depth});
 }
 
-export function str(value: SonicWeaveValue) {
-  return str_(value);
+export function str(
+  this: ExpressionVisitor | StatementVisitor,
+  value: SonicWeaveValue
+) {
+  return str_.bind(this)(value);
 }
 str.__doc__ = 'Obtain a string representation of the value.';
 str.__node__ = builtinNode(str);
 
-function print(...args: any[]) {
-  console.log(...args.map(a => str(a)));
+function print(this: ExpressionVisitor, ...args: any[]) {
+  const s = str.bind(this);
+  console.log(...args.map(a => s(a)));
 }
 print.__doc__ = 'Print the arguments to the console.';
 print.__node__ = builtinNode(print);

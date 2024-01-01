@@ -462,4 +462,16 @@ describe('SonicWeave parser', () => {
     expect(scale[1].label).toBe('fifth');
     expect(scale[2].label).toBe('octave');
   });
+
+  it('can average absolute pitches', () => {
+    const visitor = evaluateSource('C4 = 261Hz; absoluteFJS((B4 + Bb4) % 2)');
+    const beeSemiflat = visitor.context.get('$')![0];
+    expect(beeSemiflat.toString(visitor.rootContext)).toBe('Bd4');
+  });
+
+  it('can convert monzo to absolute FJS', () => {
+    const visitor = evaluateSource('C4 = 261Hz; absoluteFJS([0 -1 1>)');
+    const pitch = visitor.context.get('$')![0];
+    expect(pitch.toString(visitor.rootContext)).toBe('A♮4^5');
+  });
 });

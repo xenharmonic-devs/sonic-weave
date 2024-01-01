@@ -598,6 +598,8 @@ export class ExpressionVisitor {
         return this.visitStepLiteral(node);
       case 'RadicalLiteral':
         throw new Error('Unexpected radical literal');
+      case 'AspiringAbsoluteFJS':
+        throw new Error('Unexpected aspiring absolute FJS');
     }
     node satisfies never;
   }
@@ -717,7 +719,7 @@ export class ExpressionVisitor {
     return new Interval(
       this.rootContext.C4.mul(this.down(relativeToC4, node)),
       'logarithmic',
-      node.downs ? undefined : node
+      node.downs ? {type: 'AspiringAbsoluteFJS'} : undefined
     );
   }
 

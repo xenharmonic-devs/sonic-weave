@@ -94,6 +94,11 @@ export type AbsoluteFJS = {
   subscripts: bigint[];
 };
 
+// Ironically the meaning of absolute FJS depends on context.
+export type AspiringAbsoluteFJS = {
+  type: 'AspiringAbsoluteFJS';
+};
+
 export type WartsLiteral = {
   type: 'WartsLiteral';
   equave: string;
@@ -136,6 +141,7 @@ export type IntervalLiteral =
   | FalseLiteral
   | FJS
   | AbsoluteFJS
+  | AspiringAbsoluteFJS
   | HertzLiteral
   | SecondLiteral
   | MonzoLiteral
@@ -348,7 +354,7 @@ function formatNedji(literal: NedjiLiteral) {
   return `${literal.numerator}\\${literal.denominator}<${equave}>`;
 }
 
-export function toString(literal: IntervalLiteral) {
+export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedoLiteral':
       return formatNedji(literal);
@@ -392,7 +398,9 @@ export function toString(literal: IntervalLiteral) {
         throw new Error('The meaning of downs depends on context');
       }
       return `<${formatComponents(literal.components)}]`;
-    default:
+    case 'IntegerLiteral':
       return literal.value.toString();
+    default:
+      throw new Error(`Cannot format ${literal.type}`);
   }
 }

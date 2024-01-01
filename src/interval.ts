@@ -7,10 +7,11 @@ import {
   mulNodes,
   projectNodes,
   subNodes,
-  toString,
+  literalToString,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
+import {RootContext} from './context';
 
 export class Color {
   value: string;
@@ -281,15 +282,30 @@ export class Interval {
     return this.domain === other.domain && this.value.strictEquals(other.value);
   }
 
-  _toString() {
+  _toString(context?: RootContext) {
     if (this.node) {
-      return toString(this.node);
+      if (this.node.type === 'AbsoluteFJS') {
+        throw new Error('Unexpected frozen absolute FJS');
+      }
+      let node: IntervalLiteral | undefined = this.node;
+      if (this.node.type === 'AspiringAbsoluteFJS') {
+        if (!context) {
+          return this.value.toString(this.domain);
+        }
+        const C4 = context.C4;
+        const relativeToC4 = this.value.div(C4);
+        node = asAbsoluteFJS(relativeToC4);
+        if (!node) {
+          return this.value.toString(this.domain);
+        }
+      }
+      return literalToString(node);
     }
     return this.value.toString(this.domain);
   }
 
-  toString() {
-    const base = this._toString();
+  toString(context?: RootContext) {
+    const base = this._toString(context);
     const color = this.color ? this.color.value : '';
     if (this.color || this.label) {
       let result = '(' + base;
