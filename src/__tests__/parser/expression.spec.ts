@@ -361,4 +361,9 @@ describe('SonicWeave expression evaluator', () => {
     const centisemioctave = parseSingle('¢');
     expect(centisemioctave.toString()).toBe('c');
   });
+
+  it('can add FJS', () => {
+    const augmentedFifth = parseSingle('M3 + M3');
+    expect(augmentedFifth.toString()).toBe('A5');
+  });
 });

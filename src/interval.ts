@@ -312,17 +312,19 @@ export class Interval {
         }
       }
       if (this.node.type === 'AspiringFJS') {
-        if (!context) {
-          return this.value.toString(this.domain);
-        }
         const value = this.value.clone();
-        if (context.up.isHardCents() && context.lift.isHardCents()) {
-          ({prefix, postfix} = countUpsAndLifts(
-            value.cents,
-            context.up.cents,
-            context.lift.cents
-          ));
-          value.cents = 0;
+        if (value.cents) {
+          if (!context) {
+            return this.value.toString(this.domain);
+          }
+          if (context.up.isHardCents() && context.lift.isHardCents()) {
+            ({prefix, postfix} = countUpsAndLifts(
+              value.cents,
+              context.up.cents,
+              context.lift.cents
+            ));
+            value.cents = 0;
+          }
         }
 
         node = asFJS(value);

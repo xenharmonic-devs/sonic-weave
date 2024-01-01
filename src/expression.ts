@@ -209,7 +209,19 @@ export function addNodes(
       equaveDenominator: a.equaveDenominator,
     };
   }
-  // TODO: FJS, AbsoluteFJS
+  if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
+    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+  }
+  if (a.type === 'FJS' || a.type === 'AspiringFJS') {
+    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+      return {type: 'AspiringFJS'};
+    }
+  }
 
   return undefined;
 }
@@ -231,6 +243,19 @@ export function subNodes(
     const negB = {...b};
     negB.numerator = -b.numerator;
     return addNodes(a, negB);
+  }
+  if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
+    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+  }
+  if (a.type === 'FJS' || a.type === 'AspiringFJS') {
+    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+      return {type: 'AspiringFJS'};
+    }
   }
 
   return undefined;
