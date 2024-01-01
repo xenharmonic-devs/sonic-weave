@@ -16,6 +16,8 @@ import {
   formatComponent,
   ValLiteral,
   StepLiteral,
+  AspiringFJS,
+  AspiringAbsoluteFJS,
 } from './expression';
 import {Interval, Color, timeMonzoAs} from './interval';
 import {TimeMonzo, Domain} from './monzo';
@@ -598,6 +600,8 @@ export class ExpressionVisitor {
         return this.visitStepLiteral(node);
       case 'RadicalLiteral':
         throw new Error('Unexpected radical literal');
+      case 'AspiringFJS':
+        throw new Error('Unexpected aspiring FJS');
       case 'AspiringAbsoluteFJS':
         throw new Error('Unexpected aspiring absolute FJS');
     }
@@ -704,7 +708,9 @@ export class ExpressionVisitor {
       node.flavor
     );
     if (node.downs) {
-      return new Interval(this.down(monzo, node), 'logarithmic');
+      return new Interval(this.down(monzo, node), 'logarithmic', {
+        type: 'AspiringFJS',
+      });
     }
     return new Interval(monzo, 'logarithmic', node);
   }
@@ -719,7 +725,7 @@ export class ExpressionVisitor {
     return new Interval(
       this.rootContext.C4.mul(this.down(relativeToC4, node)),
       'logarithmic',
-      node.downs ? {type: 'AspiringAbsoluteFJS'} : undefined
+      {type: 'AspiringAbsoluteFJS'}
     );
   }
 
@@ -826,6 +832,17 @@ export class ExpressionVisitor {
       return new Interval(value, operand.domain, newNode);
     }
     let newValue: Interval;
+    let aspirant: undefined | AspiringFJS | AspiringAbsoluteFJS = undefined;
+    switch (operand.node?.type) {
+      case 'FJS':
+      case 'AspiringFJS':
+        aspirant = {type: 'AspiringFJS'};
+        break;
+      case 'AbsoluteFJS':
+      case 'AspiringAbsoluteFJS':
+        aspirant = {type: 'AspiringAbsoluteFJS'};
+        break;
+    }
     switch (node.operator) {
       case '+':
         return operand;
@@ -838,21 +855,21 @@ export class ExpressionVisitor {
         return new Interval(
           operand.value.mul(this.rootContext.up),
           operand.domain,
-          undefined,
+          aspirant,
           operand
         );
       case '/':
         return new Interval(
           operand.value.mul(this.rootContext.lift),
           operand.domain,
-          undefined,
+          aspirant,
           operand
         );
       case '\\':
         return new Interval(
           operand.value.div(this.rootContext.lift),
           operand.domain,
-          undefined,
+          aspirant,
           operand
         );
       case '++':

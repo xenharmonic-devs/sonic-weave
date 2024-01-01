@@ -346,4 +346,14 @@ describe('SonicWeave expression evaluator', () => {
     const interval = parseSingle('FJS([25 -16>)');
     expect(interval.toString()).toBe('AA-2');
   });
+
+  it('preserves ups and lifts on FJS', () => {
+    const str = evaluateExpression('str(/vvM3)');
+    expect(str).toBe('/vvM3');
+  });
+
+  it('preserves ups and lifts on AbsoluteFJS', () => {
+    const str = evaluateExpression('str(\\^^E#7)');
+    expect(str).toBe('\\^^E♯7');
+  });
 });

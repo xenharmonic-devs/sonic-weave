@@ -12,6 +12,7 @@ import {
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {RootContext} from './context';
+import {countUpsAndLifts} from './utils';
 
 export class Color {
   value: string;
@@ -288,18 +289,48 @@ export class Interval {
         throw new Error('Unexpected frozen absolute FJS');
       }
       let node: IntervalLiteral | undefined = this.node;
+      let prefix = '';
+      let postfix = '';
       if (this.node.type === 'AspiringAbsoluteFJS') {
         if (!context) {
           return this.value.toString(this.domain);
         }
         const C4 = context.C4;
         const relativeToC4 = this.value.div(C4);
+        if (context.up.isHardCents() && context.lift.isHardCents()) {
+          ({prefix, postfix} = countUpsAndLifts(
+            relativeToC4.cents,
+            context.up.cents,
+            context.lift.cents
+          ));
+          relativeToC4.cents = 0;
+        }
+
         node = asAbsoluteFJS(relativeToC4);
         if (!node) {
           return this.value.toString(this.domain);
         }
       }
-      return literalToString(node);
+      if (this.node.type === 'AspiringFJS') {
+        if (!context) {
+          return this.value.toString(this.domain);
+        }
+        const value = this.value.clone();
+        if (context.up.isHardCents() && context.lift.isHardCents()) {
+          ({prefix, postfix} = countUpsAndLifts(
+            value.cents,
+            context.up.cents,
+            context.lift.cents
+          ));
+          value.cents = 0;
+        }
+
+        node = asFJS(value);
+        if (!node) {
+          return this.value.toString(this.domain);
+        }
+      }
+      return prefix + literalToString(node) + postfix;
     }
     return this.value.toString(this.domain);
   }

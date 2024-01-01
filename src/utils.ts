@@ -119,3 +119,47 @@ export function metricExponent(prefix: MetricPrefix): number {
       throw new Error(`Unrecognized prefix ${prefix}`);
   }
 }
+
+export function countUpsAndLifts(total: number, up: number, lift: number) {
+  let lifts: number;
+  let ups: number;
+  if (up <= 0 || lift <= 0) {
+    lifts = 0;
+    ups = 0;
+  } else if (lift > up) {
+    lifts = Math.round(total / lift);
+    total -= lifts * lift;
+    ups = Math.round(total / up);
+    total -= ups * up;
+  } else {
+    ups = Math.round(total / up);
+    total -= ups * up;
+    lifts = Math.round(total / lift);
+    total -= lifts * lift;
+  }
+  let prefix: string;
+  if (lifts >= 0) {
+    prefix = '/'.repeat(lifts);
+  } else {
+    prefix = '\\'.repeat(-lifts);
+  }
+  if (ups >= 0) {
+    prefix += '^'.repeat(ups);
+  } else {
+    prefix += 'v'.repeat(-ups);
+  }
+
+  const steps = Math.round(total);
+  total -= steps;
+  let postfix = '';
+  if (steps) {
+    postfix += `${steps > 0 ? '+' : '-'} ${Math.abs(steps)}\\`;
+  }
+  if (total) {
+    postfix += `${total > 0 ? '+' : '-'} ${Math.abs(total)}!c`;
+  }
+  return {
+    prefix,
+    postfix,
+  };
+}

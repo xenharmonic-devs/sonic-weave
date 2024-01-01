@@ -85,6 +85,12 @@ export type FJS = {
   subscripts: bigint[];
 };
 
+// FJS has stable representation for everything but downs.
+// This node acts as a placeholder to indicate context-dependent up-down-lift-drop formatting.
+export type AspiringFJS = {
+  type: 'AspiringFJS';
+};
+
 export type AbsoluteFJS = {
   type: 'AbsoluteFJS';
   downs: number;
@@ -140,6 +146,7 @@ export type IntervalLiteral =
   | TrueLiteral
   | FalseLiteral
   | FJS
+  | AspiringFJS
   | AbsoluteFJS
   | AspiringAbsoluteFJS
   | HertzLiteral

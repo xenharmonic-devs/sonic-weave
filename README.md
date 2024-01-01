@@ -65,7 +65,7 @@ green
 2/1
 red_
 ```
-Results in the scale `$ = [3/2 #008000, 2/1 #FF0000]`. (`red` is a reserved keyword so the CSS color is called `red_`.)
+Results in the scale `$ = [(3/2 #008000), (2/1 #FF0000)]`. (`red` is a reserved keyword so the CSS color is called `red_`.)
 
 It is up to a user interface to interprete colors. The original intent is to color notes in an on-screen keyboard.
 
@@ -77,11 +77,13 @@ If an expression evaluates to a string it is attached to the last interval in th
 2/1
 'Unison / octave'
 ```
-Results in the scale `$ = [4/3 'My P4', 2/1 'Unison / octave']`.
+Results in the scale `$ = [(4/3 "My P4"), (2/1 "Unison / octave")]`.
 
 Labels are included in the `.scl` export.
 
 It is up to a user interface to interprete labels. The original intent is to label notes in an on-screen keyboard.
+
+Scales are intended to repeat from the last interval in the scale (a.k.a. *equave*), so a user interface would use the label of `2/1` for `1/1` or `4/1` too.
 
 ## Operators
 SonicWeave comes with some operators.

@@ -612,6 +612,25 @@ export class TimeMonzo {
   }
 
   /**
+   * Check if the time monzo is expressed solely in terms of hard cents.
+   * @returns `true` if the time monzo is a plain real number.
+   */
+  isHardCents() {
+    if (this.timeExponent.n) {
+      return false;
+    }
+    for (const pe of this.primeExponents) {
+      if (pe.n) {
+        return false;
+      }
+    }
+    if (this.residual.compare(ONE)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Check if the time monzo is a power of two in frequency space.
    * @returns `true` if the time monzo is a power of two.
    */
