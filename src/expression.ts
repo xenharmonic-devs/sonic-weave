@@ -178,6 +178,27 @@ export function uniformInvertNode(
   return undefined;
 }
 
+function aspireNodes(
+  a: IntervalLiteral,
+  b: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
+    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+  }
+  if (a.type === 'FJS' || a.type === 'AspiringFJS') {
+    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS'};
+    }
+    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+      return {type: 'AspiringFJS'};
+    }
+  }
+
+  return undefined;
+}
+
 export function addNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -209,21 +230,8 @@ export function addNodes(
       equaveDenominator: a.equaveDenominator,
     };
   }
-  if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
-    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
-    }
-  }
-  if (a.type === 'FJS' || a.type === 'AspiringFJS') {
-    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
-    }
-    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
-      return {type: 'AspiringFJS'};
-    }
-  }
 
-  return undefined;
+  return aspireNodes(a, b);
 }
 
 export function subNodes(
@@ -249,15 +257,39 @@ export function subNodes(
       return {type: 'AspiringAbsoluteFJS'};
     }
   }
-  if (a.type === 'FJS' || a.type === 'AspiringFJS') {
-    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
-    }
-    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
-      return {type: 'AspiringFJS'};
-    }
-  }
 
+  return aspireNodes(a, b);
+}
+
+export function modNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!a || !b) {
+    return undefined;
+  }
+  if (
+    (a.type === 'FJS' || a.type === 'AspiringFJS') &&
+    (b.type === 'FJS' || b.type === 'AspiringFJS')
+  ) {
+    return {type: 'AspiringFJS'};
+  }
+  return undefined;
+}
+
+export function roundToNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!a || !b) {
+    return undefined;
+  }
+  if (
+    (a.type === 'FJS' || a.type === 'AspiringFJS') &&
+    (b.type === 'FJS' || b.type === 'AspiringFJS')
+  ) {
+    return {type: 'AspiringFJS'};
+  }
   return undefined;
 }
 
@@ -285,14 +317,22 @@ export function mulNodes(
   if (!a || !b) {
     return undefined;
   }
-  if (a.type === 'IntegerLiteral' && b.type === 'NedoLiteral') {
-    return {
-      type: 'NedoLiteral',
-      numerator: a.value * b.numerator,
-      denominator: b.denominator,
-      equaveNumerator: b.equaveNumerator,
-      equaveDenominator: b.equaveDenominator,
-    };
+  if (a.type === 'IntegerLiteral') {
+    if (b.type === 'NedoLiteral') {
+      return {
+        type: 'NedoLiteral',
+        numerator: a.value * b.numerator,
+        denominator: b.denominator,
+        equaveNumerator: b.equaveNumerator,
+        equaveDenominator: b.equaveDenominator,
+      };
+    } else if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+      return {type: 'AspiringFJS'};
+    }
+    return undefined;
+  }
+  if (b.type === 'IntegerLiteral') {
+    return mulNodes(b, a);
   }
   return undefined;
 }

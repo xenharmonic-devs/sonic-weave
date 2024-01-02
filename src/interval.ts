@@ -8,6 +8,8 @@ import {
   projectNodes,
   subNodes,
   literalToString,
+  modNodes,
+  roundToNodes,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -41,8 +43,11 @@ function logLinMul(
     );
   }
   const value = logarithmic.value.pow(linear.value);
-  if (logarithmic.node?.type === 'FJS') {
-    node = asFJS(value);
+  if (
+    logarithmic.node?.type === 'FJS' ||
+    logarithmic.node?.type === 'AspiringFJS'
+  ) {
+    node = {type: 'AspiringFJS'};
   }
   return new Interval(value, logarithmic.domain, node);
 }
@@ -154,20 +159,26 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in rounding');
     }
+    const node = roundToNodes(this.node, other.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.roundTo(other.value), this.domain);
+      return new Interval(this.value.roundTo(other.value), this.domain, node);
     }
-    return new Interval(this.value.pitchRoundTo(other.value), this.domain);
+    return new Interval(
+      this.value.pitchRoundTo(other.value),
+      this.domain,
+      node
+    );
   }
 
   mmod(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in modulo');
     }
+    const node = modNodes(this.node, other.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.mmod(other.value), this.domain);
+      return new Interval(this.value.mmod(other.value), this.domain, node);
     }
-    return new Interval(this.value.reduce(other.value), this.domain);
+    return new Interval(this.value.reduce(other.value), this.domain, node);
   }
 
   pitchRoundTo(other: Interval) {
@@ -206,8 +217,8 @@ export class Interval {
     }
     if (this.domain === 'logarithmic') {
       const value = this.value.pow(other.value.inverse());
-      if (this.node?.type === 'FJS') {
-        node = asFJS(value);
+      if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
+        node = {type: 'AspiringFJS'};
       }
       return new Interval(value, this.domain, node);
     }

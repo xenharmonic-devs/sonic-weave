@@ -366,4 +366,24 @@ describe('SonicWeave expression evaluator', () => {
     const augmentedFifth = parseSingle('M3 + M3');
     expect(augmentedFifth.toString()).toBe('A5');
   });
+
+  it('can mod FJS', () => {
+    const majorThird = parseSingle('M17^5 mod P8');
+    expect(majorThird.toString()).toBe('M3^5');
+  });
+
+  it('can round FJS', () => {
+    const doubleOctave = parseSingle('M17^5 to P8');
+    expect(doubleOctave.toString()).toBe('P15');
+  });
+
+  it('can multiply FJS', () => {
+    const majorThird = parseSingle('M2 * 2');
+    expect(majorThird.toString()).toBe('M3');
+  });
+
+  it('can split FJS', () => {
+    const perfectFourth = parseSingle('m7 % 2');
+    expect(perfectFourth.toString()).toBe('P4');
+  });
 });
