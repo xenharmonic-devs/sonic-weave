@@ -386,4 +386,9 @@ describe('SonicWeave expression evaluator', () => {
     const perfectFourth = parseSingle('m7 % 2');
     expect(perfectFourth.toString()).toBe('P4');
   });
+
+  it('can wing sum FJS', () => {
+    const eight = parseSingle('P12 ~+~ M17^5');
+    expect(eight.toString()).toBe('P22');
+  });
 });

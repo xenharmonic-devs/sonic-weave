@@ -18,6 +18,7 @@ import {
   StepLiteral,
   AspiringFJS,
   AspiringAbsoluteFJS,
+  IntervalLiteral,
 } from './expression';
 import {Interval, Color, timeMonzoAs} from './interval';
 import {TimeMonzo, Domain} from './monzo';
@@ -496,6 +497,22 @@ const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
 const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
 
+function typesCompatible(
+  a: IntervalLiteral | undefined,
+  b: IntervalLiteral | undefined
+) {
+  if (a?.type === b?.type) {
+    return true;
+  }
+  if (a?.type === 'FJS' && b?.type === 'AspiringFJS') {
+    return true;
+  }
+  if (b?.type === 'FJS' && a?.type === 'AspiringFJS') {
+    return true;
+  }
+  return false;
+}
+
 function resolvePreference(
   value: TimeMonzo,
   left: Interval,
@@ -507,7 +524,11 @@ function resolvePreference(
     if (right.domain === 'linear') {
       domain = 'linear';
     }
-    return new Interval(value, domain);
+    let resolvedNode: IntervalLiteral | undefined = undefined;
+    if (typesCompatible(left.node, right.node)) {
+      resolvedNode = timeMonzoAs(value, left.node);
+    }
+    return new Interval(value, domain, resolvedNode);
   }
   if (node.preferLeft) {
     return new Interval(value, left.domain, timeMonzoAs(value, left.node));

@@ -391,9 +391,11 @@ export function timeMonzoAs(
     case 'MonzoLiteral':
       return monzo.asMonzoLiteral();
     case 'FJS':
-      return asFJS(monzo);
+    case 'AspiringFJS':
+      return {type: 'AspiringFJS'};
     case 'AbsoluteFJS':
-      return asAbsoluteFJS(monzo);
+    case 'AspiringAbsoluteFJS':
+      return {type: 'AspiringAbsoluteFJS'};
     default:
       return undefined;
   }
