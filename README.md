@@ -313,27 +313,29 @@ Quantities can be absolute such as `440 Hz` and `C♮4`, or relative like `M2` a
 
 Multiplication of absolute quantities is interpreted as their geometric average: `361 Hz * 529 Hz` corresponds to `437 Hz` in the scale.
 
-Same goes for logarithmic absolute quantities: `C♮4 + E♮4` corresponds to `D♮4` in the scale.
+Same goes for logarithmic absolute quantities: `C♮4 + E♮4` corresponds to `D♮4` in the scale if you've declared `C♮4` as absolute quantity.
 
-### Variable declaration
+## Variable declaration
 Variables can be declared using a single *equals* sign e.g. `k = relog(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
 
-#### Re-assignment
+### Re-assignment
 Variables can be reassigned for example after `i = 2` declaring `i += 3` sets `i` to `5`.
 
-### Pitch declaration
-Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz` or both e.g. `a4 = 440 Hz = 27/16`.
+## Pitch declaration
+Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz`.
+
+When using both the middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
 
 The unison frequency is set implicitly when declaring pitch, but can be set explicitly too e.g. `1/1 = 420 Hz`.
 
-### Blocks
+## Blocks
 Blocks start with a curly bracket `{`, have their own instance of a current scale `$` and end with `}`. The current scale is unrolled onto the parent scale at the end of the block.
 
-#### Parent scale
+### Parent scale
 The current scale of the parent block can be accessed using `$$`.
 
-### While
-While loops repeat a statement until the test becames *falsy* e.g.
+## While
+"While" loops repeat a statement until the test becames *falsy* e.g.
 ```javascript
 i = 5
 while (--i) {
@@ -342,8 +344,8 @@ while (--i) {
 ```
 results in `$ = [4, 3, 2, 1]`.
 
-### For...of
-For loops iterate over array contents e.g.
+## For...of
+"For" loops iterate over array contents e.g.
 ```javascript
 for (i of [1..5]) {
   2 ^ (i % 5)
@@ -351,7 +353,7 @@ for (i of [1..5]) {
 ```
 results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
-### If...else
+## If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
 ```javascript
 if (3/2 > 700.) {
@@ -360,10 +362,10 @@ if (3/2 > 700.) {
   print("This won't print")
 }
 ```
-#### Ternary expressions
+### Ternary expressions
 Conditional expressions look similar but work inline e.g. `3 if true else 5` evaluates to `3` while `3 if false else 5` evaluates to `5`.
 
-### Function declaration
+## Function declaration
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
 ```javascript
 riff subharmonics start end {
@@ -372,13 +374,13 @@ riff subharmonics start end {
 ```
 Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
 
-#### Calling functions
+### Calling functions
 Once declared, functions can be called:`subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`.
 
-#### Lambda expressions
+### Lambda expressions
 Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start, end => inverted(start::end))`.
 
-### Throwing
+## Throwing
 To interupt execution you can throw string messages.
 ```javascript
 if (2 < 1) {
@@ -388,7 +390,7 @@ if (2 < 1) {
 }
 ```
 
-### Implicit mapping
+## Implicit mapping
 The default action when encountering a function is to remap the current scale using it.
 ```javascript
 primes(3, 17)
@@ -398,7 +400,7 @@ sort()
 ```
 First results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
 
-### Tempering
+## Tempering
 In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
 
 Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
@@ -420,7 +422,7 @@ st = 2^1/12 // One semitone
 ```
 Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
 
-#### Implicit tempering
+### Implicit tempering
 The above could've been achieved by
 ```javascript
 [5/4, 3/2, 2]
@@ -428,7 +430,7 @@ i => 12@ dot i \ 12
 ```
 The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
 
-The default action when encountering a val (`12@` is shorthand for `<12 19 28]`) is to temper the current scale with it.
+The default action when encountering a val such as `12@` is to temper the current scale with it.
 
 The above reduces to
 ```javascript
@@ -436,7 +438,7 @@ The above reduces to
 12@
 ```
 
-#### Using ups and downs
+### Using ups and downs
 By default the up inflection (`^`) corresponds to one step upwards irregardless of the equal temperament while the down inflection (`v`) corresponds to one step downwards.
 
 This can make notation shorter. The 5-limit major scale in 22-tone equal temperament is:
@@ -463,7 +465,7 @@ P8
 22@
 ```
 
-#### Tweaking ups and downs
+### Tweaking ups and downs
 To control what ups and downs correspond to, you can use an up declaration:
 ```javascript
 ^ = 81/80
@@ -479,7 +481,7 @@ P8
 311@
 ```
 
-In this case we could've also set lifts to equal six steps of 311edo.
+In this case we could've also set lifts equal to six steps of 311edo to preserve `^` and `v` for small adjustments.
 ```javascript
 / = 6\
 
@@ -494,10 +496,26 @@ P8
 311@
 ```
 
-### Stdlib
+## Issues with the decimal separator
+To be backwards compatible with Scale Workshop versions 1 and 2, SonicWeave preserves the syntax for "dot cents" and "comma decimals".
+
+Both of these are problematic for the language grammar.
+
+### Dot cents
+Compare the expressions `100.0` and `100.0 Hz`. The first one indicates one hundred cents and the second one is interpreted as one hundred hertz due to a special grammar rule.
+
+To force the cents interpretation we can use parenthesis `(100.0) Hz` and produce an error because the domains and echelons are incompatible. This is just to say that the special grammar rule doesn't hide anything sensible.
+
+### Comma decimals
+The expression `1,2` for `6/5` is problematic when you consider the rest of the grammar. Would `[1,2,3,4]` be the same as `[6/5, 17/5]` or `[1, 2, 3, 4]`? SonicWeave takes the latter interpretation and bans comma decimals from most of the syntax.
+
+### Recommendations
+To avoid ambiguity use explicit cents i.e. `100.0c` or explicit scientific notation i.e. `1.2e0`.
+
+## Stdlib
 SonicWeave comes with batteries included.
 
-#### Constants
+### Constants
 
 | Name  | Value                | Meaning                   |
 | ----- | -------------------- | ------------------------- |
@@ -505,10 +523,10 @@ SonicWeave comes with batteries included.
 | `PI`  | `3.141592653589793!` | Ratio of a circle's circumference to its diameter |
 | `TAU` | `6.283185307179586!` | The [superior circle constant](https://tauday.com/tau-manifesto) |
 
-#### Built-in functions
+### Built-in functions
 See [BUILTIN.md](BUILTIN.md#built-in-functions).
 
-#### Prelude functions
+### Prelude functions
 See [BUILTIN.md](BUILTIN.md#prelude-functions).
 
 ## Odds and ends
@@ -529,7 +547,7 @@ Notable neutral intervals include:
 | Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
 | Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
 
-The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `m3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sA6` is `M6 + sA1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
+The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `n3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sA6` is `M6 + sA1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
 
 Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sA4` is simply `P4 + sA1` or `32/27^3/2` if expressed linearly.
 
@@ -584,7 +602,7 @@ The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-dimi
 They are octave complements of each other: `n4` is `P8 - n5`.
 
 ### True tone-splitters
-Technically the term _semitone_ is a misnomer because `m2` doesn't split the tone `M2` in half with mathematical precission. The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
+Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `A1`). The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
 
 The difference `n1.5 - m2` is only `11.730c` so true tone-splitters are not very useful in their untempered form, but they do provide the notation `n4.5` for the semioctave `P8 % 2` which is stable in all even equal divisions of the octave.
 
@@ -620,7 +638,7 @@ The scale is nominated such that the Greek nominals form the Ionian mode startin
 | `β4`    | `beta4`  | `C4 + n7½`  |
 | `C5`    |          | `C4 + P8`   |
 
-Notice how the notation is half-way antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode.
+Notice how the notation is half-way antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode. Some temperaments stretch the scale to make room for both so e.g. 14-tone equal temperament can be fully notated with alternating Latin and Greek nominals.
 
 The accidentals associated with this bihexatonic scale are `r` and `p`.
 
