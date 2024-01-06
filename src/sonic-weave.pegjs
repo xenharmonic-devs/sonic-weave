@@ -408,7 +408,7 @@ UnaryExpression
   }
 
 DownExpression
-  = operators: 'v'+ '{' _ operand: Primary _ '}' {
+  = operators: 'v'+ '{' _ operand: Expression _ '}' {
     return {
       type: 'DownExpression',
       count: operators.length,

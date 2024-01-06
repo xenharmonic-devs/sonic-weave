@@ -391,4 +391,12 @@ describe('SonicWeave expression evaluator', () => {
     const eight = parseSingle('P12 ~+~ M17^5');
     expect(eight.toString()).toBe('P22');
   });
+
+  it('can measure the quality of vals', () => {
+    const prettyGood = parseSingle('cosJIP(12@5)');
+    expect(prettyGood.valueOf()).toBeCloseTo(1, 5);
+
+    const great = parseSingle('cosJIP(53@5)');
+    expect(great.valueOf()).toBeCloseTo(1, 7);
+  });
 });

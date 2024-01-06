@@ -55,6 +55,12 @@ Convert interval to cologarithmic representation.
 
 `interval`
 
+### cosJIP
+Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".
+#### Parameters:
+
+`interval`, `weighting = "tenney"`
+
 ### decimal
 Convert interval to a decimal number.
 #### Parameters:
@@ -307,13 +313,13 @@ Obtain a slice of a string or scale between the given indices.
 Sort the current/given scale in ascending order.
 #### Parameters:
 
-`scale`
+`scale`, `compareFn`
 
 ### sorted
 Obtain a sorted copy of the current/given scale in ascending order.
 #### Parameters:
 
-`scale`
+`scale`, `compareFn`
 
 ### str
 Obtain a string representation of the value.
@@ -537,6 +543,12 @@ Quantize the current/given scale to subharmonics of the given overtone.
 #### Parameters:
 
 `overtone`, `scale`
+
+### tune
+Find a combination of two vals that is closer to just intonation.
+#### Parameters:
+
+`a`, `b`, `numIter`, `weighting`
 
 ### void
 Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale.

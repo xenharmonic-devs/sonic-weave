@@ -269,4 +269,11 @@ describe('SonicWeave standard library', () => {
       '2001\\20750;14007\\83000;22011\\83000;106053\\332000;138069\\332000;162081\\332000;194097\\332000;226113\\332000;122061\\166000;282141\\332000;6003\\6640;2001\\2000'
     );
   });
+
+  it('can combine vals to approach the JIP', () => {
+    const thirtyOne = evaluateExpression('tune(12@5, 19@5)') as Interval;
+    expect(thirtyOne.value.cents).toBe(1);
+    thirtyOne.value.cents = 0;
+    expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
+  });
 });

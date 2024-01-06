@@ -8,6 +8,8 @@ import {
   PRIME_CENTS,
   dot,
   valueToCents,
+  LOG_PRIMES,
+  norm,
 } from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
@@ -435,6 +437,38 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Other ==
 
+function cosJIP(
+  this: ExpressionVisitor,
+  interval: Interval,
+  weighting: 'none' | 'tenney' = 'tenney'
+) {
+  const monzo = relog.bind(this)(interval).value;
+  const pe = monzo.primeExponents.map(e => e.valueOf());
+  let value = 0;
+  if (weighting.toLowerCase() === 'tenney') {
+    let n2 = 0;
+    for (let i = 0; i < pe.length; ++i) {
+      const e = pe[i] / LOG_PRIMES[i];
+      value += e;
+      n2 += e * e;
+    }
+    value /= Math.sqrt(n2 * pe.length);
+  } else {
+    const peNorm = norm(pe);
+    const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
+    value = dot(LOG_PRIMES, pe) / peNorm / jipNorm;
+  }
+  return new Interval(
+    TimeMonzo.fromValue(value),
+    'linear',
+    undefined,
+    interval
+  );
+}
+cosJIP.__doc__ =
+  'Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".';
+cosJIP.__node__ = builtinNode(cosJIP);
+
 function JIP(this: ExpressionVisitor, interval: Interval) {
   const monzo = relog.bind(this)(interval).value;
   const pe = monzo.primeExponents.map(e => e.valueOf());
@@ -636,17 +670,31 @@ function max(...args: Interval[]) {
 max.__doc__ = 'Obtain the argument with the maximum value.';
 max.__node__ = builtinNode(max);
 
-function sort(this: ExpressionVisitor, scale?: Interval[]) {
+function sort(
+  this: ExpressionVisitor,
+  scale?: Interval[],
+  compareFn?: Function
+) {
   scale ??= this.context.get('$') as Interval[];
-  scale.sort((a, b) => a.compare(b));
+  if (compareFn === undefined) {
+    scale.sort((a, b) => a.compare(b));
+  } else {
+    scale.sort((a, b) =>
+      (compareFn.bind(this)(a, b) as Interval).value.valueOf()
+    );
+  }
 }
 sort.__doc__ = 'Sort the current/given scale in ascending order.';
 sort.__node__ = builtinNode(sort);
 
-function sorted(this: ExpressionVisitor, scale?: Interval[]) {
+function sorted(
+  this: ExpressionVisitor,
+  scale?: Interval[],
+  compareFn?: Function
+) {
   scale = scale ?? (this.context.get('$') as Interval[]);
   scale = [...scale];
-  scale.sort((a, b) => a.compare(b));
+  sort.bind(this)(scale, compareFn);
   return scale;
 }
 sorted.__doc__ =
@@ -900,6 +948,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  cosJIP,
   JIP,
   PrimeMapping,
   gcd,
@@ -992,6 +1041,21 @@ riff label labels scale {
   for ([i, l] of zip(scale, labels)) {
     void(i l);
   }
+}
+
+riff tune a b numIter weighting {
+  "Find a combination of two vals that is closer to just intonation.";
+  numIter ??= 1;
+  while (numIter--) {
+    x = 2 * a - b;
+    y = v{a + b};
+    z = 2 * b - a;
+
+    best = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
+    a = best[0];
+    b = best[1];
+  }
+  return a;
 }
 
 // == Scale generation ==
