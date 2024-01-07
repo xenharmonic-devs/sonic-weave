@@ -474,4 +474,18 @@ describe('SonicWeave parser', () => {
     const pitch = visitor.context.get('$')![0];
     expect(pitch.toString(visitor.rootContext)).toBe('A♮4^5');
   });
+
+  it('supports other roots besides C4', () => {
+    const scale = parseSource(`
+      A=3 = 200 Hz
+      D=4
+      E=4
+      A=4
+      relin;
+    `);
+    const ratios = scale.map(i => i.value.valueOf());
+    expect(ratios[0]).toBeCloseTo(4 / 3);
+    expect(ratios[1]).toBeCloseTo(3 / 2);
+    expect(ratios[2]).toBeCloseTo(2 / 1);
+  });
 });
