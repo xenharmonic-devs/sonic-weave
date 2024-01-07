@@ -128,6 +128,7 @@ export class StatementVisitor {
   }
 
   visit(node: Statement): Interupt | undefined {
+    this.rootContext.spendGas();
     switch (node.type) {
       case 'VariableDeclaration':
         return this.visitVariableDeclaration(node);
@@ -545,6 +546,7 @@ export class ExpressionVisitor {
   }
 
   visit(node: Expression): SonicWeaveValue {
+    this.rootContext.spendGas();
     switch (node.type) {
       case 'ConditionalExpression':
         return this.visitConditionalExpression(node);

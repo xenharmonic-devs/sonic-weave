@@ -1,5 +1,10 @@
 import {describe, it, expect} from 'vitest';
-import {parseAST, evaluateSource, StatementVisitor} from '../../parser';
+import {
+  parseAST,
+  evaluateSource,
+  StatementVisitor,
+  getSourceVisitor,
+} from '../../parser';
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
@@ -487,5 +492,13 @@ describe('SonicWeave parser', () => {
     expect(ratios[0]).toBeCloseTo(4 / 3);
     expect(ratios[1]).toBeCloseTo(3 / 2);
     expect(ratios[2]).toBeCloseTo(2 / 1);
+  });
+
+  it('supports guard rails against infinite loops', () => {
+    const ast = parseAST('while (true) {}');
+
+    const visitor = getSourceVisitor();
+    visitor.rootContext.gas = 100;
+    expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 });
