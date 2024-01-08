@@ -294,7 +294,7 @@ export class Interval {
     return this.domain === other.domain && this.value.strictEquals(other.value);
   }
 
-  _toString(context?: RootContext) {
+  str(context?: RootContext) {
     if (this.node) {
       if (this.node.type === 'AbsoluteFJS') {
         throw new Error('Unexpected frozen absolute FJS');
@@ -348,8 +348,9 @@ export class Interval {
     return this.value.toString(this.domain);
   }
 
+  // "JS" toString or "Python" repr.
   toString(context?: RootContext) {
-    const base = this._toString(context);
+    const base = this.str(context);
     const color = this.color ? this.color.value : '';
     if (this.color || this.label) {
       let result = '(' + base;

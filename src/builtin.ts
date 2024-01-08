@@ -842,7 +842,7 @@ function isArray(value: any) {
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
-function str_(
+function repr_(
   this: ExpressionVisitor | StatementVisitor,
   value: SonicWeaveValue | null,
   depth = 2
@@ -860,7 +860,7 @@ function str_(
     if (depth < 0) {
       return '[Array]';
     }
-    const s = str_.bind(this);
+    const s = repr_.bind(this);
     return '[' + value.map(e => s(e, depth - 1)).join(', ') + ']';
   }
   if (typeof value === 'function') {
@@ -870,17 +870,31 @@ function str_(
   return inspect(value, {depth});
 }
 
+export function repr(
+  this: ExpressionVisitor | StatementVisitor,
+  value: SonicWeaveValue
+) {
+  return repr_.bind(this)(value);
+}
+repr.__doc__ =
+  'Obtain a string representation of the value (with color and label).';
+repr.__node__ = builtinNode(repr);
+
 export function str(
   this: ExpressionVisitor | StatementVisitor,
   value: SonicWeaveValue
 ) {
-  return str_.bind(this)(value);
+  if (value instanceof Interval) {
+    return value.str(this.rootContext);
+  }
+  return repr_.bind(this)(value);
 }
-str.__doc__ = 'Obtain a string representation of the value.';
+str.__doc__ =
+  'Obtain a string representation of the value (w/o color or label).';
 str.__node__ = builtinNode(str);
 
 function print(this: ExpressionVisitor, ...args: any[]) {
-  const s = str.bind(this);
+  const s = repr.bind(this);
   console.log(...args.map(a => s(a)));
 }
 print.__doc__ = 'Print the arguments to the console.';
@@ -955,6 +969,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   lcm,
   hasConstantStructure,
   str,
+  repr,
   slice,
   zip,
   zipLongest,

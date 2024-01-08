@@ -279,6 +279,12 @@ Map a riff over the given/current scale replacing the content.
 
 `mapper`, `array`
 
+### repr
+Obtain a string representation of the value (with color and label).
+#### Parameters:
+
+`value`
+
 ### reverse
 Reverse the order of the current/given scale.
 #### Parameters:
@@ -322,7 +328,7 @@ Obtain a sorted copy of the current/given scale in ascending order.
 `scale`, `compareFn`
 
 ### str
-Obtain a string representation of the value.
+Obtain a string representation of the value (w/o color or label).
 #### Parameters:
 
 `value`

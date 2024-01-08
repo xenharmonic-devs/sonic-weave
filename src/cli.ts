@@ -10,7 +10,7 @@ import {
 } from './parser';
 import nodeRepl = require('repl');
 import {Context} from 'node:vm';
-import {str} from './builtin';
+import {repr} from './builtin';
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
@@ -117,5 +117,5 @@ export function repl() {
     }
   }
 
-  nodeRepl.start({prompt, eval: evaluateStatement, writer: str.bind(visitor)});
+  nodeRepl.start({prompt, eval: evaluateStatement, writer: repr.bind(visitor)});
 }

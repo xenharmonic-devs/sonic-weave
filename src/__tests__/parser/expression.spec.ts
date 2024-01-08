@@ -399,4 +399,9 @@ describe('SonicWeave expression evaluator', () => {
     const great = parseSingle('cosJIP(53@5)');
     expect(great.valueOf()).toBeCloseTo(1, 7);
   });
+
+  it('can strip colors and labels to get a plain string representation', () => {
+    const fifth = evaluateExpression('str(6/4 lime "fifth")');
+    expect(fifth).toBe('6/4');
+  });
 });
