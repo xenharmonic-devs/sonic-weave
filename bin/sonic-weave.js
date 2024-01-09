@@ -3,6 +3,7 @@
 'use strict';
 
 const {readFileSync} = require('fs');
+const {start} = require('repl');
 const {toScalaScl, repl} = require('../dist');
 
 if (require.main === module) {
@@ -10,7 +11,7 @@ if (require.main === module) {
     throw new Error('No input files given');
   }
   if (process.argv[2] === 'repl') {
-    repl();
+    repl(start);
   } else {
     const data = readFileSync(process.argv[2]);
     process.stdout.write(toScalaScl(data.toString()));

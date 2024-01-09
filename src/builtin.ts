@@ -16,7 +16,6 @@ import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {type ExpressionVisitor, type StatementVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS, asFJS} from './fjs';
-import {inspect} from 'node:util';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
 
 // Runtime
@@ -867,7 +866,13 @@ function repr_(
     // Don't stringify __doc__ and __node__
     return `[Function: ${value.name}]`;
   }
-  return inspect(value, {depth});
+  if (typeof value === 'string') {
+    return JSON.stringify(value);
+  }
+  if (value instanceof Color) {
+    return value.value;
+  }
+  return `${value}`;
 }
 
 export function repr(

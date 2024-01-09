@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {REPLServer} from 'repl';
 import {relin} from './builtin';
 import {Interval} from './interval';
 import {
@@ -8,9 +7,9 @@ import {
   getSourceVisitor,
   parseAST,
 } from './parser';
-import nodeRepl = require('repl');
-import {Context} from 'node:vm';
 import {repr} from './builtin';
+import type {REPLServer, ReplOptions} from 'repl';
+import type {Context} from 'node:vm';
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
@@ -51,7 +50,7 @@ export function toScalaScl(source: string) {
 
 const prompt = '𝄞 ';
 
-export function repl() {
+export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   const visitor = getSourceVisitor();
 
   let numCurlies = 0;
@@ -117,5 +116,5 @@ export function repl() {
     }
   }
 
-  nodeRepl.start({prompt, eval: evaluateStatement, writer: repr.bind(visitor)});
+  start({prompt, eval: evaluateStatement, writer: repr.bind(visitor)});
 }
