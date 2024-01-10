@@ -480,4 +480,9 @@ describe('Automatic semicolon insertion', () => {
     const ast = parse('^B4\n^^B4');
     expect(ast.body).toHaveLength(2);
   });
+
+  it('works with nedji projection', () => {
+    const ast = parse('1\\2<3>\n2\\2<3>');
+    expect(ast.body).toHaveLength(2);
+  });
 });

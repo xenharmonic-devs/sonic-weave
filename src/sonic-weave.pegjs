@@ -281,7 +281,7 @@ CoalescingOperator
   / $(AndToken)
 
 CoalescingExpression
-  = head: RelationalExpression tail: (_ @CoalescingOperator _ @RelationalExpression)* {
+  = head: RelationalExpression tail: (__ @CoalescingOperator _ @RelationalExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
@@ -300,7 +300,7 @@ RelationalOperator
   / $('!~' OfToken)
 
 RelationalExpression
-  = head: AdditiveExpression tail: (_ @RelationalOperator _ @AdditiveExpression)* {
+  = head: AdditiveExpression tail: (__ @RelationalOperator __ @AdditiveExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 

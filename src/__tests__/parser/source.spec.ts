@@ -501,4 +501,15 @@ describe('SonicWeave parser', () => {
     visitor.rootContext.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
+
+  it('can make edji', () => {
+    const scale = parseSource(`
+      1\\5<3>
+      2\\5<3>
+      5\\5<3>
+    `);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '1\\5<3>;2\\5<3>;5\\5<3>'
+    );
+  });
 });
