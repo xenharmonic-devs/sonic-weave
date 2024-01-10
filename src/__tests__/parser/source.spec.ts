@@ -8,6 +8,7 @@ import {
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
+import {relin} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
@@ -510,6 +511,57 @@ describe('SonicWeave parser', () => {
     `);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
       '1\\5<3>;2\\5<3>;5\\5<3>'
+    );
+  });
+
+  it('can expand basic scales', () => {
+    const visitor = evaluateSource('5::10');
+    expect(visitor.expand(visitor)).toBe('6/5\n7/5\n8/5\n9/5\n10/5');
+  });
+
+  it('can expand customized scales', () => {
+    const visitor = evaluateSource(
+      'A=4 = 440Hz = 1/1;^D4;A=4 = 432Hz;^ = 2\\;syn=81/80;vD4~*syn;3;$[-1]=5;'
+    );
+    expect(visitor.expand(getSourceVisitor())).toBe(
+      [
+        'C4 = 256 Hz',
+        '1/1 = 432 Hz',
+        '^ = 2\\',
+        'syn = 81/80',
+        '^D♮4^5,11 - 1\\',
+        'vD♮4_5',
+        '5',
+      ].join('\n')
+    );
+  });
+
+  it('can sort scales after the fact', () => {
+    const visitor = getSourceVisitor();
+    const ast = parseAST('C5 = 256 Hz;baseMidiNote = 72;');
+    for (const statement of ast.body) {
+      visitor.visit(statement);
+    }
+    const defaults = visitor.clone();
+    defaults.rootContext = visitor.rootContext.clone();
+
+    const userAst = parseAST('D4 = 270 Hz;x = 7;D4;200Hz;x;3;2');
+    for (const statement of userAst.body) {
+      visitor.visit(statement);
+    }
+    const r = relin.bind(visitor);
+    (visitor.context.get('$') as Interval[]).sort((a, b) => r(a).compare(r(b)));
+    expect(visitor.expand(defaults)).toBe(
+      [
+        'C4 = 240 Hz',
+        '1/1 = 270 Hz',
+        'x = 7',
+        '200 Hz',
+        'D♮4',
+        '2',
+        '3',
+        '7',
+      ].join('\n')
     );
   });
 });

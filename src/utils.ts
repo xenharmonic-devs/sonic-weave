@@ -153,10 +153,10 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
   total -= steps;
   let postfix = '';
   if (steps) {
-    postfix += `${steps > 0 ? '+' : '-'} ${Math.abs(steps)}\\`;
+    postfix += ` ${steps > 0 ? '+' : '-'} ${Math.abs(steps)}\\`;
   }
   if (total) {
-    postfix += `${total > 0 ? '+' : '-'} ${Math.abs(total)}!c`;
+    postfix += ` ${total > 0 ? '+' : '-'} ${Math.abs(total)}!c`;
   }
   return {
     prefix,
