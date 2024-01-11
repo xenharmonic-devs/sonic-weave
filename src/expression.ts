@@ -78,14 +78,15 @@ export type SecondLiteral = {
 
 export type FJS = {
   type: 'FJS';
-  downs: number;
+  ups: number;
+  lifts: number;
   pythagorean: Pythagorean;
   flavor: FJSFlavor;
   superscripts: bigint[];
   subscripts: bigint[];
 };
 
-// FJS has stable representation for everything but downs.
+// FJS has stable representation for everything but ups.
 // This node acts as a placeholder to indicate context-dependent up-down-lift-drop formatting.
 export type AspiringFJS = {
   type: 'AspiringFJS';
@@ -93,7 +94,8 @@ export type AspiringFJS = {
 
 export type AbsoluteFJS = {
   type: 'AbsoluteFJS';
-  downs: number;
+  ups: number;
+  lifts: number;
   pitch: AbsolutePitch;
   flavor: FJSFlavor;
   superscripts: bigint[];
@@ -124,13 +126,15 @@ export type VectorComponent = {
 export type MonzoLiteral = {
   type: 'MonzoLiteral';
   components: VectorComponent[];
-  downs: number;
+  ups: number;
+  lifts: number;
 };
 
 export type ValLiteral = {
   type: 'ValLiteral';
   components: VectorComponent[];
-  downs: number;
+  ups: number;
+  lifts: number;
 };
 
 export type IntervalLiteral =
@@ -380,6 +384,21 @@ export function projectNodes(
   return undefined;
 }
 
+function formatUps(literal: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
+  let result: string;
+  if (literal.lifts < 0) {
+    result = '\\'.repeat(-literal.lifts);
+  } else {
+    result = '/'.repeat(literal.lifts);
+  }
+  if (literal.ups < 0) {
+    result += 'v'.repeat(-literal.ups);
+  } else {
+    result += '^'.repeat(literal.ups);
+  }
+  return result;
+}
+
 function tailFJS(literal: FJS | AbsoluteFJS) {
   let result = literal.flavor;
   if (literal.superscripts.length) {
@@ -392,21 +411,19 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
 }
 
 function formatFJS(literal: FJS) {
-  if (literal.downs) {
-    throw new Error('The meaning of downs depends on context');
-  }
+  const base = formatUps(literal);
   const d = literal.pythagorean.degree;
-  return `${literal.pythagorean.quality}${d.negative ? '-' : ''}${
+  return `${base}${literal.pythagorean.quality}${d.negative ? '-' : ''}${
     d.base + 7 * d.octaves
   }${tailFJS(literal)}`;
 }
 
 function formatAbsoluteFJS(literal: AbsoluteFJS) {
-  if (literal.downs) {
-    throw new Error('The meaning of downs depends on context');
-  }
+  const base = formatUps(literal);
   const p = literal.pitch;
-  return `${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(literal)}`;
+  return `${base}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
+    literal
+  )}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {
@@ -480,15 +497,9 @@ export function literalToString(literal: IntervalLiteral) {
     case 'SecondLiteral':
       return `${literal.prefix}s`;
     case 'MonzoLiteral':
-      if (literal.downs) {
-        throw new Error('The meaning of downs depends on context');
-      }
-      return `[${formatComponents(literal.components)}>`;
+      return `${formatUps(literal)}[${formatComponents(literal.components)}>`;
     case 'ValLiteral':
-      if (literal.downs) {
-        throw new Error('The meaning of downs depends on context');
-      }
-      return `<${formatComponents(literal.components)}]`;
+      return `${formatUps(literal)}<${formatComponents(literal.components)}]`;
     case 'IntegerLiteral':
       return literal.value.toString();
     default:

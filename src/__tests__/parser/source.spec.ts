@@ -313,6 +313,9 @@ describe('SonicWeave parser', () => {
       ^m6
       P8
 
+      // Break fragiles
+      ^ = 1\\
+
       FJS
     `);
     expect(scale).toHaveLength(4);
@@ -557,11 +560,20 @@ describe('SonicWeave parser', () => {
         '1/1 = 270 Hz',
         'x = 7',
         '200 Hz',
-        'D♮4',
+        'D4',
         '2',
         '3',
         '7',
       ].join('\n')
     );
+  });
+
+  it('breaks ups on monzos', () => {
+    const oopsFourth = parseSource(`
+      ^[2 -1>
+
+      ^ = 81/80
+    `);
+    expect(oopsFourth.toString()).toBe('[2 -1>+1\\');
   });
 });

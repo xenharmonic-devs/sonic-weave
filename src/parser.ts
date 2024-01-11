@@ -16,8 +16,6 @@ import {
   formatComponent,
   ValLiteral,
   StepLiteral,
-  AspiringFJS,
-  AspiringAbsoluteFJS,
   IntervalLiteral,
 } from './expression';
 import {Interval, Color, timeMonzoAs} from './interval';
@@ -678,12 +676,7 @@ export class ExpressionVisitor {
     if (!(operand instanceof Interval)) {
       throw new Error('Can only apply down arrows to intervals');
     }
-    return new Interval(
-      operand.value.div(this.rootContext.up),
-      operand.domain,
-      undefined,
-      operand
-    );
+    return operand.down(this.rootContext);
   }
 
   visitLabeledExpression(node: LabeledExpression) {
@@ -717,28 +710,30 @@ export class ExpressionVisitor {
     return new Fraction(formatComponent(component));
   }
 
-  down(monzo: TimeMonzo, node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
-    return monzo.div(this.rootContext.up.pow(node.downs));
+  up(monzo: TimeMonzo, node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
+    return monzo.mul(this.rootContext.up.pow(node.ups));
   }
 
   visitMonzoLiteral(node: MonzoLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
-    const value = this.down(new TimeMonzo(ZERO, primeExponents), node);
-    if (node.downs) {
-      return new Interval(value, 'logarithmic');
+    const value = this.up(new TimeMonzo(ZERO, primeExponents), node);
+    const result = new Interval(value, 'logarithmic', node);
+    if (node.ups) {
+      this.rootContext.fragiles.push(result);
     }
-    return new Interval(value, 'logarithmic', node);
+    return result;
   }
 
   visitValLiteral(node: ValLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
-    const value = this.down(new TimeMonzo(ZERO, primeExponents), node);
+    const value = this.up(new TimeMonzo(ZERO, primeExponents), node);
     // Rig ups-and-downs.
     value.cents += 1;
-    if (node.downs) {
-      return new Interval(value, 'cologarithmic');
+    const result = new Interval(value, 'cologarithmic', node);
+    if (node.ups) {
+      this.rootContext.fragiles.push(result);
     }
-    return new Interval(value, 'cologarithmic', node);
+    return result;
   }
 
   visitNedjiProjection(node: NedjiProjection) {
@@ -767,12 +762,9 @@ export class ExpressionVisitor {
       node.subscripts,
       node.flavor
     );
-    if (node.downs) {
-      return new Interval(this.down(monzo, node), 'logarithmic', {
-        type: 'AspiringFJS',
-      });
-    }
-    return new Interval(monzo, 'logarithmic', node);
+    const result = new Interval(this.up(monzo, node), 'logarithmic', node);
+    this.rootContext.fragiles.push(result);
+    return result;
   }
 
   visitAbsoluteFJS(node: AbsoluteFJS) {
@@ -782,11 +774,13 @@ export class ExpressionVisitor {
       node.subscripts,
       node.flavor
     );
-    return new Interval(
-      this.rootContext.C4.mul(this.down(relativeToC4, node)),
+    const result = new Interval(
+      this.rootContext.C4.mul(this.up(relativeToC4, node)),
       'logarithmic',
-      {type: 'AspiringAbsoluteFJS'}
+      node
     );
+    this.rootContext.fragiles.push(result);
+    return result;
   }
 
   visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
@@ -892,17 +886,6 @@ export class ExpressionVisitor {
       return new Interval(value, operand.domain, newNode);
     }
     let newValue: Interval;
-    let aspirant: undefined | AspiringFJS | AspiringAbsoluteFJS = undefined;
-    switch (operand.node?.type) {
-      case 'FJS':
-      case 'AspiringFJS':
-        aspirant = {type: 'AspiringFJS'};
-        break;
-      case 'AbsoluteFJS':
-      case 'AspiringAbsoluteFJS':
-        aspirant = {type: 'AspiringAbsoluteFJS'};
-        break;
-    }
     switch (node.operator) {
       case '+':
         return operand;
@@ -912,26 +895,11 @@ export class ExpressionVisitor {
       case '\u00F7':
         return operand.inverse();
       case '^':
-        return new Interval(
-          operand.value.mul(this.rootContext.up),
-          operand.domain,
-          aspirant,
-          operand
-        );
+        return operand.up(this.rootContext);
       case '/':
-        return new Interval(
-          operand.value.mul(this.rootContext.lift),
-          operand.domain,
-          aspirant,
-          operand
-        );
+        return operand.lift(this.rootContext);
       case '\\':
-        return new Interval(
-          operand.value.div(this.rootContext.lift),
-          operand.domain,
-          aspirant,
-          operand
-        );
+        return operand.drop(this.rootContext);
       case '++':
         newValue = operand.add(linearOne());
         break;

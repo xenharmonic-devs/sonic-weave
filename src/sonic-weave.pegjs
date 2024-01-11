@@ -644,7 +644,8 @@ MonzoLiteral
     return {
       type: 'MonzoLiteral',
       components,
-      downs: downs.length,
+      ups: -downs.length,
+      lifts: 0,
     };
   }
 
@@ -653,7 +654,8 @@ ValLiteral
     return {
       type: 'ValLiteral',
       components,
-      downs: downs.length,
+      ups: -downs.length,
+      lifts: 0,
     };
   }
 
@@ -798,7 +800,8 @@ FJS
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'FJS',
-      downs: downs.length,
+      ups: -downs.length,
+      lifts: 0,
       flavor: flavor ?? '',
       pythagorean,
       superscripts: superscripts ?? [],
@@ -830,7 +833,8 @@ AbsoluteFJS
     subscripts: ('_' @CommaJoinedIntegers)? {
     return {
       type: 'AbsoluteFJS',
-      downs: downs.length,
+      ups: -downs.length,
+      lifts: 0,
       pitch,
       flavor: flavor ?? '',
       superscripts: superscripts ?? [],

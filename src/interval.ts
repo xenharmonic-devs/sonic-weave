@@ -296,9 +296,6 @@ export class Interval {
 
   str(context?: RootContext) {
     if (this.node) {
-      if (this.node.type === 'AbsoluteFJS') {
-        throw new Error('Unexpected frozen absolute FJS');
-      }
       let node: IntervalLiteral | undefined = this.node;
       let prefix = '';
       let postfix = '';
@@ -370,6 +367,89 @@ export class Interval {
       return Number(this.value.toBigInteger());
     }
     return this.value.valueOf();
+  }
+
+  up(context: RootContext) {
+    const value = this.value.mul(context.up);
+    if (
+      this.node?.type === 'FJS' ||
+      this.node?.type === 'AbsoluteFJS' ||
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'ValLiteral'
+    ) {
+      const node = {...this.node};
+      node.ups++;
+      const result = new Interval(value, this.domain, node, this);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Interval(value, this.domain, undefined, this);
+  }
+
+  down(context: RootContext) {
+    const value = this.value.div(context.up);
+    if (
+      this.node?.type === 'FJS' ||
+      this.node?.type === 'AbsoluteFJS' ||
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'ValLiteral'
+    ) {
+      const node = {...this.node};
+      node.ups--;
+      const result = new Interval(value, this.domain, node, this);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Interval(value, this.domain, undefined, this);
+  }
+
+  lift(context: RootContext) {
+    const value = this.value.mul(context.lift);
+    if (
+      this.node?.type === 'FJS' ||
+      this.node?.type === 'AbsoluteFJS' ||
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'ValLiteral'
+    ) {
+      const node = {...this.node};
+      node.lifts++;
+      const result = new Interval(value, this.domain, node, this);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Interval(value, this.domain, undefined, this);
+  }
+
+  drop(context: RootContext) {
+    const value = this.value.div(context.lift);
+    if (
+      this.node?.type === 'FJS' ||
+      this.node?.type === 'AbsoluteFJS' ||
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'ValLiteral'
+    ) {
+      const node = {...this.node};
+      node.lifts--;
+      const result = new Interval(value, this.domain, node, this);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Interval(value, this.domain, undefined, this);
+  }
+
+  break() {
+    if (this.node?.type === 'FJS') {
+      this.node = {type: 'AspiringFJS'};
+    }
+    if (this.node?.type === 'AbsoluteFJS') {
+      this.node = {type: 'AspiringAbsoluteFJS'};
+    }
+    if (
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'ValLiteral'
+    ) {
+      this.node = undefined;
+    }
   }
 }
 

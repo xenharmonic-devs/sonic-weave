@@ -1,28 +1,55 @@
+import {type Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
 
 export class RootContext {
   title: string;
-  C4: TimeMonzo;
-  up: TimeMonzo;
-  lift: TimeMonzo;
+  C4_: TimeMonzo;
+  up_: TimeMonzo;
+  lift_: TimeMonzo;
   unisonFrequency?: TimeMonzo;
   gas: number;
+  fragiles: Interval[];
 
   constructor(gas?: number) {
     this.title = '';
-    this.C4 = new TimeMonzo(ZERO, []);
-    this.up = new TimeMonzo(ZERO, [], undefined, 1);
-    this.lift = new TimeMonzo(ZERO, [], undefined, 5);
+    this.C4_ = new TimeMonzo(ZERO, []);
+    this.up_ = new TimeMonzo(ZERO, [], undefined, 1);
+    this.lift_ = new TimeMonzo(ZERO, [], undefined, 5);
     this.gas = gas ?? Infinity;
+    this.fragiles = [];
+  }
+
+  get C4() {
+    return this.C4_;
+  }
+  set C4(value: TimeMonzo) {
+    this.C4_ = value;
+    this.breakFragiles();
+  }
+
+  get up() {
+    return this.up_;
+  }
+  set up(value: TimeMonzo) {
+    this.up_ = value;
+    this.breakFragiles();
+  }
+
+  get lift() {
+    return this.lift_;
+  }
+  set lift(value: TimeMonzo) {
+    this.lift_ = value;
+    this.breakFragiles();
   }
 
   clone() {
     const result = new RootContext(this.gas);
     result.title = this.title;
-    result.C4 = this.C4.clone();
-    result.up = this.up.clone();
-    result.lift = this.lift.clone();
+    result.C4_ = this.C4.clone();
+    result.up_ = this.up.clone();
+    result.lift_ = this.lift.clone();
     if (this.unisonFrequency) {
       result.unisonFrequency = this.unisonFrequency.clone();
     }
@@ -33,6 +60,13 @@ export class RootContext {
     if (this.gas-- <= 0) {
       throw new Error('Out of gas. (Infinite loop?)');
     }
+  }
+
+  breakFragiles() {
+    for (const fragile of this.fragiles) {
+      fragile.break();
+    }
+    this.fragiles = [];
   }
 
   expand(defaults: RootContext) {

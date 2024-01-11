@@ -224,7 +224,8 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
   }
   return {
     type: 'FJS',
-    downs: 0,
+    ups: 0,
+    lifts: 0,
     flavor: '',
     pythagorean,
     superscripts,
@@ -249,7 +250,8 @@ export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
   }
   return {
     type: 'AbsoluteFJS',
-    downs: 0,
+    ups: 0,
+    lifts: 0,
     flavor: '',
     pitch,
     superscripts,

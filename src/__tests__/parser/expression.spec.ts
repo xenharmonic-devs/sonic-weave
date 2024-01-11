@@ -354,7 +354,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('preserves ups and lifts on AbsoluteFJS', () => {
     const str = evaluateExpression('str(\\^^E#7)');
-    expect(str).toBe('\\^^E♯7');
+    expect(str).toBe('\\^^E#7');
   });
 
   it('has a fancy cent', () => {
@@ -421,5 +421,20 @@ describe('SonicWeave expression evaluator', () => {
   it('produces a cents literal from cent multiplication (decimal)', () => {
     const eightyEight = evaluateExpression('12.03 c');
     expect(eightyEight?.toString()).toBe('12.03');
+  });
+
+  it('preserves absolute FJS formatting', () => {
+    const phiAt = evaluateExpression('str(phi@4)');
+    expect(phiAt).toBe('phi@4');
+  });
+
+  it('preserves lifts on monzos', () => {
+    const liftFifth = evaluateExpression('/[-1 1>');
+    expect(liftFifth?.toString()).toBe('/[-1 1>');
+  });
+
+  it('preserves neutral FJS formatting', () => {
+    const neutralThird = evaluateExpression('str(n3^11)');
+    expect(neutralThird).toBe('n3^11');
   });
 });
