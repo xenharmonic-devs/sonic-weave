@@ -404,4 +404,12 @@ describe('SonicWeave expression evaluator', () => {
     const fifth = evaluateExpression('str(6/4 lime "fifth")');
     expect(fifth).toBe('6/4');
   });
+
+  it('can compare absolute to relative', () => {
+    const fifth = evaluateExpression('1/1 = 440Hz; max(500Hz, 3/2)');
+    expect(fifth?.toString()).toBe('3/2');
+
+    const eightHundred = evaluateExpression('1/1 = 440Hz; max(800Hz, 3/2)');
+    expect(eightHundred?.toString()).toBe('800 Hz');
+  });
 });

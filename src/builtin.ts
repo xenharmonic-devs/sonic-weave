@@ -436,6 +436,18 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Other ==
 
+export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
+  if (a.isRelative() && b.isRelative()) {
+    return a.compare(b);
+  }
+  if (a.isAbsolute() && b.isAbsolute()) {
+    const ab = ablin.bind(this);
+    return ab(a).compare(ab(b));
+  }
+  const r = relin.bind(this);
+  return r(a).compare(r(b));
+}
+
 function cosJIP(
   this: ExpressionVisitor,
   interval: Interval,
@@ -657,14 +669,16 @@ function abs(value: Interval) {
 abs.__doc__ = 'Calculate the absolute value of the interval.';
 abs.__node__ = builtinNode(abs);
 
-function min(...args: Interval[]) {
-  return args.slice(1).reduce((a, b) => (a.compare(b) <= 0 ? a : b), args[0]);
+function min(this: ExpressionVisitor, ...args: Interval[]) {
+  const c = compare.bind(this);
+  return args.slice(1).reduce((a, b) => (c(a, b) <= 0 ? a : b), args[0]);
 }
 min.__doc__ = 'Obtain the argument with the minimum value.';
 min.__node__ = builtinNode(min);
 
-function max(...args: Interval[]) {
-  return args.slice(1).reduce((a, b) => (a.compare(b) >= 0 ? a : b), args[0]);
+function max(this: ExpressionVisitor, ...args: Interval[]) {
+  const c = compare.bind(this);
+  return args.slice(1).reduce((a, b) => (c(a, b) >= 0 ? a : b), args[0]);
 }
 max.__doc__ = 'Obtain the argument with the maximum value.';
 max.__node__ = builtinNode(max);
@@ -676,7 +690,7 @@ function sort(
 ) {
   scale ??= this.context.get('$') as Interval[];
   if (compareFn === undefined) {
-    scale.sort((a, b) => a.compare(b));
+    scale.sort(compare.bind(this));
   } else {
     scale.sort((a, b) =>
       (compareFn.bind(this)(a, b) as Interval).value.valueOf()

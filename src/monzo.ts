@@ -1116,8 +1116,14 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns `true` if the time monzos share the same time exponent, prime exponents, residual and cents offset.
    */
-  strictEquals(other: TimeMonzo) {
-    // TODO: Make primeExponent vectors the same length for a fair comparison of the residual
+  strictEquals(other: TimeMonzo): boolean {
+    if (this.numberOfComponents < other.numberOfComponents) {
+      return other.strictEquals(this);
+    }
+    if (this.numberOfComponents > other.numberOfComponents) {
+      other = other.clone();
+      other.numberOfComponents = this.numberOfComponents;
+    }
     return (
       this.timeExponent.equals(other.timeExponent) &&
       monzosEqual(this.primeExponents, other.primeExponents) &&

@@ -34,6 +34,7 @@ import {
   linearOne,
   SonicWeaveFunction,
   repr,
+  compare,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -1078,13 +1079,13 @@ export class ExpressionVisitor {
         case '!=':
           return sonicBool(!left.equals(right));
         case '<=':
-          return sonicBool(left.compare(right) <= 0);
+          return sonicBool(compare.bind(this)(left, right) <= 0);
         case '>=':
-          return sonicBool(left.compare(right) >= 0);
+          return sonicBool(compare.bind(this)(left, right) >= 0);
         case '<':
-          return sonicBool(left.compare(right) < 0);
+          return sonicBool(compare.bind(this)(left, right) < 0);
         case '>':
-          return sonicBool(left.compare(right) > 0);
+          return sonicBool(compare.bind(this)(left, right) > 0);
         case '+':
           return left.add(right);
         case '-':
