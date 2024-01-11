@@ -328,10 +328,29 @@ export function mulNodes(
       };
     } else if (b.type === 'FJS' || b.type === 'AspiringFJS') {
       return {type: 'AspiringFJS'};
+    } else if (b.type === 'CentLiteral') {
+      return {
+        type: 'CentsLiteral',
+        whole: a.value,
+        fractional: '',
+      };
     }
     return undefined;
   }
-  if (b.type === 'IntegerLiteral') {
+  if (a.type === 'DecimalLiteral') {
+    if (a.exponent || a.hard) {
+      return undefined;
+    }
+    if (b.type === 'CentLiteral') {
+      return {
+        type: 'CentsLiteral',
+        whole: a.whole,
+        fractional: a.fractional,
+      };
+    }
+    return undefined;
+  }
+  if (b.type === 'IntegerLiteral' || b.type === 'DecimalLiteral') {
     return mulNodes(b, a);
   }
   return undefined;

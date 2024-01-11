@@ -412,4 +412,14 @@ describe('SonicWeave expression evaluator', () => {
     const eightHundred = evaluateExpression('1/1 = 440Hz; max(800Hz, 3/2)');
     expect(eightHundred?.toString()).toBe('800 Hz');
   });
+
+  it('produces a cents literal from cent multiplication (integer)', () => {
+    const eightyEight = evaluateExpression('88c');
+    expect(eightyEight?.toString()).toBe('88.');
+  });
+
+  it('produces a cents literal from cent multiplication (decimal)', () => {
+    const eightyEight = evaluateExpression('12.03 c');
+    expect(eightyEight?.toString()).toBe('12.03');
+  });
 });
