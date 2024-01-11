@@ -1231,7 +1231,7 @@ riff eulerGenus guide root equave {
       n ~+= equave;
     }
   }
-  i => i ~% root ~red equave;
+  i => i ~% root ~rd equave;
   sort();
   void(shift());
   equave;
@@ -1271,7 +1271,7 @@ riff ags generators ordinal period numPeriods maxSize {
   i = 0;
   while (ordinal) {
     accumulator *~= generators[i++ mod length(generators)];
-    push(accumulator red period, $$);
+    push(accumulator ~rd period, $$);
     if (length($$) > maxSize) {
       throw "No constant structure found before reaching maximum size";
     }
@@ -1288,7 +1288,7 @@ riff reduce scale {
   "Reduce the current/given scale by its equave.";
   $ = scale ?? $$;
   equave = pop();
-  i => i ~red equave;
+  i => i ~rd equave;
   equave;
   return;
 }
@@ -1394,7 +1394,7 @@ riff mergeOffset offsets overflow scale {
   if (overflow === 'drop') {
     remap(copy => filter(i => i > 1 and i < equave, copy), copies);
   } else if (overflow === 'wrap') {
-    remap(copy => map(i => i ~red equave, copy), copies);
+    remap(copy => map(i => i ~rd equave, copy), copies);
   }
 
   copies;

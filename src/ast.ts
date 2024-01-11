@@ -27,7 +27,7 @@ export type BinaryOperator =
   | '÷'
   | '\\'
   | 'mod'
-  | 'red'
+  | 'rd'
   | 'log'
   | '·'
   | 'dot'

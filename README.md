@@ -63,9 +63,9 @@ If an expression evaluates to a color it is attached to the last interval in the
 3/2
 green
 2/1
-red_
+red
 ```
-Results in the scale `$ = [(3/2 #008000), (2/1 #FF0000)]`. (`red` is a reserved keyword so the CSS color is called `red_`.)
+Results in the scale `$ = [(3/2 #008000), (2/1 #FF0000)]`.
 
 It is up to a user interface to interprete colors. The original intent is to color notes in an on-screen keyboard.
 
@@ -161,7 +161,7 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Multiplication         | `110Hz × 5`  | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
 | Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
 | Division               | `220Hz ÷ 2`  | `110 Hz` | `A=3 - P8`       | `A=2`   |
-| Reduction              | `5 red 2`    | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
+| Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
 | Exponentiation         | `3^2`        | `9`      | `P12 * 2`        | `M23`   |
 | Root taking            | `9^1/2`      | `3`      | `M23 % 2`        | `P12`   |
 | Logarithm (in base of) | `9 log 3`    | `2`      | `M23 % P12`      | `2`     |
@@ -394,7 +394,7 @@ if (2 < 1) {
 The default action when encountering a function is to remap the current scale using it.
 ```javascript
 primes(3, 17)
-prime => prime red 2
+prime => prime rd 2
 2
 sort()
 ```

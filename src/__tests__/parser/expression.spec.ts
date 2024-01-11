@@ -213,7 +213,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert cents to boolean', () => {
-    const yes = parseSingle('bool(0.0 red_)');
+    const yes = parseSingle('bool(0.0 red)');
     expect(yes.color?.value).toBe('#FF0000');
     expect(yes.toString()).toBe('(true #FF0000)');
   });

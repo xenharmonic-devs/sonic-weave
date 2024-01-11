@@ -367,7 +367,7 @@ describe('SonicWeave parser', () => {
 
   it('does polyoffsets as tensor products', () => {
     const scale = parseSource(
-      '2:3:4; $ tns 4:5:7; i => i red 2; sort(); shift() * 2;'
+      '2:3:4; $ tns 4:5:7; i => i rd 2; sort(); shift() * 2;'
     );
     expect(scale).toHaveLength(6);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(

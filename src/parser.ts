@@ -1042,7 +1042,7 @@ export class ExpressionVisitor {
           case '%':
             value = left.value.div(right.value);
             break;
-          case 'red':
+          case 'rd':
             value = left.value.reduce(right.value);
             break;
           case '^':
@@ -1108,7 +1108,7 @@ export class ExpressionVisitor {
         case '·':
         case 'dot':
           return left.dot(right);
-        case 'red':
+        case 'rd':
           return left.reduce(right);
         case 'to':
           return left.roundTo(right);

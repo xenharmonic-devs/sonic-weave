@@ -120,7 +120,7 @@ plum #DDA0DD
 powderblue #B0E0E6
 purple #800080
 rebeccapurple #663399
-red_ #FF0000
+red #FF0000
 rosybrown #BC8F8F
 royalblue #4169E1
 saddlebrown #8B4513
