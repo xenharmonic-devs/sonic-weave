@@ -1472,6 +1472,9 @@ export class TimeMonzo {
           this.primeExponents.every(pe => !pe.n)
         ) {
           if (this.cents) {
+            if (this.cents === Math.round(this.cents)) {
+              return this.cents.toString() + '\\';
+            }
             return this.cents.toString() + '!c';
           }
           return '0c';

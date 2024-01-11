@@ -33,6 +33,7 @@ import {
   relog,
   linearOne,
   SonicWeaveFunction,
+  repr,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -109,6 +110,7 @@ class Interupt {
 export class StatementVisitor {
   rootContext: RootContext;
   context: VisitorContext;
+
   constructor(rootContext: RootContext) {
     this.rootContext = rootContext;
     this.context = new Map();
@@ -119,12 +121,46 @@ export class StatementVisitor {
   clone() {
     const result = new StatementVisitor(this.rootContext);
     result.context = new Map(this.context);
-    result.context.set('$', []);
+    const scale = this.context.get('$');
+    if (!Array.isArray(scale)) {
+      throw new Error('Context corruption detected');
+    }
+    result.context.set('$', [...scale]);
     return result;
   }
 
   createExpressionVisitor() {
     return new ExpressionVisitor(this.rootContext, this.context);
+  }
+
+  expand(defaults: StatementVisitor) {
+    let base = this.rootContext.expand(defaults.rootContext);
+    if (base) {
+      base += '\n';
+    }
+    const variableLines: string[] = [];
+    const r = repr.bind(this);
+    for (const key of this.context.keys()) {
+      if (key === '$' || key === '$$') {
+        continue;
+      }
+      // TODO: Verify that nothing was changed.
+      if (defaults.context.has(key)) {
+        continue;
+      }
+      variableLines.push(`${key} = ${r(this.context.get(key))}`);
+    }
+    if (variableLines.length) {
+      base += variableLines.join('\n') + '\n';
+    }
+    const scale = this.context.get('$');
+    if (!Array.isArray(scale)) {
+      throw new Error('Context corruption detected');
+    }
+    const scaleLines = scale.map(interval =>
+      interval.toString(this.rootContext)
+    );
+    return `${base}${scaleLines.join('\n')}`;
   }
 
   visit(node: Statement): Interupt | undefined {
