@@ -20,7 +20,7 @@ for (i of [0 .. length(factors)-1]) {
 combo => combo % 3
 
 // Reduce each by the octave
-combo => combo red 2
+combo => combo rd 2
 
 // Sort in ascending order
 sort();

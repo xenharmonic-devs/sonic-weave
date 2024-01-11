@@ -785,7 +785,7 @@ export class ExpressionVisitor {
 
   visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
     const object = this.visit(node.object);
-    if (!Array.isArray(object)) {
+    if (!Array.isArray(object) && typeof object !== 'string') {
       throw new Error('Array access on non-array');
     }
     const index = this.visit(node.index);
@@ -799,9 +799,9 @@ export class ExpressionVisitor {
     return object[i];
   }
 
-  visitArraySlice(node: ArraySlice): Interval[] {
+  visitArraySlice(node: ArraySlice): Interval[] | string {
     const object = this.visit(node.object);
-    if (!Array.isArray(object)) {
+    if (!Array.isArray(object) && typeof object !== 'string') {
       throw new Error('Array slice on non-array');
     }
     let start = 0;
@@ -842,7 +842,10 @@ export class ExpressionVisitor {
         result.push(object[next]);
         next += step;
       }
-      return result;
+      if (typeof object === 'string') {
+        return result.join('');
+      }
+      return result as Interval[];
     } else if (step < 0) {
       if (start < end) {
         return [];
@@ -854,7 +857,10 @@ export class ExpressionVisitor {
         result.push(object[next]);
         next += step;
       }
-      return result;
+      if (typeof object === 'string') {
+        return result.join('');
+      }
+      return result as Interval[];
     }
     throw new Error('Slice step must not be zero');
   }

@@ -437,4 +437,20 @@ describe('SonicWeave expression evaluator', () => {
     const neutralThird = evaluateExpression('str(n3^11)');
     expect(neutralThird).toBe('n3^11');
   });
+
+  it('supports negative indexing on strings', () => {
+    const r = evaluateExpression('"bar"[-1]');
+    expect(r).toBe('r');
+  });
+
+  it('supports slices on strings', () => {
+    const ba = evaluateExpression('"bar"[..1]');
+    expect(ba).toBe('ba');
+  });
+
+  // TODO: Fix
+  it.skip('supports indexing on str calls', () => {
+    const C = evaluateExpression('str(C4)[0]');
+    expect(C).toBe('C');
+  });
 });

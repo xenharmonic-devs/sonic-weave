@@ -17,8 +17,8 @@ A♮4
 // Repeat at the octave
 C5
 
-// Store nominals by stripping the octaves
-labels = map(note => slice(str(note), 0, -1), $);
+// Store nominals by stripping the octaves and accidentals
+labels = map(note => (str(note))[0]);
 
 // Temper to 22 equal tones
 22@
