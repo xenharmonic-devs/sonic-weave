@@ -448,8 +448,7 @@ describe('SonicWeave expression evaluator', () => {
     expect(ba).toBe('ba');
   });
 
-  // TODO: Fix
-  it.skip('supports indexing on str calls', () => {
+  it('supports indexing on str calls', () => {
     const C = evaluateExpression('str(C4)[0]');
     expect(C).toBe('C');
   });

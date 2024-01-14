@@ -1,4 +1,9 @@
 {{
+  const TYPES_TO_PROPERTY_NAMES = {
+    CallExpression: "callee",
+    ArrayAccess: "object",
+  };
+
   function BinaryExpression(operator, left, right, preferLeft, preferRight) {
     return {
       type: 'BinaryExpression',
@@ -416,6 +421,26 @@ DownExpression
       count: operators.length,
       operand,
     };
+  }
+
+CallExpression
+  = head: (
+    callee: (ArrayAccess / Primary) __ '(' _ args: ArgumentList _ ')' {
+      return { type: 'CallExpression', callee, args };
+    }
+  ) tail: (
+    __ '(' _ args: ArgumentList _ ')' {
+      return { type: 'CallExpression', args };
+    }
+    / __ '[' _ index: Expression _ ']' {
+      return { type: 'ArrayAccess', index };
+    }
+  )* {
+    return tail.reduce((result, element) => {
+      element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
+
+      return element;
+    }, head);
   }
 
 ArrayAccess
@@ -856,15 +881,6 @@ ArrowFunction
       type: 'ArrowFunction',
       parameters,
       expression,
-    };
-  }
-
-CallExpression
-  = callee: LeftHandSideExpression _ '(' _ args: ArgumentList _ ')' {
-    return {
-      type: 'CallExpression',
-      callee,
-      args,
     };
   }
 
