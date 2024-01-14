@@ -276,4 +276,70 @@ describe('SonicWeave standard library', () => {
     thirtyOne.value.cents = 0;
     expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
   });
+
+  // Remember that unison (0.0 c) is implicit in SonicWeave
+
+  it('has harmonic segments sounding downwards', () => {
+    const harmonicSeventhChord = parseSource('7::4');
+    expect(harmonicSeventhChord[0].value.totalCents()).toBeCloseTo(-266.870905); // subminor third
+    expect(harmonicSeventhChord[1].value.totalCents()).toBeCloseTo(-582.512193); // lesser septimal tritone
+    expect(harmonicSeventhChord[2].value.totalCents()).toBeCloseTo(-968.825906); // harmonic seventh
+  });
+
+  // Four natural ways of spelling the just major chord in root position
+  it('can spell the just major chord super-overtonally', () => {
+    const superOvertone = parseSource('4:5:6');
+    expect(superOvertone[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(superOvertone[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+  });
+
+  it('can spell the just major chord sub-overtonally', () => {
+    const subOvertone = parseSource('6:5:4');
+    expect(subOvertone[0].value.totalCents()).toBeCloseTo(-315.641287); // minor third
+    expect(subOvertone[1].value.totalCents()).toBeCloseTo(-701.955001); // perfect fifth
+  });
+
+  it('can spell the just major chord inverted', () => {
+    const inversion = parseSource('inverted(10:12:15)');
+    expect(inversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(inversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+  });
+
+  it('can spell the just major chord reflected', () => {
+    const inversion = parseSource('reflected(15:12:10)');
+    expect(inversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(inversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+  });
+
+  // Major inversions
+  it('can spell the just major chord in first inversion with root on 1/1', () => {
+    const firstInversion = parseSource('8:5:6');
+    expect(firstInversion[0].value.totalCents()).toBeCloseTo(-813.686286); // minor sixth
+    expect(firstInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+  });
+
+  it('can spell the just major chord in second inversion with root on 1/1', () => {
+    const secondInversion = parseSource('4:5:3');
+    expect(secondInversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(secondInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+  });
+
+  // Minor inversions
+  it('can spell the just minor chord in root position', () => {
+    const rootPosition = parseSource('reflected(6:5:4)');
+    expect(rootPosition[0].value.totalCents()).toBeCloseTo(315.641287); // minor third
+    expect(rootPosition[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+  });
+
+  it('can spell the just minor chord in first inversion with root on 1/1', () => {
+    const firstInversion = parseSource('reflected(3:5:4)');
+    expect(firstInversion[0].value.totalCents()).toBeCloseTo(-884.358713); // major sixth
+    expect(firstInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+  });
+
+  it('can spell the just minor chord in second inversion with root on 1/1', () => {
+    const secondInversion = parseSource('reflected(6:5:8)');
+    expect(secondInversion[0].value.totalCents()).toBeCloseTo(315.641287); // major sixth
+    expect(secondInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+  });
 });

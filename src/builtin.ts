@@ -705,7 +705,7 @@ function sorted(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale = scale ?? (this.context.get('$') as Interval[]);
+  scale ??= this.context.get('$') as Interval[];
   scale = [...scale];
   sort.bind(this)(scale, compareFn);
   return scale;
@@ -720,6 +720,16 @@ function reverse(this: ExpressionVisitor, scale?: Interval[]) {
 }
 reverse.__doc__ = 'Reverse the order of the current/given scale.';
 reverse.__node__ = builtinNode(reverse);
+
+function reversed(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.context.get('$') as Interval[];
+  scale = [...scale];
+  reverse.bind(this)(scale);
+  return scale;
+}
+reversed.__doc__ =
+  'Obtain a copy of the current/given scale in reversed order.';
+reversed.__node__ = builtinNode(reversed);
 
 function pop(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
@@ -1001,6 +1011,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   sort,
   sorted,
   reverse,
+  reversed,
   pop,
   push,
   shift,
@@ -1307,6 +1318,18 @@ riff inverted scale {
   "Obtain an inverted copy of the current/given scale (negative harmony).";
   $ = (scale ?? $$)[..];
   invert();
+}
+
+riff reflect scale {
+  "Reflect the current/given scale about unison.";
+  $ = scale ?? $$;
+  i => %~i;
+  return;
+}
+
+riff reflected scale {
+  "Obtain a copy of the current/given scale reflected about unison.";
+  map(i => %~i, scale ?? $$);
 }
 
 riff rotate onto scale {

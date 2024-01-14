@@ -1316,11 +1316,19 @@ export class ExpressionVisitor {
       throw new Error('Harmonic segments must be built from intervals');
     }
     const one = linearOne();
-    let next = root.add(one);
     const result: Interval[] = [];
-    while (next.compare(end) <= 0) {
-      result.push(next.div(root));
-      next = next.add(one);
+    if (root.compare(end) <= 0) {
+      let next = root.add(one);
+      while (next.compare(end) <= 0) {
+        result.push(next.div(root));
+        next = next.add(one);
+      }
+    } else {
+      let next = root.sub(one);
+      while (next.compare(end) >= 0) {
+        result.push(next.div(root));
+        next = next.sub(one);
+      }
     }
     return result;
   }
