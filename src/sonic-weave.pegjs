@@ -48,6 +48,7 @@ ElseToken     = 'else'   !IdentifierPart
 FalseToken    = 'false'  !IdentifierPart
 ForToken      = 'for'    !IdentifierPart
 HertzToken    = 'Hz'     !IdentifierPart
+LowHertzToken = 'hz'     !IdentifierPart
 IfToken       = 'if'     !IdentifierPart
 LogToken      = 'log'    !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
@@ -73,6 +74,7 @@ ReservedWord
   / FalseToken
   / ForToken
   / HertzToken
+  / LowHertzToken
   / IfToken
   / LogToken
   / ModToken
@@ -676,7 +678,13 @@ CentLiteral
   = (CentToken / '¢') { return { type: 'CentLiteral' }; }
 
 HertzLiteral
-  = prefix: MetricPrefix? HertzToken {
+  = LowHertzToken {
+    return {
+      type: 'HertzLiteral',
+      prefix: '',
+    }
+  }
+  / prefix: MetricPrefix? (HertzToken / LowHertzToken) {
     return {
       type: 'HertzLiteral',
       prefix,

@@ -453,4 +453,19 @@ describe('SonicWeave expression evaluator', () => {
     const C = evaluateExpression('str(C4)[0]');
     expect(C).toBe('C');
   });
+
+  it('has a lower-case hertz literal', () => {
+    const ninety = parseSingle('90hz');
+    expect(ninety.value.valueOf()).toBeCloseTo(90);
+  });
+
+  it('has zepto hertz', () => {
+    const smol = parseSingle('zhz');
+    expect(smol.value.valueOf()).toBeCloseTo(1e-21);
+  });
+
+  it('has hecto hertz', () => {
+    const chonk = parseSingle('hHz');
+    expect(chonk.value.valueOf()).toBeCloseTo(100);
+  });
 });

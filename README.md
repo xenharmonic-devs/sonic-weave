@@ -160,7 +160,7 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Multiplication         | `2 * 3`      | `6`      | `P8 + P12`       | `P19`   |
 | Multiplication         | `110Hz × 5`  | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
 | Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
-| Division               | `220Hz ÷ 2`  | `110 Hz` | `A=3 - P8`       | `A=2`   |
+| Division               | `220hz ÷ 2`  | `110 Hz` | `A=3 - P8`       | `A=2`   |
 | Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
 | Exponentiation         | `3^2`        | `9`      | `P12 * 2`        | `M23`   |
 | Root taking            | `9^1/2`      | `3`      | `M23 % 2`        | `P12`   |
