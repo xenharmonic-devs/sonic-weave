@@ -844,19 +844,25 @@ function arrayReduce(
     currentIndex: Interval,
     array: any[]
   ) => any,
-  initialValue: any,
+  initialValue?: any,
   array?: any[]
 ) {
   reducer = reducer.bind(this);
   array ??= this.context.get('$') as Interval[];
-  return array.reduce(
-    (value, currentValue, currentIndex, arr) =>
-      reducer(value, currentValue, Interval.fromInteger(currentIndex), arr),
-    initialValue
-  );
+  if (arguments.length >= 2) {
+    return array.reduce(
+      (value, currentValue, currentIndex, arr) =>
+        reducer(value, currentValue, Interval.fromInteger(currentIndex), arr),
+      initialValue
+    );
+  } else {
+    return array.reduce((value, currentValue, currentIndex, arr) =>
+      reducer(value, currentValue, Interval.fromInteger(currentIndex), arr)
+    );
+  }
 }
 arrayReduce.__doc__ =
-  'Reduce the given/current scale to a single value by `reducer` riff.';
+  'Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.';
 arrayReduce.__node__ = builtinNode(arrayReduce);
 
 function isArray(value: any) {
@@ -1370,6 +1376,15 @@ riff ground scale {
   $ = scale ?? $$;
   root = shift();
   i => i ~% root;
+  return;
+}
+
+riff elevate scale {
+  "Remove denominators and make the unison explicit in the current/given scale.";
+  $ = scale ?? $$;
+  root = %~arrayReduce(gcd);
+  i => i ~* root;
+  unshift(root);
   return;
 }
 

@@ -342,4 +342,23 @@ describe('SonicWeave standard library', () => {
     expect(secondInversion[0].value.totalCents()).toBeCloseTo(315.641287); // major sixth
     expect(secondInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
+
+  it('has the means to convert JI scales to enumerations', () => {
+    const scale = parseSource('12/11;6/5;4/3;3/2;elevate();simplify;str');
+    expect(scale.join(':')).toBe('330:360:396:440:495');
+  });
+
+  it('has the means to convert JI scales to inverted enumerations', () => {
+    const scale = parseSource(
+      '12/11;6/5;4/3;3/2;invert();elevate();simplify;str'
+    );
+    expect(`inverted(${scale.join(':')})`).toBe('inverted(8:9:10:11:12)');
+  });
+
+  it('has the means to convert JI scales to reflected enumerations', () => {
+    const scale = parseSource(
+      '12/11;6/5;4/3;3/2;reflect();elevate();simplify;str'
+    );
+    expect(`reflected(${scale.join(':')})`).toBe('reflected(12:11:10:9:8)');
+  });
 });

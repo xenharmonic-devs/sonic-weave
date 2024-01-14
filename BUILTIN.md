@@ -26,7 +26,7 @@ Convert interval to absolute FJS.
 `interval`
 
 ### arrayReduce
-Reduce the given/current scale to a single value by `reducer` riff.
+Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.
 #### Parameters:
 
 `reducer`, `initialValue`, `array`
@@ -411,6 +411,12 @@ Generate an equal temperament with the given number of divisions of the given eq
 #### Parameters:
 
 `divisions`, `equave`
+
+### elevate
+Remove denominators and make the unison explicit in the current/given scale.
+#### Parameters:
+
+`scale`
 
 ### eulerGenus
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
