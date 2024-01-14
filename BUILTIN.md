@@ -29,7 +29,7 @@ Convert interval to absolute FJS.
 Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.
 #### Parameters:
 
-`reducer`, `initialValue`, `array`
+`reducer`, `array`, `initialValue`
 
 ### bool
 Convert value to a boolean.
@@ -413,7 +413,7 @@ Generate an equal temperament with the given number of divisions of the given eq
 `divisions`, `equave`
 
 ### elevate
-Remove denominators and make the unison explicit in the current/given scale.
+Remove denominators and make the root explicit in the current/given scale.
 #### Parameters:
 
 `scale`

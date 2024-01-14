@@ -844,12 +844,12 @@ function arrayReduce(
     currentIndex: Interval,
     array: any[]
   ) => any,
-  initialValue?: any,
-  array?: any[]
+  array?: any[],
+  initialValue?: any
 ) {
   reducer = reducer.bind(this);
   array ??= this.context.get('$') as Interval[];
-  if (arguments.length >= 2) {
+  if (arguments.length >= 3) {
     return array.reduce(
       (value, currentValue, currentIndex, arr) =>
         reducer(value, currentValue, Interval.fromInteger(currentIndex), arr),
@@ -1062,12 +1062,12 @@ riff void {
 
 riff sum terms {
   "Calculate the (linear) sum of the terms.";
-  return arrayReduce(total, element => total +~ element, 0, terms);
+  return arrayReduce(total, element => total +~ element, terms);
 }
 
 riff prod factors {
   "Calculate the (linear) product of the factors. (i.e. the logarithmic sum)";
-  return arrayReduce(total, element => total *~ element, 1, factors);
+  return arrayReduce(total, element => total *~ element, factors);
 }
 
 riff cumsum array {
@@ -1380,7 +1380,7 @@ riff ground scale {
 }
 
 riff elevate scale {
-  "Remove denominators and make the unison explicit in the current/given scale.";
+  "Remove denominators and make the root explicit in the current/given scale.";
   $ = scale ?? $$;
   root = %~arrayReduce(gcd);
   i => i ~* root;
