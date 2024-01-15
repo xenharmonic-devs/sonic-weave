@@ -361,4 +361,14 @@ describe('SonicWeave standard library', () => {
     );
     expect(`reflected(${scale.join(':')})`).toBe('reflected(12:11:10:9:8)');
   });
+
+  it('has the means to keep already enumerated scales enumerated', () => {
+    const scale = parseSource('4:12:14:16;elevate();simplify;str');
+    expect(scale.join(':')).toBe('2:6:7:8');
+  });
+
+  it("doesn't introduce extra denominators when elevating", () => {
+    const scale = parseSource('5/3;10/3;elevate();simplify;str');
+    expect(scale.join(':')).toBe('3:5:10');
+  });
 });

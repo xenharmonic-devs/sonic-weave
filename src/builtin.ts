@@ -1382,9 +1382,9 @@ riff ground scale {
 riff elevate scale {
   "Remove denominators and make the root explicit in the current/given scale.";
   $ = scale ?? $$;
+  unshift($[-1]~^0);
   root = %~arrayReduce(gcd);
   i => i ~* root;
-  unshift(root);
   return;
 }
 
