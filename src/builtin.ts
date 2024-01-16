@@ -1319,6 +1319,22 @@ riff reduce scale {
   return;
 }
 
+riff revpose scale {
+  "Change the sounding direction. Converts a descending scale to an ascending one."
+  $ = scale ?? $$;
+  equave = pop();
+  i => i ~% equave;
+  reverse();
+  %equave;
+  return;
+}
+
+riff revposed scale {
+  "Obtain a copy of the current/given scale that sounds in the opposite direction."
+  scale ?? $$;
+  revpose();
+}
+
 riff retrovert scale {
   "Retrovert the current/given scale (negative harmony i.e reflect and transpose).";
   $ = scale ?? $$;
@@ -1331,7 +1347,7 @@ riff retrovert scale {
 
 riff retroverted scale {
   "Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).";
-  $ = (scale ?? $$)[..];
+  scale ?? $$;
   retrovert();
 }
 

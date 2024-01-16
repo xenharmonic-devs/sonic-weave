@@ -294,9 +294,9 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can spell the just major chord sub-overtonally', () => {
-    const subOvertone = parseSource('6:5:4');
-    expect(subOvertone[0].value.totalCents()).toBeCloseTo(-315.641287); // minor third
-    expect(subOvertone[1].value.totalCents()).toBeCloseTo(-701.955001); // perfect fifth
+    const subOvertone = parseSource('revposed(6:5:4)');
+    expect(subOvertone[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(subOvertone[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord retroverted', () => {

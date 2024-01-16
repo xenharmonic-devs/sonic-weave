@@ -538,6 +538,18 @@ Obtain an retroverted copy of the current/given scale (negative harmony i.e. ref
 
 `scale`
 
+### revpose
+Change the sounding direction. Converts a descending scale to an ascending one.
+#### Parameters:
+
+`scale`
+
+### revposed
+Obtain a copy of the current/given scale that sounds in the opposite direction.
+#### Parameters:
+
+`scale`
+
 ### rotate
 Rotate the current/given scale onto the given degree.
 #### Parameters:
