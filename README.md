@@ -162,9 +162,9 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
 | Division               | `220hz ÷ 2`  | `110 Hz` | `A=3 - P8`       | `A=2`   |
 | Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
-| Exponentiation         | `3^2`        | `9`      | `P12 * 2`        | `M23`   |
-| Root taking            | `9^1/2`      | `3`      | `M23 % 2`        | `P12`   |
-| Logarithm (in base of) | `9 log 3`    | `2`      | `M23 % P12`      | `2`     |
+| Exponentiation         | `3 ^ 2`      | `9`      | `P12 * 2`        | `M23`   |
+| Root taking            | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
+| Logarithm (in base of) | `9 /_ 3`     | `2`      | `M23 % P12`      | `2`     |
 | Round (to power of)    | `5 by 2`     | `4`      | `M17^5 to P8`    | `P15`   |
 | N of EDO               | `(5+2)\12`   | `7\12`   | _N/A_            |         |
 | NEDJI Projection       | `sqrt(2)<3>` | `1\2<3>` | _N/A_            |         |
@@ -708,6 +708,10 @@ The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the diff
 
 ## Future work
 The syntax could be extended to cover movement in time i.e. to become a full textual music notation vis-à-vis Xenpaper.
+
+## Additional resources
+* [Xenharmonic Wiki](https://en.xen.wiki/)
+* [Rationale](https://forum.sagittal.org/viewtopic.php?t=575) behind the two flavors of anti-exponentiation `/^` and `/_`.
 
 ## Acknowledgments / inspiration
 SonicWeave looks like Javascript with Python semantics, has Haskell ranges and operates similar to xen-calc.
