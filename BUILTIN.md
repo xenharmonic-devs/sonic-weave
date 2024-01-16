@@ -436,18 +436,6 @@ Use the first interval in the current/given scale as the implicit unison.
 
 `scale`
 
-### invert
-Invert the current/given scale (negative harmony).
-#### Parameters:
-
-`scale`
-
-### inverted
-Obtain an inverted copy of the current/given scale (negative harmony).
-#### Parameters:
-
-`scale`
-
 ### keepUnique
 Only keep unique intervals in the current/given scale.
 #### Parameters:
@@ -459,6 +447,12 @@ Apply labels (or colors) from the first array to the current/given scale.
 #### Parameters:
 
 `labels`, `scale`
+
+### log
+Calculate the logarithm of x base y. Base defaults to E.
+#### Parameters:
+
+`x`, `y`
 
 ### mergeOffset
 Merge the given offset or polyoffset of the current/given scale onto itself. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
@@ -483,6 +477,12 @@ Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 #### Parameters:
 
 `b0`, `b1`, `b2`, `b3`, `equave`, `withUnity`
+
+### pow
+Calculate x to the power of y.
+#### Parameters:
+
+`x`, `y`
 
 ### prod
 Calculate the (linear) product of the factors. (i.e. the logarithmic sum)
@@ -525,6 +525,18 @@ Stack the current/given scale on top of itself. Clears the scale if the number o
 #### Parameters:
 
 `times`
+
+### retrovert
+Retrovert the current/given scale (negative harmony i.e reflect and transpose).
+#### Parameters:
+
+`scale`
+
+### retroverted
+Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).
+#### Parameters:
+
+`scale`
 
 ### rotate
 Rotate the current/given scale onto the given degree.

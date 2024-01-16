@@ -1128,7 +1128,7 @@ riff ed divisions equave {
 
 riff subharmonics start end {
   "Generate a subharmonic segment including the given start and end points.";
-  inverted(start::end);
+  reflected(end::start);
 }
 
 riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep up down equave {
@@ -1319,8 +1319,8 @@ riff reduce scale {
   return;
 }
 
-riff invert scale {
-  "Invert the current/given scale (negative harmony).";
+riff retrovert scale {
+  "Retrovert the current/given scale (negative harmony i.e reflect and transpose).";
   $ = scale ?? $$;
   equave = pop();
   i => equave %~ i;
@@ -1329,10 +1329,10 @@ riff invert scale {
   return;
 }
 
-riff inverted scale {
-  "Obtain an inverted copy of the current/given scale (negative harmony).";
+riff retroverted scale {
+  "Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).";
   $ = (scale ?? $$)[..];
-  invert();
+  retrovert();
 }
 
 riff reflect scale {

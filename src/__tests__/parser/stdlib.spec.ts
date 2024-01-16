@@ -132,8 +132,8 @@ describe('SonicWeave standard library', () => {
     expect(scale).toHaveLength(0);
   });
 
-  it('inverts scales', () => {
-    const scale = parseSource('1\\6;2\\6;3\\6;6\\6;invert();');
+  it('retroverts scales', () => {
+    const scale = parseSource('1\\6;2\\6;3\\6;6\\6;retrovert();');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('3\\6;4\\6;5\\6;6\\6');
   });
@@ -299,16 +299,16 @@ describe('SonicWeave standard library', () => {
     expect(subOvertone[1].value.totalCents()).toBeCloseTo(-701.955001); // perfect fifth
   });
 
-  it('can spell the just major chord inverted', () => {
-    const inversion = parseSource('inverted(10:12:15)');
-    expect(inversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(inversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+  it('can spell the just major chord retroverted', () => {
+    const retroversion = parseSource('retroverted(10:12:15)');
+    expect(retroversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(retroversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord reflected', () => {
-    const inversion = parseSource('reflected(15:12:10)');
-    expect(inversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(inversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    const reflection = parseSource('reflected(15:12:10)');
+    expect(reflection[0].value.totalCents()).toBeCloseTo(386.313714); // major third
+    expect(reflection[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   // Major inversions
@@ -348,11 +348,11 @@ describe('SonicWeave standard library', () => {
     expect(scale.join(':')).toBe('330:360:396:440:495');
   });
 
-  it('has the means to convert JI scales to inverted enumerations', () => {
+  it('has the means to convert JI scales to retroverted enumerations', () => {
     const scale = parseSource(
-      '12/11;6/5;4/3;3/2;invert();elevate();simplify;str'
+      '12/11;6/5;4/3;3/2;retrovert();elevate();simplify;str'
     );
-    expect(`inverted(${scale.join(':')})`).toBe('inverted(8:9:10:11:12)');
+    expect(`retroverted(${scale.join(':')})`).toBe('retroverted(8:9:10:11:12)');
   });
 
   it('has the means to convert JI scales to reflected enumerations', () => {
