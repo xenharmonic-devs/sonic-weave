@@ -467,4 +467,19 @@ describe('SonicWeave expression evaluator', () => {
     const chonk = parseSingle('hHz');
     expect(chonk.value.valueOf()).toBeCloseTo(100);
   });
+
+  it('has exponentiation as a binary operation', () => {
+    const nine = parseSingle('3 ^ 2');
+    expect(nine.toInteger()).toBe(9);
+  });
+
+  it('has inverse exponentiation as a binary operation', () => {
+    const three = parseSingle('9 /^ 2');
+    expect(three.toInteger()).toBe(3);
+  });
+
+  it('has the logarithm as a binary operation', () => {
+    const two = parseSingle('9 /_ 3');
+    expect(two.toInteger()).toBe(2);
+  });
 });

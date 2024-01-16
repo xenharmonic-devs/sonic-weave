@@ -55,7 +55,7 @@ ForToken      = 'for'    !IdentifierPart
 HertzToken    = 'Hz'     !IdentifierPart
 LowHertzToken = 'hz'     !IdentifierPart
 IfToken       = 'if'     !IdentifierPart
-LogToken      = 'log'    !IdentifierPart
+LogToken      = '/_'     !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
 NoneToken     = 'niente' !IdentifierPart
 OfToken       = 'of'     !IdentifierPart
@@ -338,7 +338,7 @@ MultiplicativeExpression
   }
 
 ExponentiationOperator
-  = '^'
+  = $('^' / '/^')
 
 ExponentiationExpression
   = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {

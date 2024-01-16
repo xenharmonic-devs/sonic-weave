@@ -247,6 +247,18 @@ export class Interval {
     return new Interval(this.value.pow(other.value), this.domain);
   }
 
+  ipow(other: Interval) {
+    if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
+      throw new Error(
+        'Inverse exponentiation not implemented in logarithmic domain'
+      );
+    }
+    if (!other.value.isScalar()) {
+      throw new Error('Only scalar inverse exponentiation implemented');
+    }
+    return new Interval(this.value.pow(other.value.inverse()), this.domain);
+  }
+
   log(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(

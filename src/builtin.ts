@@ -1045,6 +1045,15 @@ riff cbrt x {
   "Calculate the cube root of the input.";
   return x ~^ 1/3;
 }
+riff log x y {
+  "Calculate the logarithm of x base y. Base defaults to E.";
+  y ??= E;
+  return x ~/_ y;
+}
+riff pow x y {
+  "Calculate x to the power of y.";
+  return x ~^ y;
+}
 
 riff mtof index {
   "Convert MIDI note number to absolute frequency.";
@@ -1052,7 +1061,7 @@ riff mtof index {
 }
 riff ftom freq {
   "Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).";
-  return freq % 440 Hz log 2 * 12 + 69;
+  return freq % 440 Hz /_ 2 * 12 + 69;
 }
 
 riff void {

@@ -1022,6 +1022,9 @@ export class ExpressionVisitor {
           case '^':
             value = left.value.pow(right.value);
             break;
+          case '/^':
+            value = left.value.pow(right.value.inverse());
+            break;
           case 'mod':
             value = left.value.mmod(right.value);
             break;
@@ -1029,7 +1032,7 @@ export class ExpressionVisitor {
           case 'dot':
             value = left.dot(right).value;
             break;
-          case 'log':
+          case '/_':
             value = left.value.log(right.value);
             break;
           case '\\':
@@ -1073,7 +1076,9 @@ export class ExpressionVisitor {
           return left.div(right);
         case '^':
           return left.pow(right);
-        case 'log':
+        case '/^':
+          return left.ipow(right);
+        case '/_':
           return left.log(right);
         case '\\':
           return left.backslash(right);

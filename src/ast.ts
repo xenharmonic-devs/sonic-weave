@@ -28,12 +28,13 @@ export type BinaryOperator =
   | '\\'
   | 'mod'
   | 'rd'
-  | 'log'
+  | '/_'
   | '·'
   | 'dot'
   | '⊗'
   | 'tns'
-  | '^';
+  | '^'
+  | '/^';
 
 export type Program = {
   type: 'Program';
