@@ -725,6 +725,7 @@ SonicWeave looks like Javascript with Python semantics, has Haskell ranges and o
 * NFJS - Matthew Yacavone
 * Xen-calc - Matthew Yacavone
 * Xenpaper - Damien Clarke
+* Ups and downs notation - Kite Giedraitis
 * Peg.js - David Majda et. al.
 * Peggy - Joe Hildebrand et. al.
 * Xenharmonic Wiki - (community project)
