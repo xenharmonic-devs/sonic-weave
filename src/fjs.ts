@@ -1,5 +1,4 @@
 import {
-  BIG_INT_PRIMES,
   Fraction,
   PRIMES,
   PRIME_CENTS,
@@ -119,7 +118,7 @@ export function getNeutralComma(index: number) {
   return neutralCommas[index];
 }
 
-export function formalInflection(superscripts: bigint[], subscripts: bigint[]) {
+export function formalInflection(superscripts: number[], subscripts: number[]) {
   let result = TimeMonzo.fromFraction(1);
   for (const s of superscripts) {
     const monzo = toMonzo(s);
@@ -137,8 +136,8 @@ export function formalInflection(superscripts: bigint[], subscripts: bigint[]) {
 }
 
 export function neutralInflection(
-  superscripts: bigint[],
-  subscripts: bigint[]
+  superscripts: number[],
+  subscripts: number[]
 ) {
   let result = TimeMonzo.fromFraction(1);
   for (const s of superscripts) {
@@ -158,8 +157,8 @@ export function neutralInflection(
 
 export function inflect(
   pythagorean: TimeMonzo,
-  superscripts: bigint[],
-  subscripts: bigint[],
+  superscripts: number[],
+  subscripts: number[],
   flavor: FJSFlavor
 ) {
   if (
@@ -173,25 +172,25 @@ export function inflect(
 }
 
 export function uninflect(monzo: TimeMonzo) {
-  const superscripts: bigint[] = [];
-  const subscripts: bigint[] = [];
+  const superscripts: number[] = [];
+  const subscripts: number[] = [];
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
     for (let j = 0; pe[i].compare(j) > 0; ++j) {
-      superscripts.push(BIG_INT_PRIMES[i]);
+      superscripts.push(PRIMES[i]);
     }
     for (let j = 0; pe[i].compare(-j) < 0; ++j) {
-      subscripts.push(BIG_INT_PRIMES[i]);
+      subscripts.push(PRIMES[i]);
     }
   }
   try {
     const rpe = toMonzo(monzo.residual);
     for (let i = 2; i < rpe.length; ++i) {
       for (let j = 0; j < rpe[i]; ++j) {
-        superscripts.push(BIG_INT_PRIMES[i]);
+        superscripts.push(PRIMES[i]);
       }
       for (let j = 0; j > rpe[i]; --j) {
-        subscripts.push(BIG_INT_PRIMES[i]);
+        subscripts.push(PRIMES[i]);
       }
     }
   } catch (e) {

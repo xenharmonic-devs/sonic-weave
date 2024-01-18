@@ -542,7 +542,7 @@ Primary
   / StringLiteral
 
 StepLiteral
-  = count: Integer '\\' {
+  = count: BasicInteger '\\' {
     return {
       type: 'StepLiteral',
       count,
@@ -550,7 +550,7 @@ StepLiteral
   }
 
 NedoLiteral
-  = numerator: Integer '\\' denominator: PositiveInteger {
+  = numerator: BasicInteger '\\' denominator: PositiveBasicInteger {
     return {
       type: 'NedoLiteral',
       numerator,
@@ -568,7 +568,7 @@ NedjiProjector
 
 SoftDotDecimalWithExponent
   = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart exponent: ExponentPart  {
+  whole: Integer? '.' !'.' fractional: UnderscoreDigits exponent: ExponentPart  {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -589,7 +589,7 @@ SoftDotDecimalWithExponent
 
 SoftDotDecimal
   = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart {
+  whole: Integer? '.' !'.' fractional: UnderscoreDigits {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
@@ -647,7 +647,7 @@ IntegerLiteral
 
 DotCentsLiteral
   = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: FractionalPart  {
+  whole: Integer? '.' !'.' fractional: UnderscoreDigits  {
     return {
       type: 'CentsLiteral',
       whole: whole,
@@ -656,13 +656,13 @@ DotCentsLiteral
   }
 
 VectorComponent
-  = sign: SignPart left: Integer separator: '/' right: $(PositiveInteger) {
+  = sign: SignPart left: BasicInteger separator: '/' right: $(PositiveBasicInteger) {
     return {sign, left, separator, right, exponent: null};
   }
-  / sign: SignPart left: Integer separator: '.' right: FractionalPart exponent: ExponentPart? {
+  / sign: SignPart left: BasicInteger separator: '.' right: UnderscoreDigits exponent: ExponentPart? {
     return {sign, left, separator, right, exponent};
   }
-  / sign: SignPart left: Integer exponent: ExponentPart? {
+  / sign: SignPart left: BasicInteger exponent: ExponentPart? {
     return {sign, left, separator: '', right: '', exponent};
   }
 
@@ -690,7 +690,7 @@ ValLiteral
   }
 
 WartsLiteral
-  = equave: [a-z]i? divisions: PositiveInteger warts: [a-z]i* '@' basis: DotJoinedRationals {
+  = equave: [a-z]i? divisions: PositiveBasicInteger warts: [a-z]i* '@' basis: DotJoinedRationals {
     return {
       type: 'WartsLiteral',
       equave: (equave ?? '').toLowerCase(),
@@ -765,8 +765,8 @@ MidQuality = 'P' / 'n'
 PerfectQuality = 'P'
 
 Degree
-  = sign: '-'? num: PositiveInteger {
-    num = Number(num) - 1;
+  = sign: '-'? num: PositiveBasicInteger {
+    num--;
     return {
       negative: !!sign,
       base: (num % 7) + 1,
@@ -832,8 +832,8 @@ FJS
   = downs: 'v'*
     pythagorean: SplitDemisemipythagorean
     flavor: 'n'?
-    superscripts: ('^' @CommaJoinedIntegers)?
-    subscripts: ('_' @CommaJoinedIntegers)? {
+    superscripts: ('^' @CommaJoinedPositiveBasicIntegers)?
+    subscripts: ('_' @CommaJoinedPositiveBasicIntegers)? {
     return {
       type: 'FJS',
       ups: -downs.length,
@@ -852,7 +852,7 @@ Nominal
   = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωaA-G])
 
 AbsolutePitch
-  = nominal: Nominal accidentals: Accidental* octave: SignedInteger {
+  = nominal: Nominal accidentals: Accidental* octave: SignedBasicInteger {
     return {
       type: 'AbsolutePitch',
       nominal,
@@ -865,8 +865,8 @@ AbsoluteFJS
   = downs: 'v'*
     pitch: AbsolutePitch
     flavor: 'n'?
-    superscripts: ('^' @CommaJoinedIntegers)?
-    subscripts: ('_' @CommaJoinedIntegers)? {
+    superscripts: ('^' @CommaJoinedPositiveBasicIntegers)?
+    subscripts: ('_' @CommaJoinedPositiveBasicIntegers)? {
     return {
       type: 'AbsoluteFJS',
       ups: -downs.length,
@@ -909,29 +909,39 @@ ParenthesizedExpression
 MetricPrefix
   = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
 
-Integer
-  = num:$('0' / ([1-9] DecimalDigit*)) { return BigInt(num); }
+UnderscoreDigits
+  = num: $([_0-9]*) { return num.replace(/_/g, ''); }
 
 PositiveInteger
-  = num:$([1-9] DecimalDigit*) { return BigInt(num); }
+  = num:([1-9] UnderscoreDigits) { return BigInt(num.join('')); }
 
-SignedInteger
-  = num:$(SignPart Integer) { return BigInt(num); }
+Integer
+  = '0' { return 0n; }
+  / PositiveInteger
 
 SignPart
   = $([+-]?)
 
-ExponentPart
-  = ExponentIndicator exponent: SignedInteger { return exponent; }
+SignedInteger
+  = sign: SignPart integer: Integer { return sign === '-' ? -integer : integer; }
 
 ExponentIndicator
   = "e"i
 
-FractionalPart
-  = $(DecimalDigit*)
+ExponentPart
+  = ExponentIndicator exponent: SignedInteger { return exponent; }
 
-CommaJoinedIntegers
-  = Integer|.., ','|
+BasicInteger
+  = num: $('0' / ([1-9] DecimalDigit*)) { return parseInt(num, 10) }
+
+PositiveBasicInteger
+  = num: $([1-9] DecimalDigit*) { return parseInt(num, 10) }
+
+SignedBasicInteger
+  = num: $([+-]? ('0' / ([1-9] DecimalDigit*))) { return parseInt(num, 10) }
+
+CommaJoinedPositiveBasicIntegers
+  = PositiveBasicInteger|.., ','|
 
 RGB4
   = $('#' HexDigit|3|)

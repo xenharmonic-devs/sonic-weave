@@ -340,7 +340,7 @@ export class StatementVisitor {
         let equaveNumerator: number | undefined = undefined;
         let equaveDenominator: number | undefined = undefined;
         if (value?.node?.type === 'WartsLiteral') {
-          divisions = new Fraction(Number(value.node.divisions));
+          divisions = new Fraction(value.node.divisions);
           const equave_ = inferEquave(value.node);
           if (!equave_) {
             throw new Error('Invalid warts equave');
@@ -356,8 +356,8 @@ export class StatementVisitor {
           'logarithmic',
           {
             type: 'NedoLiteral',
-            numerator: BigInt(divisions.d),
-            denominator: BigInt(divisions.n),
+            numerator: divisions.d,
+            denominator: divisions.n,
             equaveNumerator,
             equaveDenominator,
           }

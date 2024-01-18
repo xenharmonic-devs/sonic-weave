@@ -33,10 +33,10 @@ describe('Idempontent formatting', () => {
     const majorThird = TimeMonzo.fromEqualTemperament('4/12');
     const node = timeMonzoAs(majorThird, {
       type: 'NedoLiteral',
-      numerator: 4n,
-      denominator: 12n,
+      numerator: 4,
+      denominator: 12,
     }) as NedjiLiteral;
-    expect(node.numerator).toBe(4n);
-    expect(node.denominator).toBe(12n);
+    expect(node.numerator).toBe(4);
+    expect(node.denominator).toBe(12);
   });
 });

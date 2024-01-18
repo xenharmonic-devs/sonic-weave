@@ -1357,15 +1357,13 @@ export class TimeMonzo {
         if (denominator === Number(node.denominator)) {
           return {
             ...node,
-            numerator: BigInt(
-              (denominator / fractionOfEquave.d) * fractionOfEquave.n
-            ),
+            numerator: (denominator / fractionOfEquave.d) * fractionOfEquave.n,
           };
         }
         return {
           ...node,
-          numerator: BigInt(fractionOfEquave.n),
-          denominator: BigInt(fractionOfEquave.d),
+          numerator: fractionOfEquave.n,
+          denominator: fractionOfEquave.d,
         };
       } catch {
         return undefined;

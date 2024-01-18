@@ -347,7 +347,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'NedjiProjection',
-        octaves: {type: 'NedoLiteral', numerator: 7n, denominator: 13n},
+        octaves: {type: 'NedoLiteral', numerator: 7, denominator: 13},
         base: {type: 'IntegerLiteral', value: 3n},
       },
     });

@@ -287,8 +287,8 @@ export class Interval {
     if (this.value.isIntegral() && other.value.isIntegral()) {
       node = {
         type: 'NedoLiteral',
-        numerator: this.value.toBigInteger(),
-        denominator: other.value.toBigInteger(),
+        numerator: this.toInteger(),
+        denominator: other.toInteger(),
       };
     }
     return new Interval(value, 'logarithmic', node);

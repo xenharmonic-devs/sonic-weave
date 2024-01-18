@@ -35,6 +35,9 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative | Used to temper scales. |
 | Warts        | `12@`, `29@2.3.13/5`    | Cologarithmic | Relative | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 
+#### Numeric separators
+It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
+
 ## Basic operation
 SonicWeave is intended for designing musical scales so a fundamental concept is the current scale (accessible through `$`).
 

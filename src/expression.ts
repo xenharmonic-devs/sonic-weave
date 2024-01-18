@@ -1,6 +1,6 @@
-import {MetricPrefix, bigLcm} from './utils';
+import {MetricPrefix} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
-import {Fraction} from 'xen-dev-utils';
+import {Fraction, lcm} from 'xen-dev-utils';
 
 export type FJSFlavor = '' | 'n';
 
@@ -32,13 +32,13 @@ export type RadicalLiteral = {
 
 export type StepLiteral = {
   type: 'StepLiteral';
-  count: bigint;
+  count: number;
 };
 
 export type NedjiLiteral = {
   type: 'NedoLiteral';
-  numerator: bigint;
-  denominator: bigint;
+  numerator: number;
+  denominator: number;
   // These synthetic fields are not found in the AST
   equaveNumerator?: number;
   equaveDenominator?: number;
@@ -82,8 +82,8 @@ export type FJS = {
   lifts: number;
   pythagorean: Pythagorean;
   flavor: FJSFlavor;
-  superscripts: bigint[];
-  subscripts: bigint[];
+  superscripts: number[];
+  subscripts: number[];
 };
 
 // FJS has stable representation for everything but ups.
@@ -98,8 +98,8 @@ export type AbsoluteFJS = {
   lifts: number;
   pitch: AbsolutePitch;
   flavor: FJSFlavor;
-  superscripts: bigint[];
-  subscripts: bigint[];
+  superscripts: number[];
+  subscripts: number[];
 };
 
 // Ironically the meaning of absolute FJS depends on context.
@@ -110,7 +110,7 @@ export type AspiringAbsoluteFJS = {
 export type WartsLiteral = {
   type: 'WartsLiteral';
   equave: string;
-  divisions: bigint;
+  divisions: number;
   warts: string[];
   basis: string[];
 };
@@ -223,7 +223,7 @@ export function addNodes(
     ) {
       return undefined;
     }
-    const denominator = bigLcm(a.denominator, b.denominator);
+    const denominator = lcm(a.denominator, b.denominator);
     return {
       type: a.type,
       numerator:
@@ -325,7 +325,7 @@ export function mulNodes(
     if (b.type === 'NedoLiteral') {
       return {
         type: 'NedoLiteral',
-        numerator: a.value * b.numerator,
+        numerator: Number(a.value) * b.numerator,
         denominator: b.denominator,
         equaveNumerator: b.equaveNumerator,
         equaveDenominator: b.equaveDenominator,

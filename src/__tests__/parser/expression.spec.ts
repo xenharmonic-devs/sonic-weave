@@ -482,4 +482,14 @@ describe('SonicWeave expression evaluator', () => {
     const two = parseSingle('9 /_ 3');
     expect(two.toInteger()).toBe(2);
   });
+
+  it('supports underscores as separators (integer)', () => {
+    const million = parseSingle('1_000_000');
+    expect(million.toInteger()).toBe(1_000_000);
+  });
+
+  it('supports underscores as separators (fraction)', () => {
+    const comma = parseSingle('1_000_001/1_000_000');
+    expect(comma.toString()).toBe('1000001/1000000');
+  });
 });
