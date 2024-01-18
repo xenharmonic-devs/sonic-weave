@@ -4,6 +4,8 @@ import {Fraction, lcm} from 'xen-dev-utils';
 
 export type FJSFlavor = '' | 'n';
 
+export type FJSInflection = [number, FJSFlavor];
+
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
   value: bigint;
@@ -81,9 +83,8 @@ export type FJS = {
   ups: number;
   lifts: number;
   pythagorean: Pythagorean;
-  flavor: FJSFlavor;
-  superscripts: number[];
-  subscripts: number[];
+  superscripts: FJSInflection[];
+  subscripts: FJSInflection[];
 };
 
 // FJS has stable representation for everything but ups.
@@ -97,9 +98,8 @@ export type AbsoluteFJS = {
   ups: number;
   lifts: number;
   pitch: AbsolutePitch;
-  flavor: FJSFlavor;
-  superscripts: number[];
-  subscripts: number[];
+  superscripts: FJSInflection[];
+  subscripts: FJSInflection[];
 };
 
 // Ironically the meaning of absolute FJS depends on context.
@@ -400,12 +400,12 @@ function formatUps(literal: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
 }
 
 function tailFJS(literal: FJS | AbsoluteFJS) {
-  let result = literal.flavor;
+  let result = '';
   if (literal.superscripts.length) {
-    result += '^' + literal.superscripts.join(',');
+    result += '^' + literal.superscripts.map(i => i.join('')).join(',');
   }
   if (literal.subscripts.length) {
-    result += '_' + literal.subscripts.join(',');
+    result += '_' + literal.subscripts.map(i => i.join('')).join(',');
   }
   return result;
 }

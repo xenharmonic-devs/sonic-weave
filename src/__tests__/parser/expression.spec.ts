@@ -83,9 +83,9 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("has mid from ups-and-downs but it's spelled 'n' and mixes with NFJS", () => {
-    const undecimalMidFourth = parseSingle('n4n^11');
+    const undecimalMidFourth = parseSingle('n4^11n');
     expect(undecimalMidFourth.value.toFraction().toFraction()).toBe('11/8');
-    const undecimalMidFifth = parseSingle('n5n_11');
+    const undecimalMidFifth = parseSingle('n5_11n');
     expect(undecimalMidFifth.value.toFraction().toFraction()).toBe('16/11');
   });
 
@@ -133,18 +133,18 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('supports neutral FJS', () => {
-    const sixth = parseSingle('n6n_11');
+    const sixth = parseSingle('n6_11n');
     expect(sixth.value.toFraction().toFraction()).toBe('18/11');
-    expect(sixth.toString()).toBe('n6n_11');
+    expect(sixth.toString()).toBe('n6_11n');
   });
 
   it('has access to NFJS accidentals on rationals (relative)', () => {
-    const flatFifth = parseSingle('P5n^121');
+    const flatFifth = parseSingle('P5^121n');
     expect(flatFifth.value.toFraction().toFraction()).toBe('121/81');
   });
 
   it('has access to NFJS accidentals on rationals (absolute)', () => {
-    const flatFifth = parseSingle('G4n_11,11');
+    const flatFifth = parseSingle('G4_11n,11n');
     expect(flatFifth.value.toFraction().toFraction()).toBe('729/484');
   });
 

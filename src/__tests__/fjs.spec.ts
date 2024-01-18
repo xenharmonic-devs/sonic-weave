@@ -7,6 +7,7 @@ import {
   absoluteMonzo,
   pythagoreanMonzo,
 } from '../pythagorean';
+import {FJSInflection} from '../expression';
 
 describe('Formal comma calculator', () => {
   it.each([
@@ -64,37 +65,47 @@ describe('FJS interval inflector', () => {
   it.each([
     ['P', 8, [], [], '2/1'],
     ['P', 5, [], [], '3/2'],
-    ['M', 3, [5], [], '5/4'],
-    ['m', 7, [7], [], '7/4'],
-    ['P', 4, [11], [], '11/8'],
-    ['m', 6, [13], [], '13/8'],
-    ['d', 5, [7], [5], '7/5'],
+    ['M', 3, [[5, '' as const]], [], '5/4'],
+    ['m', 7, [[7, '']], [], '7/4'],
+    ['P', 4, [[11, '']], [], '11/8'],
+    ['m', 6, [[13, '']], [], '13/8'],
+    ['d', 5, [[7, '']], [[5, '']], '7/5'],
     // Automatic factoring
-    ['A', 1, [25], [], '25/24'],
-    ['A', 1, [5, 5], [], '25/24'],
+    ['A', 1, [[25, '']], [], '25/24'],
+    [
+      'A',
+      1,
+      [
+        [5, ''],
+        [5, ''],
+      ],
+      [],
+      '25/24',
+    ],
     // Resistant to the first two primes
-    ['M', 2, [10], [9], '10/9'],
+    ['M', 2, [[10, '']], [[9, '']], '10/9'],
     // Neutral extension
-    ['n', 2, [], [], '12/11', [], [11]],
-    ['n', 2, [], [5], '11/10', [11]],
-    ['n', 3, [], [], '11/9', [11]],
-    ['sA', 4, [], [], '11/8', [11]],
-    ['n', 2, [], [], '13/12', [13]],
-    ['sd', 4, [7], [], '14/11', [], [11]],
-    ['sA', 2, [5], [], '15/13', [], [13]],
+    ['n', 2, [], [[11, 'n']], '12/11'],
+    ['n', 2, [[11, 'n']], [[5, '']], '11/10'],
+    ['n', 3, [[11, 'n']], [], '11/9'],
+    ['sA', 4, [[11, 'n']], [], '11/8'],
+    ['n', 2, [[13, 'n']], [], '13/12'],
+    ['sd', 4, [[7, '']], [[11, 'n']], '14/11'],
+    ['sA', 2, [[5, '']], [[13, 'n']], '15/13'],
     // Neutral resistance with automatic factoring
-    ['n', 7, [], [6], '4147/2304', [13, 319]],
+    [
+      'n',
+      7,
+      [
+        [13, 'n'],
+        [319, 'n'],
+      ],
+      [[6, '']],
+      '4147/2304',
+    ],
   ])(
     'Inflects %s%s%s%s',
-    (
-      quality,
-      degree,
-      superscripts,
-      subscripts,
-      fraction,
-      neutralSuper?,
-      neutralSub?
-    ) => {
+    (quality, degree, superscripts: unknown, subscripts: unknown, fraction) => {
       const base = ((Math.abs(degree) - 1) % 7) + 1;
       const octaves = Math.floor((Math.abs(degree) - 1) / 7);
       const imperfect = ![1, 4, 5].includes(degree);
@@ -105,10 +116,11 @@ describe('FJS interval inflector', () => {
         imperfect,
       };
       const monzo = pythagoreanMonzo(node);
-      let interval = inflect(monzo, superscripts, subscripts, '');
-      if (neutralSuper || neutralSub) {
-        interval = inflect(interval, neutralSuper ?? [], neutralSub ?? [], 'n');
-      }
+      const interval = inflect(
+        monzo,
+        superscripts as FJSInflection[],
+        subscripts as FJSInflection[]
+      );
       expect(interval.toFraction().equals(fraction)).toBe(true);
     }
   );
@@ -119,19 +131,11 @@ describe('Absolute FJS pitch inflector', () => {
     ['C', [], 4, [], [], '1/1'],
     ['C', [], 5, [], [], '2/1'],
     ['F', [], 4, [], [], '4/3'],
-    ['E', [], 4, [5], [], '5/4'],
-    ['E', ['d'], 4, [], [], '11/9', [11]],
+    ['E', [], 4, [[5, '']], [], '5/4'],
+    ['E', ['d'], 4, [[11, 'n']], [], '11/9'],
   ])(
     'Inflects %s%s%s%s%s',
-    (
-      nominal,
-      accidentals,
-      octave,
-      superscripts,
-      subscripts,
-      fraction,
-      neutralSuper?
-    ) => {
+    (nominal, accidentals, octave, superscripts, subscripts, fraction) => {
       const node: AbsolutePitch = {
         type: 'AbsolutePitch',
         nominal: nominal as AbsolutePitch['nominal'],
@@ -139,10 +143,11 @@ describe('Absolute FJS pitch inflector', () => {
         octave: BigInt(octave),
       };
       const monzo = absoluteMonzo(node);
-      let interval = inflect(monzo, superscripts, subscripts, '');
-      if (neutralSuper) {
-        interval = inflect(monzo, neutralSuper, [], 'n');
-      }
+      const interval = inflect(
+        monzo,
+        superscripts as unknown as FJSInflection[],
+        subscripts
+      );
       expect(interval.toFraction().equals(fraction)).toBe(true);
     }
   );

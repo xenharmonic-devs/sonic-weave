@@ -826,17 +826,20 @@ SplitDemisemipythagorean
     };
   }
 
+InflectionFlavor = 'n' / ''
+
+PrimeInflections
+  = (PositiveBasicInteger InflectionFlavor)|.., ','|
+
 FJS
   = downs: 'v'*
     pythagorean: SplitDemisemipythagorean
-    flavor: 'n'?
-    superscripts: ('^' @CommaJoinedPositiveBasicIntegers)?
-    subscripts: ('_' @CommaJoinedPositiveBasicIntegers)? {
+    superscripts: ('^' @PrimeInflections)?
+    subscripts: ('_' @PrimeInflections)? {
     return {
       type: 'FJS',
       ups: -downs.length,
       lifts: 0,
-      flavor: flavor ?? '',
       pythagorean,
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
@@ -862,15 +865,13 @@ AbsolutePitch
 AbsoluteFJS
   = downs: 'v'*
     pitch: AbsolutePitch
-    flavor: 'n'?
-    superscripts: ('^' @CommaJoinedPositiveBasicIntegers)?
-    subscripts: ('_' @CommaJoinedPositiveBasicIntegers)? {
+    superscripts: ('^' @PrimeInflections)?
+    subscripts: ('_' @PrimeInflections)? {
     return {
       type: 'AbsoluteFJS',
       ups: -downs.length,
       lifts: 0,
       pitch,
-      flavor: flavor ?? '',
       superscripts: superscripts ?? [],
       subscripts: subscripts ?? [],
     };
@@ -940,9 +941,6 @@ PositiveBasicInteger
 
 SignedBasicInteger
   = num: $([+-]? ('0' / ([1-9] DecimalDigit*))) { return parseInt(num, 10) }
-
-CommaJoinedPositiveBasicIntegers
-  = PositiveBasicInteger|.., ','|
 
 RGB4
   = $('#' HexDigit|3|)

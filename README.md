@@ -571,18 +571,25 @@ For example the neutral third above `C4` is `Ed4`.
 | `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `[11/2 -7/2>` | `-56.843`     |
 
 #### Neutral FJS
-[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation only applies to neutral sounding primes such as 11, 13, 29, 31 etc. so you can spell `11/9` as `n3^11` or `27/22` as `n3_11`.
+[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation originally applied to neutral sounding primes such as 11, 13, 29, 31 etc. In SonicWeave you must be explicit about the comma set you wish to use in order to spell `11/9` as `n3^11n` or `27/22` as `n3_11n`.
 
 The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
-| Prime | Comma                   | Monzo                             | Size in cents |
-| ----- | ----------------------- | --------------------------------- | ------------- |
-| `11`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`                | `-3.570`      |
-| `13`  | `sqrt(507/512)`         | `[-9/2 1/2 0 0 0 1>`              | `-8.495`      |
-| `29`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
-| `31`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
-| `37`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
+| Prime  | Comma                   | Monzo                             | Size in cents |
+| ------ | ----------------------- | --------------------------------- | ------------- |
+| `11n`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`                | `-3.570`      |
+| `13n`  | `sqrt(507/512)`         | `[-9/2 1/2 0 0 0 1>`              | `-8.495`      |
+| `29n`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
+| `31n`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
+| `37n`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
 
-Sometimes you may need access to the NFJS commas on rationals. In that case you need to be explicit about the flavor with an `n` tag before the super/subscripts e.g. `n3^11 + n3^11` is `P5n^11,11` (or `121/81`).
+As an extension to NFJS SonicWeave has a neutral bridging comma associated with every prime.
+| Prime  | Comma                   | Monzo                             | Size in cents |
+| ------ | ----------------------- | --------------------------------- | ------------- |
+| `5n`   | `sqrt(25/24)`           | `[-3/2 -1/2 1>`                   | `+35.336`     |
+| `7n`   | `sqrt(54/49)`           | `[-1/2 -3/2 0 1>`                 | `-84.107`     |
+| `17n`  | `sqrt(8192/7803)`       | `[-13/2 3/2 0 0 0 0 1>`           | `-42.112`     |
+| `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`         | `-53.464`     |
+| `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>`       | `73.387`      |
 
 #### Quarter-augmented Pythagorean notation
 As mentioned above the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.

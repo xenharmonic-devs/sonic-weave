@@ -7,7 +7,7 @@ import {
   valueToCents,
 } from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
-import {AbsoluteFJS, FJS, FJSFlavor} from './expression';
+import {AbsoluteFJS, FJS, FJSInflection} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
 
 const ZERO = new Fraction(0);
@@ -140,38 +140,29 @@ export function getNeutralComma(index: number) {
   return neutralCommas[index];
 }
 
-export function formalInflection(superscripts: number[], subscripts: number[]) {
-  let result = TimeMonzo.fromFraction(1);
-  for (const s of superscripts) {
-    const monzo = toMonzo(s);
-    for (let i = 0; i < monzo.length; ++i) {
-      result = result.mul(getFormalComma(i).pow(monzo[i]));
-    }
-  }
-  for (const s of subscripts) {
-    const monzo = toMonzo(s);
-    for (let i = 0; i < monzo.length; ++i) {
-      result = result.div(getFormalComma(i).pow(monzo[i]));
-    }
-  }
-  return result;
-}
-
-export function neutralInflection(
-  superscripts: number[],
-  subscripts: number[]
+export function getInflection(
+  superscripts: FJSInflection[],
+  subscripts: FJSInflection[]
 ) {
   let result = TimeMonzo.fromFraction(1);
-  for (const s of superscripts) {
+  for (const [s, flavor] of superscripts) {
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      result = result.mul(getNeutralComma(i).pow(monzo[i]));
+      if (flavor === '') {
+        result = result.mul(getFormalComma(i).pow(monzo[i]));
+      } else {
+        result = result.mul(getNeutralComma(i).pow(monzo[i]));
+      }
     }
   }
-  for (const s of subscripts) {
+  for (const [s, flavor] of subscripts) {
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      result = result.div(getNeutralComma(i).pow(monzo[i]));
+      if (flavor === '') {
+        result = result.div(getFormalComma(i).pow(monzo[i]));
+      } else {
+        result = result.div(getNeutralComma(i).pow(monzo[i]));
+      }
     }
   }
   return result;
@@ -179,44 +170,38 @@ export function neutralInflection(
 
 export function inflect(
   pythagorean: TimeMonzo,
-  superscripts: number[],
-  subscripts: number[],
-  flavor: FJSFlavor
+  superscripts: FJSInflection[],
+  subscripts: FJSInflection[]
 ) {
-  if (flavor === 'n') {
-    return neutralInflection(superscripts, subscripts).mul(pythagorean);
-  }
-  return formalInflection(superscripts, subscripts).mul(pythagorean);
+  return getInflection(superscripts, subscripts).mul(pythagorean);
 }
 
 export function uninflect(monzo: TimeMonzo) {
-  const superscripts: number[] = [];
-  const subscripts: number[] = [];
+  const superscripts: FJSInflection[] = [];
+  const subscripts: FJSInflection[] = [];
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
     for (let j = 0; pe[i].compare(j) > 0; ++j) {
-      superscripts.push(PRIMES[i]);
+      superscripts.push([PRIMES[i], '']);
     }
     for (let j = 0; pe[i].compare(-j) < 0; ++j) {
-      subscripts.push(PRIMES[i]);
+      subscripts.push([PRIMES[i], '']);
     }
   }
   try {
     const rpe = toMonzo(monzo.residual);
     for (let i = 2; i < rpe.length; ++i) {
       for (let j = 0; j < rpe[i]; ++j) {
-        superscripts.push(PRIMES[i]);
+        superscripts.push([PRIMES[i], '']);
       }
       for (let j = 0; j > rpe[i]; --j) {
-        subscripts.push(PRIMES[i]);
+        subscripts.push([PRIMES[i], '']);
       }
     }
   } catch (e) {
     /* empty */
   }
-  const pythagoreanMonzo = monzo.div(
-    formalInflection(superscripts, subscripts)
-  );
+  const pythagoreanMonzo = monzo.div(getInflection(superscripts, subscripts));
   return {
     pythagoreanMonzo,
     superscripts,
@@ -243,7 +228,6 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
     type: 'FJS',
     ups: 0,
     lifts: 0,
-    flavor: '',
     pythagorean,
     superscripts,
     subscripts,
@@ -269,7 +253,6 @@ export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
     type: 'AbsoluteFJS',
     ups: 0,
     lifts: 0,
-    flavor: '',
     pitch,
     superscripts,
     subscripts,
