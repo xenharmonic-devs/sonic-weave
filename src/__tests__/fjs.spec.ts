@@ -28,6 +28,7 @@ describe('Formal comma calculator', () => {
 });
 
 describe('Neutral comma calculator', () => {
+  // M-yac's commas
   it.each([
     [11, '242/243'],
     [13, '507/512'],
@@ -41,6 +42,21 @@ describe('Neutral comma calculator', () => {
   ])('Has a neutral comma for prime %s', (prime, square) => {
     const comma = getNeutralComma(PRIMES.indexOf(prime));
     expect(comma.pow(2).toFraction().equals(square)).toBe(true);
+  });
+  // Frostburn's commas
+  it.each([
+    [5, '25/24'],
+    [7, '49/54'],
+    [17, '7803/8192'],
+    [19, '361/384'],
+    [23, '529/486'],
+    [41, '1681/1536'],
+  ])('Has a bridging comma for prime %s', (prime, square) => {
+    const comma = getNeutralComma(PRIMES.indexOf(prime));
+    expect(
+      comma.pow(2).toFraction().equals(square),
+      `${comma.pow(2).toFraction().toFraction()} != ${square}`
+    ).toBe(true);
   });
 });
 
@@ -59,18 +75,26 @@ describe('FJS interval inflector', () => {
     // Resistant to the first two primes
     ['M', 2, [10], [9], '10/9'],
     // Neutral extension
-    ['n', 2, [], [11], '12/11'],
-    ['n', 2, [11], [5], '11/10'],
-    ['n', 3, [11], [], '11/9'],
-    ['sA', 4, [11], [], '11/8'],
-    ['n', 2, [13], [], '13/12'],
-    ['sd', 4, [7], [11], '14/11'],
-    ['sA', 2, [5], [13], '15/13'],
+    ['n', 2, [], [], '12/11', [], [11]],
+    ['n', 2, [], [5], '11/10', [11]],
+    ['n', 3, [], [], '11/9', [11]],
+    ['sA', 4, [], [], '11/8', [11]],
+    ['n', 2, [], [], '13/12', [13]],
+    ['sd', 4, [7], [], '14/11', [], [11]],
+    ['sA', 2, [5], [], '15/13', [], [13]],
     // Neutral resistance with automatic factoring
-    ['n', 7, [13, 319], [6], '4147/2304'],
+    ['n', 7, [], [6], '4147/2304', [13, 319]],
   ])(
     'Inflects %s%s%s%s',
-    (quality, degree, superscripts, subscripts, fraction) => {
+    (
+      quality,
+      degree,
+      superscripts,
+      subscripts,
+      fraction,
+      neutralSuper?,
+      neutralSub?
+    ) => {
       const base = ((Math.abs(degree) - 1) % 7) + 1;
       const octaves = Math.floor((Math.abs(degree) - 1) / 7);
       const imperfect = ![1, 4, 5].includes(degree);
@@ -81,11 +105,10 @@ describe('FJS interval inflector', () => {
         imperfect,
       };
       const monzo = pythagoreanMonzo(node);
-      const interval = inflect(
-        monzo,
-        superscripts.map(BigInt),
-        subscripts.map(BigInt)
-      );
+      let interval = inflect(monzo, superscripts, subscripts, '');
+      if (neutralSuper || neutralSub) {
+        interval = inflect(interval, neutralSuper ?? [], neutralSub ?? [], 'n');
+      }
       expect(interval.toFraction().equals(fraction)).toBe(true);
     }
   );
@@ -97,10 +120,18 @@ describe('Absolute FJS pitch inflector', () => {
     ['C', [], 5, [], [], '2/1'],
     ['F', [], 4, [], [], '4/3'],
     ['E', [], 4, [5], [], '5/4'],
-    ['E', ['d'], 4, [11], [], '11/9'],
+    ['E', ['d'], 4, [], [], '11/9', [11]],
   ])(
     'Inflects %s%s%s%s%s',
-    (nominal, accidentals, octave, superscripts, subscripts, fraction) => {
+    (
+      nominal,
+      accidentals,
+      octave,
+      superscripts,
+      subscripts,
+      fraction,
+      neutralSuper?
+    ) => {
       const node: AbsolutePitch = {
         type: 'AbsolutePitch',
         nominal: nominal as AbsolutePitch['nominal'],
@@ -108,11 +139,10 @@ describe('Absolute FJS pitch inflector', () => {
         octave: BigInt(octave),
       };
       const monzo = absoluteMonzo(node);
-      const interval = inflect(
-        monzo,
-        superscripts.map(BigInt),
-        subscripts.map(BigInt)
-      );
+      let interval = inflect(monzo, superscripts, subscripts, '');
+      if (neutralSuper) {
+        interval = inflect(monzo, neutralSuper, [], 'n');
+      }
       expect(interval.toFraction().equals(fraction)).toBe(true);
     }
   );

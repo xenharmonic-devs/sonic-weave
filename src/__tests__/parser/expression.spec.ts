@@ -83,9 +83,9 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("has mid from ups-and-downs but it's spelled 'n' and mixes with NFJS", () => {
-    const undecimalMidFourth = parseSingle('n4^11');
+    const undecimalMidFourth = parseSingle('n4n^11');
     expect(undecimalMidFourth.value.toFraction().toFraction()).toBe('11/8');
-    const undecimalMidFifth = parseSingle('n5_11');
+    const undecimalMidFifth = parseSingle('n5n_11');
     expect(undecimalMidFifth.value.toFraction().toFraction()).toBe('16/11');
   });
 
@@ -133,9 +133,9 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('supports neutral FJS', () => {
-    const sixth = parseSingle('n6_11');
+    const sixth = parseSingle('n6n_11');
     expect(sixth.value.toFraction().toFraction()).toBe('18/11');
-    expect(sixth.toString()).toBe('n6_11');
+    expect(sixth.toString()).toBe('n6n_11');
   });
 
   it('has access to NFJS accidentals on rationals (relative)', () => {

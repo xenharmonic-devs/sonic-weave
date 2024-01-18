@@ -16,6 +16,9 @@ const RADIUS_OF_TOLERANCE = valueToCents(65 / 63);
 
 const NFJS_RADIUS = 13.5 * PRIME_CENTS[0] - 8.5 * PRIME_CENTS[1];
 
+// Tweaked manually to be as large as possible without disrupting original NFJS commas.
+const BRIDGING_RADIUS = 92.1;
+
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
 function masterAlgorithm(primeCents: number) {
@@ -37,7 +40,9 @@ function masterAlgorithm(primeCents: number) {
   }
 }
 
-function neutralMaster(primeCents: number) {
+// The original NFJS master algorithm by M-yac
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function myacNeutralMaster(primeCents: number) {
   let pythagoras = 0;
   if (circleDistance(primeCents, pythagoras) < NFJS_RADIUS) {
     return 0;
@@ -62,6 +67,23 @@ function neutralMaster(primeCents: number) {
     pythagoras += FIFTH;
   }
   throw new Error('Unable to locate NFJS region');
+}
+
+// Bridging comma master algorithm by frostburn
+function neutralMaster(primeCents: number) {
+  let pythagoras = 0.5 * FIFTH;
+  let k = 0.5;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (circleDistance(primeCents, pythagoras) < BRIDGING_RADIUS) {
+      return k;
+    }
+    if (circleDistance(primeCents, -pythagoras) < BRIDGING_RADIUS) {
+      return -k;
+    }
+    pythagoras += FIFTH;
+    k++;
+  }
 }
 
 function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
@@ -161,11 +183,7 @@ export function inflect(
   subscripts: number[],
   flavor: FJSFlavor
 ) {
-  if (
-    (pythagorean.primeExponents[0].d === 2 &&
-      pythagorean.primeExponents[1].d === 2) ||
-    flavor === 'n'
-  ) {
+  if (flavor === 'n') {
     return neutralInflection(superscripts, subscripts).mul(pythagorean);
   }
   return formalInflection(superscripts, subscripts).mul(pythagorean);
