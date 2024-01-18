@@ -125,20 +125,32 @@ LeftHandSideExpression
 
 VariableDeclaration
   = name: LeftHandSideExpression _ '=' _ value: Expression EOS {
-    return {
-      type: 'VariableDeclaration',
-      name,
-      value,
-    };
+    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
+      return {
+        type: 'VariableDeclaration',
+        name,
+        value,
+      };
+    } else {
+      return {
+        type: 'PitchDeclaration',
+        left: name,
+        right: value,
+      };
+    }
   }
 
 ReassignmentStatement
   = name: LeftHandSideExpression _ preferLeft: '~'? operator: AssigningOperator preferRight: '~'? '=' _ expression: Expression EOS {
-    return {
-      type: 'VariableDeclaration',
-      name,
-      value: BinaryExpression(operator, name, expression, !!preferLeft, !!preferRight),
-    };
+    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
+      return {
+        type: 'VariableDeclaration',
+        name,
+        value: BinaryExpression(operator, name, expression, !!preferLeft, !!preferRight),
+      };
+    } else {
+      throw new Error('Left-hand-side expression expected');
+    }
   }
 
 FunctionDeclaration
@@ -152,7 +164,7 @@ FunctionDeclaration
   }
 
 PitchDeclaration
-  = left: Expression _ '=' _ middle: Expression _ '=' _ right: Expression EOS {
+  = left: AbsoluteFJS _ '=' _ middle: Expression _ '=' _ right: Expression EOS {
     return {
       type: 'PitchDeclaration',
       left,
@@ -160,7 +172,7 @@ PitchDeclaration
       right,
     };
   }
-  / left: Expression _ '=' _ right: Expression EOS {
+  / left: AbsoluteFJS _ '=' _ right: Expression EOS {
     return {
       type: 'PitchDeclaration',
       left,
@@ -360,14 +372,14 @@ LabeledExpression
   }
 
 Group
-  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression / Secondary / Primary) __
+  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression / Secondary) __
 
 Secondary
   = DownExpression
   / Range
   / CallExpression
-  / ArrayAccess
   / ArraySlice
+  / ArrayAccess
 
 UniformUnaryOperator
   = '-' / '%' / '÷'
@@ -447,7 +459,7 @@ HarmonicSegment
 
 CallExpression
   = head: (
-    callee: (ArrayAccess / Primary) __ '(' _ args: ArgumentList _ ')' {
+    callee: ArrayAccess __ '(' _ args: ArgumentList _ ')' {
       return { type: 'CallExpression', callee, args };
     }
   ) tail: (
@@ -466,7 +478,7 @@ CallExpression
   }
 
 ArrayAccess
-  = head: Primary tail: (_ '[' @Expression ']')+ {
+  = head: Primary tail: (_ '[' @Expression ']')* {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
