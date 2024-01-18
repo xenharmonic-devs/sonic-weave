@@ -105,8 +105,9 @@ Statements
 
 Statement
   = VariableManipulationStatement
-  / FunctionDeclaration
   / PitchDeclaration
+  / ExpressionStatement
+  / FunctionDeclaration
   / UpDeclaration
   / LiftDeclaration
   / BlockStatement
@@ -115,7 +116,6 @@ Statement
   / WhileStatement
   / IfStatement
   / ForOfStatement
-  / ExpressionStatement
 
 LeftHandSideExpression
   = ArrayAccess
