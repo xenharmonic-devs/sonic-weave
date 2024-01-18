@@ -492,4 +492,11 @@ describe('SonicWeave expression evaluator', () => {
     const comma = parseSingle('1_000_001/1_000_000');
     expect(comma.toString()).toBe('1000001/1000000');
   });
+
+  it('supports hsl colors', () => {
+    const greenish = evaluateExpression('hsl(123, 45, 67)') as Color;
+    expect(greenish.value).toBe(
+      'hsl(122.99999999999993, 45%, 66.99999999999999%)'
+    );
+  });
 });

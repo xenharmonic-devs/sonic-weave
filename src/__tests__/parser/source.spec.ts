@@ -592,4 +592,18 @@ describe('SonicWeave parser', () => {
       '8/7;8/6;8/5;8/4'
     );
   });
+
+  // Manual inspection
+  it.skip('has a coloring method based on interval size', () => {
+    const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
+    console.log(colors);
+  });
+
+  // Manual inspection
+  it.skip('has a coloring method base on prime factors', () => {
+    const colors = parseSource(
+      '[1/3, 3, 9] tns [1/5, 5, 25]; popAll() tns [1/7, 7, 49]; factorColor'
+    );
+    console.log(colors);
+  });
 });

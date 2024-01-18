@@ -49,6 +49,12 @@ Convert interval to cents.
 
 `interval`, `fractionDigits`
 
+### centsColor
+Color based on the size of the interval. Hue wraps around every 1200 cents.
+#### Parameters:
+
+`interval`
+
 ### cologarithmic
 Convert interval to cologarithmic representation.
 #### Parameters:
@@ -84,6 +90,12 @@ Obtain the docstring of the given riff.
 #### Parameters:
 
 `riff`
+
+### factorColor
+Color an interval based on its prime factors.
+#### Parameters:
+
+`interval`
 
 ### filter
 Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.
@@ -126,6 +138,18 @@ Print information about the given riff to the console.
 #### Parameters:
 
 `riff`
+
+### hsl
+HSL color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100).
+#### Parameters:
+
+`hue`, `saturation`, `lightness`
+
+### hsla
+HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alpha range 0-1).
+#### Parameters:
+
+`hue`, `saturation`, `lightness`, `alpha`
 
 ### int
 Truncate value towards zero to the nearest integer.
@@ -223,6 +247,12 @@ Remove and return the last interval in the current/given scale.
 
 `scale`
 
+### popAll
+Remove and return all intervals in the current/given scale.
+#### Parameters:
+
+`scale`
+
 ### PrimeMapping
 Construct a prime mapping for tempering intervals to hard cents. Remaining primes are converted to hard cents without tempering.
 #### Parameters:
@@ -296,6 +326,18 @@ Obtain a copy of the current/given scale in reversed order.
 #### Parameters:
 
 `scale`
+
+### rgb
+RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).
+#### Parameters:
+
+`red`, `green`, `blue`
+
+### rgba
+RGBA color (Red range 0-255, Green range 0-255, Blue range 0-255, Alpha range 0-1).
+#### Parameters:
+
+`red`, `green`, `blue`, `alpha`
 
 ### round
 Round value to the nearest integer.

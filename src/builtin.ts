@@ -741,6 +741,15 @@ function pop(this: ExpressionVisitor, scale?: Interval[]) {
 pop.__doc__ = 'Remove and return the last interval in the current/given scale.';
 pop.__node__ = builtinNode(pop);
 
+function popAll(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.context.get('$') as Interval[];
+  const result = [...scale];
+  scale.length = 0;
+  return result;
+}
+popAll.__doc__ = 'Remove and return all intervals in the current/given scale.';
+popAll.__node__ = builtinNode(popAll);
+
 function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
   scale ??= this.context.get('$') as Interval[];
   scale.push(interval);
@@ -961,6 +970,114 @@ function help(riff: SonicWeaveFunction) {
 help.__doc__ = 'Print information about the given riff to the console.';
 help.__node__ = builtinNode(help);
 
+// CSS color generation
+function rgb(red: Interval, green: Interval, blue: Interval) {
+  return new Color(
+    `rgb(${red.value.valueOf()}, ${green.value.valueOf()}, ${blue.value.valueOf()})`
+  );
+}
+rgb.__doc__ =
+  'RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).';
+rgb.__node__ = builtinNode(rgb);
+
+function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
+  return new Color(
+    `rgba(${red.value.valueOf()}, ${green.value.valueOf()}, ${blue.value.valueOf()}, ${alpha.value.valueOf()})`
+  );
+}
+rgba.__doc__ =
+  'RGBA color (Red range 0-255, Green range 0-255, Blue range 0-255, Alpha range 0-1).';
+rgba.__node__ = builtinNode(rgba);
+
+function hsl(hue: Interval, saturation: Interval, lightness: Interval) {
+  return new Color(
+    `hsl(${hue.value.valueOf()}, ${saturation.value.valueOf()}%, ${lightness.value.valueOf()}%)`
+  );
+}
+hsl.__doc__ =
+  'HSL color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100).';
+hsl.__node__ = builtinNode(hsl);
+
+function hsla(
+  hue: Interval,
+  saturation: Interval,
+  lightness: Interval,
+  alpha: Interval
+) {
+  return new Color(
+    `hsla(${hue.value.valueOf()}, ${saturation.value.valueOf()}%, ${lightness.value.valueOf()}%, ${alpha.value.valueOf()})`
+  );
+}
+hsla.__doc__ =
+  'HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alpha range 0-1).';
+hsla.__node__ = builtinNode(hsla);
+
+function centsColor(interval: Interval) {
+  const octaves = interval.value.totalCents() / 1200;
+  const h = octaves * 360;
+  const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
+  const l = Math.tanh(octaves * 0.2) * 50 + 50;
+  return new Color(`hsl(${h}, ${s}%, ${l}%)`);
+}
+centsColor.__doc__ =
+  'Color based on the size of the interval. Hue wraps around every 1200 cents.';
+centsColor.__node__ = builtinNode(centsColor);
+
+// Prime colors for over/under.
+const PRIME_RGB = [
+  // 2
+  [
+    [0, 0, 0],
+    [0, 0, 0],
+  ],
+  // 3
+  [
+    [10, 10, 10],
+    [-10, -10, -10],
+  ],
+  // 5
+  [
+    [255, 255, 0],
+    [0, 255, 0],
+  ],
+  // 7
+  [
+    [0, 0, 255],
+    [255, 0, 0],
+  ],
+  // 11
+  [
+    [230, 230, 250],
+    [255, 240, 245],
+  ],
+  // 13
+  [
+    [255, 0, 255],
+    [0, 255, 255],
+  ],
+];
+
+function tanh255(x: number) {
+  return 127.5 * Math.tanh(x / 200 - 1.5) + 127.5;
+}
+
+function factorColor(interval: Interval) {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  const monzo = interval.value.primeExponents.map(f => f.valueOf());
+  for (let i = 0; i < Math.min(monzo.length, PRIME_RGB.length); ++i) {
+    const prgb = monzo[i] > 0 ? PRIME_RGB[i][0] : PRIME_RGB[i][1];
+    const m = Math.abs(monzo[i]);
+    r += prgb[0] * m;
+    g += prgb[1] * m;
+    b += prgb[2] * m;
+  }
+  return new Color(`rgb(${tanh255(r)}, ${tanh255(g)}, ${tanh255(b)})`);
+}
+factorColor.__doc__ = 'Color an interval based on its prime factors.';
+factorColor.__node__ = builtinNode(factorColor);
+
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // Constants
   E,
@@ -1019,6 +1136,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   reverse,
   reversed,
   pop,
+  popAll,
   push,
   shift,
   unshift,
@@ -1033,6 +1151,13 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   distill,
   arrayReduce,
   kCombinations,
+  // CSS color generation
+  rgb,
+  rgba,
+  hsl,
+  hsla,
+  centsColor,
+  factorColor,
 };
 
 export const PRELUDE_SOURCE = `
