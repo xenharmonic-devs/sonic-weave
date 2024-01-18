@@ -909,7 +909,7 @@ function repr_(
     return JSON.stringify(value);
   }
   if (value instanceof Color) {
-    return value.value;
+    return value.toString();
   }
   return `${value}`;
 }
@@ -971,10 +971,12 @@ help.__doc__ = 'Print information about the given riff to the console.';
 help.__node__ = builtinNode(help);
 
 // CSS color generation
+function cc(x: Interval, fractionDigits = 3) {
+  return x.value.valueOf().toFixed(fractionDigits);
+}
+
 function rgb(red: Interval, green: Interval, blue: Interval) {
-  return new Color(
-    `rgb(${red.value.valueOf()}, ${green.value.valueOf()}, ${blue.value.valueOf()})`
-  );
+  return new Color(`rgb(${cc(red)}, ${cc(green)}, ${cc(blue)})`);
 }
 rgb.__doc__ =
   'RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).';
@@ -982,7 +984,7 @@ rgb.__node__ = builtinNode(rgb);
 
 function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
   return new Color(
-    `rgba(${red.value.valueOf()}, ${green.value.valueOf()}, ${blue.value.valueOf()}, ${alpha.value.valueOf()})`
+    `rgba${cc(red)}, ${cc(green)}, ${cc(blue)} ${cc(alpha, 5)})`
   );
 }
 rgba.__doc__ =
@@ -990,9 +992,7 @@ rgba.__doc__ =
 rgba.__node__ = builtinNode(rgba);
 
 function hsl(hue: Interval, saturation: Interval, lightness: Interval) {
-  return new Color(
-    `hsl(${hue.value.valueOf()}, ${saturation.value.valueOf()}%, ${lightness.value.valueOf()}%)`
-  );
+  return new Color(`hsl(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%)`);
 }
 hsl.__doc__ =
   'HSL color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100).';
@@ -1005,7 +1005,7 @@ function hsla(
   alpha: Interval
 ) {
   return new Color(
-    `hsla(${hue.value.valueOf()}, ${saturation.value.valueOf()}%, ${lightness.value.valueOf()}%, ${alpha.value.valueOf()})`
+    `hsla(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%, ${cc(alpha, 5)})`
   );
 }
 hsla.__doc__ =
@@ -1017,7 +1017,7 @@ function centsColor(interval: Interval) {
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
   const l = Math.tanh(octaves * 0.2) * 50 + 50;
-  return new Color(`hsl(${h}, ${s}%, ${l}%)`);
+  return new Color(`hsl(${h.toFixed(3)}, ${s.toFixed(3)}%, ${l.toFixed(3)}%)`);
 }
 centsColor.__doc__ =
   'Color based on the size of the interval. Hue wraps around every 1200 cents.';
@@ -1058,7 +1058,7 @@ const PRIME_RGB = [
 ];
 
 function tanh255(x: number) {
-  return 127.5 * Math.tanh(x / 200 - 1.5) + 127.5;
+  return (127.5 * Math.tanh(x / 200 - 1.5) + 127.5).toFixed(3);
 }
 
 function factorColor(interval: Interval) {

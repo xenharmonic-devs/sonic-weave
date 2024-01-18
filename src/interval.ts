@@ -22,6 +22,13 @@ export class Color {
   constructor(value: string) {
     this.value = value;
   }
+
+  toString() {
+    return this.value
+      .replace(/%/g, '')
+      .replace(/,/g, 'e,')
+      .replace(/\)/g, 'e)');
+  }
 }
 
 const TWO = new TimeMonzo(new Fraction(0), [new Fraction(1)]);

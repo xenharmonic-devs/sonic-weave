@@ -495,8 +495,9 @@ describe('SonicWeave expression evaluator', () => {
 
   it('supports hsl colors', () => {
     const greenish = evaluateExpression('hsl(123, 45, 67)') as Color;
-    expect(greenish.value).toBe(
-      'hsl(122.99999999999993, 45%, 66.99999999999999%)'
-    );
+    expect(greenish.value).toBe('hsl(123.000, 45.000%, 67.000%)');
+    expect(greenish.toString()).toBe('hsl(123.000e, 45.000e, 67.000e)');
+    const retry = evaluateExpression(greenish.toString()) as Color;
+    expect(retry.value).toBe(greenish.value);
   });
 });
