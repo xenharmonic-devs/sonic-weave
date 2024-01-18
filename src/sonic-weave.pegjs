@@ -174,20 +174,23 @@ FunctionDeclaration
   }
 
 PitchDeclaration
-  = left: AbsoluteFJS _ '=' _ middle: Expression _ '=' _ right: Expression EOS {
-    return {
-      type: 'PitchDeclaration',
-      left,
-      middle,
-      right,
-    };
-  }
-  / left: AbsoluteFJS _ '=' _ right: Expression EOS {
-    return {
-      type: 'PitchDeclaration',
-      left,
-      right,
-    };
+  = left: AbsoluteFJS middle: (_ '=' _ @Expression)? right: (_ '=' _ @Expression)? EOS {
+    if (right) {
+      return {
+        type: 'PitchDeclaration',
+        left,
+        middle,
+        right,
+      };
+    }
+    if (middle) {
+      return {
+        type: 'PitchDeclaration',
+        left,
+        right: middle,
+      };
+    }
+    return left;
   }
 
 UpDeclaration
