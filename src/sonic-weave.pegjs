@@ -120,24 +120,28 @@ Statement
 
 LeftHandSideExpression
   = ArrayAccess
-  / Identifier
   / IdentifierArray
 
 VariableDeclaration
-  = name: LeftHandSideExpression _ '=' _ value: Expression EOS {
+  = name: LeftHandSideExpression value: (_ '=' _ @Expression)? EOS {
+    if (!value) {
+      return {
+        type: 'ExpressionStatement',
+        expression: name,
+      }
+    }
     if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
       return {
         type: 'VariableDeclaration',
         name,
         value,
       };
-    } else {
-      return {
-        type: 'PitchDeclaration',
-        left: name,
-        right: value,
-      };
     }
+    return {
+      type: 'PitchDeclaration',
+      left: name,
+      right: value,
+    };
   }
 
 ReassignmentStatement
