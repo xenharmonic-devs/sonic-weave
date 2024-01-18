@@ -1262,7 +1262,7 @@ export class TimeMonzo {
         whole: BigInt(whole),
         fractional,
         exponent: null,
-        hard: false,
+        flavor: 'e',
       };
     }
     // eslint-disable-next-line prefer-const
@@ -1276,7 +1276,7 @@ export class TimeMonzo {
       whole: BigInt(whole),
       fractional,
       exponent: BigInt(exponent),
-      hard: true,
+      flavor: 'r',
     };
   }
 
@@ -1305,7 +1305,7 @@ export class TimeMonzo {
     const cents = this.totalCents();
     const whole = Math.trunc(cents);
     // Note: This abuses the grammar
-    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + '!c';
+    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'rc';
     return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
   }
 
@@ -1447,7 +1447,7 @@ export class TimeMonzo {
         factors.push(this.residual.toFraction());
       }
       if (this.cents) {
-        factors.push(centsToValue(this.cents) + '!');
+        factors.push(centsToValue(this.cents) + 'r');
       }
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
         factors.push('Hz');
@@ -1479,7 +1479,7 @@ export class TimeMonzo {
             if (this.cents === Math.round(this.cents)) {
               return this.cents.toString() + '\\';
             }
-            return this.cents.toString() + '!c';
+            return this.cents.toString() + 'rc';
           }
           return '0c';
         }
@@ -1504,7 +1504,7 @@ export class TimeMonzo {
       }
       const cents = this.cents - steps;
       if (cents) {
-        terms.push(`${cents}!c`);
+        terms.push(`${cents}rc`);
       }
       return [terms[0]]
         .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
@@ -1530,7 +1530,7 @@ export class TimeMonzo {
     }
     const cents = this.cents - 1 - steps;
     if (cents) {
-      terms.push(`${cents}!€`);
+      terms.push(`${cents}r€`);
     }
     return [terms[0]]
       .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))

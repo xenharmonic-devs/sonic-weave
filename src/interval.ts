@@ -31,7 +31,7 @@ function logLinMul(
   linear: Interval,
   node?: IntervalLiteral
 ) {
-  if (linear.node?.type === 'DecimalLiteral' && linear.node.hard) {
+  if (linear.node?.type === 'DecimalLiteral' && linear.node.flavor === 'r') {
     let size = logarithmic.value.totalCents();
     if (logarithmic.domain === 'cologarithmic') {
       size *= 1200 ** -2;

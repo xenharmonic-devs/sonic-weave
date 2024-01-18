@@ -58,6 +58,7 @@ IfToken       = 'if'     !IdentifierPart
 LogToken      = '/_'     !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
 NoneToken     = 'niente' !IdentifierPart
+NotToken      = 'not'    !IdentifierPart
 OfToken       = 'of'     !IdentifierPart
 OrToken       = 'or'     !IdentifierPart
 ReduceToken   = 'rd'     !IdentifierPart
@@ -84,6 +85,7 @@ ReservedWord
   / LogToken
   / ModToken
   / NoneToken
+  / NotToken
   / OfToken
   / OrToken
   / ReduceToken
@@ -302,9 +304,9 @@ RelationalOperator
   / '<'
   / '>'
   / $(OfToken)
-  / $('!' OfToken)
+  / (NotToken __ OfToken) { return 'not of'; }
   / $('~' OfToken)
-  / $('!~' OfToken)
+  / (NotToken __ '~' OfToken) { return 'not ~of'; }
 
 RelationalExpression
   = head: AdditiveExpression tail: (__ @RelationalOperator __ @AdditiveExpression)* {
@@ -371,7 +373,7 @@ UniformUnaryOperator
   = '-' / '%' / '÷'
 
 ChainableUnaryOperator
-  = '!' / '^' / '/' / '\\'
+  = $NotToken / '^' / '/' / '\\'
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: (Secondary / Primary) {
@@ -383,7 +385,7 @@ UnaryExpression
       uniform: !!uniform,
     };
   }
-  / operator: ChainableUnaryOperator operand: (Secondary / Primary / UnaryExpression) {
+  / operator: ChainableUnaryOperator __ operand: (Secondary / Primary / UnaryExpression) {
     return {
       type: 'UnaryExpression',
       operator,
@@ -508,9 +510,8 @@ ScalarMultiple
 
 ScalarLike
   = ParenthesizedExpression
-  / DotDecimal
   / FractionLiteral
-  / IntegerLiteral
+  / NumericLiteral
 
 Quantity
   = WartsLiteral
@@ -529,8 +530,6 @@ Primary
   / FalseLiteral
   / NedoLiteral
   / StepLiteral
-  / SoftDotDecimalWithExponent
-  / HardDotDecimal
   / DotCentsLiteral
   / ColorLiteral
   / FJS
@@ -566,65 +565,42 @@ NedjiProjector
     };
   }
 
-SoftDotDecimalWithExponent
-  = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: UnderscoreDigits exponent: ExponentPart  {
-    return {
-      type: 'DecimalLiteral',
-      whole: whole ?? 0n,
-      fractional: fractional,
-      exponent,
-      hard: false,
-    };
-  }
-  / whole: Integer exponent: ExponentPart {
-    return {
-      type: 'DecimalLiteral',
-      whole,
-      fractional: '',
-      exponent,
-      hard: false,
-    };
-  }
-
-SoftDotDecimal
-  = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: UnderscoreDigits {
-    return {
-      type: 'DecimalLiteral',
-      whole: whole ?? 0n,
-      fractional: fractional,
-      exponent: null,
-      hard: false,
-    };
-  }
-
-HardDotDecimal
-  = soft: (SoftDotDecimalWithExponent / SoftDotDecimal) '!' {
-    return {...soft, hard: true};
-  }
-  / whole: Integer '!' {
-    return {
-      type: 'DecimalLiteral',
-      whole,
-      fractional: '',
-      hard: true,
-    };
-  }
-
-DotDecimal
-  = HardDotDecimal
-  / SoftDotDecimalWithExponent
-  / SoftDotDecimal
+NumericFlavor = 'r' / 'e'i / ''
 
 CommaDecimal
-  = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? hard: '!'? {
+  = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? flavor: NumericFlavor {
     return {
       type: 'DecimalLiteral',
       whole: whole ?? 0n,
       fractional: fractional,
       exponent,
-      hard: !!hard,
+      flavor,
+    };
+  }
+
+NumericLiteral
+  = whole: Integer separator: $(!'..' '.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+    if (separator === '.' || exponent || flavor) {
+      return {
+        type: 'DecimalLiteral',
+        whole,
+        fractional,
+        exponent,
+        flavor,
+      }
+    }
+    return {
+      type: 'IntegerLiteral',
+      value: whole,
+    };
+  }
+  / !'..' '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+    return {
+      type: 'DecimalLiteral',
+      whole: 0n,
+      fractional,
+      exponent,
+      flavor,
     };
   }
 
@@ -637,20 +613,21 @@ FractionLiteral
     };
   }
 
-IntegerLiteral
-  = value: Integer {
-    return {
-      type: 'IntegerLiteral',
-      value,
-    };
-  }
-
 DotCentsLiteral
   = !('.' [^0-9])
-  whole: Integer? '.' !'.' fractional: UnderscoreDigits  {
+  whole: Integer? !'..' '.' fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor  {
+    if (exponent || flavor) {
+      return {
+        type: 'DecimalLiteral',
+        whole: whole ?? 0n,
+        fractional,
+        exponent,
+        flavor,
+      }
+    }
     return {
       type: 'CentsLiteral',
-      whole: whole,
+      whole: whole ?? 0n,
       fractional: fractional,
     };
   }
@@ -912,6 +889,9 @@ MetricPrefix
 UnderscoreDigits
   = num: $([_0-9]*) { return num.replace(/_/g, ''); }
 
+NonEmptyUnderscoreDigits
+  = num: $([_0-9]+) { return num.replace(/_/g, ''); }
+
 PositiveInteger
   = num:([1-9] UnderscoreDigits) { return BigInt(num.join('')); }
 
@@ -926,7 +906,7 @@ SignedInteger
   = sign: SignPart integer: Integer { return sign === '-' ? -integer : integer; }
 
 ExponentIndicator
-  = "e"i
+  = 'e'i
 
 ExponentPart
   = ExponentIndicator exponent: SignedInteger { return exponent; }

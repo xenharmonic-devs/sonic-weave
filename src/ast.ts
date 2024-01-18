@@ -13,9 +13,9 @@ export type BinaryOperator =
   | '<'
   | '>'
   | 'of'
-  | '!of'
+  | 'not of'
   | '~of'
-  | '!~of'
+  | 'not ~of'
   | '+'
   | '-'
   | 'to'
@@ -148,7 +148,7 @@ export type ArraySlice = {
 
 export type UnaryExpression = {
   type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | '!' | '^' | '/' | '\\' | '++' | '--';
+  operator: '+' | '-' | '%' | '÷' | 'not' | '^' | '/' | '\\' | '++' | '--';
   operand: Expression;
   prefix: boolean;
   uniform: boolean;

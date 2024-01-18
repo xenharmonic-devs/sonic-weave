@@ -1170,7 +1170,7 @@ riff cps factors count equave withUnity {
   for (combination of kCombinations(factors, count))
     prod(combination);
   sort();
-  if (!withUnity) ground();
+  if (not withUnity) ground();
   equave;
   reduce();
   sort();
@@ -1253,7 +1253,7 @@ riff eulerGenus guide root equave {
   while (++remainder < equave) {
     n = remainder;
     while (n <= guide) {
-      if (!(guide ~mod n)) n;
+      if (not (guide ~mod n)) n;
       n ~+= equave;
     }
   }
@@ -1277,7 +1277,7 @@ riff octaplex b0 b1 b2 b3 equave withUnity {
     }
   }
   sort();
-  if (!withUnity) ground();
+  if (not withUnity) ground();
   equave;
   reduce();
   sort();
@@ -1386,7 +1386,7 @@ riff repeat times {
   "Stack the current/given scale on top of itself. Clears the scale if the number of repeats is zero.";
   times ??= 2;
   scale = $$;
-  if (!times) {
+  if (not times) {
     return clear(scale);
   }
   equave = scale[-1];
@@ -1446,7 +1446,7 @@ riff keepUnique scale {
 riff mergeOffset offsets overflow scale {
   "Merge the given offset or polyoffset of the current/given scale onto itself. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
   overflow ??= 'drop';
-  if (!isArray(offsets)) offsets = [offsets];
+  if (not isArray(offsets)) offsets = [offsets];
   $ = scale ?? $$;
   equave = pop();
 
@@ -1477,9 +1477,9 @@ riff stretch amount scale {
 riff randomVariance amount varyEquave scale {
   "Add random variance to the current/given scale.";
   $ = scale ?? $$;
-  if (!varyEquave) equave = pop();
+  if (not varyEquave) equave = pop();
   i => i ~* (amount ~^ (2 * random() - 1));
-  if (!varyEquave) equave;
+  if (not varyEquave) equave;
   return;
 }
 `;

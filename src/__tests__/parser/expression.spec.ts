@@ -37,7 +37,7 @@ describe('SonicWeave expression evaluator', () => {
   it('accesses variables', () => {
     const interval = parseSingle('TAU');
     // The correct value is actually 6.283185307179586, but it gets mushed a bit along the way.
-    expect(interval.toString()).toBe('6.283185307179587!');
+    expect(interval.toString()).toBe('6.283185307179587r');
   });
 
   it('evaluates a color', () => {
@@ -195,7 +195,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can format a decimal', () => {
     const minorThird = parseSingle('1,2');
-    expect(minorThird.toString()).toBe('1.2e0');
+    expect(minorThird.toString()).toBe('1.2e');
   });
 
   it('has a constant structure calculator', () => {
@@ -231,12 +231,12 @@ describe('SonicWeave expression evaluator', () => {
 
   it('converts pi to a hard decimal', () => {
     const pi = parseSingle('decimal(PI)');
-    expect(pi.toString()).toBe('3.141592653589793!');
+    expect(pi.toString()).toBe('3.141592653589793r');
   });
 
   it('converts pi to a soft decimal', () => {
     const pi = parseSingle('decimal(PI, 5)');
-    expect(pi.toString()).toBe('3.14159e0');
+    expect(pi.toString()).toBe('3.14159e');
   });
 
   it('converts pi to a fraction', () => {
@@ -280,7 +280,7 @@ describe('SonicWeave expression evaluator', () => {
         'cologarithmic',
       ]) {
         const value = parseSingle(
-          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793!${hz}))`
+          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}))`
         );
         const iterated = parseSingle(
           `A=4 = 440Hz = 27/16; ${value.toString()}`
@@ -334,7 +334,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a just intonation point', () => {
     const marvelCents = parseSingle('JIP(225/224)');
-    expect(marvelCents.toString()).toBe('7.711522991319271!c');
+    expect(marvelCents.toString()).toBe('7.711522991319271rc');
   });
 
   it('parses negative intervals correctly', () => {

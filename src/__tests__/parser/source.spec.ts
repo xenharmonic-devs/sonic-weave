@@ -44,7 +44,7 @@ describe('SonicWeave parser', () => {
   it('can call built-in functions', () => {
     const scale = parseSource('7;1;2;TAU;1\\2;sort();');
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1;1\\2;2;6.283185307179587!;7'
+      '1;1\\2;2;6.283185307179587r;7'
     );
   });
 
@@ -124,7 +124,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('parses hard decimals (reals)', () => {
-    const scale = parseSource('1.6180339887498948482!;');
+    const scale = parseSource('1.6180339887498948482r;');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.value.valueOf()).toBeCloseTo(Math.sqrt(1.25) + 0.5);
@@ -300,7 +300,7 @@ describe('SonicWeave parser', () => {
       cents;
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '91.5283295833232842!c;196.08999826922536158!c;294.13499740383849712!c;392.17999653845072316!c;498.04499913461268079!c;590.8766626281940262!c;698.04499913461268079!c;792.17999653845072316!c;894.13499740383849712!c;996.08999826922536158!c;1090.2249956730629492!c;1200.'
+      '91.5283295833232842rc;196.08999826922536158rc;294.13499740383849712rc;392.17999653845072316rc;498.04499913461268079rc;590.8766626281940262rc;698.04499913461268079rc;792.17999653845072316rc;894.13499740383849712rc;996.08999826922536158rc;1090.2249956730629492rc;1200.'
     );
   });
 
@@ -340,8 +340,8 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig i {
-        ups = round(1!€ dot i);
-        return i ~% (1!c * ups) ~* 81/80 ^ ups;
+        ups = round(1r€ dot i);
+        return i ~% (1rc * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;
       rig;
@@ -353,7 +353,7 @@ describe('SonicWeave parser', () => {
 
   it('can construct the hard cotritave', () => {
     const scale = parseSource(`
-      tritave = 1! * relog(3);
+      tritave = 1r * relog(3);
       cotritave = %tritave;
       tritave dot cotritave;
     `);

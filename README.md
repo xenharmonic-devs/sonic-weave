@@ -92,22 +92,22 @@ Scales are intended to repeat from the last interval in the scale (a.k.a. *equav
 SonicWeave comes with some operators.
 
 ### Unary
-| Name          | Linear | Result      | Logarithmic | Result     |
-| ------------- | ------ | ----------- | ----------- | ---------- |
-| Identity      | `+2`   | `2`         | `+P8`       | `P8`       |
-| Negation      | `-2`   | `-2`        | _N/A_       |            |
-| Inversion     | `%2`   | `1/2`       | `-P8`       | `P-8`      |
-| Inversion     | `÷3/2` | `2/3`       | `-P5`       | `P-5`      |
-| Geom. inverse | _N/A_  |             | `%P8`       | `v<1]`     |
-| Logical NOT   | `!2`   | `false`     | `!P8`       | `false`    |
-| Up-shimmer*   | `^2`   | `2*1.0006!` | `^P8`       | `P8 + 1\`  |
-| Down-shimmer* | `v{2}` | `2*0.9994!` | `vP8`       | `P8 - 1\`  |
-| Lift-shimmer* | `/2`   | `2*1.0029!` | `/P8`       | `P8 + 5\`  |
-| Drop-shimmer* | `\2`   | `2*0.9971!` | `\P8`       | `P8 - 5\`  |
-| Increment     | `++i`  | `3`         | _N/A_       |            |
-| Increment     | `i++`  | `2`         | _N/A_       |            |
-| Decrement     | `--i`  | `1`         | _N/A_       |            |
-| Decrement     | `i--`  | `2`         | _N/A_       |            |
+| Name          | Linear  | Result      | Logarithmic | Result     |
+| ------------- | ------- | ----------- | ----------- | ---------- |
+| Identity      | `+2`    | `2`         | `+P8`       | `P8`       |
+| Negation      | `-2`    | `-2`        | _N/A_       |            |
+| Inversion     | `%2`    | `1/2`       | `-P8`       | `P-8`      |
+| Inversion     | `÷3/2`  | `2/3`       | `-P5`       | `P-5`      |
+| Geom. inverse | _N/A_   |             | `%P8`       | `v<1]`     |
+| Logical NOT   | `not 2` | `false`     | `not P8`    | `false`    |
+| Up-shimmer*   | `^2`    | `2*1.0006r` | `^P8`       | `P8 + 1\`  |
+| Down-shimmer* | `v{2}`  | `2*0.9994r` | `vP8`       | `P8 - 1\`  |
+| Lift-shimmer* | `/2`    | `2*1.0029r` | `/P8`       | `P8 + 5\`  |
+| Drop-shimmer* | `\2`    | `2*0.9971r` | `\P8`       | `P8 - 5\`  |
+| Increment     | `++i`   | `3`         | _N/A_       |            |
+| Increment     | `i++`   | `2`         | _N/A_       |            |
+| Decrement     | `--i`   | `1`         | _N/A_       |            |
+| Decrement     | `i--`   | `2`         | _N/A_       |            |
 
 *) Shimmer is meant to be used with tempering and corresponds to edo-steps unless otherwise declared.
 
@@ -134,14 +134,14 @@ Increment/decrement assumes that `i = 2` originally.
 | Less than or equal    | `<=`     |
 
 ### Array
-| Name             | Operator |
-| ---------------- | -------- |
-| Strict inclusion | `of`     |
-| Strict exclusion | `!of`    |
-| Inclusion        | `~of`    |
-| Exclusion        | `!~of`   |
-| Outer product    | `tns`    |
-| Outer product    | `⊗`     |
+| Name             | Operator  |
+| ---------------- | --------- |
+| Strict inclusion | `of`      |
+| Strict exclusion | `not of`  |
+| Inclusion        | `~of`     |
+| Exclusion        | `not ~of` |
+| Outer product    | `tns`     |
+| Outer product    | `⊗`      |
 
 Inclusion is similar to Python's `in` operator e.g. `2 of [1, 2, 3]` evaluates to `true`.
 
@@ -313,9 +313,9 @@ The *cologarithmic* domain mostly comes up in tempering. An expression like `12@
  * decimal (`1,2`, `3.14e0`, `5/4`, etc.)
  * rational (`5/3`, `P4`, `M2_7`, etc.)
  * radical (`sqrt(2)`, `9\13<3>`, `n3`, etc.)
- * real (`2.718281828459045!`, `3.141592653589793!`, etc.)
+ * real (`2.718281828459045r`, `3.141592653589793r`, etc.)
 
-The `!` at the end of real literals just means that they're not cents or associated with the octave in any way.
+The `r` at the end of real literals just means that they're not cents or associated with the octave in any way.
 
 ### Echelons
 Quantities can be absolute such as `440 Hz` and `C♮4`, or relative like `M2` and `7/5`.
@@ -519,7 +519,7 @@ To force the cents interpretation we can use parenthesis `(100.0) Hz` and produc
 The expression `1,2` for `6/5` is problematic when you consider the rest of the grammar. Would `[1,2,3,4]` be the same as `[6/5, 17/5]` or `[1, 2, 3, 4]`? SonicWeave takes the latter interpretation and bans comma decimals from most of the syntax.
 
 ### Recommendations
-To avoid ambiguity use explicit cents i.e. `100.0c` or explicit scientific notation i.e. `1.2e0`.
+To avoid ambiguity use explicit cents i.e. `100.0c` or explicit scientific notation i.e. `1.2e0` or just `1.2e`.
 
 ## Stdlib
 SonicWeave comes with batteries included.
@@ -528,9 +528,9 @@ SonicWeave comes with batteries included.
 
 | Name  | Value                | Meaning                   |
 | ----- | -------------------- | ------------------------- |
-| `E`   | `2.718281828459045!` | Base of natural logarithm |
-| `PI`  | `3.141592653589793!` | Ratio of a circle's circumference to its diameter |
-| `TAU` | `6.283185307179586!` | The [superior circle constant](https://tauday.com/tau-manifesto) |
+| `E`   | `2.718281828459045r` | Base of natural logarithm |
+| `PI`  | `3.141592653589793r` | Ratio of a circle's circumference to its diameter |
+| `TAU` | `6.283185307179586r` | The [superior circle constant](https://tauday.com/tau-manifesto) |
 
 ### Built-in functions
 See [BUILTIN.md](BUILTIN.md#built-in-functions).

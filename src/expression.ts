@@ -14,7 +14,7 @@ export type DecimalLiteral = {
   whole: bigint;
   fractional: string;
   exponent: bigint | null;
-  hard: boolean;
+  flavor: '' | 'r' | 'e' | 'E';
 };
 
 export type FractionLiteral = {
@@ -342,7 +342,7 @@ export function mulNodes(
     return undefined;
   }
   if (a.type === 'DecimalLiteral') {
-    if (a.exponent || a.hard) {
+    if (a.exponent || a.flavor) {
       return undefined;
     }
     if (b.type === 'CentLiteral') {
@@ -433,10 +433,10 @@ function formatDecimal(literal: DecimalLiteral) {
   }
   const exponent = literal.exponent
     ? 'e' + literal.exponent.toString()
-    : literal.hard
+    : literal.flavor
     ? ''
-    : 'e0';
-  return `${result}${exponent}${literal.hard ? '!' : ''}`;
+    : 'e';
+  return `${result}${exponent}${literal.flavor}`;
 }
 
 export function formatComponent(component: VectorComponent) {

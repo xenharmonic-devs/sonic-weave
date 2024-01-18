@@ -80,7 +80,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           whole: 420n,
           fractional: '69',
           exponent: null,
-          hard: false,
+          flavor: '',
         },
         right: {type: 'HertzLiteral', prefix: ''},
         preferLeft: false,
@@ -90,7 +90,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses exaseconds', () => {
-    const ast = parseSingle('420Es');
+    const ast = parseSingle('420 Es');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
@@ -116,7 +116,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           whole: 420n,
           fractional: '',
           exponent: 69n,
-          hard: false,
+          flavor: '',
         },
         right: {type: 'SecondLiteral', prefix: ''},
         preferLeft: false,
@@ -134,7 +134,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         whole: 42n,
         fractional: '0',
         exponent: -69n,
-        hard: false,
+        flavor: '',
       },
     });
   });
@@ -148,7 +148,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         whole: 42n,
         fractional: '0',
         exponent: -69n,
-        hard: false,
+        flavor: '',
       },
     });
   });
@@ -161,8 +161,8 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('parses hard decimals over cents', () => {
-    const ast = parseSingle('1.955!');
+  it('parses real decimals over cents', () => {
+    const ast = parseSingle('1.955r');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
@@ -170,7 +170,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         whole: 1n,
         fractional: '955',
         exponent: null,
-        hard: true,
+        flavor: 'r',
       },
     });
   });
@@ -404,12 +404,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('supports unary expressions applied to call expressions', () => {
-    const ast = parseSingle('!foo()');
+    const ast = parseSingle('not foo()');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
         type: 'UnaryExpression',
-        operator: '!',
+        operator: 'not',
         operand: {
           type: 'CallExpression',
           callee: {type: 'Identifier', id: 'foo'},
@@ -444,7 +444,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         whole: 3n,
         fractional: '14',
         exponent: null,
-        hard: false,
+        flavor: '',
       },
     });
   });

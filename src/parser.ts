@@ -867,7 +867,7 @@ export class ExpressionVisitor {
 
   visitUnaryExpression(node: UnaryExpression): Interval {
     const operand = this.visit(node.operand);
-    if (node.operator === '!') {
+    if (node.operator === 'not') {
       return sonicBool(!sonicTruth(operand));
     }
     if (!(operand instanceof Interval)) {
@@ -972,19 +972,19 @@ export class ExpressionVisitor {
     }
     if (
       operator === 'of' ||
-      operator === '!of' ||
+      operator === 'not of' ||
       operator === '~of' ||
-      operator === '!~of'
+      operator === 'not ~of'
     ) {
       if (Array.isArray(right)) {
         switch (operator) {
           case 'of':
             return sonicBool(strictIncludes(left, right));
-          case '!of':
+          case 'not of':
             return sonicBool(!strictIncludes(left, right));
           case '~of':
             return sonicBool(includes(left, right));
-          case '!~of':
+          case 'not ~of':
             return sonicBool(!includes(left, right));
         }
       } else {
@@ -1174,7 +1174,7 @@ export class ExpressionVisitor {
   }
 
   visitDecimalLiteral(node: DecimalLiteral): Interval {
-    if (node.hard) {
+    if (node.flavor === 'r') {
       const value = TimeMonzo.fromValue(
         parseFloat(`${node.whole}.${node.fractional}e${node.exponent ?? '0'}`)
       );
