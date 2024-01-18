@@ -530,7 +530,22 @@ StepRange
 Range = StepRange / UnitStepRange
 
 ScalarMultiple
-  = scalar: ScalarLike _ quantity: Quantity { return BinaryExpression('', scalar, quantity, false, false) }
+  = scalar: ScalarLike quantity: (__ @Quantity)? {
+    if (quantity) {
+      return BinaryExpression('', scalar, quantity, false, false);
+    }
+    if (scalar.type === 'DecimalLiteral') {
+      if (scalar.exponent || scalar.flavor) {
+        return scalar;
+      }
+      return {
+        type: 'CentsLiteral',
+        whole: scalar.whole,
+        fractional: scalar.fractional,
+      };
+    }
+    return scalar;
+  }
 
 ScalarLike
   = ParenthesizedExpression
@@ -547,20 +562,18 @@ Quantity
   / ValLiteral
 
 Primary
-  = ScalarMultiple
-  / Quantity
+  = Quantity
   / NoneLiteral
   / TrueLiteral
   / FalseLiteral
   / NedoLiteral
   / StepLiteral
-  / DotCentsLiteral
+  / ScalarMultiple
   / ColorLiteral
   / FJS
   / AbsoluteFJS
   / ArrowFunction
   / Identifier
-  / ScalarLike
   / ArrayLiteral
   / StringLiteral
 
@@ -634,25 +647,6 @@ FractionLiteral
       type: 'FractionLiteral',
       numerator,
       denominator,
-    };
-  }
-
-DotCentsLiteral
-  = !('.' [^0-9])
-  whole: Integer? !'..' '.' fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor  {
-    if (exponent || flavor) {
-      return {
-        type: 'DecimalLiteral',
-        whole: whole ?? 0n,
-        fractional,
-        exponent,
-        flavor,
-      }
-    }
-    return {
-      type: 'CentsLiteral',
-      whole: whole ?? 0n,
-      fractional: fractional,
     };
   }
 
