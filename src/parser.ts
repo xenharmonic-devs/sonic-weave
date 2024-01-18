@@ -1253,24 +1253,40 @@ export class ExpressionVisitor {
   }
 
   visitEnumeratedChord(node: EnumeratedChord): Interval[] {
+    const intervals: Interval[] = [];
     const domains: Domain[] = [];
     const monzos: TimeMonzo[] = [];
     for (const expression of node.intervals) {
       const interval = this.visit(expression);
       if (interval instanceof Interval) {
+        intervals.push(interval);
         monzos.push(interval.value);
         domains.push(interval.domain);
       } else {
         throw new Error('Type error: Can only stack intervals in a chord');
       }
     }
-    domains.shift();
+    const rootInterval = intervals.shift()!;
+    const rootDomain = domains.shift()!;
     const root = monzos.shift()!;
-    const intervals: Interval[] = [];
+    const result: Interval[] = [];
     for (let i = 0; i < monzos.length; ++i) {
-      intervals.push(new Interval(monzos[i].div(root), domains[i]));
+      if (rootDomain === 'linear' && domains[i] === 'linear') {
+        result.push(
+          node.mirror
+            ? rootInterval.div(intervals[i])
+            : intervals[i].div(rootInterval)
+        );
+      } else {
+        result.push(
+          new Interval(
+            node.mirror ? root.div(monzos[i]) : monzos[i].div(root),
+            domains[i]
+          )
+        );
+      }
     }
-    return intervals;
+    return result;
   }
 
   visitRange(node: Range): Interval[] {
@@ -1325,13 +1341,13 @@ export class ExpressionVisitor {
     if (root.compare(end) <= 0) {
       let next = root.add(one);
       while (next.compare(end) <= 0) {
-        result.push(next.div(root));
+        result.push(node.mirror ? root.div(next) : next.div(root));
         next = next.add(one);
       }
     } else {
       let next = root.sub(one);
       while (next.compare(end) >= 0) {
-        result.push(next.div(root));
+        result.push(node.mirror ? root.div(next) : next.div(root));
         next = next.sub(one);
       }
     }

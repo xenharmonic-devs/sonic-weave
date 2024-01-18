@@ -576,4 +576,20 @@ describe('SonicWeave parser', () => {
     `);
     expect(oopsFourth.toString()).toBe('[2 -1>+1\\');
   });
+
+  it('has syntax for subharmonic segments', () => {
+    const scale = parseSource('/10::5');
+    expect(scale).toHaveLength(5);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '10/9;10/8;10/7;10/6;10/5'
+    );
+  });
+
+  it('has syntax for subharmonic chords', () => {
+    const scale = parseSource('/8:7:6:5:4');
+    expect(scale).toHaveLength(4);
+    expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
+      '8/7;8/6;8/5;8/4'
+    );
+  });
 });

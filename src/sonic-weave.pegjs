@@ -358,13 +358,11 @@ LabeledExpression
   }
 
 Group
-  = __ @(UnaryExpression / Secondary / Primary) __
+  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression / Secondary / Primary) __
 
 Secondary
   = DownExpression
   / Range
-  / HarmonicSegment
-  / EnumeratedChord
   / CallExpression
   / ArrayAccess
   / ArraySlice
@@ -420,6 +418,28 @@ DownExpression
       type: 'DownExpression',
       count: operators.length,
       operand,
+    };
+  }
+
+// TODO: Allow call expressions and array access here without a huge performance hit
+Enumerable = Primary
+
+EnumeratedChord
+  = mirror: '/'? intervals: Enumerable|2.., _ ':' _| {
+    return {
+      type: 'EnumeratedChord',
+      mirror: !!mirror,
+      intervals,
+    };
+  }
+
+HarmonicSegment
+  = mirror: '/'? root: Enumerable _ '::' _ end: Enumerable {
+    return {
+      type: 'HarmonicSegment',
+      mirror: !!mirror,
+      root,
+      end,
     };
   }
 
@@ -482,23 +502,6 @@ StepRange
   }
 
 Range = StepRange / UnitStepRange
-
-HarmonicSegment
-  = root: Primary _ '::' _ end: Primary {
-    return {
-      type: 'HarmonicSegment',
-      root,
-      end,
-    };
-  }
-
-EnumeratedChord
-  = intervals: Primary|2.., _ ':' _| {
-    return {
-      type: 'EnumeratedChord',
-      intervals,
-    };
-  }
 
 ScalarMultiple
   = scalar: ScalarLike _ quantity: Quantity { return BinaryExpression('', scalar, quantity, false, false) }

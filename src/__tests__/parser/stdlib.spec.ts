@@ -196,7 +196,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can merge polyoffsets', () => {
-    const scale = parseSource('2:3:4; mergeOffset(4:5:7, "wrap");');
+    const scale = parseSource('2:3:4; mergeOffset(4:5:7, "wrap"); simplify');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '5/4;21/16;3/2;7/4;15/8;2'

@@ -189,8 +189,14 @@ To skip over values you can specify the second element `[1,3..10]` evaluates to 
 ### Harmonic segments
 Segments of the (musical) harmonic series can be obtained by specifying the root and the harmonic of equivalence e.g. `4::8` evaluates to `[5/4, 6/4, 7/4, 8/4]`.
 
+#### Subharmonic segments
+Segments of the subharmonic series can be obtained by prefixing the segment with `/`, specifying the root and the subharmonic of equivalence e.g. `/8::4` evaluates to (frequency ratios) `[8/7, 8/6, 8/5, 8/4]`. Recall that larger subharmonics sound lower so the largest/lowest root pitch should come first if you wish the resulting scale to sound upwards.
+
 ### Enumerated chords
 Chord enumerations take the first interval and use it as the implied root in a scale e.g. `2:3:5` evaluates to `[3/2, 5/2]`.
+
+#### Reflected enumerations
+By default enumeration assumes that we're dealing with frequency ratios. If you wish to specify ratios of wavelengths, prefix the enumeration with `/` e.g. `/6:5:4:3` evaluates to (frequency ratios) `[6/5, 6/4, 6/3]`.
 
 ### Array access
 Use square brackets to access array elements. Indexing starts from zero. Negative indices count back from the end. `$[-1]` is a handy shorthand for the last element in the current scale.

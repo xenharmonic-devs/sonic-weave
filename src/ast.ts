@@ -209,11 +209,13 @@ export type ArrowFunction = {
 
 export type EnumeratedChord = {
   type: 'EnumeratedChord';
+  mirror: Boolean;
   intervals: Expression[];
 };
 
 export type HarmonicSegment = {
   type: 'HarmonicSegment';
+  mirror: Boolean;
   root: Expression;
   end: Expression;
 };
