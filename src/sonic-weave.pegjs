@@ -382,7 +382,7 @@ LabeledExpression
   }
 
 Group
-  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression / Secondary) __
+  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression) __
 
 Secondary
   = DownExpression
@@ -425,15 +425,17 @@ UnaryExpression
       uniform: false,
     };
   }
-  / operand: (Primary) operator: ('--' / '++') {
-    // TODO: Adjust flow to allow secondaries here without a huge performance hit
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: false,
-      uniform: false,
+  / operand: Secondary operator: ('--' / '++')? {
+    if (operator) {
+      return {
+        type: 'UnaryExpression',
+        operator,
+        operand,
+        prefix: false,
+        uniform: false,
+      }
     }
+    return operand;
   }
 
 DownExpression
