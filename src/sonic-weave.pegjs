@@ -104,8 +104,7 @@ Statements
   }
 
 Statement
-  = VariableDeclaration
-  / ReassignmentStatement
+  = VariableManipulationStatement
   / FunctionDeclaration
   / PitchDeclaration
   / UpDeclaration
@@ -122,39 +121,46 @@ LeftHandSideExpression
   = ArrayAccess
   / IdentifierArray
 
-VariableDeclaration
-  = name: LeftHandSideExpression value: (_ '=' _ @Expression)? EOS {
-    if (!value) {
+ReassignmentTail
+  = _ preferLeft: '~'? operator: AssigningOperator? preferRight: '~'? '=' _ value: Expression {
+    return {
+      preferLeft: !!preferLeft,
+      preferRight: !!preferRight,
+      operator,
+      value,
+    };
+  }
+
+VariableManipulationStatement
+  = name: LeftHandSideExpression tail: ReassignmentTail? EOS {
+    if (!tail) {
       return {
         type: 'ExpressionStatement',
         expression: name,
       }
     }
+    const {preferLeft, preferRight, operator, value} = tail;
     if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
+      if (operator) {
+        return {
+          type: 'VariableDeclaration',
+          name,
+          value: BinaryExpression(operator, name, value, preferLeft, preferRight),
+        };
+      }
       return {
         type: 'VariableDeclaration',
         name,
         value,
       };
+    } else if (operator) {
+      throw new Error('Left-hand-side expression expected.');
     }
     return {
       type: 'PitchDeclaration',
       left: name,
       right: value,
     };
-  }
-
-ReassignmentStatement
-  = name: LeftHandSideExpression _ preferLeft: '~'? operator: AssigningOperator preferRight: '~'? '=' _ expression: Expression EOS {
-    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
-      return {
-        type: 'VariableDeclaration',
-        name,
-        value: BinaryExpression(operator, name, expression, !!preferLeft, !!preferRight),
-      };
-    } else {
-      throw new Error('Left-hand-side expression expected');
-    }
   }
 
 FunctionDeclaration
@@ -392,7 +398,7 @@ ChainableUnaryOperator
   = $NotToken / '^' / '/' / '\\'
 
 UnaryExpression
-  = operator: UniformUnaryOperator uniform: '~'? operand: (Secondary / Primary) {
+  = operator: UniformUnaryOperator uniform: '~'? operand: Secondary {
     return {
       type: 'UnaryExpression',
       operator,
@@ -401,7 +407,7 @@ UnaryExpression
       uniform: !!uniform,
     };
   }
-  / operator: ChainableUnaryOperator __ operand: (Secondary / Primary / UnaryExpression) {
+  / operator: ChainableUnaryOperator __ operand: (Secondary / UnaryExpression) {
     return {
       type: 'UnaryExpression',
       operator,
@@ -410,7 +416,7 @@ UnaryExpression
       uniform: false,
     };
   }
-  / operator: ('--' / '++' / '+') operand: (Secondary / Primary) {
+  / operator: ('--' / '++' / '+') operand: Secondary {
     return {
       type: 'UnaryExpression',
       operator,
