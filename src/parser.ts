@@ -227,7 +227,7 @@ export class StatementVisitor {
 
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = this.createExpressionVisitor();
-    const value = subVisitor.visit(node.value);
+    const value = node.value ? subVisitor.visit(node.value) : undefined;
     if (Array.isArray(node.name)) {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring declaration must assign an array.');

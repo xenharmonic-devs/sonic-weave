@@ -47,12 +47,19 @@ export type AssignmentStatement = {
   value: Expression;
 };
 
-export type VariableDeclaration = {
-  type: 'VariableDeclaration';
-  name: Identifier | Identifier[];
-  value: Expression;
-  mutable: Boolean;
-};
+export type VariableDeclaration =
+  | {
+      type: 'VariableDeclaration';
+      name: Identifier | Identifier[];
+      value: Expression;
+      mutable: false;
+    }
+  | {
+      type: 'VariableDeclaration';
+      name: Identifier | Identifier[];
+      value?: Expression;
+      mutable: true;
+    };
 
 export type FunctionDeclaration = {
   type: 'FunctionDeclaration';

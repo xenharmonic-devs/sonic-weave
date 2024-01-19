@@ -1584,7 +1584,7 @@ riff stretch amount scale {
 riff randomVariance amount varyEquave scale {
   "Add random variance to the current/given scale.";
   $ = scale ?? $$;
-  let equave = niente;
+  let equave;
   if (not varyEquave) equave = pop();
   i => i ~* (amount ~^ (2 * random() - 1));
   if (not varyEquave) equave;

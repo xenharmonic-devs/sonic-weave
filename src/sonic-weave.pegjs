@@ -169,7 +169,7 @@ VariableManipulationStatement
   }
 
 VariableDeclaration
-  = LetToken _ name: (Identifier / IdentifierArray) _ '=' _ value: Expression EOS {
+  = LetToken _ name: (Identifier / IdentifierArray) value: (_ '=' _ @Expression)? EOS {
     return {
       type: 'VariableDeclaration',
       name,
