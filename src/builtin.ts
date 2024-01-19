@@ -1202,6 +1202,22 @@ riff cumprod array {
     $[i] ~*= $[i-1];
 }
 
+riff diff array {
+  "Calculate the (linear) differences between the terms.";
+  array;
+  let i = length($) - 1;
+  while (i--)
+    $[i + 1] ~-= $[i];
+}
+
+riff geodiff array {
+  "Calculate the geometric differences between the factors.";
+  array;
+  let i = length($) - 1;
+  while (i--)
+    $[i + 1] ~%= $[i];
+}
+
 riff label labels scale {
   "Apply labels (or colors) from the first array to the current/given scale.";
   scale ??= $$;

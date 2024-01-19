@@ -384,4 +384,14 @@ describe('SonicWeave standard library', () => {
     ) as Interval;
     expect(yes.toString()).toBe('true');
   });
+
+  it('has a linear differentiator', () => {
+    const steps = parseSource('diff([2, 3, 5, 8]);str');
+    expect(steps).toEqual(['2', '1', '2', '3']);
+  });
+
+  it('has a geometric differentiator', () => {
+    const steps = parseSource('geodiff(4::8);simplify;str');
+    expect(steps).toEqual(['5/4', '6/5', '7/6', '8/7']);
+  });
 });

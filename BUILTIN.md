@@ -442,6 +442,12 @@ Calculate the cumulative sums of the terms in the array.
 
 `array`
 
+### diff
+Calculate the (linear) differences between the terms.
+#### Parameters:
+
+`array`
+
 ### ed
 Generate an equal temperament with the given number of divisions of the given equave/octave.
 #### Parameters:
@@ -465,6 +471,12 @@ Convert absolute frequency to MIDI note number / MTS value (fractional semitones
 #### Parameters:
 
 `freq`
+
+### geodiff
+Calculate the geometric differences between the factors.
+#### Parameters:
+
+`array`
 
 ### ground
 Use the first interval in the current/given scale as the implicit unison.
