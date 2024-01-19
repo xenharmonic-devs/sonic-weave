@@ -367,7 +367,7 @@ export class Interval {
   // "JS" toString or "Python" repr.
   toString(context?: RootContext) {
     const base = this.str(context);
-    const color = this.color ? this.color.value : '';
+    const color = this.color ? this.color.toString() : '';
     if (this.color || this.label) {
       let result = '(' + base;
       if (color) {

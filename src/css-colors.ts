@@ -152,5 +152,5 @@ yellowgreen #9ACD32`;
 export const CSS_COLOR_CONTEXT = new Map<string, Color>(
   CSS_COLORS.split('\n')
     .map(l => l.split(' '))
-    .map(ps => [ps[0], new Color(ps[1])])
+    .map(ps => [ps[0], new Color(ps[0])]) // Ignore ps[1] and just use the standard names.
 );

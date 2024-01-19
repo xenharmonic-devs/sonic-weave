@@ -169,7 +169,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can color and label an interval directly', () => {
     const greenFifth = parseSingle('1.5e0 green "fifth"');
-    expect(greenFifth.color?.value).toBe('#008000');
+    expect(greenFifth.color?.value).toBe('green');
     expect(greenFifth.label).toBe('fifth');
   });
 
@@ -214,8 +214,8 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert cents to boolean', () => {
     const yes = parseSingle('bool(0.0 red)');
-    expect(yes.color?.value).toBe('#FF0000');
-    expect(yes.toString()).toBe('(true #FF0000)');
+    expect(yes.color?.value).toBe('red');
+    expect(yes.toString()).toBe('(true red)');
   });
 
   it('can convert boolean to cents', () => {
@@ -499,5 +499,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(greenish.toString()).toBe('hsl(123.000e, 45.000e, 67.000e)');
     const retry = evaluateExpression(greenish.toString()) as Color;
     expect(retry.value).toBe(greenish.value);
+  });
+
+  it('supports rgb color labels and reprs', () => {
+    const lightFifth = evaluateExpression('repr(3/2 rgb(200, 222, 256))');
+    expect(lightFifth).toBe('(3/2 rgb(200.000e, 222.000e, 256.000e))');
   });
 });

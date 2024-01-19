@@ -373,7 +373,7 @@ ExponentiationExpression
     }
 
 LabeledExpression
-  = object: Group labels: (Identifier / ColorLiteral / StringLiteral)|.., _| __ {
+  = object: Group labels: (CallExpression / Identifier / ColorLiteral / StringLiteral)|.., _| __ {
     if (labels.length) {
       return {
         type: 'LabeledExpression',
