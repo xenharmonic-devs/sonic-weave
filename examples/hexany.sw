@@ -2,11 +2,11 @@
 
 "Canonical 1-3-5-7 Hexany"
 
-factors = [1, 3, 5, 7]
+const factors = [1, 3, 5, 7]
 
 // These two 'for' loops could be replaced with map(prod, kCombinations(factors, 2))
-for (i of [0 .. length(factors)-1]) {
-  for (j of [i+1 .. length(factors)-1]) {
+for (const i of [0 .. length(factors)-1]) {
+  for (const j of [i+1 .. length(factors)-1]) {
     // Push a combination product onto this scale
     factors[i] * factors[j]
   }

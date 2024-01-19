@@ -412,12 +412,6 @@ Combine elements of each array into tuples until all of them are exhausted. Pads
 `...args`
 
 ## Prelude functions
-### ags
-Generate an alternating generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
-#### Parameters:
-
-`generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
-
 ### cbrt
 Calculate the cube root of the input.
 #### Parameters:
@@ -477,6 +471,12 @@ Use the first interval in the current/given scale as the implicit unison.
 #### Parameters:
 
 `scale`
+
+### gs
+Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
+#### Parameters:
+
+`generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
 
 ### keepUnique
 Only keep unique intervals in the current/given scale.

@@ -12,7 +12,7 @@ import {relin} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
-  return visitor.context.get('$') as Interval[];
+  return visitor.mutables.get('$') as Interval[];
 }
 
 describe('SonicWeave parser', () => {
@@ -49,16 +49,16 @@ describe('SonicWeave parser', () => {
   });
 
   it('can declare variables', () => {
-    const ast = parseAST('i = 676/675 /* The Island comma */;');
+    const ast = parseAST('const i = 676/675 /* The Island comma */;');
     const visitor = new StatementVisitor(new RootContext());
     visitor.visit(ast.body[0]);
-    expect(visitor.context.get('i')?.toString()).toBe('676/675');
+    expect(visitor.get('i')?.toString()).toBe('676/675');
   });
 
   it('can invert a scale', () => {
     const scale = parseSource(`
       2;3;4;5;6;7;8; // Build scale
-      equave = pop(); // Pop from the scale
+      const equave = pop(); // Pop from the scale
       i => equave %~ i; // Functions map over the scale implicitly
       reverse(); // Reverse the current scale
       equave; // The default action is to push onto the current scale
@@ -94,11 +94,11 @@ describe('SonicWeave parser', () => {
     const ast = parseAST('riff plusOne x { x ~+ 1; }');
     const visitor = new StatementVisitor(new RootContext());
     visitor.visit(ast.body[0]);
-    expect(visitor.context.has('plusOne')).toBe(true);
+    expect(visitor.immutables.has('plusOne')).toBe(true);
     const two = new Interval(TimeMonzo.fromBigInt(2n), 'linear');
     expect(
-      (visitor.context.get('plusOne') as Function)
-        .bind(visitor)(two)[0]
+      (visitor.get('plusOne') as Function)
+        .bind(visitor.createExpressionVisitor())(two)[0]
         .value.toBigInteger()
     ).toBe(3n);
   });
@@ -142,14 +142,14 @@ describe('SonicWeave parser', () => {
     while (i) {
       i--;
     }
-    const scale = parseSource('i = 5; while (i) { i--; }');
+    const scale = parseSource('let i = 5; while (i) { i--; }');
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
   });
 
   it('supports explicit arguments to builtin functions', () => {
     const scale = parseSource(`
-      segment = [1..5];
+      const segment = [1..5];
       segment;
       reverse(segment);
       map(i => i + 10, segment);
@@ -276,9 +276,9 @@ describe('SonicWeave parser', () => {
   it('can construct well-temperaments (manual)', () => {
     const scale = parseSource(`
       // Bach / Louie 2018
-      g = relog(3/2);
-      p = relog(531441/524288);
-      equave = relog(2);
+      const g = relog(3/2);
+      const p = relog(531441/524288);
+      const equave = relog(2);
       // Down
       -g;
       $[-1] - g;
@@ -340,7 +340,7 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig i {
-        ups = round(1r€ dot i);
+        const ups = round(1r€ dot i);
         return i ~% (1rc * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;
@@ -353,8 +353,8 @@ describe('SonicWeave parser', () => {
 
   it('can construct the hard cotritave', () => {
     const scale = parseSource(`
-      tritave = 1r * relog(3);
-      cotritave = %tritave;
+      const tritave = 1r * relog(3);
+      const cotritave = %tritave;
       tritave dot cotritave;
     `);
     expect(scale).toHaveLength(1);
@@ -448,8 +448,8 @@ describe('SonicWeave parser', () => {
 
   it('supports expressions inside ranges', () => {
     const scale = parseSource(`
-      factors = [1, 3, 5, 7]
-      for (i of [0 .. length(factors)-1]) {
+      const factors = [1, 3, 5, 7]
+      for (const i of [0 .. length(factors)-1]) {
         factors[i] + i
       }
     `);
@@ -474,13 +474,13 @@ describe('SonicWeave parser', () => {
 
   it('can average absolute pitches', () => {
     const visitor = evaluateSource('C4 = 261Hz; absoluteFJS((B4 + Bb4) % 2)');
-    const beeSemiflat = visitor.context.get('$')![0];
+    const beeSemiflat = visitor.get('$')![0];
     expect(beeSemiflat.toString(visitor.rootContext)).toBe('Bd4');
   });
 
   it('can convert monzo to absolute FJS', () => {
     const visitor = evaluateSource('C4 = 261Hz; absoluteFJS([0 -1 1>)');
-    const pitch = visitor.context.get('$')![0];
+    const pitch = visitor.get('$')![0];
     expect(pitch.toString(visitor.rootContext)).toBe('A♮4^5');
   });
 
@@ -524,14 +524,14 @@ describe('SonicWeave parser', () => {
 
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
-      'A=4 = 440Hz = 1/1;^D4;A=4 = 432Hz;^ = 2\\;syn=81/80;vD4~*syn;3;$[-1]=5;'
+      'A=4 = 440Hz = 1/1;^D4;A=4 = 432Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;'
     );
     expect(visitor.expand(getSourceVisitor())).toBe(
       [
         'C4 = 256 Hz',
         '1/1 = 432 Hz',
         '^ = 2\\',
-        'syn = 81/80',
+        'const syn = 81/80',
         '^D♮4^5,11 - 1\\',
         'vD♮4_5',
         '5',
@@ -541,24 +541,24 @@ describe('SonicWeave parser', () => {
 
   it('can sort scales after the fact', () => {
     const visitor = getSourceVisitor();
-    const ast = parseAST('C5 = 256 Hz;baseMidiNote = 72;');
+    const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');
     for (const statement of ast.body) {
       visitor.visit(statement);
     }
     const defaults = visitor.clone();
     defaults.rootContext = visitor.rootContext.clone();
 
-    const userAst = parseAST('D4 = 270 Hz;x = 7;D4;200Hz;x;3;2');
+    const userAst = parseAST('D4 = 270 Hz;let x = 7;D4;200Hz;x;3;2');
     for (const statement of userAst.body) {
       visitor.visit(statement);
     }
     const r = relin.bind(visitor);
-    (visitor.context.get('$') as Interval[]).sort((a, b) => r(a).compare(r(b)));
+    (visitor.get('$') as Interval[]).sort((a, b) => r(a).compare(r(b)));
     expect(visitor.expand(defaults)).toBe(
       [
         'C4 = 240 Hz',
         '1/1 = 270 Hz',
-        'x = 7',
+        'let x = 7',
         '200 Hz',
         'D4',
         '2',

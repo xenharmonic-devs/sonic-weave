@@ -12,7 +12,7 @@ stdout.write(
 const builtins: SonicWeaveFunction[] = [];
 const prelude: SonicWeaveFunction[] = [];
 
-for (const riff of visitor.context.values()) {
+for (const riff of visitor.immutables.values()) {
   if (typeof riff === 'function') {
     const node = riff.__node__;
     if (node.type === 'FunctionDeclaration' && !node.body.length) {
@@ -23,7 +23,7 @@ for (const riff of visitor.context.values()) {
   }
 }
 
-const int = visitor.context.get('int') as SonicWeaveFunction;
+const int = visitor.immutables.get('int') as SonicWeaveFunction;
 const dummy = () => null;
 Object.defineProperty(dummy, 'name', {value: 'int', enumerable: false});
 dummy.__node__ = int.__node__;

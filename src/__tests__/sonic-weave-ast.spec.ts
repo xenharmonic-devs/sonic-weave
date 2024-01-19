@@ -220,7 +220,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   it('parses coalescing reassignment', () => {
     const ast = parseSingle('x ??= 42');
     expect(ast).toEqual({
-      type: 'VariableDeclaration',
+      type: 'AssignmentStatement',
       name: {type: 'Identifier', id: 'x'},
       value: {
         type: 'BinaryExpression',
@@ -250,7 +250,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses for..of', () => {
-    const ast = parse('for (foo of bar) foo;');
+    const ast = parse('for (const foo of bar) foo;');
     expect(ast).toEqual({
       type: 'Program',
       body: [
@@ -262,6 +262,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             type: 'ExpressionStatement',
             expression: {type: 'Identifier', id: 'foo'},
           },
+          mutable: false,
         },
       ],
     });
@@ -315,7 +316,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   it('parses array element assignment', () => {
     const ast = parseSingle('arr[1] = 2');
     expect(ast).toEqual({
-      type: 'VariableDeclaration',
+      type: 'AssignmentStatement',
       name: {
         type: 'ArrayAccess',
         object: {type: 'Identifier', id: 'arr'},
@@ -400,7 +401,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
 
   it("still parses variable declaration when there's no conflict with FJS", () => {
     const ast = parseSingle('d=4');
-    expect(ast.type).toBe('VariableDeclaration');
+    expect(ast.type).toBe('AssignmentStatement');
   });
 
   it('supports unary expressions applied to call expressions', () => {

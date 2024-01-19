@@ -4,7 +4,7 @@ import {Interval} from '../../interval';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
-  return visitor.context.get('$') as Interval[];
+  return visitor.get('$') as Interval[];
 }
 
 describe('SonicWeave standard library', () => {
@@ -229,27 +229,27 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can generate alternating generator sequences (diasem #1)', () => {
-    const scale = parseSource('ags([8/7, 7/6]);');
+    const scale = parseSource('gs([8/7, 7/6]);');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;2');
   });
 
   it('can generate alternating generator sequences (diasem #2)', () => {
-    const scale = parseSource('ags([8/7, 7/6], 2);');
+    const scale = parseSource('gs([8/7, 7/6], 2);');
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;16/9;2');
   });
 
-  it('can generate alternating generator sequences (diasem #3)', () => {
-    const scale = parseSource('ags([8/7, 7/6], 3);');
+  it('can generate generator sequences (diasem #3)', () => {
+    const scale = parseSource('gs([8/7, 7/6], 3);');
     expect(scale).toHaveLength(9);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '64/63;8/7;32/27;8/6;256/189;32/21;128/81;16/9;2'
     );
   });
 
-  it('throws for ags with no constant structure', () => {
-    expect(() => parseSource('ags([8/7, 7/6, 8/7], 3);')).toThrow();
+  it('throws for gs with no constant structure', () => {
+    expect(() => parseSource('gs([8/7, 7/6, 8/7], 3);')).toThrow();
   });
 
   it('can access docstrings', () => {
@@ -370,5 +370,18 @@ describe('SonicWeave standard library', () => {
   it("doesn't introduce extra denominators when elevating", () => {
     const scale = parseSource('5/3;10/3;elevate();simplify;str');
     expect(scale.join(':')).toBe('3:5:10');
+  });
+
+  it('has a constant structure calculator', () => {
+    // 6\12 is ambiguous as a fourth and a fifth
+    const no = evaluateExpression(
+      'hasConstantStructure(mos(5, 2))'
+    ) as Interval;
+    expect(no.toString()).toBe('false');
+    // Augmented fourth and diminished fifth are distinct in 19 edo
+    const yes = evaluateExpression(
+      'hasConstantStructure(mos(5, 2, 3, 2))'
+    ) as Interval;
+    expect(yes.toString()).toBe('true');
   });
 });

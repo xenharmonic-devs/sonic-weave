@@ -43,6 +43,7 @@ import {
   ArrayAccess,
   ArraySlice,
   ArrowFunction,
+  AssignmentStatement,
   BinaryExpression,
   BlockStatement,
   CallExpression,
@@ -108,28 +109,33 @@ class Interupt {
 
 export class StatementVisitor {
   rootContext: RootContext;
-  context: VisitorContext;
+  parent?: StatementVisitor;
+  mutables: VisitorContext;
+  immutables: VisitorContext;
 
-  constructor(rootContext: RootContext) {
+  constructor(rootContext: RootContext, parent?: StatementVisitor) {
     this.rootContext = rootContext;
-    this.context = new Map();
-    this.context.set('$', []);
+    this.parent = parent;
+    this.mutables = new Map();
+    this.mutables.set('$', []);
+    this.immutables = new Map();
   }
 
   // TODO: Deep cloning
   clone() {
     const result = new StatementVisitor(this.rootContext);
-    result.context = new Map(this.context);
-    const scale = this.context.get('$');
+    result.mutables = new Map(this.mutables);
+    result.immutables = new Map(this.immutables);
+    const scale = this.mutables.get('$');
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption detected');
     }
-    result.context.set('$', [...scale]);
+    result.mutables.set('$', [...scale]);
     return result;
   }
 
   createExpressionVisitor() {
-    return new ExpressionVisitor(this.rootContext, this.context);
+    return new ExpressionVisitor(this);
   }
 
   expand(defaults: StatementVisitor) {
@@ -138,21 +144,27 @@ export class StatementVisitor {
       base += '\n';
     }
     const variableLines: string[] = [];
-    const r = repr.bind(this);
-    for (const key of this.context.keys()) {
+    const r = repr.bind(this.createExpressionVisitor());
+    for (const key of this.mutables.keys()) {
       if (key === '$' || key === '$$') {
         continue;
       }
       // TODO: Verify that nothing was changed.
-      if (defaults.context.has(key)) {
+      if (defaults.mutables.has(key)) {
         continue;
       }
-      variableLines.push(`${key} = ${r(this.context.get(key))}`);
+      variableLines.push(`let ${key} = ${r(this.mutables.get(key))}`);
+    }
+    for (const key of this.immutables.keys()) {
+      if (defaults.immutables.has(key)) {
+        continue;
+      }
+      variableLines.push(`const ${key} = ${r(this.immutables.get(key))}`);
     }
     if (variableLines.length) {
       base += variableLines.join('\n') + '\n';
     }
-    const scale = this.context.get('$');
+    const scale = this.mutables.get('$');
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption detected');
     }
@@ -167,6 +179,8 @@ export class StatementVisitor {
     switch (node.type) {
       case 'VariableDeclaration':
         return this.visitVariableDeclaration(node);
+      case 'AssignmentStatement':
+        return this.visitAssignmentStatement(node);
       case 'ExpressionStatement':
         return this.visitExpression(node);
       case 'FunctionDeclaration':
@@ -216,13 +230,71 @@ export class StatementVisitor {
     const value = subVisitor.visit(node.value);
     if (Array.isArray(node.name)) {
       if (!Array.isArray(value)) {
-        throw new Error('Destructuring declaration must assign an array');
+        throw new Error('Destructuring declaration must assign an array.');
       }
       for (let i = 0; i < node.name.length; ++i) {
-        this.context.set(node.name[i].id, value[i]);
+        const name = node.name[i].id;
+        if (this.immutables.has(name) || this.mutables.has(name)) {
+          throw new Error('Cannot redeclare variable.');
+        }
+        if (node.mutable) {
+          this.mutables.set(name, value[i]);
+        } else {
+          this.immutables.set(name, value[i]);
+        }
+      }
+    } else {
+      const name = node.name.id;
+      if (this.immutables.has(name) || this.mutables.has(name)) {
+        throw new Error('Cannot redeclare variable.');
+      }
+      if (node.mutable) {
+        this.mutables.set(name, value);
+      } else {
+        this.immutables.set(name, value);
+      }
+    }
+    return undefined;
+  }
+
+  visitAssignmentStatement(node: AssignmentStatement) {
+    const subVisitor = this.createExpressionVisitor();
+    const value = subVisitor.visit(node.value);
+    if (Array.isArray(node.name)) {
+      if (!Array.isArray(value)) {
+        throw new Error('Destructuring assignment must use an array.');
+      }
+      destructuring: for (let i = 0; i < node.name.length; ++i) {
+        const name = node.name[i].id;
+        if (this.immutables.has(name)) {
+          throw new Error('Assignment to a constant variable.');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let visitor: StatementVisitor | undefined = this;
+        while (visitor) {
+          if (visitor.mutables.has(name)) {
+            visitor.mutables.set(name, value[i]);
+            continue destructuring;
+          }
+          visitor = visitor.parent;
+        }
+        throw new Error('Assignment to an undeclared variable.');
       }
     } else if (node.name.type === 'Identifier') {
-      this.context.set(node.name.id, value);
+      const name = node.name.id;
+      if (this.immutables.has(name)) {
+        throw new Error('Assignment to a constant variable.');
+      }
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      let visitor: StatementVisitor | undefined = this;
+      while (visitor) {
+        if (visitor.mutables.has(name)) {
+          visitor.mutables.set(name, value);
+          return undefined;
+        }
+        visitor = visitor.parent;
+      }
+      throw new Error('Assignment to an undeclared variable.');
     } else {
       const object = subVisitor.visit(node.name.object);
       if (!Array.isArray(object)) {
@@ -232,7 +304,7 @@ export class StatementVisitor {
       if (!(index instanceof Interval)) {
         throw new Error('Array access with a non-integer');
       }
-      let i = Number(index.value.toBigInteger());
+      let i = index.toInteger();
       if (i < 0) {
         i += object.length;
       }
@@ -320,12 +392,12 @@ export class StatementVisitor {
   visitExpression(node: ExpressionStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.expression);
-    this.handleValue(value);
+    this.handleValue(value, subVisitor);
     return undefined;
   }
 
-  handleValue(value: SonicWeaveValue) {
-    const scale = this.context.get('$');
+  handleValue(value: SonicWeaveValue, subVisitor: ExpressionVisitor) {
+    const scale = this.mutables.get('$');
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption detected');
     }
@@ -362,7 +434,7 @@ export class StatementVisitor {
             equaveDenominator,
           }
         );
-        const rl = relog.bind(this);
+        const rl = relog.bind(subVisitor);
         const mapped = scale.map(i =>
           rl(i)
             .dot(value as Interval)
@@ -383,7 +455,7 @@ export class StatementVisitor {
         value = [...value];
       }
       for (const subvalue of value) {
-        this.handleValue(subvalue);
+        this.handleValue(subvalue, subVisitor);
       }
     } else if (value === undefined) {
       /* Do nothing */
@@ -394,7 +466,7 @@ export class StatementVisitor {
         this.rootContext.title = value;
       }
     } else {
-      const bound = value.bind(this);
+      const bound = value.bind(subVisitor);
       const mapped = scale.map(i => bound(i));
       scale.length = 0;
       scale.push(...mapped);
@@ -402,35 +474,23 @@ export class StatementVisitor {
   }
 
   visitBlockStatement(node: BlockStatement) {
-    const subVisitor = new StatementVisitor(this.rootContext);
-    for (const [name, value] of this.context) {
-      subVisitor.context.set(name, value);
-    }
-    const scale = this.context.get('$')!;
+    const subVisitor = new StatementVisitor(this.rootContext, this);
+    const scale = this.mutables.get('$')!;
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption detected');
     }
-    subVisitor.context.set('$$', scale);
-    subVisitor.context.set('$', []);
+    subVisitor.mutables.set('$$', scale);
     for (const statement of node.body) {
       const interrupt = subVisitor.visit(statement);
       if (interrupt) {
         return interrupt;
       }
     }
-    const subScale = subVisitor.context.get('$');
+    const subScale = subVisitor.mutables.get('$');
     if (!Array.isArray(subScale)) {
       throw new Error('Context corruption detected');
     }
     scale.push(...subScale);
-    for (const [name, value] of subVisitor.context) {
-      if (name === '$' || name === '$$') {
-        continue;
-      }
-      if (this.context.has(name)) {
-        this.context.set(name, value);
-      }
-    }
     return undefined;
   }
 
@@ -449,20 +509,41 @@ export class StatementVisitor {
     const subVisitor = this.createExpressionVisitor();
     const array = subVisitor.visit(node.array);
     if (!Array.isArray(array)) {
-      throw new Error('Can only iterate over arrays');
+      throw new Error('Can only iterate over arrays.');
+    }
+    const loopVisitor = new StatementVisitor(this.rootContext, this);
+    // We need a fresh context, but don't feel like complicating the scope rules more.
+    loopVisitor.mutables.set('$', this.mutables.get('$'));
+    if (this.mutables.has('$$')) {
+      loopVisitor.mutables.set('$$', this.mutables.get('$$'));
     }
     for (const value of array) {
       if (Array.isArray(node.element)) {
         if (!Array.isArray(value)) {
-          throw new Error('Must iterate over arrays when destructuring');
+          throw new Error('Must iterate over arrays when destructuring.');
         }
         for (let i = 0; i < node.element.length; ++i) {
-          this.context.set(node.element[i].id, value[i]);
+          const name = node.element[i].id;
+          if (node.mutable) {
+            // Technically a mutation, but should be fine.
+            loopVisitor.mutables.set(name, value[i]);
+          } else {
+            loopVisitor.immutables.set(name, value[i]);
+          }
         }
       } else {
-        this.context.set(node.element.id, value);
+        const name = node.element.id;
+        if (node.mutable) {
+          loopVisitor.mutables.set(name, value);
+        } else {
+          loopVisitor.immutables.set(name, value);
+        }
       }
-      const interrupt = this.visit(node.body);
+      const interrupt = loopVisitor.visit(node.body);
+      this.mutables.set('$', loopVisitor.mutables.get('$'));
+      if (loopVisitor.mutables.has('$$')) {
+        this.mutables.set('$$', loopVisitor.mutables.get('$$'));
+      }
       if (interrupt) {
         return interrupt;
       }
@@ -496,18 +577,17 @@ export class StatementVisitor {
     }
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localVisitor = new StatementVisitor(this.rootContext);
-      for (const [name, value] of this.context) {
-        localVisitor.context.set(name, value);
-      }
-      localVisitor.context.set('$$', this.context.get('$'));
-      localVisitor.context.set('$', []);
+      const localVisitor = new StatementVisitor(
+        this.parent.rootContext,
+        this.parent
+      );
+      localVisitor.mutables.set('$$', this.parent.mutables.get('$'));
 
       for (let i = 0; i < node.parameters.length; ++i) {
         if (i < args.length) {
-          localVisitor.context.set(node.parameters[i].id, args[i]);
+          localVisitor.mutables.set(node.parameters[i].id, args[i]);
         } else {
-          localVisitor.context.set(node.parameters[i].id, undefined);
+          localVisitor.mutables.set(node.parameters[i].id, undefined);
         }
       }
       for (const statement of node.body) {
@@ -516,7 +596,7 @@ export class StatementVisitor {
           return interrupt.value;
         }
       }
-      return localVisitor.context.get('$');
+      return localVisitor.mutables.get('$');
     }
     Object.defineProperty(realization, 'name', {
       value: node.name.id,
@@ -524,8 +604,23 @@ export class StatementVisitor {
     });
     realization.__doc__ = docstring;
     realization.__node__ = node;
-    this.context.set(node.name.id, realization);
+    this.immutables.set(node.name.id, realization);
     return undefined;
+  }
+
+  get(name: string) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let parent: StatementVisitor | undefined = this;
+    while (parent) {
+      if (parent.immutables.has(name)) {
+        return parent.immutables.get(name)!;
+      }
+      if (parent.mutables.has(name)) {
+        return parent.mutables.get(name)!;
+      }
+      parent = parent.parent;
+    }
+    throw new Error(`Undeclared variable ${name}`);
   }
 }
 
@@ -573,11 +668,14 @@ function resolvePreference(
 }
 
 export class ExpressionVisitor {
-  rootContext: RootContext;
-  context: VisitorContext;
-  constructor(rootContext: RootContext, context: VisitorContext) {
-    this.rootContext = rootContext;
-    this.context = context;
+  parent: StatementVisitor;
+
+  constructor(parent: StatementVisitor) {
+    this.parent = parent;
+  }
+
+  get rootContext() {
+    return this.parent.rootContext;
   }
 
   visit(node: Expression): SonicWeaveValue {
@@ -914,11 +1012,19 @@ export class ExpressionVisitor {
     if (node.operand.type !== 'Identifier') {
       throw new Error('Cannot increment/decrement a value');
     }
-    this.context.set(node.operand.id, newValue);
-    if (node.prefix) {
-      return newValue;
+    const name = node.operand.id;
+    let parent: StatementVisitor | undefined = this.parent;
+    while (parent) {
+      if (parent.mutables.has(name)) {
+        parent.mutables.set(node.operand.id, newValue);
+        if (node.prefix) {
+          return newValue;
+        }
+        return operand;
+      }
+      parent = parent.parent;
     }
-    return operand;
+    throw new Error('Increment/decrement of a constant/undeclared variable');
   }
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
@@ -1127,35 +1233,27 @@ export class ExpressionVisitor {
 
   visitCallExpression(node: CallExpression) {
     if (node.callee.type === 'Identifier') {
-      if (this.context.has(node.callee.id)) {
-        const args = node.args.map(arg => this.visit(arg));
-        return (this.context.get(node.callee.id) as Function).bind(this)(
-          ...args
-        );
-      }
-      throw new Error(`Reference error: ${node.callee.id} is not defined`);
+      const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
+      const args = node.args.map(arg => this.visit(arg));
+      return callee.bind(this)(...args);
     } else {
       const callee = this.visitArrayAccess(node.callee);
       const args = node.args.map(arg => this.visit(arg));
-      return (callee as Function).bind(this)(...args);
+      return (callee as SonicWeaveFunction).bind(this)(...args);
     }
   }
 
   visitArrowFunction(node: ArrowFunction) {
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localContext: VisitorContext = new Map(this.context);
+      const localVisitor = new StatementVisitor(this.rootContext, this.parent);
       for (let i = 0; i < node.parameters.length; ++i) {
         if (i < args.length) {
-          localContext.set(node.parameters[i].id, args[i]);
+          localVisitor.mutables.set(node.parameters[i].id, args[i]);
         } else {
-          localContext.set(node.parameters[i].id, undefined);
+          localVisitor.mutables.set(node.parameters[i].id, undefined);
         }
       }
-      const localVisitor = new ExpressionVisitor(
-        this.rootContext,
-        localContext
-      );
-      return localVisitor.visit(node.expression);
+      return localVisitor.createExpressionVisitor().visit(node.expression);
     }
     Object.defineProperty(realization, 'name', {
       value: '(lambda)',
@@ -1243,11 +1341,8 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitIdentifier(node: Identifier): Interval {
-    if (this.context.has(node.id)) {
-      return this.context.get(node.id) as Interval;
-    }
-    throw new Error(`Reference error: ${node.id} is not defined`);
+  visitIdentifier(node: Identifier): SonicWeaveValue {
+    return this.parent.get(node.id);
   }
 
   visitEnumeratedChord(node: EnumeratedChord): Interval[] {
@@ -1351,6 +1446,10 @@ export class ExpressionVisitor {
     }
     return result;
   }
+
+  get(name: string) {
+    return this.parent.get(name);
+  }
 }
 
 export function parseAST(source: string): Program {
@@ -1369,11 +1468,11 @@ export function getSourceVisitor(includePrelude = true) {
   } else {
     const visitor = new StatementVisitor(rootContext);
     for (const [name, color] of CSS_COLOR_CONTEXT) {
-      visitor.context.set(name, color);
+      visitor.immutables.set(name, color);
     }
     for (const name in BUILTIN_CONTEXT) {
       const value = BUILTIN_CONTEXT[name];
-      visitor.context.set(name, value);
+      visitor.immutables.set(name, value);
     }
 
     if (includePrelude) {
@@ -1399,7 +1498,7 @@ export function evaluateSource(source: string, includePrelude = true) {
       throw new Error('Illegal statement');
     }
   }
-  if (!Array.isArray(visitor.context.get('$'))) {
+  if (!Array.isArray(visitor.mutables.get('$'))) {
     throw new Error('Context corruption detected');
   }
   return visitor;

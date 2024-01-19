@@ -48,6 +48,7 @@ Program
 AndToken      = 'and'    !IdentifierPart
 ByToken       = 'by'     !IdentifierPart
 CentToken     = 'c'      !IdentifierPart
+ConstToken    = 'const'  !IdentifierPart
 DotToken      = 'dot'    !IdentifierPart
 ElseToken     = 'else'   !IdentifierPart
 FalseToken    = 'false'  !IdentifierPart
@@ -55,6 +56,7 @@ ForToken      = 'for'    !IdentifierPart
 HertzToken    = 'Hz'     !IdentifierPart
 LowHertzToken = 'hz'     !IdentifierPart
 IfToken       = 'if'     !IdentifierPart
+LetToken      = 'let'     !IdentifierPart
 LogToken      = '/_'     !IdentifierPart
 ModToken      = 'mod'    !IdentifierPart
 NoneToken     = 'niente' !IdentifierPart
@@ -75,6 +77,7 @@ ReservedWord
   = AndToken
   / ByToken
   / CentToken
+  / ConstToken
   / DotToken
   / ElseToken
   / FalseToken
@@ -82,6 +85,7 @@ ReservedWord
   / HertzToken
   / LowHertzToken
   / IfToken
+  / LetToken
   / LogToken
   / ModToken
   / NoneToken
@@ -107,6 +111,7 @@ Statement
   = VariableManipulationStatement
   / PitchDeclaration
   / ExpressionStatement
+  / VariableDeclaration
   / FunctionDeclaration
   / UpDeclaration
   / LiftDeclaration
@@ -143,13 +148,13 @@ VariableManipulationStatement
     if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
       if (operator) {
         return {
-          type: 'VariableDeclaration',
+          type: 'AssignmentStatement',
           name,
           value: BinaryExpression(operator, name, value, preferLeft, preferRight),
         };
       }
       return {
-        type: 'VariableDeclaration',
+        type: 'AssignmentStatement',
         name,
         value,
       };
@@ -160,6 +165,24 @@ VariableManipulationStatement
       type: 'PitchDeclaration',
       left: name,
       right: value,
+    };
+  }
+
+VariableDeclaration
+  = LetToken _ name: (Identifier / IdentifierArray) _ '=' _ value: Expression EOS {
+    return {
+      type: 'VariableDeclaration',
+      name,
+      value,
+      mutable: true,
+    };
+  }
+  / ConstToken _ name: (Identifier / IdentifierArray) _ '=' _ value: Expression EOS {
+    return {
+      type: 'VariableDeclaration',
+      name,
+      value,
+      mutable: false,
     };
   }
 
@@ -269,12 +292,22 @@ IfStatement
   }
 
 ForOfStatement
-  = ForToken _ '(' _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
+  = ForToken _ '(' _ LetToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
     return {
       type: 'ForOfStatement',
       element,
       array,
       body,
+      mutable: true,
+    };
+  }
+  / ForToken _ '(' _ ConstToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
+    return {
+      type: 'ForOfStatement',
+      element,
+      array,
+      body,
+      mutable: false,
     };
   }
 

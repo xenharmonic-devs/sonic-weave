@@ -16,7 +16,7 @@ G&4
 C5
 
 // Store nominals by stripping the octaves
-labels = map(note => slice(str(note), 0, -1));
+const labels = map(note => slice(str(note), 0, -1));
 
 // Temper to 313 equal tones
 313@

@@ -198,15 +198,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(minorThird.toString()).toBe('1.2e');
   });
 
-  it('has a constant structure calculator', () => {
-    // 6\12 is ambiguous as a fourth and a fifth
-    const no = parseSingle('hasConstantStructure(mos(5, 2))');
-    expect(no.toString()).toBe('false');
-    // Augmented fourth and diminished fifth are distinct in 19 edo
-    const yes = parseSingle('hasConstantStructure(mos(5, 2, 3, 2))');
-    expect(yes.toString()).toBe('true');
-  });
-
   it('can convert FJS to monzo', () => {
     const monzo = parseSingle('monzo(vm6_5)');
     expect(monzo.toString()).toBe('[3 0 -1>-1\\');

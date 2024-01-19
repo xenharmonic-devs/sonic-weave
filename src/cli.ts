@@ -17,7 +17,7 @@ export function toScalaScl(source: string) {
   let useColors = false;
   const lines = ['!Created using SonicWeave v0.0.0 alpha', '!'];
   lines.push(visitor.rootContext.title || 'Untitled tuning');
-  const scale = visitor.context.get('$') as Interval[];
+  const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');
   const rel = relin.bind(visitor as unknown as ExpressionVisitor);
@@ -93,7 +93,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
       if (finalStatement.type === 'ExpressionStatement') {
         const subVisitor = visitor.createExpressionVisitor();
         const value = subVisitor.visit(finalStatement.expression);
-        visitor.handleValue(value);
+        visitor.handleValue(value, subVisitor);
         cb(null, value);
       } else {
         const interrupt = visitor.visit(finalStatement);
@@ -116,5 +116,9 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
     }
   }
 
-  start({prompt, eval: evaluateStatement, writer: repr.bind(visitor)});
+  start({
+    prompt,
+    eval: evaluateStatement,
+    writer: repr.bind(visitor.createExpressionVisitor()),
+  });
 }

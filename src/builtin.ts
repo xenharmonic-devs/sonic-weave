@@ -13,7 +13,7 @@ import {
 } from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
-import {type ExpressionVisitor, type StatementVisitor} from './parser';
+import {type ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
@@ -182,10 +182,7 @@ function cologarithmic(interval: Interval) {
 cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
 cologarithmic.__node__ = builtinNode(cologarithmic);
 
-export function ablin(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
+export function ablin(this: ExpressionVisitor, interval: Interval) {
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
     return new Interval(
@@ -210,10 +207,7 @@ export function ablin(
 ablin.__doc__ = 'Convert interval to absolute linear representation.';
 ablin.__node__ = builtinNode(ablin);
 
-export function relin(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
+export function relin(this: ExpressionVisitor, interval: Interval) {
   if (interval.isRelative()) {
     return new Interval(interval.value.clone(), 'linear', undefined, interval);
   }
@@ -233,10 +227,7 @@ export function relin(
 relin.__doc__ = 'Convert interval to relative linear representation.';
 relin.__node__ = builtinNode(relin);
 
-export function ablog(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
+export function ablog(this: ExpressionVisitor, interval: Interval) {
   const converted = ablin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
@@ -244,10 +235,7 @@ export function ablog(
 ablog.__doc__ = 'Convert interval to absolute logarithmic representation.';
 ablog.__node__ = builtinNode(ablog);
 
-export function relog(
-  this: ExpressionVisitor | StatementVisitor,
-  interval: Interval
-) {
+export function relog(this: ExpressionVisitor, interval: Interval) {
   const converted = relin.bind(this)(interval);
   converted.domain = 'logarithmic';
   return converted;
@@ -543,7 +531,7 @@ lcm.__doc__ =
 lcm.__node__ = builtinNode(lcm);
 
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   if (scale.length < 1) {
     return sonicBool(false);
   }
@@ -688,7 +676,7 @@ function sort(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   if (compareFn === undefined) {
     scale.sort(compare.bind(this));
   } else {
@@ -705,7 +693,7 @@ function sorted(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   scale = [...scale];
   sort.bind(this)(scale, compareFn);
   return scale;
@@ -715,14 +703,14 @@ sorted.__doc__ =
 sorted.__node__ = builtinNode(sorted);
 
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   scale.reverse();
 }
 reverse.__doc__ = 'Reverse the order of the current/given scale.';
 reverse.__node__ = builtinNode(reverse);
 
 function reversed(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   scale = [...scale];
   reverse.bind(this)(scale);
   return scale;
@@ -732,7 +720,7 @@ reversed.__doc__ =
 reversed.__node__ = builtinNode(reversed);
 
 function pop(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   if (!scale.length) {
     throw new Error('Pop from an empty scale');
   }
@@ -742,7 +730,7 @@ pop.__doc__ = 'Remove and return the last interval in the current/given scale.';
 pop.__node__ = builtinNode(pop);
 
 function popAll(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   const result = [...scale];
   scale.length = 0;
   return result;
@@ -751,14 +739,14 @@ popAll.__doc__ = 'Remove and return all intervals in the current/given scale.';
 popAll.__node__ = builtinNode(popAll);
 
 function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   scale.push(interval);
 }
 push.__doc__ = 'Append an interval onto the current/given scale.';
 push.__node__ = builtinNode(push);
 
 function shift(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   if (!scale.length) {
     throw new Error('Shift from an empty scale');
   }
@@ -773,7 +761,7 @@ function unshift(
   interval: Interval,
   scale?: Interval[]
 ) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   scale.unshift(interval);
 }
 unshift.__doc__ =
@@ -781,7 +769,7 @@ unshift.__doc__ =
 unshift.__node__ = builtinNode(unshift);
 
 function length(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.context.get('$') as Interval[];
+  scale ??= this.get('$') as Interval[];
   return Interval.fromInteger(scale.length);
 }
 length.__doc__ = 'Return the number of intervals in the scale.';
@@ -794,7 +782,7 @@ function map(
   array?: any[]
 ) {
   mapper = mapper.bind(this);
-  array ??= this.context.get('$') as Interval[];
+  array ??= this.get('$') as Interval[];
   return array.map((value, index, arr) =>
     mapper(value, Interval.fromInteger(index), arr)
   );
@@ -807,7 +795,7 @@ function remap(
   mapper: (value: any, index: Interval, array: any[]) => unknown,
   array?: any[]
 ) {
-  array ??= this.context.get('$') as Interval[];
+  array ??= this.get('$') as Interval[];
   const mapped = map.bind(this)(mapper, array);
   array.length = 0;
   array.push(...mapped);
@@ -822,7 +810,7 @@ function filter(
   array?: any[]
 ) {
   tester = tester.bind(this);
-  array ??= this.context.get('$') as Interval[];
+  array ??= this.get('$') as Interval[];
   return array.filter((value, index, arr) =>
     sonicTruth(tester(value, Interval.fromInteger(index), arr))
   );
@@ -836,7 +824,7 @@ function distill(
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
   array?: any[]
 ) {
-  array ??= this.context.get('$') as Interval[];
+  array ??= this.get('$') as Interval[];
   const filtered = filter.bind(this)(tester, array);
   array.length = 0;
   array.push(...filtered);
@@ -857,7 +845,7 @@ function arrayReduce(
   initialValue?: any
 ) {
   reducer = reducer.bind(this);
-  array ??= this.context.get('$') as Interval[];
+  array ??= this.get('$') as Interval[];
   if (arguments.length >= 3) {
     return array.reduce(
       (value, currentValue, currentIndex, arr) =>
@@ -881,7 +869,7 @@ isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
 function repr_(
-  this: ExpressionVisitor | StatementVisitor,
+  this: ExpressionVisitor,
   value: SonicWeaveValue | null,
   depth = 2
 ): string {
@@ -914,20 +902,14 @@ function repr_(
   return `${value}`;
 }
 
-export function repr(
-  this: ExpressionVisitor | StatementVisitor,
-  value: SonicWeaveValue
-) {
+export function repr(this: ExpressionVisitor, value: SonicWeaveValue) {
   return repr_.bind(this)(value);
 }
 repr.__doc__ =
   'Obtain a string representation of the value (with color and label).';
 repr.__node__ = builtinNode(repr);
 
-export function str(
-  this: ExpressionVisitor | StatementVisitor,
-  value: SonicWeaveValue
-) {
+export function str(this: ExpressionVisitor, value: SonicWeaveValue) {
   if (value instanceof Interval) {
     return value.str(this.rootContext);
   }
@@ -1207,7 +1189,7 @@ riff prod factors {
 riff cumsum array {
   "Calculate the cumulative sums of the terms in the array.";
   array;
-  i = 0;
+  let i = 0;
   while (++i < length($))
     $[i] ~+= $[i-1];
 }
@@ -1215,7 +1197,7 @@ riff cumsum array {
 riff cumprod array {
   "Calculate the cumulative products of the factors in the array. (i.e. logarithmic cumulative sum)";
   array;
-  i = 0;
+  let i = 0;
   while (++i < length($))
     $[i] ~*= $[i-1];
 }
@@ -1223,7 +1205,7 @@ riff cumprod array {
 riff label labels scale {
   "Apply labels (or colors) from the first array to the current/given scale.";
   scale ??= $$;
-  for ([i, l] of zip(scale, labels)) {
+  for (const [i, l] of zip(scale, labels)) {
     void(i l);
   }
 }
@@ -1232,11 +1214,11 @@ riff tune a b numIter weighting {
   "Find a combination of two vals that is closer to just intonation.";
   numIter ??= 1;
   while (numIter--) {
-    x = 2 * a - b;
-    y = v{a + b};
-    z = 2 * b - a;
+    const x = 2 * a - b;
+    const y = v{a + b};
+    const z = 2 * b - a;
 
-    best = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
+    const best = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
     a = best[0];
     b = best[1];
   }
@@ -1263,7 +1245,7 @@ riff mos numberOfLargeSteps numberOfSmallSteps sizeOfLargeStep sizeOfSmallStep u
   Alternatively \`down\` defines the darkness of the mode i.e. the number of minor intervals from the root. \\
   The default \`equave\` is the octave \`2/1\`.";
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
-  divisions = $[-1];
+  const divisions = $[-1];
   if (equave === niente) step => step \\ divisions;
   else step => step \\ divisions < equave >;
 }
@@ -1273,7 +1255,7 @@ riff rank2 generator up down period numPeriods {
   down ??= 0;
   period ??= 2;
   numPeriods ??= 1;
-  accumulator = 1;
+  let accumulator = 1;
   while (up--) {
     accumulator *~= generator;
     accumulator;
@@ -1292,7 +1274,7 @@ riff rank2 generator up down period numPeriods {
 riff cps factors count equave withUnity {
   "Generate a combination product set from the given factors and combination size.";
   equave ??= 2;
-  for (combination of kCombinations(factors, count))
+  for (const combination of kCombinations(factors, count))
     prod(combination);
   sort();
   if (not withUnity) ground();
@@ -1308,10 +1290,10 @@ riff wellTemperament commaFractions comma down generator period {
   generator ??= 3/2;
   period ??= 2;
 
-  up = length(commaFractions) - down;
+  const up = length(commaFractions) - down;
 
-  accumulator = 1;
-  i = 0;
+  let accumulator = 1;
+  let i = 0;
   while (i < up) {
     accumulator *~= generator ~* comma ~^ commaFractions[down + i++];
     accumulator;
@@ -1340,19 +1322,19 @@ riff spanLattice basis ups downs equave {
   1;
 
   while (basis) {
-    generator = pop(basis);
-    up = pop(ups);
-    down = pop(downs);
+    const generator = pop(basis);
+    const up = pop(ups);
+    const down = pop(downs);
 
-    for (root of $$) {
-      accumulator = root;
-      u = up;
+    for (const root of $$) {
+      let accumulator = root;
+      let u = up;
       while (u--) {
         accumulator *~= generator;
         accumulator;
       }
       accumulator = root;
-      d = down;
+      let d = down;
       while (d--) {
         accumulator %~= generator;
         accumulator;
@@ -1374,9 +1356,9 @@ riff eulerGenus guide root equave {
     throw "Root must divide the guide tone";
   }
 
-  remainder = 0;
+  let remainder = 0;
   while (++remainder < equave) {
-    n = remainder;
+    let n = remainder;
     while (n <= guide) {
       if (not (guide ~mod n)) n;
       n ~+= equave;
@@ -1391,8 +1373,8 @@ riff eulerGenus guide root equave {
 riff octaplex b0 b1 b2 b3 equave withUnity {
   "Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.";
   equave ??= 2;
-  for (s1 of [-1, 1]) {
-    for (s2 of [-1, 1]) {
+  for (const s1 of [-1, 1]) {
+    for (const s2 of [-1, 1]) {
       b0 ~^ s1 ~* b1 ~^ s2;
       b0 ~^ s1 ~* b2 ~^ s2;
       b0 ~^ s1 ~* b3 ~^ s2;
@@ -1408,18 +1390,18 @@ riff octaplex b0 b1 b2 b3 equave withUnity {
   sort();
 }
 
-riff ags generators ordinal period numPeriods maxSize {
-  "Generate an alternating generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.";
+riff gs generators ordinal period numPeriods maxSize {
+  "Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.";
   ordinal ??= 1;
   period ??= 2;
   numPeriods ??= 1;
   maxSize ??= 100;
   cumprod(generators);
-  accumulator = $[-1];
+  let accumulator = $[-1];
   period;
   reduce();
   sort();
-  i = 0;
+  let i = 0;
   while (ordinal) {
     accumulator *~= generators[i++ mod length(generators)];
     push(accumulator ~rd period, $$);
@@ -1438,7 +1420,7 @@ riff ags generators ordinal period numPeriods maxSize {
 riff reduce scale {
   "Reduce the current/given scale by its equave.";
   $ = scale ?? $$;
-  equave = pop();
+  const equave = pop();
   i => i ~rd equave;
   equave;
   return;
@@ -1447,7 +1429,7 @@ riff reduce scale {
 riff revpose scale {
   "Change the sounding direction. Converts a descending scale to an ascending one."
   $ = scale ?? $$;
-  equave = pop();
+  const equave = pop();
   i => i ~% equave;
   reverse();
   %equave;
@@ -1463,7 +1445,7 @@ riff revposed scale {
 riff retrovert scale {
   "Retrovert the current/given scale (negative harmony i.e reflect and transpose).";
   $ = scale ?? $$;
-  equave = pop();
+  const equave = pop();
   i => equave %~ i;
   reverse();
   equave;
@@ -1492,9 +1474,9 @@ riff rotate onto scale {
   "Rotate the current/given scale onto the given degree.";
   onto ??= 1;
   $ = scale ?? $$;
-  equave = $[-1];
+  const equave = $[-1];
   while (--onto) equave *~ shift();
-  root = shift();
+  const root = shift();
   i => i ~% root;
   equave;
   return;
@@ -1510,11 +1492,11 @@ riff clear scale {
 riff repeat times {
   "Stack the current/given scale on top of itself. Clears the scale if the number of repeats is zero.";
   times ??= 2;
-  scale = $$;
+  const scale = $$;
   if (not times) {
     return clear(scale);
   }
-  equave = scale[-1];
+  const equave = scale[-1];
   while (--times) {
     scale;
     i => i ~* equave ~^ times;
@@ -1524,7 +1506,7 @@ riff repeat times {
 riff ground scale {
   "Use the first interval in the current/given scale as the implicit unison.";
   $ = scale ?? $$;
-  root = shift();
+  const root = shift();
   i => i ~% root;
   return;
 }
@@ -1533,7 +1515,7 @@ riff elevate scale {
   "Remove denominators and make the root explicit in the current/given scale.";
   $ = scale ?? $$;
   unshift($[-1]~^0);
-  root = %~arrayReduce(gcd);
+  const root = %~arrayReduce(gcd);
   i => i ~* root;
   return;
 }
@@ -1555,10 +1537,10 @@ riff toSubharmonics overtone scale {
 riff keepUnique scale {
   "Only keep unique intervals in the current/given scale.";
   scale ??= $$;
-  last = niente;
-  i = length(scale);
+  let last = niente;
+  let i = length(scale);
   while (i--) {
-    current = shift(scale);
+    const current = shift(scale);
     if (last != current) {
       current;
       last = current;
@@ -1573,10 +1555,10 @@ riff mergeOffset offsets overflow scale {
   overflow ??= 'drop';
   if (not isArray(offsets)) offsets = [offsets];
   $ = scale ?? $$;
-  equave = pop();
+  const equave = pop();
 
   unshift(equave ~^ 0);
-  copies = $ ~tns offsets;
+  const copies = $ ~tns offsets;
   void(shift());
 
   if (overflow === 'drop') {
@@ -1602,6 +1584,7 @@ riff stretch amount scale {
 riff randomVariance amount varyEquave scale {
   "Add random variance to the current/given scale.";
   $ = scale ?? $$;
+  let equave = niente;
   if (not varyEquave) equave = pop();
   i => i ~* (amount ~^ (2 * random() - 1));
   if (not varyEquave) equave;

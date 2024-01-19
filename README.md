@@ -68,7 +68,7 @@ green
 2/1
 red
 ```
-Results in the scale `$ = [(3/2 #008000), (2/1 #FF0000)]`.
+Results in a scale equivalent to `$ = [3/2 #008000, 2/1 #FF0000]`.
 
 It is up to a user interface to interprete colors. The original intent is to color notes in an on-screen keyboard.
 
@@ -113,12 +113,12 @@ SonicWeave comes with some operators.
 
 Down-shimmer sometimes requires curly brackets due to `v` colliding with the Latin alphabet.
 
-Increment/decrement assumes that `i = 2` originally.
+Increment/decrement assumes that you've declared `let i = 2` originally.
 ### Coalescing
 | Name               | Example       | Result |
 | ------------------ | ------------- | ------ |
-| Logical AND        | `2 and 0`      | `0`    |
-| Logical OR         | `0 or 2`    | `2`    |
+| Logical AND        | `2 and 0`     | `0`    |
+| Logical OR         | `0 or 2`      | `2`    |
 | Nullish coalescing | `niente ?? 2` | `2`    |
 
 ### Boolean
@@ -325,10 +325,12 @@ Multiplication of absolute quantities is interpreted as their geometric average:
 Same goes for logarithmic absolute quantities: `C♮4 + E♮4` corresponds to `D♮4` in the scale if you've declared `C♮4` as absolute quantity.
 
 ## Variable declaration
-Variables can be declared using a single *equals* sign e.g. `k = relog(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
+Variables can be declared using the keyword `let` or `const` and a single *equals* sign e.g. `const k = relog(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
+
+Only variables declared using `let` can be re-assigned later.
 
 ### Re-assignment
-Variables can be reassigned for example after `i = 2` declaring `i += 3` sets `i` to `5`.
+Variables can be reassigned for example after `let i = 2` declaring `i += 3` sets `i` to `5`.
 
 ## Pitch declaration
 Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz`.
@@ -346,7 +348,7 @@ The current scale of the parent block can be accessed using `$$`.
 ## While
 "While" loops repeat a statement until the test becames *falsy* e.g.
 ```javascript
-i = 5
+let i = 5
 while (--i) {
   i
 }
@@ -356,7 +358,7 @@ results in `$ = [4, 3, 2, 1]`.
 ## For...of
 "For" loops iterate over array contents e.g.
 ```javascript
-for (i of [1..5]) {
+for (const i of [1..5]) {
   2 ^ (i % 5)
 }
 ```
@@ -378,7 +380,7 @@ Conditional expressions look similar but work inline e.g. `3 if true else 5` eva
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
 ```javascript
 riff subharmonics start end {
-  return inverted(start::end)
+  return retroverted(start::end)
 }
 ```
 Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
@@ -387,7 +389,7 @@ Above the `return` statement is suprefluous. We could've left it out and let the
 Once declared, functions can be called:`subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`.
 
 ### Lambda expressions
-Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start, end => inverted(start::end))`.
+Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start, end => retroverted(start::end))`.
 
 ## Throwing
 To interupt execution you can throw string messages.
@@ -423,7 +425,7 @@ First we'll measure out the primes:
 
 Then we replace each prime with their closest approximation:
 ```javascript
-st = 2^1/12 // One semitone
+const st = 2^1/12 // One semitone
 
 (2 by st)^-2 * (3 by st)^0 * (5 by st)^1
 (2 by st)^-1 * (3 by st)^1 * (5 by st)^0
@@ -582,7 +584,7 @@ The first few NFJS commas are. To bridge from irrational to rational the commas 
 | `31n`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
 | `37n`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
 
-As an extension to NFJS SonicWeave has a neutral bridging comma associated with every prime.
+In addition to NFJS commas SonicWeave has a neutral bridging comma associated with every prime.
 | Prime  | Comma                   | Monzo                             | Size in cents |
 | ------ | ----------------------- | --------------------------------- | ------------- |
 | `5n`   | `sqrt(25/24)`           | `[-3/2 -1/2 1>`                   | `+35.336`     |
@@ -590,6 +592,8 @@ As an extension to NFJS SonicWeave has a neutral bridging comma associated with 
 | `17n`  | `sqrt(8192/7803)`       | `[-13/2 3/2 0 0 0 0 1>`           | `-42.112`     |
 | `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`         | `-53.464`     |
 | `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>`       | `73.387`      |
+
+Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`.
 
 #### Quarter-augmented Pythagorean notation
 As mentioned above the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.

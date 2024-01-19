@@ -2,10 +2,10 @@
 
 // https://en.xen.wiki/w/Orgonia#Orgone
 // POTE generator: ~77/64 = 323.372
-generator = 323.372
+const generator = 323.372
 
-up = 3
-down = 3
+const up = 3
+const down = 3
 rank2(generator, up, down);
 
 // https://en.xen.wiki/w/4L_3s#Note_names

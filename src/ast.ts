@@ -41,10 +41,17 @@ export type Program = {
   body: Statement[];
 };
 
-export type VariableDeclaration = {
-  type: 'VariableDeclaration';
+export type AssignmentStatement = {
+  type: 'AssignmentStatement';
   name: Identifier | Identifier[] | ArrayAccess;
   value: Expression;
+};
+
+export type VariableDeclaration = {
+  type: 'VariableDeclaration';
+  name: Identifier | Identifier[];
+  value: Expression;
+  mutable: Boolean;
 };
 
 export type FunctionDeclaration = {
@@ -104,6 +111,7 @@ export type ForOfStatement = {
   element: Identifier | Identifier[];
   array: Expression;
   body: Statement;
+  mutable: Boolean;
 };
 
 export type ExpressionStatement = {
@@ -112,6 +120,7 @@ export type ExpressionStatement = {
 };
 
 export type Statement =
+  | AssignmentStatement
   | VariableDeclaration
   | ExpressionStatement
   | FunctionDeclaration
