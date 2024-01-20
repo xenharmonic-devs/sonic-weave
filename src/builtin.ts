@@ -519,20 +519,28 @@ PrimeMapping.__doc__ =
   'Construct a prime mapping for tempering intervals to real cents. Remaining primes are converted to real cents without tempering.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
-function gcd(a: Interval, b: Interval) {
-  const value = a.value.gcd(b.value);
-  return new Interval(value, 'linear');
+function gcd(this: ExpressionVisitor, ...intervals: Interval[]) {
+  if (!intervals.length) {
+    intervals = this.get('$') as Interval[];
+  }
+  return intervals.reduce(
+    (a, b) => new Interval(a.value.gcd(b.value), 'linear')
+  );
 }
 gcd.__doc__ =
-  'Obtain the largest (linear) multiplicative factor shared by both intervals.';
+  'Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.';
 gcd.__node__ = builtinNode(gcd);
 
-function lcm(a: Interval, b: Interval) {
-  const value = a.value.lcm(b.value);
-  return new Interval(value, 'linear');
+function lcm(this: ExpressionVisitor, ...intervals: Interval[]) {
+  if (!intervals.length) {
+    intervals = this.get('$') as Interval[];
+  }
+  return intervals.reduce(
+    (a, b) => new Interval(a.value.lcm(b.value), 'linear')
+  );
 }
 lcm.__doc__ =
-  'Obtain the smallest (linear) interval that shares both intervals as multiplicative factors.';
+  'Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.';
 lcm.__node__ = builtinNode(lcm);
 
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
@@ -772,6 +780,18 @@ function unshift(
 unshift.__doc__ =
   'Prepend an interval at the beginning of the current/given scale.';
 unshift.__node__ = builtinNode(unshift);
+
+function extend(
+  this: ExpressionVisitor,
+  first: Interval[],
+  ...rest: Interval[][]
+) {
+  for (const r of rest) {
+    first.push(...r);
+  }
+}
+extend.__doc__ = 'Extend the first array with the contents of the rest.';
+extend.__node__ = builtinNode(extend);
 
 function concat(
   this: ExpressionVisitor,
@@ -1146,6 +1166,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   push,
   shift,
   unshift,
+  extend,
   concat,
   length,
   print,
@@ -1584,7 +1605,7 @@ riff elevate scale {
   "Remove denominators and make the root explicit in the current/given scale.";
   $ = scale ?? $$;
   unshift($[-1]~^0);
-  const root = %~arrayReduce(gcd);
+  const root = %~gcd();
   i => i ~* root;
   return;
 }

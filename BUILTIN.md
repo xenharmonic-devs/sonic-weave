@@ -97,6 +97,12 @@ Obtain the docstring of the given riff.
 
 `riff`
 
+### extend
+Extend the first array with the contents of the rest.
+#### Parameters:
+
+`first`, `...rest`
+
 ### factorColor
 Color an interval based on its prime factors.
 #### Parameters:
@@ -128,10 +134,10 @@ Convert interval to a fraction.
 `interval`, `epsilon`
 
 ### gcd
-Obtain the largest (linear) multiplicative factor shared by both intervals.
+Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
 #### Parameters:
 
-`a`, `b`
+`...intervals`
 
 ### hasConstantStructure
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
@@ -188,10 +194,10 @@ Obtain all k-sized combinations in a set
 `set`, `k`
 
 ### lcm
-Obtain the smallest (linear) interval that shares both intervals as multiplicative factors.
+Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.
 #### Parameters:
 
-`a`, `b`
+`...intervals`
 
 ### length
 Return the number of intervals in the scale.
