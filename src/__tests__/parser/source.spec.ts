@@ -593,6 +593,15 @@ describe('SonicWeave parser', () => {
     );
   });
 
+  it('has rest syntax', () => {
+    const scale = parseSource(`
+      riff fun foo ...bar {return foo + bar[1]}
+      fun(1, 2, 3, 4, 5, 6)
+    `);
+    expect(scale).toHaveLength(1);
+    expect(scale[0].toInteger()).toBe(4);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

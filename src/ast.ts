@@ -41,22 +41,28 @@ export type Program = {
   body: Statement[];
 };
 
+export type Parameters = {
+  type: 'Parameters';
+  identifiers: Identifier[];
+  rest?: Identifier;
+};
+
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
-  name: Identifier | Identifier[] | ArrayAccess;
+  name: Identifier | Parameters | ArrayAccess;
   value: Expression;
 };
 
 export type VariableDeclaration =
   | {
       type: 'VariableDeclaration';
-      name: Identifier | Identifier[];
+      name: Identifier | Parameters;
       value: Expression;
       mutable: false;
     }
   | {
       type: 'VariableDeclaration';
-      name: Identifier | Identifier[];
+      name: Identifier | Parameters;
       value?: Expression;
       mutable: true;
     };
@@ -64,7 +70,7 @@ export type VariableDeclaration =
 export type FunctionDeclaration = {
   type: 'FunctionDeclaration';
   name: Identifier;
-  parameters: Identifier[];
+  parameters: Parameters;
   body: Statement[];
 };
 
@@ -115,7 +121,7 @@ export type IfStatement = {
 
 export type ForOfStatement = {
   type: 'ForOfStatement';
-  element: Identifier | Identifier[];
+  element: Identifier | Parameters;
   array: Expression;
   body: Statement;
   mutable: Boolean;
@@ -211,15 +217,21 @@ export type Identifier = {
   id: string;
 };
 
+export type Argument = {
+  type: 'Argument';
+  expression: Expression;
+  spread: Boolean;
+};
+
 export type CallExpression = {
   type: 'CallExpression';
   callee: Identifier | ArrayAccess;
-  args: Expression[];
+  args: Argument[];
 };
 
 export type ArrowFunction = {
   type: 'ArrowFunction';
-  parameters: Identifier[];
+  parameters: Parameters;
   expression: Expression;
 };
 
@@ -245,7 +257,7 @@ export type Range = {
 
 export type ArrayLiteral = {
   type: 'ArrayLiteral';
-  elements: Expression[];
+  elements: Argument[];
 };
 
 export type StringLiteral = {

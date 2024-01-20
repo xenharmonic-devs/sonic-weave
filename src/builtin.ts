@@ -57,7 +57,7 @@ export function linearOne() {
 }
 
 function builtinNode(builtin: Function): FunctionDeclaration {
-  const parameters: Identifier[] = builtin
+  const identifiers: Identifier[] = builtin
     .toString()
     .split('(', 2)[1]
     .split(')', 2)[0]
@@ -68,7 +68,7 @@ function builtinNode(builtin: Function): FunctionDeclaration {
   return {
     type: 'FunctionDeclaration',
     name: {type: 'Identifier', id: builtin.name},
-    parameters,
+    parameters: {type: 'Parameters', identifiers},
     body: [],
   };
 }
@@ -962,9 +962,13 @@ function help(riff: SonicWeaveFunction) {
   console.log(`Help on ${riff.name}`);
   console.log(riff.__doc__);
   const params = riff.__node__.parameters;
-  if (params.length) {
+  if (params.identifiers.length || params.rest) {
     console.log('Parameters:');
-    console.log(params.map(p => p.id).join(', '));
+    const names = params.identifiers.map(p => p.id);
+    if (params.rest) {
+      names.push('...' + params.rest.id);
+    }
+    console.log(names.join(', '));
   } else {
     console.log('(No parameters)');
   }

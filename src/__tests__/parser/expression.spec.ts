@@ -503,4 +503,9 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(helloWorld).toBe('Hello, World!');
   });
+
+  it('has spread syntax', () => {
+    const stuff = evaluateExpression('["1", ...["2", "3"], "4"]');
+    expect(stuff).toEqual(['1', ...['2', '3'], '4']);
+  });
 });

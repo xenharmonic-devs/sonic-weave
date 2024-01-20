@@ -40,7 +40,9 @@ import {inflect} from './fjs';
 import {inferEquave, wartsToVal} from './warts';
 import {RootContext} from './context';
 import {
+  Argument,
   ArrayAccess,
+  ArrayLiteral,
   ArraySlice,
   ArrowFunction,
   AssignmentStatement,
@@ -228,12 +230,12 @@ export class StatementVisitor {
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = this.createExpressionVisitor();
     const value = node.value ? subVisitor.visit(node.value) : undefined;
-    if (Array.isArray(node.name)) {
+    if (node.name.type === 'Parameters') {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring declaration must assign an array.');
       }
-      for (let i = 0; i < node.name.length; ++i) {
-        const name = node.name[i].id;
+      for (let i = 0; i < node.name.identifiers.length; ++i) {
+        const name = node.name.identifiers[i].id;
         if (this.immutables.has(name) || this.mutables.has(name)) {
           throw new Error('Cannot redeclare variable.');
         }
@@ -241,6 +243,17 @@ export class StatementVisitor {
           this.mutables.set(name, value[i]);
         } else {
           this.immutables.set(name, value[i]);
+        }
+      }
+      if (node.name.rest) {
+        const name = node.name.rest.id;
+        if (this.immutables.has(name) || this.mutables.has(name)) {
+          throw new Error('Cannot redeclare variable.');
+        }
+        if (node.mutable) {
+          this.mutables.set(name, value.slice(node.name.identifiers.length));
+        } else {
+          this.immutables.set(name, value.slice(node.name.identifiers.length));
         }
       }
     } else {
@@ -260,12 +273,12 @@ export class StatementVisitor {
   visitAssignmentStatement(node: AssignmentStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
-    if (Array.isArray(node.name)) {
+    if (node.name.type === 'Parameters') {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring assignment must use an array.');
       }
-      destructuring: for (let i = 0; i < node.name.length; ++i) {
-        const name = node.name[i].id;
+      destructuring: for (let i = 0; i < node.name.identifiers.length; ++i) {
+        const name = node.name.identifiers[i].id;
         if (this.immutables.has(name)) {
           throw new Error('Assignment to a constant variable.');
         }
@@ -275,6 +288,25 @@ export class StatementVisitor {
           if (visitor.mutables.has(name)) {
             visitor.mutables.set(name, value[i]);
             continue destructuring;
+          }
+          visitor = visitor.parent;
+        }
+        throw new Error('Assignment to an undeclared variable.');
+      }
+      if (node.name.rest) {
+        const name = node.name.rest.id;
+        if (this.immutables.has(name)) {
+          throw new Error('Assignment to a constant variable.');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let visitor: StatementVisitor | undefined = this;
+        while (visitor) {
+          if (visitor.mutables.has(name)) {
+            visitor.mutables.set(
+              name,
+              value.slice(node.name.identifiers.length)
+            );
+            return undefined;
           }
           visitor = visitor.parent;
         }
@@ -518,17 +550,31 @@ export class StatementVisitor {
       loopVisitor.mutables.set('$$', this.mutables.get('$$'));
     }
     for (const value of array) {
-      if (Array.isArray(node.element)) {
+      if (node.element.type === 'Parameters') {
         if (!Array.isArray(value)) {
           throw new Error('Must iterate over arrays when destructuring.');
         }
-        for (let i = 0; i < node.element.length; ++i) {
-          const name = node.element[i].id;
+        for (let i = 0; i < node.element.identifiers.length; ++i) {
+          const name = node.element.identifiers[i].id;
           if (node.mutable) {
             // Technically a mutation, but should be fine.
             loopVisitor.mutables.set(name, value[i]);
           } else {
             loopVisitor.immutables.set(name, value[i]);
+          }
+        }
+        if (node.element.rest) {
+          const name = node.element.rest.id;
+          if (node.mutable) {
+            loopVisitor.mutables.set(
+              name,
+              value.slice(node.element.identifiers.length)
+            );
+          } else {
+            loopVisitor.immutables.set(
+              name,
+              value.slice(node.element.identifiers.length)
+            );
           }
         }
       } else {
@@ -583,12 +629,21 @@ export class StatementVisitor {
       );
       localVisitor.mutables.set('$$', this.parent.mutables.get('$'));
 
-      for (let i = 0; i < node.parameters.length; ++i) {
+      for (let i = 0; i < node.parameters.identifiers.length; ++i) {
+        const name = node.parameters.identifiers[i].id;
         if (i < args.length) {
-          localVisitor.mutables.set(node.parameters[i].id, args[i]);
+          localVisitor.mutables.set(name, args[i]);
         } else {
-          localVisitor.mutables.set(node.parameters[i].id, undefined);
+          localVisitor.mutables.set(name, undefined);
         }
+      }
+      if (node.parameters.rest) {
+        const name = node.parameters.rest.id;
+        // XXX: Poor type system gets abused again.
+        localVisitor.mutables.set(
+          name,
+          args.slice(node.parameters.identifiers.length) as Interval[]
+        );
       }
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
@@ -744,8 +799,7 @@ export class ExpressionVisitor {
       case 'HarmonicSegment':
         return this.visitHarmonicSegment(node);
       case 'ArrayLiteral':
-        // We cheat here to simplify the type hierarchy definition (no nested arrays).
-        return node.elements.map(this.visit.bind(this)) as SonicWeaveValue;
+        return this.visitArrayLiteral(node);
       case 'StringLiteral':
         return node.value;
       case 'NoneLiteral':
@@ -762,6 +816,23 @@ export class ExpressionVisitor {
         throw new Error('Unexpected aspiring absolute FJS');
     }
     node satisfies never;
+  }
+
+  spread(args: Argument[]): Interval[] {
+    const result: Interval[] = [];
+    for (const arg of args) {
+      if (arg.spread) {
+        result.push(...(this.visit(arg.expression) as Interval[]));
+      } else {
+        result.push(this.visit(arg.expression) as Interval);
+      }
+    }
+    return result;
+  }
+
+  // We cheat here to simplify the type hierarchy definition (no nested arrays).
+  visitArrayLiteral(node: ArrayLiteral): Interval[] {
+    return this.spread(node.elements);
   }
 
   visitStepLiteral(node: StepLiteral) {
@@ -1232,13 +1303,12 @@ export class ExpressionVisitor {
   }
 
   visitCallExpression(node: CallExpression) {
+    const args = this.spread(node.args);
     if (node.callee.type === 'Identifier') {
       const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
-      const args = node.args.map(arg => this.visit(arg));
       return callee.bind(this)(...args);
     } else {
       const callee = this.visitArrayAccess(node.callee);
-      const args = node.args.map(arg => this.visit(arg));
       return (callee as SonicWeaveFunction).bind(this)(...args);
     }
   }
@@ -1246,12 +1316,20 @@ export class ExpressionVisitor {
   visitArrowFunction(node: ArrowFunction) {
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor(this.rootContext, this.parent);
-      for (let i = 0; i < node.parameters.length; ++i) {
+      for (let i = 0; i < node.parameters.identifiers.length; ++i) {
+        const name = node.parameters.identifiers[i].id;
         if (i < args.length) {
-          localVisitor.mutables.set(node.parameters[i].id, args[i]);
+          localVisitor.mutables.set(name, args[i]);
         } else {
-          localVisitor.mutables.set(node.parameters[i].id, undefined);
+          localVisitor.mutables.set(name, undefined);
         }
+      }
+      if (node.parameters.rest) {
+        const name = node.parameters.rest.id;
+        localVisitor.mutables.set(
+          name,
+          args.slice(node.parameters.identifiers.length) as Interval[]
+        );
       }
       return localVisitor.createExpressionVisitor().visit(node.expression);
     }
