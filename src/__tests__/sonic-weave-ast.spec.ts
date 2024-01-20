@@ -210,8 +210,63 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         {
           type: 'FunctionDeclaration',
           name: {type: 'Identifier', id: 'foo'},
-          parameters: [],
+          parameters: {
+            type: 'Parameters',
+            identifiers: [],
+            rest: null,
+          },
           body: [{type: 'ReturnStatement'}],
+        },
+      ],
+    });
+  });
+
+  it('parses rest syntax', () => {
+    const ast = parse('riff foo bar ...baz {}');
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'FunctionDeclaration',
+          name: {type: 'Identifier', id: 'foo'},
+          parameters: {
+            type: 'Parameters',
+            identifiers: [{type: 'Identifier', id: 'bar'}],
+            rest: {type: 'Identifier', id: 'baz'},
+          },
+          body: [],
+        },
+      ],
+    });
+  });
+
+  it('parses spread syntax', () => {
+    const ast = parse('[foo ...bar, baz]');
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'ArrayLiteral',
+            elements: [
+              {
+                type: 'Argument',
+                spread: false,
+                expression: {type: 'Identifier', id: 'foo'},
+              },
+              {
+                type: 'Argument',
+                spread: true,
+                expression: {type: 'Identifier', id: 'bar'},
+              },
+              {
+                type: 'Argument',
+                spread: false,
+                expression: {type: 'Identifier', id: 'baz'},
+              },
+            ],
+          },
         },
       ],
     });

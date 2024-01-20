@@ -38,11 +38,13 @@ function generateDocs(riffs: SonicWeaveFunction[]) {
     const node = riff.__node__;
     stdout.write('### ' + riff.name + '\n');
     stdout.write(riff.__doc__ + '\n');
-    if (node.parameters.length) {
+    if (node.parameters.identifiers.length || node.parameters.rest) {
       stdout.write('#### Parameters:\n\n');
-      stdout.write(
-        node.parameters.map(p => '`' + p.id + '`').join(', ') + '\n\n'
-      );
+      const names = node.parameters.identifiers.map(p => '`' + p.id + '`');
+      if (node.parameters.rest) {
+        names.push('`...' + node.parameters.rest.id + '`');
+      }
+      stdout.write(names.join(', ') + '\n\n');
     } else {
       stdout.write('_(No parameters)_\n\n');
     }

@@ -233,10 +233,25 @@ LiftDeclaration
   }
 
 Parameters
-  = Identifier|.., _ ','? _|
+  = identifiers: Identifier|.., _ ','? _| rest: (','? _ '...' _ @Identifier)? {
+    return {
+      type: 'Parameters',
+      identifiers,
+      rest,
+    };
+  }
+
+Argument
+  = spread: '...'? _ expression: Expression {
+    return {
+      type: 'Argument',
+      spread: !!spread,
+      expression,
+    };
+  }
 
 ArgumentList
-  = Expression|.., _ ','? _|
+  = Argument|.., _ ','? _|
 
 IdentifierArray
   = '[' _ @Parameters _ ']'
