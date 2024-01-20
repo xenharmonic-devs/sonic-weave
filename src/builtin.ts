@@ -481,12 +481,17 @@ function JIP(this: ExpressionVisitor, interval: Interval) {
   }
   return new Interval(value, 'logarithmic', undefined, interval);
 }
-JIP.__doc__ = 'The Just Intonation Point. Converts intervals to hard cents.';
+JIP.__doc__ = 'The Just Intonation Point. Converts intervals to real cents.';
 JIP.__node__ = builtinNode(JIP);
 
-function PrimeMapping(this: ExpressionVisitor, ...primeCents: Interval[]) {
+function PrimeMapping(
+  this: ExpressionVisitor,
+  ...primeCents: (Interval | undefined)[]
+) {
   const rl = relog.bind(this);
-  const pc = primeCents.map(p => rl(p).value.totalCents());
+  const pc = primeCents.map((p, i) =>
+    p ? rl(p).value.totalCents() : PRIME_CENTS[i]
+  );
 
   function mapper(this: ExpressionVisitor, interval: Interval) {
     const monzo = relog.bind(this)(interval).value;
@@ -506,12 +511,12 @@ function PrimeMapping(this: ExpressionVisitor, ...primeCents: Interval[]) {
     value: `PrimeMapping${pc.map(p => p.toString() + 'c').join(', ')}`,
     enumerable: false,
   });
-  mapper.__doc__ = 'Prime mapper. Temperes intervals to hard cents.';
+  mapper.__doc__ = 'Prime mapper. Temperes intervals to real cents.';
   mapper.__node__ = builtinNode(mapper);
   return mapper;
 }
 PrimeMapping.__doc__ =
-  'Construct a prime mapping for tempering intervals to hard cents. Remaining primes are converted to hard cents without tempering.';
+  'Construct a prime mapping for tempering intervals to real cents. Remaining primes are converted to real cents without tempering.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
 function gcd(a: Interval, b: Interval) {
@@ -768,6 +773,21 @@ unshift.__doc__ =
   'Prepend an interval at the beginning of the current/given scale.';
 unshift.__node__ = builtinNode(unshift);
 
+function concat(
+  this: ExpressionVisitor,
+  first: SonicWeaveValue[] | string,
+  ...rest: SonicWeaveValue[]
+) {
+  if (typeof first === 'string') {
+    return first.concat(
+      ...rest.map(r => (typeof r === 'string' ? r : repr.bind(this)(r)))
+    );
+  }
+  return first.concat(...rest);
+}
+concat.__doc__ = 'Combine two or more arrays/strings.';
+concat.__node__ = builtinNode(concat);
+
 function length(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.get('$') as Interval[];
   return Interval.fromInteger(scale.length);
@@ -801,7 +821,7 @@ function remap(
   array.push(...mapped);
 }
 remap.__doc__ =
-  'Map a riff over the given/current scale replacing the content.';
+  'Map a riff over the given/current scale replacing the contents.';
 remap.__node__ = builtinNode(remap);
 
 function filter(
@@ -1122,6 +1142,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   push,
   shift,
   unshift,
+  concat,
   length,
   print,
   dir,
@@ -1442,6 +1463,12 @@ riff reduce scale {
   return;
 }
 
+riff reduced scale {
+  "Obtain a copy of the current/given scale reduced by its equave.";
+  scale ?? $$;
+  reduce();
+}
+
 riff revpose scale {
   "Change the sounding direction. Converts a descending scale to an ascending one."
   $ = scale ?? $$;
@@ -1498,6 +1525,12 @@ riff rotate onto scale {
   return;
 }
 
+riff rotated onto scale {
+  "Obtain a copy of the current/given scale rotated onto the given degree.";
+  scale ?? $$;
+  rotate(onto);
+}
+
 riff clear scale {
   "Remove the contents of the current/given scale.";
   $ = scale ?? $$;
@@ -1505,8 +1538,9 @@ riff clear scale {
   return;
 }
 
+// TODO: Spread syntax on push or an in-place extend() for modifying given scales.
 riff repeat times {
-  "Stack the current/given scale on top of itself. Clears the scale if the number of repeats is zero.";
+  "Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.";
   times ??= 2;
   const scale = $$;
   if (not times) {
@@ -1519,12 +1553,24 @@ riff repeat times {
   }
 }
 
+riff repeated times scale {
+  "Stack the current/given on top of itself.";
+  scale ?? $$;
+  repeat(times);
+}
+
 riff ground scale {
   "Use the first interval in the current/given scale as the implicit unison.";
   $ = scale ?? $$;
   const root = shift();
   i => i ~% root;
   return;
+}
+
+riff grounded scale {
+  "Obtain a copy of the current/given scale that uses the first interval as the implicit unison.";
+  scale ?? $$;
+  ground();
 }
 
 riff elevate scale {
@@ -1536,10 +1582,21 @@ riff elevate scale {
   return;
 }
 
+riff elevated scale {
+  "Obtain a copy of the current/given scale with denominators removed and the root made explicit.";
+  scale ?? $$;
+  elevate();
+}
+
 riff subset indices scale {
   "Only keep the given indices (scale degrees) of the current/given scale.";
   scale ??= $$;
   distill(_, i => i of indices, scale);
+}
+
+riff subsetOf indices scale {
+  "Obtain a copy of the current/given scale with only the given indices kept.";
+  filter(_, i => i of indices, scale ?? $$);
 }
 
 riff toSubharmonics overtone scale {
@@ -1547,6 +1604,11 @@ riff toSubharmonics overtone scale {
   $ = scale ?? $$;
   i => %~(%~i to~ %~overtone);
   return;
+}
+
+riff subharmonicsOf overtone scale {
+  "Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.";
+  map(i => %~(%~i to~ %~overtone), scale ?? $$);
 }
 
 // Assumes a sorted scale
@@ -1564,6 +1626,12 @@ riff keepUnique scale {
   }
   i => push(i, scale);
   return;
+}
+
+riff uniquesOf scale {
+  "Obtain a copy of the current/given scale with only unique intervals kept.";
+  scale ?? $$;
+  keepUnique();
 }
 
 riff mergeOffset offsets overflow scale {
@@ -1590,11 +1658,22 @@ riff mergeOffset offsets overflow scale {
   return;
 }
 
+riff withOffset offsets overflow scale {
+  "Obtain a copy of the current/given scale with the given offset or polyoffset merged into it. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
+  scale ?? $$;
+  mergeOffset(offsets, overflow);
+}
+
 riff stretch amount scale {
   "Stretch the current/given scale by the given amount. A value of \`1\` corresponds to no change.";
   $ = scale ?? $$;
   i => i ~^ amount;
   return;
+}
+
+riff stretched amount scale {
+  "Obtain a copy of the current/given scale streched by the given amount. A value of \`1\` corresponds to no change.";
+  map(i => i ~^ amount, scale ?? $$);
 }
 
 riff randomVariance amount varyEquave scale {
@@ -1605,5 +1684,11 @@ riff randomVariance amount varyEquave scale {
   i => i ~* (amount ~^ (2 * random() - 1));
   if (not varyEquave) equave;
   return;
+}
+
+riff randomVaried amount varyEquave scale {
+  "Obtain a copy of the current/given scale with random variance added.";
+  scale ?? $$;
+  randomVariance(amount, varyEquave);
 }
 `;

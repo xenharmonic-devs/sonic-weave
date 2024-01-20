@@ -496,4 +496,11 @@ describe('SonicWeave expression evaluator', () => {
     const lightFifth = evaluateExpression('repr(3/2 rgb(200, 222, 256))');
     expect(lightFifth).toBe('(3/2 rgb(200.000e, 222.000e, 256.000e))');
   });
+
+  it('can concatenate strings', () => {
+    const helloWorld = evaluateExpression(
+      'concat("Hello", ",", " ", "World", "!")'
+    );
+    expect(helloWorld).toBe('Hello, World!');
+  });
 });
