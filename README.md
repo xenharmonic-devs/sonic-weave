@@ -24,8 +24,8 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Integer      | `2`, `5`                | Linear        | Relative | Same as `2/1` or `5/1`. |
 | Decimal      | `1,2`, `1.4e0`          | Linear        | Relative | Decimal commas only work in isolation. |
 | Fraction     | `4/3`, `10/7`           | Linear        | Relative | |
-| N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative | `n/m` means `n` steps of `m` equal divisions of the octave `2/1`. |
-| N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative | `n/m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
+| N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative | `n\m` means `n` steps of `m` equal divisions of the octave `2/1`. |
+| N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative | `n\m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
 | Step         | `7\`, `13\`             | Logarithmic   | Relative | Correspond to edo-steps after tempering is applied. |
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative | One centisemitone `1.0` is equal to `1\1200`. |
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
