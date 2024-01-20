@@ -277,56 +277,20 @@ export class StatementVisitor {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring assignment must use an array.');
       }
-      destructuring: for (let i = 0; i < node.name.identifiers.length; ++i) {
+      for (let i = 0; i < node.name.identifiers.length; ++i) {
         const name = node.name.identifiers[i].id;
-        if (this.immutables.has(name)) {
-          throw new Error('Assignment to a constant variable.');
-        }
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        let visitor: StatementVisitor | undefined = this;
-        while (visitor) {
-          if (visitor.mutables.has(name)) {
-            visitor.mutables.set(name, value[i]);
-            continue destructuring;
-          }
-          visitor = visitor.parent;
-        }
-        throw new Error('Assignment to an undeclared variable.');
+        this.set(name, value[i]);
       }
       if (node.name.rest) {
         const name = node.name.rest.id;
-        if (this.immutables.has(name)) {
-          throw new Error('Assignment to a constant variable.');
-        }
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        let visitor: StatementVisitor | undefined = this;
-        while (visitor) {
-          if (visitor.mutables.has(name)) {
-            visitor.mutables.set(
-              name,
-              value.slice(node.name.identifiers.length)
-            );
-            return undefined;
-          }
-          visitor = visitor.parent;
-        }
-        throw new Error('Assignment to an undeclared variable.');
+        this.set(name, value.slice(node.name.identifiers.length));
       }
     } else if (node.name.type === 'Identifier') {
       const name = node.name.id;
       if (this.immutables.has(name)) {
         throw new Error('Assignment to a constant variable.');
       }
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      let visitor: StatementVisitor | undefined = this;
-      while (visitor) {
-        if (visitor.mutables.has(name)) {
-          visitor.mutables.set(name, value);
-          return undefined;
-        }
-        visitor = visitor.parent;
-      }
-      throw new Error('Assignment to an undeclared variable.');
+      this.set(name, value);
     } else {
       const object = subVisitor.visit(node.name.object);
       if (!Array.isArray(object)) {
@@ -676,6 +640,22 @@ export class StatementVisitor {
       parent = parent.parent;
     }
     throw new Error(`Undeclared variable ${name}`);
+  }
+
+  set(name: string, value: SonicWeaveValue) {
+    if (this.immutables.has(name)) {
+      throw new Error('Assignment to a constant variable.');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let parent: StatementVisitor | undefined = this;
+    while (parent) {
+      if (parent.mutables.has(name)) {
+        parent.mutables.set(name, value);
+        return;
+      }
+      parent = parent.parent;
+    }
+    throw new Error('Assignment to an undeclared variable.');
   }
 }
 
@@ -1084,18 +1064,11 @@ export class ExpressionVisitor {
       throw new Error('Cannot increment/decrement a value');
     }
     const name = node.operand.id;
-    let parent: StatementVisitor | undefined = this.parent;
-    while (parent) {
-      if (parent.mutables.has(name)) {
-        parent.mutables.set(node.operand.id, newValue);
-        if (node.prefix) {
-          return newValue;
-        }
-        return operand;
-      }
-      parent = parent.parent;
+    this.parent.set(name, newValue);
+    if (node.prefix) {
+      return newValue;
     }
-    throw new Error('Increment/decrement of a constant/undeclared variable');
+    return operand;
   }
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
