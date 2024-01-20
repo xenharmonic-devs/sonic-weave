@@ -312,7 +312,7 @@ ForOfStatement
   }
 
 ExpressionStatement
-  = !("{" / FunctionToken) expression: (CommaDecimal / Expression) EOS {
+  = !("{" / FunctionToken) expression: (LabeledCommaDecimal / Expression) EOS {
     return {
       type: 'ExpressionStatement',
       expression,
@@ -405,8 +405,23 @@ ExponentiationExpression
       return tail.reduce(operatorReducer, head);
     }
 
+Labels
+  = (CallExpression / Identifier / ColorLiteral / StringLiteral)|.., _|
+
 LabeledExpression
-  = object: Group labels: (CallExpression / Identifier / ColorLiteral / StringLiteral)|.., _| __ {
+  = object: Group labels: Labels __ {
+    if (labels.length) {
+      return {
+        type: 'LabeledExpression',
+        object,
+        labels,
+      };
+    }
+    return object;
+  }
+
+LabeledCommaDecimal
+  = __ object: CommaDecimal __ labels: Labels __ {
     if (labels.length) {
       return {
         type: 'LabeledExpression',

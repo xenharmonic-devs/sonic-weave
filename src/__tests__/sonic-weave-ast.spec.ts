@@ -454,6 +454,27 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     const ast = parseSingle('[C#4^11_5,7,P5^77_25]');
     expect(ast.expression.elements).toHaveLength(2);
   });
+
+  it('can label and color comma-decimals', () => {
+    const ast = parseSingle('1,234 "my third" #0dead0');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'LabeledExpression',
+        object: {
+          type: 'DecimalLiteral',
+          whole: 1n,
+          fractional: '234',
+          exponent: null,
+          flavor: '',
+        },
+        labels: [
+          {type: 'StringLiteral', value: 'my third'},
+          {type: 'ColorLiteral', value: '#0dead0'},
+        ],
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
