@@ -608,7 +608,7 @@ Obtain a copy of the current/given scale reflected about unison.
 Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.
 #### Parameters:
 
-`times`
+`times`, `scale`
 
 ### repeated
 Stack the current/given on top of itself.

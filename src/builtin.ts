@@ -1538,25 +1538,28 @@ riff clear scale {
   return;
 }
 
-// TODO: Spread syntax on push or an in-place extend() for modifying given scales.
-riff repeat times {
-  "Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.";
+riff repeated times scale {
+  "Stack the current/given on top of itself.";
+  scale ??= $$;
   times ??= 2;
-  const scale = $$;
   if (not times) {
-    return clear(scale);
+    return [];
   }
   const equave = scale[-1];
-  while (--times) {
+  let i = -1;
+  while (++i < times) {
     scale;
-    i => i ~* equave ~^ times;
+    interval => interval ~* equave ~^ i;
   }
 }
 
-riff repeated times scale {
-  "Stack the current/given on top of itself.";
-  scale ?? $$;
-  repeat(times);
+riff repeat times scale {
+  "Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.";
+  $ = scale ?? $$;
+  const segment = $[..];
+  clear();
+  repeated(times, segment);
+  return;
 }
 
 riff ground scale {

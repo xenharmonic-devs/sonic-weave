@@ -56,7 +56,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('rank2(707.048, 2, 2, 600.0, 2);');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
+      '107.048;214.096;385.904;492.952;600.;707.048;814.096;985.904;1092.952;1200.'
     );
   });
 
@@ -393,5 +393,10 @@ describe('SonicWeave standard library', () => {
   it('has a geometric differentiator', () => {
     const steps = parseSource('geodiff(4::8);simplify;str');
     expect(steps).toEqual(['5/4', '6/5', '7/6', '8/7']);
+  });
+
+  it('has a copying repeater', () => {
+    const bigScale = parseSource('repeated(2, 3::6);str');
+    expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '12/3']);
   });
 });
