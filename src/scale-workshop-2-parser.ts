@@ -1,6 +1,13 @@
 import {Fraction, PRIMES, PRIME_CENTS} from 'xen-dev-utils';
-import {TimeMonzo} from './monzo';
+import {Domain, TimeMonzo, getNumberOfComponents} from './monzo';
 import {parse} from './scale-workshop-2-ast';
+import {Interval} from './interval';
+import {
+  NedjiLiteral,
+  divNodes,
+  mulNodes,
+  uniformInvertNode,
+} from './expression';
 
 const ZERO = new Fraction(0);
 
@@ -72,20 +79,20 @@ function parseDegenerateFloat(whole: bigint | null, fractional: string | null) {
 }
 
 /**
- * Parse a string to the {@link TimeMonzo} it represents.
+ * Parse a string to the {@link Interval} it represents.
  * @param input A string to parse.
- * @param numberOfComponents Number of components to use for the {@link TimeMonzo} instance's prime exponent part.
+ * @param numberOfComponents Number of components to use for the {@link Interval} instance's {@link TimeMonzo} prime exponent part.
  * @param admitBareNumbers Interprete bare numbers as n/1 ratios instead of throwing an error.
  * @param universalMinus Allow unary minus operator in front of every line type.
- * @returns {@link TimeMonzo} instance constructed from the input string.
+ * @returns {@link Interval} instance constructed from the input string.
  * @throws An error if the input cannot be interpreted as an interval.
  */
 export function parseScaleWorkshop2Line(
   input: string,
-  numberOfComponents: number,
+  numberOfComponents?: number,
   admitBareNumbers = false,
   universalMinus = true
-): TimeMonzo {
+): Interval {
   const ast = parseAst(input);
   if (!universalMinus && ast.type === 'UnaryExpression') {
     if (ast.operand.type !== 'CentsLiteral') {
@@ -99,48 +106,88 @@ export function parseScaleWorkshop2Line(
   ) {
     throw new Error('Bare numbers not allowed');
   }
+  numberOfComponents ??= getNumberOfComponents();
   return evaluateAst(ast, numberOfComponents);
 }
 
-function evaluateAst(ast: Expression, numberOfComponents: number): TimeMonzo {
+function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
   switch (ast.type) {
     case 'PlainLiteral':
-      return TimeMonzo.fromBigInt(ast.value, numberOfComponents);
+      return new Interval(
+        TimeMonzo.fromBigInt(ast.value, numberOfComponents),
+        'linear',
+        {
+          type: 'IntegerLiteral',
+          value: ast.value,
+        }
+      );
     case 'CentsLiteral':
-      return TimeMonzo.fromCents(
-        parseDegenerateFloat(ast.whole, ast.fractional),
-        numberOfComponents
+      return new Interval(
+        TimeMonzo.fromCents(
+          parseDegenerateFloat(ast.whole, ast.fractional),
+          numberOfComponents
+        ),
+        'logarithmic',
+        {
+          type: 'CentsLiteral',
+          whole: ast.whole ?? 0n,
+          fractional: ast.fractional ?? '',
+        }
       );
     case 'NumericLiteral':
-      return TimeMonzo.fromValue(
-        parseDegenerateFloat(ast.whole, ast.fractional),
-        numberOfComponents
+      return new Interval(
+        TimeMonzo.fromValue(
+          parseDegenerateFloat(ast.whole, ast.fractional),
+          numberOfComponents
+        ),
+        'linear',
+        {
+          type: 'DecimalLiteral',
+          whole: ast.whole ?? 0n,
+          fractional: ast.fractional ?? '',
+          flavor: 'e',
+          exponent: null,
+        }
       );
     case 'FractionLiteral':
-      return TimeMonzo.fromBigNumeratorDenominator(
-        ast.numerator,
-        ast.denominator,
-        numberOfComponents
+      return new Interval(
+        TimeMonzo.fromBigNumeratorDenominator(
+          ast.numerator,
+          ast.denominator,
+          numberOfComponents
+        ),
+        'linear',
+        {
+          type: 'FractionLiteral',
+          numerator: ast.numerator,
+          denominator: ast.denominator,
+        }
       );
   }
   if (ast.type === 'EdjiFraction') {
-    const fractionOfEquave = new Fraction(
-      Number(ast.numerator),
-      Number(ast.denominator)
-    );
+    const node: NedjiLiteral = {
+      type: 'NedoLiteral',
+      numerator: Number(ast.numerator),
+      denominator: Number(ast.denominator),
+    };
+    const fractionOfEquave = new Fraction(node.numerator, node.denominator);
     let equave: Fraction | undefined;
     if (ast.equave?.type === 'PlainLiteral') {
-      equave = new Fraction(Number(ast.equave.value));
+      node.equaveNumerator = Number(ast.equave.value);
+      equave = new Fraction(node.equaveNumerator);
     } else if (ast.equave?.type === 'FractionLiteral') {
-      equave = new Fraction(
-        Number(ast.equave.numerator),
-        Number(ast.equave.denominator)
-      );
+      node.equaveNumerator = Number(ast.equave.numerator);
+      node.equaveDenominator = Number(ast.equave.denominator);
+      equave = new Fraction(node.equaveNumerator, node.equaveDenominator);
     }
-    return TimeMonzo.fromEqualTemperament(
-      fractionOfEquave,
-      equave,
-      numberOfComponents
+    return new Interval(
+      TimeMonzo.fromEqualTemperament(
+        fractionOfEquave,
+        equave,
+        numberOfComponents
+      ),
+      'logarithmic',
+      node
     );
   } else if (ast.type === 'Monzo') {
     const components = ast.components.map(c => new Fraction(c));
@@ -158,15 +205,35 @@ function evaluateAst(ast: Expression, numberOfComponents: number): TimeMonzo {
         residual = residual.mul(factor);
       }
     }
-    return new TimeMonzo(ZERO, components, residual, cents);
+    return new Interval(
+      new TimeMonzo(ZERO, components, residual, cents),
+      'logarithmic'
+    );
   } else if (ast.type === 'UnaryExpression') {
     const operand = evaluateAst(ast.operand, numberOfComponents);
-    return operand.inverse();
+    return new Interval(
+      operand.value.inverse(),
+      operand.domain,
+      uniformInvertNode(operand.node),
+      operand
+    );
   }
   const left = evaluateAst(ast.left, numberOfComponents);
   const right = evaluateAst(ast.right, numberOfComponents);
-  if (ast.operator === '+') {
-    return left.mul(right);
+  let domain: Domain = 'linear';
+  if (left.domain === 'logarithmic' || right.domain === 'logarithmic') {
+    domain = 'logarithmic';
   }
-  return left.div(right);
+  if (ast.operator === '+') {
+    return new Interval(
+      left.value.mul(right.value),
+      domain,
+      mulNodes(left.node, right.node)
+    );
+  }
+  return new Interval(
+    left.value.div(right.value),
+    domain,
+    divNodes(left.node, right.node)
+  );
 }

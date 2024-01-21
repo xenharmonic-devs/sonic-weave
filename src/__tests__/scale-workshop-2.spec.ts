@@ -3,6 +3,7 @@ import {describe, it, expect} from 'vitest';
 import {parseScaleWorkshop2Line} from '../scale-workshop-2-parser';
 import {TimeMonzo} from '../monzo';
 import {Fraction} from 'xen-dev-utils';
+import {Interval} from '../interval';
 
 const DEFAULT_NUMBER_OF_COMPONENTS = 25;
 
@@ -19,7 +20,10 @@ describe('Line parser', () => {
     const result = parseLine('-1/2');
     expect(
       result.equals(
-        TimeMonzo.fromFraction(new Fraction(2), DEFAULT_NUMBER_OF_COMPONENTS)
+        new Interval(
+          TimeMonzo.fromFraction(new Fraction(2), DEFAULT_NUMBER_OF_COMPONENTS),
+          'linear'
+        )
       )
     ).toBeTruthy();
   });
@@ -44,7 +48,13 @@ describe('Line parser', () => {
     );
     expect(
       result.equals(
-        TimeMonzo.fromFraction(new Fraction(3, 2), DEFAULT_NUMBER_OF_COMPONENTS)
+        new Interval(
+          TimeMonzo.fromFraction(
+            new Fraction(3, 2),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'linear'
+        )
       )
     ).toBeTruthy();
   });
@@ -56,7 +66,7 @@ describe('Line parser', () => {
       undefined,
       false
     );
-    expect(result.totalCents()).toBeCloseTo(-1.23);
+    expect(result.value.totalCents()).toBeCloseTo(-1.23);
   });
 
   it('rejects fractions without a numerator', () => {
@@ -67,10 +77,13 @@ describe('Line parser', () => {
     const result = parseLine('-2\\5');
     expect(
       result.equals(
-        TimeMonzo.fromEqualTemperament(
-          new Fraction(-2, 5),
-          new Fraction(2),
-          DEFAULT_NUMBER_OF_COMPONENTS
+        new Interval(
+          TimeMonzo.fromEqualTemperament(
+            new Fraction(-2, 5),
+            new Fraction(2),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'logarithmic'
         )
       )
     ).toBeTruthy();
@@ -80,10 +93,13 @@ describe('Line parser', () => {
     const result = parseLine('2\\-5');
     expect(
       result.equals(
-        TimeMonzo.fromEqualTemperament(
-          new Fraction(2, 5),
-          new Fraction(1, 2),
-          DEFAULT_NUMBER_OF_COMPONENTS
+        new Interval(
+          TimeMonzo.fromEqualTemperament(
+            new Fraction(2, 5),
+            new Fraction(1, 2),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'logarithmic'
         )
       )
     ).toBeTruthy();
@@ -93,10 +109,13 @@ describe('Line parser', () => {
     const result = parseLine('5\\11<7/3>');
     expect(
       result.equals(
-        TimeMonzo.fromEqualTemperament(
-          new Fraction(5, 11),
-          new Fraction(7, 3),
-          DEFAULT_NUMBER_OF_COMPONENTS
+        new Interval(
+          TimeMonzo.fromEqualTemperament(
+            new Fraction(5, 11),
+            new Fraction(7, 3),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'logarithmic'
         )
       )
     ).toBeTruthy();
@@ -106,10 +125,13 @@ describe('Line parser', () => {
     const result = parseLine('-7\\13<5>');
     expect(
       result.equals(
-        TimeMonzo.fromEqualTemperament(
-          new Fraction(-7, 13),
-          new Fraction(5),
-          DEFAULT_NUMBER_OF_COMPONENTS
+        new Interval(
+          TimeMonzo.fromEqualTemperament(
+            new Fraction(-7, 13),
+            new Fraction(5),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'logarithmic'
         )
       )
     ).toBeTruthy();
@@ -126,7 +148,9 @@ describe('Line parser', () => {
       components.push(new Fraction(0));
     }
     expect(
-      result.equals(new TimeMonzo(new Fraction(0), components))
+      result.equals(
+        new Interval(new TimeMonzo(new Fraction(0), components), 'logarithmic')
+      )
     ).toBeTruthy();
   });
 
@@ -134,7 +158,13 @@ describe('Line parser', () => {
     const result = parseLine('3/1 + [-1>');
     expect(
       result.equals(
-        TimeMonzo.fromFraction(new Fraction(3, 2), DEFAULT_NUMBER_OF_COMPONENTS)
+        new Interval(
+          TimeMonzo.fromFraction(
+            new Fraction(3, 2),
+            DEFAULT_NUMBER_OF_COMPONENTS
+          ),
+          'logarithmic'
+        )
       )
     ).toBeTruthy();
   });
@@ -145,7 +175,10 @@ describe('Line parser', () => {
     vector[0] = new Fraction(3, 15);
     expect(
       result.equals(
-        new TimeMonzo(new Fraction(0), vector, new Fraction(103, 101), 6.9)
+        new Interval(
+          new TimeMonzo(new Fraction(0), vector, new Fraction(103, 101), 6.9),
+          'logarithmic'
+        )
       )
     ).toBeTruthy();
   });
@@ -162,21 +195,35 @@ describe('Line parser', () => {
   it('supports omitting leading zeros', () => {
     const quarterCents = parseLine('.25');
     const half = parseLine(',5');
-    expect(quarterCents.totalCents()).toBe(0.25);
+    expect(quarterCents.value.totalCents()).toBe(0.25);
     expect(half.valueOf()).toBeCloseTo(0.5);
   });
 
   it('supports omitting trailing zeros', () => {
     const cent = parseLine('1.');
     const two = parseLine('2,');
-    expect(cent.totalCents()).toBe(1);
+    expect(cent.value.totalCents()).toBe(1);
     expect(two.valueOf()).toBeCloseTo(2);
   });
 
   it('supports completely omitted zeros', () => {
     const noCents = parseLine('.');
     const zero = parseLine(',');
-    expect(noCents.totalCents()).toBe(0);
+    expect(noCents.value.totalCents()).toBe(0);
     expect(zero.valueOf()).toBe(0);
+  });
+});
+
+describe('Line parser formatting', () => {
+  it('preserves fractions', () => {
+    expect(parseLine('6/4').toString()).toBe('6/4');
+  });
+
+  it('preserves N-of-EDO', () => {
+    expect(parseLine('4\\12').toString()).toBe('4\\12');
+  });
+
+  it('adds flavor to comma-decimals', () => {
+    expect(parseLine('1,23').toString()).toBe('1.23e');
   });
 });
