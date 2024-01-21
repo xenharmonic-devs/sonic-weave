@@ -3,11 +3,12 @@ import {Domain, TimeMonzo, getNumberOfComponents} from './monzo';
 import {parse} from './scale-workshop-2-ast';
 import {Interval} from './interval';
 import {
+  CentsLiteral,
+  DecimalLiteral,
   NedjiLiteral,
-  divNodes,
-  mulNodes,
   uniformInvertNode,
 } from './expression';
+import {bigGcd} from './utils';
 
 const ZERO = new Fraction(0);
 
@@ -17,7 +18,7 @@ type PlainLiteral = {
   value: bigint;
 };
 
-type CentsLiteral = {
+type SW2CentsLiteral = {
   type: 'CentsLiteral';
   whole: bigint | null;
   fractional: string | null;
@@ -62,7 +63,7 @@ type BinaryExpression = {
 
 type Expression =
   | PlainLiteral
-  | CentsLiteral
+  | SW2CentsLiteral
   | NumericLiteral
   | FractionLiteral
   | EdjiFraction
@@ -74,8 +75,51 @@ function parseAst(input: string): Expression {
   return parse(input);
 }
 
-function parseDegenerateFloat(whole: bigint | null, fractional: string | null) {
-  return parseFloat(`${whole ?? 0n}.${fractional ?? ''}`);
+function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {
+  const node: DecimalLiteral = {
+    type: 'DecimalLiteral',
+    whole: sw2Node.whole ?? 0n,
+    fractional: sw2Node.fractional ?? '',
+    flavor: 'e',
+    exponent: null,
+  };
+  let numerator = node.whole;
+  let denominator = 1n;
+  for (const c of node.fractional) {
+    numerator = 10n * numerator + BigInt(c);
+    denominator *= 10n;
+  }
+  const value = TimeMonzo.fromBigNumeratorDenominator(
+    numerator,
+    denominator,
+    numberOfComponents
+  );
+  return new Interval(value, 'linear', node);
+}
+
+function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
+  const node: CentsLiteral = {
+    type: 'CentsLiteral',
+    whole: sw2Node.whole ?? 0n,
+    fractional: sw2Node.fractional ?? '',
+  };
+  let numerator: bigint | number = node.whole;
+  let denominator: bigint | number = 1200n;
+  for (const c of node.fractional) {
+    numerator = 10n * numerator + BigInt(c);
+    denominator *= 10n;
+  }
+  const factor = bigGcd(numerator, denominator);
+  numerator = Number(numerator / factor);
+  denominator = Number(denominator / factor);
+  let value: TimeMonzo;
+  try {
+    value = new TimeMonzo(ZERO, [new Fraction(numerator, denominator)]);
+  } catch {
+    value = TimeMonzo.fromCents((1200 * numerator) / denominator);
+  }
+  value.numberOfComponents = numberOfComponents;
+  return new Interval(value, 'logarithmic', node);
 }
 
 /**
@@ -122,33 +166,9 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         }
       );
     case 'CentsLiteral':
-      return new Interval(
-        TimeMonzo.fromCents(
-          parseDegenerateFloat(ast.whole, ast.fractional),
-          numberOfComponents
-        ),
-        'logarithmic',
-        {
-          type: 'CentsLiteral',
-          whole: ast.whole ?? 0n,
-          fractional: ast.fractional ?? '',
-        }
-      );
+      return parseCents(ast, numberOfComponents);
     case 'NumericLiteral':
-      return new Interval(
-        TimeMonzo.fromValue(
-          parseDegenerateFloat(ast.whole, ast.fractional),
-          numberOfComponents
-        ),
-        'linear',
-        {
-          type: 'DecimalLiteral',
-          whole: ast.whole ?? 0n,
-          fractional: ast.fractional ?? '',
-          flavor: 'e',
-          exponent: null,
-        }
-      );
+      return parseDecimal(ast, numberOfComponents);
     case 'FractionLiteral':
       return new Interval(
         TimeMonzo.fromBigNumeratorDenominator(
@@ -225,15 +245,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
     domain = 'logarithmic';
   }
   if (ast.operator === '+') {
-    return new Interval(
-      left.value.mul(right.value),
-      domain,
-      mulNodes(left.node, right.node)
-    );
+    return new Interval(left.value.mul(right.value), domain);
   }
-  return new Interval(
-    left.value.div(right.value),
-    domain,
-    divNodes(left.node, right.node)
-  );
+  return new Interval(left.value.div(right.value), domain);
 }

@@ -226,4 +226,16 @@ describe('Line parser formatting', () => {
   it('adds flavor to comma-decimals', () => {
     expect(parseLine('1,23').toString()).toBe('1.23e');
   });
+
+  it('produces octave-related cents', () => {
+    expect(parseLine('1.23').toString()).toBe('1.23');
+  });
+
+  it('inflects linearly', () => {
+    expect(parseLine('10/9 + 81/80').toString()).toBe('9/8');
+  });
+
+  it('inflects logarithmically', () => {
+    expect(parseLine('7\\12 - 1\\5').toString()).toBe('23\\60');
+  });
 });
