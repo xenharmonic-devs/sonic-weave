@@ -625,7 +625,7 @@ describe('SonicWeave parser', () => {
   // Manual inspection
   it.skip('has a coloring method base on prime factors', () => {
     const colors = parseSource(
-      '[1/3, 3, 9] tns [1/5, 5, 25]; popAll() tns [1/7, 7, 49]; factorColor'
+      '[1/3, 1, 3, 9] tns [1/5, 1, 5, 25]; popAll() tns [1/7, 1, 7, 49]; factorColor'
     );
     console.log(colors);
   });
