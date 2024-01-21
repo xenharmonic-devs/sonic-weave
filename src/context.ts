@@ -56,8 +56,12 @@ export class RootContext {
     return result;
   }
 
-  spendGas() {
-    if (this.gas-- <= 0) {
+  spendGas(amount = 1) {
+    if (amount < 0) {
+      throw new Error('Cannot refill gas.');
+    }
+    this.gas -= amount;
+    if (this.gas <= 0) {
       throw new Error('Out of gas. (Infinite loop?)');
     }
   }

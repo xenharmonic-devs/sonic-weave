@@ -506,6 +506,20 @@ describe('SonicWeave parser', () => {
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
+  it('supports guard rails against huge segments', () => {
+    const ast = parseAST('1000::2000');
+    const visitor = getSourceVisitor();
+    visitor.rootContext.gas = 100;
+    expect(() => visitor.visit(ast.body[0])).toThrow();
+  });
+
+  it('supports guard rails against large tensors', () => {
+    const ast = parseAST('[1..15] tns [1..15]');
+    const visitor = getSourceVisitor();
+    visitor.rootContext.gas = 100;
+    expect(() => visitor.visit(ast.body[0])).toThrow();
+  });
+
   it('can make edji', () => {
     const scale = parseSource(`
       1\\5<3>

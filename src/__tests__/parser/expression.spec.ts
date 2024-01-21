@@ -508,4 +508,15 @@ describe('SonicWeave expression evaluator', () => {
     const stuff = evaluateExpression('["1", ...["2", "3"], "4"]');
     expect(stuff).toEqual(['1', ...['2', '3'], '4']);
   });
+
+  it('cannot produce empty ranges', () => {
+    const zero = evaluateExpression('[0..0]') as Interval[];
+    expect(zero).toHaveLength(1);
+    expect(zero[0].toInteger()).toBe(0);
+  });
+
+  it('can produce empty segments', () => {
+    const nothing = evaluateExpression('1::1') as Interval[];
+    expect(nothing).toHaveLength(0);
+  });
 });

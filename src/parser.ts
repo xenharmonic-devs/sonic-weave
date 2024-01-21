@@ -1097,6 +1097,7 @@ export class ExpressionVisitor {
       if (!Array.isArray(left) || !Array.isArray(right)) {
         throw new Error('Tensor product is only defined on arrays');
       }
+      this.rootContext.spendGas(left.length * right.length);
       const result: any[] = [];
       if (node.preferLeft || node.preferRight) {
         for (const l of left) {
@@ -1448,10 +1449,14 @@ export class ExpressionVisitor {
       }
       step = second.sub(start);
     }
+    if (step.value.residual.s !== 0) {
+      this.rootContext.spendGas(
+        Math.abs(
+          (end.value.valueOf() - start.value.valueOf()) / step.value.valueOf()
+        )
+      );
+    }
     if (step.value.residual.s > 0) {
-      if (start.compare(end) > 0) {
-        return [];
-      }
       const result = [start];
       let next = start.add(step);
       while (next.compare(end) <= 0) {
@@ -1460,9 +1465,6 @@ export class ExpressionVisitor {
       }
       return result;
     } else if (step.value.residual.s < 0) {
-      if (start.compare(end) < 0) {
-        return [];
-      }
       const result = [start];
       let next = start.add(step);
       while (next.compare(end) >= 0) {
@@ -1480,6 +1482,9 @@ export class ExpressionVisitor {
     if (!(root instanceof Interval && end instanceof Interval)) {
       throw new Error('Harmonic segments must be built from intervals');
     }
+    this.rootContext.spendGas(
+      Math.abs(end.value.valueOf() - root.value.valueOf())
+    );
     const one = linearOne();
     const result: Interval[] = [];
     if (root.compare(end) <= 0) {
