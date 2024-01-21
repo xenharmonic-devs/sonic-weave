@@ -1038,7 +1038,7 @@ hsla.__doc__ =
   'HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alpha range 0-1).';
 hsla.__node__ = builtinNode(hsla);
 
-function centsColor(interval: Interval) {
+export function centsColor(interval: Interval) {
   const octaves = interval.value.totalCents() / 1200;
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
@@ -1087,7 +1087,7 @@ function tanh255(x: number) {
   return (127.5 * Math.tanh(x / 300 - 0.75) + 127.5).toFixed(3);
 }
 
-function factorColor(interval: Interval) {
+export function factorColor(interval: Interval) {
   let r = 0;
   let g = 0;
   let b = 0;
