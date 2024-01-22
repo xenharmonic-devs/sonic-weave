@@ -998,6 +998,9 @@ help.__node__ = builtinNode(help);
 
 // CSS color generation
 function cc(x: Interval, fractionDigits = 3) {
+  if (x?.node?.type === 'CentsLiteral') {
+    return x.value.totalCents().toFixed(fractionDigits);
+  }
   return x.value.valueOf().toFixed(fractionDigits);
 }
 
@@ -1010,7 +1013,7 @@ rgb.__node__ = builtinNode(rgb);
 
 function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
   return new Color(
-    `rgba${cc(red)}, ${cc(green)}, ${cc(blue)} ${cc(alpha, 5)})`
+    `rgba(${cc(red)}, ${cc(green)}, ${cc(blue)}, ${cc(alpha, 5)})`
   );
 }
 rgba.__doc__ =

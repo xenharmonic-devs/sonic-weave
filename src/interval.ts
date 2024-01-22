@@ -24,10 +24,7 @@ export class Color {
   }
 
   toString() {
-    return this.value
-      .replace(/%/g, '')
-      .replace(/,/g, 'e,')
-      .replace(/\)/g, 'e)');
+    return this.value.replace(/%/g, '');
   }
 }
 
