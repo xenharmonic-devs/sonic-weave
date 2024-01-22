@@ -136,7 +136,7 @@ EquaveExpression
   = '<' _ @(SlashFraction / PlainNumber) _ '>'
 
 BackslashFraction
-  = numerator:Integer '\\' denominator:SignedInteger equave:EquaveExpression? { return EdjiFraction(numerator, denominator, equave) }
+  = numerator:Integer? '\\' denominator:SignedInteger equave:EquaveExpression? { return EdjiFraction(numerator, denominator, equave) }
 
 Component
   = $([+-]? (SlashFraction / PlainNumber))

@@ -38,7 +38,7 @@ type FractionLiteral = {
 
 type EdjiFraction = {
   type: 'EdjiFraction';
-  numerator: bigint;
+  numerator?: bigint;
   denominator: bigint;
   equave: null | PlainLiteral | FractionLiteral;
 };

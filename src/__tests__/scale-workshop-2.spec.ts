@@ -137,8 +137,16 @@ describe('Line parser', () => {
     ).toBeTruthy();
   });
 
-  it('rejects N-of-EDO without a numerator', () => {
-    expect(() => parseLine('\\8')).toThrow();
+  it('accepts N-of-EDO without a numerator', () => {
+    const result = parseLine('\\8');
+    expect(
+      result.equals(
+        new Interval(
+          TimeMonzo.fromEqualTemperament(0, 2, DEFAULT_NUMBER_OF_COMPONENTS),
+          'logarithmic'
+        )
+      )
+    ).toBeTruthy();
   });
 
   it('parses monzos', () => {
