@@ -602,7 +602,7 @@ It does require an intermediary quality between major and neutral called _semima
 
 The quarter fifth `P5 % 4` is a semimajor second `sM2` (or `½M2`).
 
-The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-diminished (`qd`, `¼d`). Quarter-augmented plus semiaugmented is sesqui-quarter-augmented (`QA`, `¾A`) and correspondingly sesqui-quarter-diminished (`Qd`, `¾d`).
+The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-diminished (`qd`, `¼d`). Quarter-augmented plus semiaugmented is sesqui-semiaugmented (`QA`, `¾A`) and correspondingly sesqui-semidiminished (`Qd`, `¾d`).
 
 | Accidental             | Monzo          | Size in cents |
 | ---------------------- | -------------- | ------------- |
