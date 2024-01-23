@@ -641,6 +641,11 @@ describe('SonicWeave parser', () => {
     expect(scale[2].color?.value).toBe('white');
   });
 
+  it('accepts empty lines', () => {
+    const nothing = parseSource(';;;');
+    expect(nothing).toHaveLength(0);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

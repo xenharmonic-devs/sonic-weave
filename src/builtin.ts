@@ -1205,6 +1205,11 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
 
 export const PRELUDE_SOURCE = `
 // == Functions ==
+riff sanitize interval {
+  "Get rid of interval formatting, color and label."
+  return bleach(simplify(interval));
+}
+
 riff sqrt x {
   "Calculate the square root of the input.";
   return x ~^ 1/2;
@@ -1619,8 +1624,8 @@ riff grounded scale {
 riff elevate scale {
   "Remove denominators and make the root explicit in the current/given scale.";
   $ = scale ?? $$;
-  unshift($[-1]~^0);
-  const root = %~gcd();
+  unshift(sanitize($[-1]~^0));
+  const root = sanitize(%~gcd());
   i => i ~* root;
   return;
 }

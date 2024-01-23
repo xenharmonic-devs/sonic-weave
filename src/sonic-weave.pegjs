@@ -121,6 +121,7 @@ Statement
   / WhileStatement
   / IfStatement
   / ForOfStatement
+  / EmptyStatement
 
 LeftHandSideExpression
   = ArrayAccess
@@ -325,6 +326,10 @@ ForOfStatement
       mutable: false,
     };
   }
+
+EmptyStatement
+  = _ ';'
+  / __ SingleLineComment LineTerminatorSequence
 
 ExpressionStatement
   = !("{" / FunctionToken) expression: (LabeledCommaDecimal / Expression) EOS {

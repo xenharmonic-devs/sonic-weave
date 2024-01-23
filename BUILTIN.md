@@ -664,6 +664,12 @@ Obtain a copy of the current/given scale rotated onto the given degree.
 
 `onto`, `scale`
 
+### sanitize
+Get rid of interval formatting, color and label.
+#### Parameters:
+
+`interval`
+
 ### spanLattice
 Span a lattice by extending a basis combinatorically.
 #### Parameters:
