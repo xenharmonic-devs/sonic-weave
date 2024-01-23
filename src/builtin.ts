@@ -149,10 +149,21 @@ mosSubset.__node__ = builtinNode(mosSubset);
 // == Domain conversion ==
 
 function simplify(interval: Interval) {
-  return new Interval(interval.value.clone(), interval.domain, undefined);
+  return new Interval(
+    interval.value.clone(),
+    interval.domain,
+    undefined,
+    interval
+  );
 }
-simplify.__doc__ = 'Get rid of interval formatting, coloring and label.';
+simplify.__doc__ = 'Get rid of interval formatting.';
 simplify.__node__ = builtinNode(simplify);
+
+function bleach(interval: Interval) {
+  return new Interval(interval.value.clone(), interval.domain, interval.node);
+}
+bleach.__doc__ = 'Get rid of interval coloring and label.';
+bleach.__node__ = builtinNode(bleach);
 
 function linear(interval: Interval) {
   return new Interval(interval.value.clone(), 'linear', undefined, interval);
@@ -1120,6 +1131,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   primes,
   // Domain conversion
   simplify,
+  bleach,
   linear,
   logarithmic,
   cologarithmic,

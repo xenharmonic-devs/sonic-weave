@@ -553,6 +553,15 @@ describe('SonicWeave parser', () => {
     );
   });
 
+  it('can expand colored scales', () => {
+    const visitor = evaluateSource(
+      '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"'
+    );
+    expect(visitor.expand(getSourceVisitor())).toBe(
+      '5/4\n6/4 black\n7/4 "seventh"\n8/4'
+    );
+  });
+
   it('can sort scales after the fact', () => {
     const visitor = getSourceVisitor();
     const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');

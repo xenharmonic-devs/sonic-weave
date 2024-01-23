@@ -31,6 +31,12 @@ Reduce the given/current scale to a single value by the `reducer` riff which tak
 
 `reducer`, `array`, `initialValue`
 
+### bleach
+Get rid of interval coloring and label.
+#### Parameters:
+
+`interval`
+
 ### bool
 Convert value to a boolean.
 #### Parameters:
@@ -364,7 +370,7 @@ Remove and return the first interval in the current/given scale.
 `scale`
 
 ### simplify
-Get rid of interval formatting, coloring and label.
+Get rid of interval formatting.
 #### Parameters:
 
 `interval`

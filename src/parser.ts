@@ -173,6 +173,11 @@ export class StatementVisitor {
     const scaleLines = scale.map(interval =>
       interval.toString(this.rootContext)
     );
+    for (let i = 0; i < scaleLines.length; ++i) {
+      if (scaleLines[i].startsWith('(') && scaleLines[i].endsWith(')')) {
+        scaleLines[i] = scaleLines[i].slice(1, -1);
+      }
+    }
     return `${base}${scaleLines.join('\n')}`;
   }
 

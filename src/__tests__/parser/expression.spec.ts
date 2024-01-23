@@ -545,4 +545,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(redTone.color?.value).toBe('red');
     expect(redTone.label).toBe('redtone');
   });
+
+  it('can simplify formatting', () => {
+    const fifth = evaluateExpression('repr(simplify(6/4 plum))');
+    expect(fifth).toBe('(3/2 plum)');
+  });
+
+  it('can bleach away colors', () => {
+    const fifth = evaluateExpression('repr(bleach(6/4 plum))');
+    expect(fifth).toBe('6/4');
+  });
 });
