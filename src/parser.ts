@@ -1051,7 +1051,7 @@ export class ExpressionVisitor {
           // The grammar shouldn't let you get here.
           throw new Error('Uniform operation not supported');
       }
-      return new Interval(value, operand.domain, newNode);
+      return new Interval(value, operand.domain, newNode, operand);
     }
     let newValue: Interval;
     switch (node.operator) {

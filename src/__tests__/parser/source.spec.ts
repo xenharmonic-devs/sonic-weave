@@ -646,6 +646,14 @@ describe('SonicWeave parser', () => {
     expect(nothing).toHaveLength(0);
   });
 
+  it('preserves color upon reflection', () => {
+    const scale = parseSource('4/3 green;3/2;2/1 red;reflect()');
+    expect(scale).toHaveLength(3);
+    expect(scale[0].color?.value).toBe('green');
+    expect(scale[1].color?.value).toBe(undefined);
+    expect(scale[2].color?.value).toBe('red');
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
