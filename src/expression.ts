@@ -182,6 +182,15 @@ export function uniformInvertNode(
   return undefined;
 }
 
+// TODO: negNode
+// TODO: invertNode
+// TODO: absNode
+// TODO: pitchRoundToNode
+// TODO: powNode
+// TODO: ipowNode
+// TODO: logNode
+// TODO: reduceNode
+
 function aspireNodes(
   a: IntervalLiteral,
   b: IntervalLiteral

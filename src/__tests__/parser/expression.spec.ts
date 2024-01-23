@@ -524,4 +524,25 @@ describe('SonicWeave expression evaluator', () => {
     const faded = evaluateExpression('rgba(255, 255, 255, 0.5)') as Color;
     expect(faded.value).toBe('rgba(255.000, 255.000, 255.000, 0.50000)');
   });
+
+  it('preserves labels based on preference (left)', () => {
+    const limeTone = parseSingle('(9 lime) ~rd (2 tomato)');
+    expect(limeTone.color?.value).toBe('lime');
+  });
+
+  it('preserves labels based on preference (right)', () => {
+    const limeTone = parseSingle('(9 lime) rd~ (2 tomato)');
+    expect(limeTone.color?.value).toBe('tomato');
+  });
+
+  it('resolves labels based on preference (wings)', () => {
+    const limeTone = parseSingle('(9 lime) ~rd~ (2 tomato)');
+    expect(limeTone.color?.value).toBe('lime');
+  });
+
+  it('has infectious labels', () => {
+    const redTone = parseSingle('(8 "redtone") % (7 red)');
+    expect(redTone.color?.value).toBe('red');
+    expect(redTone.label).toBe('redtone');
+  });
 });

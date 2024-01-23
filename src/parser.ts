@@ -18,7 +18,7 @@ import {
   StepLiteral,
   IntervalLiteral,
 } from './expression';
-import {Interval, Color, timeMonzoAs} from './interval';
+import {Interval, Color, timeMonzoAs, infect} from './interval';
 import {TimeMonzo, Domain} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from './css-colors';
@@ -694,12 +694,22 @@ function resolvePreference(
     if (typesCompatible(left.node, right.node)) {
       resolvedNode = timeMonzoAs(value, left.node);
     }
-    return new Interval(value, domain, resolvedNode);
+    return new Interval(value, domain, resolvedNode, infect(left, right));
   }
   if (node.preferLeft) {
-    return new Interval(value, left.domain, timeMonzoAs(value, left.node));
+    return new Interval(
+      value,
+      left.domain,
+      timeMonzoAs(value, left.node),
+      left
+    );
   }
-  return new Interval(value, right.domain, timeMonzoAs(value, right.node));
+  return new Interval(
+    value,
+    right.domain,
+    timeMonzoAs(value, right.node),
+    right
+  );
 }
 
 export class ExpressionVisitor {
@@ -1419,14 +1429,16 @@ export class ExpressionVisitor {
       if (rootDomain === 'linear' && domains[i] === 'linear') {
         result.push(
           node.mirror
-            ? rootInterval.div(intervals[i])
+            ? intervals[i].ldiv(rootInterval)
             : intervals[i].div(rootInterval)
         );
       } else {
         result.push(
           new Interval(
             node.mirror ? root.div(monzos[i]) : monzos[i].div(root),
-            domains[i]
+            domains[i],
+            undefined,
+            infect(intervals[i], rootInterval)
           )
         );
       }

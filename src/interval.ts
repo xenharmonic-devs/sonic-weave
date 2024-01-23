@@ -33,7 +33,8 @@ const TWO = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
 function logLinMul(
   logarithmic: Interval,
   linear: Interval,
-  node?: IntervalLiteral
+  node?: IntervalLiteral,
+  zombie?: Interval
 ) {
   if (linear.node?.type === 'DecimalLiteral' && linear.node.flavor === 'r') {
     let size = logarithmic.value.totalCents();
@@ -43,7 +44,8 @@ function logLinMul(
     return new Interval(
       TimeMonzo.fromCents(size * linear.value.valueOf()),
       logarithmic.domain,
-      node
+      node,
+      zombie
     );
   }
   const value = logarithmic.value.pow(linear.value);
@@ -53,7 +55,13 @@ function logLinMul(
   ) {
     node = {type: 'AspiringFJS'};
   }
-  return new Interval(value, logarithmic.domain, node);
+  return new Interval(value, logarithmic.domain, node, zombie);
+}
+
+export function infect(left: Interval, right: Interval) {
+  ZOMBIE.color = left.color ?? right.color;
+  ZOMBIE.label = left.label || right.label;
+  return ZOMBIE;
 }
 
 export class Interval {
@@ -105,27 +113,29 @@ export class Interval {
 
   neg() {
     if (this.domain === 'linear') {
-      return new Interval(this.value.neg(), this.domain);
+      return new Interval(this.value.neg(), this.domain, undefined, this);
     }
-    return new Interval(this.value.inverse(), this.domain);
+    return new Interval(this.value.inverse(), this.domain, undefined, this);
   }
 
   inverse() {
     if (this.domain === 'linear') {
-      return new Interval(this.value.inverse(), this.domain);
+      return new Interval(this.value.inverse(), this.domain, undefined, this);
     }
     // This overload should be fine because multiplication is not implemented in the logarithmic domain.
     return new Interval(
       this.value.geometricInverse(),
-      this.domain === 'logarithmic' ? 'cologarithmic' : 'logarithmic'
+      this.domain === 'logarithmic' ? 'cologarithmic' : 'logarithmic',
+      undefined,
+      this
     );
   }
 
   abs() {
     if (this.domain === 'linear') {
-      return new Interval(this.value.abs(), this.domain);
+      return new Interval(this.value.abs(), this.domain, undefined, this);
     }
-    return new Interval(this.value.pitchAbs(), this.domain);
+    return new Interval(this.value.pitchAbs(), this.domain, undefined, this);
   }
 
   project(base: Interval) {
@@ -133,7 +143,8 @@ export class Interval {
     return new Interval(
       base.value.pow(this.value.octaves),
       'logarithmic',
-      node
+      node,
+      infect(this, base)
     );
   }
 
@@ -142,10 +153,16 @@ export class Interval {
       throw new Error('Domains must match in addition');
     }
     const node = addNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (this.domain === 'linear') {
-      return new Interval(this.value.add(other.value), this.domain, node);
+      return new Interval(
+        this.value.add(other.value),
+        this.domain,
+        node,
+        zombie
+      );
     }
-    return new Interval(this.value.mul(other.value), this.domain, node);
+    return new Interval(this.value.mul(other.value), this.domain, node, zombie);
   }
 
   sub(other: Interval) {
@@ -153,10 +170,16 @@ export class Interval {
       throw new Error('Domains must match in subtraction');
     }
     const node = subNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (this.domain === 'linear') {
-      return new Interval(this.value.sub(other.value), this.domain, node);
+      return new Interval(
+        this.value.sub(other.value),
+        this.domain,
+        node,
+        zombie
+      );
     }
-    return new Interval(this.value.div(other.value), this.domain, node);
+    return new Interval(this.value.div(other.value), this.domain, node, zombie);
   }
 
   roundTo(other: Interval) {
@@ -164,13 +187,20 @@ export class Interval {
       throw new Error('Domains must match in rounding');
     }
     const node = roundToNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (this.domain === 'linear') {
-      return new Interval(this.value.roundTo(other.value), this.domain, node);
+      return new Interval(
+        this.value.roundTo(other.value),
+        this.domain,
+        node,
+        zombie
+      );
     }
     return new Interval(
       this.value.pitchRoundTo(other.value),
       this.domain,
-      node
+      node,
+      zombie
     );
   }
 
@@ -179,10 +209,21 @@ export class Interval {
       throw new Error('Domains must match in modulo');
     }
     const node = modNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (this.domain === 'linear') {
-      return new Interval(this.value.mmod(other.value), this.domain, node);
+      return new Interval(
+        this.value.mmod(other.value),
+        this.domain,
+        node,
+        zombie
+      );
     }
-    return new Interval(this.value.reduce(other.value), this.domain, node);
+    return new Interval(
+      this.value.reduce(other.value),
+      this.domain,
+      node,
+      zombie
+    );
   }
 
   pitchRoundTo(other: Interval) {
@@ -194,7 +235,12 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar exponential rounding implemented');
     }
-    return new Interval(this.value.pitchRoundTo(other.value), this.domain);
+    return new Interval(
+      this.value.pitchRoundTo(other.value),
+      this.domain,
+      undefined,
+      infect(this, other)
+    );
   }
 
   mul(other: Interval) {
@@ -202,43 +248,67 @@ export class Interval {
       throw new Error('At least one domain must be linear in multiplication');
     }
     const node = mulNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (other.domain === 'logarithmic' || other.domain === 'cologarithmic') {
-      return logLinMul(other, this, node);
+      return logLinMul(other, this, node, zombie);
     }
     if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
-      return logLinMul(this, other, node);
+      return logLinMul(this, other, node, zombie);
     }
-    return new Interval(this.value.mul(other.value), this.domain, node);
+    return new Interval(this.value.mul(other.value), this.domain, node, zombie);
   }
 
   div(other: Interval) {
     let node = divNodes(this.node, other.node);
+    const zombie = infect(this, other);
     if (other.domain === 'logarithmic') {
       if (this.domain !== 'logarithmic') {
         throw new Error('Domains must match in non-scalar division');
       }
-      return new Interval(this.value.log(other.value), 'linear', node);
+      return new Interval(this.value.log(other.value), 'linear', node, zombie);
     }
     if (this.domain === 'logarithmic') {
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
         node = {type: 'AspiringFJS'};
       }
-      return new Interval(value, this.domain, node);
+      return new Interval(value, this.domain, node, zombie);
     }
-    return new Interval(this.value.div(other.value), this.domain, node);
+    return new Interval(this.value.div(other.value), this.domain, node, zombie);
+  }
+
+  ldiv(other: Interval) {
+    const result = other.div(this);
+    result.color = this.color ?? other.color;
+    result.label = this.label || other.label;
+    return result;
   }
 
   dot(other: Interval) {
     const product = this.value.dot(other.value);
+    const zombie = infect(this, other);
     if (product.d === 1) {
       const value = BigInt(product.s * product.n);
-      return new Interval(TimeMonzo.fromBigInt(value), 'linear', {
-        type: 'IntegerLiteral',
-        value,
-      });
+      return new Interval(
+        TimeMonzo.fromBigInt(value),
+        'linear',
+        {
+          type: 'IntegerLiteral',
+          value,
+        },
+        zombie
+      );
     }
-    return new Interval(TimeMonzo.fromFraction(product), 'linear');
+    return new Interval(
+      TimeMonzo.fromFraction(product),
+      'linear',
+      {
+        type: 'FractionLiteral',
+        numerator: BigInt(product.s * product.n),
+        denominator: BigInt(product.d),
+      },
+      zombie
+    );
   }
 
   pow(other: Interval) {
@@ -248,7 +318,12 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar exponentiation implemented');
     }
-    return new Interval(this.value.pow(other.value), this.domain);
+    return new Interval(
+      this.value.pow(other.value),
+      this.domain,
+      undefined,
+      infect(this, other)
+    );
   }
 
   ipow(other: Interval) {
@@ -260,7 +335,12 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar inverse exponentiation implemented');
     }
-    return new Interval(this.value.pow(other.value.inverse()), this.domain);
+    return new Interval(
+      this.value.pow(other.value.inverse()),
+      this.domain,
+      undefined,
+      infect(this, other)
+    );
   }
 
   log(other: Interval) {
@@ -269,14 +349,24 @@ export class Interval {
         'Logarithm not implemented in the (already) logarithmic domain'
       );
     }
-    return new Interval(this.value.log(other.value), this.domain);
+    return new Interval(
+      this.value.log(other.value),
+      this.domain,
+      undefined,
+      infect(this, other)
+    );
   }
 
   reduce(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error('Reduction not implemented in logarithmic domain');
     }
-    return new Interval(this.value.reduce(other.value), this.domain);
+    return new Interval(
+      this.value.reduce(other.value),
+      this.domain,
+      undefined,
+      infect(this, other)
+    );
   }
 
   backslash(other: Interval) {
@@ -295,7 +385,7 @@ export class Interval {
         denominator: other.toInteger(),
       };
     }
-    return new Interval(value, 'logarithmic', node);
+    return new Interval(value, 'logarithmic', node, infect(this, other));
   }
 
   compare(other: Interval) {
@@ -468,6 +558,9 @@ export class Interval {
     }
   }
 }
+
+// Dummy variable to hold color and label infections.
+const ZOMBIE = new Interval(TWO, 'cologarithmic');
 
 export function timeMonzoAs(
   monzo: TimeMonzo,

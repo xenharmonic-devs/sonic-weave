@@ -616,6 +616,22 @@ describe('SonicWeave parser', () => {
     expect(scale[0].toInteger()).toBe(4);
   });
 
+  it('can color enumerations', () => {
+    const scale = parseSource('(5 white):(7 blue):(9 silver):10');
+    expect(scale).toHaveLength(3);
+    expect(scale[0].color?.value).toBe('blue');
+    expect(scale[1].color?.value).toBe('silver');
+    expect(scale[2].color?.value).toBe('white');
+  });
+
+  it('can color reflected enumerations', () => {
+    const scale = parseSource('/(5 white):(7 blue):(9 silver):10');
+    expect(scale).toHaveLength(3);
+    expect(scale[0].color?.value).toBe('blue');
+    expect(scale[1].color?.value).toBe('silver');
+    expect(scale[2].color?.value).toBe('white');
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
