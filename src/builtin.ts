@@ -1335,18 +1335,7 @@ riff rank2 generator up down period numPeriods {
   down ??= 0;
   period ??= 2;
   numPeriods ??= 1;
-  let accumulator = 1;
-  while (up--) {
-    accumulator *~= generator;
-    accumulator;
-  }
-  accumulator = 1;
-  while (down--) {
-    accumulator %~= generator;
-    accumulator;
-  }
-  period;
-  reduce();
+  [generator ~^ i ~rdc period for i of [-down..up]];
   sort();
   repeat(numPeriods);
 }
@@ -1406,25 +1395,11 @@ riff spanLattice basis ups downs equave {
     const up = pop(ups);
     const down = pop(downs);
 
-    for (const root of $$) {
-      let accumulator = root;
-      let u = up;
-      while (u--) {
-        accumulator *~= generator;
-        accumulator;
-      }
-      accumulator = root;
-      let d = down;
-      while (d--) {
-        accumulator %~= generator;
-        accumulator;
-      }
-    }
+    popAll($$) tns [generator ~^ i for i of [-down..up]];
   }
 
-  void(shift());
-  equave;
-  reduce();
+  i => i ~rdc equave;
+
   sort();
 }
 
@@ -1433,7 +1408,7 @@ riff eulerGenus guide root equave {
   root ??= 1;
   equave ??= 2;
   if (guide ~mod root) {
-    throw "Root must divide the guide tone";
+    throw "Root must divide the guide tone.";
   }
 
   let remainder = 0;
@@ -1484,7 +1459,7 @@ riff gs generators ordinal period numPeriods maxSize {
     accumulator *~= generators[i++ mod length(generators)];
     push(accumulator ~rd period, $$);
     if (length($$) > maxSize) {
-      throw "No constant structure found before reaching maximum size";
+      throw "No constant structure found before reaching maximum size.";
     }
     sort($$);
     if (hasConstantStructure($$)) {
