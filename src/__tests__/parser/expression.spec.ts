@@ -602,4 +602,10 @@ describe('SonicWeave expression evaluator', () => {
     const blueBP = parseSingle('9\\13<3> blue');
     expect(blueBP.color?.value).toBe('blue');
   });
+
+  // This is somewhat hopeless to fix.
+  it.skip('can color nedji projection', () => {
+    const blueBP = parseSingle('9\\13<(3)> blue');
+    expect(blueBP.color?.value).toBe('blue');
+  });
 });

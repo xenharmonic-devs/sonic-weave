@@ -607,6 +607,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('rejects numeric labels', () => {
+    expect(() => parseSingle('1 2')).toThrow();
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

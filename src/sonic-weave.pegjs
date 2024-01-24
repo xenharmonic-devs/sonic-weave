@@ -431,7 +431,7 @@ ExponentiationExpression
     }
 
 Labels
-  = (CallExpression / ArrayAccess / Identifier / ColorLiteral / StringLiteral)|.., _|
+  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral)|.., _|
 
 LabeledExpression
   = object: Group labels: Labels __ {
@@ -565,6 +565,13 @@ CallExpression
 
 ArrayAccess
   = head: ArraySlice tail: (_ '[' @Expression ']')* {
+    return tail.reduce( (object, index) => {
+      return { type: 'ArrayAccess', object, index };
+    }, head);
+  }
+
+TrueArrayAccess
+  = head: Primary tail: (_ '[' @Expression ']')+ {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
