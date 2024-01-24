@@ -458,7 +458,36 @@ LabeledCommaDecimal
   }
 
 Group
-  = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression) __
+  = __ @(HarmonicSegment / EnumeratedChord) __
+
+HarmonicSegment
+  = mirror: '/'? root: UnaryExpression _ '::' _ end: UnaryExpression {
+    return {
+      type: 'HarmonicSegment',
+      mirror: !!mirror,
+      root,
+      end,
+    };
+  }
+
+EnumeratedChord
+  = '/' intervals: UnaryExpression|2.., _ ':' _| {
+    return {
+      type: 'EnumeratedChord',
+      mirror: true,
+      intervals,
+    };
+  }
+  / intervals: UnaryExpression|1.., _ ':' _| {
+    if (intervals.length === 1) {
+      return intervals[0];
+    }
+    return {
+      type: 'EnumeratedChord',
+      mirror: false,
+      intervals,
+    };
+  }
 
 Secondary
   = CallExpression
@@ -509,28 +538,6 @@ UnaryExpression
       }
     }
     return operand;
-  }
-
-// TODO: Allow call expressions and array access here without a huge performance hit
-Enumerable = Primary
-
-EnumeratedChord
-  = mirror: '/'? intervals: Enumerable|2.., _ ':' _| {
-    return {
-      type: 'EnumeratedChord',
-      mirror: !!mirror,
-      intervals,
-    };
-  }
-
-HarmonicSegment
-  = mirror: '/'? root: Enumerable _ '::' _ end: Enumerable {
-    return {
-      type: 'HarmonicSegment',
-      mirror: !!mirror,
-      root,
-      end,
-    };
   }
 
 CallExpression

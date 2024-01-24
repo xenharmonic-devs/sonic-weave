@@ -576,6 +576,31 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('can enumerate unary expressions and function calls', () => {
+    const ast = parseSingle('root():-2');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'EnumeratedChord',
+        mirror: false,
+        intervals: [
+          {
+            type: 'CallExpression',
+            callee: {type: 'Identifier', id: 'root'},
+            args: [],
+          },
+          {
+            type: 'UnaryExpression',
+            operator: '-',
+            operand: {type: 'IntegerLiteral', value: 2n},
+            prefix: true,
+            uniform: false,
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
