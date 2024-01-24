@@ -643,6 +643,10 @@ describe('SonicWeave parser', () => {
     expect(arr.map(i => i.toString()).join(';')).toBe('1;4');
   });
 
+  it("doesn't leak comprehension variables", () => {
+    expect(() => parseSource('[i for i of [1]]; i')).toThrow();
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

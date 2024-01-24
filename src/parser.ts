@@ -129,10 +129,7 @@ export class StatementVisitor {
     const result = new StatementVisitor(this.rootContext);
     result.mutables = new Map(this.mutables);
     result.immutables = new Map(this.immutables);
-    const scale = this.mutables.get('$');
-    if (!Array.isArray(scale)) {
-      throw new Error('Context corruption detected');
-    }
+    const scale = this.getCurrentScale();
     result.mutables.set('$', [...scale]);
     return result;
   }
@@ -167,10 +164,7 @@ export class StatementVisitor {
     if (variableLines.length) {
       base += variableLines.join('\n') + '\n';
     }
-    const scale = this.mutables.get('$');
-    if (!Array.isArray(scale)) {
-      throw new Error('Context corruption detected');
-    }
+    const scale = this.getCurrentScale();
     const scaleLines = scale.map(interval =>
       interval.toString(this.rootContext)
     );
@@ -470,10 +464,7 @@ export class StatementVisitor {
   }
 
   handleValue(value: SonicWeaveValue, subVisitor: ExpressionVisitor) {
-    const scale = this.mutables.get('$');
-    if (!Array.isArray(scale)) {
-      throw new Error('Context corruption detected');
-    }
+    const scale = this.getCurrentScale();
     if (value instanceof Color) {
       if (scale.length) {
         scale[scale.length - 1].color = value;
@@ -548,10 +539,7 @@ export class StatementVisitor {
 
   visitBlockStatement(node: BlockStatement) {
     const subVisitor = new StatementVisitor(this.rootContext, this);
-    const scale = this.mutables.get('$')!;
-    if (!Array.isArray(scale)) {
-      throw new Error('Context corruption detected');
-    }
+    const scale = this.getCurrentScale();
     subVisitor.mutables.set('$$', scale);
     for (const statement of node.body) {
       const interrupt = subVisitor.visit(statement);
@@ -559,10 +547,7 @@ export class StatementVisitor {
         return interrupt;
       }
     }
-    const subScale = subVisitor.mutables.get('$');
-    if (!Array.isArray(subScale)) {
-      throw new Error('Context corruption detected');
-    }
+    const subScale = subVisitor.getCurrentScale();
     scale.push(...subScale);
     return undefined;
   }
@@ -585,11 +570,7 @@ export class StatementVisitor {
       throw new Error('Can only iterate over arrays.');
     }
     const loopVisitor = new StatementVisitor(this.rootContext, this);
-    // We need a fresh context, but don't feel like complicating the scope rules more.
-    loopVisitor.mutables.set('$', this.mutables.get('$'));
-    if (this.mutables.has('$$')) {
-      loopVisitor.mutables.set('$$', this.mutables.get('$$'));
-    }
+    loopVisitor.mutables.delete('$'); // Collapse scope
     for (const value of array) {
       if (node.element.type === 'Parameters') {
         if (!Array.isArray(value)) {
@@ -598,9 +579,9 @@ export class StatementVisitor {
         for (let i = 0; i < node.element.identifiers.length; ++i) {
           const name = node.element.identifiers[i].id;
           if (node.mutable) {
-            // Technically a mutation, but should be fine.
             loopVisitor.mutables.set(name, value[i]);
           } else {
+            // Technically a mutation, but should be fine.
             loopVisitor.immutables.set(name, value[i]);
           }
         }
@@ -627,10 +608,6 @@ export class StatementVisitor {
         }
       }
       const interrupt = loopVisitor.visit(node.body);
-      this.mutables.set('$', loopVisitor.mutables.get('$'));
-      if (loopVisitor.mutables.has('$$')) {
-        this.mutables.set('$$', loopVisitor.mutables.get('$$'));
-      }
       if (interrupt) {
         return interrupt;
       }
@@ -668,7 +645,7 @@ export class StatementVisitor {
         this.parent.rootContext,
         this.parent
       );
-      localVisitor.mutables.set('$$', this.parent.mutables.get('$'));
+      localVisitor.mutables.set('$$', this.parent.getCurrentScale());
 
       for (let i = 0; i < node.parameters.identifiers.length; ++i) {
         const name = node.parameters.identifiers[i].id;
@@ -692,7 +669,7 @@ export class StatementVisitor {
           return interrupt.value;
         }
       }
-      return localVisitor.mutables.get('$');
+      return localVisitor.getCurrentScale();
     }
     Object.defineProperty(realization, 'name', {
       value: node.name.id,
@@ -733,6 +710,14 @@ export class StatementVisitor {
       parent = parent.parent;
     }
     throw new Error('Assignment to an undeclared variable.');
+  }
+
+  getCurrentScale(): Interval[] {
+    const result = this.get('$') as Interval[];
+    if (!Array.isArray(result)) {
+      throw new Error('Context corruption detected.');
+    }
+    return result;
   }
 }
 
@@ -887,13 +872,15 @@ export class ExpressionVisitor {
     node satisfies never;
   }
 
-  // TODO: Ephemerealize loop variables.
   visitArrayComprehension(node: ArrayComprehension) {
     const array = this.visit(node.array);
     if (!Array.isArray(array)) {
       throw new Error('Can only iterate over arrays.');
     }
     const result: Interval[] = [];
+    const localVisitor = new StatementVisitor(this.rootContext, this.parent);
+    localVisitor.mutables.delete('$'); // Collapse scope
+    const localSubvisitor = localVisitor.createExpressionVisitor();
     for (const value of array) {
       if (node.element.type === 'Parameters') {
         if (!Array.isArray(value)) {
@@ -901,7 +888,7 @@ export class ExpressionVisitor {
         }
         for (let i = 0; i < node.element.identifiers.length; ++i) {
           const name = node.element.identifiers[i].id;
-          this.parent.mutables.set(name, value[i]);
+          localVisitor.mutables.set(name, value[i]);
         }
         if (node.element.rest) {
           const name = node.element.rest.id;
@@ -912,9 +899,9 @@ export class ExpressionVisitor {
         }
       } else {
         const name = node.element.id;
-        this.parent.mutables.set(name, value);
+        localVisitor.mutables.set(name, value);
       }
-      result.push(this.visit(node.expression) as Interval);
+      result.push(localSubvisitor.visit(node.expression) as Interval);
     }
     return result;
   }
@@ -1701,9 +1688,6 @@ export function evaluateSource(source: string, includePrelude = true) {
     if (interrupt) {
       throw new Error('Illegal statement');
     }
-  }
-  if (!Array.isArray(visitor.mutables.get('$'))) {
-    throw new Error('Context corruption detected');
   }
   return visitor;
 }
