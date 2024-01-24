@@ -456,8 +456,7 @@ Group
   = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression) __
 
 Secondary
-  = DownExpression
-  / Range
+  = Range
   / CallExpression
   / ArraySlice
   / ArrayAccess
@@ -507,15 +506,6 @@ UnaryExpression
       }
     }
     return operand;
-  }
-
-DownExpression
-  = operators: 'v'+ '{' _ operand: Expression _ '}' {
-    return {
-      type: 'DownExpression',
-      count: operators.length,
-      operand,
-    };
   }
 
 // TODO: Allow call expressions and array access here without a huge performance hit
@@ -631,6 +621,7 @@ Quantity
   / ReciprocalCentLiteral
   / MonzoLiteral
   / ValLiteral
+  / DownExpression
 
 Primary
   = Quantity
@@ -647,6 +638,15 @@ Primary
   / Identifier
   / ArrayLiteral
   / StringLiteral
+
+DownExpression
+  = operators: 'v'+ '{' _ operand: Expression _ '}' {
+    return {
+      type: 'DownExpression',
+      count: operators.length,
+      operand,
+    };
+  }
 
 StepLiteral
   = count: BasicInteger '\\' {
