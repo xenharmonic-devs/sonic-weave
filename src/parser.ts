@@ -1289,6 +1289,9 @@ export class ExpressionVisitor {
           case 'rd':
             value = left.value.reduce(right.value);
             break;
+          case 'rdc':
+            value = left.value.reduce(right.value, true);
+            break;
           case '^':
             value = left.value.pow(right.value);
             break;
@@ -1297,6 +1300,9 @@ export class ExpressionVisitor {
             break;
           case 'mod':
             value = left.value.mmod(right.value);
+            break;
+          case 'modc':
+            value = left.value.mmod(right.value, true);
             break;
           case '·':
           case 'dot':
@@ -1354,11 +1360,15 @@ export class ExpressionVisitor {
           return left.backslash(right);
         case 'mod':
           return left.mmod(right);
+        case 'modc':
+          return left.mmod(right, true);
         case '·':
         case 'dot':
           return left.dot(right);
         case 'rd':
           return left.reduce(right);
+        case 'rdc':
+          return left.reduce(right, true);
         case 'to':
           return left.roundTo(right);
         case 'by':
@@ -1413,6 +1423,10 @@ export class ExpressionVisitor {
   visitArrowFunction(node: ArrowFunction) {
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor(this.rootContext, this.parent);
+
+      // Contract scope
+      localVisitor.mutables.delete('$');
+
       for (let i = 0; i < node.parameters.identifiers.length; ++i) {
         const name = node.parameters.identifiers[i].id;
         if (i < args.length) {

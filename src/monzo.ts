@@ -1076,9 +1076,10 @@ export class TimeMonzo {
   /**
    * Calculate modulus with respect to another time monzo.
    * @param other Another time monzo.
+   * @param ceiling If true x.mmod(x) evaluates to x.
    * @returns This modulo the other.
    */
-  mmod(other: TimeMonzo) {
+  mmod(other: TimeMonzo, ceiling = false) {
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
         `Cannot mod time monzos with disparate units. Have s^${this.timeExponent.toFraction()} mod s^${other.timeExponent.toFraction()}`
@@ -1093,6 +1094,9 @@ export class TimeMonzo {
     } else {
       result = TimeMonzo.fromValue(mmod(this.valueOf(), other.valueOf()));
     }
+    if (ceiling && !result.residual.n) {
+      return other.clone();
+    }
     result.timeExponent = this.timeExponent;
     return result;
   }
@@ -1100,12 +1104,17 @@ export class TimeMonzo {
   /**
    * Calculate modulus in pitch space with respect to another time monzo.
    * @param other Another time monzo.
+   * @param ceiling If true x.reduce(x) evaluates to x.
    * @returns This reduced by the other.
    */
-  reduce(other: TimeMonzo) {
+  reduce(other: TimeMonzo, ceiling = false) {
     const otherCents = other.totalCents();
     if (otherCents === 0) {
       throw Error('Reduction by unison');
+    }
+    if (ceiling) {
+      const ceilDiv = Math.ceil(this.totalCents() / otherCents);
+      return this.div(other.pow(ceilDiv - 1));
     }
     const floorDiv = Math.floor(this.totalCents() / otherCents);
     return this.div(other.pow(floorDiv));

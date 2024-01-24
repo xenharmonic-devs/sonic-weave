@@ -46,33 +46,35 @@ Program
     };
   }
 
-AndToken      = 'and'    !IdentifierPart
-ByToken       = 'by'     !IdentifierPart
-CentToken     = 'c'      !IdentifierPart
-ConstToken    = 'const'  !IdentifierPart
-DotToken      = 'dot'    !IdentifierPart
-ElseToken     = 'else'   !IdentifierPart
-FalseToken    = 'false'  !IdentifierPart
-ForToken      = 'for'    !IdentifierPart
-HertzToken    = 'Hz'     !IdentifierPart
-LowHertzToken = 'hz'     !IdentifierPart
-IfToken       = 'if'     !IdentifierPart
-LetToken      = 'let'     !IdentifierPart
-LogToken      = '/_'     !IdentifierPart
-ModToken      = 'mod'    !IdentifierPart
-NoneToken     = 'niente' !IdentifierPart
-NotToken      = 'not'    !IdentifierPart
-OfToken       = 'of'     !IdentifierPart
-OrToken       = 'or'     !IdentifierPart
-ReduceToken   = 'rd'     !IdentifierPart
-ReturnToken   = 'return' !IdentifierPart
-FunctionToken = 'riff'   !IdentifierPart
-SecondToken   = 's'      !IdentifierPart
-TensorToken   = 'tns'    !IdentifierPart
-ThrowToken    = 'throw'  !IdentifierPart
-ToToken       = 'to'     !IdentifierPart
-TrueToken     = 'true'   !IdentifierPart
-WhileToken    = 'while'  !IdentifierPart
+AndToken           = 'and'    !IdentifierPart
+ByToken            = 'by'     !IdentifierPart
+CentToken          = 'c'      !IdentifierPart
+ConstToken         = 'const'  !IdentifierPart
+DotToken           = 'dot'    !IdentifierPart
+ElseToken          = 'else'   !IdentifierPart
+FalseToken         = 'false'  !IdentifierPart
+ForToken           = 'for'    !IdentifierPart
+HertzToken         = 'Hz'     !IdentifierPart
+LowHertzToken      = 'hz'     !IdentifierPart
+IfToken            = 'if'     !IdentifierPart
+LetToken           = 'let'     !IdentifierPart
+LogToken           = '/_'     !IdentifierPart
+ModToken           = 'mod'    !IdentifierPart
+ModCeilingToken    = 'modc'    !IdentifierPart
+NoneToken          = 'niente' !IdentifierPart
+NotToken           = 'not'    !IdentifierPart
+OfToken            = 'of'     !IdentifierPart
+OrToken            = 'or'     !IdentifierPart
+ReduceToken        = 'rd'     !IdentifierPart
+ReduceCeilingToken = 'rdc'     !IdentifierPart
+ReturnToken        = 'return' !IdentifierPart
+FunctionToken      = 'riff'   !IdentifierPart
+SecondToken        = 's'      !IdentifierPart
+TensorToken        = 'tns'    !IdentifierPart
+ThrowToken         = 'throw'  !IdentifierPart
+ToToken            = 'to'     !IdentifierPart
+TrueToken          = 'true'   !IdentifierPart
+WhileToken         = 'while'  !IdentifierPart
 
 ReservedWord
   = AndToken
@@ -89,11 +91,13 @@ ReservedWord
   / LetToken
   / LogToken
   / ModToken
+  / ModCeilingToken
   / NoneToken
   / NotToken
   / OfToken
   / OrToken
   / ReduceToken
+  / ReduceCeilingToken
   / ReturnToken
   / FunctionToken
   / SecondToken
@@ -411,7 +415,7 @@ AdditiveTail
   = (__ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ReduceToken / LogToken / '·' / DotToken / '⊗' / TensorToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / '·' / DotToken / '⊗' / TensorToken / LogToken / '/^')
 
 MultiplicativeExpression
   = head: ExponentiationExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
@@ -419,7 +423,7 @@ MultiplicativeExpression
   }
 
 ExponentiationOperator
-  = $('^' / '/^')
+  = '^'
 
 ExponentiationExpression
   = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {

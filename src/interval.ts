@@ -204,7 +204,7 @@ export class Interval {
     );
   }
 
-  mmod(other: Interval) {
+  mmod(other: Interval, ceiling = false) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in modulo');
     }
@@ -212,14 +212,14 @@ export class Interval {
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
-        this.value.mmod(other.value),
+        this.value.mmod(other.value, ceiling),
         this.domain,
         node,
         zombie
       );
     }
     return new Interval(
-      this.value.reduce(other.value),
+      this.value.reduce(other.value, ceiling),
       this.domain,
       node,
       zombie
@@ -357,12 +357,12 @@ export class Interval {
     );
   }
 
-  reduce(other: Interval) {
+  reduce(other: Interval, ceiling = false) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error('Reduction not implemented in logarithmic domain');
     }
     return new Interval(
-      this.value.reduce(other.value),
+      this.value.reduce(other.value, ceiling),
       this.domain,
       undefined,
       infect(this, other)

@@ -564,7 +564,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has array comprehensions', () => {
     const pyth12 = evaluateExpression(
-      'map(str, sorted([3^i rd 2 if i else 2 for i of [-4..7]]))',
+      'map(str, sorted([3^i rdc 2 for i of [-4..7]]))',
       false
     );
     expect(pyth12).toEqual([
@@ -581,5 +581,10 @@ describe('SonicWeave expression evaluator', () => {
       '243/128',
       '2',
     ]);
+  });
+
+  it('has ceiling modulo', () => {
+    const negativeFour = parseSingle('(-4) modc (-4)');
+    expect(negativeFour.toInteger()).toBe(-4);
   });
 });

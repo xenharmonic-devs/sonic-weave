@@ -1446,10 +1446,8 @@ riff eulerGenus guide root equave {
       n ~+= equave;
     }
   }
-  i => i ~% root ~rd equave;
+  i => i ~% root ~rdc equave;
   sort();
-  void(shift());
-  equave;
 }
 
 riff octaplex b0 b1 b2 b3 equave withUnity {
@@ -1502,9 +1500,7 @@ riff gs generators ordinal period numPeriods maxSize {
 riff reduce scale {
   "Reduce the current/given scale by its equave.";
   $ = scale ?? $$;
-  const equave = pop();
-  i => i ~rd equave;
-  equave;
+  i => i ~rdc $[-1];
   return;
 }
 

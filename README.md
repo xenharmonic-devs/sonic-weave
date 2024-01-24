@@ -159,12 +159,14 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Addition               | `3 + 5`      | `8`      | _N/A_            |         |
 | Subtraction            | `5 - 3`      | `2`      | _N/A_            |         |
 | Modulo                 | `5 mod 3`    | `2`      | _N/A_            |         |
+| Ceiling modulo         | `0 modc 3`   | `3`      | _N/A_            |         |
 | Round (to multiple of) | `5 to 3`     | `6`      | _N/A_            |         |
 | Multiplication         | `2 * 3`      | `6`      | `P8 + P12`       | `P19`   |
 | Multiplication         | `110 Hz × 5` | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
 | Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
 | Division               | `220 hz ÷ 2` | `110 Hz` | `A=3 - P8`       | `A=2`   |
 | Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
+| Ceiling reduction      | `2 rdc 2`    | `2`      | `P8 modc P8`     | `P8`  |
 | Exponentiation         | `3 ^ 2`      | `9`      | `P12 * 2`        | `M23`   |
 | Root taking            | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
 | Logarithm (in base of) | `9 /_ 3`     | `2`      | `M23 % P12`      | `2`     |
@@ -370,7 +372,7 @@ results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 ### Array comprehensions
 "For" loops have an inline counterpart in array comprehensions e.g.
 ```javascript
-[(2 /^ 7) ^ i for i of [1..7]]
+[2 ^ i /^7 for i of [1..7]]
 ```
 results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
 
@@ -420,6 +422,8 @@ prime => prime rd 2
 sort()
 ```
 First results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
+
+Or the same with a oneliner `sorted(map(prime => prime rdc 2, primes(17)))` displaying the utility of *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
 
 ## Tempering
 In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
