@@ -2,6 +2,7 @@
   const TYPES_TO_PROPERTY_NAMES = {
     CallExpression: "callee",
     ArrayAccess: "object",
+    ArraySlice: "object",
   };
 
   function BinaryExpression(operator, left, right, preferLeft, preferRight) {
@@ -146,7 +147,7 @@ VariableManipulationStatement
       }
     }
     const {preferLeft, preferRight, operator, value} = tail;
-    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'Identifier') {
+    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
       if (operator) {
         return {
           type: 'AssignmentStatement',
@@ -537,8 +538,11 @@ CallExpression
     __ '(' _ args: ArgumentList _ ')' {
       return { type: 'CallExpression', args };
     }
-    / __ '[' _ index: Expression _ ']' {
+    / __ '[' index: Expression ']' {
       return { type: 'ArrayAccess', index };
+    }
+    / __ '[' start: Expression? second: (',' @Expression)? '..' end: Expression? ']' {
+      return { type: 'ArraySlice', start, second, end };
     }
   )* {
     return tail.reduce((result, element) => {

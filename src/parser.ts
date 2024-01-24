@@ -296,14 +296,85 @@ export class StatementVisitor {
         throw new Error('Assignment to a constant variable.');
       }
       this.set(name, value);
+    } else if (node.name.type === 'ArraySlice') {
+      if (!Array.isArray(value)) {
+        throw new Error('Slice assignment with a non-array.');
+      }
+      const object = subVisitor.visit(node.name.object);
+      if (!Array.isArray(object)) {
+        throw new Error('Array slice on non-array.');
+      }
+      let start = 0;
+      let step = 1;
+      let end = object.length - 1;
+
+      if (node.name.start) {
+        const interval = subVisitor.visit(node.name.start);
+        if (!(interval instanceof Interval)) {
+          throw new Error('Slice indices must consist of intervals.');
+        }
+        start = Number(interval.value.toBigInteger());
+      }
+
+      if (node.name.end) {
+        const interval = subVisitor.visit(node.name.end);
+        if (!(interval instanceof Interval)) {
+          throw new Error('Slice indices must consist of intervals.');
+        }
+        end = Number(interval.value.toBigInteger());
+      }
+
+      if (node.name.second) {
+        const second = subVisitor.visit(node.name.second);
+        if (!(second instanceof Interval)) {
+          throw new Error('Slice indices must consist of intervals.');
+        }
+        step = Number(second.value.toBigInteger()) - start;
+      }
+
+      let i = 0;
+      if (step > 0) {
+        if (start > end) {
+          throw new Error('Invalid slice assignment.');
+        }
+
+        object[start] = value[i++];
+        let next = start + step;
+        while (next <= end) {
+          object[next] = value[i++];
+          next += step;
+        }
+        object.splice(end, 0, ...value.slice(i));
+        // TODO: Add support for niente arrays.
+        object.splice(0, object.length, ...object.filter(x => x !== undefined));
+        return undefined;
+      } else if (step < 0) {
+        if (start < end) {
+          throw new Error('Invalid slice assignment.');
+        }
+
+        object[start] = value[i++];
+        let next = start + step;
+        while (next >= end) {
+          object[next] = value[i++];
+          next += step;
+        }
+        const rest = value.slice(i);
+        rest.reverse();
+        object.splice(end, 0, ...rest);
+        // TODO: Add support for niente arrays.
+        object.splice(0, object.length, ...object.filter(x => x !== undefined));
+        return undefined;
+      }
+      throw new Error('Slice step must not be zero');
     } else {
       const object = subVisitor.visit(node.name.object);
       if (!Array.isArray(object)) {
-        throw new Error('Array access on non-array');
+        throw new Error('Array access on non-array.');
       }
       const index = subVisitor.visit(node.name.index);
       if (!(index instanceof Interval)) {
-        throw new Error('Array access with a non-integer');
+        throw new Error('Array access with a non-integer.');
       }
       let i = index.toInteger();
       if (i < 0) {
@@ -1296,6 +1367,8 @@ export class ExpressionVisitor {
     if (node.callee.type === 'Identifier') {
       const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
       return callee.bind(this)(...args);
+    } else if (node.callee.type === 'ArraySlice') {
+      throw new Error('Cannot call array slices.');
     } else {
       const callee = this.visitArrayAccess(node.callee);
       return (callee as SonicWeaveFunction).bind(this)(...args);

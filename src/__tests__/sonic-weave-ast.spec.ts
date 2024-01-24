@@ -421,6 +421,28 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('lets you call functions from sliced arrays', () => {
+    const ast = parseSingle('arr[..][1]()');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {
+          type: 'ArrayAccess',
+          object: {
+            type: 'ArraySlice',
+            object: {type: 'Identifier', id: 'arr'},
+            start: null,
+            second: null,
+            end: null,
+          },
+          index: {type: 'IntegerLiteral', value: 1n},
+        },
+        args: [],
+      },
+    });
+  });
+
   it('parses N-steps-of-M-equal-divisions-of-just-intonation (literal)', () => {
     const ast = parseSingle('7\\13<3>');
     expect(ast).toEqual({

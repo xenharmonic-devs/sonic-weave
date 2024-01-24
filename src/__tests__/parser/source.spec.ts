@@ -638,6 +638,11 @@ describe('SonicWeave parser', () => {
     expect(nothing).toHaveLength(0);
   });
 
+  it('has slice assignment', () => {
+    const arr = parseSource('const arr = [1, 2, 3]; arr[1..] = [4]; arr');
+    expect(arr.map(i => i.toString()).join(';')).toBe('1;4');
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

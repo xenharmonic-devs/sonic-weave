@@ -49,7 +49,7 @@ export type Parameters = {
 
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
-  name: Identifier | Parameters | ArrayAccess;
+  name: Identifier | Parameters | ArrayAccess | ArraySlice;
   value: Expression;
 };
 
@@ -225,7 +225,8 @@ export type Argument = {
 
 export type CallExpression = {
   type: 'CallExpression';
-  callee: Identifier | ArrayAccess;
+  // Slicing is legal in the grammar, but not in the runtime.
+  callee: Identifier | ArrayAccess | ArraySlice;
   args: Argument[];
 };
 
