@@ -785,6 +785,10 @@ export class ExpressionVisitor {
     return this.parent.rootContext;
   }
 
+  getCurrentScale() {
+    return this.parent.getCurrentScale();
+  }
+
   visit(node: Expression): SonicWeaveValue {
     this.rootContext.spendGas();
     switch (node.type) {

@@ -532,7 +532,7 @@ PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
 function gcd(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
-    intervals = this.get('$') as Interval[];
+    intervals = this.getCurrentScale();
   }
   return intervals.reduce(
     (a, b) => new Interval(a.value.gcd(b.value), 'linear')
@@ -544,7 +544,7 @@ gcd.__node__ = builtinNode(gcd);
 
 function lcm(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
-    intervals = this.get('$') as Interval[];
+    intervals = this.getCurrentScale();
   }
   return intervals.reduce(
     (a, b) => new Interval(a.value.lcm(b.value), 'linear')
@@ -555,7 +555,7 @@ lcm.__doc__ =
 lcm.__node__ = builtinNode(lcm);
 
 function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   if (scale.length < 1) {
     return sonicBool(false);
   }
@@ -700,7 +700,7 @@ function sort(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   if (compareFn === undefined) {
     scale.sort(compare.bind(this));
   } else {
@@ -717,7 +717,7 @@ function sorted(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   scale = [...scale];
   sort.bind(this)(scale, compareFn);
   return scale;
@@ -727,14 +727,14 @@ sorted.__doc__ =
 sorted.__node__ = builtinNode(sorted);
 
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   scale.reverse();
 }
 reverse.__doc__ = 'Reverse the order of the current/given scale.';
 reverse.__node__ = builtinNode(reverse);
 
 function reversed(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   scale = [...scale];
   reverse.bind(this)(scale);
   return scale;
@@ -744,7 +744,7 @@ reversed.__doc__ =
 reversed.__node__ = builtinNode(reversed);
 
 function pop(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   if (!scale.length) {
     throw new Error('Pop from an empty scale');
   }
@@ -754,7 +754,7 @@ pop.__doc__ = 'Remove and return the last interval in the current/given scale.';
 pop.__node__ = builtinNode(pop);
 
 function popAll(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   const result = [...scale];
   scale.length = 0;
   return result;
@@ -763,14 +763,14 @@ popAll.__doc__ = 'Remove and return all intervals in the current/given scale.';
 popAll.__node__ = builtinNode(popAll);
 
 function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   scale.push(interval);
 }
 push.__doc__ = 'Append an interval onto the current/given scale.';
 push.__node__ = builtinNode(push);
 
 function shift(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   if (!scale.length) {
     throw new Error('Shift from an empty scale');
   }
@@ -785,7 +785,7 @@ function unshift(
   interval: Interval,
   scale?: Interval[]
 ) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   scale.unshift(interval);
 }
 unshift.__doc__ =
@@ -820,7 +820,7 @@ concat.__doc__ = 'Combine two or more arrays/strings.';
 concat.__node__ = builtinNode(concat);
 
 function length(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.get('$') as Interval[];
+  scale ??= this.getCurrentScale();
   return Interval.fromInteger(scale.length);
 }
 length.__doc__ = 'Return the number of intervals in the scale.';
@@ -833,7 +833,7 @@ function map(
   array?: any[]
 ) {
   mapper = mapper.bind(this);
-  array ??= this.get('$') as Interval[];
+  array ??= this.getCurrentScale();
   return array.map((value, index, arr) =>
     mapper(value, Interval.fromInteger(index), arr)
   );
@@ -846,7 +846,7 @@ function remap(
   mapper: (value: any, index: Interval, array: any[]) => unknown,
   array?: any[]
 ) {
-  array ??= this.get('$') as Interval[];
+  array ??= this.getCurrentScale();
   const mapped = map.bind(this)(mapper, array);
   array.length = 0;
   array.push(...mapped);
@@ -861,7 +861,7 @@ function filter(
   array?: any[]
 ) {
   tester = tester.bind(this);
-  array ??= this.get('$') as Interval[];
+  array ??= this.getCurrentScale();
   return array.filter((value, index, arr) =>
     sonicTruth(tester(value, Interval.fromInteger(index), arr))
   );
@@ -875,7 +875,7 @@ function distill(
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
   array?: any[]
 ) {
-  array ??= this.get('$') as Interval[];
+  array ??= this.getCurrentScale();
   const filtered = filter.bind(this)(tester, array);
   array.length = 0;
   array.push(...filtered);
@@ -896,7 +896,7 @@ function arrayReduce(
   initialValue?: any
 ) {
   reducer = reducer.bind(this);
-  array ??= this.get('$') as Interval[];
+  array ??= this.getCurrentScale();
   if (arguments.length >= 3) {
     return array.reduce(
       (value, currentValue, currentIndex, arr) =>
