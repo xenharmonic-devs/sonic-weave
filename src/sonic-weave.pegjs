@@ -456,8 +456,7 @@ Group
   = __ @(HarmonicSegment / EnumeratedChord / UnaryExpression) __
 
 Secondary
-  = Range
-  / CallExpression
+  = CallExpression
   / ArraySlice
   / ArrayAccess
 
@@ -569,27 +568,6 @@ ArraySlice
     }, head);
   }
 
-UnitStepRange
-  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
-    return {
-      type: 'Range',
-      start,
-      end,
-    };
-  }
-
-StepRange
-  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
-    return {
-      type: 'Range',
-      start,
-      second,
-      end,
-    };
-  }
-
-Range = StepRange / UnitStepRange
-
 ScalarMultiple
   = scalar: ScalarLike operator: ' '? quantity: (__ @Quantity)? {
     if (operator && quantity) {
@@ -625,6 +603,7 @@ Quantity
 
 Primary
   = Quantity
+  / Range
   / NoneLiteral
   / TrueLiteral
   / FalseLiteral
@@ -638,6 +617,27 @@ Primary
   / Identifier
   / ArrayLiteral
   / StringLiteral
+
+UnitStepRange
+  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
+    return {
+      type: 'Range',
+      start,
+      end,
+    };
+  }
+
+StepRange
+  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
+    return {
+      type: 'Range',
+      start,
+      second,
+      end,
+    };
+  }
+
+Range = StepRange / UnitStepRange
 
 DownExpression
   = operators: 'v'+ '{' _ operand: Expression _ '}' {
