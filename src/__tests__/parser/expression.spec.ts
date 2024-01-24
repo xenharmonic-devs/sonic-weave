@@ -149,7 +149,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert time to frequency', () => {
-    const freq = parseSingle('ablin(2ms)');
+    const freq = parseSingle('ablin(2 ms)');
     expect(freq.value.valueOf()).toBe(500);
   });
 
@@ -261,7 +261,7 @@ describe('SonicWeave expression evaluator', () => {
     'absoluteFJS',
     'monzo',
   ])('has a string representation for variants of %s(pi)', (tier: string) => {
-    for (const hz of ['', 'Hz']) {
+    for (const hz of ['', ' Hz']) {
       for (const conversion of [
         'simplify',
         'relin',
@@ -274,7 +274,7 @@ describe('SonicWeave expression evaluator', () => {
           `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}))`
         );
         const iterated = parseSingle(
-          `A=4 = 440Hz = 27/16; ${value.toString()}`
+          `A=4 = 440 Hz = 27/16; ${value.toString()}`
         );
         expect(iterated.domain).toBe(value.domain);
         expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
@@ -325,7 +325,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a just intonation point', () => {
     const marvelCents = parseSingle('JIP(225/224)');
-    expect(marvelCents.toString()).toBe('7.711522991319271rc');
+    expect(marvelCents.toString()).toBe('7.711522991319271r c');
   });
 
   it('parses negative intervals correctly', () => {
@@ -397,15 +397,15 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can compare absolute to relative', () => {
-    const fifth = evaluateExpression('1/1 = 440Hz; max(500Hz, 3/2)');
+    const fifth = evaluateExpression('1/1 = 440 Hz; max(500 Hz, 3/2)');
     expect(fifth?.toString()).toBe('3/2');
 
-    const eightHundred = evaluateExpression('1/1 = 440Hz; max(800Hz, 3/2)');
+    const eightHundred = evaluateExpression('1/1 = 440 Hz; max(800 Hz, 3/2)');
     expect(eightHundred?.toString()).toBe('800 Hz');
   });
 
   it('produces a cents literal from cent multiplication (integer)', () => {
-    const eightyEight = evaluateExpression('88c');
+    const eightyEight = evaluateExpression('88 c');
     expect(eightyEight?.toString()).toBe('88.');
   });
 

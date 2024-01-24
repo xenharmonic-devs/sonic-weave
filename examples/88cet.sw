@@ -1,2 +1,2 @@
 "88 cent Equal Temperament"
-88c
+88 c

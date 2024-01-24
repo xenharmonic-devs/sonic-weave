@@ -30,7 +30,7 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative | One centisemitone `1.0` is equal to `1\1200`. |
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
-| Frequency    | `440 Hz`, `2.2kHz`      | Linear        | Absolute | Absolute frequency of oscillation. |
+| Frequency    | `440 Hz`, `2.2 kHz`      | Linear        | Absolute | Absolute frequency of oscillation. |
 | Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System).
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative | Used to temper scales. |
 | Warts        | `12@`, `29@2.3.13/5`    | Cologarithmic | Relative | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
@@ -161,9 +161,9 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Modulo                 | `5 mod 3`    | `2`      | _N/A_            |         |
 | Round (to multiple of) | `5 to 3`     | `6`      | _N/A_            |         |
 | Multiplication         | `2 * 3`      | `6`      | `P8 + P12`       | `P19`   |
-| Multiplication         | `110Hz × 5`  | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
+| Multiplication         | `110 Hz × 5` | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
 | Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
-| Division               | `220hz ÷ 2`  | `110 Hz` | `A=3 - P8`       | `A=2`   |
+| Division               | `220 hz ÷ 2` | `110 Hz` | `A=3 - P8`       | `A=2`   |
 | Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
 | Exponentiation         | `3 ^ 2`      | `9`      | `P12 * 2`        | `M23`   |
 | Root taking            | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
@@ -335,7 +335,7 @@ Variables can be reassigned for example after `let i = 2` declaring `i += 3` set
 ## Pitch declaration
 Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz`.
 
-When using both the middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
+When using both the middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440 Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
 
 The unison frequency is set implicitly when declaring pitch, but can be set explicitly too e.g. `1/1 = 420 Hz`.
 

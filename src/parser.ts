@@ -1233,7 +1233,7 @@ export class ExpressionVisitor {
           return left.sub(right);
         case '×':
         case '*':
-        case '':
+        case ' ':
           return left.mul(right);
         case '÷':
         case '%':

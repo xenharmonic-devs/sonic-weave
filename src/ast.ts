@@ -20,7 +20,7 @@ export type BinaryOperator =
   | '-'
   | 'to'
   | 'by'
-  | ''
+  | ' '
   | '*'
   | '×'
   | '%'

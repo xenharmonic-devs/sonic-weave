@@ -1305,7 +1305,7 @@ export class TimeMonzo {
     const cents = this.totalCents();
     const whole = Math.trunc(cents);
     // Note: This abuses the grammar
-    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'rc';
+    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'r c';
     return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
   }
 
@@ -1479,7 +1479,7 @@ export class TimeMonzo {
             if (this.cents === Math.round(this.cents)) {
               return this.cents.toString() + '\\';
             }
-            return this.cents.toString() + 'rc';
+            return this.cents.toString() + 'r c';
           }
           return '0c';
         }
@@ -1504,7 +1504,7 @@ export class TimeMonzo {
       }
       const cents = this.cents - steps;
       if (cents) {
-        terms.push(`${cents}rc`);
+        terms.push(`${cents}r c`);
       }
       return [terms[0]]
         .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
@@ -1530,7 +1530,7 @@ export class TimeMonzo {
     }
     const cents = this.cents - 1 - steps;
     if (cents) {
-      terms.push(`${cents}r€`);
+      terms.push(`${cents}r €`);
     }
     return [terms[0]]
       .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))

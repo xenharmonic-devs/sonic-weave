@@ -74,7 +74,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: '',
+        operator: ' ',
         left: {
           type: 'DecimalLiteral',
           whole: 420n,
@@ -95,7 +95,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: '',
+        operator: ' ',
         left: {type: 'IntegerLiteral', value: 420n},
         right: {type: 'SecondLiteral', prefix: 'E'},
         preferLeft: false,
@@ -105,12 +105,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses scientific notation in scalar multipliers', () => {
-    const ast = parseSingle('420E69s');
+    const ast = parseSingle('420E69 s');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: '',
+        operator: ' ',
         left: {
           type: 'DecimalLiteral',
           whole: 420n,

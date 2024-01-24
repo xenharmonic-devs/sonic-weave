@@ -601,9 +601,9 @@ StepRange
 Range = StepRange / UnitStepRange
 
 ScalarMultiple
-  = scalar: ScalarLike quantity: (__ @Quantity)? {
-    if (quantity) {
-      return BinaryExpression('', scalar, quantity, false, false);
+  = scalar: ScalarLike operator: ' '? quantity: (__ @Quantity)? {
+    if (operator && quantity) {
+      return BinaryExpression(operator, scalar, quantity, false, false);
     }
     if (scalar.type === 'DecimalLiteral') {
       if (scalar.exponent || scalar.flavor) {

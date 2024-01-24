@@ -349,7 +349,7 @@ describe('Extended Monzo', () => {
       1.25
     );
     expect(value.toString('logarithmic')).toBe(
-      '-3/2*logarithmic(s)+[3/2 -5/3>+relog(31/23)+1\\+0.25rc'
+      '-3/2*logarithmic(s)+[3/2 -5/3>+relog(31/23)+1\\+0.25r c'
     );
   });
 
@@ -361,7 +361,7 @@ describe('Extended Monzo', () => {
       2.25
     );
     expect(value.toString('cologarithmic')).toBe(
-      '-3/2*cologarithmic(s)+<3/2 -5/3]+cologarithmic(31/23)+cologarithmic(1\\)+0.25r€'
+      '-3/2*cologarithmic(s)+<3/2 -5/3]+cologarithmic(31/23)+cologarithmic(1\\)+0.25r €'
     );
   });
 });

@@ -246,7 +246,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('supports absolute FJS', () => {
-    const scale = parseSource('C6 = 1kHz; Bb6^7;');
+    const scale = parseSource('C6 = 1 kHz; Bb6^7;');
     expect(scale).toHaveLength(1);
     expect(scale[0].value.valueOf()).toBeCloseTo(1750);
   });
@@ -300,7 +300,7 @@ describe('SonicWeave parser', () => {
       cents;
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '91.5283295833232842rc;196.08999826922536158rc;294.13499740383849712rc;392.17999653845072316rc;498.04499913461268079rc;590.8766626281940262rc;698.04499913461268079rc;792.17999653845072316rc;894.13499740383849712rc;996.08999826922536158rc;1090.2249956730629492rc;1200.'
+      '91.5283295833232842r c;196.08999826922536158r c;294.13499740383849712r c;392.17999653845072316r c;498.04499913461268079r c;590.8766626281940262r c;698.04499913461268079r c;792.17999653845072316r c;894.13499740383849712r c;996.08999826922536158r c;1090.2249956730629492r c;1200.'
     );
   });
 
@@ -340,8 +340,8 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig i {
-        const ups = round(1r€ dot i);
-        return i ~% (1rc * ups) ~* 81/80 ^ ups;
+        const ups = round(1r € dot i);
+        return i ~% (1r c * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;
       rig;
@@ -473,13 +473,13 @@ describe('SonicWeave parser', () => {
   });
 
   it('can average absolute pitches', () => {
-    const visitor = evaluateSource('C4 = 261Hz; absoluteFJS((B4 + Bb4) % 2)');
+    const visitor = evaluateSource('C4 = 261 Hz; absoluteFJS((B4 + Bb4) % 2)');
     const beeSemiflat = visitor.get('$')![0];
     expect(beeSemiflat.toString(visitor.rootContext)).toBe('Bd4');
   });
 
   it('can convert monzo to absolute FJS', () => {
-    const visitor = evaluateSource('C4 = 261Hz; absoluteFJS([0 -1 1>)');
+    const visitor = evaluateSource('C4 = 261 Hz; absoluteFJS([0 -1 1>)');
     const pitch = visitor.get('$')![0];
     expect(pitch.toString(visitor.rootContext)).toBe('A♮4^5');
   });
@@ -538,7 +538,7 @@ describe('SonicWeave parser', () => {
 
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
-      'A=4 = 440Hz = 1/1;^D4;A=4 = 432Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;'
+      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;'
     );
     expect(visitor.expand(getSourceVisitor())).toBe(
       [
@@ -571,7 +571,7 @@ describe('SonicWeave parser', () => {
     const defaults = visitor.clone();
     defaults.rootContext = visitor.rootContext.clone();
 
-    const userAst = parseAST('D4 = 270 Hz;let x = 7;D4;200Hz;x;3;2');
+    const userAst = parseAST('D4 = 270 Hz;let x = 7;D4;200 Hz;x;3;2');
     for (const statement of userAst.body) {
       visitor.visit(statement);
     }
