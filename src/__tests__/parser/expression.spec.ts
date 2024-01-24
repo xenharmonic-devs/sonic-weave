@@ -597,4 +597,9 @@ describe('SonicWeave expression evaluator', () => {
     const purePi = parseSingle('PI;chocolate;PI');
     expect(purePi.color?.value).toBe(undefined);
   });
+
+  it('can color nedji', () => {
+    const blueBP = parseSingle('9\\13<3> blue');
+    expect(blueBP.color?.value).toBe('blue');
+  });
 });

@@ -444,12 +444,18 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses N-steps-of-M-equal-divisions-of-just-intonation (literal)', () => {
-    const ast = parseSingle('7\\13<3>');
+    const ast = parseSingle('(7\\13)<3>');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
         type: 'NedjiProjection',
-        octaves: {type: 'NedoLiteral', numerator: 7, denominator: 13},
+        octaves: {
+          type: 'NedjiLiteral',
+          numerator: 7,
+          denominator: 13,
+          equaveNumerator: null,
+          equaveDenominator: null,
+        },
         base: {type: 'IntegerLiteral', value: 3n},
       },
     });
@@ -630,7 +636,7 @@ describe('Automatic semicolon insertion', () => {
   });
 
   it('works with nedji projection', () => {
-    const ast = parse('1\\2<3>\n2\\2<3>');
+    const ast = parse('(1\\2)<3>\n2\\2<(3)>');
     expect(ast.body).toHaveLength(2);
   });
 });

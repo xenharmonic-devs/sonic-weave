@@ -384,9 +384,11 @@ export class Interval {
     let node: NedjiLiteral | undefined;
     if (this.value.isIntegral() && other.value.isIntegral()) {
       node = {
-        type: 'NedoLiteral',
+        type: 'NedjiLiteral',
         numerator: this.toInteger(),
         denominator: other.toInteger(),
+        equaveNumerator: null,
+        equaveDenominator: null,
       };
     }
     return new Interval(value, 'logarithmic', node, infect(this, other));
@@ -578,7 +580,7 @@ export function timeMonzoAs(
       return monzo.asIntegerLiteral();
     case 'FractionLiteral':
       return monzo.asFractionLiteral(node);
-    case 'NedoLiteral':
+    case 'NedjiLiteral':
       return monzo.asNedjiLiteral(node);
     case 'CentsLiteral':
       return monzo.asCentsLiteral();

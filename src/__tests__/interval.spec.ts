@@ -32,9 +32,11 @@ describe('Idempontent formatting', () => {
   it('has stable equal temperament', () => {
     const majorThird = TimeMonzo.fromEqualTemperament('4/12');
     const node = timeMonzoAs(majorThird, {
-      type: 'NedoLiteral',
+      type: 'NedjiLiteral',
       numerator: 4,
       denominator: 12,
+      equaveNumerator: null,
+      equaveDenominator: null,
     }) as NedjiLiteral;
     expect(node.numerator).toBe(4);
     expect(node.denominator).toBe(12);

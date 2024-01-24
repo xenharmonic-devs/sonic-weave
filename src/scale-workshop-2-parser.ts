@@ -186,9 +186,11 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
   }
   if (ast.type === 'EdjiFraction') {
     const node: NedjiLiteral = {
-      type: 'NedoLiteral',
+      type: 'NedjiLiteral',
       numerator: Number(ast.numerator),
       denominator: Number(ast.denominator),
+      equaveNumerator: null,
+      equaveDenominator: null,
     };
     const fractionOfEquave = new Fraction(node.numerator, node.denominator);
     let equave: Fraction | undefined;

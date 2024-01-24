@@ -871,7 +871,7 @@ export class TimeMonzo {
   /**
    * Calculate the logarithm in the given base if it exists.
    * @param other Base of the logarithm.
-   * @returns `x` such that `other ** x === this`.
+   * @returns `x` such that `this ** x === other`.
    */
   log(other: FractionValue | TimeMonzo) {
     if (this.timeExponent.n !== 0) {
@@ -1352,7 +1352,7 @@ export class TimeMonzo {
     if (this.isEqualTemperament()) {
       try {
         const {fractionOfEquave, equave} = this.toEqualTemperament();
-        if (node.equaveNumerator === undefined) {
+        if (node.equaveNumerator === null) {
           if (equave.compare(TWO)) {
             return undefined;
           }

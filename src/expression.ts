@@ -38,12 +38,11 @@ export type StepLiteral = {
 };
 
 export type NedjiLiteral = {
-  type: 'NedoLiteral';
+  type: 'NedjiLiteral';
   numerator: number;
   denominator: number;
-  // These synthetic fields are not found in the AST
-  equaveNumerator?: number;
-  equaveDenominator?: number;
+  equaveNumerator: number | null;
+  equaveDenominator: number | null;
 };
 
 export type CentsLiteral = {
@@ -225,7 +224,7 @@ export function addNodes(
       value: a.value + b.value,
     };
   }
-  if (a.type === 'NedoLiteral' && b.type === 'NedoLiteral') {
+  if (a.type === 'NedjiLiteral' && b.type === 'NedjiLiteral') {
     if (
       a.equaveNumerator !== b.equaveNumerator ||
       a.equaveDenominator !== b.equaveDenominator
@@ -260,7 +259,7 @@ export function subNodes(
       value: a.value - b.value,
     };
   }
-  if (a.type === 'NedoLiteral' && b.type === 'NedoLiteral') {
+  if (a.type === 'NedjiLiteral' && b.type === 'NedjiLiteral') {
     const negB = {...b};
     negB.numerator = -b.numerator;
     return addNodes(a, negB);
@@ -331,9 +330,9 @@ export function mulNodes(
     return undefined;
   }
   if (a.type === 'IntegerLiteral') {
-    if (b.type === 'NedoLiteral') {
+    if (b.type === 'NedjiLiteral') {
       return {
-        type: 'NedoLiteral',
+        type: 'NedjiLiteral',
         numerator: Number(a.value) * b.numerator,
         denominator: b.denominator,
         equaveNumerator: b.equaveNumerator,
@@ -376,7 +375,7 @@ export function projectNodes(
   if (!octaves || !base) {
     return undefined;
   }
-  if (octaves.type === 'NedoLiteral' && octaves.equaveNumerator === undefined) {
+  if (octaves.type === 'NedjiLiteral' && octaves.equaveNumerator === null) {
     if (base.type === 'IntegerLiteral') {
       return {
         ...octaves,
@@ -461,11 +460,11 @@ function formatComponents(components: VectorComponent[]) {
 }
 
 function formatNedji(literal: NedjiLiteral) {
-  if (literal.equaveNumerator === undefined) {
+  if (literal.equaveNumerator === null) {
     return `${literal.numerator}\\${literal.denominator}`;
   }
   let equave = literal.equaveNumerator.toString();
-  if (literal.equaveDenominator !== undefined) {
+  if (literal.equaveDenominator !== null) {
     equave += '/' + literal.equaveDenominator.toString();
   }
   return `${literal.numerator}\\${literal.denominator}<${equave}>`;
@@ -473,7 +472,7 @@ function formatNedji(literal: NedjiLiteral) {
 
 export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
-    case 'NedoLiteral':
+    case 'NedjiLiteral':
       return formatNedji(literal);
     case 'StepLiteral':
       return `${literal.count}\\`;

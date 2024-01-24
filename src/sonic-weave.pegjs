@@ -57,16 +57,16 @@ ForToken           = 'for'    !IdentifierPart
 HertzToken         = 'Hz'     !IdentifierPart
 LowHertzToken      = 'hz'     !IdentifierPart
 IfToken            = 'if'     !IdentifierPart
-LetToken           = 'let'     !IdentifierPart
+LetToken           = 'let'    !IdentifierPart
 LogToken           = '/_'     !IdentifierPart
 ModToken           = 'mod'    !IdentifierPart
-ModCeilingToken    = 'modc'    !IdentifierPart
+ModCeilingToken    = 'modc'   !IdentifierPart
 NoneToken          = 'niente' !IdentifierPart
 NotToken           = 'not'    !IdentifierPart
 OfToken            = 'of'     !IdentifierPart
 OrToken            = 'or'     !IdentifierPart
 ReduceToken        = 'rd'     !IdentifierPart
-ReduceCeilingToken = 'rdc'     !IdentifierPart
+ReduceCeilingToken = 'rdc'    !IdentifierPart
 ReturnToken        = 'return' !IdentifierPart
 FunctionToken      = 'riff'   !IdentifierPart
 SecondToken        = 's'      !IdentifierPart
@@ -617,7 +617,7 @@ Primary
   / NoneLiteral
   / TrueLiteral
   / FalseLiteral
-  / NedoLiteral
+  / NedjiLiteral
   / StepLiteral
   / ScalarMultiple
   / ColorLiteral
@@ -676,12 +676,23 @@ StepLiteral
     };
   }
 
-NedoLiteral
-  = numerator: BasicInteger '\\' denominator: PositiveBasicInteger {
+NedjiLiteral
+  = numerator: BasicInteger '\\' denominator: PositiveBasicInteger '<' equaveNumerator: PositiveBasicInteger equaveDenominator: ('/' @PositiveBasicInteger)? '>' {
     return {
-      type: 'NedoLiteral',
+      type: 'NedjiLiteral',
       numerator,
       denominator,
+      equaveNumerator,
+      equaveDenominator,
+    };
+  }
+  / numerator: BasicInteger '\\' denominator: PositiveBasicInteger {
+    return {
+      type: 'NedjiLiteral',
+      numerator,
+      denominator,
+      equaveNumerator: null,
+      equaveDenominator: null,
     };
   }
 

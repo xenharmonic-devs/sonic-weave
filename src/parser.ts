@@ -474,8 +474,8 @@ export class StatementVisitor {
       if (value.domain === 'cologarithmic') {
         let divisions = value.value.primeExponents[0];
         let equave = new Fraction(2);
-        let equaveNumerator: number | undefined = undefined;
-        let equaveDenominator: number | undefined = undefined;
+        let equaveNumerator: number | null = null;
+        let equaveDenominator: number | null = null;
         if (value?.node?.type === 'WartsLiteral') {
           divisions = new Fraction(value.node.divisions);
           const equave_ = inferEquave(value.node);
@@ -492,7 +492,7 @@ export class StatementVisitor {
           TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
           'logarithmic',
           {
-            type: 'NedoLiteral',
+            type: 'NedjiLiteral',
             numerator: divisions.d,
             denominator: divisions.n,
             equaveNumerator,
@@ -818,8 +818,8 @@ export class ExpressionVisitor {
         return this.visitDecimalLiteral(node);
       case 'FractionLiteral':
         return this.visitFractionLiteral(node);
-      case 'NedoLiteral':
-        return this.visitNedoLiteral(node);
+      case 'NedjiLiteral':
+        return this.visitNedjiLiteral(node);
       case 'CentsLiteral':
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
@@ -1505,13 +1505,17 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitNedoLiteral(node: NedjiLiteral): Interval {
-    if (node.equaveNumerator !== undefined) {
-      throw new Error('Unexpected nedji equave in AST');
+  visitNedjiLiteral(node: NedjiLiteral): Interval {
+    let value: TimeMonzo;
+    const fractionOfEquave = new Fraction(node.numerator, node.denominator);
+    if (node.equaveNumerator !== null) {
+      value = TimeMonzo.fromEqualTemperament(
+        fractionOfEquave,
+        new Fraction(node.equaveNumerator, node.equaveDenominator ?? undefined)
+      );
+    } else {
+      value = TimeMonzo.fromEqualTemperament(fractionOfEquave);
     }
-    const value = TimeMonzo.fromEqualTemperament(
-      new Fraction(Number(node.numerator), Number(node.denominator))
-    );
     return new Interval(value, 'logarithmic', node);
   }
 
