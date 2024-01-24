@@ -431,7 +431,7 @@ ExponentiationExpression
     }
 
 Labels
-  = (CallExpression / Identifier / ColorLiteral / StringLiteral)|.., _|
+  = (CallExpression / ArrayAccess / Identifier / ColorLiteral / StringLiteral)|.., _|
 
 LabeledExpression
   = object: Group labels: Labels __ {

@@ -588,9 +588,13 @@ describe('SonicWeave expression evaluator', () => {
     expect(negativeFour.toInteger()).toBe(-4);
   });
 
-  // TODO: Fix
-  it.skip("doesn't let you color pi", () => {
+  it("doesn't let you color pi (variable)", () => {
     const purePi = parseSingle('PI chocolate;PI');
+    expect(purePi.color?.value).toBe(undefined);
+  });
+
+  it("doesn't let you color pi (scale)", () => {
+    const purePi = parseSingle('PI;chocolate;PI');
     expect(purePi.color?.value).toBe(undefined);
   });
 });

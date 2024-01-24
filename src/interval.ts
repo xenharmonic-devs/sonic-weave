@@ -99,6 +99,10 @@ export class Interval {
     );
   }
 
+  shallowClone(): Interval {
+    return new Interval(this.value, this.domain, this.node, this);
+  }
+
   toInteger(): number {
     return Number(this.value.toBigInteger());
   }

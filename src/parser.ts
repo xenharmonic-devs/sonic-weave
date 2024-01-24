@@ -467,6 +467,7 @@ export class StatementVisitor {
     const scale = this.getCurrentScale();
     if (value instanceof Color) {
       if (scale.length) {
+        scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
         scale[scale.length - 1].color = value;
       }
     } else if (value instanceof Interval) {
@@ -525,6 +526,7 @@ export class StatementVisitor {
       /* Do nothing */
     } else if (typeof value === 'string') {
       if (scale.length) {
+        scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
         scale[scale.length - 1].label = value;
       } else {
         this.rootContext.title = value;
@@ -941,10 +943,11 @@ export class ExpressionVisitor {
   }
 
   visitLabeledExpression(node: LabeledExpression) {
-    const object = this.visit(node.object);
+    let object = this.visit(node.object);
     if (!(object instanceof Interval)) {
       throw new Error('Labels can only be applied to intervals');
     }
+    object = object.shallowClone();
     for (const label of node.labels) {
       const l = this.visit(label);
       if (typeof l === 'string') {

@@ -1287,9 +1287,9 @@ riff geodiff array {
 riff label labels scale {
   "Apply labels (or colors) from the first array to the current/given scale.";
   scale ??= $$;
-  for (const [i, l] of zip(scale, labels)) {
-    void(i l);
-  }
+  let i = -1;
+  while (++i < min(length(labels), length(scale)))
+    scale[i] = scale[i] labels[i];
 }
 
 riff tune a b numIter weighting {
