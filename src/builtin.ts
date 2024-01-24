@@ -1562,6 +1562,8 @@ riff rotate onto scale {
   "Rotate the current/given scale onto the given degree.";
   onto ??= 1;
   $ = scale ?? $$;
+  onto = onto mod length($);
+  if (not onto) return;
   const equave = $[-1];
   while (--onto) equave *~ shift();
   const root = shift();

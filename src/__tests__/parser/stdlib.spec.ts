@@ -150,6 +150,18 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe('4\\6;5\\6;6\\6');
   });
 
+  it('rotates scales zero steps', () => {
+    const scale = parseSource('1\\6;2\\6;6\\6;rotate(0);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('1\\6;2\\6;6\\6');
+  });
+
+  it('rotates scales negative one steps', () => {
+    const scale = parseSource('1\\6;2\\6;6\\6;rotate(-1);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe('4\\6;5\\6;6\\6');
+  });
+
   it('clears the scale', () => {
     const scale = parseSource('2;clear();');
     expect(scale).toHaveLength(0);
