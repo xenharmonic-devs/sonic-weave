@@ -673,7 +673,7 @@ NedjiProjector
     };
   }
 
-NumericFlavor = 'r' / 'e'i / ''
+NumericFlavor = 'r' / 'e'i / 'z' / ''
 
 CommaDecimal
   = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? flavor: NumericFlavor {

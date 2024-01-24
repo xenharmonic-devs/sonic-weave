@@ -30,7 +30,7 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative | One centisemitone `1.0` is equal to `1\1200`. |
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
-| Frequency    | `440 Hz`, `2.2 kHz`      | Linear        | Absolute | Absolute frequency of oscillation. |
+| Frequency    | `440 Hz`, `2.2 kHz`     | Linear        | Absolute | Absolute frequency of oscillation. |
 | Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System).
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative | Used to temper scales. |
 | Warts        | `12@`, `29@2.3.13/5`    | Cologarithmic | Relative | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
@@ -211,6 +211,9 @@ In slice syntax the end points are optional e.g. `[1, 2, 3][..]` evaluates to `[
 
 ## Metric prefixes
 Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`.
+
+## Numeric frequency flavor
+The space is mandatory in frequency literals like `123 hz` but there is a numeric *flavor* 'z' for quick input i.e. `123z`.
 
 ## Truth values
 Unlike Javascript the empty array `[]` is *falsy* similar to Python.

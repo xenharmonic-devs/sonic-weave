@@ -555,4 +555,10 @@ describe('SonicWeave expression evaluator', () => {
     const fifth = evaluateExpression('repr(bleach(6/4 plum))');
     expect(fifth).toBe('6/4');
   });
+
+  it('has a frequency flavor', () => {
+    const nice = parseSingle('69z');
+    expect(nice.value.valueOf()).toBeCloseTo(69);
+    expect(nice.value.timeExponent.equals(-1));
+  });
 });

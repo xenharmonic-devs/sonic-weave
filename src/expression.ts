@@ -16,7 +16,7 @@ export type DecimalLiteral = {
   whole: bigint;
   fractional: string;
   exponent: bigint | null;
-  flavor: '' | 'r' | 'e' | 'E';
+  flavor: '' | 'r' | 'e' | 'E' | 'z';
 };
 
 export type FractionLiteral = {

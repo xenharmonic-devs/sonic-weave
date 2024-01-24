@@ -1356,6 +1356,9 @@ export class ExpressionVisitor {
       denominator *= 10n;
     }
     const value = TimeMonzo.fromBigNumeratorDenominator(numerator, denominator);
+    if (node.flavor === 'z') {
+      value.timeExponent = NEGATIVE_ONE;
+    }
     return new Interval(value, 'linear', node);
   }
 
