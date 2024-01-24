@@ -457,7 +457,6 @@ Group
 
 Secondary
   = CallExpression
-  / ArraySlice
   / ArrayAccess
 
 UniformUnaryOperator
@@ -550,21 +549,16 @@ CallExpression
   }
 
 ArrayAccess
-  = head: Primary tail: (_ '[' @Expression ']')* {
+  = head: ArraySlice tail: (_ '[' @Expression ']')* {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
   }
 
 ArraySlice
-  = head: Primary tail: (_ '[' @Expression ',' @Expression '..' @Expression? ']')+ {
+  = head: Primary tail: (_ '[' @Expression? @(',' @Expression)? '..' @Expression? ']')* {
     return tail.reduce( (object, [start, second, end]) => {
       return { type: 'ArraySlice', object, start, second, end };
-    }, head);
-  }
-  / head: Primary tail: (_ '[' @Expression? '..' @Expression? ']')+ {
-    return tail.reduce( (object, [start, end]) => {
-      return { type: 'ArraySlice', object, start, second: null, end };
     }, head);
   }
 

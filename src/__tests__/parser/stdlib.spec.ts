@@ -411,4 +411,25 @@ describe('SonicWeave standard library', () => {
     const bigScale = parseSource('repeated(2, 3::6);str');
     expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '12/3']);
   });
+
+  it('can label intervals after generating', () => {
+    const scale = parseSource(`
+      4/3
+      3/2
+      2
+      label(["fourth", "fifth", "octave"])
+    `);
+    expect(scale).toHaveLength(3);
+    expect(scale[0].label).toBe('fourth');
+    expect(scale[1].label).toBe('fifth');
+    expect(scale[2].label).toBe('octave');
+  });
+
+  it('preserves color upon reflection', () => {
+    const scale = parseSource('4/3 green;3/2;2/1 red;reflect()');
+    expect(scale).toHaveLength(3);
+    expect(scale[0].color?.value).toBe('green');
+    expect(scale[1].color?.value).toBe(undefined);
+    expect(scale[2].color?.value).toBe('red');
+  });
 });

@@ -3,7 +3,7 @@ import {evaluateExpression} from '../../parser';
 import {Color, Interval} from '../../interval';
 
 function parseSingle(source: string) {
-  const value = evaluateExpression(source);
+  const value = evaluateExpression(source, false);
   expect(value).toBeInstanceOf(Interval);
   return value as Interval;
 }

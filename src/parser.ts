@@ -1533,12 +1533,17 @@ export function parseAST(source: string): Program {
 }
 
 // Cached globally on first initialization.
-let SOURCE_VISITOR: StatementVisitor | null = null;
+let SOURCE_VISITOR_WITH_PRELUDE: StatementVisitor | null = null;
+let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
 
 export function getSourceVisitor(includePrelude = true) {
   const rootContext = new RootContext();
-  if (SOURCE_VISITOR) {
-    const visitor = SOURCE_VISITOR.clone();
+  if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE) {
+    const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
+    visitor.rootContext = rootContext;
+    return visitor;
+  } else if (!includePrelude && SOURCE_VISITOR_NO_PRELUDE) {
+    const visitor = SOURCE_VISITOR_NO_PRELUDE.clone();
     visitor.rootContext = rootContext;
     return visitor;
   } else {
@@ -1556,10 +1561,11 @@ export function getSourceVisitor(includePrelude = true) {
       for (const statement of prelude.body) {
         visitor.visit(statement);
       }
-      SOURCE_VISITOR = visitor.clone();
+      SOURCE_VISITOR_WITH_PRELUDE = visitor.clone();
       return visitor;
     } else {
-      throw new Error('Sdtlib is mandatory for now');
+      SOURCE_VISITOR_NO_PRELUDE = visitor.clone();
+      return visitor;
     }
   }
 }

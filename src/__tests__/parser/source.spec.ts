@@ -11,7 +11,7 @@ import {RootContext} from '../../context';
 import {relin} from '../../builtin';
 
 function parseSource(source: string) {
-  const visitor = evaluateSource(source);
+  const visitor = evaluateSource(source, false);
   return visitor.mutables.get('$') as Interval[];
 }
 
@@ -459,27 +459,17 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('can label intervals after generating', () => {
-    const scale = parseSource(`
-      4/3
-      3/2
-      2
-      label(["fourth", "fifth", "octave"])
-    `);
-    expect(scale).toHaveLength(3);
-    expect(scale[0].label).toBe('fourth');
-    expect(scale[1].label).toBe('fifth');
-    expect(scale[2].label).toBe('octave');
-  });
-
   it('can average absolute pitches', () => {
-    const visitor = evaluateSource('C4 = 261 Hz; absoluteFJS((B4 + Bb4) % 2)');
+    const visitor = evaluateSource(
+      'C4 = 261 Hz; absoluteFJS((B4 + Bb4) % 2)',
+      false
+    );
     const beeSemiflat = visitor.get('$')![0];
     expect(beeSemiflat.toString(visitor.rootContext)).toBe('Bd4');
   });
 
   it('can convert monzo to absolute FJS', () => {
-    const visitor = evaluateSource('C4 = 261 Hz; absoluteFJS([0 -1 1>)');
+    const visitor = evaluateSource('C4 = 261 Hz; absoluteFJS([0 -1 1>)', false);
     const pitch = visitor.get('$')![0];
     expect(pitch.toString(visitor.rootContext)).toBe('A♮4^5');
   });
@@ -501,21 +491,21 @@ describe('SonicWeave parser', () => {
   it('supports guard rails against infinite loops', () => {
     const ast = parseAST('while (true) {}');
 
-    const visitor = getSourceVisitor();
+    const visitor = getSourceVisitor(false);
     visitor.rootContext.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
   it('supports guard rails against huge segments', () => {
     const ast = parseAST('1000::2000');
-    const visitor = getSourceVisitor();
+    const visitor = getSourceVisitor(false);
     visitor.rootContext.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
   it('supports guard rails against large tensors', () => {
     const ast = parseAST('[1..15] tns [1..15]');
-    const visitor = getSourceVisitor();
+    const visitor = getSourceVisitor(false);
     visitor.rootContext.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
@@ -532,15 +522,16 @@ describe('SonicWeave parser', () => {
   });
 
   it('can expand basic scales', () => {
-    const visitor = evaluateSource('5::10');
+    const visitor = evaluateSource('5::10', false);
     expect(visitor.expand(visitor)).toBe('6/5\n7/5\n8/5\n9/5\n10/5');
   });
 
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
-      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;'
+      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;',
+      false
     );
-    expect(visitor.expand(getSourceVisitor())).toBe(
+    expect(visitor.expand(getSourceVisitor(false))).toBe(
       [
         'C4 = 256 Hz',
         '1/1 = 432 Hz',
@@ -555,15 +546,16 @@ describe('SonicWeave parser', () => {
 
   it('can expand colored scales', () => {
     const visitor = evaluateSource(
-      '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"'
+      '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"',
+      false
     );
-    expect(visitor.expand(getSourceVisitor())).toBe(
+    expect(visitor.expand(getSourceVisitor(false))).toBe(
       '5/4\n6/4 black\n7/4 "seventh"\n8/4'
     );
   });
 
   it('can sort scales after the fact', () => {
-    const visitor = getSourceVisitor();
+    const visitor = getSourceVisitor(false);
     const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');
     for (const statement of ast.body) {
       visitor.visit(statement);
@@ -644,14 +636,6 @@ describe('SonicWeave parser', () => {
   it('accepts empty lines', () => {
     const nothing = parseSource(';;;');
     expect(nothing).toHaveLength(0);
-  });
-
-  it('preserves color upon reflection', () => {
-    const scale = parseSource('4/3 green;3/2;2/1 red;reflect()');
-    expect(scale).toHaveLength(3);
-    expect(scale[0].color?.value).toBe('green');
-    expect(scale[1].color?.value).toBe(undefined);
-    expect(scale[2].color?.value).toBe('red');
   });
 
   // Manual inspection

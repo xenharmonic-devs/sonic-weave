@@ -304,6 +304,30 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('parses iterated slice and array access', () => {
+    const ast = parseSingle('x[0,2..10][1..2][0]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArrayAccess',
+        object: {
+          type: 'ArraySlice',
+          object: {
+            type: 'ArraySlice',
+            object: {type: 'Identifier', id: 'x'},
+            start: {type: 'IntegerLiteral', value: 0n},
+            second: {type: 'IntegerLiteral', value: 2n},
+            end: {type: 'IntegerLiteral', value: 10n},
+          },
+          start: {type: 'IntegerLiteral', value: 1n},
+          second: null,
+          end: {type: 'IntegerLiteral', value: 2n},
+        },
+        index: {type: 'IntegerLiteral', value: 0n},
+      },
+    });
+  });
+
   it('parses for..of', () => {
     const ast = parse('for (const foo of bar) foo;');
     expect(ast).toEqual({
