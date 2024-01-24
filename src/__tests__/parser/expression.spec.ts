@@ -587,4 +587,10 @@ describe('SonicWeave expression evaluator', () => {
     const negativeFour = parseSingle('(-4) modc (-4)');
     expect(negativeFour.toInteger()).toBe(-4);
   });
+
+  // TODO: Fix
+  it.skip("doesn't let you color pi", () => {
+    const purePi = parseSingle('PI chocolate;PI');
+    expect(purePi.color?.value).toBe(undefined);
+  });
 });

@@ -129,8 +129,8 @@ Statement
   / EmptyStatement
 
 LeftHandSideExpression
-  = ArrayAccess
-  / IdentifierArray
+  = IdentifierArray
+  / ArrayAccess
 
 ReassignmentTail
   = _ preferLeft: '~'? operator: AssigningOperator? preferRight: '~'? '=' _ value: Expression {
@@ -151,7 +151,7 @@ VariableManipulationStatement
       }
     }
     const {preferLeft, preferRight, operator, value} = tail;
-    if (Array.isArray(name) || name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
+    if (name.type === 'Parameters' || name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
       if (operator) {
         return {
           type: 'AssignmentStatement',

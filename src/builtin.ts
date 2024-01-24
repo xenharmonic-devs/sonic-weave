@@ -1212,11 +1212,11 @@ riff sanitize interval {
 
 riff sqrt x {
   "Calculate the square root of the input.";
-  return x ~^ 1/2;
+  return x ~/^ 2;
 }
 riff cbrt x {
   "Calculate the cube root of the input.";
-  return x ~^ 1/3;
+  return x ~/^ 3;
 }
 riff log x y {
   "Calculate the logarithm of x base y. Base defaults to E.";
@@ -1248,7 +1248,7 @@ riff sum terms {
 }
 
 riff prod factors {
-  "Calculate the (linear) product of the factors. (i.e. the logarithmic sum)";
+  "Calculate the (linear) product of the factors i.e. the logarithmic sum.";
   return arrayReduce(total, element => total *~ element, factors);
 }
 
@@ -1261,7 +1261,7 @@ riff cumsum array {
 }
 
 riff cumprod array {
-  "Calculate the cumulative products of the factors in the array. (i.e. logarithmic cumulative sum)";
+  "Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.";
   array;
   let i = 0;
   while (++i < length($))
@@ -1300,9 +1300,7 @@ riff tune a b numIter weighting {
     const y = v{a + b};
     const z = 2 * b - a;
 
-    const best = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
-    a = best[0];
-    b = best[1];
+    [a, b] = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
   }
   return a;
 }

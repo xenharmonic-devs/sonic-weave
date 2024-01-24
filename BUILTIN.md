@@ -449,7 +449,7 @@ Generate a combination product set from the given factors and combination size.
 `factors`, `count`, `equave`, `withUnity`
 
 ### cumprod
-Calculate the cumulative products of the factors in the array. (i.e. logarithmic cumulative sum)
+Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.
 #### Parameters:
 
 `array`
@@ -569,7 +569,7 @@ Calculate x to the power of y.
 `x`, `y`
 
 ### prod
-Calculate the (linear) product of the factors. (i.e. the logarithmic sum)
+Calculate the (linear) product of the factors i.e. the logarithmic sum.
 #### Parameters:
 
 `factors`
