@@ -256,6 +256,13 @@ export type Range = {
   end: Expression;
 };
 
+export type ArrayComprehension = {
+  type: 'ArrayComprehension';
+  expression: Expression;
+  element: Identifier | Parameters;
+  array: Expression;
+};
+
 export type ArrayLiteral = {
   type: 'ArrayLiteral';
   elements: Argument[];
@@ -283,6 +290,7 @@ export type Expression =
   | Identifier
   | EnumeratedChord
   | Range
+  | ArrayComprehension
   | ArrayLiteral
   | StringLiteral
   | HarmonicSegment;

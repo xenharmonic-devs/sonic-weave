@@ -42,6 +42,7 @@ import {RootContext} from './context';
 import {
   Argument,
   ArrayAccess,
+  ArrayComprehension,
   ArrayLiteral,
   ArraySlice,
   ArrowFunction,
@@ -880,8 +881,42 @@ export class ExpressionVisitor {
         throw new Error('Unexpected aspiring FJS');
       case 'AspiringAbsoluteFJS':
         throw new Error('Unexpected aspiring absolute FJS');
+      case 'ArrayComprehension':
+        return this.visitArrayComprehension(node);
     }
     node satisfies never;
+  }
+
+  // TODO: Ephemerealize loop variables.
+  visitArrayComprehension(node: ArrayComprehension) {
+    const array = this.visit(node.array);
+    if (!Array.isArray(array)) {
+      throw new Error('Can only iterate over arrays.');
+    }
+    const result: Interval[] = [];
+    for (const value of array) {
+      if (node.element.type === 'Parameters') {
+        if (!Array.isArray(value)) {
+          throw new Error('Must iterate over arrays when destructuring.');
+        }
+        for (let i = 0; i < node.element.identifiers.length; ++i) {
+          const name = node.element.identifiers[i].id;
+          this.parent.mutables.set(name, value[i]);
+        }
+        if (node.element.rest) {
+          const name = node.element.rest.id;
+          this.parent.mutables.set(
+            name,
+            value.slice(node.element.identifiers.length)
+          );
+        }
+      } else {
+        const name = node.element.id;
+        this.parent.mutables.set(name, value);
+      }
+      result.push(this.visit(node.expression) as Interval);
+    }
+    return result;
   }
 
   spread(args: Argument[]): Interval[] {

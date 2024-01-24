@@ -367,6 +367,13 @@ for (const i of [1..5]) {
 ```
 results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
+### Array comprehensions
+"For" loops have an inline counterpart in array comprehensions e.g.
+```javascript
+[(2 /^ 7) ^ i for i of [1..7]]
+```
+results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
+
 ## If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
 ```javascript

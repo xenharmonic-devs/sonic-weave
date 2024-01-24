@@ -561,4 +561,25 @@ describe('SonicWeave expression evaluator', () => {
     expect(nice.value.valueOf()).toBeCloseTo(69);
     expect(nice.value.timeExponent.equals(-1));
   });
+
+  it('has array comprehensions', () => {
+    const pyth12 = evaluateExpression(
+      'map(str, sorted([3^i rd 2 if i else 2 for i of [-4..7]]))',
+      false
+    );
+    expect(pyth12).toEqual([
+      '2187/2048',
+      '9/8',
+      '32/27',
+      '81/64',
+      '4/3',
+      '729/512',
+      '3/2',
+      '128/81',
+      '27/16',
+      '16/9',
+      '243/128',
+      '2',
+    ]);
+  });
 });

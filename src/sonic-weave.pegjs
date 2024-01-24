@@ -602,6 +602,7 @@ Quantity
 Primary
   = Quantity
   / Range
+  / ArrayComprehension
   / NoneLiteral
   / TrueLiteral
   / FalseLiteral
@@ -617,7 +618,7 @@ Primary
   / StringLiteral
 
 UnitStepRange
-  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
+  = '[' start: Expression '..' end: Expression ']' {
     return {
       type: 'Range',
       start,
@@ -626,7 +627,7 @@ UnitStepRange
   }
 
 StepRange
-  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
+  = '[' start: Expression ',' second: Expression '..' end: Expression ']' {
     return {
       type: 'Range',
       start,
@@ -636,6 +637,16 @@ StepRange
   }
 
 Range = StepRange / UnitStepRange
+
+ArrayComprehension
+  = '[' expression: Expression ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression ']' {
+    return  {
+      type: 'ArrayComprehension',
+      expression,
+      element,
+      array,
+    };
+  }
 
 DownExpression
   = operators: 'v'+ '{' _ operand: Expression _ '}' {
