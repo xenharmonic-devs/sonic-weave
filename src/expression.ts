@@ -114,6 +114,19 @@ export type WartsLiteral = {
   basis: string[];
 };
 
+export type PatentTweak = {
+  rational: 'string';
+  tweak: number;
+};
+
+export type PlusMinusVal = {
+  type: 'PlusMinusVal';
+  equave: string;
+  divisions: number;
+  tweaks: PatentTweak[];
+  basis: string[];
+};
+
 export type VectorComponent = {
   sign: '' | '+' | '-';
   left: bigint;
@@ -156,6 +169,7 @@ export type IntervalLiteral =
   | SecondLiteral
   | MonzoLiteral
   | ValLiteral
+  | PlusMinusVal
   | WartsLiteral;
 
 export function uniformInvertNode(
@@ -470,6 +484,25 @@ function formatNedji(literal: NedjiLiteral) {
   return `${literal.numerator}\\${literal.denominator}<${equave}>`;
 }
 
+function formatPatentTweak(tweak: PatentTweak) {
+  if (tweak.tweak > 0) {
+    return '+'.repeat(tweak.tweak) + tweak.rational;
+  }
+  return '-'.repeat(-tweak.tweak) + tweak.rational;
+}
+
+function formatPlusMinusVal(literal: PlusMinusVal) {
+  let result = '';
+  if (literal.equave) {
+    result += '[' + literal.equave + ']';
+  }
+  result += literal.divisions.toString();
+  if (literal.tweaks) {
+    result += '[' + literal.tweaks.map(formatPatentTweak).join(',') + ']';
+  }
+  return result + '@' + literal.basis.join('.');
+}
+
 export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedjiLiteral':
@@ -500,6 +533,8 @@ export function literalToString(literal: IntervalLiteral) {
       return `${literal.equave}${literal.divisions}${literal.warts.join(
         ''
       )}@${literal.basis.join('.')}`;
+    case 'PlusMinusVal':
+      return formatPlusMinusVal(literal);
     case 'HertzLiteral':
       return `${literal.prefix}Hz`;
     case 'SecondLiteral':

@@ -647,6 +647,18 @@ describe('SonicWeave parser', () => {
     expect(() => parseSource('[i for i of [1]]; i')).toThrow();
   });
 
+  it('supports plus minus val notation', () => {
+    const scale = parseSource(`
+      5/4
+      3/2
+      2/1
+
+      17[+5]@
+      str
+    `);
+    expect(scale).toEqual(['6\\17', '10\\17', '17\\17']);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

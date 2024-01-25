@@ -609,6 +609,7 @@ ScalarLike
 
 Quantity
   = WartsLiteral
+  / PlusMinusVal
   / HertzLiteral
   / SecondLiteral
   / CentLiteral
@@ -804,7 +805,36 @@ WartsLiteral
     };
   }
 
-DotJoinedRationals = ($(PositiveInteger ('/' PositiveInteger)?))|.., '.'|
+PatentTweak
+  = wide: '+'+ rational: Rational {
+    return {
+      rational,
+      tweak: wide.length,
+    };
+  }
+  / narrow: '-'* rational: Rational {
+    return {
+      rational,
+      tweak: -narrow.length,
+    };
+  }
+
+PatentTweaks = PatentTweak|.., _ ',' _|
+
+PlusMinusVal
+  = equave: ('[' @Rational ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: DotJoinedRationals {
+    return {
+      type: 'PlusMinusVal',
+      equave: equave ?? '',
+      divisions,
+      tweaks: tweaks ?? [],
+      basis,
+    }
+  }
+
+Rational = $(PositiveInteger ('/' PositiveInteger)?)
+
+DotJoinedRationals = Rational|.., '.'|
 
 CentLiteral
   = (CentToken / '¢') { return { type: 'CentLiteral' }; }

@@ -17,6 +17,7 @@ import {
   ValLiteral,
   StepLiteral,
   IntervalLiteral,
+  PlusMinusVal,
 } from './expression';
 import {Interval, Color, timeMonzoAs, infect} from './interval';
 import {TimeMonzo, Domain} from './monzo';
@@ -37,7 +38,7 @@ import {
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
-import {inferEquave, wartsToVal} from './warts';
+import {inferEquave, plusMinusToVal, wartsToVal} from './warts';
 import {RootContext} from './context';
 import {
   Argument,
@@ -846,6 +847,8 @@ export class ExpressionVisitor {
         return this.visitSecondLiteral(node);
       case 'WartsLiteral':
         return this.visitWartsLiteral(node);
+      case 'PlusMinusVal':
+        return this.visitPlusMinusVal(node);
       case 'ColorLiteral':
         return new Color(node.value);
       case 'Identifier':
@@ -1014,6 +1017,13 @@ export class ExpressionVisitor {
 
   visitWartsLiteral(node: WartsLiteral) {
     const val = wartsToVal(node);
+    // Rig ups-and-downs.
+    val.cents = 1;
+    return new Interval(val, 'cologarithmic', node);
+  }
+
+  visitPlusMinusVal(node: PlusMinusVal) {
+    const val = plusMinusToVal(node);
     // Rig ups-and-downs.
     val.cents = 1;
     return new Interval(val, 'cologarithmic', node);
