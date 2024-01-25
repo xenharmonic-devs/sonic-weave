@@ -659,6 +659,18 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual(['6\\17', '10\\17', '17\\17']);
   });
 
+  it('supports equaves and ups/downs in val notation', () => {
+    const scale = parseSource(`
+      5/3
+      7/3
+      3/1
+
+      [3]13[v7]@
+      str
+    `);
+    expect(scale).toEqual(['6\\13<3>', '9\\13<3>', '13\\13<3>']);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

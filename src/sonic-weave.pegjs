@@ -564,14 +564,14 @@ CallExpression
   }
 
 ArrayAccess
-  = head: ArraySlice tail: (_ '[' @Expression ']')* {
+  = head: ArraySlice tail: (__ '[' @Expression ']')* {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
   }
 
 TrueArrayAccess
-  = head: Primary tail: (_ '[' @Expression ']')+ {
+  = head: Primary tail: (__ '[' @Expression ']')+ {
     return tail.reduce( (object, index) => {
       return { type: 'ArrayAccess', object, index };
     }, head);
@@ -806,13 +806,13 @@ WartsLiteral
   }
 
 PatentTweak
-  = wide: '+'+ rational: Rational {
+  = wide: ('+' / '^')+ rational: Rational {
     return {
       rational,
       tweak: wide.length,
     };
   }
-  / narrow: '-'* rational: Rational {
+  / narrow: ('-' / 'v')* rational: Rational {
     return {
       rational,
       tweak: -narrow.length,

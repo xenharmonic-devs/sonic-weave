@@ -492,7 +492,9 @@ export class StatementVisitor {
         }
         if (equave.compare(TWO)) {
           equaveNumerator = equave.n;
-          equaveDenominator = equave.d;
+          if (equave.d !== 1) {
+            equaveDenominator = equave.d;
+          }
         }
         const step = new Interval(
           TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
