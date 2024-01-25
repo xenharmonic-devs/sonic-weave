@@ -431,4 +431,52 @@ describe('SonicWeave standard library', () => {
     expect(scale[1].color?.value).toBe(undefined);
     expect(scale[2].color?.value).toBe('red');
   });
+
+  it('can reduce Raga Bhairavi to a comma recipe', () => {
+    const scale = parseSource(
+      'periodiff(geodiff([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]));str'
+    );
+    expect(scale).toEqual([
+      '24/25',
+      '2025/2048',
+      '2048/2025',
+      '135/128',
+      '80/81',
+      '24/25',
+      '135/128',
+      '80/81',
+    ]);
+  });
+
+  it('can recover Raga Bhairavi from its comma recipe', () => {
+    const scale = parseSource(`
+      cumprod(
+        antiperiodiff(
+          [
+            24/25,
+            2025/2048,
+            2048/2025,
+            135/128,
+            80/81,
+            24/25,
+            135/128,
+            80/81,
+          ],
+          10/9,
+        )
+      )
+      simplify
+      str
+    `);
+    expect(scale).toEqual([
+      '16/15',
+      '9/8',
+      '6/5',
+      '27/20',
+      '3/2',
+      '8/5',
+      '9/5',
+      '2',
+    ]);
+  });
 });

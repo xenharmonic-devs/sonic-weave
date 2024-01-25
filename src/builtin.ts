@@ -1284,6 +1284,26 @@ riff geodiff array {
     $[i + 1] ~%= $[i];
 }
 
+riff periodiff array {
+  "Calculate the geometric differences of the periodic interval pattern.";
+  array;
+  const first = $[0] ~% $[-1];
+  let i = length($) - 1;
+  while (i--)
+    $[i + 1] ~%= $[i];
+  $[0] = first;
+}
+
+riff antiperiodiff array constantOfIntegration {
+  "Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.";
+  constantOfIntegration ??= 1;
+  array;
+  $[0] ~*= constantOfIntegration;
+  let i = 0;
+  while (++i < length($))
+    $[i] ~*= $[i-1];
+}
+
 riff label labels scale {
   "Apply labels (or colors) from the first array to the current/given scale.";
   scale ??= $$;

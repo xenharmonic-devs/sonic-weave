@@ -430,6 +430,12 @@ Combine elements of each array into tuples until all of them are exhausted. Pads
 `...args`
 
 ## Prelude functions
+### antiperiodiff
+Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.
+#### Parameters:
+
+`array`, `constantOfIntegration`
+
 ### cbrt
 Calculate the cube root of the input.
 #### Parameters:
@@ -561,6 +567,12 @@ Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 #### Parameters:
 
 `b0`, `b1`, `b2`, `b3`, `equave`, `withUnity`
+
+### periodiff
+Calculate the geometric differences of the periodic interval pattern.
+#### Parameters:
+
+`array`
 
 ### pow
 Calculate x to the power of y.

@@ -239,7 +239,7 @@ LiftDeclaration
   }
 
 Parameters
-  = identifiers: Identifier|.., _ ','? _| rest: (','? _ '...' _ @Identifier)? {
+  = identifiers: Identifier|.., _ ','? _| rest: (','? _ '...' _ @Identifier)? _ ','? _ {
     return {
       type: 'Parameters',
       identifiers,
@@ -257,7 +257,7 @@ Argument
   }
 
 ArgumentList
-  = Argument|.., _ ','? _|
+  = (@(Argument|.., _ ','? _|) _ ','? _)
 
 IdentifierArray
   = '[' _ @Parameters _ ']'
