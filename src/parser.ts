@@ -484,10 +484,15 @@ export class StatementVisitor {
             throw new Error('Invalid warts equave');
           }
           equave = equave_;
-          if (equave.compare(TWO)) {
-            equaveNumerator = equave.n;
-            equaveDenominator = equave.d;
+        } else if (value.node?.type === 'PlusMinusVal') {
+          divisions = new Fraction(value.node.divisions);
+          if (value.node.equave) {
+            equave = new Fraction(value.node.equave);
           }
+        }
+        if (equave.compare(TWO)) {
+          equaveNumerator = equave.n;
+          equaveDenominator = equave.d;
         }
         const step = new Interval(
           TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
@@ -994,8 +999,6 @@ export class ExpressionVisitor {
   visitValLiteral(node: ValLiteral) {
     const primeExponents = node.components.map(this.visitComponent);
     const value = this.up(new TimeMonzo(ZERO, primeExponents), node);
-    // Rig ups-and-downs.
-    value.cents += 1;
     const result = new Interval(value, 'cologarithmic', node);
     if (node.ups) {
       this.rootContext.fragiles.push(result);
@@ -1017,15 +1020,11 @@ export class ExpressionVisitor {
 
   visitWartsLiteral(node: WartsLiteral) {
     const val = wartsToVal(node);
-    // Rig ups-and-downs.
-    val.cents = 1;
     return new Interval(val, 'cologarithmic', node);
   }
 
   visitPlusMinusVal(node: PlusMinusVal) {
     const val = plusMinusToVal(node);
-    // Rig ups-and-downs.
-    val.cents = 1;
     return new Interval(val, 'cologarithmic', node);
   }
 

@@ -340,7 +340,7 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig i {
-        const ups = round(1r € dot i);
+        const ups = round(v{1r €} dot i);
         return i ~% (1r c * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;
@@ -354,7 +354,7 @@ describe('SonicWeave parser', () => {
   it('can construct the hard cotritave', () => {
     const scale = parseSource(`
       const tritave = 1r * relog(3);
-      const cotritave = %tritave;
+      const cotritave = v{%tritave};
       tritave dot cotritave;
     `);
     expect(scale).toHaveLength(1);

@@ -361,7 +361,7 @@ describe('Extended Monzo', () => {
       2.25
     );
     expect(value.toString('cologarithmic')).toBe(
-      '-3/2*cologarithmic(s)+<3/2 -5/3]+cologarithmic(31/23)+cologarithmic(1\\)+0.25r €'
+      '-3/2*cologarithmic(s)+<3/2 -5/3]+cologarithmic(31/23)+cologarithmic(2\\)+0.25r €'
     );
   });
 });

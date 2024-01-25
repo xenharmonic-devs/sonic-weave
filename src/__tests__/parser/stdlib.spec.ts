@@ -284,8 +284,7 @@ describe('SonicWeave standard library', () => {
 
   it('can combine vals to approach the JIP', () => {
     const thirtyOne = evaluateExpression('tune(12@5, 19@5)') as Interval;
-    expect(thirtyOne.value.cents).toBe(1);
-    thirtyOne.value.cents = 0;
+    expect(thirtyOne.value.cents).toBe(0);
     expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
   });
 

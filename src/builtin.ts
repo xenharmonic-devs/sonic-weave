@@ -1297,7 +1297,7 @@ riff tune a b numIter weighting {
   numIter ??= 1;
   while (numIter--) {
     const x = 2 * a - b;
-    const y = v{a + b};
+    const y = a + b;
     const z = 2 * b - a;
 
     [a, b] = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));

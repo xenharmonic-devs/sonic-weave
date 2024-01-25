@@ -1533,11 +1533,11 @@ export class TimeMonzo {
     if (this.residual.compare(ONE)) {
       terms.push(`cologarithmic(${this.residual.toFraction()})`);
     }
-    const steps = Math.round(this.cents - 1);
+    const steps = Math.round(this.cents);
     if (steps) {
       terms.push(`cologarithmic(${steps}\\)`);
     }
-    const cents = this.cents - 1 - steps;
+    const cents = this.cents - steps;
     if (cents) {
       terms.push(`${cents}r €`);
     }

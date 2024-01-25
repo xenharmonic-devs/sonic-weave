@@ -271,7 +271,7 @@ export class Interval {
       }
       return new Interval(this.value.log(other.value), 'linear', node, zombie);
     }
-    if (this.domain === 'logarithmic') {
+    if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
         node = {type: 'AspiringFJS'};
@@ -289,7 +289,23 @@ export class Interval {
   }
 
   dot(other: Interval) {
-    const product = this.value.dot(other.value);
+    let monzo: TimeMonzo;
+    let val: TimeMonzo;
+    // Rig ups and downs.
+    if (this.domain === 'cologarithmic') {
+      monzo = other.value;
+      val = this.value.clone();
+      val.cents++;
+    } else if (other.domain === 'cologarithmic') {
+      monzo = this.value;
+      val = other.value.clone();
+      val.cents++;
+    } else {
+      monzo = this.value;
+      val = other.value;
+    }
+
+    const product = monzo.dot(val);
     const zombie = infect(this, other);
     if (product.d === 1) {
       const value = BigInt(product.s * product.n);
