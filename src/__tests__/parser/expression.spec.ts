@@ -613,4 +613,40 @@ describe('SonicWeave expression evaluator', () => {
     const yes = parseSingle('24@7 + 5@7 === 29c@7');
     expect(yes.toString()).toBe('true');
   });
+
+  it('knows how to calculate logarithms of negative values', () => {
+    const three = parseSingle('(-8) /_ (-2)');
+    expect(three.toString()).toBe('3');
+  });
+
+  // TODO: Fix unary minus precedence.
+  it('knows how to calculate logarithms of negative radicals', () => {
+    const three = parseSingle('(-(2^3/2)) /_ (-(2^1/2))');
+    expect(three.toString()).toBe('3');
+  });
+
+  it('knows how to calculate negative logarithms', () => {
+    const minusTwo = parseSingle('1/9 /_ 3');
+    expect(minusTwo.toString()).toBe('-2');
+  });
+
+  it('has an accurate rdc', () => {
+    const thirtyOne = parseSingle('29791 rdc 31');
+    expect(thirtyOne.toString()).toBe('31');
+  });
+
+  it('can calculate log pi base two', () => {
+    const logPi = parseSingle('PI /_ 2');
+    expect(logPi.toString()).toBe('1.6514961294723187r');
+  });
+
+  it('can calculate log 2 base pi', () => {
+    const logPi = parseSingle('2 /_ PI');
+    expect(logPi.toString()).toBe('0.6055115613982802r');
+  });
+
+  it('calculates geometric absolute value', () => {
+    const six = parseSingle('abs(logarithmic(-1/6))');
+    expect(six.toString()).toBe('1\\1<6>');
+  });
 });
