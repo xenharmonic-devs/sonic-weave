@@ -64,6 +64,15 @@ export function infect(left: Interval, right: Interval) {
   return ZOMBIE;
 }
 
+export function log(left: Interval, right: Interval) {
+  const log = left.value.log(right.value);
+  if (typeof log === 'number') {
+    return TimeMonzo.fromValue(log);
+  } else {
+    return TimeMonzo.fromFraction(log);
+  }
+}
+
 export class Interval {
   value: TimeMonzo;
   domain: Domain;
@@ -269,7 +278,7 @@ export class Interval {
       if (this.domain !== 'logarithmic') {
         throw new Error('Domains must match in non-scalar division');
       }
-      return new Interval(this.value.log(other.value), 'linear', node, zombie);
+      return new Interval(log(this, other), 'linear', node, zombie);
     }
     if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
       const value = this.value.pow(other.value.inverse());
@@ -369,8 +378,9 @@ export class Interval {
         'Logarithm not implemented in the (already) logarithmic domain'
       );
     }
+
     return new Interval(
-      this.value.log(other.value),
+      log(this, other),
       this.domain,
       undefined,
       infect(this, other)

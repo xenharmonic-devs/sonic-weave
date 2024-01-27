@@ -479,4 +479,9 @@ describe('SonicWeave standard library', () => {
       '2',
     ]);
   });
+
+  it('can calculate log pi', () => {
+    const logPi = evaluateExpression('str(log(PI))');
+    expect(logPi).toBe('1.1447298858494r');
+  });
 });

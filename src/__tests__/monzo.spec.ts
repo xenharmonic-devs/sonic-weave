@@ -202,7 +202,7 @@ describe('Extended Monzo', () => {
   it('throws an error when trying to reduce by unison', () => {
     const unison = new TimeMonzo(new Fraction(0), [new Fraction(0)]);
     const octave = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
-    expect(() => octave.reduce(unison)).toThrowError('Reduction by unison');
+    expect(() => octave.reduce(unison)).toThrow();
   });
   it('can be stretched', () => {
     const octave = new TimeMonzo(new Fraction(0), [new Fraction(1)]);

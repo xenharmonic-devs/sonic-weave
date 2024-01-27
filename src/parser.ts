@@ -19,7 +19,7 @@ import {
   IntervalLiteral,
   PlusMinusVal,
 } from './expression';
-import {Interval, Color, timeMonzoAs, infect} from './interval';
+import {Interval, Color, timeMonzoAs, infect, log} from './interval';
 import {TimeMonzo, Domain} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from './css-colors';
@@ -1314,7 +1314,7 @@ export class ExpressionVisitor {
             value = left.dot(right).value;
             break;
           case '/_':
-            value = left.value.log(right.value);
+            value = log(left, right);
             break;
           case '\\':
             throw new Error('Preference not supported with backslahes');

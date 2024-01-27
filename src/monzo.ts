@@ -873,12 +873,12 @@ export class TimeMonzo {
    * @param other Base of the logarithm.
    * @returns `x` such that `this ** x === other`.
    */
-  log(other: FractionValue | TimeMonzo) {
+  log(other: FractionValue | TimeMonzo): Fraction | number {
     if (this.timeExponent.n !== 0) {
       if (other instanceof TimeMonzo) {
         if (other.timeExponent.n === 0) {
           throw new Error(
-            'Cannot take a scalar logarithm of a value with time units'
+            'Cannot take a scalar logarithm of a value with time units.'
           );
         }
       } else {
@@ -893,79 +893,81 @@ export class TimeMonzo {
         if (
           !this.primeExponents[i].equals(other.primeExponents[i].mul(solution))
         ) {
-          throw new Error("Solution doesn't exist");
+          throw new Error("Logarithm doesn't exist.");
         }
       }
       if (n < m) {
         for (let i = n; i < m; ++i) {
           if (other.primeExponents[i].n) {
-            throw new Error("Solution doesn't exist");
+            throw new Error("Logarithm doesn't exist.");
           }
         }
       } else if (n > m) {
         for (let i = m; i < n; ++i) {
           if (this.primeExponents[i].n) {
-            throw new Error("Solution doesn't exist");
+            throw new Error("Logarithm doesn't exist.");
           }
         }
       }
       const respow = other.residual.pow(solution);
       if (!respow || respow.compare(this.residual)) {
-        throw new Error("Solution doesn't exist");
+        throw new Error("Logarithm doesn't exist.");
       }
-      return TimeMonzo.fromFraction(solution);
+      return solution;
     }
     if (other instanceof TimeMonzo) {
-      const copout = TimeMonzo.fromValue(
-        Math.log(this.valueOf()) / Math.log(other.valueOf())
-      );
       if (this.cents || other.cents) {
-        return copout;
+        return this.totalCents() / other.totalCents();
       }
-      const n = this.numberOfComponents;
-      const m = other.numberOfComponents;
-      if (n < m) {
-        for (let i = n; i < m; ++i) {
-          if (other.primeExponents[i].n) {
-            return copout;
-          }
-        }
-      } else if (n > m) {
-        for (let i = m; i < n; ++i) {
-          if (this.primeExponents[i].n) {
-            return copout;
-          }
-        }
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      let self: TimeMonzo = this;
+      if (self.numberOfComponents < other.numberOfComponents) {
+        self = this.clone();
+        self.numberOfComponents = other.numberOfComponents;
+      }
+      if (other.numberOfComponents < self.numberOfComponents) {
+        other = other.clone();
+        other.numberOfComponents = self.numberOfComponents;
       }
       let solution: Fraction | undefined;
-      for (let i = 0; i < Math.min(n, m); ++i) {
-        if (solution !== undefined) {
+      for (let i = 0; i < self.numberOfComponents; ++i) {
+        if (solution === undefined && other.primeExponents[i].n) {
+          solution = self.primeExponents[i].div(other.primeExponents[i]);
+        } else if (solution !== undefined) {
           if (
-            !this.primeExponents[i].equals(
+            !self.primeExponents[i].equals(
               other.primeExponents[i].mul(solution)
             )
           ) {
-            return copout;
+            return this.totalCents() / other.totalCents();
           }
-        } else if (other.primeExponents[i].n) {
-          solution = this.primeExponents[i].div(other.primeExponents[i]);
         }
       }
       if (solution === undefined) {
-        return copout;
+        const residualLog = this.residual.log(other.residual);
+        if (residualLog === null) {
+          return this.totalCents() / other.totalCents();
+        }
+        return residualLog;
       }
-      const respow = other.residual.pow(solution);
-      if (respow === null || !respow.equals(this.residual)) {
-        return copout;
+      const residualPow = other.residual.pow(solution);
+      if (residualPow === null || !residualPow.equals(this.residual)) {
+        return this.totalCents() / other.totalCents();
       }
-      return TimeMonzo.fromFraction(solution);
+      return solution;
     }
     if (typeof other === 'number') {
-      return TimeMonzo.fromValue(Math.log(this.valueOf()) / Math.log(other));
+      return this.totalCents() / valueToCents(other);
     }
-    return TimeMonzo.fromValue(
-      Math.log(this.valueOf()) / Math.log(new Fraction(other).valueOf())
-    );
+    other = new Fraction(other);
+    if (this.isFractional()) {
+      const solution = this.toFraction().log(other);
+      if (solution === null) {
+        return this.totalCents() / valueToCents((other as Fraction).valueOf());
+      }
+      return solution;
+    }
+    return this.totalCents() / valueToCents((other as Fraction).valueOf());
   }
 
   /**
@@ -1053,10 +1055,15 @@ export class TimeMonzo {
    * @returns The time monzo unchanged or inverted if less than one originally.
    */
   pitchAbs() {
-    if (this.totalCents() < 0) {
-      return this.inverse();
+    const result = this.clone();
+    if (result.residual.s === 0) {
+      return result;
     }
-    return this.clone();
+    result.residual.s = 1;
+    if (result.totalCents() < 0) {
+      return result.inverse();
+    }
+    return result;
   }
 
   // Consistent with Fraction.js
@@ -1108,16 +1115,17 @@ export class TimeMonzo {
    * @returns This reduced by the other.
    */
   reduce(other: TimeMonzo, ceiling = false) {
-    const otherCents = other.totalCents();
-    if (otherCents === 0) {
-      throw Error('Reduction by unison');
+    const log = this.log(other);
+    if (typeof log === 'number') {
+      if (ceiling) {
+        return this.mul(other.pow(1 - Math.ceil(log)));
+      }
+      return this.div(other.pow(Math.floor(log)));
     }
     if (ceiling) {
-      const ceilDiv = Math.ceil(this.totalCents() / otherCents);
-      return this.div(other.pow(ceilDiv - 1));
+      return this.mul(other.pow(ONE.sub(log.ceil())));
     }
-    const floorDiv = Math.floor(this.totalCents() / otherCents);
-    return this.div(other.pow(floorDiv));
+    return this.div(other.pow(log.floor()));
   }
 
   /**
@@ -1207,7 +1215,7 @@ export class TimeMonzo {
   }
 
   pitchRoundTo(other: TimeMonzo) {
-    const multiplier = Math.round(this.log(other).valueOf());
+    const multiplier = Math.round(this.totalCents() / other.totalCents());
     return other.pow(multiplier);
   }
 
