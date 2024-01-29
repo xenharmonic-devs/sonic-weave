@@ -539,13 +539,7 @@ export class StatementVisitor {
         scale.push(value);
       }
     } else if (Array.isArray(value)) {
-      // Prevent scale from growing recursively on itself
-      if (value === scale) {
-        value = [...value];
-      }
-      for (const subvalue of value) {
-        this.handleValue(subvalue, subVisitor);
-      }
+      scale.push(...this.flattenArray(value));
     } else if (value === undefined) {
       /* Do nothing */
     } else if (typeof value === 'string') {
@@ -561,6 +555,26 @@ export class StatementVisitor {
       scale.length = 0;
       scale.push(...mapped);
     }
+  }
+
+  flattenArray(value: any): Interval[] {
+    const result: any[] = [];
+    for (const subvalue of value) {
+      if (Array.isArray(subvalue)) {
+        result.push(...this.flattenArray(subvalue));
+      } else if (subvalue instanceof Interval) {
+        result.push(subvalue);
+      } else if (result.length) {
+        if (subvalue instanceof Color) {
+          result[result.length - 1] = result[result.length - 1].shallowClone();
+          result[result.length - 1].color = subvalue;
+        } else if (typeof subvalue === 'string') {
+          result[result.length - 1] = result[result.length - 1].shallowClone();
+          result[result.length - 1].label = subvalue;
+        }
+      }
+    }
+    return result;
   }
 
   visitBlockStatement(node: BlockStatement) {

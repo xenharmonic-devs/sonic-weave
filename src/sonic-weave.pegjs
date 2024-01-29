@@ -128,10 +128,6 @@ Statement
   / ForOfStatement
   / EmptyStatement
 
-LeftHandSideExpression
-  = IdentifierArray
-  / ArrayAccess
-
 ReassignmentTail
   = _ preferLeft: '~'? operator: AssigningOperator? preferRight: '~'? '=' _ value: Expression {
     return {
@@ -143,7 +139,14 @@ ReassignmentTail
   }
 
 VariableManipulationStatement
-  = name: LeftHandSideExpression tail: ReassignmentTail? EOS {
+  = name: IdentifierArray _ '=' _ value: Expression EOS {
+    return {
+      type: 'AssignmentStatement',
+      name,
+      value,
+    };
+  }
+  / name: ArrayAccess tail: ReassignmentTail? EOS {
     if (!tail) {
       return {
         type: 'ExpressionStatement',
@@ -151,7 +154,7 @@ VariableManipulationStatement
       }
     }
     const {preferLeft, preferRight, operator, value} = tail;
-    if (name.type === 'Parameters' || name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
+    if (name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
       if (operator) {
         return {
           type: 'AssignmentStatement',

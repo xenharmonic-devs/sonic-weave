@@ -648,4 +648,12 @@ describe('SonicWeave expression evaluator', () => {
     const six = parseSingle('abs(logarithmic(-1/6))');
     expect(six.toString()).toBe('1\\1<6>');
   });
+
+  it('can put variables into arrays', () => {
+    const foobar = evaluateExpression(
+      'const foo = "foo"; const bar = "bar"; [foo, bar]',
+      false
+    );
+    expect(foobar).toEqual(['foo', 'bar']);
+  });
 });

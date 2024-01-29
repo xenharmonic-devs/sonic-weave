@@ -527,4 +527,19 @@ describe('SonicWeave standard library', () => {
     const logPi = evaluateExpression('str(log(PI))');
     expect(logPi).toBe('1.1447298858494r');
   });
+
+  it('can build a scale from self-referencing copies', () => {
+    const scale = parseSource('3;2;2;[$, $];i => i \\ sum();stack();str');
+    expect(scale).toEqual([
+      '3\\21',
+      '5\\21',
+      '7\\21',
+      '10\\21',
+      '12\\21',
+      '14\\21',
+      '17\\21',
+      '19\\21',
+      '21\\21',
+    ]);
+  });
 });
