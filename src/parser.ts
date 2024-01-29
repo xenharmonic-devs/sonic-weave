@@ -1092,15 +1092,18 @@ export class ExpressionVisitor {
   visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
     const object = this.visit(node.object);
     if (!Array.isArray(object) && typeof object !== 'string') {
-      throw new Error('Array access on non-array');
+      throw new Error('Array access on non-array.');
     }
     const index = this.visit(node.index);
     if (!(index instanceof Interval)) {
-      throw new Error('Array access with a non-integer');
+      throw new Error('Array access with a non-integer.');
     }
-    let i = Number(index.value.toBigInteger());
+    let i = index.toInteger();
     if (i < 0) {
       i += object.length;
+    }
+    if (i < 0 || i >= object.length) {
+      throw new Error('Index out of range.');
     }
     return object[i];
   }
@@ -1648,6 +1651,9 @@ export class ExpressionVisitor {
       );
     }
     if (step.value.residual.s > 0) {
+      if (start.compare(end) > 0) {
+        return [];
+      }
       const result = [start];
       let next = start.add(step);
       while (next.compare(end) <= 0) {
@@ -1656,6 +1662,9 @@ export class ExpressionVisitor {
       }
       return result;
     } else if (step.value.residual.s < 0) {
+      if (start.compare(end) < 0) {
+        return [];
+      }
       const result = [start];
       let next = start.add(step);
       while (next.compare(end) >= 0) {

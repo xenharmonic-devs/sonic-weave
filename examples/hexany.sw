@@ -31,3 +31,5 @@ void(shift())
 
 // Add the octave to finish off
 2
+
+// Had we used 'rdc' instead of 'rd' above this shifting and octave pushing wouldn't've been necessary

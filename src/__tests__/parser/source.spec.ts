@@ -741,6 +741,19 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual(['1', '2']);
   });
 
+  it('iterates over ranges', () => {
+    const scale = parseSource(`
+      const factors = [1, 3, 5, 7]
+      for (const i of [0 .. length(factors)-1]) {
+        for (const j of [i+1 .. length(factors)-1]) {
+          factors[i] * factors[j]
+        }
+      }
+      str
+    `);
+    expect(scale).toEqual(['3', '5', '7', '15', '21', '35']);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
