@@ -665,11 +665,13 @@ export class StatementVisitor {
       docstring = node.body[0].expression.value;
       node.body.shift();
     }
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const scopeParent = this;
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor(
-        this.parent.rootContext,
-        this.parent
+        scopeParent.rootContext,
+        scopeParent
       );
       localVisitor.mutables.set('$$', this.parent.getCurrentScale());
 
@@ -1442,11 +1444,18 @@ export class ExpressionVisitor {
   }
 
   visitArrowFunction(node: ArrowFunction) {
+    const scopeParent = this.parent;
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localVisitor = new StatementVisitor(this.rootContext, this.parent);
+      const localVisitor = new StatementVisitor(
+        scopeParent.rootContext,
+        scopeParent
+      );
 
-      // Contract scope
-      localVisitor.mutables.delete('$');
+      // Manipulate immediate scope
+      localVisitor.mutables.set('$', this.get('$'));
+      if (this.parent.mutables.has('$$')) {
+        localVisitor.mutables.set('$$', this.get('$$'));
+      }
 
       for (let i = 0; i < node.parameters.identifiers.length; ++i) {
         const name = node.parameters.identifiers[i].id;

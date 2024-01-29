@@ -690,6 +690,57 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual(['6\\13<3>', '9\\13<3>', '13\\13<3>']);
   });
 
+  it('has function scope similar to javascript', () => {
+    const a = 1;
+    function foo() {
+      return a;
+    }
+    {
+      const a = 2;
+      // eslint-disable-next-line no-inner-declarations
+      function bar() {
+        return a;
+      }
+      expect(foo()).toBe(1);
+      expect(bar()).toBe(2);
+    }
+    const scale = parseSource(`
+      const a = 1
+      riff foo {a}
+      {
+        const a = 2
+        riff bar {a}
+        foo()
+        bar()
+      }
+      str
+    `);
+    expect(scale).toEqual(['1', '2']);
+  });
+
+  it('has arrow function scope similar to javascript', () => {
+    const a = 1;
+    const foo = () => a;
+    {
+      const a = 2;
+      const bar = () => a;
+      expect(foo()).toBe(1);
+      expect(bar()).toBe(2);
+    }
+    const scale = parseSource(`
+      const a = 1
+      const foo = => a
+      {
+        const a = 2
+        const bar = => a
+        foo()
+        bar()
+      }
+      str
+    `);
+    expect(scale).toEqual(['1', '2']);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
