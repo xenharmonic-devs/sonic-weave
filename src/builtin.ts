@@ -434,6 +434,37 @@ Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});
 toMonzo.__doc__ = 'Convert interval to a prime count vector a.k.a. monzo.';
 toMonzo.__node__ = builtinNode(toMonzo);
 
+// == Type detection ==
+function isInterval(value: SonicWeaveValue) {
+  return sonicBool(value instanceof Interval);
+}
+isInterval.__doc__ = 'Return `true` if the value is an interval.';
+isInterval.__node__ = builtinNode(isInterval);
+
+function isColor(value: SonicWeaveValue) {
+  return sonicBool(value instanceof Color);
+}
+isColor.__doc__ = 'Return `true` if the value is a color.';
+isColor.__node__ = builtinNode(isColor);
+
+function isString(value: SonicWeaveValue) {
+  return sonicBool(typeof value === 'string');
+}
+isString.__doc__ = 'Return `true` if the value is a string.';
+isString.__node__ = builtinNode(isString);
+
+function isFunction(value: SonicWeaveValue) {
+  return sonicBool(typeof value === 'function');
+}
+isFunction.__doc__ =
+  'Return `true` if the value is a riff or an arrow function.';
+isFunction.__node__ = builtinNode(isFunction);
+
+function isArray(value: SonicWeaveValue) {
+  return sonicBool(Array.isArray(value));
+}
+isArray.__doc__ = 'Return `true` if the value is an array.';
+isArray.__node__ = builtinNode(isArray);
 // == Other ==
 
 export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
@@ -914,12 +945,6 @@ arrayReduce.__doc__ =
   'Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.';
 arrayReduce.__node__ = builtinNode(arrayReduce);
 
-function isArray(value: any) {
-  return sonicBool(Array.isArray(value));
-}
-isArray.__doc__ = 'Return `true` if the value is an array.';
-isArray.__node__ = builtinNode(isArray);
-
 function repr_(
   this: ExpressionVisitor,
   value: SonicWeaveValue | null,
@@ -1149,6 +1174,12 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   absoluteFJS,
   FJS,
   monzo: toMonzo,
+  // Type detection
+  isInterval,
+  isColor,
+  isString,
+  isFunction,
+  isArray,
   // Integer conversion
   floor,
   round,
@@ -1171,7 +1202,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   max,
   random,
   randomCents,
-  isArray,
   sort,
   sorted,
   reverse,
@@ -1319,6 +1349,8 @@ riff periodiff array {
 
 riff periostack guideGenerator array {
   "Stack the current/given inflections along with the guide generator into a periodic sequence of steps.";
+  if (not isInterval(guideGenerator))
+    throw "Guide generator must be an interval.";
   $ = array ?? $$;
   $[0] ~*= guideGenerator;
   let i = 0;

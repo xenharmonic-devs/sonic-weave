@@ -550,6 +550,7 @@ export class StatementVisitor {
         this.rootContext.title = value;
       }
     } else {
+      this.rootContext.spendGas(scale.length);
       const bound = value.bind(subVisitor);
       const mapped = scale.map(i => bound(i));
       scale.length = 0;
@@ -1511,7 +1512,7 @@ export class ExpressionVisitor {
     }
     let numerator = node.whole;
     let denominator = 1n;
-    const exponent = node.exponent || 0n;
+    const exponent = BigInt(node.exponent || 0);
     if (exponent > 0) {
       numerator *= 10n ** exponent;
     } else if (exponent < 0) {

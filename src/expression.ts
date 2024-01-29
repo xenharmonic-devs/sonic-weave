@@ -15,7 +15,7 @@ export type DecimalLiteral = {
   type: 'DecimalLiteral';
   whole: bigint;
   fractional: string;
-  exponent: bigint | null;
+  exponent: number | null;
   flavor: '' | 'r' | 'e' | 'E' | 'z';
 };
 
@@ -129,10 +129,10 @@ export type PlusMinusVal = {
 
 export type VectorComponent = {
   sign: '' | '+' | '-';
-  left: bigint;
+  left: number;
   separator?: '/' | '.';
   right: string;
-  exponent: bigint | null;
+  exponent: number | null;
 };
 
 export type MonzoLiteral = {
@@ -171,6 +171,30 @@ export type IntervalLiteral =
   | ValLiteral
   | PlusMinusVal
   | WartsLiteral;
+
+const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
+
+function validateBigInt(n: bigint) {
+  if (n > ABSURD_INT || -n > ABSURD_INT) {
+    throw new Error('Integer overflow.');
+  }
+}
+
+export function validateNode(node?: IntervalLiteral) {
+  if (!node) {
+    return;
+  }
+  if (node.type === 'IntegerLiteral') {
+    validateBigInt(node.value);
+  } else if (node.type === 'FractionLiteral') {
+    validateBigInt(node.numerator);
+    validateBigInt(node.denominator);
+  } else if (node.type === 'DecimalLiteral') {
+    validateBigInt(node.whole);
+  } else if (node.type === 'CentsLiteral') {
+    validateBigInt(node.whole);
+  }
+}
 
 export function uniformInvertNode(
   node?: IntervalLiteral

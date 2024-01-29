@@ -181,11 +181,35 @@ Return `true` if the value is an array.
 
 `value`
 
+### isColor
+Return `true` if the value is a color.
+#### Parameters:
+
+`value`
+
+### isFunction
+Return `true` if the value is a riff or an arrow function.
+#### Parameters:
+
+`value`
+
+### isInterval
+Return `true` if the value is an interval.
+#### Parameters:
+
+`value`
+
 ### isPrime
 Return `true` if `n` is a prime number, `false` otherwise.
 #### Parameters:
 
 `n`
+
+### isString
+Return `true` if the value is a string.
+#### Parameters:
+
+`value`
 
 ### JIP
 The Just Intonation Point. Converts intervals to real cents.

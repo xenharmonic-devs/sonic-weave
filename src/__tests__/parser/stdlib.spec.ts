@@ -1,5 +1,10 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression, evaluateSource} from '../../parser';
+import {
+  evaluateExpression,
+  evaluateSource,
+  getSourceVisitor,
+  parseAST,
+} from '../../parser';
 import {Interval} from '../../interval';
 
 function parseSource(source: string) {
@@ -541,5 +546,28 @@ describe('SonicWeave standard library', () => {
       '19\\21',
       '21\\21',
     ]);
+  });
+
+  it.fails("doesn't blow up while typing out commands", () => {
+    const ast = parseAST(`
+      1485/1536
+      21504/19602
+      8910/9408
+      448/450
+      2970/3072
+      384/363
+      154/162
+      810/784
+      147/150
+      30/49
+      210/81
+      96/150
+      periostack // Didn't finish typing out the parenthesis
+    `);
+    const visitor = getSourceVisitor();
+    visitor.rootContext.gas = 1000;
+    for (const statement of ast.body) {
+      visitor.visit(statement);
+    }
   });
 });

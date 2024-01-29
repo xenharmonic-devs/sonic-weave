@@ -1292,7 +1292,7 @@ export class TimeMonzo {
       type: 'DecimalLiteral',
       whole: BigInt(whole),
       fractional,
-      exponent: BigInt(exponent),
+      exponent: parseInt(exponent, 10),
       flavor: 'r',
     };
   }
@@ -1402,14 +1402,14 @@ export class TimeMonzo {
       const separator = pe.d === 1 ? undefined : '/';
       const component: VectorComponent = {
         sign: pe.s < 0 ? '-' : '',
-        left: BigInt(pe.n),
+        left: pe.n,
         right,
         separator,
         exponent: null,
       };
       components.push(component);
     }
-    while (components.length && components[components.length - 1].left === 0n) {
+    while (components.length && components[components.length - 1].left === 0) {
       components.pop();
     }
     return {type: 'MonzoLiteral', components, ups: 0, lifts: 0};

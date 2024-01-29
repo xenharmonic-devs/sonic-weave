@@ -115,7 +115,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           type: 'DecimalLiteral',
           whole: 420n,
           fractional: '',
-          exponent: 69n,
+          exponent: 69,
           flavor: '',
         },
         right: {type: 'SecondLiteral', prefix: ''},
@@ -133,7 +133,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         type: 'DecimalLiteral',
         whole: 42n,
         fractional: '0',
-        exponent: -69n,
+        exponent: -69,
         flavor: '',
       },
     });
@@ -147,7 +147,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         type: 'DecimalLiteral',
         whole: 42n,
         fractional: '0',
-        exponent: -69n,
+        exponent: -69,
         flavor: '',
       },
     });

@@ -10,6 +10,7 @@ import {
   literalToString,
   modNodes,
   roundToNodes,
+  validateNode,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -86,6 +87,7 @@ export class Interval {
     node?: IntervalLiteral,
     convert?: Interval
   ) {
+    validateNode(node);
     this.value = value;
     this.domain = domain;
     this.node = node;

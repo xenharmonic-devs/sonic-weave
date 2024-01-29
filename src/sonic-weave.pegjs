@@ -1088,14 +1088,11 @@ Integer
 SignPart
   = $([+-]?)
 
-SignedInteger
-  = sign: SignPart integer: Integer { return sign === '-' ? -integer : integer; }
-
 ExponentIndicator
   = 'e'i
 
 ExponentPart
-  = ExponentIndicator exponent: SignedInteger { return exponent; }
+  = ExponentIndicator exponent: SignedBasicInteger { return exponent; }
 
 BasicInteger
   = num: $('0' / ([1-9] DecimalDigit*)) { return parseInt(num, 10) }
