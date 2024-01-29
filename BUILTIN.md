@@ -587,7 +587,7 @@ Calculate x to the power of y.
 `x`, `y`
 
 ### prod
-Calculate the (linear) product of the factors i.e. the logarithmic sum.
+Calculate the (linear) product of the factors or the current scale i.e. the logarithmic sum.
 #### Parameters:
 
 `factors`
@@ -743,7 +743,7 @@ Obtain a copy of the current/given scale with only the given indices kept.
 `indices`, `scale`
 
 ### sum
-Calculate the (linear) sum of the terms.
+Calculate the (linear) sum of the terms or the current scale.
 #### Parameters:
 
 `terms`
