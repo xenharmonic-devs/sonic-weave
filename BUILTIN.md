@@ -434,7 +434,7 @@ Combine elements of each array into tuples until all of them are exhausted. Pads
 Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.
 #### Parameters:
 
-`array`, `constantOfIntegration`
+`constantOfIntegration`, `array`
 
 ### cbrt
 Calculate the cube root of the input.
@@ -574,6 +574,12 @@ Calculate the geometric differences of the periodic interval pattern.
 
 `array`
 
+### periostack
+Stack the current/given inflections along with the guide generator into a periodic sequence of steps.
+#### Parameters:
+
+`guideGenerator`, `array`
+
 ### pow
 Calculate x to the power of y.
 #### Parameters:
@@ -694,6 +700,12 @@ Calculate the square root of the input.
 
 `x`
 
+### stack
+Cumulatively stack the current/given intervals on top of each other.
+#### Parameters:
+
+`array`
+
 ### stretch
 Stretch the current/given scale by the given amount. A value of `1` corresponds to no change.
 #### Parameters:
@@ -753,6 +765,18 @@ Obtain a copy of the current/given scale with only unique intervals kept.
 #### Parameters:
 
 `scale`
+
+### unperiostack
+Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.
+#### Parameters:
+
+`array`
+
+### unstack
+Unstack the current/given scale into steps.
+#### Parameters:
+
+`array`
 
 ### void
 Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale.

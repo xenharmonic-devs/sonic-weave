@@ -1260,12 +1260,19 @@ riff cumsum array {
     $[i] ~+= $[i-1];
 }
 
-riff cumprod array {
-  "Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.";
-  array;
+riff stack array {
+  "Cumulatively stack the current/given intervals on top of each other.";
+  $ = array ?? $$;
   let i = 0;
   while (++i < length($))
     $[i] ~*= $[i-1];
+  return;
+}
+
+riff cumprod array {
+  "Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.";
+  array;
+  stack();
 }
 
 riff diff array {
@@ -1276,32 +1283,52 @@ riff diff array {
     $[i + 1] ~-= $[i];
 }
 
-riff geodiff array {
-  "Calculate the geometric differences between the factors.";
-  array;
+riff unstack array {
+  "Unstack the current/given scale into steps.";
+  $ = array ?? $$;
   let i = length($) - 1;
   while (i--)
     $[i + 1] ~%= $[i];
+  return;
 }
 
-riff periodiff array {
-  "Calculate the geometric differences of the periodic interval pattern.";
+riff geodiff array {
+  "Calculate the geometric differences between the factors.";
   array;
+  unstack();
+}
+
+riff unperiostack array {
+  "Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.";
+  $ = array ?? $$;
   const first = $[0] ~% $[-1];
   let i = length($) - 1;
   while (i--)
     $[i + 1] ~%= $[i];
   $[0] = first;
+  return;
 }
 
-riff antiperiodiff array constantOfIntegration {
-  "Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.";
-  constantOfIntegration ??= 1;
+riff periodiff array {
+  "Calculate the geometric differences of the periodic interval pattern.";
   array;
-  $[0] ~*= constantOfIntegration;
+  unperiostack();
+}
+
+riff periostack guideGenerator array {
+  "Stack the current/given inflections along with the guide generator into a periodic sequence of steps.";
+  $ = array ?? $$;
+  $[0] ~*= guideGenerator;
   let i = 0;
   while (++i < length($))
     $[i] ~*= $[i-1];
+  return;
+}
+
+riff antiperiodiff constantOfIntegration array {
+  "Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.";
+  array;
+  periostack(constantOfIntegration);
 }
 
 riff label labels scale {
