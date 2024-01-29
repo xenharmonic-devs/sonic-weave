@@ -416,15 +416,41 @@ AdditiveTail
   = (__ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / '·' / DotToken / '⊗' / TensorToken / LogToken / '/^')
+  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
-  = head: ExponentiationExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @ExponentiationExpression)* {
+  = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
     return tail.reduce(operatorReducer, head);
   }
 
+UniformUnaryOperator
+  = '-' / '%' / '÷'
+
+UniformUnaryExpression
+  = operator: '--' operand: ExponentiationExpression {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
+    };
+  }
+  / operator: UniformUnaryOperator? uniform: '~'? operand: ExponentiationExpression {
+    if (operator) {
+      return {
+        type: 'UnaryExpression',
+        operator,
+        operand,
+        prefix: true,
+        uniform: !!uniform,
+      };
+    }
+    return operand;
+  }
+
 ExponentiationOperator
-  = '^'
+  = $('^' / LogToken / '/^')
 
 ExponentiationExpression
   = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
@@ -493,9 +519,6 @@ EnumeratedChord
 Secondary
   = CallExpression
   / ArrayAccess
-
-UniformUnaryOperator
-  = '-' / '%' / '÷'
 
 ChainableUnaryOperator
   = $NotToken / '^' / '/' / '\\'

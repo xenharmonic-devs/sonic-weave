@@ -1234,7 +1234,7 @@ riff mtof index {
 }
 riff ftom freq {
   "Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).";
-  return freq % 440 Hz /_ 2 * 12 + 69;
+  return (freq % 440 Hz) /_ 2 * 12 + 69;
 }
 
 riff void {

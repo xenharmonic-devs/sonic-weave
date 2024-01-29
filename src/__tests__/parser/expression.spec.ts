@@ -619,9 +619,8 @@ describe('SonicWeave expression evaluator', () => {
     expect(three.toString()).toBe('3');
   });
 
-  // TODO: Fix unary minus precedence.
   it('knows how to calculate logarithms of negative radicals', () => {
-    const three = parseSingle('(-(2^3/2)) /_ (-(2^1/2))');
+    const three = parseSingle('(-2^3/2) /_ (-2^1/2)');
     expect(three.toString()).toBe('3');
   });
 
