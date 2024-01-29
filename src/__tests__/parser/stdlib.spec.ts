@@ -304,7 +304,7 @@ describe('SonicWeave standard library', () => {
 
   // Four natural ways of spelling the just major chord in root position
   it('can spell the just major chord super-overtonally', () => {
-    const superOvertone = parseSource('4:5:6');
+    const superOvertone = parseSource('o(4:5:6)');
     expect(superOvertone[0].value.totalCents()).toBeCloseTo(386.313714); // major third
     expect(superOvertone[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
@@ -342,7 +342,7 @@ describe('SonicWeave standard library', () => {
 
   // Minor inversions
   it('can spell the just minor chord in root position', () => {
-    const rootPosition = parseSource('reflected(6:5:4)');
+    const rootPosition = parseSource('u(6:5:4)');
     expect(rootPosition[0].value.totalCents()).toBeCloseTo(315.641287); // minor third
     expect(rootPosition[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });

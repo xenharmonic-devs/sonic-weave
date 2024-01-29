@@ -586,6 +586,12 @@ Convert MIDI note number to absolute frequency.
 
 `index`
 
+### o
+Obtain a copy of the current/given scale in the default overtonal interpretation.
+#### Parameters:
+
+`scale`
+
 ### octaplex
 Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 #### Parameters:
@@ -783,6 +789,12 @@ Find a combination of two vals that is closer to just intonation.
 #### Parameters:
 
 `a`, `b`, `numIter`, `weighting`
+
+### u
+Obtain a undertonal reflection of the current/given overtonal scale.
+#### Parameters:
+
+`scale`
 
 ### uniquesOf
 Obtain a copy of the current/given scale with only unique intervals kept.

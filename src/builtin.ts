@@ -1608,6 +1608,16 @@ riff reflected scale {
   map(i => %~i, scale ?? $$);
 }
 
+riff u scale {
+  "Obtain a undertonal reflection of the current/given overtonal scale.";
+  return reflected(scale)
+};
+
+riff o scale {
+  "Obtain a copy of the current/given scale in the default overtonal interpretation.";
+  scale;
+}
+
 riff rotate onto scale {
   "Rotate the current/given scale onto the given degree.";
   onto ??= 1;

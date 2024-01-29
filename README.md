@@ -203,6 +203,8 @@ Chord enumerations take the first interval and use it as the implied root in a s
 #### Reflected enumerations
 By default enumeration assumes that we're dealing with frequency ratios. If you wish to specify ratios of wavelengths, prefix the enumeration with `/` e.g. `/6:5:4:3` evaluates to (frequency ratios) `[6/5, 6/4, 6/3]`.
 
+In effect `/a:b:c` is shorthand for `1/a:1/b:1/c`. The stdlib `u()` is also an alternative e.g. `u(6:5:4:3)`. The undertonal `u()` riff pairs nicely with the overtonal `o()` riff e.g. `o(3:4:5:6)`.
+
 ### Array access
 Use square brackets to access array elements. Indexing starts from zero. Negative indices count back from the end. `$[-1]` is a handy shorthand for the last element in the current scale.
 
