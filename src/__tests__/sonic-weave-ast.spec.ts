@@ -216,6 +216,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             rest: null,
           },
           body: [{type: 'ReturnStatement'}],
+          text: 'riff foo{return;}',
         },
       ],
     });
@@ -235,6 +236,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             rest: {type: 'Identifier', id: 'baz'},
           },
           body: [],
+          text: 'riff foo bar ...baz {}',
         },
       ],
     });

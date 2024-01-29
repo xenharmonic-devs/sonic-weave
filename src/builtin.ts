@@ -70,6 +70,7 @@ function builtinNode(builtin: Function): FunctionDeclaration {
     name: {type: 'Identifier', id: builtin.name},
     parameters: {type: 'Parameters', identifiers},
     body: [],
+    text: `riff ${builtin.name} { [native riff] }`,
   };
 }
 
@@ -941,8 +942,7 @@ function repr_(
     return '[' + value.map(e => s(e, depth - 1)).join(', ') + ']';
   }
   if (typeof value === 'function') {
-    // Don't stringify __doc__ and __node__
-    return `[Function: ${value.name}]`;
+    return value.__node__.text;
   }
   if (typeof value === 'string') {
     return JSON.stringify(value);

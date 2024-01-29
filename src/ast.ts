@@ -74,6 +74,7 @@ export type FunctionDeclaration = {
   name: Identifier;
   parameters: Parameters;
   body: Statement[];
+  text: string;
 };
 
 export type PitchDeclaration = {
@@ -236,6 +237,7 @@ export type ArrowFunction = {
   type: 'ArrowFunction';
   parameters: Parameters;
   expression: Expression;
+  text: string;
 };
 
 export type EnumeratedChord = {

@@ -199,6 +199,7 @@ FunctionDeclaration
       name,
       parameters,
       body: body.body,
+      text: text(),
     };
   }
 
@@ -1019,6 +1020,7 @@ ArrowFunction
       type: 'ArrowFunction',
       parameters,
       expression,
+      text: text(),
     };
   }
 

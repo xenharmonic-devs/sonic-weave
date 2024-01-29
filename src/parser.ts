@@ -154,13 +154,29 @@ export class StatementVisitor {
       if (defaults.mutables.has(key)) {
         continue;
       }
-      variableLines.push(`let ${key} = ${r(this.mutables.get(key))}`);
+      const value = r(this.mutables.get(key));
+      if (value.startsWith('riff')) {
+        const name = (this.mutables.get(key) as SonicWeaveFunction).name;
+        variableLines.push(`let ${key} = ${name}`);
+      } else {
+        variableLines.push(`let ${key} = ${value}`);
+      }
     }
     for (const key of this.immutables.keys()) {
       if (defaults.immutables.has(key)) {
         continue;
       }
-      variableLines.push(`const ${key} = ${r(this.immutables.get(key))}`);
+      const value = r(this.immutables.get(key));
+      if (value.startsWith('riff')) {
+        if (value.includes('[native riff]')) {
+          const name = (this.immutables.get(key) as SonicWeaveFunction).name;
+          variableLines.push(`const ${key} = ${name}`);
+        } else {
+          variableLines.push(value);
+        }
+      } else {
+        variableLines.push(`const ${key} = ${value}`);
+      }
     }
     if (variableLines.length) {
       base += variableLines.join('\n') + '\n';

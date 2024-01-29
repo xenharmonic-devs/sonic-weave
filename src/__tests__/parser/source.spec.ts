@@ -554,6 +554,25 @@ describe('SonicWeave parser', () => {
     );
   });
 
+  it('can expand riffs', () => {
+    const visitor = evaluateSource('riff foo bar {bar + 3};foo(1)', false);
+    expect(visitor.expand(getSourceVisitor(false))).toBe(
+      'riff foo bar {bar + 3}\n4'
+    );
+  });
+
+  it('can expand arrow functions', () => {
+    const visitor = evaluateSource('const foo = bar => bar + 2;foo(1)', false);
+    expect(visitor.expand(getSourceVisitor(false))).toBe(
+      'const foo = bar => bar + 2\n3'
+    );
+  });
+
+  it('can expand renamed builtins', () => {
+    const visitor = evaluateSource('let foo = gcd;foo(6, 8)', false);
+    expect(visitor.expand(getSourceVisitor(false))).toBe('let foo = gcd\n2');
+  });
+
   it('can sort scales after the fact', () => {
     const visitor = getSourceVisitor(false);
     const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');
