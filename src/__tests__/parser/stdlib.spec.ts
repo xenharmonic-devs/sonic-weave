@@ -297,66 +297,66 @@ describe('SonicWeave standard library', () => {
 
   it('has harmonic segments sounding downwards', () => {
     const harmonicSeventhChord = parseSource('7::4');
-    expect(harmonicSeventhChord[0].value.totalCents()).toBeCloseTo(-266.870905); // subminor third
-    expect(harmonicSeventhChord[1].value.totalCents()).toBeCloseTo(-582.512193); // lesser septimal tritone
-    expect(harmonicSeventhChord[2].value.totalCents()).toBeCloseTo(-968.825906); // harmonic seventh
+    expect(harmonicSeventhChord[0].totalCents()).toBeCloseTo(-266.870905); // subminor third
+    expect(harmonicSeventhChord[1].totalCents()).toBeCloseTo(-582.512193); // lesser septimal tritone
+    expect(harmonicSeventhChord[2].totalCents()).toBeCloseTo(-968.825906); // harmonic seventh
   });
 
   // Four natural ways of spelling the just major chord in root position
   it('can spell the just major chord super-overtonally', () => {
     const superOvertone = parseSource('o(4:5:6)');
-    expect(superOvertone[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(superOvertone[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    expect(superOvertone[0].totalCents()).toBeCloseTo(386.313714); // major third
+    expect(superOvertone[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord sub-overtonally', () => {
     const subOvertone = parseSource('revposed(6:5:4)');
-    expect(subOvertone[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(subOvertone[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    expect(subOvertone[0].totalCents()).toBeCloseTo(386.313714); // major third
+    expect(subOvertone[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord retroverted', () => {
     const retroversion = parseSource('retroverted(10:12:15)');
-    expect(retroversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(retroversion[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    expect(retroversion[0].totalCents()).toBeCloseTo(386.313714); // major third
+    expect(retroversion[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord reflected', () => {
     const reflection = parseSource('reflected(15:12:10)');
-    expect(reflection[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(reflection[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    expect(reflection[0].totalCents()).toBeCloseTo(386.313714); // major third
+    expect(reflection[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   // Major inversions
   it('can spell the just major chord in first inversion with root on 1/1', () => {
     const firstInversion = parseSource('8:5:6');
-    expect(firstInversion[0].value.totalCents()).toBeCloseTo(-813.686286); // minor sixth
-    expect(firstInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+    expect(firstInversion[0].totalCents()).toBeCloseTo(-813.686286); // minor sixth
+    expect(firstInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
 
   it('can spell the just major chord in second inversion with root on 1/1', () => {
     const secondInversion = parseSource('4:5:3');
-    expect(secondInversion[0].value.totalCents()).toBeCloseTo(386.313714); // major third
-    expect(secondInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+    expect(secondInversion[0].totalCents()).toBeCloseTo(386.313714); // major third
+    expect(secondInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
 
   // Minor inversions
   it('can spell the just minor chord in root position', () => {
     const rootPosition = parseSource('u(6:5:4)');
-    expect(rootPosition[0].value.totalCents()).toBeCloseTo(315.641287); // minor third
-    expect(rootPosition[1].value.totalCents()).toBeCloseTo(701.955001); // perfect fifth
+    expect(rootPosition[0].totalCents()).toBeCloseTo(315.641287); // minor third
+    expect(rootPosition[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just minor chord in first inversion with root on 1/1', () => {
     const firstInversion = parseSource('reflected(3:5:4)');
-    expect(firstInversion[0].value.totalCents()).toBeCloseTo(-884.358713); // major sixth
-    expect(firstInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+    expect(firstInversion[0].totalCents()).toBeCloseTo(-884.358713); // major sixth
+    expect(firstInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
 
   it('can spell the just minor chord in second inversion with root on 1/1', () => {
     const secondInversion = parseSource('reflected(6:5:8)');
-    expect(secondInversion[0].value.totalCents()).toBeCloseTo(315.641287); // major sixth
-    expect(secondInversion[1].value.totalCents()).toBeCloseTo(-498.044999); // perfect fourth
+    expect(secondInversion[0].totalCents()).toBeCloseTo(315.641287); // major sixth
+    expect(secondInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
 
   it('has the means to convert JI scales to enumerations', () => {

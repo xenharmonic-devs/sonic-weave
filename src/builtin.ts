@@ -366,7 +366,7 @@ export function cents(
   const converted = relog.bind(this)(interval);
   if (fractionDigits !== undefined) {
     const denominator = 10 ** fractionDigits.toInteger();
-    const numerator = Math.round(converted.value.totalCents() * denominator);
+    const numerator = Math.round(converted.totalCents() * denominator);
     converted.value = new TimeMonzo(ZERO, [
       new Fraction(numerator, denominator * 1200),
     ]);
@@ -533,7 +533,7 @@ function PrimeMapping(
 ) {
   const rl = relog.bind(this);
   const pc = primeCents.map((p, i) =>
-    p ? rl(p).value.totalCents() : PRIME_CENTS[i]
+    p ? rl(p).totalCents() : PRIME_CENTS[i]
   );
 
   function mapper(this: ExpressionVisitor, interval: Interval) {
@@ -1035,7 +1035,7 @@ help.__node__ = builtinNode(help);
 // CSS color generation
 function cc(x: Interval, fractionDigits = 3) {
   if (x?.node?.type === 'CentsLiteral') {
-    return x.value.totalCents().toFixed(fractionDigits);
+    return x.totalCents().toFixed(fractionDigits);
   }
   return x.value.valueOf().toFixed(fractionDigits);
 }
@@ -1078,7 +1078,7 @@ hsla.__doc__ =
 hsla.__node__ = builtinNode(hsla);
 
 export function centsColor(interval: Interval) {
-  const octaves = interval.value.totalCents() / 1200;
+  const octaves = interval.totalCents() / 1200;
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
   const l = Math.tanh(octaves * 0.2) * 50 + 50;

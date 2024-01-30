@@ -38,7 +38,7 @@ function logLinMul(
   zombie?: Interval
 ) {
   if (linear.node?.type === 'DecimalLiteral' && linear.node.flavor === 'r') {
-    let size = logarithmic.value.totalCents();
+    let size = logarithmic.totalCents();
     if (logarithmic.domain === 'cologarithmic') {
       size *= 1200 ** -2;
     }
@@ -124,6 +124,10 @@ export class Interval {
 
   isAbsolute() {
     return !!this.value.timeExponent.n;
+  }
+
+  totalCents() {
+    return this.value.totalCents();
   }
 
   neg() {

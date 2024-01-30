@@ -66,7 +66,7 @@ describe('Line parser', () => {
       undefined,
       false
     );
-    expect(result.value.totalCents()).toBeCloseTo(-1.23);
+    expect(result.totalCents()).toBeCloseTo(-1.23);
   });
 
   it('rejects fractions without a numerator', () => {
@@ -203,21 +203,21 @@ describe('Line parser', () => {
   it('supports omitting leading zeros', () => {
     const quarterCents = parseLine('.25');
     const half = parseLine(',5');
-    expect(quarterCents.value.totalCents()).toBe(0.25);
+    expect(quarterCents.totalCents()).toBe(0.25);
     expect(half.valueOf()).toBeCloseTo(0.5);
   });
 
   it('supports omitting trailing zeros', () => {
     const cent = parseLine('1.');
     const two = parseLine('2,');
-    expect(cent.value.totalCents()).toBe(1);
+    expect(cent.totalCents()).toBe(1);
     expect(two.valueOf()).toBeCloseTo(2);
   });
 
   it('supports completely omitted zeros', () => {
     const noCents = parseLine('.');
     const zero = parseLine(',');
-    expect(noCents.value.totalCents()).toBe(0);
+    expect(noCents.totalCents()).toBe(0);
     expect(zero.valueOf()).toBe(0);
   });
 });

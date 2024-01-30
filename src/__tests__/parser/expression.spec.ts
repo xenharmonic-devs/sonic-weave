@@ -53,7 +53,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('subtracts cents', () => {
     const interval = parseSingle('1.955 - c');
-    expect(interval.value.totalCents()).toBeCloseTo(0.955);
+    expect(interval.totalCents()).toBeCloseTo(0.955);
   });
 
   it('supports pythagorean relative notation', () => {
@@ -298,19 +298,19 @@ describe('SonicWeave expression evaluator', () => {
   it('has lifts', () => {
     const liftUnison = parseSingle('/P1');
     expect(liftUnison.value.cents).toBe(5);
-    expect(liftUnison.value.totalCents()).toBe(5);
+    expect(liftUnison.totalCents()).toBe(5);
   });
 
   it('has drops', () => {
     const liftUnison = parseSingle('\\P1');
     expect(liftUnison.value.cents).toBe(-5);
-    expect(liftUnison.value.totalCents()).toBe(-5);
+    expect(liftUnison.totalCents()).toBe(-5);
   });
 
   it('has steps', () => {
     const seven = parseSingle('7\\');
     expect(seven.value.cents).toBe(7);
-    expect(seven.value.totalCents()).toBe(7);
+    expect(seven.totalCents()).toBe(7);
   });
 
   it('has gcd', () => {
@@ -330,7 +330,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('parses negative intervals correctly', () => {
     const interval = parseSingle('AA-2');
-    expect(interval.value.totalCents()).toBeCloseTo(-431.28);
+    expect(interval.totalCents()).toBeCloseTo(-431.28);
   });
 
   it('converts negative intervals correctly', () => {
