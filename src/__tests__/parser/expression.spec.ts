@@ -656,4 +656,9 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(foobar).toEqual(['foo', 'bar']);
   });
+
+  it('reduces 6 by 3', () => {
+    const two = parseSingle('6 rdc 3');
+    expect(two.toString()).toBe('2');
+  });
 });

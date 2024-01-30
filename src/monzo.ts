@@ -931,8 +931,12 @@ export class TimeMonzo {
       }
       let solution: Fraction | undefined;
       for (let i = 0; i < self.numberOfComponents; ++i) {
-        if (solution === undefined && other.primeExponents[i].n) {
-          solution = self.primeExponents[i].div(other.primeExponents[i]);
+        if (solution === undefined) {
+          if (other.primeExponents[i].n) {
+            solution = self.primeExponents[i].div(other.primeExponents[i]);
+          } else if (this.primeExponents[i].n) {
+            return this.totalCents() / other.totalCents();
+          }
         } else if (solution !== undefined) {
           if (
             !self.primeExponents[i].equals(
