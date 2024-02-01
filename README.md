@@ -208,6 +208,9 @@ In effect `/a:b:c` is shorthand for `1/a:1/b:1/c`. The stdlib `u()` is also an a
 ### Array access
 Use square brackets to access array elements. Indexing starts from zero. Negative indices count back from the end. `$[-1]` is a handy shorthand for the last element in the current scale.
 
+#### Nullish access
+Accessing an array out of bounds raises an exception. Javascript-like behavior is available using `~[]` e.g. `arr~[777]` evaluates to `niente` if the array doesn't have at least 778 elements.
+
 ### Slices
 Range syntax inside array access gets a copy of a subset the array e.g. `[1, 2, 3, 4][2..3]` evaluates to `[3, 4]`.
 

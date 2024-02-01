@@ -666,4 +666,9 @@ describe('SonicWeave expression evaluator', () => {
     const value = parseSingle('tenneyHeight(5/3)');
     expect(value.valueOf()).toBeCloseTo(2.70805);
   });
+
+  it('supports nullish array access', () => {
+    const nothing = evaluateExpression('[1, 2, 3]~[4]', false);
+    expect(nothing).toBeUndefined();
+  });
 });

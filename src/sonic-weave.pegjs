@@ -591,16 +591,26 @@ CallExpression
   }
 
 ArrayAccess
-  = head: ArraySlice tail: (__ '[' @Expression ']')* {
-    return tail.reduce( (object, index) => {
-      return { type: 'ArrayAccess', object, index };
+  = head: ArraySlice tail: (__ @('~'?) '[' @Expression ']')* {
+    return tail.reduce( (object, [nullish, index]) => {
+      return {
+        type: 'ArrayAccess',
+        object,
+        nullish: !!nullish,
+        index,
+      };
     }, head);
   }
 
 TrueArrayAccess
   = head: Primary tail: (__ '[' @Expression ']')+ {
     return tail.reduce( (object, index) => {
-      return { type: 'ArrayAccess', object, index };
+      return {
+        type: 'ArrayAccess',
+        object,
+        nullish: false,
+        index
+      };
     }, head);
   }
 

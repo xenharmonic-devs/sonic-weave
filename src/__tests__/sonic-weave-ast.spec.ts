@@ -291,7 +291,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses iterated array access', () => {
-    const ast = parseSingle('x[i][2]');
+    const ast = parseSingle('x[i]~[2]');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
@@ -299,8 +299,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         object: {
           type: 'ArrayAccess',
           object: {type: 'Identifier', id: 'x'},
+          nullish: false,
           index: {type: 'Identifier', id: 'i'},
         },
+        nullish: true,
         index: {type: 'IntegerLiteral', value: 2n},
       },
     });
@@ -312,6 +314,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'ArrayAccess',
+        nullish: false,
         object: {
           type: 'ArraySlice',
           object: {
@@ -401,6 +404,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       name: {
         type: 'ArrayAccess',
         object: {type: 'Identifier', id: 'arr'},
+        nullish: false,
         index: {type: 'IntegerLiteral', value: 1n},
       },
       value: {type: 'IntegerLiteral', value: 2n},
@@ -416,6 +420,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         callee: {
           type: 'ArrayAccess',
           object: {type: 'Identifier', id: 'arr'},
+          nullish: false,
           index: {type: 'IntegerLiteral', value: 1n},
         },
         args: [],
@@ -431,6 +436,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         type: 'CallExpression',
         callee: {
           type: 'ArrayAccess',
+          nullish: false,
           object: {
             type: 'ArraySlice',
             object: {type: 'Identifier', id: 'arr'},

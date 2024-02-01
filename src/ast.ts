@@ -160,6 +160,7 @@ export type ConditionalExpression = {
 export type ArrayAccess = {
   type: 'ArrayAccess';
   object: Expression;
+  nullish: boolean;
   index: Expression;
 };
 

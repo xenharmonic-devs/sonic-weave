@@ -1102,6 +1102,9 @@ export class ExpressionVisitor {
     if (i < 0) {
       i += object.length;
     }
+    if (node.nullish) {
+      return object[i];
+    }
     if (i < 0 || i >= object.length) {
       throw new Error('Index out of range.');
     }
