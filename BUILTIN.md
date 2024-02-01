@@ -423,6 +423,12 @@ Obtain a string representation of the value (w/o color or label).
 
 `value`
 
+### tenneyHeight
+Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
+#### Parameters:
+
+`interval`
+
 ### trunc
 Truncate value towards zero to the nearest integer.
 #### Parameters:
@@ -460,17 +466,47 @@ Calculate the cumulative geometric sums of a periodic difference pattern. Undoes
 
 `constantOfIntegration`, `array`
 
+### avg
+Calculate the arithmetic mean of the terms.
+#### Parameters:
+
+`...terms`
+
 ### cbrt
 Calculate the cube root of the input.
 #### Parameters:
 
 `x`
 
+### circleDifference
+Calculate the geometric difference of two intervals on a circle.
+#### Parameters:
+
+`a`, `b`, `equave`
+
+### circleDistance
+Calculate the geometric distance of two intervals on a circle.
+#### Parameters:
+
+`a`, `b`, `equave`
+
 ### clear
 Remove the contents of the current/given scale.
 #### Parameters:
 
 `scale`
+
+### coalesce
+Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.
+#### Parameters:
+
+`tolerance`, `action`, `scale`
+
+### coalesced
+Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` (default 3.5 cents) are coalesced into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.
+#### Parameters:
+
+`tolerance`, `action`, `scale`
 
 ### cps
 Generate a combination product set from the given factors and combination size.
@@ -526,6 +562,12 @@ Convert absolute frequency to MIDI note number / MTS value (fractional semitones
 
 `freq`
 
+### geoavg
+Calculate the geometric mean of the factors.
+#### Parameters:
+
+`...factors`
+
 ### geodiff
 Calculate the geometric differences between the factors.
 #### Parameters:
@@ -549,6 +591,12 @@ Generate a constant structure generator sequence. Zero ordinal corresponds to th
 #### Parameters:
 
 `generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
+
+### havg
+Calculate the harmonic mean of the terms.
+#### Parameters:
+
+`...terms`
 
 ### keepUnique
 Only keep unique intervals in the current/given scale.

@@ -12,6 +12,12 @@ function parseSource(source: string) {
   return visitor.get('$') as Interval[];
 }
 
+function parseSingle(source: string) {
+  const value = evaluateExpression(source);
+  expect(value).toBeInstanceOf(Interval);
+  return value as Interval;
+}
+
 describe('SonicWeave standard library', () => {
   it('converts MIDI note number to frequency', () => {
     const scale = parseSource('mtof(60);');
@@ -585,5 +591,30 @@ describe('SonicWeave standard library', () => {
       '1076.6',
       '1200.',
     ]);
+  });
+
+  it('calculates an arithmetic mean', () => {
+    const mean = parseSingle('avg(5/4, 4/3, 3/2)');
+    expect(mean.toString()).toBe('49/36');
+  });
+
+  it('calculates a harmonic mean', () => {
+    const mean = parseSingle('havg(5/4, 4/3, 3/2)');
+    expect(mean.toString()).toBe('180/133');
+  });
+
+  it('calculates a geometric mean', () => {
+    const mean = parseSingle('geoavg(5/4, 4/3, 3/2)');
+    expect(mean.toString()).toBe('5/2^1/3');
+  });
+
+  it('calculates the circle distance of 100/99 and 100/51', () => {
+    const value = parseSingle('circleDistance(100/99, 100/51, 2/1)');
+    expect(value.valueOf()).toBeCloseTo(34 / 33);
+  });
+
+  it('coalesces intervals that are close to each other', () => {
+    const scale = parseSource('50/49;49/48;3/2;2/1;coalesce();str');
+    expect(scale).toEqual(['49/48', '3/2', '2/1']);
   });
 });

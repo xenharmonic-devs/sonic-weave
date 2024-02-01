@@ -661,4 +661,9 @@ describe('SonicWeave expression evaluator', () => {
     const two = parseSingle('6 rdc 3');
     expect(two.toString()).toBe('2');
   });
+
+  it('calculates tenney height of 5/3', () => {
+    const value = parseSingle('tenneyHeight(5/3)');
+    expect(value.valueOf()).toBeCloseTo(2.70805);
+  });
 });

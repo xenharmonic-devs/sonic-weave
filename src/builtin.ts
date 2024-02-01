@@ -10,6 +10,7 @@ import {
   valueToCents,
   LOG_PRIMES,
   norm,
+  centsToNats,
 } from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
@@ -562,6 +563,21 @@ PrimeMapping.__doc__ =
   'Construct a prime mapping for tempering intervals to real cents. Remaining primes are converted to real cents without tempering.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
+export function tenneyHeight(this: ExpressionVisitor, interval: Interval) {
+  const monzo = relog.bind(this)(interval).value;
+  const height =
+    centsToNats(Math.abs(monzo.cents)) +
+    Math.log(monzo.residual.n * monzo.residual.d) +
+    monzo.primeExponents.reduce(
+      (total, pe, i) => total + Math.abs(pe.valueOf()) * LOG_PRIMES[i],
+      0
+    );
+  return new Interval(TimeMonzo.fromValue(height), 'linear');
+}
+tenneyHeight.__doc__ =
+  'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
+tenneyHeight.__node__ = builtinNode(tenneyHeight);
+
 function gcd(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
     intervals = this.getCurrentScale();
@@ -927,6 +943,9 @@ function arrayReduce(
   array?: any[],
   initialValue?: any
 ) {
+  if (!(typeof reducer === 'function')) {
+    throw new Error('The first argument of arrayReduce must be a function.');
+  }
   reducer = reducer.bind(this);
   array ??= this.getCurrentScale();
   if (arguments.length >= 3) {
@@ -1189,6 +1208,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   cosJIP,
   JIP,
   PrimeMapping,
+  tenneyHeight,
   gcd,
   lcm,
   hasConstantStructure,
@@ -1256,6 +1276,32 @@ riff log x y {
 riff pow x y {
   "Calculate x to the power of y.";
   return x ~^ y;
+}
+
+riff avg ...terms {
+  "Calculate the arithmetic mean of the terms.";
+  return arrayReduce(a b => a ~+ b, terms) ~% length(terms);
+}
+
+riff havg ...terms {
+  "Calculate the harmonic mean of the terms.";
+  return ~%arrayReduce(total a => total +~ ~%a, terms, 0) ~* length(terms);
+}
+
+riff geoavg ...factors {
+  "Calculate the geometric mean of the factors.";
+  return arrayReduce(a b => a ~* b, factors) /^ length(factors);
+}
+
+riff circleDifference a b equave {
+  "Calculate the geometric difference of two intervals on a circle.";
+  const half = equave ~/^ 2;
+  return logarithmic((a ~% b ~* half) ~rd equave ~% half);
+}
+
+riff circleDistance a b equave {
+  "Calculate the geometric distance of two intervals on a circle.";
+  return abs(circleDifference(a, b, equave));
 }
 
 riff mtof index {
@@ -1800,5 +1846,45 @@ riff randomVaried amount varyEquave scale {
   "Obtain a copy of the current/given scale with random variance added.";
   scale ?? $$;
   randomVariance(amount, varyEquave);
+}
+
+riff coalesced tolerance action scale {
+  "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` (default 3.5 cents) are coalesced into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.";
+  tolerance ??= 3.5;
+  scale ??= $$;
+  const equave = scale[-1];
+  let last = 1;
+  let group = [];
+  for (const interval of scale[..length(scale) - 1]) {
+    if (circleDistance(last, interval, equave) > tolerance and group) {
+      if (action === 'lowest') {
+        group[0];
+      } else if (action === 'highest') {
+        group[-1];
+      } else if (action === 'avg') {
+        avg(...group);
+      } else if (action === 'avg') {
+        havg(...group);
+      } else if (action === 'geoavg') {
+        geoavg(...group);
+      } else {
+        sort(group, (a b => tenneyHeight(a) - tenneyHeight(b)));
+        group[0];
+      }
+      group = [];
+    }
+    last = interval;
+    push(interval, group);
+  }
+  equave;
+}
+
+riff coalesce tolerance action scale {
+  "Coalesce intervals in the current/given scale separated by \`tolerance\` (default 3.5 cents) into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.";
+  $ = scale ?? $$;
+  scale = $[..];
+  clear();
+  coalesced(tolerance, action, scale);
+  return;
 }
 `;
