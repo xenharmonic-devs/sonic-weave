@@ -1476,7 +1476,7 @@ riff spanLattice basis ups downs equave {
     const up = pop(ups);
     const down = pop(downs);
 
-    popAll($$) tns [generator ~^ i for i of [-down..up]];
+    popAll($$) tns~ [generator ~^ i for i of [-down..up]];
   }
 
   i => i ~rdc equave;

@@ -570,4 +570,20 @@ describe('SonicWeave standard library', () => {
       visitor.visit(statement);
     }
   });
+
+  it('spans a lattice in cents', () => {
+    const scale = parseSource(
+      'spanLattice([123.4, 567.9], [2, 1], [1, 0], 1200.);str'
+    );
+    expect(scale).toEqual([
+      '123.4',
+      '246.8',
+      '444.5',
+      '567.9',
+      '691.3',
+      '814.7',
+      '1076.6',
+      '1200.',
+    ]);
+  });
 });
