@@ -1113,9 +1113,16 @@ export class ExpressionVisitor {
     if (!Array.isArray(object) && typeof object !== 'string') {
       throw new Error('Array slice on non-array');
     }
+
+    const empty = typeof object === 'string' ? '' : [];
+
+    if (!object.length) {
+      return empty;
+    }
+
     let start = 0;
     let step = 1;
-    let end = object.length - 1;
+    let end = -1;
 
     if (node.start) {
       const interval = this.visit(node.start);
@@ -1140,10 +1147,20 @@ export class ExpressionVisitor {
       }
       step = Number(second.value.toBigInteger()) - start;
     }
+
+    if (start < 0) {
+      start += object.length;
+    }
+    if (end < 0) {
+      end += object.length;
+    }
+
     if (step > 0) {
-      if (start > end) {
-        return [];
+      start = Math.max(0, start);
+      if (start > end || start >= object.length) {
+        return empty;
       }
+      end = Math.min(object.length - 1, end);
 
       const result = [object[start]];
       let next = start + step;
@@ -1156,9 +1173,11 @@ export class ExpressionVisitor {
       }
       return result as Interval[];
     } else if (step < 0) {
-      if (start < end) {
-        return [];
+      start = Math.min(object.length - 1, start);
+      if (start < end || start < 0) {
+        return empty;
       }
+      end = Math.max(0, end);
 
       const result = [object[start]];
       let next = start + step;

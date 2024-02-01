@@ -1855,7 +1855,7 @@ riff coalesced tolerance action scale {
   const equave = scale[-1];
   let last = 1;
   let group = [];
-  for (const interval of scale[..length(scale) - 1]) {
+  for (const interval of scale[..-2]) {
     if (circleDistance(last, interval, equave) > tolerance and group) {
       if (action === 'lowest') {
         group[0];
@@ -1876,6 +1876,7 @@ riff coalesced tolerance action scale {
     last = interval;
     push(interval, group);
   }
+  group;
   equave;
 }
 
