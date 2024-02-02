@@ -662,4 +662,16 @@ describe('SonicWeave standard library', () => {
       '(2/1 blue "root")',
     ]);
   });
+
+  it('coalesces cents geometrically', () => {
+    const scale = parseSource(`
+      100.
+      200.
+      202.
+      1200.
+      coalesce(3.5, 'geoavg')
+      str
+    `);
+    expect(scale).toEqual(['100.', '201.', '1200.']);
+  });
 });

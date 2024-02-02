@@ -1340,12 +1340,12 @@ riff avg ...terms {
 
 riff havg ...terms {
   "Calculate the harmonic mean of the terms.";
-  return ~%arrayReduce(total a => total +~ ~%a, terms, 0) ~* length(terms);
+  return length(terms) %~ arrayReduce(total a => total +~ %~a, terms, 0);
 }
 
 riff geoavg ...factors {
   "Calculate the geometric mean of the factors.";
-  return arrayReduce(a b => a ~* b, factors) /^ length(factors);
+  return arrayReduce(a b => a ~* b, factors) ~/^ length(factors);
 }
 
 riff circleDifference a b equave {
@@ -1918,7 +1918,7 @@ riff coalesced tolerance action scale {
         group[-1];
       } else if (action === 'avg') {
         avg(...group);
-      } else if (action === 'avg') {
+      } else if (action === 'havg') {
         havg(...group);
       } else if (action === 'geoavg') {
         geoavg(...group);
