@@ -493,7 +493,7 @@ ExponentiationExpression
     }
 
 Labels
-  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|.., _|
+  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|.., __|
 
 LabeledExpression
   = object: UnaryExpression __ labels: Labels __ {

@@ -645,4 +645,21 @@ describe('SonicWeave standard library', () => {
     expect(scale[2].color?.value).toBe('yellow');
     expect(scale[2].label).toBe('third');
   });
+
+  it("doesn't eat colors across lines", () => {
+    const scale = parseSource(`
+      4/3 red
+      3/2 "fifth"
+      7/4
+      2/1 "root" blue
+      rotate(0)
+      repr
+    `);
+    expect(scale).toEqual([
+      '(4/3 red)',
+      '(3/2 "fifth")',
+      '7/4',
+      '(2/1 blue "root")',
+    ]);
+  });
 });
