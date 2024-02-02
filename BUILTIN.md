@@ -67,6 +67,12 @@ Convert interval to cologarithmic representation.
 
 `interval`
 
+### colorOf
+Return the color of the interval.
+#### Parameters:
+
+`interval`
+
 ### concat
 Combine two or more arrays/strings.
 #### Parameters:
@@ -222,6 +228,12 @@ Obtain all k-sized combinations in a set
 #### Parameters:
 
 `set`, `k`
+
+### labelOf
+Return the label of the interval.
+#### Parameters:
+
+`interval`
 
 ### lcm
 Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.

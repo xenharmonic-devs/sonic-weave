@@ -627,4 +627,22 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('6::12;void(pop($, 4));str');
     expect(scale).toEqual(['7/6', '8/6', '9/6', '10/6', '12/6']);
   });
+
+  it('preserves labels when rotating', () => {
+    const scale = parseSource(
+      '5/4 yellow "third";3/2 white "fifth";2/1 rgba(255, 255, 255, 0.5) "octave";rotate()'
+    );
+    expect(scale).toHaveLength(3);
+    expect(scale[0].valueOf()).toBeCloseTo(6 / 5);
+    expect(scale[0].color?.value).toBe('white');
+    expect(scale[0].label).toBe('fifth');
+    expect(scale[1].valueOf()).toBeCloseTo(8 / 5);
+    expect(scale[1].color?.value).toBe(
+      'rgba(255.000, 255.000, 255.000, 0.50000)'
+    );
+    expect(scale[1].label).toBe('octave');
+    expect(scale[2].valueOf()).toBeCloseTo(2);
+    expect(scale[2].color?.value).toBe('yellow');
+    expect(scale[2].label).toBe('third');
+  });
 });

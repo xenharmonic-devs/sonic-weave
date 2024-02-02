@@ -997,8 +997,10 @@ export class ExpressionVisitor {
         object.label = l;
       } else if (l instanceof Color) {
         object.color = l;
+      } else if (l === undefined) {
+        object.color = undefined;
       } else {
-        throw new Error('Labels must be strings or colors');
+        throw new Error('Labels must be strings, colors or niente.');
       }
     }
     return object;

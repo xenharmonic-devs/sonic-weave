@@ -198,7 +198,7 @@ export type BinaryExpression = {
 export type LabeledExpression = {
   type: 'LabeledExpression';
   object: Expression;
-  labels: (Identifier | ColorLiteral | StringLiteral)[];
+  labels: (Identifier | ColorLiteral | StringLiteral | NoneLiteral)[];
 };
 
 export type NedjiProjection = {

@@ -681,4 +681,10 @@ describe('SonicWeave expression evaluator', () => {
     const nothing = evaluateExpression('[1, 2, 3]~[4]', false);
     expect(nothing).toBeUndefined();
   });
+
+  it('clears colors using niente', () => {
+    const myFifth = parseSingle('1,5 lime "my fifth" niente');
+    expect(myFifth.color).toBeUndefined;
+    expect(myFifth.label).toBe('my fifth');
+  });
 });

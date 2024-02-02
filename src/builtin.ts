@@ -480,6 +480,18 @@ export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
   return r(a).compare(r(b));
 }
 
+function colorOf(interval: Interval) {
+  return interval.color;
+}
+colorOf.__doc__ = 'Return the color of the interval.';
+colorOf.__node__ = builtinNode(colorOf);
+
+function labelOf(interval: Interval) {
+  return interval.label;
+}
+labelOf.__doc__ = 'Return the label of the interval.';
+labelOf.__node__ = builtinNode(labelOf);
+
 function cosJIP(
   this: ExpressionVisitor,
   interval: Interval,
@@ -1238,6 +1250,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  colorOf,
+  labelOf,
   cosJIP,
   JIP,
   PrimeMapping,
@@ -1714,7 +1728,7 @@ riff rotate onto scale {
   while (--onto) equave *~ shift();
   const root = shift();
   i => i ~% root;
-  equave;
+  equave colorOf(root) labelOf(root);
   return;
 }
 
