@@ -754,6 +754,11 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual(['3', '5', '7', '15', '21', '35']);
   });
 
+  it('pushes after a specified index', () => {
+    const scale = parseSource('5::10;push(4/3, $, 1);str');
+    expect(scale).toEqual(['6/5', '4/3', '7/5', '8/5', '9/5', '10/5']);
+  });
+
   // Manual inspection
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');

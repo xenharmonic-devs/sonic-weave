@@ -791,14 +791,25 @@ reversed.__doc__ =
   'Obtain a copy of the current/given scale in reversed order.';
 reversed.__node__ = builtinNode(reversed);
 
-function pop(this: ExpressionVisitor, scale?: Interval[]) {
+function pop(this: ExpressionVisitor, scale?: Interval[], index?: Interval) {
   scale ??= this.getCurrentScale();
   if (!scale.length) {
-    throw new Error('Pop from an empty scale');
+    throw new Error('Pop from an empty scale.');
+  }
+  if (index) {
+    let i = index.toInteger();
+    if (i < 0) {
+      i += scale.length;
+    }
+    if (i < 0 || i >= scale.length) {
+      throw new Error('Pop index out of range.');
+    }
+    return scale.splice(i, 1)[0];
   }
   return scale.pop()!;
 }
-pop.__doc__ = 'Remove and return the last interval in the current/given scale.';
+pop.__doc__ =
+  'Remove and return the last interval in the current/given scale. Optionally an index to pop may be given.';
 pop.__node__ = builtinNode(pop);
 
 function popAll(this: ExpressionVisitor, scale?: Interval[]) {
@@ -810,11 +821,33 @@ function popAll(this: ExpressionVisitor, scale?: Interval[]) {
 popAll.__doc__ = 'Remove and return all intervals in the current/given scale.';
 popAll.__node__ = builtinNode(popAll);
 
-function push(this: ExpressionVisitor, interval: Interval, scale?: Interval[]) {
+function push(
+  this: ExpressionVisitor,
+  interval: Interval,
+  scale?: Interval[],
+  index?: Interval
+) {
   scale ??= this.getCurrentScale();
+  if (index) {
+    let i = index.toInteger();
+    if (i < 0) {
+      i += scale.length;
+    }
+    if (i < 0) {
+      scale.unshift(interval);
+      return;
+    }
+    if (i >= scale.length) {
+      scale.push(interval);
+      return;
+    }
+    scale.splice(i, 0, interval);
+    return;
+  }
   scale.push(interval);
 }
-push.__doc__ = 'Append an interval onto the current/given scale.';
+push.__doc__ =
+  'Append an interval onto the current/given scale. Optionally an index to push after may be given.';
 push.__node__ = builtinNode(push);
 
 function shift(this: ExpressionVisitor, scale?: Interval[]) {

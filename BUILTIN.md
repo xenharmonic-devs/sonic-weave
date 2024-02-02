@@ -284,10 +284,10 @@ Get/set the number of prime exponents to support in monzos. Also sets the length
 `value`
 
 ### pop
-Remove and return the last interval in the current/given scale.
+Remove and return the last interval in the current/given scale. Optionally an index to pop may be given.
 #### Parameters:
 
-`scale`
+`scale`, `index`
 
 ### popAll
 Remove and return all intervals in the current/given scale.
@@ -314,10 +314,10 @@ Print the arguments to the console.
 `...args`
 
 ### push
-Append an interval onto the current/given scale.
+Append an interval onto the current/given scale. Optionally an index to push after may be given.
 #### Parameters:
 
-`interval`, `scale`
+`interval`, `scale`, `index`
 
 ### radical
 Convert interval to a radical expression.
