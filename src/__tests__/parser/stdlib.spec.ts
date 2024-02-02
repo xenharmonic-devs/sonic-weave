@@ -618,6 +618,11 @@ describe('SonicWeave standard library', () => {
     expect(scale).toEqual(['49/48', '3/2', '2/1']);
   });
 
+  it('coalesces with zero tolerance', () => {
+    const scale = parseSource('5/4;3/2;7/4;7/4;7/4;2/1;coalesce(0.);str');
+    expect(scale).toEqual(['5/4', '3/2', '7/4', '2/1']);
+  });
+
   it('pops a specific index', () => {
     const scale = parseSource('6::12;void(pop($, 4));str');
     expect(scale).toEqual(['7/6', '8/6', '9/6', '10/6', '12/6']);

@@ -1452,6 +1452,13 @@ riff label labels scale {
     scale[i] = scale[i] labels[i];
 }
 
+riff enumerate array {
+  "Produce an array of [index, element] pairs from the given current/given array.";
+  array ??= $$;
+  let i = 0;
+  return [[i++, element] for element of array];
+}
+
 riff tune a b numIter weighting {
   "Find a combination of two vals that is closer to just intonation.";
   numIter ??= 1;
@@ -1885,11 +1892,10 @@ riff coalesced tolerance action scale {
   "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` (default 3.5 cents) are coalesced into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.";
   tolerance ??= 3.5;
   scale ??= $$;
-  const equave = scale[-1];
-  let last = 1;
+  let last;
   let group = [];
-  for (const interval of scale[..-2]) {
-    if (circleDistance(last, interval, equave) > tolerance and group) {
+  for (const [i interval] of enumerate(scale)) {
+    if (group and (abs(logarithmic(last %~ interval)) > tolerance or i === length(scale)-1)) {
       if (action === 'lowest') {
         group[0];
       } else if (action === 'highest') {
@@ -1909,8 +1915,7 @@ riff coalesced tolerance action scale {
     last = interval;
     push(interval, group);
   }
-  group;
-  equave;
+  scale[-1];
 }
 
 riff coalesce tolerance action scale {

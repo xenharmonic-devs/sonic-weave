@@ -550,6 +550,12 @@ Obtain a copy of the current/given scale with denominators removed and the root 
 
 `scale`
 
+### enumerate
+Produce an array of [index, element] pairs from the given current/given array.
+#### Parameters:
+
+`array`
+
 ### eulerGenus
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 #### Parameters:
