@@ -45,7 +45,7 @@ export type Program = {
 
 export type Parameters = {
   type: 'Parameters';
-  identifiers: Identifier[];
+  identifiers: (Identifier | Parameters)[];
   rest?: Identifier;
 };
 

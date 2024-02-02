@@ -243,7 +243,7 @@ LiftDeclaration
   }
 
 Parameters
-  = identifiers: Identifier|.., _| rest: (_ '...' _ @Identifier)? _ {
+  = identifiers: (Identifier / IdentifierArray)|.., _| rest: (_ '...' _ @Identifier)? _ {
     return {
       type: 'Parameters',
       identifiers,
