@@ -737,7 +737,7 @@ Stack the current scale on top of itself. Clears the scale if the number of repe
 `times`, `scale`
 
 ### repeated
-Stack the current/given on top of itself.
+Stack the current/given scale on top of itself.
 #### Parameters:
 
 `times`, `scale`

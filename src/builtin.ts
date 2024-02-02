@@ -1342,6 +1342,7 @@ riff geoavg ...factors {
 
 riff circleDifference a b equave {
   "Calculate the geometric difference of two intervals on a circle.";
+  equave ??= 2;
   const half = equave ~/^ 2;
   return logarithmic((a ~% b ~* half) ~rd equave ~% half);
 }
@@ -1746,7 +1747,7 @@ riff clear scale {
 }
 
 riff repeated times scale {
-  "Stack the current/given on top of itself.";
+  "Stack the current/given scale on top of itself.";
   scale ??= $$;
   times ??= 2;
   if (not times) {
