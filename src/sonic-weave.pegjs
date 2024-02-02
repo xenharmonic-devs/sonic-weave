@@ -261,7 +261,7 @@ Argument
   }
 
 ArgumentList
-  = (@(Argument|.., _ ','? _|) _ ','? _)
+  = (@(Argument|.., _ ',' _|) _ ','? _)
 
 IdentifierArray
   = '[' _ @Parameters _ ']'
@@ -395,9 +395,41 @@ RelationalOperator
   / $('~' OfToken)
   / (NotToken __ '~' OfToken) { return 'not ~of'; }
 
+Segment
+  = __ @(HarmonicSegment / EnumeratedChord) __
+
 RelationalExpression
-  = head: AdditiveExpression tail: (__ @RelationalOperator __ @AdditiveExpression)* {
+  = head: Segment tail: (__ @RelationalOperator __ @Segment)* {
     return tail.reduce(operatorReducerLite, head);
+  }
+
+HarmonicSegment
+  = mirror: '/'? __ root: AdditiveExpression _ '::' _ end: AdditiveExpression {
+    return {
+      type: 'HarmonicSegment',
+      mirror: !!mirror,
+      root,
+      end,
+    };
+  }
+
+EnumeratedChord
+  = '/' __ intervals: AdditiveExpression|2.., _ ':' _| {
+    return {
+      type: 'EnumeratedChord',
+      mirror: true,
+      intervals,
+    };
+  }
+  / intervals: AdditiveExpression|1.., _ ':' _| {
+    if (intervals.length === 1) {
+      return intervals[0];
+    }
+    return {
+      type: 'EnumeratedChord',
+      mirror: false,
+      intervals,
+    };
   }
 
 AdditiveOperator
@@ -464,7 +496,7 @@ Labels
   = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral)|.., _|
 
 LabeledExpression
-  = object: Group labels: Labels __ {
+  = object: UnaryExpression __ labels: Labels __ {
     if (labels.length) {
       return {
         type: 'LabeledExpression',
@@ -485,38 +517,6 @@ LabeledCommaDecimal
       };
     }
     return object;
-  }
-
-Group
-  = __ @(HarmonicSegment / EnumeratedChord) __
-
-HarmonicSegment
-  = mirror: '/'? root: UnaryExpression _ '::' _ end: UnaryExpression {
-    return {
-      type: 'HarmonicSegment',
-      mirror: !!mirror,
-      root,
-      end,
-    };
-  }
-
-EnumeratedChord
-  = '/' intervals: UnaryExpression|2.., _ ':' _| {
-    return {
-      type: 'EnumeratedChord',
-      mirror: true,
-      intervals,
-    };
-  }
-  / intervals: UnaryExpression|1.., _ ':' _| {
-    if (intervals.length === 1) {
-      return intervals[0];
-    }
-    return {
-      type: 'EnumeratedChord',
-      mirror: false,
-      intervals,
-    };
   }
 
 Secondary

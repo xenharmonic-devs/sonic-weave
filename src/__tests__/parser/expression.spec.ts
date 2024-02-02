@@ -41,7 +41,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('evaluates a color', () => {
-    const purple = evaluateExpression('#dc12ab');
+    const purple = evaluateExpression('#dc12ab', false);
     expect(purple).instanceOf(Color);
     expect((purple as Color).value).toBe('#dc12ab');
   });
@@ -113,7 +113,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has reversed ranges', () => {
-    const scale = evaluateExpression('[5, 4..1]');
+    const scale = evaluateExpression('[5, 4..1]', false);
     expect(Array.isArray(scale)).toBe(true);
     expect(scale).toHaveLength(5);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
@@ -283,7 +283,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can access builtin docs', () => {
-    const doc = evaluateExpression('doc(primes)');
+    const doc = evaluateExpression('doc(primes)', false);
     expect(doc).toBe(
       'Obtain an array of prime numbers such that start <= p <= end.'
     );
@@ -339,12 +339,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('preserves ups and lifts on FJS', () => {
-    const str = evaluateExpression('str(/vvM3)');
+    const str = evaluateExpression('str(/vvM3)', false);
     expect(str).toBe('/vvM3');
   });
 
   it('preserves ups and lifts on AbsoluteFJS', () => {
-    const str = evaluateExpression('str(\\^^E#7)');
+    const str = evaluateExpression('str(\\^^E#7)', false);
     expect(str).toBe('\\^^E#7');
   });
 
@@ -392,55 +392,58 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can strip colors and labels to get a plain string representation', () => {
-    const fifth = evaluateExpression('str(6/4 lime "fifth")');
+    const fifth = evaluateExpression('str(6/4 lime "fifth")', false);
     expect(fifth).toBe('6/4');
   });
 
   it('can compare absolute to relative', () => {
-    const fifth = evaluateExpression('1/1 = 440 Hz; max(500 Hz, 3/2)');
+    const fifth = evaluateExpression('1/1 = 440 Hz; max(500 Hz, 3/2)', false);
     expect(fifth?.toString()).toBe('3/2');
 
-    const eightHundred = evaluateExpression('1/1 = 440 Hz; max(800 Hz, 3/2)');
+    const eightHundred = evaluateExpression(
+      '1/1 = 440 Hz; max(800 Hz, 3/2)',
+      false
+    );
     expect(eightHundred?.toString()).toBe('800 Hz');
   });
 
   it('produces a cents literal from cent multiplication (integer)', () => {
-    const eightyEight = evaluateExpression('88 c');
+    const eightyEight = parseSingle('88 c');
     expect(eightyEight?.toString()).toBe('88.');
   });
 
   it('produces a cents literal from cent multiplication (decimal)', () => {
-    const eightyEight = evaluateExpression('12.03 c');
+    const eightyEight = parseSingle('12.03 c');
     expect(eightyEight?.toString()).toBe('12.03');
   });
 
   it('preserves absolute FJS formatting', () => {
-    const phiAt = evaluateExpression('str(phi@4)');
+    const phiAt = evaluateExpression('str(phi@4)', false);
     expect(phiAt).toBe('phi@4');
   });
 
   it('preserves lifts on monzos', () => {
-    const liftFifth = evaluateExpression('/[-1 1>');
+    const liftFifth = parseSingle('/[-1 1>');
     expect(liftFifth?.toString()).toBe('/[-1 1>');
   });
 
   it('preserves neutral FJS formatting', () => {
-    const neutralThird = evaluateExpression('str(n3^11)');
+    const neutralThird = evaluateExpression('str(n3^11)', false);
     expect(neutralThird).toBe('n3^11');
   });
 
   it('supports negative indexing on strings', () => {
-    const r = evaluateExpression('"bar"[-1]');
+    const r = evaluateExpression('"bar"[-1]', false);
     expect(r).toBe('r');
   });
 
   it('supports slices on strings', () => {
-    const ba = evaluateExpression('"bar"[..1]');
+    const ba = evaluateExpression('"bar"[..1]', false);
     expect(ba).toBe('ba');
   });
 
   it('supports indexing on str calls', () => {
-    const C = evaluateExpression('str(C4)[0]');
+    const C = evaluateExpression('str(C4)[0]', false);
     expect(C).toBe('C');
   });
 
@@ -485,43 +488,50 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('supports hsl colors', () => {
-    const greenish = evaluateExpression('hsl(123, 45, 67)') as Color;
+    const greenish = evaluateExpression('hsl(123, 45, 67)', false) as Color;
     expect(greenish.value).toBe('hsl(123.000, 45.000%, 67.000%)');
     expect(greenish.toString()).toBe('hsl(123.000, 45.000, 67.000)');
-    const retry = evaluateExpression(greenish.toString()) as Color;
+    const retry = evaluateExpression(greenish.toString(), false) as Color;
     expect(retry.value).toBe(greenish.value);
   });
 
   it('supports rgb color labels and reprs', () => {
-    const lightFifth = evaluateExpression('repr(3/2 rgb(200, 222, 256))');
+    const lightFifth = evaluateExpression(
+      'repr(3/2 rgb(200, 222, 256))',
+      false
+    );
     expect(lightFifth).toBe('(3/2 rgb(200.000, 222.000, 256.000))');
   });
 
   it('can concatenate strings', () => {
     const helloWorld = evaluateExpression(
-      'concat("Hello", ",", " ", "World", "!")'
+      'concat("Hello", ",", " ", "World", "!")',
+      false
     );
     expect(helloWorld).toBe('Hello, World!');
   });
 
   it('has spread syntax', () => {
-    const stuff = evaluateExpression('["1", ...["2", "3"], "4"]');
+    const stuff = evaluateExpression('["1", ...["2", "3"], "4"]', false);
     expect(stuff).toEqual(['1', ...['2', '3'], '4']);
   });
 
   it('cannot produce empty ranges', () => {
-    const zero = evaluateExpression('[0..0]') as Interval[];
+    const zero = evaluateExpression('[0..0]', false) as Interval[];
     expect(zero).toHaveLength(1);
     expect(zero[0].toInteger()).toBe(0);
   });
 
   it('can produce empty segments', () => {
-    const nothing = evaluateExpression('1::1') as Interval[];
+    const nothing = evaluateExpression('1::1', false) as Interval[];
     expect(nothing).toHaveLength(0);
   });
 
   it('interpretes cents as linear decimals in rgba', () => {
-    const faded = evaluateExpression('rgba(255, 255, 255, 0.5)') as Color;
+    const faded = evaluateExpression(
+      'rgba(255, 255, 255, 0.5)',
+      false
+    ) as Color;
     expect(faded.value).toBe('rgba(255.000, 255.000, 255.000, 0.50000)');
   });
 
@@ -547,12 +557,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can simplify formatting', () => {
-    const fifth = evaluateExpression('repr(simplify(6/4 plum))');
+    const fifth = evaluateExpression('repr(simplify(6/4 plum))', false);
     expect(fifth).toBe('(3/2 plum)');
   });
 
   it('can bleach away colors', () => {
-    const fifth = evaluateExpression('repr(bleach(6/4 plum))');
+    const fifth = evaluateExpression('repr(bleach(6/4 plum))', false);
     expect(fifth).toBe('6/4');
   });
 

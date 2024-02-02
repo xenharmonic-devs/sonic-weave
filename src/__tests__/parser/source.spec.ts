@@ -370,7 +370,7 @@ describe('SonicWeave parser', () => {
 
   it('does polyoffsets as tensor products', () => {
     const scale = parseSource(
-      '2:3:4; $ tns 4:5:7; i => i rd 2; sort(); shift() * 2;'
+      '2:3:4; $ tns (4:5:7); i => i rd 2; sort(); shift() * 2;'
     );
     expect(scale).toHaveLength(6);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
@@ -763,6 +763,11 @@ describe('SonicWeave parser', () => {
   it.skip('has a coloring method based on interval size', () => {
     const colors = parseSource('[-12..24];n => n * 100.0;centsColor');
     console.log(colors);
+  });
+
+  it('supports operators inside enumerations', () => {
+    const scale = parseSource('%6:%5:%4;str');
+    expect(scale).toEqual(['6/5', '3/2']);
   });
 
   // Manual inspection

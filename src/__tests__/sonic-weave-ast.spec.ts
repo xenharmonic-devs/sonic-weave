@@ -243,7 +243,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses spread syntax', () => {
-    const ast = parse('[foo ...bar, baz]');
+    const ast = parse('[foo, ...bar, baz]');
     expect(ast).toEqual({
       type: 'Program',
       body: [
