@@ -61,6 +61,12 @@ Color based on the size of the interval. Hue wraps around every 1200 cents.
 
 `interval`
 
+### clear
+Remove the contents of the current/given scale.
+#### Parameters:
+
+`scale`
+
 ### cologarithmic
 Convert interval to cologarithmic representation.
 #### Parameters:
@@ -501,12 +507,6 @@ Calculate the geometric distance of two intervals on a circle.
 #### Parameters:
 
 `a`, `b`, `equave`
-
-### clear
-Remove the contents of the current/given scale.
-#### Parameters:
-
-`scale`
 
 ### coalesce
 Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.

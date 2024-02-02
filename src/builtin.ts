@@ -480,6 +480,13 @@ export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
   return r(a).compare(r(b));
 }
 
+function clear(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.getCurrentScale();
+  scale.length = 0;
+}
+clear.__doc__ = 'Remove the contents of the current/given scale.';
+clear.__node__ = builtinNode(clear);
+
 function colorOf(interval: Interval) {
   return interval.color;
 }
@@ -1250,6 +1257,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  clear,
   colorOf,
   labelOf,
   cosJIP,
@@ -1737,13 +1745,6 @@ riff rotated onto scale {
   "Obtain a copy of the current/given scale rotated onto the given degree.";
   scale ?? $$;
   rotate(onto);
-}
-
-riff clear scale {
-  "Remove the contents of the current/given scale.";
-  $ = scale ?? $$;
-  while ($) void(pop());
-  return;
 }
 
 riff repeated times scale {
