@@ -313,6 +313,8 @@ There are three domains, multiple tiers and two echelons which can combine to a 
 ### Domains
 Quantities can be *linear* or *logarithmic*. Linear quantities denote multiplication using `*` or `×` while logarithmic quantities achieve the same effect using `+`. This is a reflection of how the logarithm converts multiplication into addition.
 
+In mathematics the *linear* domain is called *arithmetic*, while the *logarithmic* domain is referred to as *geometric*. Some builtin riffs use the *geo-* prefix to draw analogies between the domains. E.g. `geodiff` is `diff` for *logarithmic* quantities.
+
 In just intonation you might denote `16/9` as `4/3 * 4/3` if you wish to work in the linear domain or indicate the same frequency ratio as `m7` and split it into `P4 + P4` if logarithmic thinking suits you better.
 
 The *cologarithmic* domain mostly comes up in tempering. An expression like `12@ · P4` evaluating to `5` indicates that the perfect fourth is tempered to 5 steps of 12-tone equal temperament. In cologarithmic vector form (a.k.a. *val*) `12@` corresponds to `<12 19]` while `P4` corresponds to the prime exponents `[2 -1>` (a.k.a. *monzo*) so the expression `12@ · P4` reads `<12 19] · [2 -1>` = `12 * 2 + 19 * (-1)` = `5`.
@@ -406,7 +408,7 @@ Above the `return` statement is suprefluous. We could've left it out and let the
 Once declared, functions can be called:`subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`.
 
 ### Lambda expressions
-Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start, end => retroverted(start::end))`.
+Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start end => retroverted(start::end))`.
 
 ## Throwing
 To interupt execution you can throw string messages.

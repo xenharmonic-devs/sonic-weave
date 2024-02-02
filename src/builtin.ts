@@ -1321,13 +1321,13 @@ riff void {
 riff sum terms {
   "Calculate the (linear) sum of the terms or the current scale.";
   terms ??= $$;
-  return arrayReduce(total, element => total +~ element, terms);
+  return arrayReduce(total element => total +~ element, terms);
 }
 
 riff prod factors {
   "Calculate the (linear) product of the factors or the current scale i.e. the logarithmic sum.";
   factors ??= $$;
-  return arrayReduce(total, element => total *~ element, factors);
+  return arrayReduce(total element => total *~ element, factors);
 }
 
 riff cumsum array {
@@ -1427,7 +1427,7 @@ riff tune a b numIter weighting {
     const y = a + b;
     const z = 2 * b - a;
 
-    [a, b] = sorted([a, b, x, y, z], u, v => cosJIP(v) - cosJIP(u));
+    [a b] = sorted([a, b, x, y, z], u v => cosJIP(v) - cosJIP(u));
   }
   return a;
 }
@@ -1747,12 +1747,12 @@ riff elevated scale {
 riff subset indices scale {
   "Only keep the given indices (scale degrees) of the current/given scale.";
   scale ??= $$;
-  distill(_, i => i of indices, scale);
+  distill(_ i => i of indices, scale);
 }
 
 riff subsetOf indices scale {
   "Obtain a copy of the current/given scale with only the given indices kept.";
-  filter(_, i => i of indices, scale ?? $$);
+  filter(_ i => i of indices, scale ?? $$);
 }
 
 riff toSubharmonics overtone scale {
@@ -1868,7 +1868,7 @@ riff coalesced tolerance action scale {
       } else if (action === 'geoavg') {
         geoavg(...group);
       } else {
-        sort(group, (a b => tenneyHeight(a) - tenneyHeight(b)));
+        sort(group, a b => tenneyHeight(a) - tenneyHeight(b));
         group[0];
       }
       group = [];
