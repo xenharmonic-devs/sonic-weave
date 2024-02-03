@@ -183,10 +183,28 @@ describe('SonicWeave standard library', () => {
     expect(scale).toHaveLength(0);
   });
 
-  it('can round to nearest subharmonic', () => {
-    const scale = parseSource('1\\3;2\\3;3\\3;toSubharmonics(16);');
+  it('can round to nearest harmonic', () => {
+    const scale = parseSource('1\\3 "alice";2\\3 green;3\\3;toHarmonics(16);');
     expect(scale).toHaveLength(3);
-    expect(scale.map(i => i.toString()).join(';')).toBe('16/13;16/10;16/8');
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '(20/16 "alice");(25/16 green);32/16'
+    );
+  });
+
+  it('can round to nearest subharmonic', () => {
+    const scale = parseSource('1\\3 "bob";2\\3 green;3\\3;toSubharmonics(16);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '(16/13 "bob");(16/10 green);16/8'
+    );
+  });
+
+  it('can round to nearest equal division', () => {
+    const scale = parseSource('4/3 "charlie";5/3 red;6/3;equalize(7);');
+    expect(scale).toHaveLength(3);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '(3\\7 "charlie");(5\\7 red);7\\7'
+    );
   });
 
   it('can merge offset copies', () => {
@@ -673,5 +691,21 @@ describe('SonicWeave standard library', () => {
       str
     `);
     expect(scale).toEqual(['100.', '201.', '1200.']);
+  });
+
+  it('can store colors and labels for later', () => {
+    const scale = parseSource(`
+      1 red "one"
+      2 "two"
+      3
+      const colors = colorsOf()
+      const ls = labelsOf()
+      clear()
+      3::6
+      label(colors)
+      label(ls)
+      repr
+    `);
+    expect(scale).toEqual(['(4/3 red "one")', '(5/3 "two")', '6/3']);
   });
 });

@@ -1495,6 +1495,16 @@ riff tune a b numIter weighting {
   return a;
 }
 
+riff colorsOf scale {
+  "Obtain an array of colors of the current/given scale.";
+  return map(colorOf, scale ?? $$);
+}
+
+riff labelsOf scale {
+  "Obtain an array of labels of the current/given scale.";
+  return map(labelOf, scale ?? $$);
+}
+
 // == Scale generation ==
 riff ed divisions equave {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
@@ -1811,16 +1821,47 @@ riff subsetOf indices scale {
   filter(_ i => i of indices, scale ?? $$);
 }
 
+riff toHarmonics fundamental scale {
+  "Quantize the current/given scale to harmonics of the given fundamental.";
+  $ = scale ?? $$;
+  i => i to~ %~fundamental colorOf(i) labelOf(i);
+  return;
+}
+
+riff harmonicsOf fundamental scale {
+  "Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.";
+  scale ?? $$;
+  toHarmonics();
+}
+
 riff toSubharmonics overtone scale {
   "Quantize the current/given scale to subharmonics of the given overtone.";
   $ = scale ?? $$;
-  i => %~(%~i to~ %~overtone);
+  i => %~(%~i to~ %~overtone) colorOf(i) labelOf(i);
   return;
 }
 
 riff subharmonicsOf overtone scale {
   "Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.";
-  map(i => %~(%~i to~ %~overtone), scale ?? $$);
+  scale ?? $$;
+  toSubharmonics();
+}
+
+riff equalize divisions scale {
+  "Quantize the current/given scale to given equal divisions of its equave.";
+  $ = scale ?? $$;
+  let step = 1 \\ divisions;
+  if ($[-1] != 2) {
+    step = step <$[-1]>;
+  }
+  i => i by~ step colorOf(i) labelOf(i);
+  return;
+}
+
+riff equalized divisions scale {
+  "Obtain a copy of the current/given scale quantized to given equal divisions of its equave.";
+  scale ?? $$;
+  equalize();
 }
 
 // Assumes a sorted scale

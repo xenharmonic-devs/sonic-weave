@@ -520,6 +520,12 @@ Obtain a copy of the current/given scale where groups of intervals separated by 
 
 `tolerance`, `action`, `scale`
 
+### colorsOf
+Obtain an array of colors of the current/given scale.
+#### Parameters:
+
+`scale`
+
 ### cps
 Generate a combination product set from the given factors and combination size.
 #### Parameters:
@@ -568,6 +574,18 @@ Produce an array of [index, element] pairs from the given current/given array.
 
 `array`
 
+### equalize
+Quantize the current/given scale to given equal divisions of its equave.
+#### Parameters:
+
+`divisions`, `scale`
+
+### equalized
+Obtain a copy of the current/given scale quantized to given equal divisions of its equave.
+#### Parameters:
+
+`divisions`, `scale`
+
 ### eulerGenus
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 #### Parameters:
@@ -610,6 +628,12 @@ Generate a constant structure generator sequence. Zero ordinal corresponds to th
 
 `generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
 
+### harmonicsOf
+Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.
+#### Parameters:
+
+`fundamental`, `scale`
+
 ### havg
 Calculate the harmonic mean of the terms.
 #### Parameters:
@@ -627,6 +651,12 @@ Apply labels (or colors) from the first array to the current/given scale.
 #### Parameters:
 
 `labels`, `scale`
+
+### labelsOf
+Obtain an array of labels of the current/given scale.
+#### Parameters:
+
+`scale`
 
 ### log
 Calculate the logarithm of x base y. Base defaults to E.
@@ -843,6 +873,12 @@ Calculate the (linear) sum of the terms or the current scale.
 #### Parameters:
 
 `terms`
+
+### toHarmonics
+Quantize the current/given scale to harmonics of the given fundamental.
+#### Parameters:
+
+`fundamental`, `scale`
 
 ### toSubharmonics
 Quantize the current/given scale to subharmonics of the given overtone.

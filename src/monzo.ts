@@ -1369,8 +1369,8 @@ export class TimeMonzo {
             return undefined;
           }
         } else if (
-          equave.n !== node.equaveNumerator ||
-          equave.d !== (node.equaveDenominator ?? 1)
+          equave.n * (node.equaveDenominator ?? 1) !==
+          equave.d * node.equaveNumerator
         ) {
           return undefined;
         }
