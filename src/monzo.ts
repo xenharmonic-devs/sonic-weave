@@ -1305,12 +1305,16 @@ export class TimeMonzo {
     if (!this.isEqualTemperament()) {
       return undefined;
     }
-    const {fractionOfEquave, equave} = this.toEqualTemperament();
-    return {
-      type: 'RadicalLiteral',
-      argument: equave,
-      exponent: fractionOfEquave,
-    };
+    try {
+      const {fractionOfEquave, equave} = this.toEqualTemperament();
+      return {
+        type: 'RadicalLiteral',
+        argument: equave,
+        exponent: fractionOfEquave,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   asCentsLiteral(): CentsLiteral {

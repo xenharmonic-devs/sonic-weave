@@ -687,4 +687,19 @@ describe('SonicWeave expression evaluator', () => {
     expect(myFifth.color).toBeUndefined;
     expect(myFifth.label).toBe('my fifth');
   });
+
+  it('supports fraction formatting preference (numerator)', () => {
+    const fifth = parseSingle('fraction(1.5e, 6)');
+    expect(fifth.toString()).toBe('6/4');
+  });
+
+  it('supports fraction formatting preference (denominator)', () => {
+    const fifth = parseSingle('fraction(1.5e, 0, 6)');
+    expect(fifth.toString()).toBe('9/6');
+  });
+
+  it('supports nedji formatting preference', () => {
+    const third = parseSingle('nedji(1\\3, 0, 12)');
+    expect(third.toString()).toBe('4\\12');
+  });
 });

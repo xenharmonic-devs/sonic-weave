@@ -149,7 +149,7 @@ Round value down to the nearest integer.
 Convert interval to a fraction.
 #### Parameters:
 
-`interval`, `epsilon`
+`interval`, `preferredNumerator`, `preferredDenominator`, `epsilon`
 
 ### gcd
 Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
@@ -294,6 +294,12 @@ Calculate a subset of equally tempered degrees with maximum variety two per scal
 #### Parameters:
 
 `numberOfLargeSteps`, `numberOfSmallSteps`, `sizeOfLargeStep`, `sizeOfSmallStep`, `up`, `down`
+
+### nedji
+Convert interval to N steps of equally divided just intonation.
+#### Parameters:
+
+`interval`, `preferredNumerator`, `preferredDenominator`, `preferredEquaveNumerator`, `preferredEquaveDenominator`
 
 ### numComponents
 Get/set the number of prime exponents to support in monzos. Also sets the length of vals.

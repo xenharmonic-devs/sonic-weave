@@ -18,6 +18,8 @@ import {type ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
+import {NedjiLiteral, RadicalLiteral} from './expression';
+import {TWO} from './utils';
 
 // Runtime
 
@@ -292,25 +294,44 @@ decimal.__node__ = builtinNode(decimal);
 function fraction(
   this: ExpressionVisitor,
   interval: Interval,
+  preferredNumerator?: Interval,
+  preferredDenominator?: Interval,
   epsilon?: Interval
 ) {
+  const numerator = preferredNumerator
+    ? preferredNumerator.value.toBigInteger()
+    : 0n;
+  const denominator = preferredDenominator
+    ? preferredDenominator.value.toBigInteger()
+    : 0n;
   const converted = relin.bind(this)(interval);
   let eps = 1e-4;
+  let value: TimeMonzo | undefined;
   if (epsilon === undefined) {
     if (converted.value.isFractional()) {
-      return new Interval(
-        converted.value,
-        'linear',
-        converted.value.asFractionLiteral(),
-        interval
-      );
+      value = converted.value.clone();
     }
   } else {
     eps = epsilon.value.valueOf();
   }
-  const frac = new Fraction(converted.value.valueOf()).simplify(eps);
-  const value = TimeMonzo.fromFraction(frac);
-  return new Interval(value, 'linear', value.asFractionLiteral(), interval);
+  if (!value) {
+    const frac = new Fraction(converted.value.valueOf()).simplify(eps);
+    value = TimeMonzo.fromFraction(frac);
+  }
+  const node = value.asFractionLiteral();
+  if (!node) {
+    throw new Error('Failed to convert to fraction.');
+  }
+  if (numerator && node.numerator && numerator % node.numerator === 0n) {
+    const factor = numerator / node.numerator;
+    node.numerator = numerator;
+    node.denominator *= factor;
+  } else if (denominator && denominator % node.denominator === 0n) {
+    const factor = denominator / node.denominator;
+    node.numerator *= factor;
+    node.denominator = denominator;
+  }
+  return new Interval(value, 'linear', node, interval);
 }
 fraction.__doc__ = 'Convert interval to a fraction.';
 fraction.__node__ = builtinNode(fraction);
@@ -323,12 +344,10 @@ function radical(
 ) {
   const converted = relin.bind(this)(interval);
   if (converted.value.isEqualTemperament()) {
-    return new Interval(
-      converted.value,
-      'linear',
-      converted.value.asRadicalLiteral(),
-      interval
-    );
+    const node = converted.value.asRadicalLiteral();
+    if (node) {
+      return new Interval(converted.value.clone(), 'linear', node, interval);
+    }
   }
   const {index, radicand} = approximateRadical(
     converted.value.valueOf(),
@@ -358,6 +377,65 @@ function radical(
 }
 radical.__doc__ = 'Convert interval to a radical expression.';
 radical.__node__ = builtinNode(radical);
+
+export function nedji(
+  this: ExpressionVisitor,
+  interval: Interval,
+  preferredNumerator?: Interval,
+  preferredDenominator?: Interval,
+  preferredEquaveNumerator?: Interval,
+  preferredEquaveDenominator?: Interval
+) {
+  const numerator = preferredNumerator ? preferredNumerator.toInteger() : 0;
+  const denominator = preferredDenominator
+    ? preferredDenominator.toInteger()
+    : 0;
+  const eNum = preferredEquaveNumerator
+    ? preferredEquaveNumerator.toInteger()
+    : 0;
+  const eDenom = preferredEquaveDenominator
+    ? preferredEquaveDenominator.toInteger()
+    : 0;
+
+  const rad = radical.bind(this)(interval);
+  if (rad.node?.type !== 'RadicalLiteral') {
+    throw new Error('NEDJI conversion failed.');
+  }
+  const rn: RadicalLiteral = rad.node!;
+  const node: NedjiLiteral = {
+    type: 'NedjiLiteral',
+    numerator: rn.exponent.n * rn.exponent.s,
+    denominator: rn.exponent.d,
+    equaveNumerator: rn.argument.n * rn.exponent.s,
+    equaveDenominator: rn.argument.d,
+  };
+  if (numerator && node.numerator && numerator % node.numerator === 0) {
+    const factor = numerator / node.numerator;
+    node.numerator = numerator;
+    node.denominator *= factor;
+  } else if (denominator && denominator % node.denominator === 0) {
+    const factor = denominator / node.denominator;
+    node.numerator *= factor;
+    node.denominator = denominator;
+  }
+  if (eNum && node.equaveNumerator && eNum % node.equaveNumerator === 0) {
+    const factor = eNum / node.equaveNumerator;
+    node.equaveNumerator = eNum;
+    node.equaveDenominator! *= factor;
+  } else if (eDenom && eDenom % node.equaveDenominator! === 0) {
+    const factor = eDenom / node.equaveDenominator!;
+    node.equaveNumerator! *= factor;
+    node.equaveDenominator = eDenom;
+  }
+  if (!eNum && !eDenom && rn.argument.equals(TWO)) {
+    node.equaveNumerator = null;
+    node.equaveDenominator = null;
+  }
+  return new Interval(rad.value, 'logarithmic', node, interval);
+}
+nedji.__doc__ =
+  'Convert interval to N steps of equally divided just intonation.';
+nedji.__node__ = builtinNode(nedji);
 
 export function cents(
   this: ExpressionVisitor,
@@ -1241,6 +1319,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   decimal,
   fraction,
   radical,
+  nedji,
   cents,
   absoluteFJS,
   FJS,
