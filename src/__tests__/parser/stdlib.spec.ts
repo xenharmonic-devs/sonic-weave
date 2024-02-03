@@ -244,6 +244,16 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('modifies the equave when merging an offset with "keep"', () => {
+    const scale = parseSource(
+      '4/3;3/2;2/1; mergeOffset(11/8, "keep"); simplify'
+    );
+    expect(scale).toHaveLength(6);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '4/3;11/8;3/2;11/6;2;33/16'
+    );
+  });
+
   it('can compress a scale', () => {
     const scale = parseSource('3/2;2;stretch(99e-2);');
     expect(scale).toHaveLength(2);

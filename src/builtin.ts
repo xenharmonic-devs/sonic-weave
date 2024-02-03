@@ -1902,11 +1902,15 @@ riff mergeOffset offsets overflow scale {
     remap(copy => filter(i => i > 1 and i < equave, copy), copies);
   } else if (overflow === 'wrap') {
     remap(copy => map(i => i ~rd equave, copy), copies);
+  } else {
+    equave;
   }
 
   copies;
   sort();
-  equave;
+  if (overflow !== 'keep') {
+    equave;
+  }
   keepUnique();
   return;
 }
