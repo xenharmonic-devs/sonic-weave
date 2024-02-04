@@ -119,8 +119,8 @@ export type PatentTweak = {
   tweak: number;
 };
 
-export type PlusMinusVal = {
-  type: 'PlusMinusVal';
+export type SparseOffsetVal = {
+  type: 'SparseOffsetVal';
   equave: string;
   divisions: number;
   tweaks: PatentTweak[];
@@ -169,7 +169,7 @@ export type IntervalLiteral =
   | SecondLiteral
   | MonzoLiteral
   | ValLiteral
-  | PlusMinusVal
+  | SparseOffsetVal
   | WartsLiteral;
 
 const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
@@ -515,7 +515,7 @@ function formatPatentTweak(tweak: PatentTweak) {
   return '-'.repeat(-tweak.tweak) + tweak.rational;
 }
 
-function formatPlusMinusVal(literal: PlusMinusVal) {
+function formatSparseOffsetVal(literal: SparseOffsetVal) {
   let result = '';
   if (literal.equave) {
     result += '[' + literal.equave + ']';
@@ -557,8 +557,8 @@ export function literalToString(literal: IntervalLiteral) {
       return `${literal.equave}${literal.divisions}${literal.warts.join(
         ''
       )}@${literal.basis.join('.')}`;
-    case 'PlusMinusVal':
-      return formatPlusMinusVal(literal);
+    case 'SparseOffsetVal':
+      return formatSparseOffsetVal(literal);
     case 'HertzLiteral':
       return `${literal.prefix}Hz`;
     case 'SecondLiteral':

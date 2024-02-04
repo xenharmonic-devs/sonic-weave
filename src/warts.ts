@@ -1,6 +1,6 @@
 import {Fraction, PRIMES, primeLimit} from 'xen-dev-utils';
 import {TimeMonzo, getNumberOfComponents} from './monzo';
-import {PlusMinusVal, WartsLiteral} from './expression';
+import {SparseOffsetVal, WartsLiteral} from './expression';
 
 const ZERO = new Fraction(0);
 
@@ -133,7 +133,7 @@ export function wartsToVal(node: WartsLiteral) {
   return valToTimeMonzo(val, subgroup);
 }
 
-export function plusMinusToVal(node: PlusMinusVal) {
+export function sparseOffsetToVal(node: SparseOffsetVal) {
   const subgroup = parseSubgroup(node.basis)[0];
   if (node.equave) {
     const equaveFraction = new Fraction(node.equave);

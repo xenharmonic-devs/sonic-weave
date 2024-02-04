@@ -646,7 +646,7 @@ ScalarLike
 
 Quantity
   = WartsLiteral
-  / PlusMinusVal
+  / SparseOffsetVal
   / HertzLiteral
   / SecondLiteral
   / CentLiteral
@@ -858,10 +858,10 @@ PatentTweak
 
 PatentTweaks = PatentTweak|.., _ ',' _|
 
-PlusMinusVal
+SparseOffsetVal
   = equave: ('[' @Rational ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: DotJoinedRationals {
     return {
-      type: 'PlusMinusVal',
+      type: 'SparseOffsetVal',
       equave: equave ?? '',
       divisions,
       tweaks: tweaks ?? [],

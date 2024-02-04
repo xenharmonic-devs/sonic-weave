@@ -1,7 +1,7 @@
 import {parse} from './sonic-weave-chord';
 import {evaluateExpression, parseAST} from './parser';
 import {Interval} from './interval';
-import {parseSubgroup, plusMinusToVal, wartsToVal} from './warts';
+import {parseSubgroup, sparseOffsetToVal, wartsToVal} from './warts';
 import {TimeMonzo} from './monzo';
 
 export function parseChord(input: string, includePrelude = true): Interval[] {
@@ -36,8 +36,8 @@ export function parseVals(
       let val: TimeMonzo;
       if (node.type === 'WartsLiteral') {
         val = wartsToVal(node);
-      } else if (node.type === 'PlusMinusVal') {
-        val = plusMinusToVal(node);
+      } else if (node.type === 'SparseOffsetVal') {
+        val = sparseOffsetToVal(node);
       }
       result.push(
         basis.map(b =>

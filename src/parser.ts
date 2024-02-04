@@ -17,7 +17,7 @@ import {
   ValLiteral,
   StepLiteral,
   IntervalLiteral,
-  PlusMinusVal,
+  SparseOffsetVal,
 } from './expression';
 import {Interval, Color, timeMonzoAs, infect, log} from './interval';
 import {TimeMonzo, Domain} from './monzo';
@@ -38,7 +38,7 @@ import {
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
-import {inferEquave, plusMinusToVal, wartsToVal} from './warts';
+import {inferEquave, sparseOffsetToVal, wartsToVal} from './warts';
 import {RootContext} from './context';
 import {
   Argument,
@@ -500,7 +500,7 @@ export class StatementVisitor {
             throw new Error('Invalid warts equave');
           }
           equave = equave_;
-        } else if (value.node?.type === 'PlusMinusVal') {
+        } else if (value.node?.type === 'SparseOffsetVal') {
           divisions = new Fraction(value.node.divisions);
           if (value.node.equave) {
             equave = new Fraction(value.node.equave);
@@ -887,8 +887,8 @@ export class ExpressionVisitor {
         return this.visitSecondLiteral(node);
       case 'WartsLiteral':
         return this.visitWartsLiteral(node);
-      case 'PlusMinusVal':
-        return this.visitPlusMinusVal(node);
+      case 'SparseOffsetVal':
+        return this.visitSparseOffsetVal(node);
       case 'ColorLiteral':
         return new Color(node.value);
       case 'Identifier':
@@ -1060,8 +1060,8 @@ export class ExpressionVisitor {
     return new Interval(val, 'cologarithmic', node);
   }
 
-  visitPlusMinusVal(node: PlusMinusVal) {
-    const val = plusMinusToVal(node);
+  visitSparseOffsetVal(node: SparseOffsetVal) {
+    const val = sparseOffsetToVal(node);
     return new Interval(val, 'cologarithmic', node);
   }
 
