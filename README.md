@@ -744,8 +744,8 @@ The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the diff
 ### Obscure types
 | Type   | Literal | Meaning |
 | ------ | ------- | ------- |
-| Second | `s`     | Inverse of `Hz` i.e. `s * Hz` evaluates to `1` |
-| Jorp   | `€`     | Geometric inverse of `c` i.e. `€` is equal to `v<1200]` |
+| Second | `1s`    | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1` |
+| Jorp   | `€`     | Geometric inverse of `c` i.e. `€` is equal to `<1200]` |
 
 ## Future work
 The syntax could be extended to cover movement in time i.e. to become a full textual music notation vis-à-vis Xenpaper.

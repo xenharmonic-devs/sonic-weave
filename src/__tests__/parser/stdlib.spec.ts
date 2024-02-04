@@ -23,7 +23,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('mtof(60);');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
-    expect(interval.toString()).toBe('4685120000^1/4 * Hz');
+    expect(interval.toString()).toBe('4685120000^1/4 * 1Hz');
   });
 
   it('converts frequency to MIDI note number / MTS value', () => {
@@ -708,11 +708,11 @@ describe('SonicWeave standard library', () => {
       1 red "one"
       2 "two"
       3
-      const colors = colorsOf()
+      const cs = colorsOf()
       const ls = labelsOf()
       clear()
       3::6
-      label(colors)
+      label(cs)
       label(ls)
       repr
     `);

@@ -1452,7 +1452,7 @@ export class TimeMonzo {
           } else if (this.isEqualTemperament()) {
             try {
               const {fractionOfEquave, equave} = this.toEqualTemperament();
-              return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * Hz`;
+              return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * 1Hz`;
             } catch {
               /* Fall through */
             }
@@ -1475,9 +1475,9 @@ export class TimeMonzo {
         factors.push(centsToValue(this.cents) + 'r');
       }
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
-        factors.push('Hz');
+        factors.push('1Hz');
       } else if (this.timeExponent.n) {
-        factors.push(`s^${this.timeExponent.toFraction()}`);
+        factors.push(`(1s)^${this.timeExponent.toFraction()}`);
       }
       return factors.join('*');
     } else if (domain === 'logarithmic') {
@@ -1504,16 +1504,16 @@ export class TimeMonzo {
             if (this.cents === Math.round(this.cents)) {
               return this.cents.toString() + '\\';
             }
-            return this.cents.toString() + 'r c';
+            return this.cents.toString() + 'rc';
           }
           return '0c';
         }
       }
       const terms: string[] = [];
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
-        terms.push('logarithmic(Hz)');
+        terms.push('logarithmic(1Hz)');
       } else if (this.timeExponent.n) {
-        terms.push(`${this.timeExponent.toFraction()}*logarithmic(s)`);
+        terms.push(`${this.timeExponent.toFraction()}*logarithmic(1s)`);
       }
       const pe = [...this.primeExponents];
       while (pe.length && !pe[pe.length - 1].n) {
@@ -1523,13 +1523,13 @@ export class TimeMonzo {
       if (this.residual.compare(ONE)) {
         terms.push(`relog(${this.residual.toFraction()})`);
       }
-      const steps = Math.round(this.cents);
-      if (steps) {
-        terms.push(`${steps}\\`);
-      }
-      const cents = this.cents - steps;
-      if (cents) {
-        terms.push(`${cents}r c`);
+      if (this.cents) {
+        const steps = Math.round(this.cents);
+        if (steps === this.cents) {
+          terms.push(`${steps}\\`);
+        } else {
+          terms.push(`${this.cents}rc`);
+        }
       }
       return [terms[0]]
         .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
@@ -1537,9 +1537,9 @@ export class TimeMonzo {
     }
     const terms: string[] = [];
     if (this.timeExponent.equals(NEGATIVE_ONE)) {
-      terms.push('cologarithmic(Hz)');
+      terms.push('cologarithmic(1Hz)');
     } else if (this.timeExponent.n) {
-      terms.push(`${this.timeExponent.toFraction()}*cologarithmic(s)`);
+      terms.push(`${this.timeExponent.toFraction()}*cologarithmic(1s)`);
     }
     const pe = [...this.primeExponents];
     while (pe.length && !pe[pe.length - 1].n) {
@@ -1549,13 +1549,13 @@ export class TimeMonzo {
     if (this.residual.compare(ONE)) {
       terms.push(`cologarithmic(${this.residual.toFraction()})`);
     }
-    const steps = Math.round(this.cents);
-    if (steps) {
-      terms.push(`cologarithmic(${steps}\\)`);
-    }
-    const cents = this.cents - steps;
-    if (cents) {
-      terms.push(`${cents}r €`);
+    if (this.cents) {
+      const steps = Math.round(this.cents);
+      if (steps === this.cents) {
+        terms.push(`cologarithmic(${steps}\\)`);
+      } else {
+        terms.push(`${this.cents}r€`);
+      }
     }
     return [terms[0]]
       .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))

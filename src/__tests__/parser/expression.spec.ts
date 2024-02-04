@@ -52,7 +52,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('subtracts cents', () => {
-    const interval = parseSingle('1.955 - c');
+    const interval = parseSingle('1.955 - 1c');
     expect(interval.totalCents()).toBeCloseTo(0.955);
   });
 
@@ -122,7 +122,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a reciprocal cent', () => {
-    const one = parseSingle('c dot €');
+    const one = parseSingle('1c dot €');
     expect(one.toString()).toBe('1');
   });
 
@@ -325,7 +325,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a just intonation point', () => {
     const marvelCents = parseSingle('JIP(225/224)');
-    expect(marvelCents.toString()).toBe('7.711522991319271r c');
+    expect(marvelCents.toString()).toBe('7.711522991319271rc');
   });
 
   it('parses negative intervals correctly', () => {
@@ -349,8 +349,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a fancy cent', () => {
-    const centisemioctave = parseSingle('¢');
-    expect(centisemioctave.toString()).toBe('c');
+    const centisemioctave = parseSingle('1¢');
+    expect(centisemioctave.toString()).toBe('1.');
   });
 
   it('can add FJS', () => {
@@ -449,16 +449,19 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a lower-case hertz literal', () => {
     const ninety = parseSingle('90hz');
+    expect(ninety.isAbsolute()).toBe(true);
     expect(ninety.value.valueOf()).toBeCloseTo(90);
   });
 
   it('has zepto hertz', () => {
-    const smol = parseSingle('zhz');
+    const smol = parseSingle('1 zhz');
+    expect(smol.isAbsolute()).toBe(true);
     expect(smol.value.valueOf()).toBeCloseTo(1e-21);
   });
 
   it('has hecto hertz', () => {
-    const chonk = parseSingle('hHz');
+    const chonk = parseSingle('1hHz');
+    expect(chonk.isAbsolute()).toBe(true);
     expect(chonk.value.valueOf()).toBeCloseTo(100);
   });
 
@@ -701,5 +704,10 @@ describe('SonicWeave expression evaluator', () => {
   it('supports nedji formatting preference', () => {
     const third = parseSingle('nedji(1\\3, 0, 12)');
     expect(third.toString()).toBe('4\\12');
+  });
+
+  it('can use "s" as a handy inflection', () => {
+    const third = parseSingle('const s = logarithmic(81/80);M3-s');
+    expect(third.value.toFraction().toFraction()).toBe('5/4');
   });
 });

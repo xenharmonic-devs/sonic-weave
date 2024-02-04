@@ -61,10 +61,17 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses kilohertz', () => {
-    const ast = parseSingle('kHz');
+    const ast = parseSingle('1 kHz');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
-      expression: {type: 'HertzLiteral', prefix: 'k'},
+      expression: {
+        type: 'BinaryExpression',
+        operator: ' ',
+        left: {type: 'IntegerLiteral', value: 1n},
+        right: {type: 'HertzLiteral', prefix: 'k'},
+        preferLeft: false,
+        preferRight: false,
+      },
     });
   });
 

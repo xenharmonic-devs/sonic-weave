@@ -76,17 +76,15 @@ ToToken            = 'to'     !IdentifierPart
 TrueToken          = 'true'   !IdentifierPart
 WhileToken         = 'while'  !IdentifierPart
 
+// Tokens representing units can only appear along scalars so they're not reserved.
 ReservedWord
   = AndToken
   / ByToken
-  / CentToken
   / ConstToken
   / DotToken
   / ElseToken
   / FalseToken
   / ForToken
-  / HertzToken
-  / LowHertzToken
   / IfToken
   / LetToken
   / LogToken
@@ -100,7 +98,6 @@ ReservedWord
   / ReduceCeilingToken
   / ReturnToken
   / FunctionToken
-  / SecondToken
   / TensorToken
   / ThrowToken
   / ToToken
@@ -622,9 +619,9 @@ ArraySlice
   }
 
 ScalarMultiple
-  = scalar: ScalarLike operator: ' '? quantity: (__ @Quantity)? {
-    if (operator && quantity) {
-      return BinaryExpression(operator, scalar, quantity, false, false);
+  = scalar: ScalarLike operator: ' '? quantity: (__ @(Unit / Quantity))? {
+    if (quantity) {
+      return BinaryExpression(operator ?? ' ', scalar, quantity, false, false);
     }
     if (scalar.type === 'DecimalLiteral') {
       if (scalar.exponent || scalar.flavor) {
@@ -647,13 +644,15 @@ ScalarLike
 Quantity
   = WartsLiteral
   / SparseOffsetVal
-  / HertzLiteral
-  / SecondLiteral
-  / CentLiteral
   / ReciprocalCentLiteral
   / MonzoLiteral
   / ValLiteral
   / DownExpression
+
+Unit
+  = HertzLiteral
+  / SecondLiteral
+  / CentLiteral
 
 Primary
   = Quantity
