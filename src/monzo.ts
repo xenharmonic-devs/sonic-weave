@@ -314,12 +314,12 @@ export class TimeMonzo {
 
   set numberOfComponents(value: number) {
     while (this.primeExponents.length > value) {
-      const index = this.primeExponents.length;
+      const index = this.primeExponents.length - 1;
       const pe = this.primeExponents.pop()!;
       if (pe.d === 1) {
         this.residual = this.residual.mul(new Fraction(PRIMES[index]).pow(pe)!);
       } else {
-        this.cents += PRIME_CENTS[index];
+        this.cents += PRIME_CENTS[index] * pe.valueOf();
       }
     }
     if (this.primeExponents.length < value) {
@@ -1330,7 +1330,7 @@ export class TimeMonzo {
     const cents = this.totalCents();
     const whole = Math.trunc(cents);
     // Note: This abuses the grammar
-    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'r c';
+    const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'rc';
     return {type: 'CentsLiteral', whole: BigInt(whole), fractional};
   }
 

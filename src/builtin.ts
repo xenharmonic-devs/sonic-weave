@@ -11,6 +11,7 @@ import {
   LOG_PRIMES,
   norm,
   centsToNats,
+  BIG_INT_PRIMES,
 } from 'xen-dev-utils';
 import {Color, Interval} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
@@ -627,37 +628,41 @@ JIP.__node__ = builtinNode(JIP);
 
 function PrimeMapping(
   this: ExpressionVisitor,
-  ...primeCents: (Interval | undefined)[]
+  ...newPrimes: (Interval | undefined)[]
 ) {
   const rl = relog.bind(this);
-  const pc = primeCents.map((p, i) =>
-    p ? rl(p).totalCents() : PRIME_CENTS[i]
+  const np = newPrimes.map((p, i) =>
+    p ? rl(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
   );
 
   function mapper(this: ExpressionVisitor, interval: Interval) {
     const monzo = relog.bind(this)(interval).value;
-    monzo.numberOfComponents = pc.length;
-    const pe = monzo.primeExponents.map(e => e.valueOf());
-    const value = TimeMonzo.fromCents(
-      dot(pc, pe) +
-        valueToCents(Math.abs(monzo.residual.valueOf())) +
-        monzo.cents
-    );
-    if (monzo.residual.s < 0) {
-      value.residual.s = -1;
+    monzo.numberOfComponents = np.length;
+    let mapped = new TimeMonzo(ZERO, [], monzo.residual, monzo.cents);
+    while (mapped.primeExponents.length < np.length) {
+      mapped.primeExponents.push(ZERO);
     }
-    return new Interval(value, 'logarithmic', undefined, interval);
+    for (let i = 0; i < np.length; ++i) {
+      mapped = mapped.mul(np[i].pow(monzo.primeExponents[i]));
+    }
+    return new Interval(
+      mapped,
+      'logarithmic',
+      mapped.asCentsLiteral(),
+      interval
+    );
   }
+  const r = repr.bind(this);
   Object.defineProperty(mapper, 'name', {
-    value: `PrimeMapping${pc.map(p => p.toString() + 'c').join(', ')}`,
+    value: `PrimeMapping${newPrimes.map(r).join(', ')}`,
     enumerable: false,
   });
-  mapper.__doc__ = 'Prime mapper. Temperes intervals to real cents.';
+  mapper.__doc__ = 'Prime re-mapper.';
   mapper.__node__ = builtinNode(mapper);
   return mapper;
 }
 PrimeMapping.__doc__ =
-  'Construct a prime mapping for tempering intervals to real cents. Remaining primes are converted to real cents without tempering.';
+  'Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
 export function tenneyHeight(this: ExpressionVisitor, interval: Interval) {

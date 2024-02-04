@@ -320,10 +320,10 @@ Remove and return all intervals in the current/given scale.
 `scale`
 
 ### PrimeMapping
-Construct a prime mapping for tempering intervals to real cents. Remaining primes are converted to real cents without tempering.
+Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.
 #### Parameters:
 
-`...primeCents`
+`...newPrimes`
 
 ### primes
 Obtain an array of prime numbers such that start <= p <= end.
