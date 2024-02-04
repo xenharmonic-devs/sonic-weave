@@ -18,7 +18,8 @@ export function parseVals(
   subgroup: string,
   includePrelude = true
 ): number[][] {
-  const basis = parseSubgroup(subgroup.split('.'))[0];
+  subgroup = subgroup.trim();
+  const basis = parseSubgroup(subgroup ? subgroup.split('.') : [])[0];
   subgroup = '@' + subgroup;
   const parts: string[] = parse(input) as any;
   const result: number[][] = [];

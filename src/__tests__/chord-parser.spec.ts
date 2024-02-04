@@ -60,4 +60,8 @@ describe('Val input parser', () => {
       [9, 14, 12],
     ]);
   });
+  it('parses free vals', () => {
+    const result = parseVals('12', '');
+    expect(result).toEqual([[12, 19, 28, 34, 42, 44, 49, 51, 54]]);
+  });
 });
