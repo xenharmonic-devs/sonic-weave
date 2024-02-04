@@ -566,6 +566,18 @@ function clear(this: ExpressionVisitor, scale?: Interval[]) {
 clear.__doc__ = 'Remove the contents of the current/given scale.';
 clear.__node__ = builtinNode(clear);
 
+function tail(this: ExpressionVisitor, interval: Interval, index: Interval) {
+  return new Interval(
+    interval.value.tail(index.toInteger()),
+    interval.domain,
+    undefined,
+    interval
+  );
+}
+tail.__doc__ =
+  'Return the higher prime tail of an interval starting from the given index. Prime 2 has index 0.';
+tail.__node__ = builtinNode(tail);
+
 function colorOf(interval: Interval) {
   return interval.color;
 }
@@ -1342,6 +1354,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   ceil,
   // Other
   clear,
+  tail,
   colorOf,
   labelOf,
   cosJIP,

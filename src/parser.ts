@@ -524,11 +524,15 @@ export class StatementVisitor {
           }
         );
         const rl = relog.bind(subVisitor);
-        const mapped = scale.map(i =>
-          rl(i)
-            .dot(value as Interval)
-            .mul(step)
-        );
+        const mapped = scale.map(i => {
+          const v = value as Interval;
+          const t = i.value.tail(v.value.numberOfComponents);
+          const result = rl(i).dot(v).mul(step);
+          if (t.totalCents()) {
+            return new Interval(t, 'logarithmic').add(result);
+          }
+          return result;
+        });
         for (let i = 0; i < scale.length; ++i) {
           mapped[i].color = scale[i].color;
           mapped[i].label = scale[i].label;

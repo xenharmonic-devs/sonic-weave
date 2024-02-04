@@ -1273,6 +1273,15 @@ export class TimeMonzo {
     return TimeMonzo.fromFraction(result, this.numberOfComponents);
   }
 
+  tail(index: number) {
+    const result = this.clone();
+    for (let i = 0; i < index; ++i) {
+      result.primeExponents[i] = ZERO;
+    }
+    result.cents = 0;
+    return result;
+  }
+
   asDecimalLiteral(): DecimalLiteral {
     if (this.isDecimal()) {
       // eslint-disable-next-line prefer-const

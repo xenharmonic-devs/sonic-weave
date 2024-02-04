@@ -58,7 +58,6 @@ HertzToken         = 'Hz'     !IdentifierPart
 LowHertzToken      = 'hz'     !IdentifierPart
 IfToken            = 'if'     !IdentifierPart
 LetToken           = 'let'    !IdentifierPart
-LogToken           = '/_'     !IdentifierPart
 ModToken           = 'mod'    !IdentifierPart
 ModCeilingToken    = 'modc'   !IdentifierPart
 NoneToken          = 'niente' !IdentifierPart
@@ -87,7 +86,6 @@ ReservedWord
   / ForToken
   / IfToken
   / LetToken
-  / LogToken
   / ModToken
   / ModCeilingToken
   / NoneToken
@@ -482,7 +480,7 @@ UniformUnaryExpression
   }
 
 ExponentiationOperator
-  = $('^' / LogToken / '/^')
+  = $('^' / '/_' / '/^')
 
 ExponentiationExpression
   = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {

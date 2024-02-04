@@ -447,6 +447,12 @@ Obtain a string representation of the value (w/o color or label).
 
 `value`
 
+### tail
+Return the higher prime tail of an interval starting from the given index. Prime 2 has index 0.
+#### Parameters:
+
+`interval`, `index`
+
 ### tenneyHeight
 Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
 #### Parameters:
