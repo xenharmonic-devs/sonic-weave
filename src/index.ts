@@ -11,3 +11,4 @@ export * from './pythagorean';
 export * from './utils';
 export * from './warts';
 export * from './scale-workshop-2-parser';
+export * from './chord-parser';

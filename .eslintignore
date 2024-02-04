@@ -1,4 +1,5 @@
 dist/
 docs/
 src/sonic-weave-ast.js
+src/sonic-weave-chord.js
 src/scale-workshop-2-ast.js

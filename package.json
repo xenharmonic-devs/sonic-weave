@@ -36,7 +36,7 @@
   "scripts": {
     "lint": "gts lint",
     "clean": "gts clean",
-    "compile-parsers": "peggy src/sonic-weave.pegjs -o src/sonic-weave-ast.js && peggy src/scale-workshop-2.pegjs -o src/scale-workshop-2-ast.js",
+    "compile-parsers": "peggy src/sonic-weave.pegjs -o src/sonic-weave-ast.js && peggy src/sonic-weave-chord.pegjs -o src/sonic-weave-chord.js &&peggy src/scale-workshop-2.pegjs -o src/scale-workshop-2-ast.js",
     "precompile": "npm run compile-parsers",
     "compile": "tsc",
     "fix": "gts fix",
