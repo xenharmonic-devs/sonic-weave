@@ -791,10 +791,11 @@ describe('SonicWeave parser', () => {
   });
 
   it('leaves higher prime limits alone in implicit tempering', () => {
-    const scale = parseSource('5/4;7/5;3/2;2/1;12@5');
+    const scale = parseSource('5/4;7/5;3/2;2/1;101;12@5');
     expect(scale[0].totalCents()).toBeCloseTo(400);
     expect(scale[1].totalCents()).toBeCloseTo(3368.825906469125 - 2800);
     expect(scale[2].totalCents()).toBeCloseTo(700);
     expect(scale[3].totalCents()).toBeCloseTo(1200);
+    expect(scale[4].totalCents()).toBeCloseTo(7989.853779302155);
   });
 });

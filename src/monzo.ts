@@ -980,36 +980,29 @@ export class TimeMonzo {
    * @returns The sum of the pairwise products of the vector parts.
    */
   dot(other: TimeMonzo): Fraction {
-    if (this.primeExponents.length > other.primeExponents.length) {
+    if (this.numberOfComponents < other.numberOfComponents) {
       return other.dot(this);
     }
-
-    if (!other.residual.equals(ONE)) {
-      throw new Error('Residuals prevent calculating the dot product');
+    if (other.numberOfComponents < this.numberOfComponents) {
+      other = other.clone();
+      other.numberOfComponents = this.numberOfComponents;
     }
-    if (!this.residual.equals(ONE)) {
-      const fix = TimeMonzo.fromFraction(
-        this.residual,
-        other.numberOfComponents
-      );
-      if (!fix.residual.equals(ONE)) {
-        throw new Error('Residuals prevent calculating the dot product');
+
+    if (this.residual.isUnity() || other.residual.isUnity()) {
+      // Including hard cents doesn't really make sense.
+      // In any sensible context one of them is zero anyway.
+      // Real cents are simply co-opted for ups-and-downs by giving vals a unity cents component.
+      let result = new Fraction(this.cents * other.cents).simplify(1e-8);
+      // Not sure if time should have zero metric or not.
+      result.add(this.timeExponent.mul(other.timeExponent));
+      for (let i = 0; i < this.primeExponents.length; ++i) {
+        result = result.add(
+          this.primeExponents[i].mul(other.primeExponents[i])
+        );
       }
-      const clone = this.clone();
-      clone.residual = ONE;
-      return clone.mul(fix).dot(other);
+      return result;
     }
-
-    // Including hard cents doesn't really make sense.
-    // In any sensible context one of them is zero anyway.
-    // Real cents are simply co-opted for ups-and-downs by giving vals a unity cents component.
-    let result = new Fraction(this.cents * other.cents).simplify(1e-8);
-    // Not sure if time should have zero metric or not.
-    result.add(this.timeExponent.mul(other.timeExponent));
-    for (let i = 0; i < this.primeExponents.length; ++i) {
-      result = result.add(this.primeExponents[i].mul(other.primeExponents[i]));
-    }
-    return result;
+    throw new Error('Residuals prevent calculating the dot product');
   }
 
   /**
