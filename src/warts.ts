@@ -18,7 +18,7 @@ function wartToBasis(wart: string, nonPrimes: Fraction[]) {
   return undefined;
 }
 
-function parseSubgroup(basisStrings: string[]) {
+export function parseSubgroup(basisStrings: string[]) {
   const subgroup: Fraction[] = [];
 
   if (basisStrings.length === 1) {

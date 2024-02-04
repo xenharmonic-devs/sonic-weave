@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {parseChord} from '../chord-parser';
+import {parseChord, parseVals} from '../chord-parser';
 import {MonzoLiteral} from '../expression';
 
 describe('Chord input parser', () => {
@@ -22,15 +22,42 @@ describe('Chord input parser', () => {
       '[0 -1 1>',
     ]);
   });
-  it('parses space-separated vals', () => {
-    const result = parseChord('<12 19]   <5 8]');
-    expect(result).toHaveLength(2);
-    expect(result[0].node?.type).toBe('ValLiteral');
-    expect(result.map(i => i.toString())).toEqual(['<12 19]', '<5 8]']);
-  });
   it('parses a lifted monzo', () => {
     const result = parseChord('/[2 -1>');
     expect(result).toHaveLength(1);
     expect((result[0].node as MonzoLiteral).lifts).toBe(1);
+  });
+});
+
+describe('Val input parser', () => {
+  it('parses space-separated vals', () => {
+    const result = parseVals('<12 19]   <5 8]', '2.3');
+    expect(result).toHaveLength(2);
+    expect(result).toEqual([
+      [12, 19],
+      [5, 8],
+    ]);
+  });
+  it('parses &-separated warts', () => {
+    const result = parseVals('12&17c', '5');
+    expect(result).toHaveLength(2);
+    expect(result).toEqual([
+      [12, 19, 28],
+      [17, 27, 40],
+    ]);
+  });
+  it('parses comma-separated SOVs', () => {
+    const result = parseVals('24,67[^7]', '2.3.7');
+    expect(result).toEqual([
+      [24, 38, 67],
+      [67, 106, 189],
+    ]);
+  });
+  it('parses fractional subgroup vals', () => {
+    const result = parseVals('5;<9 14,  12]', '2.3.13/5');
+    expect(result).toEqual([
+      [5, 8, 7],
+      [9, 14, 12],
+    ]);
   });
 });

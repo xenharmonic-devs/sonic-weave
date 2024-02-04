@@ -1,6 +1,8 @@
 import {parse} from './sonic-weave-chord';
-import {evaluateExpression} from './parser';
+import {evaluateExpression, parseAST} from './parser';
 import {Interval} from './interval';
+import {parseSubgroup, plusMinusToVal, wartsToVal} from './warts';
+import {TimeMonzo} from './monzo';
 
 export function parseChord(input: string, includePrelude = true): Interval[] {
   const parts: string[] = parse(input) as any;
@@ -9,4 +11,40 @@ export function parseChord(input: string, includePrelude = true): Interval[] {
     includePrelude
   ) as Interval[];
   return result.filter(i => i instanceof Interval);
+}
+
+export function parseVals(
+  input: string,
+  subgroup: string,
+  includePrelude = true
+): number[][] {
+  const basis = parseSubgroup(subgroup.split('.'))[0];
+  subgroup = '@' + subgroup;
+  const parts: string[] = parse(input) as any;
+  const result: number[][] = [];
+  for (const part of parts) {
+    if (part.includes('<')) {
+      const val = evaluateExpression(part, includePrelude) as Interval;
+      // Just re-interprete in the subgroup's basis.
+      result.push(val.value.toIntegerMonzo());
+    } else {
+      const ast = parseAST(part + subgroup)['body'][0];
+      if (ast.type !== 'ExpressionStatement') {
+        throw new Error('Invalid val literal');
+      }
+      const node = ast.expression;
+      let val: TimeMonzo;
+      if (node.type === 'WartsLiteral') {
+        val = wartsToVal(node);
+      } else if (node.type === 'PlusMinusVal') {
+        val = plusMinusToVal(node);
+      }
+      result.push(
+        basis.map(b =>
+          val.dot(TimeMonzo.fromFraction(b, val.numberOfComponents)).valueOf()
+        )
+      );
+    }
+  }
+  return result;
 }
