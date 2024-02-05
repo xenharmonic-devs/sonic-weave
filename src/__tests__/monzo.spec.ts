@@ -364,4 +364,9 @@ describe('Extended Monzo', () => {
       '-3/2*cologarithmic(1s)+<3/2 -5/3]+cologarithmic(31/23)+2.25r€'
     );
   });
+
+  it('tails residuals', () => {
+    const value = new TimeMonzo(new Fraction(0), [], new Fraction(7, 6));
+    expect(value.tail(2).toString()).toBe('7');
+  });
 });

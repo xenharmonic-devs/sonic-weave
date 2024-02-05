@@ -1268,6 +1268,7 @@ export class TimeMonzo {
 
   tail(index: number) {
     const result = this.clone();
+    result.numberOfComponents = Math.max(result.numberOfComponents, index);
     for (let i = 0; i < index; ++i) {
       result.primeExponents[i] = ZERO;
     }
