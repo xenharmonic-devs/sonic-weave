@@ -280,19 +280,19 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can generate alternating generator sequences (diasem #1)', () => {
-    const scale = parseSource('gs([8/7, 7/6]);');
+    const scale = parseSource('csgs([8/7, 7/6]);');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;2');
   });
 
   it('can generate alternating generator sequences (diasem #2)', () => {
-    const scale = parseSource('gs([8/7, 7/6], 2);');
+    const scale = parseSource('csgs([8/7, 7/6], 2);');
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe('8/7;8/6;32/21;16/9;2');
   });
 
   it('can generate generator sequences (diasem #3)', () => {
-    const scale = parseSource('gs([8/7, 7/6], 3);');
+    const scale = parseSource('csgs([8/7, 7/6], 3);');
     expect(scale).toHaveLength(9);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '64/63;8/7;32/27;8/6;256/189;32/21;128/81;16/9;2'
@@ -300,7 +300,36 @@ describe('SonicWeave standard library', () => {
   });
 
   it('throws for gs with no constant structure', () => {
-    expect(() => parseSource('gs([8/7, 7/6, 8/7], 3);')).toThrow();
+    expect(() => parseSource('csgs([8/7, 7/6, 8/7], 3);')).toThrow();
+  });
+
+  it('can generate generator sequences (zil[5])', () => {
+    const scale = parseSource(
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5);str'
+    );
+    expect(scale).toEqual(['8/7', '8/6', '32/21', '16/9', '2']);
+  });
+
+  it('can generate generator sequences (zil[14])', () => {
+    const scale = parseSource(
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 14);str'
+    );
+    expect(scale).toEqual([
+      '64/63',
+      '16/15',
+      '8/7',
+      '32/27',
+      '128/105',
+      '8/6',
+      '256/189',
+      '64/45',
+      '32/21',
+      '256/160',
+      '512/315',
+      '16/9',
+      '64/35',
+      '2',
+    ]);
   });
 
   it('can access docstrings', () => {

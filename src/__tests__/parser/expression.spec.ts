@@ -710,4 +710,17 @@ describe('SonicWeave expression evaluator', () => {
     const third = parseSingle('const s = logarithmic(81/80);M3-s');
     expect(third.value.toFraction().toFraction()).toBe('5/4');
   });
+
+  it('can repeat strings', () => {
+    const batperson = evaluateExpression('arrayRepeat(5, "na")', false);
+    expect(batperson).toBe('nanananana');
+  });
+
+  it('can repeat arrays', () => {
+    const stuff = evaluateExpression(
+      '1;2;3;arrayRepeat(3)',
+      false
+    ) as Interval[];
+    expect(stuff.map(i => i.toString()).join(';')).toBe('1;2;3;1;2;3;1;2;3');
+  });
 });

@@ -31,6 +31,12 @@ Reduce the given/current scale to a single value by the `reducer` riff which tak
 
 `reducer`, `array`, `initialValue`
 
+### arrayRepeat
+Repeat the given/current array or string `count` times.
+#### Parameters:
+
+`count`, `array`
+
 ### bleach
 Get rid of interval coloring and label.
 #### Parameters:
@@ -161,7 +167,7 @@ Obtain the largest (linear) multiplicative factor shared by all intervals or the
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
 #### Parameters:
 
-`scale`
+`monzos`
 
 ### help
 Print information about the given riff to the console.
@@ -544,6 +550,12 @@ Generate a combination product set from the given factors and combination size.
 
 `factors`, `count`, `equave`, `withUnity`
 
+### csgs
+Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
+#### Parameters:
+
+`generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
+
 ### cumprod
 Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.
 #### Parameters:
@@ -635,10 +647,10 @@ Obtain a copy of the current/given scale that uses the first interval as the imp
 `scale`
 
 ### gs
-Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
+Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.
 #### Parameters:
 
-`generators`, `ordinal`, `period`, `numPeriods`, `maxSize`
+`generators`, `size`, `period`, `numPeriods`
 
 ### harmonicsOf
 Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.

@@ -716,13 +716,10 @@ lcm.__doc__ =
   'Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.';
 lcm.__node__ = builtinNode(lcm);
 
-function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
-  if (scale.length < 1) {
-    return sonicBool(false);
+export function hasConstantStructure(monzos: TimeMonzo[]) {
+  if (monzos.length < 1) {
+    return false;
   }
-  const rl = relin.bind(this);
-  const monzos = scale.map(i => rl(i).value);
   const equave = monzos.pop()!;
   monzos.unshift(equave.pow(0));
   const subtensions: [TimeMonzo, number][] = [];
@@ -736,7 +733,7 @@ function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
       for (const [existing, subtension] of subtensions) {
         if (width.strictEquals(existing)) {
           if (subtension !== j) {
-            return sonicBool(false);
+            return false;
           }
           unique = false;
         }
@@ -746,11 +743,22 @@ function hasConstantStructure(this: ExpressionVisitor, scale?: Interval[]) {
       }
     }
   }
-  return sonicBool(true);
+  return true;
 }
-hasConstantStructure.__doc__ =
+
+function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.getCurrentScale();
+  const rl = relin.bind(this);
+  const monzos = scale.map(i => rl(i).value);
+  return sonicBool(hasConstantStructure(monzos));
+}
+Object.defineProperty(hasConstantStructure_, 'name', {
+  value: 'hasConstantStructure',
+  enumerable: false,
+});
+hasConstantStructure_.__doc__ =
   'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
-hasConstantStructure.__node__ = builtinNode(hasConstantStructure);
+hasConstantStructure_.__node__ = builtinNode(hasConstantStructure);
 
 function slice(
   array: string | Interval[],
@@ -1111,6 +1119,24 @@ arrayReduce.__doc__ =
   'Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.';
 arrayReduce.__node__ = builtinNode(arrayReduce);
 
+function arrayRepeat(
+  this: ExpressionVisitor,
+  count: Interval,
+  array?: any[] | string
+) {
+  const c = count.toInteger();
+  if (typeof array === 'string') {
+    return array.repeat(c);
+  }
+  if (c === 0) {
+    return [];
+  }
+  array ??= this.getCurrentScale();
+  return [].concat(...Array(c).fill(array));
+}
+arrayRepeat.__doc__ = 'Repeat the given/current array or string `count` times.';
+arrayRepeat.__node__ = builtinNode(arrayRepeat);
+
 function repr_(
   this: ExpressionVisitor,
   value: SonicWeaveValue | null,
@@ -1363,7 +1389,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   tenneyHeight,
   gcd,
   lcm,
-  hasConstantStructure,
+  hasConstantStructure: hasConstantStructure_,
   str,
   repr,
   slice,
@@ -1395,6 +1421,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   filter,
   distill,
   arrayReduce,
+  arrayRepeat,
   kCombinations,
   // CSS color generation
   rgb,
@@ -1768,7 +1795,23 @@ riff octaplex b0 b1 b2 b3 equave withUnity {
   sort();
 }
 
-riff gs generators ordinal period numPeriods maxSize {
+riff gs generators size period numPeriods {
+  "Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.";
+  period ??= 2;
+  numPeriods ??= 1;
+  size = round(size % numPeriods);
+  let i = 0;
+  while (--size > 0) {
+    generators[i++ mod length(generators)];
+  }
+  stack();
+  period;
+  reduce();
+  sort();
+  repeat(numPeriods);
+}
+
+riff csgs generators ordinal period numPeriods maxSize {
   "Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.";
   ordinal ??= 1;
   period ??= 2;
