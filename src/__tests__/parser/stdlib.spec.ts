@@ -321,10 +321,16 @@ describe('SonicWeave standard library', () => {
     );
   });
 
-  it('can combine vals to approach the JIP', () => {
+  it('can combine two vals to approach the JIP', () => {
     const thirtyOne = evaluateExpression('tune(12@5, 19@5)') as Interval;
     expect(thirtyOne.value.cents).toBe(0);
     expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
+  });
+
+  it('can combine three vals to approach the JIP', () => {
+    const fourtyOne = evaluateExpression('tune3(5@7, 17@7, 19@7)') as Interval;
+    expect(fourtyOne.value.cents).toBe(0);
+    expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
   });
 
   // Remember that unison (0.0 c) is implicit in SonicWeave

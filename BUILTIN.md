@@ -904,6 +904,12 @@ Find a combination of two vals that is closer to just intonation.
 
 `a`, `b`, `numIter`, `weighting`
 
+### tune3
+Find a combination of three vals that is closer to just intonation.
+#### Parameters:
+
+`a`, `b`, `c`, `numIter`, `weighting`
+
 ### u
 Obtain a undertonal reflection of the current/given overtonal scale.
 #### Parameters:

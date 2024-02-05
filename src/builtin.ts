@@ -1587,7 +1587,35 @@ riff tune a b numIter weighting {
     const y = a + b;
     const z = 2 * b - a;
 
-    [a b] = sorted([a, b, x, y, z], u v => cosJIP(v) - cosJIP(u));
+    [a b] = sorted([a, b, x, y, z], u v => cosJIP(v, weighting) - cosJIP(u, weighting));
+  }
+  return a;
+}
+
+riff tune3 a b c numIter weighting {
+  "Find a combination of three vals that is closer to just intonation.";
+  numIter ??= 1;
+  while (numIter--) {
+    const combos = [
+      a,
+      b,
+      c,
+      a + b,
+      a + c,
+      b + c,
+      2 * a - b,
+      2 * a - c,
+      2 * b - a,
+      2 * b - c,
+      2 * c - a,
+      2 * c - b,
+      a + b + c,
+      a + b - c,
+      a + c - b,
+      b + c - a,
+    ];
+
+    [a b c] = sorted(combos, u v => cosJIP(v, weighting) - cosJIP(u, weighting));
   }
   return a;
 }
