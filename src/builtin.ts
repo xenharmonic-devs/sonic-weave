@@ -720,11 +720,21 @@ export function hasConstantStructure(monzos: TimeMonzo[]) {
   if (monzos.length < 1) {
     return false;
   }
+  const numComponents = Math.max(...monzos.map(m => m.numberOfComponents));
+  monzos = monzos.map(m => m.clone());
   const equave = monzos.pop()!;
   monzos.unshift(equave.pow(0));
+  for (const monzo of monzos) {
+    monzo.numberOfComponents = numComponents;
+  }
   const subtensions: [TimeMonzo, number][] = [];
-  for (let i = 0; i < monzos.length; ++i) {
-    for (let j = 0; j < monzos.length; ++j) {
+  // Against 1/1
+  for (let i = 1; i < monzos.length; ++i) {
+    subtensions.push([monzos[i], i]);
+  }
+  // Against each other
+  for (let i = 1; i < monzos.length; ++i) {
+    for (let j = 1; j < monzos.length; ++j) {
       let width = monzos[mmod(i + j, monzos.length)].div(monzos[i]);
       if (i + j >= monzos.length) {
         width = width.mul(equave);
