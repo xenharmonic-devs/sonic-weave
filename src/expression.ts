@@ -1,4 +1,4 @@
-import {MetricPrefix} from './utils';
+import {MetricPrefix, validateBigInt} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
@@ -171,14 +171,6 @@ export type IntervalLiteral =
   | ValLiteral
   | SparseOffsetVal
   | WartsLiteral;
-
-const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
-
-function validateBigInt(n: bigint) {
-  if (n > ABSURD_INT || -n > ABSURD_INT) {
-    throw new Error('Integer overflow.');
-  }
-}
 
 export function validateNode(node?: IntervalLiteral) {
   if (!node) {

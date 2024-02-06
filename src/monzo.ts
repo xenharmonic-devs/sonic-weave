@@ -13,7 +13,7 @@ import {
   BIG_INT_PRIMES,
 } from 'xen-dev-utils';
 
-import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd} from './utils';
+import {NEGATIVE_ONE, ONE, TWO, ZERO, bigGcd, validateBigInt} from './utils';
 import {
   NedjiLiteral,
   FractionLiteral,
@@ -408,9 +408,13 @@ export class TimeMonzo {
       }
       const n = BigInt(component.n);
       if (component.s > 0) {
+        // XXX: This might cause memory problems with doubly absurd exponents.
+        // The validation is about preventing display blowup for now.
         numerator *= BIG_INT_PRIMES[i] ** n;
+        validateBigInt(numerator);
       } else if (component.s < 0) {
         denominator *= BIG_INT_PRIMES[i] ** n;
+        validateBigInt(denominator);
       }
     });
     return {numerator, denominator};
@@ -1437,7 +1441,12 @@ export class TimeMonzo {
         if (this.isIntegral()) {
           return this.toBigInteger().toString();
         } else if (this.isFractional()) {
-          return this.toFraction().toFraction();
+          try {
+            const {numerator, denominator} = this.toBigNumeratorDenominator();
+            return `${numerator}/${denominator}`;
+          } catch {
+            /* Fall through */
+          }
         } else if (this.isEqualTemperament()) {
           try {
             const {fractionOfEquave, equave} = this.toEqualTemperament();

@@ -369,4 +369,28 @@ describe('Extended Monzo', () => {
     const value = new TimeMonzo(new Fraction(0), [], new Fraction(7, 6));
     expect(value.tail(2).toString()).toBe('7');
   });
+
+  it('can be displayed as a fraction beyond safe limits', () => {
+    const generator = TimeMonzo.fromFraction('3/2');
+    const period = TimeMonzo.fromFraction('2/1');
+    let accumulator = TimeMonzo.fromFraction('1/1');
+    let n = 1n;
+    let d = 1n;
+    for (let i = 0; i < 50; ++i) {
+      accumulator = accumulator.mul(generator).reduce(period);
+      n *= 3n;
+      while (n > 2n * d) {
+        d *= 2n;
+      }
+      expect(accumulator.toString()).toBe(`${n}/${d}`);
+    }
+  });
+
+  it('can be displayed as a radical expression beyond absurd limits', () => {
+    const absurd = new TimeMonzo(new Fraction(0), [
+      new Fraction(-15849),
+      new Fraction(10000),
+    ]);
+    expect(absurd.toString()).toBe('2^-15849*3^10000');
+  });
 });

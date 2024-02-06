@@ -163,3 +163,11 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
     postfix,
   };
 }
+
+const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
+
+export function validateBigInt(n: bigint) {
+  if (n > ABSURD_INT || -n > ABSURD_INT) {
+    throw new Error('Integer overflow.');
+  }
+}
