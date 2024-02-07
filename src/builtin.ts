@@ -1857,6 +1857,7 @@ riff gs generators size period numPeriods {
   while (--size > 0) {
     generators[i++ mod length(generators)];
   }
+  simplify;
   stack();
   period;
   reduce();
@@ -1870,7 +1871,7 @@ riff csgs generators ordinal period numPeriods maxSize {
   period ??= 2;
   numPeriods ??= 1;
   maxSize ??= 100;
-  cumprod(generators);
+  cumprod(map(simplify, generators));
   let accumulator = $[-1];
   period;
   reduce();
