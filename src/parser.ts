@@ -792,7 +792,8 @@ function resolvePreference(
   value: TimeMonzo,
   left: Interval,
   right: Interval,
-  node: BinaryExpression
+  node: BinaryExpression,
+  simplify: boolean
 ) {
   if (node.preferLeft && node.preferRight) {
     let domain = left.domain;
@@ -801,7 +802,7 @@ function resolvePreference(
     }
     let resolvedNode: IntervalLiteral | undefined = undefined;
     if (typesCompatible(left.node, right.node)) {
-      resolvedNode = timeMonzoAs(value, left.node);
+      resolvedNode = timeMonzoAs(value, left.node, simplify);
     }
     return new Interval(value, domain, resolvedNode, infect(left, right));
   }
@@ -809,14 +810,14 @@ function resolvePreference(
     return new Interval(
       value,
       left.domain,
-      timeMonzoAs(value, left.node),
+      timeMonzoAs(value, left.node, simplify),
       left
     );
   }
   return new Interval(
     value,
     right.domain,
-    timeMonzoAs(value, right.node),
+    timeMonzoAs(value, right.node, simplify),
     right
   );
 }
@@ -1294,7 +1295,7 @@ export class ExpressionVisitor {
           const row: Interval[] = [];
           for (const r of right) {
             const value = l.value.mul(r.value);
-            row.push(resolvePreference(value, l, r, node));
+            row.push(resolvePreference(value, l, r, node, false));
           }
           result.push(row);
         }
@@ -1334,6 +1335,7 @@ export class ExpressionVisitor {
     if (left instanceof Interval && right instanceof Interval) {
       if (node.preferLeft || node.preferRight) {
         let value: TimeMonzo;
+        let simplify = false;
         switch (operator) {
           case '+':
             value = left.value.add(right.value);
@@ -1363,9 +1365,11 @@ export class ExpressionVisitor {
             break;
           case '^':
             value = left.value.pow(right.value);
+            simplify = true;
             break;
           case '/^':
             value = left.value.pow(right.value.inverse());
+            simplify = true;
             break;
           case 'mod':
             value = left.value.mmod(right.value);
@@ -1376,9 +1380,11 @@ export class ExpressionVisitor {
           case '·':
           case 'dot':
             value = left.dot(right).value;
+            simplify = true;
             break;
           case '/_':
             value = log(left, right);
+            simplify = true;
             break;
           case '\\':
             throw new Error('Preference not supported with backslahes');
@@ -1389,7 +1395,7 @@ export class ExpressionVisitor {
               } unimplemented`
             );
         }
-        return resolvePreference(value, left, right, node);
+        return resolvePreference(value, left, right, node, simplify);
       }
       switch (operator) {
         case '===':

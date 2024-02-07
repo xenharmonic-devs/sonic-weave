@@ -1371,10 +1371,32 @@ export class TimeMonzo {
     return undefined;
   }
 
-  asNedjiLiteral(node: NedjiLiteral): NedjiLiteral | undefined {
+  asNedjiLiteral(node?: NedjiLiteral): NedjiLiteral | undefined {
     if (this.isEqualTemperament()) {
       try {
         const {fractionOfEquave, equave} = this.toEqualTemperament();
+        // eslint-disable-next-line prefer-const
+        let {s, n, d} = fractionOfEquave;
+        n *= s;
+        if (!node) {
+          if (equave.compare(TWO)) {
+            return {
+              type: 'NedjiLiteral',
+              numerator: n,
+              denominator: d,
+              equaveNumerator: equave.s * equave.n,
+              equaveDenominator: equave.d,
+            };
+          } else {
+            return {
+              type: 'NedjiLiteral',
+              numerator: n,
+              denominator: d,
+              equaveNumerator: null,
+              equaveDenominator: null,
+            };
+          }
+        }
         if (node.equaveNumerator === null) {
           if (equave.compare(TWO)) {
             return undefined;
@@ -1385,17 +1407,17 @@ export class TimeMonzo {
         ) {
           return undefined;
         }
-        const denominator = lcm(fractionOfEquave.d, Number(node.denominator));
+        const denominator = lcm(d, Number(node.denominator));
         if (denominator === Number(node.denominator)) {
           return {
             ...node,
-            numerator: (denominator / fractionOfEquave.d) * fractionOfEquave.n,
+            numerator: (denominator / d) * n,
           };
         }
         return {
           ...node,
-          numerator: fractionOfEquave.n,
-          denominator: fractionOfEquave.d,
+          numerator: n,
+          denominator: d,
         };
       } catch {
         return undefined;

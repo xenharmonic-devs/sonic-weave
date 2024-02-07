@@ -753,4 +753,19 @@ describe('SonicWeave standard library', () => {
     `);
     expect(scale).toEqual(['(4/3 red "one")', '(5/3 "two")', '6/3']);
   });
+
+  it('generates Raga Kafi with everything simplified', () => {
+    const scale = parseSource(
+      'rank2(3/2 white, 2, 3)\npush(5/3 black, $, 4)\nrepr'
+    );
+    expect(scale).toEqual([
+      '(9/8 white)',
+      '(32/27 white)',
+      '(4/3 white)',
+      '(3/2 white)',
+      '(5/3 black)',
+      '(16/9 white)',
+      '(2/1 white)',
+    ]);
+  });
 });

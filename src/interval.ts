@@ -602,7 +602,8 @@ const ZOMBIE = new Interval(TWO, 'cologarithmic');
 
 export function timeMonzoAs(
   monzo: TimeMonzo,
-  node: IntervalLiteral | undefined
+  node: IntervalLiteral | undefined,
+  simplify = false
 ): IntervalLiteral | undefined {
   if (!node) {
     return undefined;
@@ -611,9 +612,9 @@ export function timeMonzoAs(
     case 'IntegerLiteral':
       return monzo.asIntegerLiteral();
     case 'FractionLiteral':
-      return monzo.asFractionLiteral(node);
+      return monzo.asFractionLiteral(simplify ? undefined : node);
     case 'NedjiLiteral':
-      return monzo.asNedjiLiteral(node);
+      return monzo.asNedjiLiteral(simplify ? undefined : node);
     case 'CentsLiteral':
       return monzo.asCentsLiteral();
     case 'MonzoLiteral':
