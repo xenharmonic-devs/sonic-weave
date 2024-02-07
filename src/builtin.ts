@@ -716,6 +716,49 @@ lcm.__doc__ =
   'Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.';
 lcm.__node__ = builtinNode(lcm);
 
+export type Subtender = {
+  monzo: TimeMonzo;
+  subtensions: Set<number>;
+};
+
+export function subtensions(monzos: TimeMonzo[]): Subtender[] {
+  if (monzos.length < 1) {
+    return [];
+  }
+  const numComponents = Math.max(...monzos.map(m => m.numberOfComponents));
+  monzos = monzos.map(m => m.clone());
+  const equave = monzos.pop()!;
+  monzos.unshift(equave.pow(0));
+  for (const monzo of monzos) {
+    monzo.numberOfComponents = numComponents;
+  }
+  const result: Subtender[] = [];
+  // Against 1/1
+  for (let i = 1; i < monzos.length; ++i) {
+    result.push({monzo: monzos[i], subtensions: new Set([i])});
+  }
+  // Against each other
+  for (let i = 1; i < monzos.length; ++i) {
+    for (let j = 1; j < monzos.length; ++j) {
+      let width = monzos[mmod(i + j, monzos.length)].div(monzos[i]);
+      if (i + j >= monzos.length) {
+        width = width.mul(equave);
+      }
+      let unique = true;
+      for (const subtender of result) {
+        if (width.strictEquals(subtender.monzo)) {
+          subtender.subtensions.add(j);
+          unique = false;
+        }
+      }
+      if (unique) {
+        result.push({monzo: width, subtensions: new Set([j])});
+      }
+    }
+  }
+  return result;
+}
+
 export function hasConstantStructure(monzos: TimeMonzo[]) {
   if (monzos.length < 1) {
     return false;
