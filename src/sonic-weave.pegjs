@@ -428,7 +428,7 @@ EnumeratedChord
   }
 
 AdditiveOperator
-  = $('+' / '-' / ToToken / ByToken)
+  = $('+' / '-' / ToToken / ByToken / '/+' / '⊕' / '/-' / '⊖')
 
 AdditiveExpression
   = head: MultiplicativeExpression tail: (NedjiProjector / AdditiveTail) {

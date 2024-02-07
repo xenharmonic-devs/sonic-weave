@@ -747,6 +747,31 @@ The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the diff
 | Second | `1s`    | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1` |
 | Jorp   | `€`     | Geometric inverse of `c` i.e. `€` is equal to `<1200]` |
 
+### Obscure operations
+| Name                      | Linear       | Result   | Logarithmic      | Result     |
+| ------------------------- | ------------ | -------- | ---------------- | ---------- |
+| Harmonic/lens addition    | `3 /+ 5`     | `15/8`   | _N/A_            |            |
+| Harmonic/lens addition    | `3 ⊕ 5`      | `15/8`   | _N/A_            |            |
+| Harmonic/lens subtraction | `3 /- 5`     | `15/2`   | _N/A_            |            |
+| Harmonic/lens subtraction | `3 ⊖ 5`      | `15/2`   | _N/A_            |            |
+| _N/A_                     | _N/A_        | _N/A_    | `P8 /+ P12`      | `1\2<6>`   |
+| _N/A_                     | _N/A_        | _N/A_    | `P12 /- P8`      | `1\2<3/2>` |
+
+The [thin lens equation](https://en.wikipedia.org/wiki/Thin_lens) f⁻¹ = u⁻¹ + v⁻¹ motivates the definition of *lens addition* f = u ⊕ v and the corresponding *lens subtraction* u = f ⊖ v.
+
+Although the real *raison d'être* is to complete the [Triangle of Power](https://www.youtube.com/watch?v=sULa9Lc4pck):
+| Equation                          | Name                         |
+| --------------------------------- | ---------------------------- |
+| `x ^ y = z`                       | Exponentiation               |
+| `z /^ y = x`                      | Recipropower                 |
+| `z /_ x = y`                      | Logdivision                  |
+| `a ^ x * a ^ y = a ^ (x + y)`     | Distribution of exponents    |
+| `(x * y) /_ a = x /_ a + y /_ a`  | Distribution of logdividends |
+| `x ^ a * y ^ a = (x * y) ^ a`     | Factoring of bases I         |
+| `x /^ a * y /^ a = (x * y) /^ a`  | Factoring of bases II        |
+| `a /_ (x * y) = a /_ x /+ a /_ y` | Lensing of logarithmands     |
+| `a /^ x * a /^ y = a /^ (x /+ y)` | Lensing of roots             |
+
 ## Future work
 The syntax could be extended to cover movement in time i.e. to become a full textual music notation vis-à-vis Xenpaper.
 

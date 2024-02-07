@@ -723,4 +723,24 @@ describe('SonicWeave expression evaluator', () => {
     ) as Interval[];
     expect(stuff.map(i => i.toString()).join(';')).toBe('1;2;3;1;2;3;1;2;3');
   });
+
+  it('has harmonic addition', () => {
+    const value = parseSingle('3/2 /+ 5/3');
+    expect(value.toString()).toBe('15/19');
+  });
+
+  it('has harmonic subtraction', () => {
+    const value = parseSingle('15/19 /- 5/3');
+    expect(value.toString()).toBe('3/2');
+  });
+
+  it('has something better left unnamed', () => {
+    const ghost = parseSingle('P5 /+ M3^5');
+    expect(ghost.toString()).toBe('1\\11<6075/512>');
+  });
+
+  it('has something even stranger', () => {
+    const third = parseSingle('1\\11<6075/512> /- P5');
+    expect(third.toString()).toBe('1\\1<5/4>');
+  });
 });

@@ -219,6 +219,8 @@ export function uniformInvertNode(
 // TODO: ipowNode
 // TODO: logNode
 // TODO: reduceNode
+// TODO: lensAddNodes
+// TODO: lensSubNodes
 
 function aspireNodes(
   a: IntervalLiteral,
