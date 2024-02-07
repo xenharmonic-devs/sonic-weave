@@ -768,4 +768,34 @@ describe('SonicWeave standard library', () => {
       '(2/1 white)',
     ]);
   });
+
+  it('generates 22 Shruti with the intended colors', () => {
+    const scale = parseSource(
+      "rank2(3/2 white, 4)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify\nrepr"
+    );
+    expect(scale).toEqual([
+      '(256/243 white)',
+      '(16/15 green)',
+      '(10/9 yellow)',
+      '(9/8 white)',
+      '(32/27 white)',
+      '(6/5 green)',
+      '(5/4 yellow)',
+      '(81/64 white)',
+      '(4/3 white)',
+      '(27/20 green)',
+      '(45/32 yellow)',
+      '(729/512 white)',
+      '(3/2 white)',
+      '(128/81 white)',
+      '(8/5 green)',
+      '(5/3 yellow)',
+      '(27/16 white)',
+      '(16/9 white)',
+      '(9/5 green)',
+      '(15/8 yellow)',
+      '(243/128 white)',
+      '(2 white)',
+    ]);
+  });
 });

@@ -2117,7 +2117,7 @@ riff mergeOffset offsets overflow scale {
   const equave = pop();
 
   unshift(equave ~^ 0);
-  const copies = $ ~tns offsets;
+  const copies = $ tns~ offsets;
   void(shift());
 
   if (overflow === 'drop') {
