@@ -694,7 +694,6 @@ export class TimeMonzo {
         this.toFraction().add(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-      result.timeExponent = this.timeExponent;
     } else {
       result = TimeMonzo.fromValue(this.valueOf() + other.valueOf());
     }
@@ -719,9 +718,68 @@ export class TimeMonzo {
         this.toFraction().sub(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-      result.timeExponent = this.timeExponent;
     } else {
       result = TimeMonzo.fromValue(this.valueOf() - other.valueOf());
+    }
+    result.timeExponent = this.timeExponent;
+    return result;
+  }
+
+  /**
+   * Perform harmonic addition according to the thin lens equation f⁻¹ = u⁻¹ + v⁻¹.
+   * @param other Another time monzo.
+   * @returns The reciprocal of the sum of the reciprocals.
+   */
+  lensAdd(other: TimeMonzo): TimeMonzo {
+    if (this.timeExponent.compare(other.timeExponent)) {
+      throw new Error(
+        `Cannot lens add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}`
+      );
+    }
+    let result: TimeMonzo;
+    if (this.isFractional() && other.isFractional()) {
+      result = TimeMonzo.fromFraction(
+        this.toFraction().lensAdd(other.toFraction()),
+        Math.max(this.numberOfComponents, other.numberOfComponents)
+      );
+    } else {
+      const t = this.valueOf();
+      if (t) {
+        const o = other.valueOf();
+        result = TimeMonzo.fromValue((t * o) / (t + o));
+      } else {
+        result = TimeMonzo.fromValue(0);
+      }
+    }
+    result.timeExponent = this.timeExponent;
+    return result;
+  }
+
+  /**
+   * Perform harmonic subtraction f⁻¹ = u⁻¹ - v⁻¹ (a variation of the thin lens equation).
+   * @param other Another time monzo.
+   * @returns The reciprocal of the difference of the reciprocals.
+   */
+  lensSub(other: TimeMonzo): TimeMonzo {
+    if (this.timeExponent.compare(other.timeExponent)) {
+      throw new Error(
+        `Cannot lens subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}`
+      );
+    }
+    let result: TimeMonzo;
+    if (this.isFractional() && other.isFractional()) {
+      result = TimeMonzo.fromFraction(
+        this.toFraction().lensSub(other.toFraction()),
+        Math.max(this.numberOfComponents, other.numberOfComponents)
+      );
+    } else {
+      const t = this.valueOf();
+      if (t) {
+        const o = other.valueOf();
+        result = TimeMonzo.fromValue((t * o) / (o - t));
+      } else {
+        result = TimeMonzo.fromValue(0);
+      }
     }
     result.timeExponent = this.timeExponent;
     return result;

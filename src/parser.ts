@@ -1386,6 +1386,14 @@ export class ExpressionVisitor {
             value = log(left, right);
             simplify = true;
             break;
+          case '/+':
+          case '⊕':
+            value = left.value.lensAdd(right.value);
+            break;
+          case '/-':
+          case '⊖':
+            value = left.value.lensSub(right.value);
+            break;
           case '\\':
             throw new Error('Preference not supported with backslahes');
           default:
@@ -1448,6 +1456,12 @@ export class ExpressionVisitor {
           return left.roundTo(right);
         case 'by':
           return left.pitchRoundTo(right);
+        case '/+':
+        case '⊕':
+          return left.lensAdd(right);
+        case '/-':
+        case '⊖':
+          return left.lensSub(right);
       }
       operator satisfies never;
     }

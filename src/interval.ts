@@ -201,6 +201,56 @@ export class Interval {
     return new Interval(this.value.div(other.value), this.domain, node, zombie);
   }
 
+  lensAdd(other: Interval) {
+    if (this.domain !== other.domain) {
+      throw new Error('Domains must match in harmonic addition');
+    }
+    const zombie = infect(this, other);
+    if (this.domain === 'linear') {
+      return new Interval(
+        this.value.lensAdd(other.value),
+        this.domain,
+        undefined,
+        zombie
+      );
+    }
+    // TODO: Special handling for unison.
+    return new Interval(
+      this.value
+        .geometricInverse()
+        .mul(other.value.geometricInverse())
+        .geometricInverse(),
+      this.domain,
+      undefined,
+      zombie
+    );
+  }
+
+  lensSub(other: Interval) {
+    if (this.domain !== other.domain) {
+      throw new Error('Domains must match in harmonic subtraction');
+    }
+    const zombie = infect(this, other);
+    if (this.domain === 'linear') {
+      return new Interval(
+        this.value.lensSub(other.value),
+        this.domain,
+        undefined,
+        zombie
+      );
+    }
+    // TODO: Special handling for unison.
+    return new Interval(
+      this.value
+        .geometricInverse()
+        .div(other.value.geometricInverse())
+        .geometricInverse(),
+      this.domain,
+      undefined,
+      zombie
+    );
+  }
+
   roundTo(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in rounding');
