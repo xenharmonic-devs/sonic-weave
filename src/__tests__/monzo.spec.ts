@@ -393,4 +393,25 @@ describe('Extended Monzo', () => {
     ]);
     expect(absurd.toString()).toBe('2^-15849*3^10000');
   });
+
+  it('survives repeated multiplication of higher primes', () => {
+    let trouble = TimeMonzo.fromFraction('113/110');
+    const cents = trouble.totalCents();
+    trouble = trouble.mul(trouble);
+    trouble = trouble.mul(trouble);
+    trouble = trouble.mul(trouble);
+    trouble = trouble.mul(trouble);
+    expect(trouble.totalCents()).toBeCloseTo(cents * 16);
+  });
+
+  it('survives repeated division by higher primes', () => {
+    let foo = TimeMonzo.fromFraction('3/2');
+    const originalCents = foo.totalCents();
+    const bar = TimeMonzo.fromFraction('103/101');
+    const stepCents = bar.totalCents();
+    for (let i = 0; i < 10; ++i) {
+      foo = foo.div(bar);
+    }
+    expect(foo.totalCents()).toBeCloseTo(originalCents - 10 * stepCents);
+  });
 });

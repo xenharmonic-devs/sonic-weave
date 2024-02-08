@@ -802,12 +802,22 @@ export class TimeMonzo {
     for (let i = 0; i < other.primeExponents.length; ++i) {
       vector.push(this.primeExponents[i].add(other.primeExponents[i]));
     }
-    const residual = this.residual.mul(other.residual);
+    let residual = new Fraction(1);
+    let cents = this.cents + other.cents;
+    try {
+      residual = this.residual.mul(other.residual);
+    } catch {
+      cents += valueToCents(
+        (this.residual.n * other.residual.n) /
+          (this.residual.d * other.residual.d)
+      );
+      residual.s = this.residual.s * other.residual.s;
+    }
     return new TimeMonzo(
       this.timeExponent.add(other.timeExponent),
       vector,
       residual,
-      this.cents + other.cents
+      cents
     );
   }
 
@@ -882,12 +892,22 @@ export class TimeMonzo {
     for (let i = 0; i < other.primeExponents.length; ++i) {
       vector.push(self.primeExponents[i].sub(other.primeExponents[i]));
     }
-    const residual = self.residual.div(other.residual);
+    let residual = new Fraction(1);
+    let cents = self.cents - other.cents;
+    try {
+      residual = self.residual.div(other.residual);
+    } catch {
+      cents += valueToCents(
+        (self.residual.n * other.residual.d) /
+          (self.residual.d * other.residual.n)
+      );
+      residual.s = self.residual.s * other.residual.s;
+    }
     return new TimeMonzo(
       self.timeExponent.sub(other.timeExponent),
       vector,
       residual,
-      self.cents - other.cents
+      cents
     );
   }
 
