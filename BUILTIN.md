@@ -187,6 +187,12 @@ HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alph
 
 `hue`, `saturation`, `lightness`, `alpha`
 
+### insert
+Insert an interval into the current/given scale keeping it sorted.
+#### Parameters:
+
+`interval`, `scale`
+
 ### int
 Truncate value towards zero to the nearest integer.
 #### Parameters:

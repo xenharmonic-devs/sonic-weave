@@ -756,7 +756,7 @@ describe('SonicWeave standard library', () => {
 
   it('generates Raga Kafi with everything simplified', () => {
     const scale = parseSource(
-      'rank2(3/2 white, 2, 3)\npush(5/3 black, $, 4)\nrepr'
+      'rank2(3/2 white, 2, 3)\ninsert(5/3 black)\nrepr'
     );
     expect(scale).toEqual([
       '(9/8 white)',

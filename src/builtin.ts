@@ -1048,6 +1048,25 @@ unshift.__doc__ =
   'Prepend an interval at the beginning of the current/given scale.';
 unshift.__node__ = builtinNode(unshift);
 
+function insert(
+  this: ExpressionVisitor,
+  interval: Interval,
+  scale?: Interval[]
+) {
+  scale ??= this.getCurrentScale();
+  const cmp = compare.bind(this);
+  for (let i = 0; i < scale.length; ++i) {
+    if (cmp(interval, scale[i]) < 0) {
+      scale.splice(i, 0, interval);
+      return;
+    }
+  }
+  scale.push(interval);
+}
+insert.__doc__ =
+  'Insert an interval into the current/given scale keeping it sorted.';
+insert.__node__ = builtinNode(insert);
+
 function extend(
   this: ExpressionVisitor,
   first: Interval[],
@@ -1462,6 +1481,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   push,
   shift,
   unshift,
+  insert,
   extend,
   concat,
   length,

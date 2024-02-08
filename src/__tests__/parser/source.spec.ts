@@ -798,4 +798,17 @@ describe('SonicWeave parser', () => {
     expect(scale[3].totalCents()).toBeCloseTo(1200);
     expect(scale[4].totalCents()).toBeCloseTo(7989.853779302155);
   });
+
+  it('can insert intervals into a sorted scale', () => {
+    const scale = parseSource('28/27;16/15;4/3;14/9;8/5;2/1;insert(3/2);str');
+    expect(scale).toEqual([
+      '28/27',
+      '16/15',
+      '4/3',
+      '3/2',
+      '14/9',
+      '8/5',
+      '2/1',
+    ]);
+  });
 });
