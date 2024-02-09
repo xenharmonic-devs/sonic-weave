@@ -777,4 +777,14 @@ describe('SonicWeave expression evaluator', () => {
       '5/5',
     ]);
   });
+
+  it('produces cents from addition', () => {
+    const nineHundred = parseSingle('894.9 + 5.1');
+    expect(nineHundred.toString()).toBe('900.');
+  });
+
+  it('produces cents from subtraction', () => {
+    const nineHundred = parseSingle('905.1 - 5.1');
+    expect(nineHundred.toString()).toBe('900.');
+  });
 });

@@ -171,34 +171,32 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in addition');
     }
-    const node = addNodes(this.node, other.node);
-    const zombie = infect(this, other);
-    if (this.domain === 'linear') {
-      return new Interval(
-        this.value.add(other.value),
-        this.domain,
-        node,
-        zombie
-      );
+    let node = addNodes(this.node, other.node);
+    const value =
+      this.domain === 'linear'
+        ? this.value.add(other.value)
+        : this.value.mul(other.value);
+    if (!node && this.node?.type === other.node?.type) {
+      node = timeMonzoAs(value, this.node, true);
     }
-    return new Interval(this.value.mul(other.value), this.domain, node, zombie);
+    const zombie = infect(this, other);
+    return new Interval(value, this.domain, node, zombie);
   }
 
   sub(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in subtraction');
     }
-    const node = subNodes(this.node, other.node);
-    const zombie = infect(this, other);
-    if (this.domain === 'linear') {
-      return new Interval(
-        this.value.sub(other.value),
-        this.domain,
-        node,
-        zombie
-      );
+    let node = subNodes(this.node, other.node);
+    const value =
+      this.domain === 'linear'
+        ? this.value.sub(other.value)
+        : this.value.div(other.value);
+    if (!node && this.node?.type === other.node?.type) {
+      node = timeMonzoAs(value, this.node, true);
     }
-    return new Interval(this.value.div(other.value), this.domain, node, zombie);
+    const zombie = infect(this, other);
+    return new Interval(value, this.domain, node, zombie);
   }
 
   lensAdd(other: Interval) {
