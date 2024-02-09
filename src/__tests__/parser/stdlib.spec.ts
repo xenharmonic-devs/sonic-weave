@@ -798,4 +798,27 @@ describe('SonicWeave standard library', () => {
       '(2 white)',
     ]);
   });
+
+  it('has inline labeling', () => {
+    const pythagoras = parseSource(`
+      labeled(['F', 'C', 'G', 'D', 'A', 'E', 'B'], [3^i rdc 2 white for i of [-2..4]])
+      labeled(['Gb', 'Db', 'Ab', 'Eb', 'Bb'], [3^i rdc 2 black for i of [-7..-3]])
+      sort()
+      repr
+    `);
+    expect(pythagoras).toEqual([
+      '(256/243 black "Ab")',
+      '(9/8 white "A")',
+      '(32/27 black "Bb")',
+      '(81/64 white "B")',
+      '(4/3 white "C")',
+      '(1024/729 black "Db")',
+      '(3/2 white "D")',
+      '(128/81 black "Eb")',
+      '(27/16 white "E")',
+      '(16/9 white "F")',
+      '(4096/2187 black "Gb")',
+      '(2 white "G")',
+    ]);
+  });
 });

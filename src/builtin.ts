@@ -1672,6 +1672,15 @@ riff label labels scale {
     scale[i] = scale[i] labels[i];
 }
 
+riff labeled labels scale {
+  "Apply labels (or colors) from the first array to a copy of the current/given scale.";
+  scale ??= $$;
+  for (const [i l] of zip(scale, labels)) {
+    i l;
+  }
+  scale[length(labels)..];
+}
+
 riff enumerate array {
   "Produce an array of [index, element] pairs from the given current/given array.";
   array ??= $$;

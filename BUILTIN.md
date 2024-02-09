@@ -682,6 +682,12 @@ Apply labels (or colors) from the first array to the current/given scale.
 
 `labels`, `scale`
 
+### labeled
+Apply labels (or colors) from the first array to a copy of the current/given scale.
+#### Parameters:
+
+`labels`, `scale`
+
 ### labelsOf
 Obtain an array of labels of the current/given scale.
 #### Parameters:
