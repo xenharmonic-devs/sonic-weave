@@ -821,4 +821,11 @@ describe('SonicWeave standard library', () => {
       '(2 white "G")',
     ]);
   });
+
+  it('merges offsets without duplicating', () => {
+    const scale = parseSource(
+      '4/3;3/2;2/1;mergeOffset(3/2, "wrap");simplify;str'
+    );
+    expect(scale).toEqual(['9/8', '4/3', '3/2', '2']);
+  });
 });
