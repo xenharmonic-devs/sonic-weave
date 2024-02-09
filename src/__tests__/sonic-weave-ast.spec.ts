@@ -626,6 +626,59 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   it('rejects numeric labels', () => {
     expect(() => parseSingle('1 2')).toThrow();
   });
+
+  it('accepts array comprehensions spanning multiple rows', () => {
+    const ast = parseSingle(`
+      [
+        foo bar
+          for
+            foo of baz
+          for
+            bar of qux
+      ]
+    `);
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArrayComprehension',
+        expression: {
+          type: 'LabeledExpression',
+          object: {type: 'Identifier', id: 'foo'},
+          labels: [{type: 'Identifier', id: 'bar'}],
+        },
+        comprehensions: [
+          {
+            element: {type: 'Identifier', id: 'foo'},
+            array: {type: 'Identifier', id: 'baz'},
+          },
+          {
+            element: {type: 'Identifier', id: 'bar'},
+            array: {type: 'Identifier', id: 'qux'},
+          },
+        ],
+      },
+    });
+  });
+
+  it('accepts ranges spanning multiple rows', () => {
+    const ast = parseSingle('[\n1\n..\n10\n]');
+    expect(ast.expression.type).toBe('Range');
+  });
+
+  it('accepts step ranges spanning multiple rows', () => {
+    const ast = parseSingle('[\n2\n,\n4\n..\n10\n]');
+    expect(ast.expression.type).toBe('Range');
+  });
+
+  it('accepts array access spanning multiple rows', () => {
+    const ast = parseSingle('foo[\nbar\n]');
+    expect(ast.expression.type).toBe('ArrayAccess');
+  });
+
+  it('accepts array slice spanning multiple rows', () => {
+    const ast = parseSingle('foo[\n1\n..\n10\n]');
+    expect(ast.expression.type).toBe('ArraySlice');
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

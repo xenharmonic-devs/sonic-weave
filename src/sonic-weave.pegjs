@@ -571,10 +571,10 @@ CallExpression
     __ '(' _ args: ArgumentList _ ')' {
       return { type: 'CallExpression', args };
     }
-    / __ '[' index: Expression ']' {
+    / __ '[' _ index: Expression _ ']' {
       return { type: 'ArrayAccess', index };
     }
-    / __ '[' start: Expression? second: (',' @Expression)? '..' end: Expression? ']' {
+    / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ '..' _ end: Expression? _ ']' {
       return { type: 'ArraySlice', start, second, end };
     }
   )* {
@@ -586,7 +586,7 @@ CallExpression
   }
 
 ArrayAccess
-  = head: ArraySlice tail: (__ @('~'?) '[' @Expression ']')* {
+  = head: ArraySlice tail: (__ @('~'?) '[' _ @Expression _ ']')* {
     return tail.reduce( (object, [nullish, index]) => {
       return {
         type: 'ArrayAccess',
@@ -598,7 +598,7 @@ ArrayAccess
   }
 
 TrueArrayAccess
-  = head: Primary tail: (__ '[' @Expression ']')+ {
+  = head: Primary tail: (__ '[' _ @Expression _ ']')+ {
     return tail.reduce( (object, index) => {
       return {
         type: 'ArrayAccess',
@@ -610,7 +610,7 @@ TrueArrayAccess
   }
 
 ArraySlice
-  = head: Primary tail: (_ '[' @Expression? @(',' @Expression)? '..' @Expression? ']')* {
+  = head: Primary tail: (_ '[' _ @Expression? @(_ ',' _ @Expression)? _ '..' _ @Expression? _ ']')* {
     return tail.reduce( (object, [start, second, end]) => {
       return { type: 'ArraySlice', object, start, second, end };
     }, head);
@@ -671,7 +671,7 @@ Primary
   / StringLiteral
 
 UnitStepRange
-  = '[' start: Expression '..' end: Expression ']' {
+  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,
@@ -680,7 +680,7 @@ UnitStepRange
   }
 
 StepRange
-  = '[' start: Expression ',' second: Expression '..' end: Expression ']' {
+  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,
@@ -692,7 +692,7 @@ StepRange
 Range = StepRange / UnitStepRange
 
 Comprehension
-  = ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression {
+  = _ ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ {
     return {
       element,
       array,
@@ -700,7 +700,7 @@ Comprehension
   }
 
 ArrayComprehension
-  = '[' expression: Expression comprehensions: Comprehension+ ']' {
+  = '[' _ expression: Expression comprehensions: Comprehension+ _ ']' {
     return  {
       type: 'ArrayComprehension',
       expression,
