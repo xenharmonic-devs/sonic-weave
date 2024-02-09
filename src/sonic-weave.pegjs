@@ -691,13 +691,20 @@ StepRange
 
 Range = StepRange / UnitStepRange
 
+Comprehension
+  = ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression {
+    return {
+      element,
+      array,
+    };
+  }
+
 ArrayComprehension
-  = '[' expression: Expression ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression ']' {
+  = '[' expression: Expression comprehensions: Comprehension+ ']' {
     return  {
       type: 'ArrayComprehension',
       expression,
-      element,
-      array,
+      comprehensions,
     };
   }
 

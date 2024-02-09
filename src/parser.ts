@@ -927,36 +927,53 @@ export class ExpressionVisitor {
   }
 
   visitArrayComprehension(node: ArrayComprehension) {
-    const array = this.visit(node.array);
-    if (!Array.isArray(array)) {
-      throw new Error('Can only iterate over arrays.');
-    }
     const result: Interval[] = [];
+
+    function comprehend(
+      this: ExpressionVisitor,
+      localVisitor: StatementVisitor,
+      index: number
+    ) {
+      if (index >= node.comprehensions.length) {
+        const localSubvisitor = localVisitor.createExpressionVisitor();
+        result.push(localSubvisitor.visit(node.expression) as Interval);
+        return;
+      }
+      const comprehension = node.comprehensions[index];
+      const array = this.visit(comprehension.array);
+      if (!Array.isArray(array)) {
+        throw new Error('Can only iterate over arrays.');
+      }
+      const element = comprehension.element;
+      for (const value of array) {
+        if (element.type === 'Parameters') {
+          if (!Array.isArray(value)) {
+            throw new Error('Must iterate over arrays when destructuring.');
+          }
+          for (let i = 0; i < element.identifiers.length; ++i) {
+            const name = element.identifiers[i].id;
+            localVisitor.mutables.set(name, value[i]);
+          }
+          if (element.rest) {
+            const name = element.rest.id;
+            localVisitor.mutables.set(
+              name,
+              value.slice(element.identifiers.length)
+            );
+          }
+        } else {
+          const name = element.id;
+          localVisitor.mutables.set(name, value);
+        }
+        comprehend.bind(this)(localVisitor, index + 1);
+      }
+    }
+
     const localVisitor = new StatementVisitor(this.rootContext, this.parent);
     localVisitor.mutables.delete('$'); // Collapse scope
-    const localSubvisitor = localVisitor.createExpressionVisitor();
-    for (const value of array) {
-      if (node.element.type === 'Parameters') {
-        if (!Array.isArray(value)) {
-          throw new Error('Must iterate over arrays when destructuring.');
-        }
-        for (let i = 0; i < node.element.identifiers.length; ++i) {
-          const name = node.element.identifiers[i].id;
-          localVisitor.mutables.set(name, value[i]);
-        }
-        if (node.element.rest) {
-          const name = node.element.rest.id;
-          this.parent.mutables.set(
-            name,
-            value.slice(node.element.identifiers.length)
-          );
-        }
-      } else {
-        const name = node.element.id;
-        localVisitor.mutables.set(name, value);
-      }
-      result.push(localSubvisitor.visit(node.expression) as Interval);
-    }
+
+    comprehend.bind(this)(localVisitor, 0);
+
     return result;
   }
 

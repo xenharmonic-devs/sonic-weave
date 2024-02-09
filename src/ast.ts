@@ -265,11 +265,15 @@ export type Range = {
   end: Expression;
 };
 
+export type Comprehension = {
+  element: Identifier | Parameters;
+  array: Expression;
+};
+
 export type ArrayComprehension = {
   type: 'ArrayComprehension';
   expression: Expression;
-  element: Identifier | Parameters;
-  array: Expression;
+  comprehensions: Comprehension[];
 };
 
 export type ArrayLiteral = {
