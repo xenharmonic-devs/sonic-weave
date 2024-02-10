@@ -905,16 +905,16 @@ Obtain a copy of the current/given scale quantized to subharmonics of the given 
 `overtone`, `scale`
 
 ### subset
-Only keep the given indices (scale degrees) of the current/given scale.
+Only keep the given degrees of the current/given scale. Omitting the zero degree rotates the scale.
 #### Parameters:
 
-`indices`, `scale`
+`degrees`, `scale`
 
 ### subsetOf
-Obtain a copy of the current/given scale with only the given indices kept.
+Obtain a copy of the current/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.
 #### Parameters:
 
-`indices`, `scale`
+`degrees`, `scale`
 
 ### sum
 Calculate the (linear) sum of the terms or the current scale.

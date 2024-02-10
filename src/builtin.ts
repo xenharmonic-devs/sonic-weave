@@ -2080,15 +2080,23 @@ riff elevated scale {
   elevate();
 }
 
-riff subset indices scale {
-  "Only keep the given indices (scale degrees) of the current/given scale.";
-  scale ??= $$;
-  distill(_ i => i of indices, scale);
+riff subsetOf degrees scale {
+  "Obtain a copy of the current/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.";
+  scale = (scale ?? $$)[..];
+  const equave = pop(scale);
+  unshift(equave ~^ 0, scale);
+  filter(_ i => i of degrees, scale);
+  ground();
+  equave;
 }
 
-riff subsetOf indices scale {
-  "Obtain a copy of the current/given scale with only the given indices kept.";
-  filter(_ i => i of indices, scale ?? $$);
+riff subset degrees scale {
+  "Only keep the given degrees of the current/given scale. Omitting the zero degree rotates the scale.";
+  $ = scale ?? $$;
+  const result = subsetOf(degrees);
+  clear();
+  result;
+  return;
 }
 
 riff toHarmonics fundamental scale {

@@ -125,19 +125,24 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can take edo subsets', () => {
-    const scale = parseSource('ed(7);subset([0, 1, 6]);');
+    const scale = parseSource('ed(7);subset([0, 1, 2]);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('1\\7;2\\7;7\\7');
   });
 
   it('can take relative edo subsets', () => {
-    const scale = parseSource(
-      'ed(12);subset(cumsum([2 - 1, 2, 1, 2, 2, 2, 1]));'
-    );
+    const scale = parseSource('ed(12);subset(cumsum([0, 2, 2, 1, 2, 2, 2]));');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'
     );
+  });
+
+  it('can take out the unison rotating the result', () => {
+    const scale = parseSource(
+      '3\\100;10\\100;75\\100;100\\100;subset([1, 2]);str'
+    );
+    expect(scale).toEqual(['7\\100', '100\\100']);
   });
 
   it('reduces scales by their equave', () => {
