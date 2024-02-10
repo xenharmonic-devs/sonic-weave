@@ -64,7 +64,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates rank-2 scales', () => {
-    const scale = parseSource('rank2(707.048, 2, 2, 600.0, 2);');
+    const scale = parseSource('rank2(707.048, 4, 4, 600.0, 2);');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '107.048;214.096;385.904;492.952;600.;707.048;814.096;985.904;1092.952;1200.'
@@ -107,6 +107,16 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '9/8;5/4;45/32;3/2;15/8;2'
     );
+  });
+
+  it('generates Euler-Fokker genera with colors', () => {
+    const scale = parseSource('eulerGenus(15 white, 1, 2 gray);repr');
+    expect(scale).toEqual([
+      '(5/4 white)',
+      '(3/2 white)',
+      '(15/8 white)',
+      '(2 gray)',
+    ]);
   });
 
   it('generates the Easter egg', () => {
@@ -765,13 +775,13 @@ describe('SonicWeave standard library', () => {
       '(3/2 white)',
       '(5/3 black)',
       '(16/9 white)',
-      '(2/1 white)',
+      '2',
     ]);
   });
 
   it('generates 22 Shruti with the intended colors', () => {
     const scale = parseSource(
-      "rank2(3/2 white, 4)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify\nrepr"
+      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify\nrepr"
     );
     expect(scale).toEqual([
       '(256/243 white)',
@@ -795,7 +805,7 @@ describe('SonicWeave standard library', () => {
       '(9/5 green)',
       '(15/8 yellow)',
       '(243/128 white)',
-      '(2 white)',
+      '(2 gray)',
     ]);
   });
 
