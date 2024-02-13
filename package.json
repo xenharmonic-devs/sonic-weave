@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils",
-    "moment-of-symmetry": "github:xenharmonic-devs/moment-of-symmetry#home-mode"
+    "moment-of-symmetry": "github:xenharmonic-devs/moment-of-symmetry"
   },
   "engines": {
     "node": ">=10.6.0"
