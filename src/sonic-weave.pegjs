@@ -816,22 +816,24 @@ VectorComponents
   = VectorComponent|.., _ ','? _|
 
 MonzoLiteral
-  = downs: 'v'* '[' _ components: VectorComponents _ '>' {
+  = downs: 'v'* '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
     return {
       type: 'MonzoLiteral',
       components,
       ups: -downs.length,
       lifts: 0,
+      basis: basis ?? [],
     };
   }
 
 ValLiteral
-  = downs: 'v'* '<' _ components: VectorComponents _ ']' {
+  = downs: 'v'* '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
     return {
       type: 'ValLiteral',
       components,
       ups: -downs.length,
       lifts: 0,
+      basis: basis ?? [],
     };
   }
 

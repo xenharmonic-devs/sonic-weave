@@ -140,6 +140,7 @@ export type MonzoLiteral = {
   components: VectorComponent[];
   ups: number;
   lifts: number;
+  basis: string[];
 };
 
 export type ValLiteral = {
@@ -147,6 +148,7 @@ export type ValLiteral = {
   components: VectorComponent[];
   ups: number;
   lifts: number;
+  basis: string[];
 };
 
 export type IntervalLiteral =
@@ -521,6 +523,22 @@ function formatSparseOffsetVal(literal: SparseOffsetVal) {
   return result + '@' + literal.basis.join('.');
 }
 
+function formatMonzo(literal: MonzoLiteral) {
+  let result = `${formatUps(literal)}[${formatComponents(literal.components)}>`;
+  if (literal.basis.length) {
+    result += `@${literal.basis.join('.')}`;
+  }
+  return result;
+}
+
+function formatVal(literal: ValLiteral) {
+  let result = `${formatUps(literal)}<${formatComponents(literal.components)}]`;
+  if (literal.basis.length) {
+    result += `@${literal.basis.join('.')}`;
+  }
+  return result;
+}
+
 export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedjiLiteral':
@@ -558,9 +576,9 @@ export function literalToString(literal: IntervalLiteral) {
     case 'SecondLiteral':
       return `${literal.prefix}s`;
     case 'MonzoLiteral':
-      return `${formatUps(literal)}[${formatComponents(literal.components)}>`;
+      return formatMonzo(literal);
     case 'ValLiteral':
-      return `${formatUps(literal)}<${formatComponents(literal.components)}]`;
+      return formatVal(literal);
     case 'IntegerLiteral':
       return literal.value.toString();
     default:

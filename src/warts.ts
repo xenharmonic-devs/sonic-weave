@@ -63,7 +63,10 @@ function patentVal(divisions: number, subgroup: Fraction[]) {
   return scaledLogs.map(Math.round);
 }
 
-function valToTimeMonzo(val: number[], subgroup: Fraction[]) {
+export function valToTimeMonzo(
+  val: (number | Fraction)[],
+  subgroup: Fraction[]
+) {
   let numberOfComponents = 0;
   for (const basis of subgroup) {
     numberOfComponents = Math.max(primeLimit(basis, true), numberOfComponents);

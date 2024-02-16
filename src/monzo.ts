@@ -1527,7 +1527,7 @@ export class TimeMonzo {
     while (components.length && components[components.length - 1].left === 0) {
       components.pop();
     }
-    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0};
+    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis: []};
   }
 
   /**

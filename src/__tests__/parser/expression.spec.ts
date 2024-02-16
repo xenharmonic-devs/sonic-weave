@@ -1,6 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {evaluateExpression} from '../../parser';
 import {Color, Interval} from '../../interval';
+import {TimeMonzo} from '../../monzo';
 
 function parseSingle(source: string) {
   const value = evaluateExpression(source, false);
@@ -786,5 +787,27 @@ describe('SonicWeave expression evaluator', () => {
   it('produces cents from subtraction', () => {
     const nineHundred = parseSingle('905.1 - 5.1');
     expect(nineHundred.toString()).toBe('900.');
+  });
+
+  it('has explicit subgroups for monzos', () => {
+    const semifourth = parseSingle('[0, 1, -1>@2.3.13/5');
+    expect(semifourth.toString()).toBe('[0 1 -1>@2.3.13/5');
+    expect(semifourth.value.toFraction().toFraction()).toBe('15/13');
+  });
+
+  it('has explicit subgroups for vals', () => {
+    const fiveGPV = parseSingle('<5, 8, 7]@2.3.13/5');
+    expect(fiveGPV.toString()).toBe('<5 8 7]@2.3.13/5');
+    expect(fiveGPV.value.primeExponents.map(pe => pe.toFraction())).toEqual([
+      '5',
+      '8',
+      '-7/2',
+      '0',
+      '0',
+      '7/2',
+    ]);
+    expect(
+      fiveGPV.value.dot(TimeMonzo.fromFraction('15/13')).toFraction()
+    ).toBe('1');
   });
 });

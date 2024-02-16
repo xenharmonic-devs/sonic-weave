@@ -38,7 +38,13 @@ import {
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
-import {inferEquave, sparseOffsetToVal, wartsToVal} from './warts';
+import {
+  inferEquave,
+  parseSubgroup,
+  sparseOffsetToVal,
+  valToTimeMonzo,
+  wartsToVal,
+} from './warts';
 import {RootContext} from './context';
 import {
   Argument,
@@ -1046,8 +1052,21 @@ export class ExpressionVisitor {
   }
 
   visitMonzoLiteral(node: MonzoLiteral) {
-    const primeExponents = node.components.map(this.visitComponent);
-    const value = this.up(new TimeMonzo(ZERO, primeExponents), node);
+    const exponents = node.components.map(this.visitComponent);
+    let value: TimeMonzo;
+    if (node.basis.length) {
+      const basis = parseSubgroup(node.basis)[0];
+      if (exponents.length > basis.length) {
+        throw new Error('Too many monzo components for given subgroup.');
+      }
+      value = new TimeMonzo(ZERO, []);
+      for (let i = 0; i < exponents.length; ++i) {
+        value = value.mul(TimeMonzo.fromFraction(basis[i]).pow(exponents[i]));
+      }
+    } else {
+      value = new TimeMonzo(ZERO, exponents);
+    }
+    value = this.up(value, node);
     const result = new Interval(value, 'logarithmic', node);
     if (node.ups) {
       this.rootContext.fragiles.push(result);
@@ -1056,8 +1075,18 @@ export class ExpressionVisitor {
   }
 
   visitValLiteral(node: ValLiteral) {
-    const primeExponents = node.components.map(this.visitComponent);
-    const value = this.up(new TimeMonzo(ZERO, primeExponents), node);
+    const val = node.components.map(this.visitComponent);
+    let value: TimeMonzo;
+    if (node.basis.length) {
+      const basis = parseSubgroup(node.basis)[0];
+      if (val.length !== basis.length) {
+        throw new Error('Val components must be given for the whole subgroup.');
+      }
+      value = valToTimeMonzo(val, basis);
+    } else {
+      value = new TimeMonzo(ZERO, val);
+    }
+    value = this.up(value, node);
     const result = new Interval(value, 'cologarithmic', node);
     if (node.ups) {
       this.rootContext.fragiles.push(result);
