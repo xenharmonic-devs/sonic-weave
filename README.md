@@ -383,6 +383,20 @@ results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 ```
 results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
 
+### Vector operations
+Operators operate componentwise on arrays e.g.
+```javascript
+[1, 2, 3] + [10, 20, 300]
+```
+results in `$ = [11, 22, 303]`.
+
+### Array broadcasting
+Non-array operands operate on each component of an array e.g.
+```javascript
+[2, 4, 7, 9, 12] \ 12
+```
+results in `$ = [2\12, 4\12, 7\12, 9\12, 12\12]`.
+
 ## If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
 ```javascript

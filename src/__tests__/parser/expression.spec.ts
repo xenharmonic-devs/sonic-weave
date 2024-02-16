@@ -848,4 +848,33 @@ describe('SonicWeave expression evaluator', () => {
   it('crashes with zero enumeration', () => {
     expect(() => evaluateExpression('0:1:2:3', false)).toThrow();
   });
+
+  it('has vector negation', () => {
+    const vec = evaluateExpression('-[1, -2, 3]', false) as Interval[];
+    expect(vec.map(i => i.toString())).toEqual(['-1', '2', '-3']);
+  });
+
+  it('has vector addition', () => {
+    const vec = evaluateExpression(
+      '[1, 2, 3] + [10, 20, 300]',
+      false
+    ) as Interval[];
+    expect(vec.map(i => i.toString())).toEqual(['11', '22', '303']);
+  });
+
+  it('has quick(ish) edo subset', () => {
+    const ionian = evaluateExpression(
+      '[2, 4, 5, 7, 9, 11, 12] \\ 12',
+      false
+    ) as Interval[];
+    expect(ionian.map(i => i.toString())).toEqual([
+      '2\\12',
+      '4\\12',
+      '5\\12',
+      '7\\12',
+      '9\\12',
+      '11\\12',
+      '12\\12',
+    ]);
+  });
 });

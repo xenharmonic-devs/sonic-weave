@@ -1254,13 +1254,13 @@ export class ExpressionVisitor {
     throw new Error('Slice step must not be zero');
   }
 
-  visitUnaryExpression(node: UnaryExpression): Interval {
-    const operand = this.visit(node.operand);
-    if (node.operator === 'not') {
-      return sonicBool(!sonicTruth(operand));
-    }
-    if (!(operand instanceof Interval)) {
-      throw new Error(`${node.operator} can only operate on intervals`);
+  unaryOperate(
+    operand: Interval | Interval[],
+    node: UnaryExpression
+  ): Interval | Interval[] {
+    if (Array.isArray(operand)) {
+      const op = this.unaryOperate.bind(this);
+      return operand.map(o => op(o, node)) as Interval[];
     }
     if (node.uniform) {
       let value: TimeMonzo;
@@ -1280,7 +1280,7 @@ export class ExpressionVisitor {
       }
       return new Interval(value, operand.domain, newNode, operand);
     }
-    let newValue: Interval;
+    let newValue: Interval | undefined;
     switch (node.operator) {
       case '+':
         return operand;
@@ -1303,7 +1303,11 @@ export class ExpressionVisitor {
         break;
     }
     if (node.operand.type !== 'Identifier') {
-      throw new Error('Cannot increment/decrement a value');
+      throw new Error('Cannot increment/decrement a value.');
+    }
+    if (!newValue) {
+      // TypeScript plz...
+      throw new Error('Unexpected increment/decrement.');
     }
     const name = node.operand.id;
     this.parent.set(name, newValue);
@@ -1311,6 +1315,17 @@ export class ExpressionVisitor {
       return newValue;
     }
     return operand;
+  }
+
+  visitUnaryExpression(node: UnaryExpression) {
+    const operand = this.visit(node.operand);
+    if (node.operator === 'not') {
+      return sonicBool(!sonicTruth(operand));
+    }
+    if (!(operand instanceof Interval || Array.isArray(operand))) {
+      throw new Error(`${node.operator} can only operate on intervals`);
+    }
+    return this.unaryOperate(operand, node);
   }
 
   tensor(
@@ -1332,6 +1347,167 @@ export class ExpressionVisitor {
     }
     const tns = this.tensor.bind(this);
     return left.map(l => tns(l, right, node)) as Interval[];
+  }
+
+  binaryOperate(
+    left: Interval | Interval[],
+    right: Interval | Interval[],
+    node: BinaryExpression
+  ): Interval | Interval[] {
+    const operator = node.operator;
+    if (left instanceof Interval) {
+      if (right instanceof Interval) {
+        if (node.preferLeft || node.preferRight) {
+          let value: TimeMonzo;
+          let simplify = false;
+          switch (operator) {
+            case '+':
+              value = left.value.add(right.value);
+              break;
+            case '-':
+              value = left.value.sub(right.value);
+              break;
+            case 'to':
+              value = left.value.roundTo(right.value);
+              break;
+            case 'by':
+              value = left.value.pitchRoundTo(right.value);
+              break;
+            case '×':
+            case '*':
+              value = left.value.mul(right.value);
+              break;
+            case '÷':
+            case '%':
+              value = left.value.div(right.value);
+              break;
+            case 'rd':
+              value = left.value.reduce(right.value);
+              break;
+            case 'rdc':
+              value = left.value.reduce(right.value, true);
+              break;
+            case '^':
+              value = left.value.pow(right.value);
+              simplify = true;
+              break;
+            case '/^':
+              value = left.value.pow(right.value.inverse());
+              simplify = true;
+              break;
+            case 'mod':
+              value = left.value.mmod(right.value);
+              break;
+            case 'modc':
+              value = left.value.mmod(right.value, true);
+              break;
+            case '·':
+            case 'dot':
+              value = left.dot(right).value;
+              simplify = true;
+              break;
+            case '/_':
+              value = log(left, right);
+              simplify = true;
+              break;
+            case '/+':
+            case '⊕':
+              value = left.value.lensAdd(right.value);
+              break;
+            case '/-':
+            case '⊖':
+              value = left.value.lensSub(right.value);
+              break;
+            case '\\':
+              throw new Error('Preference not supported with backslahes');
+            default:
+              throw new Error(
+                `${node.preferLeft ? '~' : ''}${node.operator}${
+                  node.preferRight ? '~' : ''
+                } unimplemented`
+              );
+          }
+          return resolvePreference(value, left, right, node, simplify);
+        }
+        switch (operator) {
+          case '===':
+            return sonicBool(left.strictEquals(right));
+          case '!==':
+            return sonicBool(!left.strictEquals(right));
+          case '==':
+            return sonicBool(left.equals(right));
+          case '!=':
+            return sonicBool(!left.equals(right));
+          case '<=':
+            return sonicBool(compare.bind(this)(left, right) <= 0);
+          case '>=':
+            return sonicBool(compare.bind(this)(left, right) >= 0);
+          case '<':
+            return sonicBool(compare.bind(this)(left, right) < 0);
+          case '>':
+            return sonicBool(compare.bind(this)(left, right) > 0);
+          case '+':
+            return left.add(right);
+          case '-':
+            return left.sub(right);
+          case '×':
+          case '*':
+          case ' ':
+            return left.mul(right);
+          case '÷':
+          case '%':
+            return left.div(right);
+          case '^':
+            return left.pow(right);
+          case '/^':
+            return left.ipow(right);
+          case '/_':
+            return left.log(right);
+          case '\\':
+            return left.backslash(right);
+          case 'mod':
+            return left.mmod(right);
+          case 'modc':
+            return left.mmod(right, true);
+          case '·':
+          case 'dot':
+            return left.dot(right);
+          case 'rd':
+            return left.reduce(right);
+          case 'rdc':
+            return left.reduce(right, true);
+          case 'to':
+            return left.roundTo(right);
+          case 'by':
+            return left.pitchRoundTo(right);
+          case '/+':
+          case '⊕':
+            return left.lensAdd(right);
+          case '/-':
+          case '⊖':
+            return left.lensSub(right);
+          case '??':
+          case 'or':
+          case 'and':
+          case 'of':
+          case 'not of':
+          case '~of':
+          case 'not ~of':
+          case '⊗':
+          case 'tns':
+            throw new Error('Unexpected code flow.');
+        }
+        operator satisfies never;
+      }
+      const op = this.binaryOperate.bind(this);
+      return right.map(r => op(left, r, node)) as Interval[];
+    }
+    if (right instanceof Interval) {
+      const op = this.binaryOperate.bind(this);
+      return left.map(l => op(l, right, node)) as Interval[];
+    }
+    const op = this.binaryOperate.bind(this);
+    return left.map((l, i) => op(l, right[i], node)) as Interval[];
   }
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
@@ -1389,138 +1565,11 @@ export class ExpressionVisitor {
       }
       operator satisfies never;
     }
-    if (left instanceof Interval && right instanceof Interval) {
-      if (node.preferLeft || node.preferRight) {
-        let value: TimeMonzo;
-        let simplify = false;
-        switch (operator) {
-          case '+':
-            value = left.value.add(right.value);
-            break;
-          case '-':
-            value = left.value.sub(right.value);
-            break;
-          case 'to':
-            value = left.value.roundTo(right.value);
-            break;
-          case 'by':
-            value = left.value.pitchRoundTo(right.value);
-            break;
-          case '×':
-          case '*':
-            value = left.value.mul(right.value);
-            break;
-          case '÷':
-          case '%':
-            value = left.value.div(right.value);
-            break;
-          case 'rd':
-            value = left.value.reduce(right.value);
-            break;
-          case 'rdc':
-            value = left.value.reduce(right.value, true);
-            break;
-          case '^':
-            value = left.value.pow(right.value);
-            simplify = true;
-            break;
-          case '/^':
-            value = left.value.pow(right.value.inverse());
-            simplify = true;
-            break;
-          case 'mod':
-            value = left.value.mmod(right.value);
-            break;
-          case 'modc':
-            value = left.value.mmod(right.value, true);
-            break;
-          case '·':
-          case 'dot':
-            value = left.dot(right).value;
-            simplify = true;
-            break;
-          case '/_':
-            value = log(left, right);
-            simplify = true;
-            break;
-          case '/+':
-          case '⊕':
-            value = left.value.lensAdd(right.value);
-            break;
-          case '/-':
-          case '⊖':
-            value = left.value.lensSub(right.value);
-            break;
-          case '\\':
-            throw new Error('Preference not supported with backslahes');
-          default:
-            throw new Error(
-              `${node.preferLeft ? '~' : ''}${node.operator}${
-                node.preferRight ? '~' : ''
-              } unimplemented`
-            );
-        }
-        return resolvePreference(value, left, right, node, simplify);
-      }
-      switch (operator) {
-        case '===':
-          return sonicBool(left.strictEquals(right));
-        case '!==':
-          return sonicBool(!left.strictEquals(right));
-        case '==':
-          return sonicBool(left.equals(right));
-        case '!=':
-          return sonicBool(!left.equals(right));
-        case '<=':
-          return sonicBool(compare.bind(this)(left, right) <= 0);
-        case '>=':
-          return sonicBool(compare.bind(this)(left, right) >= 0);
-        case '<':
-          return sonicBool(compare.bind(this)(left, right) < 0);
-        case '>':
-          return sonicBool(compare.bind(this)(left, right) > 0);
-        case '+':
-          return left.add(right);
-        case '-':
-          return left.sub(right);
-        case '×':
-        case '*':
-        case ' ':
-          return left.mul(right);
-        case '÷':
-        case '%':
-          return left.div(right);
-        case '^':
-          return left.pow(right);
-        case '/^':
-          return left.ipow(right);
-        case '/_':
-          return left.log(right);
-        case '\\':
-          return left.backslash(right);
-        case 'mod':
-          return left.mmod(right);
-        case 'modc':
-          return left.mmod(right, true);
-        case '·':
-        case 'dot':
-          return left.dot(right);
-        case 'rd':
-          return left.reduce(right);
-        case 'rdc':
-          return left.reduce(right, true);
-        case 'to':
-          return left.roundTo(right);
-        case 'by':
-          return left.pitchRoundTo(right);
-        case '/+':
-        case '⊕':
-          return left.lensAdd(right);
-        case '/-':
-        case '⊖':
-          return left.lensSub(right);
-      }
-      operator satisfies never;
+    if (
+      (left instanceof Interval || Array.isArray(left)) &&
+      (right instanceof Interval || Array.isArray(right))
+    ) {
+      return this.binaryOperate(left, right, node);
     }
     switch (node.operator) {
       case '===':
