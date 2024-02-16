@@ -8,7 +8,7 @@ import {
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
-import {relin} from '../../builtin';
+import {relative} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);
@@ -276,9 +276,9 @@ describe('SonicWeave parser', () => {
   it('can construct well-temperaments (manual)', () => {
     const scale = parseSource(`
       // Bach / Louie 2018
-      const g = relog(3/2);
-      const p = relog(531441/524288);
-      const equave = relog(2);
+      const g = logarithmic(3/2);
+      const p = logarithmic(531441/524288);
+      const equave = logarithmic(2);
       // Down
       -g;
       $[-1] - g;
@@ -345,7 +345,8 @@ describe('SonicWeave parser', () => {
       }
       vM3;P5;P8;
       rig;
-      relin;
+      relative;
+      linear;
     `);
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('5/4;3/2;2');
@@ -353,7 +354,7 @@ describe('SonicWeave parser', () => {
 
   it('can construct the hard cotritave', () => {
     const scale = parseSource(`
-      const tritave = 1r * relog(3);
+      const tritave = 1r * logarithmic(3);
       const cotritave = v{%tritave};
       tritave dot cotritave;
     `);
@@ -480,7 +481,7 @@ describe('SonicWeave parser', () => {
       D=4
       E=4
       A=4
-      relin;
+      relative;
     `);
     const ratios = scale.map(i => i.value.valueOf());
     expect(ratios[0]).toBeCloseTo(4 / 3);
@@ -586,7 +587,7 @@ describe('SonicWeave parser', () => {
     for (const statement of userAst.body) {
       visitor.visit(statement);
     }
-    const r = relin.bind(visitor);
+    const r = relative.bind(visitor);
     (visitor.get('$') as Interval[]).sort((a, b) => r(a).compare(r(b)));
     expect(visitor.expand(defaults)).toBe(
       [
@@ -688,6 +689,18 @@ describe('SonicWeave parser', () => {
       str
     `);
     expect(scale).toEqual(['6\\13<3>', '9\\13<3>', '13\\13<3>']);
+  });
+
+  it('supports equaves with val literals', () => {
+    const scale = parseSource(`
+      5/3
+      7/3
+      3/1
+
+      <13 19 23]@3.5.7
+      str
+    `);
+    expect(scale).toEqual(['6\\13<3>', '10\\13<3>', '13\\13<3>']);
   });
 
   it('has function scope similar to javascript', () => {

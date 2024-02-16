@@ -150,7 +150,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert time to frequency', () => {
-    const freq = parseSingle('ablin(2 ms)');
+    const freq = parseSingle('absolute(2 ms)');
     expect(freq.value.valueOf()).toBe(500);
   });
 
@@ -265,10 +265,10 @@ describe('SonicWeave expression evaluator', () => {
     for (const hz of ['', ' Hz']) {
       for (const conversion of [
         'simplify',
-        'relin',
-        'relog',
-        'ablin',
-        'ablog',
+        'relative',
+        'absolute',
+        'linear',
+        'logarithmic',
         'cologarithmic',
       ]) {
         const value = parseSingle(
@@ -291,7 +291,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('sets implicit 1/1 on pitch declaration', () => {
-    const freq = parseSingle('Bb5 = 100 Hz; ablin(2)');
+    const freq = parseSingle('Bb5 = 100 Hz; absolute(2)');
     expect(freq.value.timeExponent.equals(-1)).toBe(true);
     expect(freq.value.valueOf()).toBeCloseTo(200);
   });

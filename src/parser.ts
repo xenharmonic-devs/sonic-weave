@@ -29,7 +29,7 @@ import {
   BUILTIN_CONTEXT,
   PRELUDE_SOURCE,
   sonicBool,
-  relog,
+  relative,
   linearOne,
   SonicWeaveFunction,
   repr,
@@ -511,6 +511,11 @@ export class StatementVisitor {
           if (value.node.equave) {
             equave = new Fraction(value.node.equave);
           }
+        } else if (value.node?.type === 'ValLiteral') {
+          if (value.node.basis.length) {
+            divisions = subVisitor.visitComponent(value.node.components[0]);
+            equave = new Fraction(value.node.basis[0]);
+          }
         }
         if (equave.compare(TWO)) {
           equaveNumerator = equave.n;
@@ -529,11 +534,11 @@ export class StatementVisitor {
             equaveDenominator,
           }
         );
-        const rl = relog.bind(subVisitor);
+        const rel = relative.bind(subVisitor);
         const mapped = scale.map(i => {
           const v = value as Interval;
           const t = i.value.tail(v.value.numberOfComponents);
-          const result = rl(i).dot(v).mul(step);
+          const result = rel(i).dot(v).mul(step);
           if (t.totalCents()) {
             return new Interval(t, 'logarithmic').add(result);
           }

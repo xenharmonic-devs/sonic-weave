@@ -337,7 +337,7 @@ Multiplication of absolute quantities is interpreted as their geometric average:
 Same goes for logarithmic absolute quantities: `C♮4 + E♮4` corresponds to `D♮4` in the scale if you've declared `C♮4` as absolute quantity.
 
 ## Variable declaration
-Variables can be declared using the keyword `let` or `const` and a single *equals* sign e.g. `const k = relog(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
+Variables can be declared using the keyword `let` or `const` and a single *equals* sign e.g. `const k = logarithmic(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
 
 Only variables declared using `let` can be re-assigned later.
 

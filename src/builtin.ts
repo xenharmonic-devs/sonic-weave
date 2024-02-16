@@ -198,12 +198,12 @@ function cologarithmic(interval: Interval) {
 cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
 cologarithmic.__node__ = builtinNode(cologarithmic);
 
-export function ablin(this: ExpressionVisitor, interval: Interval) {
+export function absolute(this: ExpressionVisitor, interval: Interval) {
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
     return new Interval(
       interval.value.pow(te.inverse().neg()),
-      'linear',
+      interval.domain,
       undefined,
       interval
     );
@@ -215,55 +215,44 @@ export function ablin(this: ExpressionVisitor, interval: Interval) {
   }
   return new Interval(
     interval.value.mul(this.rootContext.unisonFrequency),
-    'linear',
+    interval.domain,
     undefined,
     interval
   );
 }
-ablin.__doc__ = 'Convert interval to absolute linear representation.';
-ablin.__node__ = builtinNode(ablin);
+absolute.__doc__ = 'Convert interval to absolute representation.';
+absolute.__node__ = builtinNode(absolute);
 
-export function relin(this: ExpressionVisitor, interval: Interval) {
+export function relative(this: ExpressionVisitor, interval: Interval) {
   if (interval.isRelative()) {
-    return new Interval(interval.value.clone(), 'linear', undefined, interval);
+    return new Interval(
+      interval.value.clone(),
+      interval.domain,
+      undefined,
+      interval
+    );
   }
   if (this.rootContext.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
     );
   }
-  const absoluteLinear = ablin.bind(this)(interval);
+  const absolut = absolute.bind(this)(interval);
   return new Interval(
-    absoluteLinear.value.div(this.rootContext.unisonFrequency),
-    'linear',
+    absolut.value.div(this.rootContext.unisonFrequency),
+    interval.domain,
     undefined,
     interval
   );
 }
-relin.__doc__ = 'Convert interval to relative linear representation.';
-relin.__node__ = builtinNode(relin);
-
-export function ablog(this: ExpressionVisitor, interval: Interval) {
-  const converted = ablin.bind(this)(interval);
-  converted.domain = 'logarithmic';
-  return converted;
-}
-ablog.__doc__ = 'Convert interval to absolute logarithmic representation.';
-ablog.__node__ = builtinNode(ablog);
-
-export function relog(this: ExpressionVisitor, interval: Interval) {
-  const converted = relin.bind(this)(interval);
-  converted.domain = 'logarithmic';
-  return converted;
-}
-relog.__doc__ = 'Convert interval to relative logarithmic representation.';
-relog.__node__ = builtinNode(relog);
+relative.__doc__ = 'Convert interval to relative representation.';
+relative.__node__ = builtinNode(relative);
 
 // == Type conversion ==
 
 function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
   if (value instanceof Interval) {
-    const b = sonicBool(sonicTruth(relin.bind(this)(value)));
+    const b = sonicBool(sonicTruth(relative.bind(this)(value)));
     b.color = value.color;
     b.label = value.label;
     return b;
@@ -278,7 +267,7 @@ function decimal(
   interval: Interval,
   fractionDigits?: Interval
 ) {
-  const converted = relin.bind(this)(interval);
+  const converted = relative.bind(this)(interval);
   if (fractionDigits !== undefined) {
     const denominator = 10 ** fractionDigits.toInteger();
     const numerator = Math.round(converted.value.valueOf() * denominator);
@@ -305,7 +294,7 @@ function fraction(
   const denominator = preferredDenominator
     ? preferredDenominator.value.toBigInteger()
     : 0n;
-  const converted = relin.bind(this)(interval);
+  const converted = relative.bind(this)(interval);
   let eps = 1e-4;
   let value: TimeMonzo | undefined;
   if (epsilon === undefined) {
@@ -343,7 +332,7 @@ function radical(
   maxIndex?: Interval,
   maxHeight?: Interval
 ) {
-  const converted = relin.bind(this)(interval);
+  const converted = relative.bind(this)(interval);
   if (converted.value.isEqualTemperament()) {
     const node = converted.value.asRadicalLiteral();
     if (node) {
@@ -443,7 +432,7 @@ export function cents(
   interval: Interval,
   fractionDigits?: Interval
 ) {
-  const converted = relog.bind(this)(interval);
+  const converted = relative.bind(this)(interval);
   if (fractionDigits !== undefined) {
     const denominator = 10 ** fractionDigits.toInteger();
     const numerator = Math.round(converted.totalCents() * denominator);
@@ -461,9 +450,9 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
   if (C4.timeExponent.n === 0) {
-    monzo = relog.bind(this)(interval).value;
+    monzo = relative.bind(this)(interval).value;
   } else {
-    monzo = ablog.bind(this)(interval).value;
+    monzo = absolute.bind(this)(interval).value;
   }
   let relativeToC4 = monzo.div(C4);
   const node = asAbsoluteFJS(relativeToC4);
@@ -487,7 +476,7 @@ absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
 absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 function FJS(this: ExpressionVisitor, interval: Interval) {
-  const monzo = relog.bind(this)(interval).value;
+  const monzo = relative.bind(this)(interval).value;
   const node = asFJS(monzo);
   if (node) {
     return new Interval(monzo, 'logarithmic', node, interval);
@@ -504,7 +493,7 @@ FJS.__doc__ = 'Convert interval to (relative) FJS.';
 FJS.__node__ = builtinNode(FJS);
 
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
-  const monzo = relog.bind(this)(interval).value;
+  const monzo = relative.bind(this)(interval).value;
   monzo.cents = Math.round(monzo.cents);
   monzo.residual = new Fraction(1);
   const node = monzo.asMonzoLiteral();
@@ -552,10 +541,10 @@ export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
     return a.compare(b);
   }
   if (a.isAbsolute() && b.isAbsolute()) {
-    const ab = ablin.bind(this);
+    const ab = absolute.bind(this);
     return ab(a).compare(ab(b));
   }
-  const r = relin.bind(this);
+  const r = relative.bind(this);
   return r(a).compare(r(b));
 }
 
@@ -595,7 +584,7 @@ function cosJIP(
   interval: Interval,
   weighting: 'none' | 'tenney' = 'tenney'
 ) {
-  const monzo = relog.bind(this)(interval).value;
+  const monzo = relative.bind(this)(interval).value;
   const pe = monzo.primeExponents.map(e => e.valueOf());
   let value = 0;
   if (weighting.toLowerCase() === 'tenney') {
@@ -623,7 +612,7 @@ cosJIP.__doc__ =
 cosJIP.__node__ = builtinNode(cosJIP);
 
 function JIP(this: ExpressionVisitor, interval: Interval) {
-  const monzo = relog.bind(this)(interval).value;
+  const monzo = relative.bind(this)(interval).value;
   const pe = monzo.primeExponents.map(e => e.valueOf());
   const value = TimeMonzo.fromCents(
     dot(PRIME_CENTS, pe) +
@@ -642,13 +631,13 @@ function PrimeMapping(
   this: ExpressionVisitor,
   ...newPrimes: (Interval | undefined)[]
 ) {
-  const rl = relog.bind(this);
+  const rel = relative.bind(this);
   const np = newPrimes.map((p, i) =>
-    p ? rl(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
+    p ? rel(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
   );
 
   function mapper(this: ExpressionVisitor, interval: Interval) {
-    const monzo = relog.bind(this)(interval).value;
+    const monzo = relative.bind(this)(interval).value;
     monzo.numberOfComponents = np.length;
     let mapped = new TimeMonzo(ZERO, [], monzo.residual, monzo.cents);
     while (mapped.primeExponents.length < np.length) {
@@ -678,7 +667,7 @@ PrimeMapping.__doc__ =
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
 export function tenneyHeight(this: ExpressionVisitor, interval: Interval) {
-  const monzo = relog.bind(this)(interval).value;
+  const monzo = relative.bind(this)(interval).value;
   const height =
     centsToNats(Math.abs(monzo.cents)) +
     Math.log(monzo.residual.n * monzo.residual.d) +
@@ -801,8 +790,8 @@ export function hasConstantStructure(monzos: TimeMonzo[]) {
 
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
-  const rl = relin.bind(this);
-  const monzos = scale.map(i => rl(i).value);
+  const rel = relative.bind(this);
+  const monzos = scale.map(i => rel(i).value);
   return sonicBool(hasConstantStructure(monzos));
 }
 Object.defineProperty(hasConstantStructure_, 'name', {
@@ -867,7 +856,7 @@ randomCents.__doc__ =
 randomCents.__node__ = builtinNode(randomCents);
 
 function floor(this: ExpressionVisitor, value: Interval) {
-  value = relin.bind(this)(value);
+  value = relative.bind(this)(value);
   const n = Math.floor(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
@@ -875,7 +864,7 @@ floor.__doc__ = 'Round value down to the nearest integer.';
 floor.__node__ = builtinNode(floor);
 
 function round(this: ExpressionVisitor, value: Interval) {
-  value = relin.bind(this)(value);
+  value = relative.bind(this)(value);
   const n = Math.round(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
@@ -883,7 +872,7 @@ round.__doc__ = 'Round value to the nearest integer.';
 round.__node__ = builtinNode(round);
 
 function trunc(this: ExpressionVisitor, value: Interval) {
-  value = relin.bind(this)(value);
+  value = relative.bind(this)(value);
   const n = Math.trunc(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
@@ -891,7 +880,7 @@ trunc.__doc__ = 'Truncate value towards zero to the nearest integer.';
 trunc.__node__ = builtinNode(trunc);
 
 function ceil(this: ExpressionVisitor, value: Interval) {
-  value = relin.bind(this)(value);
+  value = relative.bind(this)(value);
   const n = Math.ceil(value.value.valueOf());
   return Interval.fromInteger(n, value);
 }
@@ -1424,10 +1413,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   linear,
   logarithmic,
   cologarithmic,
-  relin,
-  ablin,
-  relog,
-  ablog,
+  absolute,
+  relative,
   // Type conversion
   bool,
   int: trunc,
@@ -1507,8 +1494,28 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
 
 export const PRELUDE_SOURCE = `
 // == Functions ==
+riff ablin interval {
+  "Convert interval to absolute linear representation.";
+  return absolute(linear(interval));
+}
+
+riff ablog interval {
+  "Convert interval to absolute logarithmic representation.";
+  return absolute(logarithmic(interval));
+}
+
+riff relin interval {
+  "Convert interval to relative linear representation.";
+  return relative(linear(interval));
+}
+
+riff relog interval {
+  "Convert interval to relative logarithmic representation.";
+  return relative(logarithmic(interval));
+}
+
 riff sanitize interval {
-  "Get rid of interval formatting, color and label."
+  "Get rid of interval formatting, color and label.";
   return bleach(simplify(interval));
 }
 

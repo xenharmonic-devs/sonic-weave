@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {relin} from './builtin';
+import {relative} from './builtin';
 import {Interval} from './interval';
 import {
   ExpressionVisitor,
@@ -20,7 +20,7 @@ export function toScalaScl(source: string) {
   const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');
-  const rel = relin.bind(visitor as unknown as ExpressionVisitor);
+  const rel = relative.bind(visitor as unknown as ExpressionVisitor);
   for (const interval of scale) {
     if (interval.color) {
       keyColors.push(interval.color.value);

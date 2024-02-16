@@ -349,7 +349,7 @@ describe('Extended Monzo', () => {
       1.25
     );
     expect(value.toString('logarithmic')).toBe(
-      '-3/2*logarithmic(1s)+[3/2 -5/3>+relog(31/23)+1.25rc'
+      '-3/2*logarithmic(1s)+[3/2 -5/3>+logarithmic(31/23)+1.25rc'
     );
   });
 

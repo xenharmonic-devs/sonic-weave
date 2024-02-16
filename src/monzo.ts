@@ -1633,7 +1633,7 @@ export class TimeMonzo {
       }
       terms.push('[' + pe.map(f => f.toFraction()).join(' ') + '>');
       if (this.residual.compare(ONE)) {
-        terms.push(`relog(${this.residual.toFraction()})`);
+        terms.push(`logarithmic(${this.residual.toFraction()})`);
       }
       if (this.cents) {
         const steps = Math.round(this.cents);
