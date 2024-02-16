@@ -49,14 +49,14 @@
   "devDependencies": {
     "@types/node": "20.8.2",
     "gts": "^5.2.0",
-    "peggy": "^3.0.2",
-    "typedoc": "^0.25.4",
+    "peggy": "^4.0.0",
+    "typedoc": "^0.25.8",
     "typescript": "~5.2.0",
-    "vitest": "^1.0.2"
+    "vitest": "^1.2.2"
   },
   "dependencies": {
-    "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils",
-    "moment-of-symmetry": "github:xenharmonic-devs/moment-of-symmetry"
+    "moment-of-symmetry": "github:xenharmonic-devs/moment-of-symmetry",
+    "xen-dev-utils": "github:xenharmonic-devs/xen-dev-utils"
   },
   "engines": {
     "node": ">=10.6.0"
