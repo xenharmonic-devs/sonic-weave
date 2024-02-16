@@ -628,6 +628,12 @@ Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 `guide`, `root`, `equave`
 
+### flatten
+Flatten a nested array into a simple array.
+#### Parameters:
+
+`array`
+
 ### ftom
 Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).
 #### Parameters:

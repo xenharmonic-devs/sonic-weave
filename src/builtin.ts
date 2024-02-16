@@ -1519,6 +1519,18 @@ riff sanitize interval {
   return bleach(simplify(interval));
 }
 
+riff flatten array {
+  "Flatten a nested array into a simple array.";
+  if (isArray(array)) {
+    let result = [];
+    for (const element of array) {
+      result = concat(result, flatten(element));
+    }
+    return result;
+  }
+  return [array];
+}
+
 riff sqrt x {
   "Calculate the square root of the input.";
   return x ~/^ 2;

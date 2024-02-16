@@ -843,4 +843,11 @@ describe('SonicWeave standard library', () => {
     );
     expect(scale).toEqual(['9/8', '4/3', '3/2', '2']);
   });
+
+  it('can flatten a nested array', () => {
+    const arr = evaluateExpression(
+      'flatten([["a", ["b", "c"]], ["d", "e"], "f"])'
+    );
+    expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
+  });
 });
