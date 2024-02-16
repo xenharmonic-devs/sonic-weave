@@ -1313,6 +1313,27 @@ export class ExpressionVisitor {
     return operand;
   }
 
+  tensor(
+    left: Interval | Interval[],
+    right: Interval | Interval[],
+    node: BinaryExpression
+  ): Interval | Interval[] {
+    if (left instanceof Interval) {
+      if (right instanceof Interval) {
+        this.rootContext.spendGas();
+        if (node.preferLeft || node.preferRight) {
+          const value = left.value.mul(right.value);
+          return resolvePreference(value, left, right, node, false);
+        }
+        return left.mul(right);
+      }
+      const tns = this.tensor.bind(this);
+      return right.map(r => tns(left, r, node)) as Interval[];
+    }
+    const tns = this.tensor.bind(this);
+    return left.map(l => tns(l, right, node)) as Interval[];
+  }
+
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
     const left = this.visit(node.left);
@@ -1336,30 +1357,15 @@ export class ExpressionVisitor {
     }
     const right = this.visit(node.right);
     if (operator === 'tns' || operator === '⊗') {
-      if (!Array.isArray(left) || !Array.isArray(right)) {
-        throw new Error('Tensor product is only defined on arrays');
+      if (!(left instanceof Interval) && !Array.isArray(left)) {
+        throw new Error('Left tensor operand must be an interval or an array.');
       }
-      this.rootContext.spendGas(left.length * right.length);
-      const result: any[] = [];
-      if (node.preferLeft || node.preferRight) {
-        for (const l of left) {
-          const row: Interval[] = [];
-          for (const r of right) {
-            const value = l.value.mul(r.value);
-            row.push(resolvePreference(value, l, r, node, false));
-          }
-          result.push(row);
-        }
-      } else {
-        for (const l of left) {
-          const row: Interval[] = [];
-          for (const r of right) {
-            row.push(l.mul(r));
-          }
-          result.push(row);
-        }
+      if (!(right instanceof Interval) && !Array.isArray(right)) {
+        throw new Error(
+          'Right tensor operand must be an interval or an array.'
+        );
       }
-      return result;
+      return this.tensor(left, right, node);
     }
     if (
       operator === 'of' ||

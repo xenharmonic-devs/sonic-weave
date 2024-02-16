@@ -810,4 +810,38 @@ describe('SonicWeave expression evaluator', () => {
       fiveGPV.value.dot(TimeMonzo.fromFraction('15/13')).toFraction()
     ).toBe('1');
   });
+
+  it('has trivial tensoring', () => {
+    const fifteen = parseSingle('3 tns 5');
+    expect(fifteen.toString()).toBe('15');
+  });
+
+  it('has rank-1 tensoring (left)', () => {
+    const doubles = evaluateExpression('2 tns [3, 5]', false) as Interval[];
+    expect(doubles.map(i => i.toString())).toEqual(['6', '10']);
+  });
+
+  it('has rank-1 tensoring (right)', () => {
+    const fives = evaluateExpression('[2, 3] tns 5', false) as Interval[];
+    expect(fives.map(i => i.toString())).toEqual(['10', '15']);
+  });
+
+  it('has rank-3 tensoring', () => {
+    const block = evaluateExpression(
+      '([1/1, 3/2]⊗[5/4, 2/1])⊗[7/4, 2/1]',
+      false
+    ) as unknown as Interval[][][];
+    expect(
+      block.map(mat => mat.map(row => row.map(i => i.toString())))
+    ).toEqual([
+      [
+        ['35/16', '5/2'],
+        ['7/2', '4'],
+      ],
+      [
+        ['105/32', '15/4'],
+        ['21/4', '6'],
+      ],
+    ]);
+  });
 });
