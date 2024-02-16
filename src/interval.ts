@@ -199,6 +199,13 @@ export class Interval {
     return new Interval(value, this.domain, node, zombie);
   }
 
+  lsub(other: Interval) {
+    const result = other.sub(this);
+    result.color = this.color ?? other.color;
+    result.label = this.label || other.label;
+    return result;
+  }
+
   lensAdd(other: Interval) {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in harmonic addition');

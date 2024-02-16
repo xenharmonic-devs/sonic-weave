@@ -1768,6 +1768,12 @@ export class ExpressionVisitor {
             ? intervals[i].ldiv(rootInterval)
             : intervals[i].div(rootInterval)
         );
+      } else if (typesCompatible(intervals[i].node, rootInterval.node)) {
+        result.push(
+          node.mirror
+            ? intervals[i].lsub(rootInterval)
+            : intervals[i].sub(rootInterval)
+        );
       } else {
         result.push(
           new Interval(

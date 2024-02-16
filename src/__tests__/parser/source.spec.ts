@@ -824,4 +824,14 @@ describe('SonicWeave parser', () => {
       '2/1',
     ]);
   });
+
+  it('can enumerate cents', () => {
+    const scale = parseSource('100.:200.:432.1;str');
+    expect(scale).toEqual(['100.', '332.1']);
+  });
+
+  it('can enumerate cents', () => {
+    const scale = parseSource('/400.:300.:234.5;str');
+    expect(scale).toEqual(['100.', '165.5']);
+  });
 });
