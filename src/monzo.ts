@@ -879,6 +879,9 @@ export class TimeMonzo {
    * @returns This monzo divided by the other monzo in linear space.
    */
   div(other: TimeMonzo) {
+    if (!other.residual.n) {
+      throw new Error('Division by zero.');
+    }
     let self = this as TimeMonzo;
     if (self.primeExponents.length < other.primeExponents.length) {
       self = self.clone();

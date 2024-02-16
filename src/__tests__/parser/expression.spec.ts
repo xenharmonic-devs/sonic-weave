@@ -844,4 +844,8 @@ describe('SonicWeave expression evaluator', () => {
       ],
     ]);
   });
+
+  it('crashes with zero enumeration', () => {
+    expect(() => evaluateExpression('0:1:2:3', false)).toThrow();
+  });
 });
