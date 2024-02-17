@@ -161,7 +161,7 @@ export class StatementVisitor {
         continue;
       }
       const value = r(this.mutables.get(key));
-      if (value.startsWith('riff')) {
+      if (value.startsWith('riff') || value.startsWith('fn')) {
         const name = (this.mutables.get(key) as SonicWeaveFunction).name;
         variableLines.push(`let ${key} = ${name}`);
       } else {
@@ -173,7 +173,7 @@ export class StatementVisitor {
         continue;
       }
       const value = r(this.immutables.get(key));
-      if (value.startsWith('riff')) {
+      if (value.startsWith('riff') || value.startsWith('fn')) {
         if (value.includes('[native riff]')) {
           const name = (this.immutables.get(key) as SonicWeaveFunction).name;
           variableLines.push(`const ${key} = ${name}`);

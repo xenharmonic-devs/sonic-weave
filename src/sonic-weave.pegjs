@@ -70,6 +70,7 @@ ReduceToken        = 'rd'     !IdentifierPart
 ReduceCeilingToken = 'rdc'    !IdentifierPart
 ReturnToken        = 'return' !IdentifierPart
 FunctionToken      = 'riff'   !IdentifierPart
+FunctionAliasToken = 'fn'     !IdentifierPart
 SecondToken        = 's'      !IdentifierPart
 TensorToken        = 'tns'    !IdentifierPart
 ThrowToken         = 'throw'  !IdentifierPart
@@ -98,6 +99,7 @@ ReservedWord
   / ReduceCeilingToken
   / ReturnToken
   / FunctionToken
+  / FunctionAliasToken
   / TensorToken
   / ThrowToken
   / ToToken
@@ -193,7 +195,7 @@ VariableDeclaration
   }
 
 FunctionDeclaration
-  = FunctionToken _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
+  = (FunctionToken / FunctionAliasToken) _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
     return {
       type: 'FunctionDeclaration',
       name,
@@ -338,7 +340,7 @@ EmptyStatement
   / __ SingleLineComment LineTerminatorSequence
 
 ExpressionStatement
-  = !("{" / FunctionToken) expression: (LabeledCommaDecimal / Expression) EOS {
+  = !("{" / FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
     return {
       type: 'ExpressionStatement',
       expression,

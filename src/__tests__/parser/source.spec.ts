@@ -562,11 +562,23 @@ describe('SonicWeave parser', () => {
     );
   });
 
+  it('can expand fns', () => {
+    const visitor = evaluateSource('fn foo bar {bar + 3};foo(1)', false);
+    expect(visitor.expand(getSourceVisitor(false))).toBe(
+      'fn foo bar {bar + 3}\n4'
+    );
+  });
+
   it('can expand arrow functions', () => {
     const visitor = evaluateSource('const foo = bar => bar + 2;foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false))).toBe(
       'const foo = bar => bar + 2\n3'
     );
+  });
+
+  it('can expend variables that start with "riff"', () => {
+    const visitor = evaluateSource('const riffy = 42', false);
+    expect(visitor.expand(getSourceVisitor(false))).toBe('const riffy = 42\n');
   });
 
   it('can expand renamed builtins', () => {

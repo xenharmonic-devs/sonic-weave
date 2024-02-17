@@ -418,8 +418,18 @@ riff subharmonics start end {
 ```
 Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
 
+Due to popular demand there's also the `fn` alias for function declaration.
+```javascript
+fn pythagoras up down {
+  down ??= 0
+  sorted([3^i rdc 2 for i of [-down..up]])
+}
+```
+
 ### Calling functions
-Once declared, functions can be called:`subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`.
+Once declared, functions can be called: `subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`,
+
+while `pythagoras(4)` evaluates to `[9/8, 81/64, 3/2, 27/16, 2]`. The missing `down` argument defaulted to `niente` and was coalesced to `0`.
 
 ### Lambda expressions
 Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start end => retroverted(start::end))`.
@@ -444,7 +454,7 @@ sort()
 ```
 First results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
 
-Or the same with a oneliner `sorted(map(prime => prime rdc 2, primes(17)))` displaying the utility of *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
+Or the same with a oneliner `sorted(map(prime => prime rdc 2, primes(17)))` demonstrating the utility of *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
 
 ## Tempering
 In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
