@@ -830,7 +830,7 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual(['100.', '332.1']);
   });
 
-  it('can enumerate cents', () => {
+  it('can enumerate cents (mirrored)', () => {
     const scale = parseSource('/400.:300.:234.5;str');
     expect(scale).toEqual(['100.', '165.5']);
   });
