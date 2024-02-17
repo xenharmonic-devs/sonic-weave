@@ -153,7 +153,7 @@ mosSubset.__node__ = builtinNode(mosSubset);
 
 // == Domain conversion ==
 
-function simplify(interval: Interval) {
+export function simplify(interval: Interval) {
   return new Interval(
     interval.value.clone(),
     interval.domain,
@@ -164,19 +164,19 @@ function simplify(interval: Interval) {
 simplify.__doc__ = 'Get rid of interval formatting.';
 simplify.__node__ = builtinNode(simplify);
 
-function bleach(interval: Interval) {
+export function bleach(interval: Interval) {
   return new Interval(interval.value.clone(), interval.domain, interval.node);
 }
 bleach.__doc__ = 'Get rid of interval coloring and label.';
 bleach.__node__ = builtinNode(bleach);
 
-function linear(interval: Interval) {
+export function linear(interval: Interval) {
   return new Interval(interval.value.clone(), 'linear', undefined, interval);
 }
 linear.__doc__ = 'Convert interval to linear representation.';
 linear.__node__ = builtinNode(linear);
 
-function logarithmic(interval: Interval) {
+export function logarithmic(interval: Interval) {
   return new Interval(
     interval.value.clone(),
     'logarithmic',
@@ -187,7 +187,7 @@ function logarithmic(interval: Interval) {
 logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
-function cologarithmic(interval: Interval) {
+export function cologarithmic(interval: Interval) {
   return new Interval(
     interval.value.clone(),
     'cologarithmic',
