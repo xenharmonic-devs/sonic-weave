@@ -1099,16 +1099,29 @@ export class ExpressionVisitor {
     return result;
   }
 
+  project(
+    octaves: Interval | Interval[],
+    base: Interval
+  ): Interval | Interval[] {
+    if (octaves instanceof Interval) {
+      return octaves.project(base);
+    }
+    const p = this.project.bind(this);
+    return octaves.map(o => p(o, base)) as Interval[];
+  }
+
   visitNedjiProjection(node: NedjiProjection) {
     const octaves = this.visit(node.octaves);
-    if (!(octaves instanceof Interval)) {
-      throw new Error('Nedji steps must evaluate to an interval');
+    if (!(octaves instanceof Interval || Array.isArray(octaves))) {
+      throw new Error(
+        'Nedji steps must evaluate to an interval or an array of intervals'
+      );
     }
     const base = this.visit(node.base);
     if (!(base instanceof Interval)) {
       throw new Error('Nedji base must evaluate to an interval');
     }
-    return octaves.project(base);
+    return this.project(octaves, base);
   }
 
   visitWartsLiteral(node: WartsLiteral) {

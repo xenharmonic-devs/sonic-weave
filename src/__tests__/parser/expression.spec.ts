@@ -877,4 +877,13 @@ describe('SonicWeave expression evaluator', () => {
       '12\\12',
     ]);
   });
+
+  it('has quick nedji subset', () => {
+    const scale = evaluateExpression('[1, 2, 5] \\ 13<3>', false) as Interval[];
+    expect(scale.map(i => i.toString())).toEqual([
+      '1\\13<3>',
+      '2\\13<3>',
+      '5\\13<3>',
+    ]);
+  });
 });
