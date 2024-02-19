@@ -476,6 +476,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(three.toInteger()).toBe(3);
   });
 
+  it('has inverse exponentiation as a binary operation (alternative spelling)', () => {
+    const three = parseSingle('9 ^/ 2');
+    expect(three.toInteger()).toBe(3);
+  });
+
   it('has the logarithm as a binary operation', () => {
     const two = parseSingle('9 /_ 3');
     expect(two.toInteger()).toBe(2);

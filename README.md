@@ -168,7 +168,8 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
 | Ceiling reduction      | `2 rdc 2`    | `2`      | `P8 modc P8`     | `P8`  |
 | Exponentiation         | `3 ^ 2`      | `9`      | `P12 * 2`        | `M23`   |
-| Root taking            | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
+| Recipropower           | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
+| Root taking            | `9 ^/ 2`     | `3`      | `M23 % 2`        | `P12`   |
 | Logarithm (in base of) | `9 /_ 3`     | `2`      | `M23 % P12`      | `2`     |
 | Round (to power of)    | `5 by 2`     | `4`      | `M17^5 to P8`    | `P15`   |
 | N of EDO               | `(5+2)\12`   | `7\12`   | _N/A_            |         |

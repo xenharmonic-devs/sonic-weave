@@ -679,6 +679,21 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     const ast = parseSingle('foo[\n1\n..\n10\n]');
     expect(ast.expression.type).toBe('ArraySlice');
   });
+
+  it('prioritizes recipropower over lift', () => {
+    const ast = parseSingle('3/2^/ 2');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '^/',
+        left: {type: 'FractionLiteral', numerator: 3n, denominator: 2n},
+        right: {type: 'IntegerLiteral', value: 2n},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

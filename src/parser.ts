@@ -1405,6 +1405,7 @@ export class ExpressionVisitor {
               simplify = true;
               break;
             case '/^':
+            case '^/':
               value = left.value.pow(right.value.inverse());
               simplify = true;
               break;
@@ -1473,6 +1474,7 @@ export class ExpressionVisitor {
           case '^':
             return left.pow(right);
           case '/^':
+          case '^/':
             return left.ipow(right);
           case '/_':
             return left.log(right);

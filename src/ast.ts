@@ -40,7 +40,8 @@ export type BinaryOperator =
   | '⊗'
   | 'tns'
   | '^'
-  | '/^';
+  | '/^'
+  | '^/';
 
 export type Program = {
   type: 'Program';

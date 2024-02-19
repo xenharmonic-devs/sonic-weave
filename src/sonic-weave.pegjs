@@ -484,7 +484,7 @@ UniformUnaryExpression
   }
 
 ExponentiationOperator
-  = $('^' / '/_' / '/^')
+  = $('^/' / '^' / '/_' / '/^')
 
 ExponentiationExpression
   = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
