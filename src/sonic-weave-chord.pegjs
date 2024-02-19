@@ -3,7 +3,7 @@
 
 // Depends on base.pegjs
 
-Start = _ @(MonzoLiteral / ValLiteral / Other)|.., Separator| _ EOF
+Start = _ @(MonzoLiteral / ValLiteral / FunctionCall / ParenthesizedExpression / ArrayExpression / Other)|.., Separator| _ EOF
 
 Separator = _ [|&:;,]? _
 
@@ -30,6 +30,21 @@ MonzoLiteral
 
 ValLiteral
   = prefix: Prefix downs: 'v'* '<' _ components: VectorComponents _ ']' {
+    return text();
+  }
+
+FunctionCall
+  = IdentifierName '(' (!')' SourceCharacter)* ')' {
+    return text();
+  }
+
+ParenthesizedExpression
+  = '(' (!')' SourceCharacter)* ')' {
+    return text();
+  }
+
+ArrayExpression
+  = '[' (!']' SourceCharacter)* ']' {
     return text();
   }
 

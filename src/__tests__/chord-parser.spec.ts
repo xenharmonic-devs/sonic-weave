@@ -27,6 +27,18 @@ describe('Chord input parser', () => {
     expect(result).toHaveLength(1);
     expect((result[0].node as MonzoLiteral).lifts).toBe(1);
   });
+  it('parses nested array-like expressions', () => {
+    const result = parseChord('9,(4:5:6),[2,3],geodiff(7:8:9)');
+    expect(result.map(i => i.toString())).toEqual([
+      '9',
+      '5/4',
+      '6/4',
+      '2',
+      '3',
+      '8/7',
+      '9/8',
+    ]);
+  });
 });
 
 describe('Val input parser', () => {
