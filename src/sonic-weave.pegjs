@@ -722,7 +722,19 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger '\\' {
+  = count: BasicInteger '\\' denominator: (CallExpression / TrueArrayAccess / Identifier)? {
+    if (denominator) {
+      return BinaryExpression(
+        '\\',
+        {
+          type: 'IntegerLiteral',
+          value: BigInt(count),
+        },
+        denominator,
+        false,
+        false
+      );
+    }
     return {
       type: 'StepLiteral',
       count,

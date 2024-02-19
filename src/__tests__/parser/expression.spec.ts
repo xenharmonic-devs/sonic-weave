@@ -891,4 +891,14 @@ describe('SonicWeave expression evaluator', () => {
       '5\\13<3>',
     ]);
   });
+
+  it('parses binary nedo over a step literal (identifier)', () => {
+    const tritone = parseSingle('const two = 2;1\\two');
+    expect(tritone.toString()).toBe('1\\2');
+  });
+
+  it('parses binary nedo over a step literal (call)', () => {
+    const tritone = parseSingle('1\\trunc(2.2e)');
+    expect(tritone.toString()).toBe('1\\2');
+  });
 });
