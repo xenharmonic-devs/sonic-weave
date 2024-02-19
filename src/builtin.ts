@@ -2220,9 +2220,8 @@ riff equalize divisions scale {
   "Quantize the current/given scale to given equal divisions of its equave.";
   $ = scale ?? $$;
   let step = 1 \\ divisions;
-  if ($[-1] != 2) {
+  if ($[-1] != 2)
     step = step <$[-1]>;
-  }
   i => i by~ step colorOf(i) labelOf(i);
   return;
 }

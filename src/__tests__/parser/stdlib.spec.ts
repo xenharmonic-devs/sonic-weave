@@ -873,4 +873,22 @@ describe('SonicWeave standard library', () => {
       '(12\\12 "37")',
     ]);
   });
+
+  it('equalizes a wide harmonic segment', () => {
+    const scale = parseSource('4::16;equalize(23);str');
+    expect(scale).toEqual([
+      '8\\23',
+      '14\\23',
+      '18\\23',
+      '24\\23',
+      '26\\23',
+      '30\\23',
+      '34\\23',
+      '36\\23',
+      '40\\23',
+      '42\\23',
+      '44\\23',
+      '2\\1',
+    ]);
+  });
 });
