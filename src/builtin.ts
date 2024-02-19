@@ -1056,6 +1056,31 @@ insert.__doc__ =
   'Insert an interval into the current/given scale keeping it sorted.';
 insert.__node__ = builtinNode(insert);
 
+function dislodge(
+  this: ExpressionVisitor,
+  element: Interval,
+  scale?: Interval[]
+) {
+  scale ??= this.getCurrentScale();
+  if (element instanceof Interval) {
+    for (let i = 0; i < scale.length; ++i) {
+      if (element.strictEquals(scale[i])) {
+        return scale.splice(i, 1)[0];
+      }
+    }
+    throw new Error('Failed to locate interval to dislodge.');
+  }
+  for (let i = 0; i < scale.length; ++i) {
+    if (element === scale[i]) {
+      return scale.splice(i, 1)[0];
+    }
+  }
+  throw new Error('Failed to locate element to dislodge.');
+}
+dislodge.__doc__ =
+  'Remove and return the first element equal to the given one from the current/given scale.';
+dislodge.__node__ = builtinNode(dislodge);
+
 function extend(
   this: ExpressionVisitor,
   first: Interval[],
@@ -1469,6 +1494,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   shift,
   unshift,
   insert,
+  dislodge,
   extend,
   concat,
   length,
@@ -1956,6 +1982,52 @@ riff csgs generators ordinal period numPeriods maxSize {
     }
   }
   repeat(numPeriods);
+}
+
+riff vao denominator maxNumerator divisions tolerance equave {
+  "Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default \`12\`) within the given tolerance (default \`5c\`). Harmonics equated by the \`equave\` (default \`2/1\`) are only included once. The returned segment begins at unison.";
+  divisions ??= 12;
+  tolerance ??= 5.0;
+  equave ??= 2;
+  const step = equave /^ divisions;
+  const witnesses = [];
+  for (const numerator of [denominator .. maxNumerator]) {
+    const candidate = numerator % denominator;
+    if (abs(logarithmic((candidate ~by step) %~ candidate)) < tolerance) {
+      const witness = candidate ~rd equave;
+      if (witness not of witnesses) {
+        candidate;
+        push(witness, witnesses);
+      }
+    }
+  }
+}
+
+riff concordanceShell denominator maxNumerator divisions tolerance equave {
+  "Generate a concordance shell i.e. a vertically aligned object reduced to an equal temperament (default \`12\`). Intervals are labeled by their harmonics. \`tolerance\` defaults to \`5c\`. \`equave\` defaults to \`2/1\`.";
+  divisions ??= 12;
+  equave ??= 2;
+  let step = 1 \\ divisions <equave>;
+  if (equave === 2) {
+    step = 1 \\ divisions;
+  }
+  const result = [];
+  for (const harmonic of vao(denominator, maxNumerator, divisions, tolerance, equave)) {
+    const candidate = (harmonic by~ step) ~rdc equave;
+    const label = str(simplify(harmonic ~* denominator))
+    if (candidate of result) {
+      const existing = dislodge(candidate, result);
+      push(existing concat(labelOf(existing), ' & ', label), result);
+    } else {
+      push(candidate label, result);
+    }
+  }
+  equave = divisions * step;
+  if (equave not of result) {
+    equave;
+  }
+  result;
+  sort();
 }
 
 // == Scale modification ==

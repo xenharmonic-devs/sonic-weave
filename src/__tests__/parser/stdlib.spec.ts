@@ -850,4 +850,27 @@ describe('SonicWeave standard library', () => {
     );
     expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
   });
+
+  it('can generate vertically aligned objects', () => {
+    const vao = parseSource('vao(16, 64);str');
+    expect(vao).toEqual(['16/16', '17/16', '18/16', '19/16', '24/16', '57/16']);
+  });
+
+  it('can generate concordance shells', () => {
+    const shell = parseSource('concordanceShell(37, 255, 12, 5.0, 2/1);repr');
+    expect(shell).toEqual([
+      '(1\\12 "157")',
+      '(2\\12 "83")',
+      '(3\\12 "44")',
+      '(4\\12 "93 & 187")',
+      '(5\\12 "99 & 197")',
+      '(6\\12 "209")',
+      '(7\\12 "111")',
+      '(8\\12 "235")',
+      '(9\\12 "249")',
+      '(10\\12 "66")',
+      '(11\\12 "70")',
+      '(12\\12 "37")',
+    ]);
+  });
 });
