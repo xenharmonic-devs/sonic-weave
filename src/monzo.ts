@@ -1439,14 +1439,20 @@ export class TimeMonzo {
           denominator,
         };
       }
-      let factor = bigGcd(node.numerator, node.denominator);
-      if (factor === 1n && node.denominator % denominator === 0n) {
-        factor = node.denominator / denominator;
+      // XXX: Using the gcd might be reasonable in some special cases but not in general.
+      // let factor = bigGcd(node.numerator, node.denominator);
+      if (node.denominator % denominator === 0n) {
+        const factor = node.denominator / denominator;
+        return {
+          ...node,
+          numerator: numerator * factor,
+          denominator: denominator * factor,
+        };
       }
       return {
-        ...node,
-        numerator: numerator * factor,
-        denominator: denominator * factor,
+        type: 'FractionLiteral',
+        numerator,
+        denominator,
       };
     }
     return undefined;

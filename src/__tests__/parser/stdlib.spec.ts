@@ -891,4 +891,9 @@ describe('SonicWeave standard library', () => {
       '2\\1',
     ]);
   });
+
+  it('has reasonable formatting for geometric differences', () => {
+    const scale = parseSource('geodiff(4:5:6:7);str');
+    expect(scale).toEqual(['5/4', '6/5', '7/6']);
+  });
 });
