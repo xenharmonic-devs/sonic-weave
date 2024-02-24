@@ -1,4 +1,3 @@
-import {Fraction} from 'xen-dev-utils';
 import {
   IntervalLiteral,
   NedjiLiteral,
@@ -15,7 +14,9 @@ import {
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {RootContext} from './context';
-import {countUpsAndLifts} from './utils';
+import {ONE, ZERO, countUpsAndLifts} from './utils';
+
+export type IntervalDomain = Exclude<Domain, 'cologarithmic'>;
 
 export class Color {
   value: string;
@@ -29,7 +30,7 @@ export class Color {
   }
 }
 
-const TWO = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
+const TWO = new TimeMonzo(ZERO, [ONE]);
 
 function logLinMul(
   logarithmic: Interval,
@@ -38,10 +39,7 @@ function logLinMul(
   zombie?: Interval
 ) {
   if (linear.node?.type === 'DecimalLiteral' && linear.node.flavor === 'r') {
-    let size = logarithmic.totalCents();
-    if (logarithmic.domain === 'cologarithmic') {
-      size *= 1200 ** -2;
-    }
+    const size = logarithmic.totalCents();
     return new Interval(
       TimeMonzo.fromCents(size * linear.value.valueOf()),
       logarithmic.domain,
@@ -76,14 +74,14 @@ export function log(left: Interval, right: Interval) {
 
 export class Interval {
   value: TimeMonzo;
-  domain: Domain;
+  domain: IntervalDomain;
   node?: IntervalLiteral;
   color?: Color;
   label: string;
 
   constructor(
     value: TimeMonzo,
-    domain: Domain,
+    domain: IntervalDomain,
     node?: IntervalLiteral,
     convert?: Interval
   ) {
@@ -142,12 +140,7 @@ export class Interval {
       return new Interval(this.value.inverse(), this.domain, undefined, this);
     }
     // This overload should be fine because multiplication is not implemented in the logarithmic domain.
-    return new Interval(
-      this.value.geometricInverse(),
-      this.domain === 'logarithmic' ? 'cologarithmic' : 'logarithmic',
-      undefined,
-      this
-    );
+    return new Val(this.value.geometricInverse(), this.value.clone());
   }
 
   abs() {
@@ -317,16 +310,21 @@ export class Interval {
     );
   }
 
-  mul(other: Interval) {
+  mul(other: Interval): Interval;
+  mul(other: Val): Val;
+  mul(other: Interval | Val) {
     if (this.domain !== 'linear' && other.domain !== 'linear') {
       throw new Error('At least one domain must be linear in multiplication');
     }
+    if (other.domain === 'cologarithmic') {
+      return other.mul(this);
+    }
     const node = mulNodes(this.node, other.node);
     const zombie = infect(this, other);
-    if (other.domain === 'logarithmic' || other.domain === 'cologarithmic') {
+    if (other.domain === 'logarithmic') {
       return logLinMul(other, this, node, zombie);
     }
-    if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
+    if (this.domain === 'logarithmic') {
       return logLinMul(this, other, node, zombie);
     }
     return new Interval(this.value.mul(other.value), this.domain, node, zombie);
@@ -341,7 +339,7 @@ export class Interval {
       }
       return new Interval(log(this, other), 'linear', node, zombie);
     }
-    if (this.domain === 'logarithmic' || this.domain === 'cologarithmic') {
+    if (this.domain === 'logarithmic') {
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
         node = {type: 'AspiringFJS'};
@@ -358,15 +356,11 @@ export class Interval {
     return result;
   }
 
-  dot(other: Interval) {
+  dot(other: Interval | Val) {
     let monzo: TimeMonzo;
     let val: TimeMonzo;
     // Rig ups and downs.
-    if (this.domain === 'cologarithmic') {
-      monzo = other.value;
-      val = this.value.clone();
-      val.cents++;
-    } else if (other.domain === 'cologarithmic') {
+    if (other.domain === 'cologarithmic') {
       monzo = this.value;
       val = other.value.clone();
       val.cents++;
@@ -376,7 +370,7 @@ export class Interval {
     }
 
     const product = monzo.dot(val);
-    const zombie = infect(this, other);
+    const zombie = other instanceof Interval ? infect(this, other) : this;
     if (product.d === 1) {
       const value = BigInt(product.s * product.n);
       return new Interval(
@@ -653,7 +647,174 @@ export class Interval {
 }
 
 // Dummy variable to hold color and label infections.
-const ZOMBIE = new Interval(TWO, 'cologarithmic');
+const ZOMBIE = new Interval(TWO, 'logarithmic');
+
+export class Val {
+  value: TimeMonzo;
+  equave: TimeMonzo;
+  domain = 'cologarithmic' as const;
+  node?: IntervalLiteral;
+
+  constructor(value: TimeMonzo, equave: TimeMonzo, node?: IntervalLiteral) {
+    if (value.timeExponent.n || equave.timeExponent.n) {
+      throw new Error('Only relative vals implemented.');
+    }
+    this.value = value;
+    this.equave = equave;
+    this.node = node;
+  }
+
+  get divisions() {
+    return this.value.dot(this.equave);
+  }
+
+  neg() {
+    return new Val(this.value.inverse(), this.equave);
+  }
+
+  inverse() {
+    // This overload should be fine because multiplication is not implemented in the logarithmic domain.
+    return new Interval(this.value.geometricInverse(), 'logarithmic');
+  }
+
+  abs() {
+    return new Val(this.value.pitchAbs(), this.equave);
+  }
+
+  up(context: RootContext) {
+    const value = this.value.mul(context.up);
+    if (this.node?.type === 'ValLiteral') {
+      const node = {...this.node};
+      node.ups++;
+      const result = new Val(value, this.equave, node);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Val(value, this.equave);
+  }
+
+  down(context: RootContext) {
+    const value = this.value.div(context.up);
+    if (this.node?.type === 'ValLiteral') {
+      const node = {...this.node};
+      node.ups--;
+      const result = new Val(value, this.equave, node);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Val(value, this.equave);
+  }
+
+  lift(context: RootContext) {
+    const value = this.value.mul(context.lift);
+    if (this.node?.type === 'ValLiteral') {
+      const node = {...this.node};
+      node.lifts++;
+      const result = new Val(value, this.equave, node);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Val(value, this.equave);
+  }
+
+  drop(context: RootContext) {
+    const value = this.value.div(context.lift);
+    if (this.node?.type === 'ValLiteral') {
+      const node = {...this.node};
+      node.lifts--;
+      const result = new Val(value, this.equave, node);
+      context.fragiles.push(result);
+      return result;
+    }
+    return new Val(value, this.equave);
+  }
+
+  equals(other: Val) {
+    return this.value.equals(other.value) && this.equave.equals(other.equave);
+  }
+
+  strictEquals(other: Val) {
+    return (
+      this.value.strictEquals(other.value) &&
+      this.equave.strictEquals(other.equave)
+    );
+  }
+
+  add(other: Val) {
+    if (!this.equave.strictEquals(other.equave)) {
+      throw new Error('Val equaves must match in addition');
+    }
+    const node = addNodes(this.node, other.node);
+    const value = this.value.mul(other.value);
+    return new Val(value, this.equave, node);
+  }
+
+  sub(other: Val) {
+    if (!this.equave.strictEquals(other.equave)) {
+      throw new Error('Val equaves must match in subtraction');
+    }
+    const node = subNodes(this.node, other.node);
+    const value = this.value.div(other.value);
+    return new Val(value, this.equave, node);
+  }
+
+  mul(other: Interval) {
+    if (other.domain !== 'linear' || other.value.timeExponent.n) {
+      throw new Error('Only scalar multiplication implemented for vals.');
+    }
+    if (other.node?.type === 'DecimalLiteral' && other.node.flavor === 'r') {
+      const size = this.value.totalCents() * 1200 ** -2;
+      return new Val(
+        TimeMonzo.fromCents(size * other.value.valueOf()),
+        this.equave
+      );
+    }
+    return new Val(this.value.pow(other.value), this.equave);
+  }
+
+  div(other: Interval) {
+    if (other.domain !== 'linear' || other.value.timeExponent.n) {
+      throw new Error('Only scalar multiplication implemented for vals.');
+    }
+    const scalar = other.value.inverse();
+    return new Val(this.value.pow(scalar), this.equave);
+  }
+
+  dot(other: Interval | Val) {
+    if (other instanceof Interval) {
+      return other.dot(this);
+    }
+
+    const product = this.value.dot(other.value);
+    if (product.d === 1) {
+      const value = BigInt(product.s * product.n);
+      return new Interval(TimeMonzo.fromBigInt(value), 'linear', {
+        type: 'IntegerLiteral',
+        value,
+      });
+    }
+    return new Interval(TimeMonzo.fromFraction(product), 'linear', {
+      type: 'FractionLiteral',
+      numerator: BigInt(product.s * product.n),
+      denominator: BigInt(product.d),
+    });
+  }
+
+  toString() {
+    if (this.node) {
+      return literalToString(this.node);
+    }
+    const result = this.value.toString('cologarithmic');
+    if (this.equave.compare(TWO)) {
+      return `withEquave(${result}, ${this.equave.toString()})`;
+    }
+    return result;
+  }
+
+  break() {
+    this.node = undefined;
+  }
+}
 
 export function timeMonzoAs(
   monzo: TimeMonzo,

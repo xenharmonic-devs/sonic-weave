@@ -19,8 +19,16 @@ import {
   IntervalLiteral,
   SparseOffsetVal,
 } from './expression';
-import {Interval, Color, timeMonzoAs, infect, log} from './interval';
-import {TimeMonzo, Domain} from './monzo';
+import {
+  Interval,
+  Color,
+  timeMonzoAs,
+  infect,
+  log,
+  Val,
+  IntervalDomain,
+} from './interval';
+import {TimeMonzo} from './monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from './css-colors';
 import {
@@ -494,65 +502,44 @@ export class StatementVisitor {
         scale[scale.length - 1].color = value;
       }
     } else if (value instanceof Interval) {
-      if (value.domain === 'cologarithmic') {
-        let divisions = value.value.primeExponents[0];
-        let equave = new Fraction(2);
-        let equaveNumerator: number | null = null;
-        let equaveDenominator: number | null = null;
-        if (value?.node?.type === 'WartsLiteral') {
-          divisions = new Fraction(value.node.divisions);
-          const equave_ = inferEquave(value.node);
-          if (!equave_) {
-            throw new Error('Invalid warts equave');
-          }
-          equave = equave_;
-        } else if (value.node?.type === 'SparseOffsetVal') {
-          divisions = new Fraction(value.node.divisions);
-          if (value.node.equave) {
-            equave = new Fraction(value.node.equave);
-          }
-        } else if (value.node?.type === 'ValLiteral') {
-          if (value.node.basis.length) {
-            divisions = subVisitor.visitComponent(value.node.components[0]);
-            equave = new Fraction(value.node.basis[0]);
-          }
+      scale.push(value);
+    } else if (value instanceof Val) {
+      const divisions = value.divisions;
+      const equave = value.equave.toFraction();
+      let equaveNumerator: number | null = null;
+      let equaveDenominator: number | null = null;
+      if (equave.compare(TWO)) {
+        equaveNumerator = equave.n;
+        if (equave.d !== 1) {
+          equaveDenominator = equave.d;
         }
-        if (equave.compare(TWO)) {
-          equaveNumerator = equave.n;
-          if (equave.d !== 1) {
-            equaveDenominator = equave.d;
-          }
-        }
-        const step = new Interval(
-          TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
-          'logarithmic',
-          {
-            type: 'NedjiLiteral',
-            numerator: divisions.d,
-            denominator: divisions.n,
-            equaveNumerator,
-            equaveDenominator,
-          }
-        );
-        const rel = relative.bind(subVisitor);
-        const mapped = scale.map(i => {
-          const v = value as Interval;
-          const t = i.value.tail(v.value.numberOfComponents);
-          const result = rel(i).dot(v).mul(step);
-          if (t.totalCents()) {
-            return new Interval(t, 'logarithmic').add(result);
-          }
-          return result;
-        });
-        for (let i = 0; i < scale.length; ++i) {
-          mapped[i].color = scale[i].color;
-          mapped[i].label = scale[i].label;
-        }
-        scale.length = 0;
-        scale.push(...mapped);
-      } else {
-        scale.push(value);
       }
+      const step = new Interval(
+        TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
+        'logarithmic',
+        {
+          type: 'NedjiLiteral',
+          numerator: divisions.d,
+          denominator: divisions.n,
+          equaveNumerator,
+          equaveDenominator,
+        }
+      );
+      const rel = relative.bind(subVisitor);
+      const mapped = scale.map(i => {
+        const t = i.value.tail(value.value.numberOfComponents);
+        const result = rel(i).dot(value).mul(step);
+        if (t.totalCents()) {
+          return new Interval(t, 'logarithmic').add(result);
+        }
+        return result;
+      });
+      for (let i = 0; i < scale.length; ++i) {
+        mapped[i].color = scale[i].color;
+        mapped[i].label = scale[i].label;
+      }
+      scale.length = 0;
+      scale.push(...mapped);
     } else if (Array.isArray(value)) {
       scale.push(...this.flattenArray(value));
     } else if (value === undefined) {
@@ -779,6 +766,7 @@ export class StatementVisitor {
   }
 }
 
+const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
 const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
@@ -882,7 +870,7 @@ export class ExpressionVisitor {
       case 'CentLiteral':
         return new Interval(CENT_MONZO, 'logarithmic', {type: 'CentLiteral'});
       case 'ReciprocalCentLiteral':
-        return new Interval(RECIPROCAL_CENT_MONZO, 'cologarithmic', {
+        return new Val(RECIPROCAL_CENT_MONZO, TWO_MONZO, {
           type: 'ReciprocalCentLiteral',
         });
       case 'TrueLiteral':
@@ -1012,10 +1000,10 @@ export class ExpressionVisitor {
 
   visitDownExpression(node: DownExpression) {
     const operand = this.visit(node.operand);
-    if (!(operand instanceof Interval)) {
-      throw new Error('Can only apply down arrows to intervals');
+    if (operand instanceof Interval || operand instanceof Val) {
+      return operand.down(this.rootContext);
     }
-    return operand.down(this.rootContext);
+    throw new Error('Can only apply down arrows to intervals and vals');
   }
 
   visitLabeledExpression(node: LabeledExpression) {
@@ -1082,17 +1070,19 @@ export class ExpressionVisitor {
   visitValLiteral(node: ValLiteral) {
     const val = node.components.map(this.visitComponent);
     let value: TimeMonzo;
+    let equave = TWO_MONZO;
     if (node.basis.length) {
       const basis = parseSubgroup(node.basis)[0];
       if (val.length !== basis.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
       value = valToTimeMonzo(val, basis);
+      equave = TimeMonzo.fromFraction(basis[0]);
     } else {
       value = new TimeMonzo(ZERO, val);
     }
     value = this.up(value, node);
-    const result = new Interval(value, 'cologarithmic', node);
+    const result = new Val(value, equave, node);
     if (node.ups) {
       this.rootContext.fragiles.push(result);
     }
@@ -1126,12 +1116,20 @@ export class ExpressionVisitor {
 
   visitWartsLiteral(node: WartsLiteral) {
     const val = wartsToVal(node);
-    return new Interval(val, 'cologarithmic', node);
+    const equave = inferEquave(node);
+    if (!equave) {
+      throw new Error('Failed to infer wart equave.');
+    }
+    return new Val(val, TimeMonzo.fromFraction(equave), node);
   }
 
   visitSparseOffsetVal(node: SparseOffsetVal) {
     const val = sparseOffsetToVal(node);
-    return new Interval(val, 'cologarithmic', node);
+    let equave = TWO_MONZO;
+    if (node.equave) {
+      equave = TimeMonzo.fromFraction(node.equave);
+    }
+    return new Val(val, equave, node);
   }
 
   visitFJS(node: FJS) {
@@ -1268,9 +1266,9 @@ export class ExpressionVisitor {
   }
 
   unaryOperate(
-    operand: Interval | Interval[],
+    operand: Interval | Interval[] | Val,
     node: UnaryExpression
-  ): Interval | Interval[] {
+  ): Interval | Interval[] | Val {
     if (Array.isArray(operand)) {
       const op = this.unaryOperate.bind(this);
       return operand.map(o => op(o, node)) as Interval[];
@@ -1289,11 +1287,13 @@ export class ExpressionVisitor {
           break;
         default:
           // The grammar shouldn't let you get here.
-          throw new Error('Uniform operation not supported');
+          throw new Error('Uniform operation not supported.');
+      }
+      if (operand.domain === 'cologarithmic') {
+        return new Val(value, operand.equave, newNode);
       }
       return new Interval(value, operand.domain, newNode, operand);
     }
-    let newValue: Interval | undefined;
     switch (node.operator) {
       case '+':
         return operand;
@@ -1308,19 +1308,21 @@ export class ExpressionVisitor {
         return operand.lift(this.rootContext);
       case '\\':
         return operand.drop(this.rootContext);
-      case '++':
-        newValue = operand.add(linearOne());
-        break;
-      case '--':
-        newValue = operand.sub(linearOne());
-        break;
+    }
+    if (!(operand instanceof Interval)) {
+      throw new Error('Unsupported unary operation.');
+    }
+    let newValue: Interval | undefined;
+    if (node.operator === '++') {
+      newValue = operand.add(linearOne());
+    } else if (node.operator === '--') {
+      newValue = operand.sub(linearOne());
+    } else {
+      // The runtime shouldn't let you get here.
+      throw new Error('Unexpected unary operation.');
     }
     if (node.operand.type !== 'Identifier') {
       throw new Error('Cannot increment/decrement a value.');
-    }
-    if (!newValue) {
-      // TypeScript plz...
-      throw new Error('Unexpected increment/decrement.');
     }
     const name = node.operand.id;
     this.parent.set(name, newValue);
@@ -1335,10 +1337,14 @@ export class ExpressionVisitor {
     if (node.operator === 'not') {
       return sonicBool(!sonicTruth(operand));
     }
-    if (!(operand instanceof Interval || Array.isArray(operand))) {
-      throw new Error(`${node.operator} can only operate on intervals`);
+    if (
+      operand instanceof Interval ||
+      Array.isArray(operand) ||
+      operand instanceof Val
+    ) {
+      return this.unaryOperate(operand, node);
     }
-    return this.unaryOperate(operand, node);
+    throw new Error(`${node.operator} can only operate on intervals`);
   }
 
   tensor(
@@ -1353,7 +1359,7 @@ export class ExpressionVisitor {
           const value = left.value.mul(right.value);
           return resolvePreference(value, left, right, node, false);
         }
-        return left.mul(right);
+        return left.mul(right) as Interval;
       }
       const tns = this.tensor.bind(this);
       return right.map(r => tns(left, r, node)) as Interval[];
@@ -1580,6 +1586,58 @@ export class ExpressionVisitor {
       }
       operator satisfies never;
     }
+    if (left instanceof Val) {
+      if (right instanceof Val) {
+        switch (operator) {
+          case '===':
+            return sonicBool(left.strictEquals(right));
+          case '!==':
+            return sonicBool(!left.strictEquals(right));
+          case '==':
+            return sonicBool(left.equals(right));
+          case '!=':
+            return sonicBool(!left.equals(right));
+          case '+':
+            return left.add(right);
+          case '-':
+            return left.sub(right);
+          case 'dot':
+            return left.dot(right);
+        }
+        throw new Error(`Operator '${operator}' not implemented between vals.`);
+      }
+      if (right instanceof Interval) {
+        switch (operator) {
+          case '×':
+          case '*':
+          case ' ':
+            return left.mul(right);
+          case '÷':
+          case '%':
+            return left.div(right);
+          case 'dot':
+            return left.dot(right);
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between vals and intervals.`
+        );
+      }
+    }
+    if (right instanceof Val) {
+      if (left instanceof Interval) {
+        switch (operator) {
+          case '×':
+          case '*':
+          case ' ':
+            return left.mul(right);
+          case 'dot':
+            return left.dot(right);
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between intervals and vals.`
+        );
+      }
+    }
     if (
       (left instanceof Interval || Array.isArray(left)) &&
       (right instanceof Interval || Array.isArray(right))
@@ -1760,7 +1818,7 @@ export class ExpressionVisitor {
 
   visitEnumeratedChord(node: EnumeratedChord): Interval[] {
     const intervals: Interval[] = [];
-    const domains: Domain[] = [];
+    const domains: IntervalDomain[] = [];
     const monzos: TimeMonzo[] = [];
     for (const expression of node.intervals) {
       const interval = this.visit(expression);

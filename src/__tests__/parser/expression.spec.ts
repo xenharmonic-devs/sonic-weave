@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {evaluateExpression} from '../../parser';
-import {Color, Interval} from '../../interval';
+import {Color, Interval, Val} from '../../interval';
 import {TimeMonzo} from '../../monzo';
 
 function parseSingle(source: string) {
@@ -105,7 +105,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses vals', () => {
-    const val = parseSingle('<5/3 , -1.001e1]');
+    const val = evaluateExpression('<5/3 , -1.001e1]', false) as Val;
     expect(val.domain).toBe('cologarithmic');
     const pe = val.value.primeExponents;
     expect(pe[0].toFraction()).toBe('5/3');
@@ -269,7 +269,6 @@ describe('SonicWeave expression evaluator', () => {
         'absolute',
         'linear',
         'logarithmic',
-        'cologarithmic',
       ]) {
         const value = parseSingle(
           `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}))`
@@ -801,7 +800,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has explicit subgroups for vals', () => {
-    const fiveGPV = parseSingle('<5, 8, 7]@2.3.13/5');
+    const fiveGPV = evaluateExpression('<5, 8, 7]@2.3.13/5', false) as Val;
     expect(fiveGPV.toString()).toBe('<5 8 7]@2.3.13/5');
     expect(fiveGPV.value.primeExponents.map(pe => pe.toFraction())).toEqual([
       '5',
@@ -900,5 +899,22 @@ describe('SonicWeave expression evaluator', () => {
   it('parses binary nedo over a step literal (call)', () => {
     const tritone = parseSingle('1\\trunc(2.2e)');
     expect(tritone.toString()).toBe('1\\2');
+  });
+
+  it('formats non-standard simplified vals', () => {
+    const orphanBohlenPierce = evaluateExpression('simplify(b13@)') as Val;
+    expect(orphanBohlenPierce.toString()).toBe(
+      'withEquave(<8 13 19 23 28 30 34 35 37], 3)'
+    );
+  });
+
+  it('parses non-standard vals', () => {
+    const orphanBohlenPierce = evaluateExpression(
+      'withEquave(<8 13 19 23], 3)'
+    ) as Val;
+    expect(orphanBohlenPierce.equave.toString()).toBe('3');
+    expect(
+      orphanBohlenPierce.value.primeExponents.map(pe => pe.toFraction())
+    ).toEqual(['8', '13', '19', '23']);
   });
 });

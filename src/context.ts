@@ -1,4 +1,4 @@
-import {type Interval} from './interval';
+import {Val, type Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
 
@@ -9,7 +9,7 @@ export class RootContext {
   lift_: TimeMonzo;
   unisonFrequency?: TimeMonzo;
   gas: number;
-  fragiles: Interval[];
+  fragiles: (Interval | Val)[];
 
   constructor(gas?: number) {
     this.title = '';

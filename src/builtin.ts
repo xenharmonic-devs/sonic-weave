@@ -13,7 +13,7 @@ import {
   centsToNats,
   BIG_INT_PRIMES,
 } from 'xen-dev-utils';
-import {Color, Interval} from './interval';
+import {Color, Interval, Val} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {type ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
@@ -33,6 +33,7 @@ export type SonicWeaveValue =
   | SonicWeaveFunction
   | Interval
   | Interval[]
+  | Val
   | Color
   | string
   | undefined;
@@ -153,7 +154,10 @@ mosSubset.__node__ = builtinNode(mosSubset);
 
 // == Domain conversion ==
 
-export function simplify(interval: Interval) {
+export function simplify(interval: Interval | Val) {
+  if (interval instanceof Val) {
+    return new Val(interval.value.clone(), interval.equave.clone());
+  }
   return new Interval(
     interval.value.clone(),
     interval.domain,
@@ -188,12 +192,7 @@ logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
 export function cologarithmic(interval: Interval) {
-  return new Interval(
-    interval.value.clone(),
-    'cologarithmic',
-    undefined,
-    interval
-  );
+  return new Val(interval.value.clone(), interval.value.clone());
 }
 cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
 cologarithmic.__node__ = builtinNode(cologarithmic);
@@ -579,13 +578,24 @@ function labelOf(interval: Interval) {
 labelOf.__doc__ = 'Return the label of the interval.';
 labelOf.__node__ = builtinNode(labelOf);
 
+function equaveOf(val: Val) {
+  return new Interval(val.equave.clone(), 'linear');
+}
+equaveOf.__doc__ = 'Return the equave of the val.';
+equaveOf.__node__ = builtinNode(equaveOf);
+
+function withEquave(val: Val, equave: Interval) {
+  return new Val(val.value.clone(), equave.value.clone());
+}
+withEquave.__doc__ = 'Change the equave of the val.';
+withEquave.__node__ = builtinNode(withEquave);
+
 function cosJIP(
   this: ExpressionVisitor,
-  interval: Interval,
+  val: Val,
   weighting: 'none' | 'tenney' = 'tenney'
 ) {
-  const monzo = relative.bind(this)(interval).value;
-  const pe = monzo.primeExponents.map(e => e.valueOf());
+  const pe = val.value.primeExponents.map(e => e.valueOf());
   let value = 0;
   if (weighting.toLowerCase() === 'tenney') {
     let n2 = 0;
@@ -600,12 +610,7 @@ function cosJIP(
     const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
     value = dot(LOG_PRIMES, pe) / peNorm / jipNorm;
   }
-  return new Interval(
-    TimeMonzo.fromValue(value),
-    'linear',
-    undefined,
-    interval
-  );
+  return new Interval(TimeMonzo.fromValue(value), 'linear');
 }
 cosJIP.__doc__ =
   'Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".';
@@ -1250,7 +1255,7 @@ function repr_(
   if (typeof value === 'string') {
     return JSON.stringify(value);
   }
-  if (value instanceof Color) {
+  if (value instanceof Color || value instanceof Val) {
     return value.toString();
   }
   return `${value}`;
@@ -1467,6 +1472,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   tail,
   colorOf,
   labelOf,
+  equaveOf,
+  withEquave,
   cosJIP,
   JIP,
   PrimeMapping,
