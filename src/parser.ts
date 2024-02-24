@@ -998,33 +998,61 @@ export class ExpressionVisitor {
     return new Interval(value, 'logarithmic', node);
   }
 
-  visitDownExpression(node: DownExpression) {
-    const operand = this.visit(node.operand);
+  down(operand: Interval | Interval[] | Val): Interval | Interval[] | Val {
     if (operand instanceof Interval || operand instanceof Val) {
       return operand.down(this.rootContext);
+    }
+    return operand.map(this.down.bind(this)) as Interval[];
+  }
+
+  visitDownExpression(node: DownExpression) {
+    const operand = this.visit(node.operand);
+    if (
+      operand instanceof Interval ||
+      operand instanceof Val ||
+      Array.isArray(operand)
+    ) {
+      return this.down(operand);
     }
     throw new Error('Can only apply down arrows to intervals and vals');
   }
 
+  label(
+    object: Interval | Interval[],
+    labels: (string | Color | undefined)[]
+  ): Interval | Interval[] {
+    if (object instanceof Interval) {
+      object = object.shallowClone();
+      for (const label of labels) {
+        if (typeof label === 'string') {
+          object.label = label;
+        } else if (label instanceof Color) {
+          object.color = label;
+        } else {
+          object.color = undefined;
+        }
+      }
+      return object;
+    }
+    const l = this.label.bind(this);
+    return object.map(o => l(o, labels)) as Interval[];
+  }
+
   visitLabeledExpression(node: LabeledExpression) {
-    let object = this.visit(node.object);
-    if (!(object instanceof Interval)) {
+    const object = this.visit(node.object);
+    if (!(object instanceof Interval || Array.isArray(object))) {
       throw new Error('Labels can only be applied to intervals');
     }
-    object = object.shallowClone();
+    const labels: (string | Color | undefined)[] = [];
     for (const label of node.labels) {
       const l = this.visit(label);
-      if (typeof l === 'string') {
-        object.label = l;
-      } else if (l instanceof Color) {
-        object.color = l;
-      } else if (l === undefined) {
-        object.color = undefined;
+      if (l instanceof Color || typeof l === 'string' || l === undefined) {
+        labels.push(l);
       } else {
         throw new Error('Labels must be strings, colors or niente.');
       }
     }
-    return object;
+    return this.label(object, labels);
   }
 
   visitConditionalExpression(node: ConditionalExpression) {

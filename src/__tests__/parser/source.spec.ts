@@ -846,4 +846,19 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('/400.:300.:234.5;str');
     expect(scale).toEqual(['100.', '165.5']);
   });
+
+  it('vectorizes ups', () => {
+    const scale = parseSource('^[M3, P5];str');
+    expect(scale).toEqual(['^M3', '^P5']);
+  });
+
+  it('vectorizes down expressions', () => {
+    const scale = parseSource('v{[M3, P5]};str');
+    expect(scale).toEqual(['vM3', 'vP5']);
+  });
+
+  it('vectorizes labels', () => {
+    const scale = parseSource('[1, 2] green;repr');
+    expect(scale).toEqual(['(1 green)', '(2 green)']);
+  });
 });
