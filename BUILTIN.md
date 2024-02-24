@@ -89,7 +89,7 @@ Combine two or more arrays/strings.
 Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".
 #### Parameters:
 
-`interval`, `weighting = "tenney"`
+`val`, `weighting = "tenney"`
 
 ### decimal
 Convert interval to a decimal number.
@@ -120,6 +120,12 @@ Obtain the docstring of the given riff.
 #### Parameters:
 
 `riff`
+
+### equaveOf
+Return the equave of the val.
+#### Parameters:
+
+`val`
 
 ### extend
 Extend the first array with the contents of the rest.
@@ -482,6 +488,12 @@ Prepend an interval at the beginning of the current/given scale.
 #### Parameters:
 
 `interval`, `scale`
+
+### withEquave
+Change the equave of the val.
+#### Parameters:
+
+`val`, `equave`
 
 ### zip
 Combine elements of each array into tuples until one of them is exhausted.
