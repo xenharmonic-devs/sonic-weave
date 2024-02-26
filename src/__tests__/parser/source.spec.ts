@@ -861,4 +861,16 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('[1, 2] green;repr');
     expect(scale).toEqual(['(1 green)', '(2 green)']);
   });
+
+  it('can notate 311p using syntonic rastmic subchroma inflections', () => {
+    const scale = parseSource('P1^1s;P1^2s;P1^3s;P1^4s;P1^23s;½A1_9s;311@;str');
+    expect(scale).toEqual([
+      '1\\311',
+      '2\\311',
+      '3\\311',
+      '4\\311',
+      '5\\311',
+      '6\\311',
+    ]);
+  });
 });

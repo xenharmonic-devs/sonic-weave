@@ -31,6 +31,32 @@ Updated 2020 version by Marc Sabat and Thomas Nicholson as defined on [XenWiki](
 | `83h` | `256/249`   | `+47.998`     |
 | `89h` | `729/712`   | `+40.850`     |
 
+## Syntonic rastmic subchroma notation
+
+These inflections follow [Aura's definitions](https://en.xen.wiki/w/Syntonic-rastmic_subchroma_notation) and combine nicely with implicit tempering for easy notation of many equal temperaments.
+
+| Identifier | Name              | Comma           | Size in cents |
+| ---------- | ----------------- | --------------- | ------------- |
+| `1s`       | Demirasharp*      | `sqrt(243/242)` | `+3.570`      |
+| `2s`       | Rasharp           | `243/242`       | `+7.139`      |
+| `3s`       | Demisynsharp      | `sqrt(81/80)`   | `+10.753`     |
+| `4s`       | Double rasharp    | `243/242 ^ 2`   | `+14.278`     |
+| `6s`       | Synsharp          | `81/80`         | `+21.506`     |
+| `8s`       | Quadruple rasharp | `243/242 ^ 4`   | `+28.556`     |
+| `9s`       | Sesquisynsharp    | `81/80 ^ 3/2`   | `+32.259`     |
+
+\*) Aura uses the *demi-* prefix while the rest of SonicWeave prefers *semi-* but this has no effect on the syntax.
+
+The identifiers stack using concatenation. `C4^12s` is the same as `C4^1s^2s`.
+
+These inflections are designed to be combined with the semisharp `t` and the semiflat `d` A.K.A. demisharp and demiflat to reach rationals. E.g. The tendodemisharp C4 is notated `Ct4^1s` while the artodemisharp C4 is notated `Ct4_1s`.
+
+Remember that the relative counterparts of demisharp intervals are notated using `½d`, `n` and `½A`. E.g. the tendodemiaugmented unison (`729/704`) is notated `½A1^1s` and the artoneutral third (`11/9`) is notated `n3_1s`.
+
+Note that `^1s` coincides with `_11n` from FJS, while `^3s` is a novel inflection not found anywhere else.
+
+The use of the prefixes "semidiminished" (`sd`) and "semiaugmented" (`sA`) are discouraged when using Syntonic rastmic subchroma inflections.
+
 ## HEWM-53
 
 A [variant](http://www.tonalsoft.com/enc/h/hewm.aspx) of Helmholtz-Ellis by Joseph Monzo and Daniel Wolf.

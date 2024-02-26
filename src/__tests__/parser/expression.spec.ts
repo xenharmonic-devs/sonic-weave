@@ -960,4 +960,24 @@ describe('SonicWeave expression evaluator', () => {
     const ohno = parseSingle('sm2^0l');
     expect(ohno.value.toFraction().toFraction()).toBe('15/14');
   });
+
+  it('has syntonic rastmic subchroma notation (relative artodemisharp)', () => {
+    const artodemi = parseSingle('sA1_1s');
+    expect(artodemi.value.toFraction().toFraction()).toBe('33/32');
+  });
+
+  it('has syntonic rastmic subchroma notation (absolute tendodemisharp)', () => {
+    const artodemi = parseSingle('C4 = 1/1;Ct4^1s');
+    expect(artodemi.value.toFraction().toFraction()).toBe('729/704');
+  });
+
+  it('has syntonic rastmic subchroma notation (relative sesquiraflat)', () => {
+    const srf = parseSingle('P1_12s');
+    const monzo = srf.value.primeExponents;
+    expect(monzo[0].equals('3/2')).toBe(true);
+    expect(monzo[1].equals('-15/2')).toBe(true);
+    expect(monzo[2].equals('0')).toBe(true);
+    expect(monzo[3].equals('0')).toBe(true);
+    expect(monzo[4].equals('3')).toBe(true);
+  });
 });
