@@ -694,6 +694,22 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('supports multiple superscripts on FJS', () => {
+    const ast = parseSingle('M2^5^7');
+    expect(ast.expression.superscripts).toEqual([
+      [5, ''],
+      [7, ''],
+    ]);
+  });
+
+  it('supports multiple subcripts on AbsoluteFJS', () => {
+    const ast = parseSingle('Fb4_5_5');
+    expect(ast.expression.subscripts).toEqual([
+      [5, ''],
+      [5, ''],
+    ]);
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

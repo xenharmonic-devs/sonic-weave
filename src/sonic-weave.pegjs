@@ -1023,21 +1023,53 @@ SplitDemisemipythagorean
 
 InflectionFlavor = 'n' / ''
 
-PrimeInflections
+Inflections
   = (PositiveBasicInteger InflectionFlavor)|.., ','|
+
+Superscripts
+  = '^' inflections: Inflections {
+    return {
+      type: 'Superscript',
+      inflections,
+    };
+  }
+
+Subscripts
+  = '_' inflections: Inflections {
+    return {
+      type: 'Subscript',
+      inflections,
+    };
+  }
+
+Hyperscripts
+  = hyperscripts: (Superscripts / Subscripts)* {
+    const superscripts = [];
+    const subscripts = [];
+    for (const h of hyperscripts) {
+      if (h.type === 'Superscript') {
+        superscripts.push(...h.inflections);
+      } else {
+        subscripts.push(...h.inflections);
+      }
+    }
+    return {
+      superscripts,
+      subscripts,
+    };
+  }
 
 FJS
   = downs: 'v'*
     pythagorean: SplitDemisemipythagorean
-    superscripts: ('^' @PrimeInflections)?
-    subscripts: ('_' @PrimeInflections)? {
+    hyperscripts: Hyperscripts {
     return {
       type: 'FJS',
       ups: -downs.length,
       lifts: 0,
       pythagorean,
-      superscripts: superscripts ?? [],
-      subscripts: subscripts ?? [],
+      superscripts: hyperscripts.superscripts,
+      subscripts: hyperscripts.subscripts,
     };
   }
 
@@ -1060,15 +1092,14 @@ AbsolutePitch
 AbsoluteFJS
   = downs: 'v'*
     pitch: AbsolutePitch
-    superscripts: ('^' @PrimeInflections)?
-    subscripts: ('_' @PrimeInflections)? {
+    hyperscripts: Hyperscripts {
     return {
       type: 'AbsoluteFJS',
       ups: -downs.length,
       lifts: 0,
       pitch,
-      superscripts: superscripts ?? [],
-      subscripts: subscripts ?? [],
+      superscripts: hyperscripts.superscripts,
+      subscripts: hyperscripts.subscripts,
     };
   }
 
