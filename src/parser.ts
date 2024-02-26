@@ -43,6 +43,7 @@ import {
   SonicWeaveFunction,
   repr,
   compare,
+  PRELUDE_VOLATILES,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -2007,6 +2008,11 @@ export function getSourceVisitor(includePrelude = true) {
   const rootContext = new RootContext();
   if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE) {
     const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
+    // Volatiles depend on the active root context.
+    const volatiles = parseAST(PRELUDE_VOLATILES);
+    for (const statement of volatiles.body) {
+      visitor.visit(statement);
+    }
     visitor.rootContext = rootContext;
     return visitor;
   } else if (!includePrelude && SOURCE_VISITOR_NO_PRELUDE) {
@@ -2029,6 +2035,11 @@ export function getSourceVisitor(includePrelude = true) {
         visitor.visit(statement);
       }
       SOURCE_VISITOR_WITH_PRELUDE = visitor.clone();
+      // Volatiles depend on the active root context.
+      const volatiles = parseAST(PRELUDE_VOLATILES);
+      for (const statement of volatiles.body) {
+        visitor.visit(statement);
+      }
       return visitor;
     } else {
       SOURCE_VISITOR_NO_PRELUDE = visitor.clone();

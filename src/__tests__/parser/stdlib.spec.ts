@@ -896,4 +896,9 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('geodiff(4:5:6:7);str');
     expect(scale).toEqual(['5/4', '6/5', '7/6']);
   });
+
+  it('can declare reference frequency at the same time as reference pitch', () => {
+    const two = evaluateExpression('A=4 = 440z = 1/1; str(relin(A=5))');
+    expect(two).toBe('2');
+  });
 });

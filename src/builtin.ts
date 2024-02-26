@@ -1525,8 +1525,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   factorColor,
 };
 
-export const PRELUDE_SOURCE = `
-// == Functions ==
+export const PRELUDE_VOLATILES = `
 riff ablin interval {
   "Convert interval to absolute linear representation.";
   return absolute(linear(interval));
@@ -1546,7 +1545,10 @@ riff relog interval {
   "Convert interval to relative logarithmic representation.";
   return relative(logarithmic(interval));
 }
+`;
 
+export const PRELUDE_SOURCE = `
+// == Functions ==
 riff sanitize interval {
   "Get rid of interval formatting, color and label.";
   return bleach(simplify(interval));
