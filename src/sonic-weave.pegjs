@@ -1022,10 +1022,10 @@ SplitDemisemipythagorean
     };
   }
 
-InflectionFlavor = 'n' / ''
+InflectionFlavor = 'n' / 'l' / 'h' / 'm' / ''
 
 Inflections
-  = (PositiveBasicInteger InflectionFlavor)|.., ','|
+  = (BasicInteger InflectionFlavor)|.., ','|
 
 Superscripts
   = '^' inflections: Inflections {
