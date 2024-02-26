@@ -31,7 +31,8 @@ You can read more about domains and echelons [below](#interval-type-system).
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
 | Frequency    | `440 Hz`, `2.2 kHz`     | Linear        | Absolute | Absolute frequency of oscillation. |
-| Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System).
+| Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System). |
+| S-expression | `S8`, `S5..8`           | Logarithmic   | Relative | Additive spelling of [square superparticulars](https://en.xen.wiki/w/Square_superparticular). |
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative | Used to temper scales. |
 | Warts        | `12@`, `29@2.3.13/5`    | Cologarithmic | Relative | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 
@@ -305,6 +306,15 @@ The first few prime harmonics in FJS are:
 | `17/16`           | `m2^17` | `D♭4^17`     |
 | `19/16`           | `m3^19` | `E♭4^19`     |
 | `23/16`           | `A4^23` | `F♯4^23`     |
+
+### S-expressions
+SonicWeave uses the logarithmic domain for [S-expressions](https://en.xen.wiki/w/Square_superparticular) in order to make them compatible with FJS.
+
+So a linear fact like S9 = S6/S8 is expressed as `S9 === S6-S8` in SonicWeave.
+
+Sums of consecutive S-expressions use the range syntax. E.g. `logarithmic(10/9)` is equivalent to `S5..8` i.e. `logarithmic(25/24 * 36/35 * 49/48 * 64/63)`
+
+In combination with FJS we can now spell `10/7` as `A4+S8-S9` or `12/11` as `M2-S9..11`.
 
 ## Interval type system
 The interval type system is fairly complex in order to accomodate all types of quantities that can refer to musical pitch or frequency.

@@ -669,6 +669,7 @@ Primary
   / ColorLiteral
   / FJS
   / AbsoluteFJS
+  / SquareSuperparticular
   / ArrowFunction
   / Identifier
   / ArrayLiteral
@@ -1103,6 +1104,15 @@ AbsoluteFJS
     };
   }
 
+SquareSuperparticular
+  = 'S' start: Integer end: ('..' @Integer)? {
+    return {
+      type: 'SquareSuperparticular',
+      start,
+      end,
+    };
+  }
+
 ArrowFunction
   = parameters: Parameters _ '=>' _ expression: Expression {
     return {
@@ -1114,7 +1124,7 @@ ArrowFunction
   }
 
 Identifier
-  = !(ReservedWord / FJS / AbsoluteFJS) id: IdentifierName {
+  = !(ReservedWord / FJS / AbsoluteFJS / SquareSuperparticular) id: IdentifierName {
     return {
       type: 'Identifier',
       id,

@@ -151,6 +151,12 @@ export type ValLiteral = {
   basis: string[];
 };
 
+export type SquareSuperparticular = {
+  type: 'SquareSuperparticular';
+  start: bigint;
+  end: bigint | null;
+};
+
 export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
@@ -172,7 +178,8 @@ export type IntervalLiteral =
   | MonzoLiteral
   | ValLiteral
   | SparseOffsetVal
-  | WartsLiteral;
+  | WartsLiteral
+  | SquareSuperparticular;
 
 export function validateNode(node?: IntervalLiteral) {
   if (!node) {
@@ -539,6 +546,13 @@ function formatVal(literal: ValLiteral) {
   return result;
 }
 
+function formatSquareSuperparticular(literal: SquareSuperparticular) {
+  if (literal.end) {
+    return `S${literal.start}..${literal.end}`;
+  }
+  return `S${literal.start}`;
+}
+
 export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedjiLiteral':
@@ -581,6 +595,8 @@ export function literalToString(literal: IntervalLiteral) {
       return formatVal(literal);
     case 'IntegerLiteral':
       return literal.value.toString();
+    case 'SquareSuperparticular':
+      return formatSquareSuperparticular(literal);
     default:
       throw new Error(`Cannot format ${literal.type}`);
   }

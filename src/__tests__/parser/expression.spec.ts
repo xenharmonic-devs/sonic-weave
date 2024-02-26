@@ -917,4 +917,22 @@ describe('SonicWeave expression evaluator', () => {
       orphanBohlenPierce.value.primeExponents.map(pe => pe.toFraction())
     ).toEqual(['8', '13', '19', '23']);
   });
+
+  it('has square superparticulars', () => {
+    const archy = parseSingle('S8');
+    expect(archy.domain).toBe('logarithmic');
+    expect(archy.value.toFraction().toFraction()).toBe('64/63');
+  });
+
+  it('does S-expressions in the logarithmic domain', () => {
+    const syntonic = parseSingle('S6-S8');
+    expect(syntonic.domain).toBe('logarithmic');
+    expect(syntonic.value.toFraction().toFraction()).toBe('81/80');
+  });
+
+  it('can use square superparticulars as inflections', () => {
+    const n2 = parseSingle('M2-S9..11');
+    expect(n2.domain).toBe('logarithmic');
+    expect(n2.value.toFraction().toFraction()).toBe('12/11');
+  });
 });

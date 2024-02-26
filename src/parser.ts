@@ -18,6 +18,7 @@ import {
   StepLiteral,
   IntervalLiteral,
   SparseOffsetVal,
+  SquareSuperparticular,
 } from './expression';
 import {
   Interval,
@@ -921,8 +922,33 @@ export class ExpressionVisitor {
         throw new Error('Unexpected aspiring absolute FJS');
       case 'ArrayComprehension':
         return this.visitArrayComprehension(node);
+      case 'SquareSuperparticular':
+        return this.visitSquareSuperparticular(node);
     }
     node satisfies never;
+  }
+
+  visitSquareSuperparticular(node: SquareSuperparticular) {
+    if (node.end) {
+      let numerator = 1n;
+      let denominator = 1n;
+      for (let i = node.start; i <= node.end; ++i) {
+        const s = i * i;
+        numerator *= s;
+        denominator *= s - 1n;
+      }
+      return new Interval(
+        TimeMonzo.fromBigNumeratorDenominator(numerator, denominator),
+        'logarithmic',
+        node
+      );
+    }
+    const s = node.start * node.start;
+    return new Interval(
+      TimeMonzo.fromBigNumeratorDenominator(s, s - 1n),
+      'logarithmic',
+      node
+    );
   }
 
   visitArrayComprehension(node: ArrayComprehension) {
