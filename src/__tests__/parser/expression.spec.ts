@@ -935,4 +935,29 @@ describe('SonicWeave expression evaluator', () => {
     expect(n2.domain).toBe('logarithmic');
     expect(n2.value.toFraction().toFraction()).toBe('12/11');
   });
+
+  it('has Helmholtz-Ellis 2020 comma flavors', () => {
+    const h17 = parseSingle('A1_17h');
+    expect(h17.value.toFraction().toFraction()).toBe('17/16');
+  });
+
+  it("has richie's HEJI extension", () => {
+    const h71 = parseSingle('M2_71h');
+    expect(h71.value.toFraction().toFraction()).toBe('71/64');
+  });
+
+  it('has wolf-monzo variant', () => {
+    const h17 = parseSingle('M2_17m');
+    expect(h17.value.toFraction().toFraction()).toBe('17/16');
+  });
+
+  it("has Lumi's bridging commas (island)", () => {
+    const semifourth = parseSingle('C4 = 1/1;φ4_3l');
+    expect(semifourth.value.toFraction().toFraction()).toBe('15/13');
+  });
+
+  it("has Lumi's bridging commas (memes)", () => {
+    const ohno = parseSingle('sm2^0l');
+    expect(ohno.value.toFraction().toFraction()).toBe('15/14');
+  });
 });

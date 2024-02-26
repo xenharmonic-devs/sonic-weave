@@ -9,6 +9,7 @@ import {
 import {TimeMonzo} from './monzo';
 import {AbsoluteFJS, FJS, FJSInflection} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
+import {getHEWM53, getHelmholtzEllis, getLumisComma} from './extra-commas';
 
 const ZERO = new Fraction(0);
 
@@ -146,22 +147,38 @@ export function getInflection(
 ) {
   let result = TimeMonzo.fromFraction(1);
   for (const [s, flavor] of superscripts) {
+    if (flavor === 'l') {
+      result = result.mul(getLumisComma(s));
+      continue;
+    }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
       if (flavor === '') {
         result = result.mul(getFormalComma(i).pow(monzo[i]));
-      } else {
+      } else if (flavor === 'n') {
         result = result.mul(getNeutralComma(i).pow(monzo[i]));
+      } else if (flavor === 'h') {
+        result = result.mul(getHelmholtzEllis(i).pow(monzo[i]));
+      } else {
+        result = result.mul(getHEWM53(i).pow(monzo[i]));
       }
     }
   }
   for (const [s, flavor] of subscripts) {
+    if (flavor === 'l') {
+      result = result.div(getLumisComma(s));
+      continue;
+    }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
       if (flavor === '') {
         result = result.div(getFormalComma(i).pow(monzo[i]));
-      } else {
+      } else if (flavor === 'n') {
         result = result.div(getNeutralComma(i).pow(monzo[i]));
+      } else if (flavor === 'h') {
+        result = result.div(getHelmholtzEllis(i).pow(monzo[i]));
+      } else {
+        result = result.div(getHEWM53(i).pow(monzo[i]));
       }
     }
   }
