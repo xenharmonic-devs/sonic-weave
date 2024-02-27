@@ -1747,11 +1747,11 @@ export class ExpressionVisitor {
     if (node.callee.type === 'Identifier') {
       const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
       return callee.bind(this)(...args);
-    } else if (node.callee.type === 'ArraySlice') {
-      throw new Error('Cannot call array slices.');
-    } else {
+    } else if (node.callee.type === 'ArrayAccess') {
       const callee = this.visitArrayAccess(node.callee);
       return (callee as SonicWeaveFunction).bind(this)(...args);
+    } else {
+      throw new Error('Invalid callee.');
     }
   }
 

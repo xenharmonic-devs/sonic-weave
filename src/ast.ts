@@ -236,8 +236,7 @@ export type Argument = {
 
 export type CallExpression = {
   type: 'CallExpression';
-  // Slicing is legal in the grammar, but not in the runtime.
-  callee: Identifier | ArrayAccess | ArraySlice;
+  callee: Expression;
   args: Argument[];
 };
 

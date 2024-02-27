@@ -986,4 +986,13 @@ describe('SonicWeave expression evaluator', () => {
     expect(M2.toString()).toBe('M2^19m');
     expect(M2.value.toFraction().toFraction()).toBe('19/16');
   });
+
+  it('can parenthesize nedo denominator', () => {
+    const almostOctave = parseSingle('1\\ (13/12)');
+    expect(almostOctave.value.primeExponents[0].toFraction()).toBe('12/13');
+  });
+
+  it("doesn't let you call step literals", () => {
+    expect(() => parseSingle('(1\\)(13/12)')).toThrow('Invalid callee.');
+  });
 });
