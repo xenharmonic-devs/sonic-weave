@@ -9,7 +9,12 @@ import {
 import {TimeMonzo} from './monzo';
 import {AbsoluteFJS, FJS, FJSInflection} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
-import {getHEWM53, getHelmholtzEllis, getLumisComma} from './extra-commas';
+import {
+  getHEWM53,
+  getHelmholtzEllis,
+  getLumisComma,
+  getSyntonicRastmic,
+} from './extra-commas';
 
 const ZERO = new Fraction(0);
 
@@ -150,6 +155,9 @@ export function getInflection(
     if (flavor === 'l') {
       result = result.mul(getLumisComma(s));
       continue;
+    } else if (flavor === 's') {
+      result = result.mul(getSyntonicRastmic(s));
+      continue;
     }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
@@ -167,6 +175,9 @@ export function getInflection(
   for (const [s, flavor] of subscripts) {
     if (flavor === 'l') {
       result = result.div(getLumisComma(s));
+      continue;
+    } else if (flavor === 's') {
+      result = result.div(getSyntonicRastmic(s));
       continue;
     }
     const monzo = toMonzo(s);

@@ -2,6 +2,23 @@ import {Fraction, PRIMES} from 'xen-dev-utils';
 import {TimeMonzo, getNumberOfComponents} from './monzo';
 import {ZERO} from './utils';
 
+// https://en.xen.wiki/w/Syntonic-rastmic_subchroma_notation
+const SYNTONIC_RASTMIC = {
+  // Note: x, t#, #, t, d, b, db and bb are already part of FJS.
+  '1': ['-1/2', '5/2', '0', '0', '-1'], // Demirasharp ('^1s' for eleven)
+  '2': ['-1', '5', '0', '0', '-2'], // Rasharp ('^2s' for twice '^1s')
+  '4': ['-2', '10', '0', '0', '-4'], // Double rasharp ('^4s' for twice '^2s')
+  '8': ['-4', '20', '0', '0', '-8'], // Quadruple rasharp ('^8s' for twice '^4s')
+  '3': ['-2', '2', '-1/2'], // Demisynsharp ('^3s' for about thrice '^1s')
+  '6': ['-4', '4', '-1'], // Synsharp ('^6s' for twice '^3s')
+  '9': ['-6', '6', '-3/2'], // Sesqui-synsharp ('^9s' for thrice '^3s')
+
+  // ^5s and ^7s left undefined on purpose due to ambiguity.
+
+  // Combination rule: Identifiers stack.
+  // '^12s' = Sesqui rasharp, equal to '^1s^2s'
+};
+
 // Lumi's irrational collection
 const LUMIS_COMMAS = {
   // For 15/14 ~ sm2^0l
@@ -71,7 +88,30 @@ const HEWM53 = {
   '53': '54/53',
 };
 
-const LUMIS_MAP = new Map<number, TimeMonzo>();
+const UNITY = TimeMonzo.fromFraction(1);
+
+const SYNTONIC_RASTMIC_MAP = new Map<string, TimeMonzo>();
+
+for (const [key, value] of Object.entries(SYNTONIC_RASTMIC)) {
+  const monzo = new TimeMonzo(
+    ZERO,
+    value.map(f => new Fraction(f))
+  );
+  monzo.numberOfComponents = getNumberOfComponents();
+  SYNTONIC_RASTMIC_MAP.set(key, monzo);
+}
+
+export function getSyntonicRastmic(id: number) {
+  let result = UNITY;
+  for (const key of id.toString()) {
+    if (SYNTONIC_RASTMIC_MAP.has(key)) {
+      result = result.mul(SYNTONIC_RASTMIC_MAP.get(key)!);
+    }
+  }
+  return result;
+}
+
+const LUMIS_MAP = new Map<string, TimeMonzo>();
 
 for (const [key, value] of Object.entries(LUMIS_COMMAS)) {
   const monzo = new TimeMonzo(
@@ -79,16 +119,17 @@ for (const [key, value] of Object.entries(LUMIS_COMMAS)) {
     value.map(f => new Fraction(f))
   );
   monzo.numberOfComponents = getNumberOfComponents();
-  LUMIS_MAP.set(parseInt(key, 10), monzo);
+  LUMIS_MAP.set(key, monzo);
 }
 
-const UNITY = TimeMonzo.fromFraction(1);
-
 export function getLumisComma(id: number) {
-  if (LUMIS_MAP.has(id)) {
-    return LUMIS_MAP.get(id)!;
+  let result = UNITY;
+  for (const key of id.toString()) {
+    if (LUMIS_MAP.has(key)) {
+      result = result.mul(LUMIS_MAP.get(key)!);
+    }
   }
-  return UNITY;
+  return result;
 }
 
 const HELMHOLTZ_ELLIS_ARRAY = [UNITY, UNITY];

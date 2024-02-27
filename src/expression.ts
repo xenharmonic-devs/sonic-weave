@@ -2,7 +2,7 @@ import {MetricPrefix, validateBigInt} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
-export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm';
+export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm' | 's';
 
 export type FJSInflection = [number, FJSFlavor];
 
