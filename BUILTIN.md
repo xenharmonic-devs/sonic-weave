@@ -886,6 +886,24 @@ Stack the current/given scale on top of itself.
 
 `times`, `scale`
 
+### replace
+Replace occurences of `interval` in the current/given scale by `replacement`.
+#### Parameters:
+
+`interval`, `replacement`, `scale`
+
+### replaced
+Obtain a copy of the current/given scale with occurences of `interval` replaced by `replacement`.
+#### Parameters:
+
+`interval`, `replacement`, `scale`
+
+### replaceStep
+Replace relative occurences of `step` in the current/given scale by `replacement`.
+#### Parameters:
+
+`step`, `replacement`, `scale`
+
 ### retrovert
 Retrovert the current/given scale (negative harmony i.e reflect and transpose).
 #### Parameters:
@@ -945,6 +963,12 @@ Cumulatively stack the current/given intervals on top of each other.
 #### Parameters:
 
 `array`
+
+### stepReplaced
+Obtain a copy of the current/given scale with relative occurences of `step` replaced by `replacement`.
+#### Parameters:
+
+`step`, `replacement`, `scale`
 
 ### stretch
 Stretch the current/given scale by the given amount. A value of `1` corresponds to no change.

@@ -921,4 +921,20 @@ describe('SonicWeave standard library', () => {
     const D4 = evaluateExpression('C4 = 1/1;str(absoluteHEJI(73/64))');
     expect(D4).toBe('D♮4^73h');
   });
+
+  it('can replace all occurences of a relative step with others', () => {
+    const splitCPS = parseSource(
+      'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33]);str'
+    );
+    expect(splitCPS).toEqual([
+      '11/10',
+      '7/6',
+      '5/4',
+      '11/8',
+      '35/24',
+      '5/3',
+      '7/4',
+      '2',
+    ]);
+  });
 });

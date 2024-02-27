@@ -2392,4 +2392,39 @@ riff coalesce tolerance action scale {
   coalesced(tolerance, action, scale);
   return;
 }
+
+riff replaced interval replacement scale {
+  "Obtain a copy of the current/given scale with occurences of \`interval\` replaced by \`replacement\`.";
+  scale ??= $$;
+  for (const existing of scale) {
+    if (existing === interval) {
+      replacement;
+    } else {
+      existing;
+    }
+  }
+}
+
+riff replace interval replacement scale {
+  "Replace occurences of \`interval\` in the current/given scale by \`replacement\`.";
+  $ = scale ?? $$;
+  scale = $[..];
+  clear();
+  replaced(interval, replacement, scale);
+  return;
+}
+
+riff replaceStep step replacement scale {
+  "Replace relative occurences of \`step\` in the current/given scale by \`replacement\`.";
+  $ = scale ?? $$;
+  unstack();
+  replace(step, replacement);
+  stack();
+  return;
+}
+
+riff stepReplaced step replacement scale {
+  "Obtain a copy of the current/given scale with relative occurences of \`step\` replaced by \`replacement\`.";
+  return cumprod(replaced(step, replacement, geodiff(scale)));
+}
 `;
