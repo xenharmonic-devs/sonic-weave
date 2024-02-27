@@ -1757,20 +1757,29 @@ riff antiperiodiff constantOfIntegration array {
 }
 
 riff label labels scale {
-  "Apply labels (or colors) from the first array to the current/given scale.";
+  "Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.";
   scale ??= $$;
-  let i = -1;
-  while (++i < length(labels) min length(scale))
-    scale[i] = scale[i] labels[i];
+  if (isArray(labels)) {
+    let i = -1;
+    while (++i < length(labels) min length(scale))
+      scale[i] = scale[i] labels[i];
+  } else {
+    remap(i => i labels, scale);
+  }
 }
 
 riff labeled labels scale {
-  "Apply labels (or colors) from the first array to a copy of the current/given scale.";
+  "Apply labels (or colors) from the first array to a copy of the current/given scale. Can also apply a single color to the whole scale.";
   scale ??= $$;
-  for (const [i l] of zip(scale, labels)) {
-    i l;
+  if (isArray(labels)) {
+    for (const [i l] of zip(scale, labels)) {
+      i l;
+    }
+    scale[length(labels)..];
+  } else {
+    scale;
+    i => i labels;
   }
-  scale[length(labels)..];
 }
 
 riff enumerate array {

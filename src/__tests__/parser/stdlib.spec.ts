@@ -937,4 +937,13 @@ describe('SonicWeave standard library', () => {
       '2',
     ]);
   });
+
+  it('can paint the whole scale', () => {
+    const scale = parseSource('3::6;label(white);label("bob");repr');
+    expect(scale).toEqual([
+      '(4/3 white "bob")',
+      '(5/3 white "bob")',
+      '(6/3 white "bob")',
+    ]);
+  });
 });

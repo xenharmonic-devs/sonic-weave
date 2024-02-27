@@ -731,13 +731,13 @@ Only keep unique intervals in the current/given scale.
 `scale`
 
 ### label
-Apply labels (or colors) from the first array to the current/given scale.
+Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.
 #### Parameters:
 
 `labels`, `scale`
 
 ### labeled
-Apply labels (or colors) from the first array to a copy of the current/given scale.
+Apply labels (or colors) from the first array to a copy of the current/given scale. Can also apply a single color to the whole scale.
 #### Parameters:
 
 `labels`, `scale`
