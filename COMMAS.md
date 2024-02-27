@@ -51,9 +51,11 @@ The identifiers stack using concatenation. `C4^12s` is the same as `C4^1s^2s`.
 
 These inflections are designed to be combined with the semisharp `t` and the semiflat `d` A.K.A. demisharp and demiflat to reach rationals. E.g. The tendodemisharp C4 is notated `Ct4^1s` while the artodemisharp C4 is notated `Ct4_1s`.
 
-Remember that the relative counterparts of demisharp intervals are notated using `½d`, `n` and `½A`. E.g. the tendodemiaugmented unison (`729/704`) is notated `½A1^1s` and the artoneutral third (`11/9`) is notated `n3_1s`.
+Remember that the relative counterparts of demisharp intervals are notated using `½d`, `n` and `½A`. E.g. the infra-augmented prime (`729/704`) is notated `½A1^1s` while the artoneutral third (`11/9`) is notated `n3_1s`.
 
 Note that `^1s` coincides with `_11n` from FJS, while `^3s` is a novel inflection not found anywhere else.
+
+Note that in general SonicWeave prefers to call `d1` a "diminished unison", but "diminished prime" should be used in this context. You can learn more about the associated nomenclature in the article on [Alpharabian tuning](https://en.xen.wiki/w/Alpharabian_tuning).
 
 The use of the prefixes "semidiminished" (`sd`) and "semiaugmented" (`sA`) are discouraged when using Syntonic rastmic subchroma inflections.
 
