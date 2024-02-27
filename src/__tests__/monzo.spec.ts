@@ -414,4 +414,11 @@ describe('Extended Monzo', () => {
     }
     expect(foo.totalCents()).toBeCloseTo(originalCents - 10 * stepCents);
   });
+
+  it('survives multiplication by complex fractions of the octave', () => {
+    const foo = new TimeMonzo(new Fraction(0), [
+      new Fraction(23999993, 120000000),
+    ]);
+    expect(foo.mul(foo).toString('logarithmic')).toBe('23999993\\60000000');
+  });
 });
