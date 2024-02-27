@@ -904,19 +904,19 @@ function abs(value: Interval) {
 abs.__doc__ = 'Calculate the absolute value of the interval.';
 abs.__node__ = builtinNode(abs);
 
-function min(this: ExpressionVisitor, ...args: Interval[]) {
+export function minimum(this: ExpressionVisitor, ...args: Interval[]) {
   const c = compare.bind(this);
   return args.slice(1).reduce((a, b) => (c(a, b) <= 0 ? a : b), args[0]);
 }
-min.__doc__ = 'Obtain the argument with the minimum value.';
-min.__node__ = builtinNode(min);
+minimum.__doc__ = 'Obtain the argument with the minimum value.';
+minimum.__node__ = builtinNode(minimum);
 
-function max(this: ExpressionVisitor, ...args: Interval[]) {
+export function maximum(this: ExpressionVisitor, ...args: Interval[]) {
   const c = compare.bind(this);
   return args.slice(1).reduce((a, b) => (c(a, b) >= 0 ? a : b), args[0]);
 }
-max.__doc__ = 'Obtain the argument with the maximum value.';
-max.__node__ = builtinNode(max);
+maximum.__doc__ = 'Obtain the argument with the maximum value.';
+maximum.__node__ = builtinNode(maximum);
 
 function sort(
   this: ExpressionVisitor,
@@ -1493,8 +1493,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   zip,
   zipLongest,
   abs,
-  min,
-  max,
+  minimum,
+  maximum,
   random,
   randomCents,
   sort,
@@ -1760,7 +1760,7 @@ riff label labels scale {
   "Apply labels (or colors) from the first array to the current/given scale.";
   scale ??= $$;
   let i = -1;
-  while (++i < min(length(labels), length(scale)))
+  while (++i < length(labels) min length(scale))
     scale[i] = scale[i] labels[i];
 }
 

@@ -60,6 +60,8 @@ HertzToken         = 'Hz'     !IdentifierPart
 LowHertzToken      = 'hz'     !IdentifierPart
 IfToken            = 'if'     !IdentifierPart
 LetToken           = 'let'    !IdentifierPart
+MaxToken           = 'max'    !IdentifierPart
+MinToken           = 'min'    !IdentifierPart
 ModToken           = 'mod'    !IdentifierPart
 ModCeilingToken    = 'modc'   !IdentifierPart
 NoneToken          = 'niente' !IdentifierPart
@@ -89,6 +91,8 @@ ReservedWord
   / ForToken
   / IfToken
   / LetToken
+  / MaxToken
+  / MinToken
   / ModToken
   / ModCeilingToken
   / NoneToken
@@ -432,7 +436,7 @@ EnumeratedChord
   }
 
 AdditiveOperator
-  = $('+' / '-' / ToToken / ByToken / '/+' / '⊕' / '/-' / '⊖')
+  = $('+' / '-' / ToToken / ByToken / MaxToken / MinToken / '/+' / '⊕' / '/-' / '⊖')
 
 AdditiveExpression
   = head: MultiplicativeExpression tail: (NedjiProjector / AdditiveTail) {

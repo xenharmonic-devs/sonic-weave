@@ -397,11 +397,11 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can compare absolute to relative', () => {
-    const fifth = evaluateExpression('1/1 = 440 Hz; max(500 Hz, 3/2)', false);
+    const fifth = evaluateExpression('1/1 = 440 Hz; 700 Hz min 3/2', false);
     expect(fifth?.toString()).toBe('3/2');
 
     const eightHundred = evaluateExpression(
-      '1/1 = 440 Hz; max(800 Hz, 3/2)',
+      '1/1 = 440 Hz; 800 Hz max 3/2',
       false
     );
     expect(eightHundred?.toString()).toBe('800 Hz');

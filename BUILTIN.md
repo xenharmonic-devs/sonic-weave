@@ -289,13 +289,13 @@ Map a riff over the given/current scale producing a new scale.
 
 `mapper`, `array`
 
-### max
+### maximum
 Obtain the argument with the maximum value.
 #### Parameters:
 
 `...args`
 
-### min
+### minimum
 Obtain the argument with the minimum value.
 #### Parameters:
 

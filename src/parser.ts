@@ -44,6 +44,8 @@ import {
   repr,
   compare,
   PRELUDE_VOLATILES,
+  maximum,
+  minimum,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -1441,6 +1443,12 @@ export class ExpressionVisitor {
             case '-':
               value = left.value.sub(right.value);
               break;
+            case 'max':
+              value = maximum.bind(this)(left, right).value;
+              break;
+            case 'min':
+              value = minimum.bind(this)(left, right).value;
+              break;
             case 'to':
               value = left.value.roundTo(right.value);
               break;
@@ -1552,6 +1560,10 @@ export class ExpressionVisitor {
             return left.reduce(right);
           case 'rdc':
             return left.reduce(right, true);
+          case 'max':
+            return maximum.bind(this)(left, right);
+          case 'min':
+            return minimum.bind(this)(left, right);
           case 'to':
             return left.roundTo(right);
           case 'by':

@@ -18,6 +18,8 @@ export type BinaryOperator =
   | 'not ~of'
   | '+'
   | '-'
+  | 'max'
+  | 'min'
   | 'to'
   | 'by'
   | '/+'
