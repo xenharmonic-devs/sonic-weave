@@ -539,6 +539,35 @@ function isArray(value: SonicWeaveValue) {
 }
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
+
+function isAbsolute(interval: Interval) {
+  return sonicBool(interval.isAbsolute());
+}
+isAbsolute.__doc__ =
+  'Return `true` if the interval belongs to the absolute echelon.';
+isAbsolute.__node__ = builtinNode(isAbsolute);
+
+function isRelative(interval: Interval) {
+  return sonicBool(interval.isRelative());
+}
+isRelative.__doc__ =
+  'Return `true` if the interval belongs to the relative echelon.';
+isRelative.__node__ = builtinNode(isRelative);
+
+function isLinear(interval: Interval) {
+  return sonicBool(interval.domain === 'linear');
+}
+isLinear.__doc__ =
+  'Return `true` if the interval belongs to the linear domain.';
+isLinear.__node__ = builtinNode(isLinear);
+
+function isLogarithmic(interval: Interval) {
+  return sonicBool(interval.domain === 'logarithmic');
+}
+isLogarithmic.__doc__ =
+  'Return `true` if the interval belongs to the logarithmic domain.';
+isLogarithmic.__node__ = builtinNode(isLogarithmic);
+
 // == Other ==
 
 export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
@@ -1468,6 +1497,10 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   isString,
   isFunction,
   isArray,
+  isAbsolute,
+  isRelative,
+  isLinear,
+  isLogarithmic,
   // Integer conversion
   floor,
   round,

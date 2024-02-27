@@ -205,6 +205,12 @@ Truncate value towards zero to the nearest integer.
 
 `value`
 
+### isAbsolute
+Return `true` if the interval belongs to the absolute echelon.
+#### Parameters:
+
+`interval`
+
 ### isArray
 Return `true` if the value is an array.
 #### Parameters:
@@ -229,11 +235,29 @@ Return `true` if the value is an interval.
 
 `value`
 
+### isLinear
+Return `true` if the interval belongs to the linear domain.
+#### Parameters:
+
+`interval`
+
+### isLogarithmic
+Return `true` if the interval belongs to the logarithmic domain.
+#### Parameters:
+
+`interval`
+
 ### isPrime
 Return `true` if `n` is a prime number, `false` otherwise.
 #### Parameters:
 
 `n`
+
+### isRelative
+Return `true` if the interval belongs to the relative echelon.
+#### Parameters:
+
+`interval`
 
 ### isString
 Return `true` if the value is a string.

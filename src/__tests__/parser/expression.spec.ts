@@ -995,4 +995,14 @@ describe('SonicWeave expression evaluator', () => {
   it("doesn't let you call step literals", () => {
     expect(() => parseSingle('(1\\)(13/12)')).toThrow('Invalid callee.');
   });
+
+  it('can detect echelons (relative)', () => {
+    const yes = evaluateExpression('str(isRelative(3/2))', false);
+    expect(yes).toBe('true');
+  });
+
+  it('can detect echelons (absolute)', () => {
+    const no = evaluateExpression('str(isAbsolute(3/2))', false);
+    expect(no).toBe('false');
+  });
 });

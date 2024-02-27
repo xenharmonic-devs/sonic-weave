@@ -946,4 +946,18 @@ describe('SonicWeave standard library', () => {
       '(6/3 white "bob")',
     ]);
   });
+
+  it('can detect domains (linear)', () => {
+    const scale = parseSource(
+      '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i;str'
+    );
+    expect(scale).toEqual(['5/4', '3/2', '7/4']);
+  });
+
+  it('can detect domains (logarithmic)', () => {
+    const scale = parseSource(
+      '1\\12;3\\12;5\\12;stack();i => i if isLogarithmic(i) else simplify(i);str'
+    );
+    expect(scale).toEqual(['1\\12', '4\\12', '9\\12']);
+  });
 });
