@@ -445,7 +445,10 @@ export function cents(
 cents.__doc__ = 'Convert interval to cents.';
 cents.__node__ = builtinNode(cents);
 
-function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
+function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+  if (flavor !== '' && flavor !== 'n' && flavor !== 'h' && flavor !== 'm') {
+    throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
+  }
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
   if (C4.timeExponent.n === 0) {
@@ -454,12 +457,12 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
     monzo = absolute.bind(this)(interval).value;
   }
   let relativeToC4 = monzo.div(C4);
-  const node = asAbsoluteFJS(relativeToC4);
+  const node = asAbsoluteFJS(relativeToC4, flavor);
   if (node) {
     return new Interval(
       monzo,
       'logarithmic',
-      {type: 'AspiringAbsoluteFJS'},
+      {type: 'AspiringAbsoluteFJS', flavor},
       interval
     );
   }
@@ -467,16 +470,19 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval) {
   return new Interval(
     C4.mul(relativeToC4),
     'logarithmic',
-    {type: 'AspiringAbsoluteFJS'},
+    {type: 'AspiringAbsoluteFJS', flavor},
     interval
   );
 }
 absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
 absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
-function FJS(this: ExpressionVisitor, interval: Interval) {
+function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+  if (flavor !== '' && flavor !== 'n' && flavor !== 'h' && flavor !== 'm') {
+    throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
+  }
   const monzo = relative.bind(this)(interval).value;
-  const node = asFJS(monzo);
+  const node = asFJS(monzo, flavor);
   if (node) {
     return new Interval(monzo, 'logarithmic', node, interval);
   }
@@ -484,7 +490,7 @@ function FJS(this: ExpressionVisitor, interval: Interval) {
   return new Interval(
     approximation,
     'logarithmic',
-    asFJS(approximation),
+    asFJS(approximation, ''),
     interval
   );
 }
@@ -1544,6 +1550,28 @@ riff relin interval {
 riff relog interval {
   "Convert interval to relative logarithmic representation.";
   return relative(logarithmic(interval));
+}
+
+riff NFJS interval {
+  "Convert interval to (relative) FJS using neutral comma flavors."
+  return FJS(interval, 'n');
+}
+
+riff absoluteNFJS interval {
+  "Convert interval to absolute FJS using neutral comma flavors."
+  return absoluteFJS(interval, 'n');
+}
+
+// TODO: Replace with proper HEJI once implemented.
+riff HEJI interval {
+  "Convert interval to (relative) FJS using HEJI comma flavors."
+  return FJS(interval, 'h');
+}
+
+// TODO: Replace with proper absoluteHEJI once implemented.
+riff absoluteHEJI interval {
+  "Convert interval to absolute FJS using HEJI comma flavors."
+  return absoluteFJS(interval, 'h');
 }
 `;
 

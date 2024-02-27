@@ -901,4 +901,24 @@ describe('SonicWeave standard library', () => {
     const two = evaluateExpression('A=4 = 440z = 1/1; str(relin(A=5))');
     expect(two).toBe('2');
   });
+
+  it('can convert just intonation to NFJS', () => {
+    const n3 = evaluateExpression('str(NFJS(11/9))');
+    expect(n3).toBe('n3^11n');
+  });
+
+  it('can convert just intonation to absolute NFJS', () => {
+    const semidimA = evaluateExpression('C4 = 1/1;str(absoluteNFJS(13/8))');
+    expect(semidimA).toBe('Ad4^13n');
+  });
+
+  it('can convert just intonation to HEJI', () => {
+    const m3 = evaluateExpression('str(HEJI(6/5))');
+    expect(m3).toBe('m3^5h');
+  });
+
+  it('can convert just intonation to extended absolute HEJI', () => {
+    const D4 = evaluateExpression('C4 = 1/1;str(absoluteHEJI(73/64))');
+    expect(D4).toBe('D♮4^73h');
+  });
 });

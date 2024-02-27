@@ -873,4 +873,15 @@ describe('SonicWeave parser', () => {
       '6\\311',
     ]);
   });
+
+  it('can convert just intonation to absolute HEWM53', () => {
+    const visitor = getSourceVisitor(false);
+    const ast = parseAST('A4 = 440Hz = 1/1; absoluteFJS(23/16, "m")');
+    for (const statement of ast.body) {
+      visitor.visit(statement);
+    }
+    const E5 = visitor.getCurrentScale()[0];
+    expect(E5.toString(visitor.rootContext)).toBe('E♮5_23m');
+    expect(E5.valueOf()).toBeCloseTo(440 * (23 / 16));
+  });
 });

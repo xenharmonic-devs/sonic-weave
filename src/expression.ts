@@ -90,6 +90,7 @@ export type FJS = {
 // This node acts as a placeholder to indicate context-dependent up-down-lift-drop formatting.
 export type AspiringFJS = {
   type: 'AspiringFJS';
+  flavor: FJSFlavor;
 };
 
 export type AbsoluteFJS = {
@@ -104,6 +105,7 @@ export type AbsoluteFJS = {
 // Ironically the meaning of absolute FJS depends on context.
 export type AspiringAbsoluteFJS = {
   type: 'AspiringAbsoluteFJS';
+  flavor: FJSFlavor;
 };
 
 export type WartsLiteral = {
@@ -237,15 +239,15 @@ function aspireNodes(
 ): IntervalLiteral | undefined {
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
     if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
   }
   if (a.type === 'FJS' || a.type === 'AspiringFJS') {
     if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
     if (b.type === 'FJS' || b.type === 'AspiringFJS') {
-      return {type: 'AspiringFJS'};
+      return {type: 'AspiringFJS', flavor: ''};
     }
   }
 
@@ -307,7 +309,7 @@ export function subNodes(
   }
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
     if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS'};
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
   }
 
@@ -325,7 +327,7 @@ export function modNodes(
     (a.type === 'FJS' || a.type === 'AspiringFJS') &&
     (b.type === 'FJS' || b.type === 'AspiringFJS')
   ) {
-    return {type: 'AspiringFJS'};
+    return {type: 'AspiringFJS', flavor: ''};
   }
   return undefined;
 }
@@ -341,7 +343,7 @@ export function roundToNodes(
     (a.type === 'FJS' || a.type === 'AspiringFJS') &&
     (b.type === 'FJS' || b.type === 'AspiringFJS')
   ) {
-    return {type: 'AspiringFJS'};
+    return {type: 'AspiringFJS', flavor: ''};
   }
   return undefined;
 }
@@ -380,7 +382,7 @@ export function mulNodes(
         equaveDenominator: b.equaveDenominator,
       };
     } else if (b.type === 'FJS' || b.type === 'AspiringFJS') {
-      return {type: 'AspiringFJS'};
+      return {type: 'AspiringFJS', flavor: ''};
     } else if (b.type === 'CentLiteral') {
       return {
         type: 'CentsLiteral',

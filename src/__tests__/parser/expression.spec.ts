@@ -980,4 +980,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(monzo[3].equals('0')).toBe(true);
     expect(monzo[4].equals('3')).toBe(true);
   });
+
+  it('can convert just intonation to HEWM53', () => {
+    const M2 = parseSingle('FJS(19/16, "m")');
+    expect(M2.toString()).toBe('M2^19m');
+    expect(M2.value.toFraction().toFraction()).toBe('19/16');
+  });
 });

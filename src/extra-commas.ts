@@ -133,10 +133,18 @@ export function getLumisComma(id: number) {
 }
 
 const HELMHOLTZ_ELLIS_ARRAY = [UNITY, UNITY];
+export const HEJI_SWAPS = [false, false];
 
 for (const [prime, fraction] of Object.entries(HELMHOLTZ_ELLIS)) {
-  HELMHOLTZ_ELLIS_ARRAY[PRIMES.indexOf(parseInt(prime, 10))] =
-    TimeMonzo.fromFraction(fraction);
+  const index = PRIMES.indexOf(parseInt(prime, 10));
+  const monzo = TimeMonzo.fromFraction(fraction);
+  HELMHOLTZ_ELLIS_ARRAY[index] = monzo;
+  for (const pe of monzo.primeExponents.slice(2)) {
+    if (pe.s) {
+      HEJI_SWAPS[index] = pe.s < 0;
+      break;
+    }
+  }
 }
 
 export function getHelmholtzEllis(index: number) {
@@ -147,10 +155,18 @@ export function getHelmholtzEllis(index: number) {
 }
 
 const HEWM53_ARRAY = [UNITY, UNITY];
+export const HEWM53_SWAPS = [false, false];
 
 for (const [prime, fraction] of Object.entries(HEWM53)) {
-  HEWM53_ARRAY[PRIMES.indexOf(parseInt(prime, 10))] =
-    TimeMonzo.fromFraction(fraction);
+  const index = PRIMES.indexOf(parseInt(prime, 10));
+  const monzo = TimeMonzo.fromFraction(fraction);
+  HEWM53_ARRAY[index] = monzo;
+  for (const pe of monzo.primeExponents.slice(2)) {
+    if (pe.s) {
+      HEWM53_SWAPS[index] = pe.s < 0;
+      break;
+    }
+  }
 }
 
 export function getHEWM53(index: number) {

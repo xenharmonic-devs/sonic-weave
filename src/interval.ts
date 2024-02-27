@@ -52,7 +52,7 @@ function logLinMul(
     logarithmic.node?.type === 'FJS' ||
     logarithmic.node?.type === 'AspiringFJS'
   ) {
-    node = {type: 'AspiringFJS'};
+    node = {type: 'AspiringFJS', flavor: ''};
   }
   return new Interval(value, logarithmic.domain, node, zombie);
 }
@@ -342,7 +342,7 @@ export class Interval {
     if (this.domain === 'logarithmic') {
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
-        node = {type: 'AspiringFJS'};
+        node = {type: 'AspiringFJS', flavor: ''};
       }
       return new Interval(value, this.domain, node, zombie);
     }
@@ -507,7 +507,7 @@ export class Interval {
           relativeToC4.cents = 0;
         }
 
-        node = asAbsoluteFJS(relativeToC4);
+        node = asAbsoluteFJS(relativeToC4, this.node.flavor);
         if (!node) {
           return this.value.toString(this.domain);
         }
@@ -528,7 +528,7 @@ export class Interval {
           }
         }
 
-        node = asFJS(value);
+        node = asFJS(value, this.node.flavor);
         if (!node) {
           return this.value.toString(this.domain);
         }
@@ -632,10 +632,10 @@ export class Interval {
 
   break() {
     if (this.node?.type === 'FJS') {
-      this.node = {type: 'AspiringFJS'};
+      this.node = {type: 'AspiringFJS', flavor: ''};
     }
     if (this.node?.type === 'AbsoluteFJS') {
-      this.node = {type: 'AspiringAbsoluteFJS'};
+      this.node = {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
     if (
       this.node?.type === 'MonzoLiteral' ||
@@ -837,10 +837,10 @@ export function timeMonzoAs(
       return monzo.asMonzoLiteral();
     case 'FJS':
     case 'AspiringFJS':
-      return {type: 'AspiringFJS'};
+      return {type: 'AspiringFJS', flavor: ''};
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
-      return {type: 'AspiringAbsoluteFJS'};
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
     default:
       return undefined;
   }

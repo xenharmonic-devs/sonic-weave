@@ -7,9 +7,11 @@ import {
   valueToCents,
 } from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
-import {AbsoluteFJS, FJS, FJSInflection} from './expression';
+import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression';
 import {absoluteToNode, monzoToNode} from './pythagorean';
 import {
+  HEJI_SWAPS,
+  HEWM53_SWAPS,
   getHEWM53,
   getHelmholtzEllis,
   getLumisComma,
@@ -204,26 +206,45 @@ export function inflect(
   return getInflection(superscripts, subscripts).mul(pythagorean);
 }
 
-export function uninflect(monzo: TimeMonzo) {
+export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
+  if (flavor === 'l' || flavor === 's') {
+    throw new Error('Uninflection not implement in non-prime basis.');
+  }
+  let swaps: boolean[] = [];
+  if (flavor === 'h') {
+    swaps = HEJI_SWAPS;
+  } else if (flavor === 'm') {
+    swaps = HEWM53_SWAPS;
+  }
   const superscripts: FJSInflection[] = [];
   const subscripts: FJSInflection[] = [];
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
+    let sup = superscripts;
+    let sub = subscripts;
+    if (swaps[i]) {
+      [sup, sub] = [sub, sup];
+    }
     for (let j = 0; pe[i].compare(j) > 0; ++j) {
-      superscripts.push([PRIMES[i], '']);
+      sup.push([PRIMES[i], flavor]);
     }
     for (let j = 0; pe[i].compare(-j) < 0; ++j) {
-      subscripts.push([PRIMES[i], '']);
+      sub.push([PRIMES[i], flavor]);
     }
   }
   try {
     const rpe = toMonzo(monzo.residual);
     for (let i = 2; i < rpe.length; ++i) {
+      let sup = superscripts;
+      let sub = subscripts;
+      if (swaps[i]) {
+        [sup, sub] = [sub, sup];
+      }
       for (let j = 0; j < rpe[i]; ++j) {
-        superscripts.push([PRIMES[i], '']);
+        sup.push([PRIMES[i], flavor]);
       }
       for (let j = 0; j > rpe[i]; --j) {
-        subscripts.push([PRIMES[i], '']);
+        sub.push([PRIMES[i], flavor]);
       }
     }
   } catch (e) {
@@ -237,7 +258,7 @@ export function uninflect(monzo: TimeMonzo) {
   };
 }
 
-export function asFJS(monzo: TimeMonzo): FJS | undefined {
+export function asFJS(monzo: TimeMonzo, flavor: FJSFlavor): FJS | undefined {
   if (monzo.cents) {
     return undefined;
   }
@@ -247,7 +268,7 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
       return undefined;
     }
   }
-  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo);
+  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
   const pythagorean = monzoToNode(pythagoreanMonzo);
   if (!pythagorean) {
     return undefined;
@@ -262,7 +283,10 @@ export function asFJS(monzo: TimeMonzo): FJS | undefined {
   };
 }
 
-export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
+export function asAbsoluteFJS(
+  monzo: TimeMonzo,
+  flavor: FJSFlavor
+): AbsoluteFJS | undefined {
   if (monzo.cents) {
     return undefined;
   }
@@ -272,7 +296,7 @@ export function asAbsoluteFJS(monzo: TimeMonzo): AbsoluteFJS | undefined {
       return undefined;
     }
   }
-  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo);
+  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
   const pitch = absoluteToNode(pythagoreanMonzo);
   if (!pitch) {
     return undefined;

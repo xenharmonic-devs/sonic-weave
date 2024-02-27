@@ -2003,14 +2003,14 @@ export function parseAST(source: string): Program {
 // Cached globally on first initialization.
 let SOURCE_VISITOR_WITH_PRELUDE: StatementVisitor | null = null;
 let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
+let VOLATILES: Program | null = null;
 
 export function getSourceVisitor(includePrelude = true) {
   const rootContext = new RootContext();
-  if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE) {
+  if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE && VOLATILES) {
     const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
     // Volatiles depend on the active root context.
-    const volatiles = parseAST(PRELUDE_VOLATILES);
-    for (const statement of volatiles.body) {
+    for (const statement of VOLATILES.body) {
       visitor.visit(statement);
     }
     visitor.rootContext = rootContext;
@@ -2036,8 +2036,8 @@ export function getSourceVisitor(includePrelude = true) {
       }
       SOURCE_VISITOR_WITH_PRELUDE = visitor.clone();
       // Volatiles depend on the active root context.
-      const volatiles = parseAST(PRELUDE_VOLATILES);
-      for (const statement of volatiles.body) {
+      VOLATILES = parseAST(PRELUDE_VOLATILES);
+      for (const statement of VOLATILES.body) {
         visitor.visit(statement);
       }
       return visitor;

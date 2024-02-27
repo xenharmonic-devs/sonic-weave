@@ -17,7 +17,7 @@ Convert interval to absolute representation.
 Convert interval to absolute FJS.
 #### Parameters:
 
-`interval`
+`interval`, `flavor = ""`
 
 ### arrayReduce
 Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.
@@ -149,7 +149,7 @@ Obtain a copy of the given/current scale containing values that evaluate to `tru
 Convert interval to (relative) FJS.
 #### Parameters:
 
-`interval`
+`interval`, `flavor = ""`
 
 ### floor
 Round value down to the nearest integer.
@@ -520,6 +520,18 @@ Convert interval to absolute logarithmic representation.
 
 `interval`
 
+### absoluteHEJI
+Convert interval to absolute FJS using HEJI comma flavors.
+#### Parameters:
+
+`interval`
+
+### absoluteNFJS
+Convert interval to absolute FJS using neutral comma flavors.
+#### Parameters:
+
+`interval`
+
 ### add
 Calculate the (linear) sum of the arguments.
 #### Parameters:
@@ -706,6 +718,12 @@ Calculate the harmonic mean of the terms.
 
 `...terms`
 
+### HEJI
+Convert interval to (relative) FJS using HEJI comma flavors.
+#### Parameters:
+
+`interval`
+
 ### keepUnique
 Only keep unique intervals in the current/given scale.
 #### Parameters:
@@ -759,6 +777,12 @@ Calculate the (linear) product of the arguments i.e. the logarithmic sum.
 #### Parameters:
 
 `...factors`
+
+### NFJS
+Convert interval to (relative) FJS using neutral comma flavors.
+#### Parameters:
+
+`interval`
 
 ### o
 Obtain a copy of the current/given scale in the default overtonal interpretation.
