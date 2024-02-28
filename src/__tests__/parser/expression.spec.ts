@@ -1032,4 +1032,9 @@ describe('SonicWeave expression evaluator', () => {
     const x5 = parseSingle('n5^2l');
     expect(x5.value.toFraction().toFraction()).toBe('3/2');
   });
+
+  it('has unicode dot product between vals and intervals', () => {
+    const plenty = evaluateExpression('str(P8·€)', false);
+    expect(plenty).toBe('1200');
+  });
 });
