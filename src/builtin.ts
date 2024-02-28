@@ -12,6 +12,8 @@ import {
   norm,
   centsToNats,
   BIG_INT_PRIMES,
+  fareySequence as xduFareySequence,
+  fareyInterior as xduFareyInterior,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
@@ -151,6 +153,30 @@ function mosSubset(
 mosSubset.__doc__ =
   'Calculate a subset of equally tempered degrees with maximum variety two per scale degree.';
 mosSubset.__node__ = builtinNode(mosSubset);
+
+function fareySequence(maxDenominator: Interval) {
+  const result: Interval[] = [];
+  for (const fraction of xduFareySequence(maxDenominator.toInteger())) {
+    const value = TimeMonzo.fromFraction(fraction);
+    result.push(new Interval(value, 'linear', value.asFractionLiteral()));
+  }
+  return result;
+}
+fareySequence.__doc__ =
+  "Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominater below or at the given limit.";
+fareySequence.__node__ = builtinNode(fareySequence);
+
+function fareyInterior(maxDenominator: Interval) {
+  const result: Interval[] = [];
+  for (const fraction of xduFareyInterior(maxDenominator.toInteger())) {
+    const value = TimeMonzo.fromFraction(fraction);
+    result.push(new Interval(value, 'linear', value.asFractionLiteral()));
+  }
+  return result;
+}
+fareyInterior.__doc__ =
+  "Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominater below or at the given limit.";
+fareyInterior.__node__ = builtinNode(fareyInterior);
 
 // == Domain conversion ==
 
@@ -1472,6 +1498,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   mosSubset,
   isPrime,
   primes,
+  fareySequence,
+  fareyInterior,
   // Domain conversion
   simplify,
   bleach,

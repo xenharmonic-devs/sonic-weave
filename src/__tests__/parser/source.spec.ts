@@ -884,4 +884,24 @@ describe('SonicWeave parser', () => {
     expect(E5.toString(visitor.rootContext)).toBe('E♮5_23m');
     expect(E5.valueOf()).toBeCloseTo(440 * (23 / 16));
   });
+
+  it('can generate Farey scales', () => {
+    const scale = parseSource('fareySequence(4) + 1;str');
+    expect(scale).toEqual(['1', '5/4', '4/3', '3/2', '5/3', '7/4', '2']);
+  });
+
+  it('can generate Farey interiors', () => {
+    const scale = parseSource('fareyInterior(5);str');
+    expect(scale).toEqual([
+      '1/5',
+      '1/4',
+      '1/3',
+      '2/5',
+      '1/2',
+      '3/5',
+      '2/3',
+      '3/4',
+      '4/5',
+    ]);
+  });
 });

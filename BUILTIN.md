@@ -139,6 +139,18 @@ Color an interval based on its prime factors.
 
 `interval`
 
+### fareyInterior
+Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominater below or at the given limit.
+#### Parameters:
+
+`maxDenominator`
+
+### fareySequence
+Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominater below or at the given limit.
+#### Parameters:
+
+`maxDenominator`
+
 ### filter
 Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.
 #### Parameters:
