@@ -904,4 +904,13 @@ describe('SonicWeave parser', () => {
       '4/5',
     ]);
   });
+
+  it('has nested destructuring', () => {
+    const scale = parseSource(`
+      const [foo [bar baz]] = [1, [2, 3]]
+      foo;bar;baz
+      str
+    `);
+    expect(scale).toEqual(['1', '2', '3']);
+  });
 });

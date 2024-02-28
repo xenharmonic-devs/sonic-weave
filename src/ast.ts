@@ -50,28 +50,28 @@ export type Program = {
   body: Statement[];
 };
 
-export type Parameters = {
+export type Parameters_ = {
   type: 'Parameters';
-  identifiers: Identifier[];
+  identifiers: (Identifier | Parameters_)[];
   rest?: Identifier;
 };
 
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
-  name: Identifier | Parameters | ArrayAccess | ArraySlice;
+  name: Identifier | Parameters_ | ArrayAccess | ArraySlice;
   value: Expression;
 };
 
 export type VariableDeclaration =
   | {
       type: 'VariableDeclaration';
-      name: Identifier | Parameters;
+      name: Identifier | Parameters_;
       value: Expression;
       mutable: false;
     }
   | {
       type: 'VariableDeclaration';
-      name: Identifier | Parameters;
+      name: Identifier | Parameters_;
       value?: Expression;
       mutable: true;
     };
@@ -79,7 +79,7 @@ export type VariableDeclaration =
 export type FunctionDeclaration = {
   type: 'FunctionDeclaration';
   name: Identifier;
-  parameters: Parameters;
+  parameters: Parameters_;
   body: Statement[];
   text: string;
 };
@@ -131,10 +131,10 @@ export type IfStatement = {
 
 export type ForOfStatement = {
   type: 'ForOfStatement';
-  element: Identifier | Parameters;
+  element: Identifier | Parameters_;
   array: Expression;
   body: Statement;
-  mutable: Boolean;
+  mutable: boolean;
 };
 
 export type ExpressionStatement = {
@@ -231,7 +231,7 @@ export type Identifier = {
 export type Argument = {
   type: 'Argument';
   expression: Expression;
-  spread: Boolean;
+  spread: boolean;
 };
 
 export type CallExpression = {
@@ -242,20 +242,20 @@ export type CallExpression = {
 
 export type ArrowFunction = {
   type: 'ArrowFunction';
-  parameters: Parameters;
+  parameters: Parameters_;
   expression: Expression;
   text: string;
 };
 
 export type EnumeratedChord = {
   type: 'EnumeratedChord';
-  mirror: Boolean;
+  mirror: boolean;
   intervals: Expression[];
 };
 
 export type HarmonicSegment = {
   type: 'HarmonicSegment';
-  mirror: Boolean;
+  mirror: boolean;
   root: Expression;
   end: Expression;
 };
@@ -268,7 +268,7 @@ export type Range = {
 };
 
 export type Comprehension = {
-  element: Identifier | Parameters;
+  element: Identifier | Parameters_;
   array: Expression;
 };
 
