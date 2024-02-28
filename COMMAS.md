@@ -90,7 +90,7 @@ Reasons for existence assume `C4 = 1/1`.
 | ---------- | ------------- | ------------------ |
 | `0l`       | `+0.797`      | `15/14` ~ `sm2^0l` |
 | `1l`       | `+10.485`     | `11/10` ~ `sM2_1l` |
-| `2l`       | `+0.378`      | `34/19` ~ `α4_2l`  |
+| `2l`       | `+56.843`     | `9/8`   ~ `n2^2l`  |
 | `3l`       | `+1.281`      | `15/13` ~ `φ4_3l`  |
 | `4l`       | `+4.018`      | `25/14` ~ `α4^4l`  |
 | `5l`       | `+17.488`     |   `7/5` ~ `ζ4_5l`  |
@@ -99,4 +99,23 @@ Reasons for existence assume `C4 = 1/1`.
 | `8l`       | `+26.343`     | `39/28` ~ `ζ4_8l`  |
 | `9l`       | `+2.221`      | `21/19` ~ `sM2_9l` |
 
-Only the [island](https://en.xen.wiki/w/676/675) inflection `3l` ~ `sqrt(676/675)` and the [jubilismic](https://en.xen.wiki/w/50/49) inflection `5l` ~ `sqrt(50/49)` have reasonable expressions. The rest are filler curiosities which should be revised by someone who's willing to do more research into irrational bridging.
+Only the [apotomic](https://en.xen.wiki/w/2187/2048) inflection `2l` ~ `sqrt(2187/2048)`, the [island](https://en.xen.wiki/w/676/675) inflection `3l` ~ `sqrt(676/675)` and the [jubilismic](https://en.xen.wiki/w/50/49) inflection `5l` ~ `sqrt(50/49)` have reasonable expressions. The rest are filler curiosities which should be revised by someone who's willing to do more research into irrational bridging.
+
+The semiapotome `2l` is a handy companion of the neutral inflections. It's equivalent to a half-sharp, but allows for spellings that bring prime 3 more in line with the higher primes. For comparison with prime 5 we get these pairs of small and large intervals centered on the neutrals.
+
+| Small   | Fraction   | Large   | Fraction  |
+| ------- | ---------- | ------- | --------- |
+| `n2_2l` | `256/243`  | `n2^2l` | `9/8`     |
+| `n2_5n` | `16/15`    | `n2^5n` | `10/9`    |
+| `n3_2l` | `32/27`    | `n3^2l` | `81/64`   |
+| `n3_5n` | `6/5`      | `n3^5n` | `5/4`     |
+| `n4_2l` | `4/3`      | `n4^2l` | `729/512` |
+| `n4_5n` | `27/20`    | `n4^5n` | `45/32`   |
+| `n5_2l` | `1024/729` | `n5^2l` | `3/2`     |
+| `n5_5n` | `64/45`    | `n5^5n` | `40/27`   |
+| `n6_2l` | `128/81`   | `n6^2l` | `27/16`   |
+| `n6_5n` | `8/5`      | `n6^5n` | `5/3`     |
+| `n7_2l` | `16/9`     | `n7^2l` | `243/128` |
+| `n7_5n` | `9/5`      | `n7^5n` | `15/8`    |
+
+If for some reason you find this concept appealing the vocalized names of intervals should follow [Color notation](https://en.xen.wiki/w/Color_notation) but in place of *white* we have *microwave* for the smaller intervals and *x-ray* for the larger ones. So `4/3` is a *'microwave-fourth'*, *'mu-fourth'* or *'µ4'* while `3/2` is an *'x-ray-fifth'*, *'ex-fifth'* or *'x5'*.

@@ -658,7 +658,7 @@ In addition to NFJS commas SonicWeave has a neutral bridging comma associated wi
 | `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`         | `-53.464`     |
 | `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>`       | `73.387`      |
 
-Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`.
+Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`. See [COMMAS.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/COMMAS.md#lumis-irrational-bridges) to learn more.
 
 #### Quarter-augmented Pythagorean notation
 As mentioned above the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.

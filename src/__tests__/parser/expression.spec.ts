@@ -1025,4 +1025,11 @@ describe('SonicWeave expression evaluator', () => {
       expect(hewm.equals(retry)).toBe(true);
     }
   });
+
+  it("has a 'mu fourth' and an 'ex fifth' using Lumi's commas", () => {
+    const µ4 = parseSingle('n4_2l');
+    expect(µ4.value.toFraction().toFraction()).toBe('4/3');
+    const x5 = parseSingle('n5^2l');
+    expect(x5.value.toFraction().toFraction()).toBe('3/2');
+  });
 });
