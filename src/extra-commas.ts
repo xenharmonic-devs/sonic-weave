@@ -139,7 +139,9 @@ for (const [prime, fraction] of Object.entries(HELMHOLTZ_ELLIS)) {
   const index = PRIMES.indexOf(parseInt(prime, 10));
   const monzo = TimeMonzo.fromFraction(fraction);
   HELMHOLTZ_ELLIS_ARRAY[index] = monzo;
-  for (const pe of monzo.primeExponents.slice(2)) {
+  const clone = monzo.clone();
+  clone.numberOfComponents = index + 1;
+  for (const pe of clone.primeExponents.slice(2)) {
     if (pe.s) {
       HEJI_SWAPS[index] = pe.s < 0;
       break;
@@ -161,7 +163,9 @@ for (const [prime, fraction] of Object.entries(HEWM53)) {
   const index = PRIMES.indexOf(parseInt(prime, 10));
   const monzo = TimeMonzo.fromFraction(fraction);
   HEWM53_ARRAY[index] = monzo;
-  for (const pe of monzo.primeExponents.slice(2)) {
+  const clone = monzo.clone();
+  clone.numberOfComponents = index + 1;
+  for (const pe of clone.primeExponents.slice(2)) {
     if (pe.s) {
       HEWM53_SWAPS[index] = pe.s < 0;
       break;

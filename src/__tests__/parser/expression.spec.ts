@@ -1005,4 +1005,24 @@ describe('SonicWeave expression evaluator', () => {
     const no = evaluateExpression('str(isAbsolute(3/2))', false);
     expect(no).toBe('false');
   });
+
+  it('has a representation for a harmonic segment in FJS', () => {
+    for (let i = 49; i <= 96; ++i) {
+      const fjs = parseSingle(`FJS(${i}/48)`);
+      expect(fjs.valueOf()).toBeGreaterThan(1);
+      expect(fjs.valueOf()).toBeLessThanOrEqual(2);
+      const retry = parseSingle(fjs.toString());
+      expect(fjs.equals(retry)).toBe(true);
+    }
+  });
+
+  it('has a representation for a harmonic segment in FJS using HEWM53 flavors', () => {
+    for (let i = 30; i <= 58; ++i) {
+      const hewm = parseSingle(`FJS(${i}/29, 'm')`);
+      expect(hewm.valueOf()).toBeGreaterThan(1);
+      expect(hewm.valueOf()).toBeLessThanOrEqual(2);
+      const retry = parseSingle(hewm.toString());
+      expect(hewm.equals(retry)).toBe(true);
+    }
+  });
 });

@@ -960,4 +960,14 @@ describe('SonicWeave standard library', () => {
     );
     expect(scale).toEqual(['1\\12', '4\\12', '9\\12']);
   });
+
+  it('has a representation for a harmonic segment in FJS using HEJI flavors', () => {
+    for (let i = 49; i <= 96; ++i) {
+      const heji = parseSingle(`HEJI(${i}/48)`);
+      expect(heji.valueOf()).toBeGreaterThan(1);
+      expect(heji.valueOf()).toBeLessThanOrEqual(2);
+      const retry = parseSingle(heji.toString());
+      expect(heji.equals(retry)).toBe(true);
+    }
+  });
 });
