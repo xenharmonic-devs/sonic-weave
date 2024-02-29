@@ -82,6 +82,7 @@ import {
   LabeledExpression,
   LiftDeclaration,
   NedjiProjection,
+  Parameters_,
   PitchDeclaration,
   Program,
   Range,
@@ -126,6 +127,27 @@ class Interupt {
   constructor(node: ReturnStatement, value?: SonicWeaveValue) {
     this.node = node;
     this.value = value;
+  }
+}
+
+function localAssign(
+  localVisitor: StatementVisitor,
+  name: Identifier | Parameters_,
+  arg: SonicWeaveValue
+) {
+  if (name.type === 'Parameters') {
+    if (!Array.isArray(arg)) {
+      throw new Error('Expected an array to destructure.');
+    }
+    for (let i = 0; i < name.identifiers.length; ++i) {
+      // XXX: Relies on arg[i] evaluating to undefined beyond bounds.
+      localAssign(localVisitor, name.identifiers[i], arg[i]);
+    }
+    if (name.rest) {
+      localAssign(localVisitor, name.rest, arg.slice(name.identifiers.length));
+    }
+  } else {
+    localVisitor.mutables.set(name.id, arg);
   }
 }
 
@@ -262,71 +284,69 @@ export class StatementVisitor {
     throw value;
   }
 
-  visitVariableDeclaration(node: VariableDeclaration) {
-    const subVisitor = this.createExpressionVisitor();
-    const value = node.value ? subVisitor.visit(node.value) : undefined;
-    if (node.name.type === 'Parameters') {
+  declareVariable(
+    name: Identifier | Parameters_,
+    value: SonicWeaveValue,
+    mutable: boolean
+  ) {
+    if (name.type === 'Parameters') {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring declaration must assign an array.');
       }
-      for (let i = 0; i < node.name.identifiers.length; ++i) {
-        const name = node.name.identifiers[i].id;
-        if (this.immutables.has(name) || this.mutables.has(name)) {
-          throw new Error('Cannot redeclare variable.');
-        }
-        if (node.mutable) {
-          this.mutables.set(name, value[i]);
-        } else {
-          this.immutables.set(name, value[i]);
-        }
+      for (let i = 0; i < name.identifiers.length; ++i) {
+        this.declareVariable(name.identifiers[i], value[i], mutable);
       }
-      if (node.name.rest) {
-        const name = node.name.rest.id;
-        if (this.immutables.has(name) || this.mutables.has(name)) {
-          throw new Error('Cannot redeclare variable.');
-        }
-        if (node.mutable) {
-          this.mutables.set(name, value.slice(node.name.identifiers.length));
-        } else {
-          this.immutables.set(name, value.slice(node.name.identifiers.length));
-        }
+      if (name.rest) {
+        this.declareVariable(
+          name.rest,
+          value.slice(name.identifiers.length),
+          mutable
+        );
       }
     } else {
-      const name = node.name.id;
-      if (this.immutables.has(name) || this.mutables.has(name)) {
+      const id = name.id;
+      if (this.immutables.has(id) || this.mutables.has(id)) {
         throw new Error('Cannot redeclare variable.');
       }
-      if (node.mutable) {
-        this.mutables.set(name, value);
+      if (mutable) {
+        this.mutables.set(id, value);
       } else {
-        this.immutables.set(name, value);
+        this.immutables.set(id, value);
       }
     }
+  }
+
+  visitVariableDeclaration(node: VariableDeclaration) {
+    const subVisitor = this.createExpressionVisitor();
+    const value = node.value ? subVisitor.visit(node.value) : undefined;
+    this.declareVariable(node.name, value, node.mutable);
     return undefined;
+  }
+
+  assign(name: Identifier | Parameters_, value: SonicWeaveValue) {
+    if (name.type === 'Parameters') {
+      if (!Array.isArray(value)) {
+        throw new Error('Destructuring assignment must use an array.');
+      }
+      for (let i = 0; i < name.identifiers.length; ++i) {
+        this.assign(name.identifiers[i], value[i]);
+      }
+      if (name.rest) {
+        this.assign(name, value.slice(name.identifiers.length));
+      }
+    } else {
+      const id = name.id;
+      if (this.immutables.has(id)) {
+        throw new Error('Assignment to a constant variable.');
+      }
+      this.set(id, value);
+    }
   }
 
   visitAssignmentStatement(node: AssignmentStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
-    if (node.name.type === 'Parameters') {
-      if (!Array.isArray(value)) {
-        throw new Error('Destructuring assignment must use an array.');
-      }
-      for (let i = 0; i < node.name.identifiers.length; ++i) {
-        const name = node.name.identifiers[i].id;
-        this.set(name, value[i]);
-      }
-      if (node.name.rest) {
-        const name = node.name.rest.id;
-        this.set(name, value.slice(node.name.identifiers.length));
-      }
-    } else if (node.name.type === 'Identifier') {
-      const name = node.name.id;
-      if (this.immutables.has(name)) {
-        throw new Error('Assignment to a constant variable.');
-      }
-      this.set(name, value);
-    } else if (node.name.type === 'ArraySlice') {
+    if (node.name.type === 'ArraySlice') {
       if (!Array.isArray(value)) {
         throw new Error('Slice assignment with a non-array.');
       }
@@ -397,7 +417,7 @@ export class StatementVisitor {
         return undefined;
       }
       throw new Error('Slice step must not be zero');
-    } else {
+    } else if (node.name.type === 'ArrayAccess') {
       const object = subVisitor.visit(node.name.object);
       if (!Array.isArray(object)) {
         throw new Error('Array access on non-array.');
@@ -412,6 +432,8 @@ export class StatementVisitor {
       }
       // XXX: Abuses the type system.
       object[i] = value as Interval;
+    } else {
+      this.assign(node.name, value);
     }
     return undefined;
   }
@@ -610,6 +632,43 @@ export class StatementVisitor {
     return undefined;
   }
 
+  declareLoopElement(
+    loopVisitor: StatementVisitor,
+    element: Identifier | Parameters_,
+    value: SonicWeaveValue,
+    mutable: boolean
+  ) {
+    if (element.type === 'Parameters') {
+      if (!Array.isArray(value)) {
+        throw new Error('Must iterate over arrays when destructuring.');
+      }
+      for (let i = 0; i < element.identifiers.length; ++i) {
+        this.declareLoopElement(
+          loopVisitor,
+          element.identifiers[i],
+          value[i],
+          mutable
+        );
+      }
+      if (element.rest) {
+        this.declareLoopElement(
+          loopVisitor,
+          element.rest,
+          value.slice(element.identifiers.length),
+          mutable
+        );
+      }
+    } else {
+      const id = element.id;
+      if (mutable) {
+        loopVisitor.mutables.set(id, value);
+      } else {
+        // Technically a mutation, but should be fine.
+        loopVisitor.immutables.set(id, value);
+      }
+    }
+  }
+
   visitForOfStatement(node: ForOfStatement) {
     const subVisitor = this.createExpressionVisitor();
     const array = subVisitor.visit(node.array);
@@ -619,41 +678,7 @@ export class StatementVisitor {
     const loopVisitor = new StatementVisitor(this.rootContext, this);
     loopVisitor.mutables.delete('$'); // Collapse scope
     for (const value of array) {
-      if (node.element.type === 'Parameters') {
-        if (!Array.isArray(value)) {
-          throw new Error('Must iterate over arrays when destructuring.');
-        }
-        for (let i = 0; i < node.element.identifiers.length; ++i) {
-          const name = node.element.identifiers[i].id;
-          if (node.mutable) {
-            loopVisitor.mutables.set(name, value[i]);
-          } else {
-            // Technically a mutation, but should be fine.
-            loopVisitor.immutables.set(name, value[i]);
-          }
-        }
-        if (node.element.rest) {
-          const name = node.element.rest.id;
-          if (node.mutable) {
-            loopVisitor.mutables.set(
-              name,
-              value.slice(node.element.identifiers.length)
-            );
-          } else {
-            loopVisitor.immutables.set(
-              name,
-              value.slice(node.element.identifiers.length)
-            );
-          }
-        }
-      } else {
-        const name = node.element.id;
-        if (node.mutable) {
-          loopVisitor.mutables.set(name, value);
-        } else {
-          loopVisitor.immutables.set(name, value);
-        }
-      }
+      this.declareLoopElement(loopVisitor, node.element, value, node.mutable);
       const interrupt = loopVisitor.visit(node.body);
       if (interrupt) {
         return interrupt;
@@ -696,22 +721,8 @@ export class StatementVisitor {
       );
       localVisitor.mutables.set('$$', this.parent.getCurrentScale());
 
-      for (let i = 0; i < node.parameters.identifiers.length; ++i) {
-        const name = node.parameters.identifiers[i].id;
-        if (i < args.length) {
-          localVisitor.mutables.set(name, args[i]);
-        } else {
-          localVisitor.mutables.set(name, undefined);
-        }
-      }
-      if (node.parameters.rest) {
-        const name = node.parameters.rest.id;
-        // XXX: Poor type system gets abused again.
-        localVisitor.mutables.set(
-          name,
-          args.slice(node.parameters.identifiers.length) as Interval[]
-        );
-      }
+      // XXX: Poor type system gets abused again.
+      localAssign(localVisitor, node.parameters, args as Interval[]);
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
         if (interrupt && interrupt.node.type === 'ReturnStatement') {
@@ -974,25 +985,7 @@ export class ExpressionVisitor {
       }
       const element = comprehension.element;
       for (const value of array) {
-        if (element.type === 'Parameters') {
-          if (!Array.isArray(value)) {
-            throw new Error('Must iterate over arrays when destructuring.');
-          }
-          for (let i = 0; i < element.identifiers.length; ++i) {
-            const name = element.identifiers[i].id;
-            localVisitor.mutables.set(name, value[i]);
-          }
-          if (element.rest) {
-            const name = element.rest.id;
-            localVisitor.mutables.set(
-              name,
-              value.slice(element.identifiers.length)
-            );
-          }
-        } else {
-          const name = element.id;
-          localVisitor.mutables.set(name, value);
-        }
+        localAssign(localVisitor, element, value);
         comprehend.bind(this)(localVisitor, index + 1);
       }
     }
@@ -1761,6 +1754,7 @@ export class ExpressionVisitor {
 
   visitArrowFunction(node: ArrowFunction) {
     const scopeParent = this.parent;
+
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       const localVisitor = new StatementVisitor(
         scopeParent.rootContext,
@@ -1773,21 +1767,9 @@ export class ExpressionVisitor {
         localVisitor.mutables.set('$$', this.get('$$'));
       }
 
-      for (let i = 0; i < node.parameters.identifiers.length; ++i) {
-        const name = node.parameters.identifiers[i].id;
-        if (i < args.length) {
-          localVisitor.mutables.set(name, args[i]);
-        } else {
-          localVisitor.mutables.set(name, undefined);
-        }
-      }
-      if (node.parameters.rest) {
-        const name = node.parameters.rest.id;
-        localVisitor.mutables.set(
-          name,
-          args.slice(node.parameters.identifiers.length) as Interval[]
-        );
-      }
+      // XXX: Poor type system gets abused again.
+      localAssign(localVisitor, node.parameters, args as Interval[]);
+
       return localVisitor.createExpressionVisitor().visit(node.expression);
     }
     Object.defineProperty(realization, 'name', {

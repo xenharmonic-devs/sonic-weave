@@ -1037,4 +1037,12 @@ describe('SonicWeave expression evaluator', () => {
     const plenty = evaluateExpression('str(P8·€)', false);
     expect(plenty).toBe('1200');
   });
+
+  it('has nested destructuring in array comprehensions', () => {
+    const sums = evaluateExpression(
+      '[str(foo + bar + baz) for [foo [bar baz]] of [[1, [2, 3]], [4, [5, 6]]]]',
+      false
+    );
+    expect(sums).toEqual(['6', '15']);
+  });
 });

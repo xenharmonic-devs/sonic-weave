@@ -1364,7 +1364,9 @@ function help(riff: SonicWeaveFunction) {
   const params = riff.__node__.parameters;
   if (params.identifiers.length || params.rest) {
     console.log('Parameters:');
-    const names = params.identifiers.map(p => p.id);
+    const names = params.identifiers.map(p =>
+      p.type === 'Identifier' ? p.id : '[...]'
+    );
     if (params.rest) {
       names.push('...' + params.rest.id);
     }
