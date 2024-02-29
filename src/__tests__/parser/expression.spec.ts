@@ -1055,4 +1055,9 @@ describe('SonicWeave expression evaluator', () => {
     const unison = parseSingle('P1^11c_31c');
     expect(unison.value.toFraction().toFraction()).toBe('8019/7936');
   });
+
+  it("can do FJS conversion to with FloraC's flavors", () => {
+    const thing = parseSingle('FJS(157/128, "f")');
+    expect(thing.toString()).toBe('M3^157f');
+  });
 });

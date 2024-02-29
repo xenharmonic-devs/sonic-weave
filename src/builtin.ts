@@ -472,8 +472,18 @@ cents.__doc__ = 'Convert interval to cents.';
 cents.__node__ = builtinNode(cents);
 
 function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
-  if (flavor !== '' && flavor !== 'n' && flavor !== 'h' && flavor !== 'm') {
+  if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
+  }
+  if (
+    flavor !== '' &&
+    flavor !== 'c' &&
+    flavor !== 'f' &&
+    flavor !== 'h' &&
+    flavor !== 'm' &&
+    flavor !== 'n'
+  ) {
+    throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
@@ -504,8 +514,18 @@ absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
 absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
-  if (flavor !== '' && flavor !== 'n' && flavor !== 'h' && flavor !== 'm') {
+  if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
+  }
+  if (
+    flavor !== '' &&
+    flavor !== 'c' &&
+    flavor !== 'f' &&
+    flavor !== 'h' &&
+    flavor !== 'm' &&
+    flavor !== 'n'
+  ) {
+    throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
   const monzo = relative.bind(this)(interval).value;
   const node = asFJS(monzo, flavor);
