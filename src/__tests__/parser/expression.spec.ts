@@ -1045,4 +1045,14 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(sums).toEqual(['6', '15']);
   });
+
+  it("has FloraC's flavor for FJS", () => {
+    const unison = parseSingle('P1^11f_31f');
+    expect(unison.value.toFraction().toFraction()).toBe('33/31');
+  });
+
+  it('has classic FJS flavor available', () => {
+    const unison = parseSingle('P1^11c_31c');
+    expect(unison.value.toFraction().toFraction()).toBe('8019/7936');
+  });
 });

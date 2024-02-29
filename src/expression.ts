@@ -2,7 +2,16 @@ import {MetricPrefix, validateBigInt} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
-export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm' | 's';
+// Comma sets for FJS:
+// '': Classic FJS
+// 'c': Classic FJS
+// 'f': FloraC's version of FJS with semiapotomic radius of tolerance
+// 'n': Neutral FJS expanded to generic bridging commas by Lumi Pakkanen
+// 'l': Lumi's irrational self-insert. Hi there! <3 Happy coding! <3
+// 'h': Helmholtz-Ellis 2020
+// 'm': Helmholtz-Ellis-Wolf-(M)onzo 53-limit
+// 's': Syntonic rastmic subchroma commas by Aura
+export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm' | 's' | 'c' | 'f';
 
 export type FJSInflection = [number, FJSFlavor];
 

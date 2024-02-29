@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {getFormalComma, getNeutralComma, inflect} from '../fjs';
+import {getFloraComma, getFormalComma, getNeutralComma, inflect} from '../fjs';
 import {PRIMES} from 'xen-dev-utils';
 import {
   AbsolutePitch,
@@ -20,11 +20,70 @@ describe('Formal comma calculator', () => {
     [23, '736/729'],
     [29, '261/256'],
     [31, '248/243'],
+    [37, '37/36'],
+    [41, '82/81'],
+    [43, '129/128'],
+    [47, '47/48'],
+    [53, '53/54'],
+    [59, '236/243'],
+    [61, '244/243'],
+    [67, '16281/16384'],
+    [71, '71/72'],
+    [73, '73/72'],
+    [79, '79/81'],
+    [83, '249/256'],
+    [89, '712/729'],
+    [97, '97/96'],
   ])('Has a comma for prime %s', (prime, comma) => {
     const fraction = getFormalComma(PRIMES.indexOf(prime)).toFraction();
     expect(fraction.equals(comma), `${fraction.toFraction()} != ${comma}`).toBe(
       true
     );
+  });
+});
+
+describe('FloraC comma calculator', () => {
+  it.each([
+    [5, '80/81'],
+    [7, '63/64'],
+    [11, '33/32'],
+    [13, '1053/1024'],
+    [17, '4131/4096'],
+    [19, '513/512'],
+    [23, '736/729'],
+    [29, '261/256'],
+    [31, '31/32'],
+    [37, '37/36'],
+    [41, '82/81'],
+    [43, '129/128'],
+    [47, '47/48'],
+    [53, '53/54'],
+    [59, '236/243'],
+    [61, '244/243'],
+    [67, '16281/16384'],
+    [71, '71/72'],
+    [73, '73/72'],
+    [79, '79/81'],
+    [83, '249/256'],
+    [89, '712/729'],
+    [97, '97/96'],
+  ])('Has a comma for prime %s', (prime, comma) => {
+    const fraction = getFloraComma(PRIMES.indexOf(prime)).toFraction();
+    expect(fraction.equals(comma), `${fraction.toFraction()} != ${comma}`).toBe(
+      true
+    );
+  });
+
+  it('mostly agrees with classic FJS', () => {
+    for (let i = 2; i < 100; ++i) {
+      if (i === 10 || i === 36 || i === 70) {
+        continue;
+      }
+      expect(
+        getFormalComma(i).equals(getFloraComma(i)),
+        `Disagreement for prime #${i} = ${PRIMES[i]}`
+      ).toBe(true);
+    }
   });
 });
 

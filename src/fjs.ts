@@ -20,7 +20,12 @@ import {
 
 const ZERO = new Fraction(0);
 
+// Classic radius of tolerance.
 const RADIUS_OF_TOLERANCE = valueToCents(65 / 63);
+
+// Using a half-sharp + epsilon as the radius of tolerace closes the gap between minor and major.
+// https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System
+const SEMIAPOTOME = 0.5 * valueToCents(2187 / 2048) + 1e-6;
 
 const NFJS_RADIUS = 13.5 * PRIME_CENTS[0] - 8.5 * PRIME_CENTS[1];
 
@@ -29,20 +34,20 @@ const BRIDGING_RADIUS = 92.1;
 
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
-function masterAlgorithm(primeCents: number) {
+function masterAlgorithm(primeCents: number, radius = RADIUS_OF_TOLERANCE) {
   let pythagoras = 0;
   let k = 0;
-  if (circleDistance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
+  if (circleDistance(primeCents, pythagoras) < radius) {
     return k;
   }
   // eslint-disable-next-line no-constant-condition
   while (true) {
     pythagoras += FIFTH;
     k++;
-    if (circleDistance(primeCents, pythagoras) < RADIUS_OF_TOLERANCE) {
+    if (circleDistance(primeCents, pythagoras) < radius) {
       return k;
     }
-    if (circleDistance(primeCents, -pythagoras) < RADIUS_OF_TOLERANCE) {
+    if (circleDistance(primeCents, -pythagoras) < radius) {
       return -k;
     }
   }
@@ -80,6 +85,7 @@ function myacNeutralMaster(primeCents: number) {
 // Bridging comma master algorithm by frostburn
 function neutralMaster(primeCents: number) {
   let pythagoras = 0.5 * FIFTH;
+  // XXX: Abuse the fact that negative powers of two are exact in floating point.
   let k = 0.5;
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -120,9 +126,15 @@ function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
 
 const formalCommas = [TimeMonzo.fromFraction(1), TimeMonzo.fromFraction(1)];
 
+const floraCommas = [TimeMonzo.fromFraction(1), TimeMonzo.fromFraction(1)];
+
 const neutralCommas = [TimeMonzo.fromFraction(1), TimeMonzo.fromFraction(1)];
 
 const commaIterator = commaGenerator(masterAlgorithm);
+
+const floraIterator = commaGenerator(primeCents =>
+  masterAlgorithm(primeCents, SEMIAPOTOME)
+);
 
 const neutralIterator = commaGenerator(neutralMaster);
 
@@ -135,6 +147,17 @@ export function getFormalComma(index: number) {
     formalCommas.push(iterand.value);
   }
   return formalCommas[index];
+}
+
+export function getFloraComma(index: number) {
+  while (index >= floraCommas.length) {
+    const iterand = floraIterator.next();
+    if (iterand.done) {
+      throw new Error('Out of primes');
+    }
+    floraCommas.push(iterand.value);
+  }
+  return floraCommas[index];
 }
 
 export function getNeutralComma(index: number) {
@@ -163,14 +186,18 @@ export function getInflection(
     }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      if (flavor === '') {
+      if (flavor === '' || flavor === 'c') {
         result = result.mul(getFormalComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.mul(getNeutralComma(i).pow(monzo[i]));
+      } else if (flavor === 'f') {
+        result = result.mul(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
         result = result.mul(getHelmholtzEllis(i).pow(monzo[i]));
-      } else {
+      } else if (flavor === 'm') {
         result = result.mul(getHEWM53(i).pow(monzo[i]));
+      } else {
+        flavor satisfies never;
       }
     }
   }
@@ -184,14 +211,18 @@ export function getInflection(
     }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      if (flavor === '') {
+      if (flavor === '' || flavor === 'c') {
         result = result.div(getFormalComma(i).pow(monzo[i]));
+      } else if (flavor === 'f') {
+        result = result.div(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.div(getNeutralComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
         result = result.div(getHelmholtzEllis(i).pow(monzo[i]));
-      } else {
+      } else if (flavor === 'm') {
         result = result.div(getHEWM53(i).pow(monzo[i]));
+      } else {
+        flavor satisfies never;
       }
     }
   }
