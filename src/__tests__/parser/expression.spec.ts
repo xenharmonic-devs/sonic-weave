@@ -1080,4 +1080,34 @@ describe('SonicWeave expression evaluator', () => {
     expect(octave.value.valueOf()).toBeCloseTo(2);
     expect(octave.domain).toBe('linear');
   });
+
+  it('evaluates the difference in absolute FJS as relative FJS (default)', () => {
+    const M2 = evaluateExpression('str(E4 - D4)', false);
+    expect(M2).toBe('M2');
+  });
+
+  it('evaluates the difference in absolute FJS as relative FJS (relative reference)', () => {
+    const m2 = evaluateExpression('B3 = 1/1; str(F4 - E4)', false);
+    expect(m2).toBe('m2');
+  });
+
+  it('evaluates the difference in absolute FJS as relative FJS (absolute reference)', () => {
+    const P5 = evaluateExpression('F#5 = 555Hz; str(G3 - C3)', false);
+    expect(P5).toBe('P5');
+  });
+
+  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference)', () => {
+    const P5 = evaluateExpression('F#5 = 5ms; str(G3 - C3)', false);
+    expect(P5).toBe('P5');
+  });
+
+  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference)', () => {
+    const P5 = evaluateExpression('F#5 = (1s)^5/2; str(G3 - C3)', false);
+    expect(P5).toBe('P5');
+  });
+
+  it('has C5 an octave above C4 even with non-standard reference', () => {
+    const C4 = parseSingle('C4 = 10ms; relative(C5)');
+    expect(C4.toString()).toBe('1\\1');
+  });
 });

@@ -459,6 +459,13 @@ export class StatementVisitor {
       const C4: TimeMonzo = this.rootContext.C4;
 
       this.rootContext.C4 = C4.mul(value.value).div(pitch.value);
+      // Coerce absolute reference to Hz
+      if (this.rootContext.C4.timeExponent.n) {
+        this.rootContext.C4 = this.rootContext.C4.pow(
+          this.rootContext.C4.timeExponent.inverse().neg()
+        );
+      }
+
       if (!node.middle) {
         // Implicit 1/1
         if (value.value.timeExponent.n) {

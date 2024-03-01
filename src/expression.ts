@@ -317,8 +317,8 @@ export function subNodes(
     return addNodes(a, negB);
   }
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
-    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+    if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringFJS', flavor: ''};
     }
   }
 

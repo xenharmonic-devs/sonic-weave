@@ -360,7 +360,7 @@ Variables can be reassigned for example after `let i = 2` declaring `i += 3` set
 ## Pitch declaration
 Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz`.
 
-When using both the middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440 Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
+Using a middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440 Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
 
 The unison frequency is set implicitly when declaring pitch, but can be set explicitly too e.g. `1/1 = 420 Hz`.
 
@@ -789,6 +789,11 @@ The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the diff
 Extra commas include extended Helmholtz-Ellis inflections and additional bridges from above irrationals to just intonation.
 
 See [COMMAS.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/COMMAS.md).
+
+### Non-standard pitch declaration
+Pitch can be declared as a period of oscillation, but it's coearced to Hz to preserve the meaning of relative notation as ratios of frequencies.
+
+E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 
 ### Obscure types
 | Type   | Literal | Meaning |
