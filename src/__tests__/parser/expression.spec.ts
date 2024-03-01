@@ -936,6 +936,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(n2.value.toFraction().toFraction()).toBe('12/11');
   });
 
+  it('evaluates S2..16 correctly', () => {
+    expect(evaluateExpression('str(linear(S2..16))', false)).toBe('32/17');
+  });
+
+  it('evaluates S11..37 correctly', () => {
+    expect(evaluateExpression('str(linear(S11..37))', false)).toBe('407/380');
+  });
+
   it('has Helmholtz-Ellis 2020 comma flavors', () => {
     const h17 = parseSingle('A1_17h');
     expect(h17.value.toFraction().toFraction()).toBe('17/16');

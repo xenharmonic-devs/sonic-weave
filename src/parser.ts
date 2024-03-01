@@ -944,12 +944,11 @@ export class ExpressionVisitor {
 
   visitSquareSuperparticular(node: SquareSuperparticular) {
     if (node.end) {
-      let numerator = 1n;
-      let denominator = 1n;
-      for (let i = node.start; i <= node.end; ++i) {
-        const s = i * i;
-        numerator *= s;
-        denominator *= s - 1n;
+      let numerator = 2n * node.end;
+      let denominator = node.end + 1n;
+      if (node.start !== 2n) {
+        numerator *= node.start;
+        denominator *= 2n * node.start - 2n;
       }
       return new Interval(
         TimeMonzo.fromBigNumeratorDenominator(numerator, denominator),
