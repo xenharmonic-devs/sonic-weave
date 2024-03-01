@@ -1060,4 +1060,16 @@ describe('SonicWeave expression evaluator', () => {
     const thing = parseSingle('FJS(157/128, "f")');
     expect(thing.toString()).toBe('M3^157f');
   });
+
+  it('switches domains while converting JI to cents', () => {
+    const octave = parseSingle('cents(2)');
+    expect(octave.totalCents()).toBeCloseTo(1200);
+    expect(octave.domain).toBe('logarithmic');
+  });
+
+  it('switched domains while converting cents to decimals', () => {
+    const octave = parseSingle('decimal(1200.)');
+    expect(octave.value.valueOf()).toBeCloseTo(2);
+    expect(octave.domain).toBe('linear');
+  });
 });

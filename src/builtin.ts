@@ -301,6 +301,7 @@ function decimal(
     );
   }
   converted.node = converted.value.asDecimalLiteral();
+  converted.domain = 'linear';
   return converted;
 }
 decimal.__doc__ = 'Convert interval to a decimal number.';
@@ -466,6 +467,7 @@ export function cents(
     ]);
   }
   converted.node = converted.value.asCentsLiteral();
+  converted.domain = 'logarithmic';
   return converted;
 }
 cents.__doc__ = 'Convert interval to cents.';
