@@ -913,4 +913,14 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['1', '2', '3']);
   });
+
+  it('has a third-apotome in 15edo', () => {
+    const step = parseSource('P1^6l;15@')[0];
+    expect(step.toString()).toBe('1\\15');
+  });
+
+  it('has a fifth-apotome in 25edo', () => {
+    const step = parseSource('P1^7l;25@')[0];
+    expect(step.toString()).toBe('1\\25');
+  });
 });

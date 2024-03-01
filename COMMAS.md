@@ -94,12 +94,14 @@ Reasons for existence assume `C4 = 1/1`.
 | `3l`       | `+1.281`      | `15/13` ~ `φ4_3l`  |
 | `4l`       | `+4.018`      | `25/14` ~ `α4^4l`  |
 | `5l`       | `+17.488`     |   `7/5` ~ `ζ4_5l`  |
-| `6l`       | `+13.573`     | `28/17` ~ `sM6_6l` |
-| `7l`       | `+3.658`      | `35/27` ~ `χ4^7l`  |
-| `8l`       | `+26.343`     | `39/28` ~ `ζ4_8l`  |
+| `6l`       | `+37.895`     | *"Third sharp"*    |
+| `7l`       | `+22.737`     | *"Fifth sharp"*    |
+| `8l`       | `+26.343`     | `13/7`  ~ `β4_8l`  |
 | `9l`       | `+2.221`      | `21/19` ~ `sM2_9l` |
 
 Only the [apotomic](https://en.xen.wiki/w/2187/2048) inflection `2l` ~ `sqrt(2187/2048)`, the [island](https://en.xen.wiki/w/676/675) inflection `3l` ~ `sqrt(676/675)` and the [jubilismic](https://en.xen.wiki/w/50/49) inflection `5l` ~ `sqrt(50/49)` have reasonable expressions. The rest are filler curiosities which should be revised by someone who's willing to do more research into irrational bridging.
+
+The additional apotomic inflections `6l` and `7l` are not bridging commas, but simply fractions of the apotome only useful for notating equal temperaments where the augmented unison splits into 3 or 5 equal parts respectively. Currently no bridges exist because the stepspan of a perfect fifth is not divisible by three or five and there is no notation for fractional ordinals besides a single split.
 
 The semiapotome `2l` is a handy companion of the neutral inflections. It's equivalent to a half-sharp, but allows for spellings that bring prime 3 more in line with the higher primes. For comparison with prime 5 we get these pairs of small and large intervals centered on the neutrals.
 
