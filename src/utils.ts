@@ -5,6 +5,16 @@ export const ONE = new Fraction(1);
 export const NEGATIVE_ONE = new Fraction(-1);
 export const TWO = new Fraction(2);
 
+function protectFraction(fraction: Fraction) {
+  Object.defineProperty(fraction, 's', {writable: false});
+  Object.defineProperty(fraction, 'n', {writable: false});
+  Object.defineProperty(fraction, 'd', {writable: false});
+}
+protectFraction(ZERO);
+protectFraction(ONE);
+protectFraction(NEGATIVE_ONE);
+protectFraction(TWO);
+
 /**
  * Greatest common divisor of two integers.
  * @param a The first integer.
@@ -22,6 +32,11 @@ export function bigGcd(a: bigint, b: bigint): bigint {
   }
 }
 
+/**
+ * Calculate the absolute value of a BigInt.
+ * @param x An integer.
+ * @returns The size of the input value.
+ */
 export function bigAbs(x: bigint) {
   return x < 0n ? -x : x;
 }
@@ -36,6 +51,10 @@ export function bigLcm(a: bigint, b: bigint): bigint {
   return (bigAbs(a) / bigGcd(a, b)) * bigAbs(b);
 }
 
+/**
+ * One of the metric prefixes listed here: https://en.wikipedia.org/wiki/Metric_prefix
+ * Goes from quecto = 10^-30 to Quetta = 10^30.
+ */
 export type MetricPrefix =
   | 'Q'
   | 'R'
@@ -63,6 +82,11 @@ export type MetricPrefix =
   | 'r'
   | 'q';
 
+/**
+ * Optain the ten's exponent associated with the given prefix.
+ * @param prefix Prefix to find exponent for.
+ * @returns The ten's exponent associated with the prefix.
+ */
 export function metricExponent(prefix: MetricPrefix): number {
   switch (prefix) {
     case 'Q':
@@ -120,6 +144,13 @@ export function metricExponent(prefix: MetricPrefix): number {
   }
 }
 
+/**
+ * Break a cents offset into lifts, ups, steps and real cents in that order of preference.
+ * @param total Total cents offset.
+ * @param up Value of the 'up' inflection in cents.
+ * @param lift Value of the 'lift' inflection in cents.
+ * @returns The prefix and postfix for recreating the cents offset according to the given context.
+ */
 export function countUpsAndLifts(total: number, up: number, lift: number) {
   let lifts: number;
   let ups: number;
@@ -166,6 +197,11 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
 
 const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
 
+/**
+ * Validate that a BigInt isn't absurdly big.
+ * @param n Integer to validate.
+ * @throws 'Integer overflow.' if the integer has over 1000 digits.
+ */
 export function validateBigInt(n: bigint) {
   if (n > ABSURD_INT || -n > ABSURD_INT) {
     throw new Error('Integer overflow.');
