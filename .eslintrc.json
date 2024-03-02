@@ -3,6 +3,15 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": 0,
     "no-constant-condition": 0,
-    "no-restricted-syntax": ["error", "SequenceExpression"]
+    "no-restricted-syntax": ["error", "SequenceExpression"],
+    "@typescript-eslint/no-this-alias": [
+      "error",
+      {
+        "allowedNames": [
+          "self"
+        ]
+      }
+    ],
+    "prefer-const": ["error", {"destructuring": "all"}]
   }
 }
