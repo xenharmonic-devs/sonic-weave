@@ -121,7 +121,7 @@ function includes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
 
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
-class Interupt {
+export class Interupt {
   node: ReturnStatement;
   value?: SonicWeaveValue;
   constructor(node: ReturnStatement, value?: SonicWeaveValue) {

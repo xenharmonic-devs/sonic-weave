@@ -1,9 +1,8 @@
 import {Fraction, mmod} from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
+import {ZERO} from './utils';
 
-const ZERO = new Fraction(0);
-
-type Degree = {
+export type Degree = {
   negative: boolean;
   base: number;
   octaves: number;

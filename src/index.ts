@@ -1,8 +1,10 @@
 export * from './ast';
 export * from './builtin';
+export * from './chord-parser';
 export * from './cli';
 export * from './context';
 export * from './css-colors';
+export * from './expression';
 export * from './fjs';
 export * from './interval';
 export * from './monzo';
@@ -11,4 +13,3 @@ export * from './pythagorean';
 export * from './utils';
 export * from './warts';
 export * from './scale-workshop-2-parser';
-export * from './chord-parser';

@@ -2,15 +2,26 @@ import {MetricPrefix, validateBigInt} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
-// Comma sets for FJS:
-// '': Classic FJS
-// 'c': Classic FJS
-// 'f': FloraC's version of FJS with semiapotomic radius of tolerance
-// 'n': Neutral FJS expanded to generic bridging commas by Lumi Pakkanen
-// 'l': Lumi's irrational self-insert. Hi there! <3 Happy coding! <3
-// 'h': Helmholtz-Ellis 2020
-// 'm': Helmholtz-Ellis-Wolf-(M)onzo 53-limit
-// 's': Syntonic rastmic subchroma commas by Aura
+/**
+ * Comma sets for Functional Just System.
+ *
+ * '': Classic FJS
+ *
+ * 'c': Classic FJS
+ *
+ * 'f': FloraC's version of FJS with semiapotomic radius of tolerance
+ *
+ * 'n': Neutral FJS expanded to generic bridging commas by Lumi Pakkanen
+ *
+ * 'l': Lumi's irrational self-insert. Hi there! <3 Happy coding! <3
+ *
+ * 'h': Helmholtz-Ellis 2020
+ *
+ * 'm': Helmholtz-Ellis-Wolf-(M)onzo 53-limit
+ *
+ * 's': Syntonic rastmic subchroma commas by Aura
+ *
+ */
 export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm' | 's' | 'c' | 'f';
 
 export type FJSInflection = [number, FJSFlavor];
@@ -192,6 +203,11 @@ export type IntervalLiteral =
   | WartsLiteral
   | SquareSuperparticular;
 
+/**
+ * Validate AST literal for display formatting.
+ * @param node Interval literal to validate.
+ * @throws An error if the literal is too complex to display.
+ */
 export function validateNode(node?: IntervalLiteral) {
   if (!node) {
     return;
@@ -564,6 +580,11 @@ function formatSquareSuperparticular(literal: SquareSuperparticular) {
   return `S${literal.start}`;
 }
 
+/**
+ * Convert an AST node to a string representation.
+ * @param literal Interval literal to convert.
+ * @returns Text representation of the literal.
+ */
 export function literalToString(literal: IntervalLiteral) {
   switch (literal.type) {
     case 'NedjiLiteral':
