@@ -676,6 +676,12 @@ Calculate the arithmetic mean of the terms.
 
 `...terms`
 
+### bpm
+Calculate the frequency corresponding to the given number of beats per minute.
+#### Parameters:
+
+`beats`
+
 ### cbrt
 Calculate the cube root of the input.
 #### Parameters:

@@ -1032,4 +1032,9 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('unstacked([5/4, 3/2]);str');
     expect(scale).toEqual(['5/4', '6/5']);
   });
+
+  it('has BPM', () => {
+    const twoHz = parseSingle('bpm(120)');
+    expect(twoHz.toString()).toBe('2 Hz');
+  });
 });

@@ -1796,6 +1796,11 @@ riff hypot ...args {
   return sum(map(a => a ~^ 2, args)) ~/^ 2;
 }
 
+riff bpm beats {
+  "Calculate the frequency corresponding to the given number of beats per minute.";
+  return beats % 60s;
+}
+
 riff avg ...terms {
   "Calculate the arithmetic mean of the terms.";
   return arrayReduce(a b => a ~+ b, terms) ~% length(terms);
