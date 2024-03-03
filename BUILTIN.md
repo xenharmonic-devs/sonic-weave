@@ -1138,6 +1138,12 @@ Cumulatively stack the current/given intervals on top of each other.
 
 `array`
 
+### stacked
+Obtain a copy of the current/given intervals cumulatively stacked on top of each other.
+#### Parameters:
+
+`array`
+
 ### stepReplaced
 Obtain a copy of the current/given scale with relative occurences of `step` replaced by `replacement`.
 #### Parameters:
@@ -1236,6 +1242,12 @@ Convert the current/given periodic sequence of steps into inflections of the las
 
 ### unstack
 Unstack the current/given scale into steps.
+#### Parameters:
+
+`array`
+
+### unstacked
+Calculate the relative steps in the current/given scale.
 #### Parameters:
 
 `array`

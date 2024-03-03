@@ -1022,4 +1022,14 @@ describe('SonicWeave standard library', () => {
     const budgetUnity = parseSingle('tanh(10)');
     expect(budgetUnity.toString()).toBe('0.9999999958776934r');
   });
+
+  it('is stacked', () => {
+    const scale = parseSource('stacked([5/4, 6/5]);str');
+    expect(scale).toEqual(['5/4', '3/2']);
+  });
+
+  it("isn't that stacked actually", () => {
+    const scale = parseSource('unstacked([5/4, 3/2]);str');
+    expect(scale).toEqual(['5/4', '6/5']);
+  });
 });

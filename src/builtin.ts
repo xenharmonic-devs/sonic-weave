@@ -1882,6 +1882,12 @@ riff cumprod array {
   stack();
 }
 
+riff stacked array {
+  "Obtain a copy of the current/given intervals cumulatively stacked on top of each other.";
+  array;
+  stack();
+}
+
 riff diff array {
   "Calculate the (linear) differences between the terms.";
   array;
@@ -1901,6 +1907,12 @@ riff unstack array {
 
 riff geodiff array {
   "Calculate the geometric differences between the factors.";
+  array;
+  unstack();
+}
+
+riff unstacked array {
+  "Calculate the relative steps in the current/given scale.";
   array;
   unstack();
 }
