@@ -2273,6 +2273,15 @@ riff repeat times scale {
   return;
 }
 
+riff flatRepeat times scale {
+  "Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.";
+  $ = scale ?? $$;
+  const segment = $[..];
+  clear();
+  arrayRepeat(times, segment);
+  return;
+}
+
 riff ground scale {
   "Use the first interval in the current/given scale as the implicit unison.";
   $ = scale ?? $$;

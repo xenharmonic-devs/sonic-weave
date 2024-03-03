@@ -982,4 +982,19 @@ describe('SonicWeave standard library', () => {
     );
     expect(scale).toEqual(['9/8^1/2', '2^1/2', '3/2', '2']);
   });
+
+  it('can repeat unstacked steps', () => {
+    const zarlino7 = parseSource(
+      '5;3/5;flatRepeat(3);stack();2;reduce();sort();str'
+    );
+    expect(zarlino7).toEqual([
+      '9/8',
+      '5/4',
+      '45/32',
+      '3/2',
+      '27/16',
+      '15/8',
+      '2',
+    ]);
+  });
 });

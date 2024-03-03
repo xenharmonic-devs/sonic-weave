@@ -700,6 +700,12 @@ Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 `guide`, `root`, `equave`
 
+### flatRepeat
+Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.
+#### Parameters:
+
+`times`, `scale`
+
 ### flatten
 Flatten a nested array into a simple array.
 #### Parameters:
