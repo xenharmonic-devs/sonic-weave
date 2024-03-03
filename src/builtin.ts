@@ -85,7 +85,13 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
 
 // == Constants
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
+const LN10 = new Interval(TimeMonzo.fromValue(Math.LN10), 'linear');
+const LN2 = new Interval(TimeMonzo.fromValue(Math.LN2), 'linear');
+const LOG10E = new Interval(TimeMonzo.fromValue(Math.LOG10E), 'linear');
+const LOG2E = new Interval(TimeMonzo.fromValue(Math.LOG2E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
+const SQRT1_2 = new Interval(TimeMonzo.fromEqualTemperament('-1/2'), 'linear');
+const SQRT2 = new Interval(TimeMonzo.fromEqualTemperament('1/2'), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 const NAN = new Interval(TimeMonzo.fromValue(NaN), 'linear');
 const INFINITY = new Interval(TimeMonzo.fromValue(Infinity), 'linear');
@@ -1516,7 +1522,13 @@ factorColor.__node__ = builtinNode(factorColor);
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // Constants
   E,
+  LN10,
+  LN2,
+  LOG10E,
+  LOG2E,
   PI,
+  SQRT1_2,
+  SQRT2,
   TAU,
   NaN: NAN,
   Infinity: INFINITY,

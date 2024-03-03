@@ -1123,4 +1123,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(inf.value.residual.s).toBe(-1);
     expect(inf.toString()).toBe('-Infinity');
   });
+
+  it('has root half', () => {
+    const half = parseSingle('SQRT1_2 ^ 2');
+    expect(half.toString()).toBe('1/2');
+  });
 });
