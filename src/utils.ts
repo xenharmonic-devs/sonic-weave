@@ -1,5 +1,7 @@
 import {Fraction, PRIMES} from 'xen-dev-utils';
 
+const EPSILON = 1e-5;
+
 export const ZERO = new Fraction(0);
 export const ONE = new Fraction(1);
 export const NEGATIVE_ONE = new Fraction(-1);
@@ -213,4 +215,97 @@ export function validateBigInt(n: bigint) {
   if (n > ABSURD_INT || -n > ABSURD_INT) {
     throw new Error('Integer overflow.');
   }
+}
+
+/**
+ * Return the index of the minimum value of the array.
+ * @param array Array of values to compare.
+ * @returns The index of the minimum value.
+ */
+export function argMin(array: number[]) {
+  if (!array.length) {
+    return NaN;
+  }
+  let indexOfMinimum = 0;
+  for (let i = 1; i < array.length; i++) {
+    if (array[i] < array[indexOfMinimum]) {
+      indexOfMinimum = i;
+    }
+  }
+  return indexOfMinimum;
+}
+
+export type MinimizationResult = {
+  x: number;
+  value: number;
+};
+
+export function minimizeFunction(
+  fn: (x: number) => number,
+  minX: number,
+  maxX: number,
+  numPartitions = 40
+): MinimizationResult {
+  if (maxX - minX < EPSILON) {
+    return {
+      x: (minX + maxX) / 2,
+      value: fn((minX + maxX) / 2),
+    };
+  }
+  const values = [];
+  for (let i = 0; i <= numPartitions; i++) {
+    const h = fn(minX + ((maxX - minX) / numPartitions) * i);
+    values.push(h);
+  }
+  const m = argMin(values);
+  return minimizeFunction(
+    fn,
+    minX + ((maxX - minX) / numPartitions) * (m - 1),
+    minX + ((maxX - minX) / numPartitions) * (m + 1),
+    5
+  );
+}
+// the objective function to be minimized
+function deltaRationalObjective(
+  chord: number[],
+  maxRoot: number,
+  offset: number
+) {
+  let signature: number[] = [];
+  let minError = Infinity;
+  for (let l = 1; l <= maxRoot; l++) {
+    const jiChord = [];
+    for (const x of chord) {
+      const b = chord[0] / x;
+      // utonal version: x / chord[chord.length - 1];
+      jiChord.push(Math.round(l / b));
+    }
+    let maxDiff = 0;
+    const root = jiChord[0] + offset;
+    for (let i = 0; i < chord.length; i++) {
+      const d = Math.abs((jiChord[i] + offset) / root - chord[i]);
+      if (d > maxDiff) {
+        maxDiff = d;
+      }
+    }
+    if (maxDiff < minError) {
+      signature = jiChord;
+      minError = maxDiff;
+    }
+  }
+  return {
+    signature,
+    error: minError,
+  };
+}
+
+export function deltaRationalize(chord: number[], maxRoot: number) {
+  const f = (x: number) => deltaRationalObjective(chord, maxRoot, x).error;
+  const minimum = minimizeFunction(f, -0.5, 0.5);
+  const offset = minimum.x;
+  return {
+    ...deltaRationalObjective(chord, maxRoot, offset),
+    offset,
+    chord: chord.map(c => c + offset),
+  };
 }
