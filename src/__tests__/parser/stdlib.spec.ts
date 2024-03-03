@@ -997,4 +997,29 @@ describe('SonicWeave standard library', () => {
       '2',
     ]);
   });
+
+  it('has log10', () => {
+    const three = parseSingle('log10(1000)');
+    expect(three.toString()).toBe('3');
+  });
+
+  it('has sign', () => {
+    const neg = parseSingle('sign(-1/12)');
+    expect(neg.toString()).toBe('-1');
+  });
+
+  it('has hypot', () => {
+    const spaceDiagonal = parseSingle('hypot(2, 3, 5)');
+    expect(spaceDiagonal.toString()).toBe('38^1/2');
+  });
+
+  it('has domain-preserving acosh', () => {
+    const whatever = parseSingle('acosh(1200.)');
+    expect(whatever.toString()).toBe('476.6510681358907959rc');
+  });
+
+  it('has tanh', () => {
+    const budgetUnity = parseSingle('tanh(10)');
+    expect(budgetUnity.toString()).toBe('0.9999999958776934r');
+  });
 });

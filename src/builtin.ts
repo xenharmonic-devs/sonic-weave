@@ -1703,14 +1703,61 @@ riff cbrt x {
   "Calculate the cube root of the input.";
   return x ~/^ 3;
 }
+riff exp x {
+  "Calculate e raised to the power of x.";
+  return E ~^ x;
+}
 riff log x y {
   "Calculate the logarithm of x base y. Base defaults to E.";
   y ??= E;
   return x ~/_ y;
 }
+riff log10 x {
+  "Calculate the logarithm of x base 10.";
+  return x ~/_ 10;
+}
+riff log2 x {
+  "Calculate the logarithm of x base 2.";
+  return x ~/_ 2;
+}
+riff acosh x {
+  "Calculate the inverse hyperbolic cosine of x.";
+  return log(x ~+ sqrt(x ~^ 2 ~- 1));
+}
+riff asinh x {
+  "Calculate the inverse hyperbolic sine of x.";
+  return log(x ~+ sqrt(x ~^ 2 ~+ 1));
+}
+riff atanh x {
+  "Calculate the inverse hyperbolic tangent of x.";
+  return log((1 +~ x) ~% (1 -~ x)) ~% 2;
+}
+riff cosh x {
+  "Calculate the hyperbolic cosine of x.";
+  return (exp(x) ~+ exp(-~x)) ~% 2;
+}
+riff sinh x {
+  "Calculate the hyperbolic sine of x.";
+  return (exp(x) ~- exp(-~x)) ~% 2;
+}
+riff tanh x {
+  "Calculate the hyperbolic tangent of x.";
+  return (exp(x) ~- exp(-~x)) ~% (exp(x) ~+ exp(-~x));
+}
 riff pow x y {
   "Calculate x to the power of y.";
   return x ~^ y;
+}
+riff sign x {
+  "Calculate the sign of x.";
+  if (x > 0) return 1;
+  if (x < 0) return -1;
+  if (x === 0) return 0;
+  return NaN;
+}
+riff hypot ...args {
+  "Calculate the square root of the sum of squares of the arguments.";
+  return sum(map(a => a ~^ 2, args)) ~/^ 2;
 }
 
 riff avg ...terms {

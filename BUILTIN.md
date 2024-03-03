@@ -568,6 +568,12 @@ Convert interval to absolute FJS using neutral comma flavors.
 
 `interval`
 
+### acosh
+Calculate the inverse hyperbolic cosine of x.
+#### Parameters:
+
+`x`
+
 ### add
 Calculate the (linear) sum of the arguments.
 #### Parameters:
@@ -579,6 +585,18 @@ Calculate the cumulative geometric sums of a periodic difference pattern. Undoes
 #### Parameters:
 
 `constantOfIntegration`, `array`
+
+### asinh
+Calculate the inverse hyperbolic sine of x.
+#### Parameters:
+
+`x`
+
+### atanh
+Calculate the inverse hyperbolic tangent of x.
+#### Parameters:
+
+`x`
 
 ### avg
 Calculate the arithmetic mean of the terms.
@@ -627,6 +645,12 @@ Generate a concordance shell i.e. a vertically aligned object reduced to an equa
 #### Parameters:
 
 `denominator`, `maxNumerator`, `divisions`, `tolerance`, `equave`
+
+### cosh
+Calculate the hyperbolic cosine of x.
+#### Parameters:
+
+`x`
 
 ### cps
 Generate a combination product set from the given factors and combination size.
@@ -700,6 +724,12 @@ Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 `guide`, `root`, `equave`
 
+### exp
+Calculate e raised to the power of x.
+#### Parameters:
+
+`x`
+
 ### flatRepeat
 Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.
 #### Parameters:
@@ -766,6 +796,12 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 
 `interval`
 
+### hypot
+Calculate the square root of the sum of squares of the arguments.
+#### Parameters:
+
+`...args`
+
 ### keepUnique
 Only keep unique intervals in the current/given scale.
 #### Parameters:
@@ -795,6 +831,18 @@ Calculate the logarithm of x base y. Base defaults to E.
 #### Parameters:
 
 `x`, `y`
+
+### log10
+Calculate the logarithm of x base 10.
+#### Parameters:
+
+`x`
+
+### log2
+Calculate the logarithm of x base 2.
+#### Parameters:
+
+`x`
 
 ### mergeOffset
 Merge the given offset or polyoffset of the current/given scale onto itself. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
@@ -988,6 +1036,18 @@ Get rid of interval formatting, color and label.
 
 `interval`
 
+### sign
+Calculate the sign of x.
+#### Parameters:
+
+`x`
+
+### sinh
+Calculate the hyperbolic sine of x.
+#### Parameters:
+
+`x`
+
 ### spanLattice
 Span a lattice by extending a basis combinatorically.
 #### Parameters:
@@ -1053,6 +1113,12 @@ Calculate the (linear) sum of the terms or the current scale.
 #### Parameters:
 
 `terms`
+
+### tanh
+Calculate the hyperbolic tangent of x.
+#### Parameters:
+
+`x`
 
 ### toHarmonics
 Quantize the current/given scale to harmonics of the given fundamental.
