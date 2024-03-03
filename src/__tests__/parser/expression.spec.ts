@@ -1128,4 +1128,14 @@ describe('SonicWeave expression evaluator', () => {
     const half = parseSingle('SQRT1_2 ^ 2');
     expect(half.toString()).toBe('1/2');
   });
+
+  it('has sine', () => {
+    const sinRad = parseSingle('sin(1)');
+    expect(sinRad.toString()).toBe('0.8414709848078965r');
+  });
+
+  it('produces nan from asin', () => {
+    const wishIwasAcomplexNumber = parseSingle('asin(2)');
+    expect(wishIwasAcomplexNumber.toString()).toBe('NaN');
+  });
 });

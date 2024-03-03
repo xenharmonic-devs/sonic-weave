@@ -96,6 +96,40 @@ const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 const NAN = new Interval(TimeMonzo.fromValue(NaN), 'linear');
 const INFINITY = new Interval(TimeMonzo.fromValue(Infinity), 'linear');
 
+// == Real-valued Math wrappers ==
+const MATH_WRAPPERS: Record<string, SonicWeaveFunction> = {};
+const MATH_KEYS: (keyof Math)[] = [
+  'acos',
+  'asin',
+  'atan',
+  'clz32',
+  'cos',
+  'expm1',
+  'fround',
+  'imul',
+  'log1p',
+  'sin',
+  'tan',
+];
+for (const name of MATH_KEYS) {
+  const fn = Math[name] as (x: number) => number;
+  const wrapper = (x: Interval) =>
+    new Interval(TimeMonzo.fromValue(fn(x.valueOf())), x.domain, undefined, x);
+  Object.defineProperty(wrapper, 'name', {value: name, enumerable: false});
+  wrapper.__doc__ = `Calculate ${String(name)} x.`;
+  wrapper.__node__ = builtinNode(wrapper);
+  MATH_WRAPPERS[name as string] = wrapper;
+}
+
+function atan2(x: Interval, y: Interval) {
+  return new Interval(
+    TimeMonzo.fromValue(Math.atan2(x.valueOf(), y.valueOf())),
+    'linear'
+  );
+}
+atan2.__doc__ = 'Calculate atan2(x, y).';
+atan2.__node__ = builtinNode(atan2);
+
 // == First-party wrappers ==
 function numComponents(value?: Interval) {
   if (value === undefined) {
@@ -1520,6 +1554,8 @@ factorColor.__doc__ = 'Color an interval based on its prime factors.';
 factorColor.__node__ = builtinNode(factorColor);
 
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
+  ...MATH_WRAPPERS,
+  atan2,
   // Constants
   E,
   LN10,

@@ -19,6 +19,12 @@ Convert interval to absolute FJS.
 
 `interval`, `flavor = ""`
 
+### acos
+Calculate acos x.
+#### Parameters:
+
+`x`
+
 ### arrayReduce
 Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.
 #### Parameters:
@@ -30,6 +36,24 @@ Repeat the given/current array or string `count` times.
 #### Parameters:
 
 `count`, `array`
+
+### asin
+Calculate asin x.
+#### Parameters:
+
+`x`
+
+### atan
+Calculate atan x.
+#### Parameters:
+
+`x`
+
+### atan2
+Calculate atan2(x, y).
+#### Parameters:
+
+`x`, `y`
 
 ### bleach
 Get rid of interval coloring and label.
@@ -67,6 +91,12 @@ Remove the contents of the current/given scale.
 
 `scale`
 
+### clz32
+Calculate clz32 x.
+#### Parameters:
+
+`x`
+
 ### cologarithmic
 Convert interval to cologarithmic representation.
 #### Parameters:
@@ -84,6 +114,12 @@ Combine two or more arrays/strings.
 #### Parameters:
 
 `first`, `...rest`
+
+### cos
+Calculate cos x.
+#### Parameters:
+
+`x`
 
 ### cosJIP
 Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".
@@ -126,6 +162,12 @@ Return the equave of the val.
 #### Parameters:
 
 `val`
+
+### expm1
+Calculate expm1 x.
+#### Parameters:
+
+`x`
 
 ### extend
 Extend the first array with the contents of the rest.
@@ -175,6 +217,12 @@ Convert interval to a fraction.
 
 `interval`, `preferredNumerator`, `preferredDenominator`, `epsilon`
 
+### fround
+Calculate fround x.
+#### Parameters:
+
+`x`
+
 ### gcd
 Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
 #### Parameters:
@@ -204,6 +252,12 @@ HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alph
 #### Parameters:
 
 `hue`, `saturation`, `lightness`, `alpha`
+
+### imul
+Calculate imul x.
+#### Parameters:
+
+`x`
 
 ### insert
 Insert an interval into the current/given scale keeping it sorted.
@@ -312,6 +366,12 @@ Convert interval to linear representation.
 #### Parameters:
 
 `interval`
+
+### log1p
+Calculate log1p x.
+#### Parameters:
+
+`x`
 
 ### logarithmic
 Convert interval to logarithmic representation.
@@ -471,6 +531,12 @@ Get rid of interval formatting.
 
 `interval`
 
+### sin
+Calculate sin x.
+#### Parameters:
+
+`x`
+
 ### slice
 Obtain a slice of a string or scale between the given indices.
 #### Parameters:
@@ -500,6 +566,12 @@ Return the higher prime tail of an interval starting from the given index. Prime
 #### Parameters:
 
 `interval`, `index`
+
+### tan
+Calculate tan x.
+#### Parameters:
+
+`x`
 
 ### tenneyHeight
 Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
