@@ -498,7 +498,7 @@ export class Interval {
         }
         const C4 = context.C4;
         const relativeToC4 = this.value.div(C4);
-        if (context.up.isHardCents() && context.lift.isHardCents()) {
+        if (context.up.isRealCents() && context.lift.isRealCents()) {
           ({prefix, postfix} = countUpsAndLifts(
             relativeToC4.cents,
             context.up.cents,
@@ -518,7 +518,7 @@ export class Interval {
           if (!context) {
             return this.value.toString(this.domain);
           }
-          if (context.up.isHardCents() && context.lift.isHardCents()) {
+          if (context.up.isRealCents() && context.lift.isRealCents()) {
             ({prefix, postfix} = countUpsAndLifts(
               value.cents,
               context.up.cents,

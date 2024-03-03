@@ -1,4 +1,4 @@
-import {Fraction} from 'xen-dev-utils';
+import {Fraction, PRIMES} from 'xen-dev-utils';
 
 export const ZERO = new Fraction(0);
 export const ONE = new Fraction(1);
@@ -14,6 +14,13 @@ protectFraction(ZERO);
 protectFraction(ONE);
 protectFraction(NEGATIVE_ONE);
 protectFraction(TWO);
+
+export const FRACTION_PRIMES: Fraction[] = [];
+for (const prime of PRIMES) {
+  const p = new Fraction(prime);
+  protectFraction(p);
+  FRACTION_PRIMES.push(p);
+}
 
 /**
  * Greatest common divisor of two integers.

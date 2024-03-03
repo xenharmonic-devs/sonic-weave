@@ -421,4 +421,9 @@ describe('Extended Monzo', () => {
     ]);
     expect(foo.mul(foo).toString('logarithmic')).toBe('23999993\\60000000');
   });
+
+  it('has zero as the identity element for gcd', () => {
+    const twelve = TimeMonzo.fromBigInt(0n).gcd(TimeMonzo.fromBigInt(12n));
+    expect(twelve.toBigInteger()).toBe(12n);
+  });
 });
