@@ -426,4 +426,10 @@ describe('Extended Monzo', () => {
     const twelve = TimeMonzo.fromBigInt(0n).gcd(TimeMonzo.fromBigInt(12n));
     expect(twelve.toBigInteger()).toBe(12n);
   });
+
+  it('can represent NaN', () => {
+    const nan = TimeMonzo.fromValue(NaN);
+    expect(nan.cents).toBeNaN();
+    expect(nan.toString()).toBe('NaN');
+  });
 });

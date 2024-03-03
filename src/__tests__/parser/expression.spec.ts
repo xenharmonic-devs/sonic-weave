@@ -1110,4 +1110,10 @@ describe('SonicWeave expression evaluator', () => {
     const C4 = parseSingle('C4 = 10ms; relative(C5)');
     expect(C4.toString()).toBe('1\\1');
   });
+
+  it('has not-a-number', () => {
+    const nan = parseSingle('NaN');
+    expect(nan.valueOf()).toBeNaN();
+    expect(nan.toString()).toBe('NaN');
+  });
 });

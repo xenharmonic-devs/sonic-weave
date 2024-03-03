@@ -151,9 +151,6 @@ export class TimeMonzo {
     residual?: Fraction,
     cents = 0
   ) {
-    if (isNaN(cents)) {
-      throw new Error('Invalid cents value.');
-    }
     if (residual === undefined) {
       residual = new Fraction(1);
     }
@@ -423,7 +420,7 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as a ratio.
    */
   toFraction() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       throw new Error('Unable to convert irrational number to fraction');
     }
     if (!this.primeExponents.length) {
@@ -446,7 +443,7 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as a ratio.
    */
   toBigNumeratorDenominator() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       throw new Error('Unable to convert irrational number to fraction.');
     }
     let numerator = BigInt(this.residual.n * this.residual.s);
@@ -478,7 +475,7 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as an integer.
    */
   toBigInteger() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       throw new Error('Unable to convert irrational number to integer.');
     }
     if (this.residual.d !== 1) {
@@ -519,7 +516,7 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as an EDJI interval.
    */
   toEqualTemperament() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       throw new Error(
         'Unable to convert non-algebraic number to equal temperament.'
       );
@@ -585,7 +582,7 @@ export class TimeMonzo {
     if (!this.residual.isUnity()) {
       throw new Error('Cannot convert monzo with residual to integers.');
     }
-    if (this.cents) {
+    if (this.isNonAlgebraic()) {
       throw new Error('Cannot convert monzo with offset to integers.');
     }
     const result: number[] = [];
@@ -610,11 +607,20 @@ export class TimeMonzo {
   }
 
   /**
+   * Check if the time monzo is not algebraic.
+   * @returns `true` if the time monzo has a non-zero real cents offset.
+   */
+  isNonAlgebraic() {
+    // This form has the intended behavior with NaN.
+    return !(this.cents === 0);
+  }
+
+  /**
    * Check if the time monzo represents a whole number.
    * @returns `true` if the time monzo represents an integer ignoring units of time.
    */
   isIntegral() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       return false;
     }
     if (this.residual.d !== 1) {
@@ -633,7 +639,7 @@ export class TimeMonzo {
    * @returns `true` if the time monzo represents a decimal number ignoring units of time.
    */
   isDecimal() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       return false;
     }
     if (!isDecimal(this.residual)) {
@@ -663,7 +669,7 @@ export class TimeMonzo {
    * @returns `true` if the time monzo can be interpreted as a ratio in frequency-space.
    */
   isFractional() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       return false;
     }
     for (const component of this.primeExponents) {
@@ -679,7 +685,7 @@ export class TimeMonzo {
    * @returns `true` if the time monzo can be interpreted as pitch-space fraction of a frequency-space fraction.
    */
   isEqualTemperament() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       return false;
     }
     return this.residual.isUnity();
@@ -706,7 +712,7 @@ export class TimeMonzo {
    * @returns `true` if the time monzo is a power of two.
    */
   isPowerOfTwo() {
-    if (this.cents !== 0) {
+    if (this.isNonAlgebraic()) {
       return false;
     }
     if (!this.primeExponents.length) {
@@ -1074,7 +1080,7 @@ export class TimeMonzo {
       return solution;
     }
     if (other instanceof TimeMonzo) {
-      if (this.cents || other.cents) {
+      if (this.isNonAlgebraic() || other.isNonAlgebraic()) {
         return this.totalCents() / other.totalCents();
       }
       let self: TimeMonzo = this;
@@ -1498,6 +1504,9 @@ export class TimeMonzo {
       }
     }
     const cents = this.totalCents();
+    if (isNaN(cents)) {
+      throw new Error('Cannot represent NaN in cents.');
+    }
     const whole = Math.trunc(cents);
     // Note: This abuses the grammar
     const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'rc';
@@ -1613,7 +1622,7 @@ export class TimeMonzo {
    * @returns Monzo literal or `undefined` if representation fails.
    */
   asMonzoLiteral(): MonzoLiteral | undefined {
-    if (this.cents) {
+    if (this.isNonAlgebraic()) {
       return undefined;
     }
     if (!this.residual.isUnity()) {
@@ -1644,6 +1653,16 @@ export class TimeMonzo {
    * @returns String that evaluates to the same value as this time monzo.
    */
   toString(domain: Domain = 'linear') {
+    if (isNaN(this.cents)) {
+      switch (domain) {
+        case 'linear':
+          return 'NaN';
+        case 'logarithmic':
+          return 'logarithmic(NaN)';
+        case 'cologarithmic':
+          return 'cologarithmic(NaN)';
+      }
+    }
     if (domain === 'linear') {
       if (this.isScalar()) {
         if (this.isIntegral()) {

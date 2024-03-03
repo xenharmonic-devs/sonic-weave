@@ -87,6 +87,7 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
 const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
+const NAN = new Interval(TimeMonzo.fromValue(NaN), 'linear');
 
 // == First-party wrappers ==
 function numComponents(value?: Interval) {
@@ -1516,6 +1517,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   E,
   PI,
   TAU,
+  NaN: NAN,
   // First-party wrappers
   numComponents,
   // Third-party wrappers
