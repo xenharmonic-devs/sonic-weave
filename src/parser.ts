@@ -2068,7 +2068,11 @@ export function evaluateSource(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
 ) {
-  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
+  const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
+  const visitor = new StatementVisitor(
+    globalVisitor.rootContext,
+    globalVisitor
+  );
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -2085,7 +2089,11 @@ export function evaluateExpression(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
 ): SonicWeaveValue {
-  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
+  const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
+  const visitor = new StatementVisitor(
+    globalVisitor.rootContext,
+    globalVisitor
+  );
   const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);

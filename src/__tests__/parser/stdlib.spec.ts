@@ -970,4 +970,16 @@ describe('SonicWeave standard library', () => {
       expect(heji.equals(retry)).toBe(true);
     }
   });
+
+  it('can shadow immutable builtins', () => {
+    const fifth = parseSingle('const simplify = "oops";sanitize(6/4)');
+    expect(fifth.toString()).toBe('3/2');
+  });
+
+  it('can shadow immutable stdlib', () => {
+    const scale = parseSource(
+      'const repeat = "Lost it!";rank2(3, 2, 0, 2 /^ 2, 2);str'
+    );
+    expect(scale).toEqual(['9/8^1/2', '2^1/2', '3/2', '2']);
+  });
 });
