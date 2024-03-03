@@ -63,7 +63,7 @@ export function linearOne() {
   return new Interval(ONE_MONZO, 'linear', {type: 'IntegerLiteral', value: 1n});
 }
 
-function builtinNode(builtin: Function): FunctionDeclaration {
+export function builtinNode(builtin: Function): FunctionDeclaration {
   const identifiers: Identifier[] = builtin
     .toString()
     .split('(', 2)[1]

@@ -4,11 +4,12 @@ import {
   evaluateSource,
   StatementVisitor,
   getSourceVisitor,
+  ExpressionVisitor,
 } from '../../parser';
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
-import {relative} from '../../builtin';
+import {builtinNode, relative} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);
@@ -922,5 +923,42 @@ describe('SonicWeave parser', () => {
   it('has a fifth-apotome in 25edo', () => {
     const step = parseSource('P1^7l;25@')[0];
     expect(step.toString()).toBe('1\\25');
+  });
+
+  it('has support for custom builtins', () => {
+    const view: number[][] = [];
+    function latticeView(this: ExpressionVisitor) {
+      view.length = 0;
+      const scale = this.getCurrentScale();
+      for (const interval of scale) {
+        view.push(interval.value.toIntegerMonzo(true));
+      }
+    }
+    latticeView.__doc__ =
+      'Store the current order of intervals for lattice visualization.';
+    latticeView.__node__ = builtinNode(latticeView);
+    const visitor = evaluateSource(
+      `
+      1
+      3
+      3
+      5/9
+      3
+      stack()
+      i => i rdc 2
+      latticeView()
+      sort()
+    `,
+      true,
+      {latticeView}
+    );
+    expect(view).toEqual([[1], [-1, 1], [-3, 2], [-2, 0, 1], [-3, 1, 1]]);
+    expect(visitor.getCurrentScale().map(i => i.toString())).toEqual([
+      '9/8',
+      '5/4',
+      '3/2',
+      '15/8',
+      '2',
+    ]);
   });
 });

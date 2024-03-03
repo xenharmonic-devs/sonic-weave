@@ -578,9 +578,10 @@ export class TimeMonzo {
   /**
    * Convert the time monzo to a simple monzo with integer coefficients.
    * @returns Array of prime exponents.
+   * @param trim If `true` trim zero components from the tail.
    * @throws An error if the time monzo cannot be represented as sufficiently simple ratio in frequency-space.
    */
-  toIntegerMonzo(): number[] {
+  toIntegerMonzo(trim?: boolean): number[] {
     if (!this.residual.isUnity()) {
       throw new Error('Cannot convert monzo with residual to integers.');
     }
@@ -593,6 +594,9 @@ export class TimeMonzo {
         throw new Error('Cannot convert fractional monzo to integers.');
       }
       result.push(component.valueOf());
+    }
+    while (trim && result.length && !result[result.length - 1]) {
+      result.pop();
     }
     return result;
   }

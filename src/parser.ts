@@ -2009,7 +2009,11 @@ let SOURCE_VISITOR_WITH_PRELUDE: StatementVisitor | null = null;
 let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
 let VOLATILES: Program | null = null;
 
-export function getSourceVisitor(includePrelude = true) {
+export function getSourceVisitor(
+  includePrelude = true,
+  extraBuiltins?: Record<string, SonicWeaveValue>
+) {
+  extraBuiltins ??= {};
   const rootContext = new RootContext();
   if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE && VOLATILES) {
     const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
@@ -2018,6 +2022,10 @@ export function getSourceVisitor(includePrelude = true) {
       visitor.visit(statement);
     }
     visitor.rootContext = rootContext;
+    for (const name in extraBuiltins) {
+      const value = extraBuiltins[name];
+      visitor.immutables.set(name, value);
+    }
     return visitor;
   } else if (!includePrelude && SOURCE_VISITOR_NO_PRELUDE) {
     const visitor = SOURCE_VISITOR_NO_PRELUDE.clone();
@@ -2044,16 +2052,23 @@ export function getSourceVisitor(includePrelude = true) {
       for (const statement of VOLATILES.body) {
         visitor.visit(statement);
       }
-      return visitor;
     } else {
       SOURCE_VISITOR_NO_PRELUDE = visitor.clone();
-      return visitor;
     }
+    for (const name in extraBuiltins) {
+      const value = extraBuiltins[name];
+      visitor.immutables.set(name, value);
+    }
+    return visitor;
   }
 }
 
-export function evaluateSource(source: string, includePrelude = true) {
-  const visitor = getSourceVisitor(includePrelude);
+export function evaluateSource(
+  source: string,
+  includePrelude = true,
+  extraBuiltins?: Record<string, SonicWeaveValue>
+) {
+  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -2067,9 +2082,10 @@ export function evaluateSource(source: string, includePrelude = true) {
 
 export function evaluateExpression(
   source: string,
-  includePrelude = true
+  includePrelude = true,
+  extraBuiltins?: Record<string, SonicWeaveValue>
 ): SonicWeaveValue {
-  const visitor = getSourceVisitor(includePrelude);
+  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
   const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
