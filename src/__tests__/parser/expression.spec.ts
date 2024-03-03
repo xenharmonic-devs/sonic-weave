@@ -1116,4 +1116,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(nan.valueOf()).toBeNaN();
     expect(nan.toString()).toBe('NaN');
   });
+
+  it('has negative infinity', () => {
+    const inf = parseSingle('-Infinity');
+    expect(inf.value.cents).toBe(Infinity);
+    expect(inf.value.residual.s).toBe(-1);
+    expect(inf.toString()).toBe('-Infinity');
+  });
 });

@@ -88,6 +88,7 @@ const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
 const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
 const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
 const NAN = new Interval(TimeMonzo.fromValue(NaN), 'linear');
+const INFINITY = new Interval(TimeMonzo.fromValue(Infinity), 'linear');
 
 // == First-party wrappers ==
 function numComponents(value?: Interval) {
@@ -1518,6 +1519,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   PI,
   TAU,
   NaN: NAN,
+  Infinity: INFINITY,
   // First-party wrappers
   numComponents,
   // Third-party wrappers

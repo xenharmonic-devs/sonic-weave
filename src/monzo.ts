@@ -190,7 +190,14 @@ export class TimeMonzo {
     while (vector.length < numberOfComponents) {
       vector.push(new Fraction(0));
     }
-    return new TimeMonzo(new Fraction(0), vector, undefined, cents);
+    const residual = new Fraction(1);
+    // Normalize representation of zero.
+    if (cents === -Infinity) {
+      residual.s = 0;
+      residual.n = 0;
+      cents = 0;
+    }
+    return new TimeMonzo(new Fraction(0), vector, residual, cents);
   }
 
   /**
@@ -1507,6 +1514,9 @@ export class TimeMonzo {
     if (isNaN(cents)) {
       throw new Error('Cannot represent NaN in cents.');
     }
+    if (!isFinite(cents)) {
+      throw new Error('Cannot represent Infinity in cents.');
+    }
     const whole = Math.trunc(cents);
     // Note: This abuses the grammar
     const fractional = ((cents - whole).toString().split('.')[1] ?? '') + 'rc';
@@ -1661,6 +1671,17 @@ export class TimeMonzo {
           return 'logarithmic(NaN)';
         case 'cologarithmic':
           return 'cologarithmic(NaN)';
+      }
+    }
+    if (!isFinite(this.cents)) {
+      const value = this.residual.s < 0 ? '-Infinity' : 'Infinity';
+      switch (domain) {
+        case 'linear':
+          return value;
+        case 'logarithmic':
+          return `logarithmic(${value})`;
+        case 'cologarithmic':
+          return `cologarithmic(${value})`;
       }
     }
     if (domain === 'linear') {

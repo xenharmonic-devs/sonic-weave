@@ -432,4 +432,10 @@ describe('Extended Monzo', () => {
     expect(nan.cents).toBeNaN();
     expect(nan.toString()).toBe('NaN');
   });
+
+  it('can represent Infinity', () => {
+    const inf = TimeMonzo.fromValue(Infinity);
+    expect(inf.cents).toBe(Infinity);
+    expect(inf.toString()).toBe('Infinity');
+  });
 });
