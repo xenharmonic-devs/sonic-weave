@@ -10,6 +10,7 @@ export class RootContext {
   unisonFrequency?: TimeMonzo;
   gas: number;
   fragiles: (Interval | Val)[];
+  trackingIndex: number;
 
   constructor(gas?: number) {
     this.title = '';
@@ -18,6 +19,7 @@ export class RootContext {
     this.lift_ = new TimeMonzo(ZERO, [], undefined, 5);
     this.gas = gas ?? Infinity;
     this.fragiles = [];
+    this.trackingIndex = 0;
   }
 
   get C4() {
@@ -96,5 +98,10 @@ export class RootContext {
       lines.push(`/ = ${this.lift.toString('logarithmic')}`);
     }
     return lines.join('\n');
+  }
+
+  nextTrackingId() {
+    this.trackingIndex++;
+    return this.trackingIndex;
   }
 }

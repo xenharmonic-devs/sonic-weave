@@ -579,6 +579,18 @@ Calculate the Tenney height of the interval. Natural logarithm of numerator time
 
 `interval`
 
+### track
+Attach a tracking ID to the interval.
+#### Parameters:
+
+`interval`
+
+### trackingIds
+Obtain an array of the tracking IDs attached to the interval.
+#### Parameters:
+
+`interval`
+
 ### trunc
 Truncate value towards zero to the nearest integer.
 #### Parameters:
