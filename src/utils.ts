@@ -214,3 +214,21 @@ export function validateBigInt(n: bigint) {
     throw new Error('Integer overflow.');
   }
 }
+
+function setUnionPolyfill<T>(a: Set<T>, b: Set<T>) {
+  const result = new Set<T>();
+  for (const value of a) {
+    result.add(value);
+  }
+  for (const value of b) {
+    result.add(value);
+  }
+  return result;
+}
+
+function setUnionNative<T>(a: Set<T>, b: Set<T>): Set<T> {
+  return (a as any).union(b);
+}
+
+export const setUnion =
+  'union' in Set.prototype ? setUnionNative : setUnionPolyfill;

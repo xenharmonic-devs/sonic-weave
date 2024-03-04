@@ -672,6 +672,21 @@ export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
   return r(a).compare(r(b));
 }
 
+export function track(this: ExpressionVisitor, interval: Interval) {
+  const result = interval.shallowClone();
+  result.trackingIds.add(this.rootContext.nextTrackingId());
+  return result;
+}
+track.__doc__ = 'Attach a tracking ID to the interval.';
+track.__node__ = builtinNode(track);
+
+function trackingIds(interval: Interval) {
+  return Array.from(interval.trackingIds).map(id => Interval.fromInteger(id));
+}
+trackingIds.__doc__ =
+  'Obtain an array of the tracking IDs attached to the interval.';
+trackingIds.__node__ = builtinNode(trackingIds);
+
 function clear(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
   scale.length = 0;
@@ -1611,6 +1626,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trunc,
   ceil,
   // Other
+  track,
+  trackingIds,
   clear,
   tail,
   colorOf,

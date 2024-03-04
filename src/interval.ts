@@ -14,7 +14,7 @@ import {
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {RootContext} from './context';
-import {ONE, ZERO, countUpsAndLifts} from './utils';
+import {ONE, ZERO, countUpsAndLifts, setUnion} from './utils';
 
 export type IntervalDomain = Exclude<Domain, 'cologarithmic'>;
 
@@ -60,6 +60,7 @@ function logLinMul(
 export function infect(left: Interval, right: Interval) {
   ZOMBIE.color = left.color ?? right.color;
   ZOMBIE.label = left.label || right.label;
+  ZOMBIE.trackingIds = setUnion(left.trackingIds, right.trackingIds);
   return ZOMBIE;
 }
 
@@ -78,6 +79,7 @@ export class Interval {
   node?: IntervalLiteral;
   color?: Color;
   label: string;
+  trackingIds: Set<number>;
 
   constructor(
     value: TimeMonzo,
@@ -89,9 +91,13 @@ export class Interval {
     this.value = value;
     this.domain = domain;
     this.node = node;
+    this.trackingIds = new Set();
     if (convert !== undefined) {
       this.color = convert.color;
       this.label = convert.label;
+      for (const id of convert.trackingIds) {
+        this.trackingIds.add(id);
+      }
     } else {
       this.label = '';
     }

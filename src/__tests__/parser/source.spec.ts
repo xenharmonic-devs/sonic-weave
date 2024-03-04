@@ -9,7 +9,7 @@ import {
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
-import {builtinNode, relative} from '../../builtin';
+import {builtinNode, relative, track} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);
@@ -817,12 +817,15 @@ describe('SonicWeave parser', () => {
   });
 
   it('leaves higher prime limits alone in implicit tempering', () => {
-    const scale = parseSource('5/4;7/5;3/2;2/1;101;12@5');
+    const scale = parseSource('5/4 "3rd";7/5;3/2;2/1;101 "big";12@5');
     expect(scale[0].totalCents()).toBeCloseTo(400);
     expect(scale[1].totalCents()).toBeCloseTo(3368.825906469125 - 2800);
     expect(scale[2].totalCents()).toBeCloseTo(700);
     expect(scale[3].totalCents()).toBeCloseTo(1200);
     expect(scale[4].totalCents()).toBeCloseTo(7989.853779302155);
+
+    expect(scale[0].label).toBe('3rd');
+    expect(scale[4].label).toBe('big');
   });
 
   it('can insert intervals into a sorted scale', () => {
@@ -930,6 +933,9 @@ describe('SonicWeave parser', () => {
     function latticeView(this: ExpressionVisitor) {
       view.length = 0;
       const scale = this.getCurrentScale();
+      for (let i = 0; i < scale.length; ++i) {
+        scale[i] = track.bind(this)(scale[i]);
+      }
       for (const interval of scale) {
         view.push(interval.value.toIntegerMonzo(true));
       }
@@ -960,5 +966,19 @@ describe('SonicWeave parser', () => {
       '15/8',
       '2',
     ]);
+    expect(
+      visitor.getCurrentScale().map(i => Array.from(i.trackingIds)[0])
+    ).toEqual([3, 4, 2, 5, 1]);
+  });
+
+  it('can keep track of tempered intervals', () => {
+    const scale = parseSource('6/5;3/2;9/5;2/1;track;12@');
+    expect(scale.map(i => i.toString())).toEqual([
+      '3\\12',
+      '7\\12',
+      '10\\12',
+      '12\\12',
+    ]);
+    expect(scale.map(i => Array.from(i.trackingIds)[0])).toEqual([1, 2, 3, 4]);
   });
 });
