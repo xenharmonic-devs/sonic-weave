@@ -1013,9 +1013,9 @@ describe('SonicWeave standard library', () => {
     expect(spaceDiagonal.toString()).toBe('38^1/2');
   });
 
-  it('has domain-preserving acosh', () => {
+  it('has domain-crossing acosh', () => {
     const whatever = parseSingle('acosh(1200.)');
-    expect(whatever.toString()).toBe('476.6510681358907959rc');
+    expect(whatever.toString()).toBe('1.3169578969248166r');
   });
 
   it('has tanh', () => {

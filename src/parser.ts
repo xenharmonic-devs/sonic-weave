@@ -1506,7 +1506,15 @@ export class ExpressionVisitor {
                 } unimplemented`
               );
           }
-          return resolvePreference(value, left, right, node, simplify);
+          const result = resolvePreference(value, left, right, node, simplify);
+
+          // Special handling for domain crossing operations
+          if (operator === '/_' || operator === 'dot' || operator === '·') {
+            result.domain = 'linear';
+            result.node = undefined;
+          }
+
+          return result;
         }
         switch (operator) {
           case '===':

@@ -1139,6 +1139,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(wishIwasAcomplexNumber.toString()).toBe('NaN');
   });
 
+  it('has domain-crossing acos', () => {
+    const acosHalf = parseSingle('acos(-P8)');
+    expect(acosHalf.toString()).toBe('1.0471975511965979r');
+  });
+
   it('formats uniformly inverted NEDJI', () => {
     const descending3rd = parseSingle('%~4\\12');
     expect(descending3rd.toString()).toBe('-4\\12');
@@ -1152,5 +1157,15 @@ describe('SonicWeave expression evaluator', () => {
   it('subtracts S-expressions from absoluteFJS', () => {
     const e4 = evaluateExpression('a4=440z;str(E4-S9)', false);
     expect(e4).toBe('E♮4^5');
+  });
+
+  it('has linear universal logarithm', () => {
+    const three = parseSingle('6\\12 ~/_ 2\\12');
+    expect(three.toString()).toBe('3');
+  });
+
+  it('has linear universal dot product', () => {
+    const negThree = parseSingle('4/3 dot~ 3/2');
+    expect(negThree.toString()).toBe('-3');
   });
 });

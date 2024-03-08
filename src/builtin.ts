@@ -111,10 +111,19 @@ const MATH_KEYS: (keyof Math)[] = [
   'sin',
   'tan',
 ];
+// There's no way to produce logarithmic quantities using logdivision.
+// The log-associated functions get the same treatment as their stdlib counterparts.
+const LOGS: (keyof Math)[] = ['acos', 'asin', 'atan', 'clz32', 'log1p'];
+
 for (const name of MATH_KEYS) {
   const fn = Math[name] as (x: number) => number;
   const wrapper = (x: Interval) =>
-    new Interval(TimeMonzo.fromValue(fn(x.valueOf())), x.domain, undefined, x);
+    new Interval(
+      TimeMonzo.fromValue(fn(x.valueOf())),
+      LOGS.includes(name) ? 'linear' : x.domain,
+      undefined,
+      x
+    );
   Object.defineProperty(wrapper, 'name', {value: name, enumerable: false});
   wrapper.__doc__ = `Calculate ${String(name)} x.`;
   wrapper.__node__ = builtinNode(wrapper);
