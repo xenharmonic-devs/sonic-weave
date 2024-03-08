@@ -1138,4 +1138,19 @@ describe('SonicWeave expression evaluator', () => {
     const wishIwasAcomplexNumber = parseSingle('asin(2)');
     expect(wishIwasAcomplexNumber.toString()).toBe('NaN');
   });
+
+  it('formats uniformly inverted NEDJI', () => {
+    const descending3rd = parseSingle('%~4\\12');
+    expect(descending3rd.toString()).toBe('-4\\12');
+  });
+
+  it('adds S-expressions to FJS', () => {
+    const majorThird = parseSingle('m3+S9');
+    expect(majorThird.toString()).toBe('m3_5');
+  });
+
+  it('subtracts S-expressions from absoluteFJS', () => {
+    const e4 = evaluateExpression('a4=440z;str(E4-S9)', false);
+    expect(e4).toBe('E♮4^5');
+  });
 });

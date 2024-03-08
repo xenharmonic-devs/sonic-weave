@@ -45,7 +45,9 @@ export type FractionLiteral = {
   denominator: bigint;
 };
 
-// Not found in the AST
+/**
+ * A synthetic AST node for formatting expressions like 2^3/5.
+ */
 export type RadicalLiteral = {
   type: 'RadicalLiteral';
   argument: Fraction;
@@ -106,8 +108,10 @@ export type FJS = {
   subscripts: FJSInflection[];
 };
 
-// FJS has stable representation for everything but ups.
-// This node acts as a placeholder to indicate context-dependent up-down-lift-drop formatting.
+/**
+ * Placeholder AST node for FJS of unknown formatting.
+ * The result of FJS addition or a context shift caused by up or lift declaration.
+ */
 export type AspiringFJS = {
   type: 'AspiringFJS';
   flavor: FJSFlavor;
@@ -122,7 +126,10 @@ export type AbsoluteFJS = {
   subscripts: FJSInflection[];
 };
 
-// Ironically the meaning of absolute FJS depends on context.
+/**
+ * Placeholder AST node for AbsoluteFJS of unknown formatting.
+ * The result of FJS addition or a context shift caused by up or lift declaration.
+ */
 export type AspiringAbsoluteFJS = {
   type: 'AspiringAbsoluteFJS';
   flavor: FJSFlavor;
@@ -224,6 +231,11 @@ export function validateNode(node?: IntervalLiteral) {
   }
 }
 
+/**
+ * Compute the node corresponding to the multiplicative inverse of the input (ignoring domain).
+ * @param node AST node to find the inverse of.
+ * @returns The inverse node or `undefined` if default formatting is enough.
+ */
 export function uniformInvertNode(
   node?: IntervalLiteral
 ): IntervalLiteral | undefined {
@@ -242,6 +254,11 @@ export function uniformInvertNode(
         type: 'FractionLiteral',
         numerator: node.denominator,
         denominator: node.numerator,
+      };
+    case 'NedjiLiteral':
+      return {
+        ...node,
+        numerator: -node.numerator,
       };
   }
   return undefined;
@@ -263,7 +280,11 @@ function aspireNodes(
   b: IntervalLiteral
 ): IntervalLiteral | undefined {
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
-    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+    if (
+      b.type === 'FJS' ||
+      b.type === 'AspiringAbsoluteFJS' ||
+      b.type === 'SquareSuperparticular'
+    ) {
       return {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
   }
@@ -271,7 +292,11 @@ function aspireNodes(
     if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
       return {type: 'AspiringAbsoluteFJS', flavor: ''};
     }
-    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+    if (
+      b.type === 'FJS' ||
+      b.type === 'AspiringFJS' ||
+      b.type === 'SquareSuperparticular'
+    ) {
       return {type: 'AspiringFJS', flavor: ''};
     }
   }
