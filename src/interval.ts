@@ -10,6 +10,7 @@ import {
   modNodes,
   roundToNodes,
   validateNode,
+  negNode,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -135,10 +136,11 @@ export class Interval {
   }
 
   neg() {
+    const node = negNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.neg(), this.domain, undefined, this);
+      return new Interval(this.value.neg(), this.domain, node, this);
     }
-    return new Interval(this.value.inverse(), this.domain, undefined, this);
+    return new Interval(this.value.inverse(), this.domain, node, this);
   }
 
   inverse() {

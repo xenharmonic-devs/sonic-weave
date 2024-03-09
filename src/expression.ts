@@ -264,7 +264,63 @@ export function uniformInvertNode(
   return undefined;
 }
 
-// TODO: negNode
+const OPPOSITE_SIGN: Record<VectorComponent['sign'], VectorComponent['sign']> =
+  {'': '-', '+': '-', '-': ''};
+
+export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'IntegerLiteral':
+      return {
+        ...node,
+        value: -node.value,
+      };
+    case 'DecimalLiteral':
+      return {
+        ...node,
+        whole: -node.whole,
+      };
+    case 'FractionLiteral':
+      return {
+        ...node,
+        numerator: -node.numerator,
+      };
+    case 'CentsLiteral':
+      return {
+        ...node,
+        whole: -node.whole,
+      };
+    case 'StepLiteral':
+      return {
+        ...node,
+        count: -node.count,
+      };
+    case 'NedjiLiteral':
+      return {
+        ...node,
+        numerator: -node.numerator,
+      };
+    case 'FJS':
+    case 'AspiringFJS':
+      return {type: 'AspiringFJS', flavor: ''};
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+    case 'MonzoLiteral':
+      return {
+        ...node,
+        components: node.components.map(c => ({
+          ...c,
+          sign: OPPOSITE_SIGN[c.sign],
+        })),
+      };
+  }
+
+  return undefined;
+}
+
 // TODO: invertNode
 // TODO: absNode
 // TODO: pitchRoundToNode

@@ -1168,4 +1168,19 @@ describe('SonicWeave expression evaluator', () => {
     const negThree = parseSingle('4/3 dot~ 3/2');
     expect(negThree.toString()).toBe('-3');
   });
+
+  it('has negative cents', () => {
+    const some = parseSingle('-123.4');
+    expect(some.toString()).toBe('-123.4');
+  });
+
+  it('has moves negation to the degree in FJS and flips scripts', () => {
+    const downwards3rd = parseSingle('-M3^5');
+    expect(downwards3rd.toString()).toBe('M-3_5');
+  });
+
+  it('distributes monzo negation', () => {
+    const syntonic = parseSingle('-[4 -4 1>');
+    expect(syntonic.toString()).toBe('[-4 4 -1>');
+  });
 });
