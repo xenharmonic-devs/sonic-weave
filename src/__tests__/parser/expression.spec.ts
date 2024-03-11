@@ -1188,4 +1188,14 @@ describe('SonicWeave expression evaluator', () => {
     const quarterTone = parseSingle('P1_31');
     expect(quarterTone.value.toFraction().toFraction()).toBe('32/31');
   });
+
+  it('has negative sub-unity cents', () => {
+    const tiny = parseSingle('-.4');
+    expect(tiny.toString()).toBe('-0.4');
+  });
+
+  it('has negative sub-unity comma-decimals', () => {
+    const tiny = parseSingle('-,99');
+    expect(tiny.toString()).toBe('-0.99e');
+  });
 });

@@ -635,6 +635,7 @@ ScalarMultiple
       }
       return {
         type: 'CentsLiteral',
+        sign: scalar.sign,
         whole: scalar.whole,
         fractional: scalar.fractional,
       };
@@ -777,9 +778,10 @@ NedjiProjector
 NumericFlavor = 'r' / 'e'i / 'z' / ''
 
 CommaDecimal
-  = whole: Integer ',' fractional: $(DecimalDigit+) exponent: ExponentPart? flavor: NumericFlavor {
+  = sign: SignPart whole: Integer? ',' fractional: $(DecimalDigit+) exponent: ExponentPart? flavor: NumericFlavor {
     return {
       type: 'DecimalLiteral',
+      sign,
       whole: whole ?? 0n,
       fractional: fractional,
       exponent,
@@ -788,10 +790,11 @@ CommaDecimal
   }
 
 NumericLiteral
-  = whole: Integer separator: $(!'..' '.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+  = sign: SignPart whole: Integer separator: $(!'..' '.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
     if (separator === '.' || exponent || flavor) {
       return {
         type: 'DecimalLiteral',
+        sign,
         whole,
         fractional,
         exponent,
@@ -803,9 +806,10 @@ NumericLiteral
       value: whole,
     };
   }
-  / !'..' '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+  / !'..' sign: SignPart '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
     return {
       type: 'DecimalLiteral',
+      sign,
       whole: 0n,
       fractional,
       exponent,

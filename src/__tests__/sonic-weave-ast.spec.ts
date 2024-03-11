@@ -84,6 +84,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         operator: ' ',
         left: {
           type: 'DecimalLiteral',
+          sign: '',
           whole: 420n,
           fractional: '69',
           exponent: null,
@@ -120,6 +121,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         operator: ' ',
         left: {
           type: 'DecimalLiteral',
+          sign: '',
           whole: 420n,
           fractional: '',
           exponent: 69,
@@ -138,6 +140,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'DecimalLiteral',
+        sign: '',
         whole: 42n,
         fractional: '0',
         exponent: -69,
@@ -152,6 +155,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'DecimalLiteral',
+        sign: '',
         whole: 42n,
         fractional: '0',
         exponent: -69,
@@ -164,16 +168,22 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     const ast = parseSingle('1.955');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
-      expression: {type: 'CentsLiteral', whole: 1n, fractional: '955'},
+      expression: {
+        type: 'CentsLiteral',
+        sign: '',
+        whole: 1n,
+        fractional: '955',
+      },
     });
   });
 
   it('parses real decimals over cents', () => {
-    const ast = parseSingle('1.955r');
+    const ast = parseSingle('-1.955r');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
         type: 'DecimalLiteral',
+        sign: '-',
         whole: 1n,
         fractional: '955',
         exponent: null,
@@ -564,6 +574,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'DecimalLiteral',
+        sign: '',
         whole: 3n,
         fractional: '14',
         exponent: null,
@@ -585,6 +596,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         type: 'LabeledExpression',
         object: {
           type: 'DecimalLiteral',
+          sign: '',
           whole: 1n,
           fractional: '234',
           exponent: null,

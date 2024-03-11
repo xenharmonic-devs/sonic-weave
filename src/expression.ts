@@ -1,4 +1,10 @@
-import {ABSURD_EXPONENT, MetricPrefix, bigAbs, validateBigInt} from './utils';
+import {
+  ABSURD_EXPONENT,
+  MetricPrefix,
+  Sign,
+  bigAbs,
+  validateBigInt,
+} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
@@ -33,6 +39,7 @@ export type IntegerLiteral = {
 
 export type DecimalLiteral = {
   type: 'DecimalLiteral';
+  sign: Sign;
   whole: bigint;
   fractional: string;
   exponent: number | null;
@@ -69,6 +76,7 @@ export type NedjiLiteral = {
 
 export type CentsLiteral = {
   type: 'CentsLiteral';
+  sign: Sign;
   whole: bigint;
   fractional: string;
 };
@@ -157,7 +165,7 @@ export type SparseOffsetVal = {
 };
 
 export type VectorComponent = {
-  sign: '' | '+' | '-';
+  sign: Sign;
   left: number;
   separator?: '/' | '.';
   right: string;
@@ -264,8 +272,7 @@ export function uniformInvertNode(
   return undefined;
 }
 
-const OPPOSITE_SIGN: Record<VectorComponent['sign'], VectorComponent['sign']> =
-  {'': '-', '+': '-', '-': ''};
+const OPPOSITE_SIGN: Record<Sign, Sign> = {'': '-', '+': '-', '-': ''};
 
 export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   if (!node) {
@@ -280,7 +287,7 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
     case 'DecimalLiteral':
       return {
         ...node,
-        whole: -node.whole,
+        sign: OPPOSITE_SIGN[node.sign],
       };
     case 'FractionLiteral':
       return {
@@ -290,7 +297,7 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
     case 'CentsLiteral':
       return {
         ...node,
-        whole: -node.whole,
+        sign: OPPOSITE_SIGN[node.sign],
       };
     case 'StepLiteral':
       return {
@@ -347,7 +354,7 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
     case 'DecimalLiteral':
       return {
         ...node,
-        whole: bigAbs(node.whole),
+        sign: '',
       };
     case 'StepLiteral':
       return {
@@ -357,7 +364,7 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
     case 'CentsLiteral':
       return {
         ...node,
-        whole: bigAbs(node.whole),
+        sign: '',
       };
     case 'FJS':
     case 'AspiringFJS':
@@ -536,7 +543,8 @@ export function mulNodes(
     } else if (b.type === 'CentLiteral') {
       return {
         type: 'CentsLiteral',
-        whole: a.value,
+        sign: a.value < 0n ? '-' : '',
+        whole: bigAbs(a.value),
         fractional: '',
       };
     }
@@ -549,6 +557,7 @@ export function mulNodes(
     if (b.type === 'CentLiteral') {
       return {
         type: 'CentsLiteral',
+        sign: a.sign,
         whole: a.whole,
         fractional: a.fractional,
       };
@@ -704,7 +713,7 @@ function formatAbsoluteFJS(literal: AbsoluteFJS) {
 }
 
 function formatDecimal(literal: DecimalLiteral) {
-  let result = literal.whole.toString();
+  let result = literal.sign + literal.whole.toString();
   if (literal.fractional) {
     result += '.' + literal.fractional;
   }
@@ -799,7 +808,7 @@ export function literalToString(literal: IntervalLiteral) {
     case 'DecimalLiteral':
       return formatDecimal(literal);
     case 'CentsLiteral':
-      return `${literal.whole}.${literal.fractional}`;
+      return `${literal.sign}${literal.whole}.${literal.fractional}`;
     case 'CentLiteral':
       return 'c';
     case 'ReciprocalCentLiteral':

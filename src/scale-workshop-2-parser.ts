@@ -78,6 +78,7 @@ function parseAst(input: string): Expression {
 function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {
   const node: DecimalLiteral = {
     type: 'DecimalLiteral',
+    sign: '',
     whole: sw2Node.whole ?? 0n,
     fractional: sw2Node.fractional ?? '',
     flavor: 'e',
@@ -100,6 +101,7 @@ function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {
 function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
   const node: CentsLiteral = {
     type: 'CentsLiteral',
+    sign: '',
     whole: sw2Node.whole ?? 0n,
     fractional: sw2Node.fractional ?? '',
   };
