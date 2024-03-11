@@ -14,6 +14,7 @@ import {
 } from 'xen-dev-utils';
 
 import {
+  ABSURD_EXPONENT,
   FRACTION_PRIMES,
   NEGATIVE_ONE,
   ONE,
@@ -460,8 +461,7 @@ export class TimeMonzo {
         throw new Error('Unable to convert irrational number to fraction.');
       }
       const n = BigInt(component.n);
-      // This is the absurdity bound for prime 2.
-      if (n > 3322n) {
+      if (n > ABSURD_EXPONENT) {
         throw new Error('Integer overflow.');
       }
       if (component.s > 0) {

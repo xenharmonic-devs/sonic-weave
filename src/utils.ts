@@ -203,6 +203,8 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
 }
 
 const ABSURD_INT = BigInt('1' + '0'.repeat(1000));
+// Absurdity bound for prime 2.
+export const ABSURD_EXPONENT = 3322n;
 
 /**
  * Validate that a BigInt isn't absurdly big.

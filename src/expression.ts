@@ -1,4 +1,4 @@
-import {MetricPrefix, validateBigInt} from './utils';
+import {ABSURD_EXPONENT, MetricPrefix, bigAbs, validateBigInt} from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
 import {Fraction, lcm} from 'xen-dev-utils';
 
@@ -321,15 +321,59 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   return undefined;
 }
 
-// TODO: invertNode
-// TODO: absNode
-// TODO: pitchRoundToNode
-// TODO: powNode
-// TODO: ipowNode
-// TODO: logNode
-// TODO: reduceNode
-// TODO: lensAddNodes
-// TODO: lensSubNodes
+export function invertNode(node?: IntervalLiteral) {
+  if (!node) {
+    return undefined;
+  }
+  if (node.type === 'IntegerLiteral' || node.type === 'FractionLiteral') {
+    return uniformInvertNode(node);
+  }
+  return undefined;
+}
+
+export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'IntegerLiteral':
+      return {type: 'IntegerLiteral', value: bigAbs(node.value)};
+    case 'FractionLiteral':
+      return {
+        type: 'FractionLiteral',
+        numerator: bigAbs(node.numerator),
+        denominator: bigAbs(node.denominator),
+      };
+    case 'DecimalLiteral':
+      return {
+        ...node,
+        whole: bigAbs(node.whole),
+      };
+    case 'StepLiteral':
+      return {
+        ...node,
+        count: Math.abs(node.count),
+      };
+    case 'CentsLiteral':
+      return {
+        ...node,
+        whole: bigAbs(node.whole),
+      };
+    case 'FJS':
+    case 'AspiringFJS':
+      return {type: 'AspiringFJS', flavor: ''};
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+    case 'NedjiLiteral':
+      return {
+        ...node,
+        numerator: Math.abs(node.numerator),
+        denominator: Math.abs(node.denominator),
+      };
+  }
+  return undefined;
+}
 
 function aspireNodes(
   a: IntervalLiteral,
@@ -538,6 +582,82 @@ export function projectNodes(
       };
     }
   }
+  return undefined;
+}
+
+export function powNodes(
+  a?: IntervalLiteral,
+  b?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!a || !b) {
+    return undefined;
+  }
+  if (b.type === 'IntegerLiteral') {
+    const exponent = b.value;
+    if (exponent >= 0n) {
+      if (exponent > ABSURD_EXPONENT) {
+        return undefined;
+      }
+      if (a.type === 'IntegerLiteral') {
+        return {type: 'IntegerLiteral', value: a.value ** exponent};
+      } else if (a.type === 'FractionLiteral') {
+        return {
+          type: 'FractionLiteral',
+          numerator: a.numerator ** exponent,
+          denominator: a.denominator ** exponent,
+        };
+      }
+    } else {
+      if (-exponent > ABSURD_EXPONENT) {
+        return undefined;
+      }
+      if (a.type === 'IntegerLiteral') {
+        return {
+          type: 'FractionLiteral',
+          numerator: 1n,
+          denominator: a.value ** -exponent,
+        };
+      } else if (a.type === 'FractionLiteral') {
+        return {
+          type: 'FractionLiteral',
+          numerator: a.denominator ** -exponent,
+          denominator: a.numerator ** -exponent,
+        };
+      }
+    }
+  }
+  return undefined;
+}
+
+// == Placeholders for future implementation ==
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function ipowNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+  return undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function logNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+  return undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function reduceNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+  return undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function lensAddNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+  return undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function lensSubNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+  return undefined;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function pitchRoundToNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 

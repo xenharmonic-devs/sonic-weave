@@ -11,6 +11,15 @@ import {
   roundToNodes,
   validateNode,
   negNode,
+  invertNode,
+  absNode,
+  lensAddNodes,
+  lensSubNodes,
+  pitchRoundToNodes,
+  powNodes,
+  ipowNodes,
+  logNodes,
+  reduceNodes,
 } from './expression';
 import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -144,18 +153,20 @@ export class Interval {
   }
 
   inverse() {
+    const node = invertNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.inverse(), this.domain, undefined, this);
+      return new Interval(this.value.inverse(), this.domain, node, this);
     }
     // This overload should be fine because multiplication is not implemented in the logarithmic domain.
-    return new Val(this.value.geometricInverse(), this.value.clone());
+    return new Val(this.value.geometricInverse(), this.value.clone(), node);
   }
 
   abs() {
+    const node = absNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.abs(), this.domain, undefined, this);
+      return new Interval(this.value.abs(), this.domain, node, this);
     }
-    return new Interval(this.value.pitchAbs(), this.domain, undefined, this);
+    return new Interval(this.value.pitchAbs(), this.domain, node, this);
   }
 
   project(base: Interval) {
@@ -211,12 +222,13 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in harmonic addition');
     }
+    const node = lensAddNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.lensAdd(other.value),
         this.domain,
-        undefined,
+        node,
         zombie
       );
     }
@@ -227,7 +239,7 @@ export class Interval {
         .mul(other.value.geometricInverse())
         .geometricInverse(),
       this.domain,
-      undefined,
+      node,
       zombie
     );
   }
@@ -236,12 +248,13 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in harmonic subtraction');
     }
+    const node = lensSubNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.lensSub(other.value),
         this.domain,
-        undefined,
+        node,
         zombie
       );
     }
@@ -252,7 +265,7 @@ export class Interval {
         .div(other.value.geometricInverse())
         .geometricInverse(),
       this.domain,
-      undefined,
+      node,
       zombie
     );
   }
@@ -310,10 +323,11 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar exponential rounding implemented');
     }
+    const node = pitchRoundToNodes(this.node, other.node);
     return new Interval(
       this.value.pitchRoundTo(other.value),
       this.domain,
-      undefined,
+      node,
       infect(this, other)
     );
   }
@@ -410,10 +424,11 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar exponentiation implemented');
     }
+    const node = powNodes(this.node, other.node);
     return new Interval(
       this.value.pow(other.value),
       this.domain,
-      undefined,
+      node,
       infect(this, other)
     );
   }
@@ -427,10 +442,11 @@ export class Interval {
     if (!other.value.isScalar()) {
       throw new Error('Only scalar inverse exponentiation implemented');
     }
+    const node = ipowNodes(this.node, other.node);
     return new Interval(
       this.value.pow(other.value.inverse()),
       this.domain,
-      undefined,
+      node,
       infect(this, other)
     );
   }
@@ -441,11 +457,11 @@ export class Interval {
         'Logarithm not implemented in the (already) logarithmic domain'
       );
     }
-
+    const node = logNodes(this.node, other.node);
     return new Interval(
       log(this, other),
       this.domain,
-      undefined,
+      node,
       infect(this, other)
     );
   }
@@ -454,10 +470,11 @@ export class Interval {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error('Reduction not implemented in logarithmic domain');
     }
+    const node = reduceNodes(this.node, other.node);
     return new Interval(
       this.value.reduce(other.value, ceiling),
       this.domain,
-      undefined,
+      node,
       infect(this, other)
     );
   }
