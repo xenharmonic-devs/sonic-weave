@@ -44,6 +44,15 @@ const ZERO = new Fraction(0);
 const ZERO_MONZO = new TimeMonzo(ZERO, [], ZERO);
 const ONE_MONZO = new TimeMonzo(ZERO, []);
 
+const INT_CACHE = [...Array(100).keys()].map(i => Interval.fromInteger(i));
+
+function fromInteger(n: number) {
+  if (n >= 0 && n < INT_CACHE.length) {
+    return INT_CACHE[n].shallowClone();
+  }
+  return Interval.fromInteger(n);
+}
+
 export function sonicTruth(test: SonicWeaveValue) {
   if (test instanceof Interval) {
     return Boolean(test.value.residual.n);
@@ -142,7 +151,7 @@ atan2.__node__ = builtinNode(atan2);
 // == First-party wrappers ==
 function numComponents(value?: Interval) {
   if (value === undefined) {
-    return Interval.fromInteger(getNumberOfComponents());
+    return fromInteger(getNumberOfComponents());
   }
   setNumberOfComponents(value.toInteger());
   return;
@@ -166,7 +175,7 @@ isPrime.__node__ = builtinNode(isPrime);
 
 function primes(start: Interval, end?: Interval) {
   return xduPrimes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
-    Interval.fromInteger(p)
+    fromInteger(p)
   );
 }
 primes.__doc__ =
@@ -199,7 +208,7 @@ function mosSubset(
     numberOfSmallSteps.toInteger(),
     options
   );
-  return result.map(s => Interval.fromInteger(s));
+  return result.map(s => fromInteger(s));
 }
 mosSubset.__doc__ =
   'Calculate a subset of equally tempered degrees with maximum variety two per scale degree.';
@@ -690,7 +699,7 @@ track.__doc__ = 'Attach a tracking ID to the interval.';
 track.__node__ = builtinNode(track);
 
 function trackingIds(interval: Interval) {
-  return Array.from(interval.trackingIds).map(id => Interval.fromInteger(id));
+  return Array.from(interval.trackingIds).map(id => fromInteger(id));
 }
 trackingIds.__doc__ =
   'Obtain an array of the tracking IDs attached to the interval.';
@@ -1264,7 +1273,7 @@ concat.__node__ = builtinNode(concat);
 
 function length(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
-  return Interval.fromInteger(scale.length);
+  return fromInteger(scale.length);
 }
 length.__doc__ = 'Return the number of intervals in the scale.';
 length.__node__ = builtinNode(length);
@@ -1278,7 +1287,7 @@ function map(
   mapper = mapper.bind(this);
   array ??= this.getCurrentScale();
   return array.map((value, index, arr) =>
-    mapper(value, Interval.fromInteger(index), arr)
+    mapper(value, fromInteger(index), arr)
   );
 }
 map.__doc__ = 'Map a riff over the given/current scale producing a new scale.';
@@ -1306,7 +1315,7 @@ function filter(
   tester = tester.bind(this);
   array ??= this.getCurrentScale();
   return array.filter((value, index, arr) =>
-    sonicTruth(tester(value, Interval.fromInteger(index), arr))
+    sonicTruth(tester(value, fromInteger(index), arr))
   );
 }
 filter.__doc__ =
@@ -1346,12 +1355,12 @@ function arrayReduce(
   if (arguments.length >= 3) {
     return array.reduce(
       (value, currentValue, currentIndex, arr) =>
-        reducer(value, currentValue, Interval.fromInteger(currentIndex), arr),
+        reducer(value, currentValue, fromInteger(currentIndex), arr),
       initialValue
     );
   } else {
     return array.reduce((value, currentValue, currentIndex, arr) =>
-      reducer(value, currentValue, Interval.fromInteger(currentIndex), arr)
+      reducer(value, currentValue, fromInteger(currentIndex), arr)
     );
   }
 }
