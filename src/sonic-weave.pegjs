@@ -840,24 +840,31 @@ VectorComponent
 VectorComponents
   = VectorComponent|.., _ ','? _|
 
-MonzoLiteral
-  = downs: 'v'* '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
+UpsAndDowns
+  = ('^' / 'v' / '/' / '\\')* {
+    const t = text();
     return {
+      ups: (t.match(/\^/g) ?? []).length - (t.match(/v/g) ?? []).length,
+      lifts: (t.match(/\//g) ?? []).length - (t.match(/\\/g) ?? []).length,
+    };
+  }
+
+MonzoLiteral
+  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
+    return {
+      ...upsAndDowns,
       type: 'MonzoLiteral',
       components,
-      ups: -downs.length,
-      lifts: 0,
       basis: basis ?? [],
     };
   }
 
 ValLiteral
-  = downs: 'v'* '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
+  = upsAndDowns: UpsAndDowns '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
     return {
+      ...upsAndDowns,
       type: 'ValLiteral',
       components,
-      ups: -downs.length,
-      lifts: 0,
       basis: basis ?? [],
     };
   }
@@ -1069,13 +1076,12 @@ Hyperscripts
   }
 
 FJS
-  = downs: 'v'*
+  = upsAndDowns: UpsAndDowns
     pythagorean: SplitDemisemipythagorean
     hyperscripts: Hyperscripts {
     return {
+      ...upsAndDowns,
       type: 'FJS',
-      ups: -downs.length,
-      lifts: 0,
       pythagorean,
       superscripts: hyperscripts.superscripts,
       subscripts: hyperscripts.subscripts,
@@ -1099,13 +1105,12 @@ AbsolutePitch
   }
 
 AbsoluteFJS
-  = downs: 'v'*
+  = upsAndDowns: UpsAndDowns
     pitch: AbsolutePitch
     hyperscripts: Hyperscripts {
     return {
+      ...upsAndDowns,
       type: 'AbsoluteFJS',
-      ups: -downs.length,
-      lifts: 0,
       pitch,
       superscripts: hyperscripts.superscripts,
       subscripts: hyperscripts.subscripts,

@@ -981,4 +981,9 @@ describe('SonicWeave parser', () => {
     ]);
     expect(scale.map(i => Array.from(i.trackingIds)[0])).toEqual([1, 2, 3, 4]);
   });
+
+  it('has the Konami code', () => {
+    const scale = parseSource('^^vv/\\/\\B4;A4 "start";repr');
+    expect(scale).toEqual(['B4', '(A4 "start")']);
+  });
 });

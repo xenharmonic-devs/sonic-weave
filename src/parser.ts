@@ -1092,8 +1092,13 @@ export class ExpressionVisitor {
     return new Fraction(formatComponent(component));
   }
 
-  up(monzo: TimeMonzo, node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
-    return monzo.mul(this.rootContext.up.pow(node.ups));
+  upLift(
+    monzo: TimeMonzo,
+    node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS
+  ) {
+    return monzo
+      .mul(this.rootContext.up.pow(node.ups))
+      .mul(this.rootContext.lift.pow(node.lifts));
   }
 
   visitMonzoLiteral(node: MonzoLiteral) {
@@ -1111,9 +1116,9 @@ export class ExpressionVisitor {
     } else {
       value = new TimeMonzo(ZERO, exponents);
     }
-    value = this.up(value, node);
+    value = this.upLift(value, node);
     const result = new Interval(value, 'logarithmic', node);
-    if (node.ups) {
+    if (node.ups || node.lifts) {
       this.rootContext.fragiles.push(result);
     }
     return result;
@@ -1133,9 +1138,9 @@ export class ExpressionVisitor {
     } else {
       value = new TimeMonzo(ZERO, val);
     }
-    value = this.up(value, node);
+    value = this.upLift(value, node);
     const result = new Val(value, equave, node);
-    if (node.ups) {
+    if (node.ups || node.lifts) {
       this.rootContext.fragiles.push(result);
     }
     return result;
@@ -1190,7 +1195,7 @@ export class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
-    const result = new Interval(this.up(monzo, node), 'logarithmic', node);
+    const result = new Interval(this.upLift(monzo, node), 'logarithmic', node);
     this.rootContext.fragiles.push(result);
     return result;
   }
@@ -1202,7 +1207,7 @@ export class ExpressionVisitor {
       node.subscripts
     );
     const result = new Interval(
-      this.rootContext.C4.mul(this.up(relativeToC4, node)),
+      this.rootContext.C4.mul(this.upLift(relativeToC4, node)),
       'logarithmic',
       node
     );
