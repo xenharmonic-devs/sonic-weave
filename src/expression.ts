@@ -5,7 +5,7 @@ import {Fraction, lcm} from 'xen-dev-utils';
 /**
  * Comma sets for Functional Just System.
  *
- * '': Classic FJS
+ * '': FloraC's tweak to FJS
  *
  * 'c': Classic FJS
  *

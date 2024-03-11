@@ -186,11 +186,11 @@ export function getInflection(
     }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      if (flavor === '' || flavor === 'c') {
+      if (flavor === 'c') {
         result = result.mul(getFormalComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.mul(getNeutralComma(i).pow(monzo[i]));
-      } else if (flavor === 'f') {
+      } else if (flavor === '' || flavor === 'f') {
         result = result.mul(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
         result = result.mul(getHelmholtzEllis(i).pow(monzo[i]));
@@ -211,9 +211,9 @@ export function getInflection(
     }
     const monzo = toMonzo(s);
     for (let i = 0; i < monzo.length; ++i) {
-      if (flavor === '' || flavor === 'c') {
+      if (flavor === 'c') {
         result = result.div(getFormalComma(i).pow(monzo[i]));
-      } else if (flavor === 'f') {
+      } else if (flavor === '' || flavor === 'f') {
         result = result.div(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.div(getNeutralComma(i).pow(monzo[i]));

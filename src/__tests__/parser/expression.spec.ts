@@ -1183,4 +1183,9 @@ describe('SonicWeave expression evaluator', () => {
     const syntonic = parseSingle('-[4 -4 1>');
     expect(syntonic.toString()).toBe('[-4 4 -1>');
   });
+
+  it("uses FloraC's FJS inflections by default", () => {
+    const quarterTone = parseSingle('P1_31');
+    expect(quarterTone.value.toFraction().toFraction()).toBe('32/31');
+  });
 });

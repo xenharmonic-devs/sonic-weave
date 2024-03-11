@@ -309,6 +309,8 @@ The first few prime harmonics in FJS are:
 | `19/16`           | `m3^19` | `E♭4^19`     |
 | `23/16`           | `A4^23` | `F♯4^23`     |
 
+SonicWeave agrees with [FloraC's critique](https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System) and assigns `31/32` to `P1^31`. The classic inflection may be accessed using the `c` flavor i.e. `P1^31c` for `248/243`.
+
 ### S-expressions
 SonicWeave uses the logarithmic domain for [S-expressions](https://en.xen.wiki/w/Square_superparticular) in order to make them compatible with FJS.
 
