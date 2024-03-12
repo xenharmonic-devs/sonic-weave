@@ -1198,4 +1198,14 @@ describe('SonicWeave expression evaluator', () => {
     const tiny = parseSingle('-,99');
     expect(tiny.toString()).toBe('-0.99e');
   });
+
+  it('has lens absorbing logarithmic unison (addition)', () => {
+    const unison = parseSingle('0\\12 /+ 5\\12');
+    expect(unison.totalCents()).toBeCloseTo(0);
+  });
+
+  it('has lens absorbing logarithmic unison (subtraction)', () => {
+    const unison = parseSingle('7\\12 /- 0\\12');
+    expect(unison.totalCents()).toBeCloseTo(0);
+  });
 });

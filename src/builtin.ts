@@ -1278,7 +1278,6 @@ function length(this: ExpressionVisitor, scale?: Interval[]) {
 length.__doc__ = 'Return the number of intervals in the scale.';
 length.__node__ = builtinNode(length);
 
-// TODO: Store function signature in mapper.length and avoid integer conversion when possible.
 function map(
   this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
@@ -1734,13 +1733,11 @@ riff absoluteNFJS interval {
   return absoluteFJS(interval, 'n');
 }
 
-// TODO: Replace with proper HEJI once implemented.
 riff HEJI interval {
   "Convert interval to (relative) FJS using HEJI comma flavors."
   return FJS(interval, 'h');
 }
 
-// TODO: Replace with proper absoluteHEJI once implemented.
 riff absoluteHEJI interval {
   "Convert interval to absolute FJS using HEJI comma flavors."
   return absoluteFJS(interval, 'h');

@@ -232,11 +232,18 @@ export class Interval {
         zombie
       );
     }
-    // TODO: Special handling for unison.
+    const magnitude = this.value.dot(this.value);
+    if (!magnitude.n) {
+      return new Interval(this.value.clone(), this.domain, node, zombie);
+    }
+    const otherMagnitude = other.value.dot(other.value);
+    if (!otherMagnitude.n) {
+      return new Interval(other.value.clone(), this.domain, node, zombie);
+    }
     return new Interval(
       this.value
-        .geometricInverse()
-        .mul(other.value.geometricInverse())
+        .pow(magnitude.inverse())
+        .mul(other.value.pow(otherMagnitude.inverse()))
         .geometricInverse(),
       this.domain,
       node,
@@ -258,11 +265,18 @@ export class Interval {
         zombie
       );
     }
-    // TODO: Special handling for unison.
+    const magnitude = this.value.dot(this.value);
+    if (!magnitude.n) {
+      return new Interval(this.value.clone(), this.domain, node, zombie);
+    }
+    const otherMagnitude = other.value.dot(other.value);
+    if (!otherMagnitude.n) {
+      return new Interval(other.value.clone(), this.domain, node, zombie);
+    }
     return new Interval(
       this.value
-        .geometricInverse()
-        .div(other.value.geometricInverse())
+        .pow(magnitude.inverse())
+        .div(other.value.pow(otherMagnitude.inverse()))
         .geometricInverse(),
       this.domain,
       node,

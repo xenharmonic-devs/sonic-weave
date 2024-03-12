@@ -65,7 +65,6 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   ) {
     currentCmd += evalCmd;
 
-    // TODO: Ignore curly braces inside strings
     numCurlies += (evalCmd.match(/{/g) ?? []).length;
     numCurlies -= (evalCmd.match(/}/g) ?? []).length;
     if (numCurlies < 0) {
