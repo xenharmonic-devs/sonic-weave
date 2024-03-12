@@ -165,7 +165,6 @@ export class StatementVisitor {
     this.immutables = new Map();
   }
 
-  // TODO: Deep cloning
   clone() {
     const result = new StatementVisitor(this.rootContext);
     result.mutables = new Map(this.mutables);
@@ -179,8 +178,8 @@ export class StatementVisitor {
     return new ExpressionVisitor(this);
   }
 
-  expand(defaults: StatementVisitor) {
-    let base = this.rootContext.expand(defaults.rootContext);
+  expand(defaultRootContext: RootContext) {
+    let base = this.rootContext.expand(defaultRootContext);
     if (base) {
       base += '\n';
     }
@@ -188,10 +187,6 @@ export class StatementVisitor {
     const r = repr.bind(this.createExpressionVisitor());
     for (const key of this.mutables.keys()) {
       if (key === '$' || key === '$$') {
-        continue;
-      }
-      // TODO: Verify that nothing was changed.
-      if (defaults.mutables.has(key)) {
         continue;
       }
       const value = r(this.mutables.get(key));
@@ -203,9 +198,6 @@ export class StatementVisitor {
       }
     }
     for (const key of this.immutables.keys()) {
-      if (defaults.immutables.has(key)) {
-        continue;
-      }
       const value = r(this.immutables.get(key));
       if (value.startsWith('riff') || value.startsWith('fn')) {
         if (value.includes('[native riff]')) {

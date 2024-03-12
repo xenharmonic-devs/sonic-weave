@@ -525,7 +525,9 @@ describe('SonicWeave parser', () => {
 
   it('can expand basic scales', () => {
     const visitor = evaluateSource('5::10', false);
-    expect(visitor.expand(visitor)).toBe('6/5\n7/5\n8/5\n9/5\n10/5');
+    expect(visitor.expand(visitor.rootContext)).toBe(
+      '6/5\n7/5\n8/5\n9/5\n10/5'
+    );
   });
 
   it('can expand customized scales', () => {
@@ -533,7 +535,7 @@ describe('SonicWeave parser', () => {
       'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;',
       false
     );
-    expect(visitor.expand(getSourceVisitor(false))).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
       [
         'C4 = 256 Hz',
         '1/1 = 432 Hz',
@@ -551,50 +553,58 @@ describe('SonicWeave parser', () => {
       '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"',
       false
     );
-    expect(visitor.expand(getSourceVisitor(false))).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
       '5/4\n6/4 black\n7/4 "seventh"\n8/4'
     );
   });
 
   it('can expand riffs', () => {
     const visitor = evaluateSource('riff foo bar {bar + 3};foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false))).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
       'riff foo bar {bar + 3}\n4'
     );
   });
 
   it('can expand fns', () => {
     const visitor = evaluateSource('fn foo bar {bar + 3};foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false))).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
       'fn foo bar {bar + 3}\n4'
     );
   });
 
   it('can expand arrow functions', () => {
     const visitor = evaluateSource('const foo = bar => bar + 2;foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false))).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
       'const foo = bar => bar + 2\n3'
     );
   });
 
   it('can expend variables that start with "riff"', () => {
     const visitor = evaluateSource('const riffy = 42', false);
-    expect(visitor.expand(getSourceVisitor(false))).toBe('const riffy = 42\n');
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+      'const riffy = 42\n'
+    );
   });
 
   it('can expand renamed builtins', () => {
     const visitor = evaluateSource('let foo = gcd;foo(6, 8)', false);
-    expect(visitor.expand(getSourceVisitor(false))).toBe('let foo = gcd\n2');
+    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+      'let foo = gcd\n2'
+    );
   });
 
   it('can sort scales after the fact', () => {
-    const visitor = getSourceVisitor(false);
+    const globalVisitor = getSourceVisitor(false);
     const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');
     for (const statement of ast.body) {
-      visitor.visit(statement);
+      globalVisitor.visit(statement);
     }
-    const defaults = visitor.clone();
-    defaults.rootContext = visitor.rootContext.clone();
+    const defaults = globalVisitor.rootContext.clone();
+
+    const visitor = new StatementVisitor(
+      globalVisitor.rootContext,
+      globalVisitor
+    );
 
     const userAst = parseAST('D4 = 270 Hz;let x = 7;D4;200 Hz;x;3;2');
     for (const statement of userAst.body) {
