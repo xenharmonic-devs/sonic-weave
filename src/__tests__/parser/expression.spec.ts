@@ -1208,4 +1208,20 @@ describe('SonicWeave expression evaluator', () => {
     const unison = parseSingle('7\\12 /- 0\\12');
     expect(unison.totalCents()).toBeCloseTo(0);
   });
+
+  it('can slice niente arrays', () => {
+    const twoNothings = evaluateExpression(
+      '[niente, niente, niente][1..]',
+      false
+    );
+    expect(twoNothings).toHaveLength(2);
+  });
+
+  it('can slice assign nientes', () => {
+    const nothings = evaluateExpression(
+      'const arr = [1, 2, 3, 4]; arr[0,2..] = [niente, niente]; map(str, arr)',
+      false
+    );
+    expect(nothings).toEqual(['niente', '2', 'niente', '4']);
+  });
 });

@@ -380,32 +380,44 @@ export class StatementVisitor {
           throw new Error('Invalid slice assignment.');
         }
 
-        object[start] = value[i++];
+        // Replace undefined with null for JS array abuse.
+        object[start] = value[i++] ?? null;
         let next = start + step;
         while (next <= end) {
-          object[next] = value[i++];
+          object[next] = value[i++] ?? null;
           next += step;
         }
         object.splice(end, 0, ...value.slice(i));
-        // TODO: Add support for niente arrays.
-        object.splice(0, object.length, ...object.filter(x => x !== undefined));
+        // Abuse sparse JS arrays.
+        object.splice(
+          0,
+          object.length,
+          ...object
+            .filter(x => x !== undefined)
+            .map(x => (x === null ? undefined : x) as unknown as Interval)
+        );
         return undefined;
       } else if (step < 0) {
         if (start < end) {
           throw new Error('Invalid slice assignment.');
         }
 
-        object[start] = value[i++];
+        object[start] = value[i++] ?? null;
         let next = start + step;
         while (next >= end) {
-          object[next] = value[i++];
+          object[next] = value[i++] ?? null;
           next += step;
         }
         const rest = value.slice(i);
         rest.reverse();
         object.splice(end, 0, ...rest);
-        // TODO: Add support for niente arrays.
-        object.splice(0, object.length, ...object.filter(x => x !== undefined));
+        object.splice(
+          0,
+          object.length,
+          ...object
+            .filter(x => x !== undefined)
+            .map(x => (x === null ? undefined : x) as unknown as Interval)
+        );
         return undefined;
       }
       throw new Error('Slice step must not be zero');
