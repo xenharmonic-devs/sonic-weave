@@ -1816,12 +1816,26 @@ riff pow x y {
   "Calculate x to the power of y.";
   return x ~^ y;
 }
+riff numerator x {
+  "Calculate the numerator of x in reduced form.";
+  return lcm(1, x);
+}
+riff denominator x {
+  "Calculate the denominator of x in reduced form.";
+  return %gcd(1, x);
+}
 riff sign x {
   "Calculate the sign of x.";
   if (x > 0) return 1;
   if (x < 0) return -1;
   if (x === 0) return 0;
   return NaN;
+}
+riff oddLimitOf x equave {
+  "Calculate the odd limit of x. Here 'odd' means not divisible by the equave (default \`2\`).";
+  equave ??= 2;
+  const noEquaves = x ~% equave^(x dot %logarithmic(equave));
+  return numerator(noEquaves) max denominator(noEquaves);
 }
 riff hypot ...args {
   "Calculate the square root of the sum of squares of the arguments.";
@@ -2307,6 +2321,20 @@ riff concordanceShell denominator maxNumerator divisions tolerance equave {
   }
   result;
   sort();
+}
+
+riff oddLimit limit equave {
+  "Generate all fractions with odd limit <= \`limit\` reduced to between 1 (exclusive) and \`equave\` (inclusive).";
+  equave ??= 2;
+  let remainder = 0;
+  while (++remainder < equave) {
+    [remainder, remainder ~+ equave .. limit];
+  }
+  const odds = popAll();
+  [n % d for n of odds for d of odds];
+  i => i rdc equave;
+  sort();
+  keepUnique();
 }
 
 // == Scale modification ==

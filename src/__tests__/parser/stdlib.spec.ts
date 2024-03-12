@@ -1037,4 +1037,80 @@ describe('SonicWeave standard library', () => {
     const twoHz = parseSingle('bpm(120)');
     expect(twoHz.toString()).toBe('2 Hz');
   });
+
+  it('can calculate the numerator of 44/30 in reduced form', () => {
+    const num = parseSingle('numerator(44/30)');
+    expect(num.toInteger()).toBe(22);
+  });
+
+  it('can calculate the denominator of 44/30 in reduced form', () => {
+    const num = parseSingle('denominator(44/30)');
+    expect(num.toInteger()).toBe(15);
+  });
+
+  it('knows the odd limit of 10/7 is 7', () => {
+    const seven = parseSingle('oddLimitOf(10/7)');
+    expect(seven.toInteger()).toBe(7);
+  });
+
+  it('knows the throdd limit of 15/7 is 7', () => {
+    const seven = parseSingle('oddLimitOf(15/7, 3)');
+    expect(seven.toInteger()).toBe(7);
+  });
+
+  it('can generate the full 9-odd limit as a scale', () => {
+    const nineOdd = parseSource('oddLimit(9);str');
+    expect(nineOdd).toEqual([
+      '10/9',
+      '9/8',
+      '8/7',
+      '7/6',
+      '6/5',
+      '5/4',
+      '9/7',
+      '4/3',
+      '7/5',
+      '10/7',
+      '3/2',
+      '14/9',
+      '8/5',
+      '5/3',
+      '12/7',
+      '7/4',
+      '16/9',
+      '9/5',
+      '2',
+    ]);
+  });
+
+  it('can generate the full 8-throdd limit as a scale', () => {
+    const eightThrodd = parseSource('oddLimit(8, 3);str');
+    expect(eightThrodd).toEqual([
+      '9/8',
+      '8/7',
+      '7/6',
+      '6/5',
+      '5/4',
+      '9/7',
+      '4/3',
+      '7/5',
+      '3/2',
+      '8/5',
+      '5/3',
+      '12/7',
+      '7/4',
+      '9/5',
+      '15/8',
+      '2',
+      '15/7',
+      '9/4',
+      '7/3',
+      '12/5',
+      '5/2',
+      '18/7',
+      '21/8',
+      '8/3',
+      '3',
+    ]);
+  });
 });

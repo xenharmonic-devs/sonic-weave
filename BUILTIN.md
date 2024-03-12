@@ -766,6 +766,12 @@ Calculate the cumulative sums of the terms in the array.
 
 `array`
 
+### denominator
+Calculate the denominator of x in reduced form.
+#### Parameters:
+
+`x`
+
 ### diff
 Calculate the (linear) differences between the terms.
 #### Parameters:
@@ -964,6 +970,12 @@ Convert interval to (relative) FJS using neutral comma flavors.
 
 `interval`
 
+### numerator
+Calculate the numerator of x in reduced form.
+#### Parameters:
+
+`x`
+
 ### o
 Obtain a copy of the current/given scale in the default overtonal interpretation.
 #### Parameters:
@@ -975,6 +987,18 @@ Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 #### Parameters:
 
 `b0`, `b1`, `b2`, `b3`, `equave`, `withUnity`
+
+### oddLimit
+Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive) and `equave` (inclusive).
+#### Parameters:
+
+`limit`, `equave`
+
+### oddLimitOf
+Calculate the odd limit of x. Here 'odd' means not divisible by the equave (default `2`).
+#### Parameters:
+
+`x`, `equave`
 
 ### parallelotope
 Span a parallelotope by extending a basis combinatorically.
