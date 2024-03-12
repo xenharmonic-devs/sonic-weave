@@ -23,6 +23,9 @@ export function parseVals(
   const result: number[][] = [];
   for (const part of parts) {
     if (part.includes('<')) {
+      if (part.includes('@')) {
+        throw new Error('Explicit sub-subgroups not supported.');
+      }
       const val = evaluateExpression(part, includePrelude) as Interval;
       // Just re-interprete in the subgroup's basis.
       result.push(val.value.toIntegerMonzo());

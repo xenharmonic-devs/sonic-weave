@@ -1,5 +1,4 @@
 // Lexer for chords separated by spaces or other separators
-// TODO: Use lightweight aux rules that don't return anything.
 
 // Depends on base.pegjs
 
@@ -21,15 +20,19 @@ VectorComponent
 VectorComponents
   = VectorComponent|.., _ ','? _|
 
-Prefix = (!WhiteSpace ![v<|&:;,] !'[' SourceCharacter)*
+Rational = $(PositiveInteger ('/' PositiveInteger)?)
+
+DotJoinedRationals = Rational|.., '.'|
+
+Prefix = (!WhiteSpace ![<|&:;,] !'[' SourceCharacter)*
 
 MonzoLiteral
-  = prefix: Prefix downs: 'v'* '[' _ components: VectorComponents _ '>' {
+  = prefix: Prefix '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
     return text();
   }
 
 ValLiteral
-  = prefix: Prefix downs: 'v'* '<' _ components: VectorComponents _ ']' {
+  = prefix: Prefix '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
     return text();
   }
 

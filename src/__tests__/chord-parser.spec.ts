@@ -39,6 +39,21 @@ describe('Chord input parser', () => {
       '9/8',
     ]);
   });
+
+  it('has the Konami code', () => {
+    const start = parseChord('^^vv/\\/\\[2, 1>');
+    expect(start[0].value.primeExponents.map(pe => pe.toFraction())).toEqual([
+      '2',
+      '1',
+    ]);
+  });
+
+  it('has subgroup monzos', () => {
+    const result = parseChord('[5, -1>@3/2.7');
+    expect(
+      result[0].value.primeExponents.slice(0, 4).map(pe => pe.toFraction())
+    ).toEqual(['-5', '5', '0', '-1']);
+  });
 });
 
 describe('Val input parser', () => {
@@ -75,5 +90,8 @@ describe('Val input parser', () => {
   it('parses free vals', () => {
     const result = parseVals('12', '');
     expect(result).toEqual([[12, 19, 28, 34, 42, 44, 49, 51, 54]]);
+  });
+  it('rejects explicit sub-subgroup vals', () => {
+    expect(() => parseVals('<1 2]@3.5', '7')).toThrow();
   });
 });
