@@ -976,6 +976,12 @@ Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 
 `b0`, `b1`, `b2`, `b3`, `equave`, `withUnity`
 
+### parallelotope
+Span a parallelotope by extending a basis combinatorically.
+#### Parameters:
+
+`basis`, `ups`, `downs`, `equave`
+
 ### periodiff
 Calculate the geometric differences of the periodic interval pattern.
 #### Parameters:
@@ -1137,12 +1143,6 @@ Calculate the hyperbolic sine of x.
 #### Parameters:
 
 `x`
-
-### spanLattice
-Span a lattice by extending a basis combinatorically.
-#### Parameters:
-
-`basis`, `ups`, `downs`, `equave`
 
 ### sqrt
 Calculate the square root of the input.

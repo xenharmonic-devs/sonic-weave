@@ -2155,8 +2155,8 @@ riff wellTemperament commaFractions comma down generator period {
   sort();
 }
 
-riff spanLattice basis ups downs equave {
-  "Span a lattice by extending a basis combinatorically.";
+riff parallelotope basis ups downs equave {
+  "Span a parallelotope by extending a basis combinatorically.";
   basis = basis[..];
   ups = ups[..] if ups else [];
   downs = downs[..] if downs else [];

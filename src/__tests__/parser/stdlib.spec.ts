@@ -94,7 +94,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates a cube', () => {
-    const scale = parseSource('spanLattice([3, 5, 7]);');
+    const scale = parseSource('parallelotope([3, 5, 7]);');
     expect(scale).toHaveLength(8);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '35/32;5/4;21/16;3/2;105/64;7/4;15/8;2'
@@ -657,7 +657,7 @@ describe('SonicWeave standard library', () => {
 
   it('spans a lattice in cents', () => {
     const scale = parseSource(
-      'spanLattice([123.4, 567.9], [2, 1], [1, 0], 1200.);str'
+      'parallelotope([123.4, 567.9], [2, 1], [1, 0], 1200.);str'
     );
     expect(scale).toEqual([
       '123.4',
