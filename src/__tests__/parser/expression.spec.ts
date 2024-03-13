@@ -1149,9 +1149,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(descending3rd.toString()).toBe('-4\\12');
   });
 
-  it('adds S-expressions to FJS', () => {
-    const majorThird = parseSingle('m3+S9');
-    expect(majorThird.toString()).toBe('m3_5');
+  it('adds S-expressions to FJS (plain)', () => {
+    const minorThird = parseSingle('m3+S9');
+    expect(minorThird.toString()).toBe('m3_5');
+  });
+
+  it('adds S-expressions to FJS (flavored)', () => {
+    const minorThird = parseSingle('m3_19h+S9');
+    expect(minorThird.toString()).toBe('m3^5h_19h');
   });
 
   it('subtracts S-expressions from absoluteFJS', () => {
@@ -1223,5 +1228,10 @@ describe('SonicWeave expression evaluator', () => {
       false
     );
     expect(nothings).toEqual(['niente', '2', 'niente', '4']);
+  });
+
+  it('aspires to preserve FJS flavor', () => {
+    const seventh = parseSingle('P5 + n3^11n');
+    expect(seventh.toString()).toBe('n7^11n');
   });
 });

@@ -239,6 +239,43 @@ export function validateNode(node?: IntervalLiteral) {
   }
 }
 
+function inferFJSFlavor(
+  a: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS,
+  b?: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS
+): FJSFlavor {
+  let result: FJSFlavor | undefined = undefined;
+  if (a.type === 'FJS' || a.type === 'AbsoluteFJS') {
+    for (const [_, flavor] of a.superscripts.concat(a.subscripts)) {
+      if (result === undefined) {
+        result = flavor;
+      } else if (result !== flavor) {
+        return '';
+      }
+    }
+  } else {
+    result = a.flavor;
+  }
+  if (b === undefined) {
+    return result ?? '';
+  }
+  if (b.type === 'FJS' || b.type === 'AbsoluteFJS') {
+    for (const [_, flavor] of b.superscripts.concat(b.subscripts)) {
+      if (result === undefined) {
+        result = flavor;
+      } else if (result !== flavor) {
+        return '';
+      }
+    }
+  } else {
+    if (result === undefined) {
+      result = b.flavor;
+    } else if (result !== b.flavor) {
+      return '';
+    }
+  }
+  return result ?? '';
+}
+
 /**
  * Compute the node corresponding to the multiplicative inverse of the input (ignoring domain).
  * @param node AST node to find the inverse of.
@@ -311,10 +348,10 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
       };
     case 'FJS':
     case 'AspiringFJS':
-      return {type: 'AspiringFJS', flavor: ''};
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(node)};
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(node)};
     case 'MonzoLiteral':
       return {
         ...node,
@@ -368,10 +405,10 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
       };
     case 'FJS':
     case 'AspiringFJS':
-      return {type: 'AspiringFJS', flavor: ''};
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(node)};
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(node)};
     case 'NedjiLiteral':
       return {
         ...node,
@@ -387,24 +424,22 @@ function aspireNodes(
   b: IntervalLiteral
 ): IntervalLiteral | undefined {
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
-    if (
-      b.type === 'FJS' ||
-      b.type === 'AspiringAbsoluteFJS' ||
-      b.type === 'SquareSuperparticular'
-    ) {
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(a, b)};
+    }
+    if (b.type === 'SquareSuperparticular') {
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(a)};
     }
   }
   if (a.type === 'FJS' || a.type === 'AspiringFJS') {
     if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(a, b)};
     }
-    if (
-      b.type === 'FJS' ||
-      b.type === 'AspiringFJS' ||
-      b.type === 'SquareSuperparticular'
-    ) {
-      return {type: 'AspiringFJS', flavor: ''};
+    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(a, b)};
+    }
+    if (b.type === 'SquareSuperparticular') {
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(a)};
     }
   }
 
@@ -466,7 +501,7 @@ export function subNodes(
   }
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
     if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
-      return {type: 'AspiringFJS', flavor: ''};
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(a, b)};
     }
   }
 
@@ -484,7 +519,7 @@ export function modNodes(
     (a.type === 'FJS' || a.type === 'AspiringFJS') &&
     (b.type === 'FJS' || b.type === 'AspiringFJS')
   ) {
-    return {type: 'AspiringFJS', flavor: ''};
+    return {type: 'AspiringFJS', flavor: inferFJSFlavor(a, b)};
   }
   return undefined;
 }
@@ -500,7 +535,7 @@ export function roundToNodes(
     (a.type === 'FJS' || a.type === 'AspiringFJS') &&
     (b.type === 'FJS' || b.type === 'AspiringFJS')
   ) {
-    return {type: 'AspiringFJS', flavor: ''};
+    return {type: 'AspiringFJS', flavor: inferFJSFlavor(a, b)};
   }
   return undefined;
 }
@@ -539,7 +574,7 @@ export function mulNodes(
         equaveDenominator: b.equaveDenominator,
       };
     } else if (b.type === 'FJS' || b.type === 'AspiringFJS') {
-      return {type: 'AspiringFJS', flavor: ''};
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(b)};
     } else if (b.type === 'CentLiteral') {
       return {
         type: 'CentsLiteral',
