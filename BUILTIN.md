@@ -784,6 +784,12 @@ Generate an equal temperament with the given number of divisions of the given eq
 
 `divisions`, `equave`
 
+### edColors
+Color every interval in the scale with hue repeating every step of an equal division (default `12` `divisions`) of `equave` (default `2`). `offset` rotates the hue wheel.
+#### Parameters:
+
+`divisions`, `offset`, `equave`
+
 ### elevate
 Remove denominators and make the root explicit in the current/given scale.
 #### Parameters:

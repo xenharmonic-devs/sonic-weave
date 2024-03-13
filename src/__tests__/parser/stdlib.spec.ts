@@ -1113,4 +1113,14 @@ describe('SonicWeave standard library', () => {
       '3',
     ]);
   });
+
+  it('colors intervals based on deviation from 12ed2', () => {
+    const scale = parseSource('5/4;3/2;7/4;2;edColors();repr');
+    expect(scale).toEqual([
+      '(5/4 hsl(310.729, 100.000, 50.000))',
+      '(3/2 hsl(7.038, 100.000, 50.000))',
+      '(7/4 hsl(247.773, 100.000, 50.000))',
+      '(2 hsl(0.000, 100.000, 50.000))',
+    ]);
+  });
 });

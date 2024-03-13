@@ -2087,6 +2087,19 @@ riff labelsOf scale {
   return map(labelOf, scale ?? $$);
 }
 
+riff edColors divisions offset equave {
+  "Color every interval in the scale with hue repeating every step of an equal division (default \`12\` \`divisions\`) of \`equave\` (default \`2\`). \`offset\` rotates the hue wheel.";
+  divisions ??= 12;
+  offset ??= 0;
+  equave ??= 2;
+  const base = (equave ~/^ divisions) ~/^ 360;
+  riff edColor interval {
+    "Color an interval wih hue repeating every step of an equal divisions.";
+    return interval hsl((offset ~+ interval ~/_ base) ~mod 360, 100, 50);
+  }
+  return edColor;
+}
+
 // == Scale generation ==
 riff ed divisions equave {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
