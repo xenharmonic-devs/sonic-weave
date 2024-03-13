@@ -295,6 +295,12 @@ Return `true` if the value is a riff or an arrow function.
 
 `value`
 
+### isInt
+Return `true` if the interval is an integer.
+#### Parameters:
+
+`interval`
+
 ### isInterval
 Return `true` if the value is an interval.
 #### Parameters:
@@ -318,6 +324,12 @@ Return `true` if `n` is a prime number, `false` otherwise.
 #### Parameters:
 
 `n`
+
+### isRadical
+Return `true` if the interval is an nth root.
+#### Parameters:
+
+`interval`
 
 ### isRelative
 Return `true` if the interval belongs to the relative echelon.

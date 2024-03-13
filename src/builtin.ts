@@ -676,6 +676,20 @@ isLogarithmic.__doc__ =
   'Return `true` if the interval belongs to the logarithmic domain.';
 isLogarithmic.__node__ = builtinNode(isLogarithmic);
 
+// == Value detection ==
+
+function isInt(interval: Interval) {
+  return sonicBool(interval.value.isIntegral());
+}
+isInt.__doc__ = 'Return `true` if the interval is an integer.';
+isInt.__node__ = builtinNode(isInt);
+
+function isRadical(interval: Interval) {
+  return sonicBool(!interval.value.isNonAlgebraic());
+}
+isRadical.__doc__ = 'Return `true` if the interval is an nth root.';
+isRadical.__node__ = builtinNode(isRadical);
+
 // == Other ==
 
 export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
@@ -1637,6 +1651,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   isRelative,
   isLinear,
   isLogarithmic,
+  // Value detection
+  isInt,
+  isRadical,
   // Integer conversion
   floor,
   round,

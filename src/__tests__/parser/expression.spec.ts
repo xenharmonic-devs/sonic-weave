@@ -1234,4 +1234,24 @@ describe('SonicWeave expression evaluator', () => {
     const seventh = parseSingle('P5 + n3^11n');
     expect(seventh.toString()).toBe('n7^11n');
   });
+
+  it('knows that 7 is an integer', () => {
+    const yes = parseSingle('isInt(7)');
+    expect(yes.toString()).toBe('true');
+  });
+
+  it('knows that sqrt(15) is not an integer', () => {
+    const no = parseSingle('isInt(15 /^ 2)');
+    expect(no.toString()).toBe('false');
+  });
+
+  it('knows that sqrt(15) is a radical', () => {
+    const sure = parseSingle('isRadical(15 /^ 2)');
+    expect(sure.toString()).toBe('true');
+  });
+
+  it('knows that TAU is not a radical', () => {
+    const no = parseSingle('isRadical(TAU)');
+    expect(no.toString()).toBe('false');
+  });
 });
