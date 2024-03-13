@@ -156,6 +156,7 @@ export class StatementVisitor {
   parent?: StatementVisitor;
   mutables: VisitorContext;
   immutables: VisitorContext;
+  expandable: boolean;
 
   constructor(rootContext: RootContext, parent?: StatementVisitor) {
     this.rootContext = rootContext;
@@ -163,6 +164,7 @@ export class StatementVisitor {
     this.mutables = new Map();
     this.mutables.set('$', []);
     this.immutables = new Map();
+    this.expandable = true;
   }
 
   clone() {
@@ -171,6 +173,7 @@ export class StatementVisitor {
     result.immutables = new Map(this.immutables);
     const scale = this.getCurrentScale();
     result.mutables.set('$', [...scale]);
+    result.expandable = this.expandable;
     return result;
   }
 
@@ -179,6 +182,9 @@ export class StatementVisitor {
   }
 
   expand(defaultRootContext: RootContext) {
+    if (!this.expandable) {
+      throw new Error('The global scope cannot be expanded.');
+    }
     let base = this.rootContext.expand(defaultRootContext);
     if (base) {
       base += '\n';
@@ -2049,6 +2055,7 @@ export function getSourceVisitor(
     return visitor;
   } else {
     const visitor = new StatementVisitor(rootContext);
+    visitor.expandable = false;
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.immutables.set(name, color);
     }
