@@ -981,6 +981,9 @@ export class ExpressionVisitor {
     ) {
       if (index >= node.comprehensions.length) {
         const localSubvisitor = localVisitor.createExpressionVisitor();
+        if (node.test && !sonicTruth(localSubvisitor.visit(node.test))) {
+          return;
+        }
         result.push(localSubvisitor.visit(node.expression) as Interval);
         return;
       }

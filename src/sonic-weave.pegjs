@@ -710,11 +710,12 @@ Comprehension
   }
 
 ArrayComprehension
-  = '[' _ expression: Expression comprehensions: Comprehension+ _ ']' {
+  = '[' _ expression: Expression comprehensions: Comprehension+ _ test: (IfToken @Expression)? _ ']' {
     return  {
       type: 'ArrayComprehension',
       expression,
       comprehensions,
+      test,
     };
   }
 

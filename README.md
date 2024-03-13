@@ -398,6 +398,15 @@ results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 ```
 results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
 
+#### If clause
+To conditionally include elements use an `if` clause e.g.
+```javascript
+[i for i of [1..9] if i mod 3 !== 0]
+```
+results in `$ = [1, 2, 4, 5, 7, 8]` i.e. all [throdd](https://en.xen.wiki/w/Threeven) numbers below 10.
+
+Above the `!== 0` part is unnecessary. `[i for i of [1..9] if i mod 3]` works the same because `0` is falsy while `1` and `2` are truthy.
+
 ### Vector operations
 Operators operate componentwise on arrays e.g.
 ```javascript

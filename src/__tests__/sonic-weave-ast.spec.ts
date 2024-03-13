@@ -668,6 +668,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             array: {type: 'Identifier', id: 'qux'},
           },
         ],
+        test: null,
       },
     });
   });

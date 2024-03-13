@@ -276,6 +276,7 @@ export type ArrayComprehension = {
   type: 'ArrayComprehension';
   expression: Expression;
   comprehensions: Comprehension[];
+  test: Expression | null;
 };
 
 export type ArrayLiteral = {

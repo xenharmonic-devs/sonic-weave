@@ -2331,10 +2331,9 @@ riff oddLimit limit equave {
     [remainder, remainder ~+ equave .. limit];
   }
   const odds = popAll();
-  [n % d for n of odds for d of odds];
+  [n % d for n of odds for d of odds if gcd(n, d) === 1];
   i => i rdc equave;
   sort();
-  keepUnique();
 }
 
 // == Scale modification ==
