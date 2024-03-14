@@ -761,6 +761,20 @@ trackingIds.__doc__ =
   'Obtain an array of the tracking IDs attached to the interval.';
 trackingIds.__node__ = builtinNode(trackingIds);
 
+function flatten(array: SonicWeaveValue, depth?: Interval) {
+  if (Array.isArray(array)) {
+    let d = Infinity;
+    if (depth !== undefined) {
+      d = depth.toInteger();
+    }
+    return array.flat(d);
+  }
+  return [array];
+}
+flatten.__doc__ =
+  'Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `Infinity`).';
+flatten.__node__ = builtinNode(flatten);
+
 function clear(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
   scale.length = 0;
@@ -1705,6 +1719,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // Other
   track,
   trackingIds,
+  flatten,
   clear,
   tail,
   colorOf,
@@ -1809,18 +1824,6 @@ export const PRELUDE_SOURCE = `
 riff sanitize interval {
   "Get rid of interval formatting, color and label.";
   return bleach(simplify(interval));
-}
-
-riff flatten array {
-  "Flatten a nested array into a simple array.";
-  if (isArray(array)) {
-    let result = [];
-    for (const element of array) {
-      result = concat(result, flatten(element));
-    }
-    return result;
-  }
-  return [array];
 }
 
 riff sqrt x {

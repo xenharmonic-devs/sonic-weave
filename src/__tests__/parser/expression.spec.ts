@@ -1273,4 +1273,12 @@ describe('SonicWeave expression evaluator', () => {
     const upSixth = evaluateExpression('str(FJS(^m6))', false);
     expect(upSixth).toBe('^m6');
   });
+
+  it('can flatten a nested array', () => {
+    const arr = evaluateExpression(
+      'flatten([["a", ["b", "c"]], ["d", ["e", "f"]], "g"])',
+      false
+    );
+    expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+  });
 });

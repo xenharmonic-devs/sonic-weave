@@ -844,13 +844,6 @@ describe('SonicWeave standard library', () => {
     expect(scale).toEqual(['9/8', '4/3', '3/2', '2']);
   });
 
-  it('can flatten a nested array', () => {
-    const arr = evaluateExpression(
-      'flatten([["a", ["b", "c"]], ["d", "e"], "f"])'
-    );
-    expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
-  });
-
   it('can generate vertically aligned objects', () => {
     const vao = parseSource('vao(16, 64);str');
     expect(vao).toEqual(['16/16', '17/16', '18/16', '19/16', '24/16', '57/16']);

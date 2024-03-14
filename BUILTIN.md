@@ -205,6 +205,12 @@ Convert interval to (relative) FJS.
 
 `interval`, `flavor = ""`
 
+### flatten
+Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `Infinity`).
+#### Parameters:
+
+`array`, `depth`
+
 ### floor
 Round value down to the nearest integer.
 #### Parameters:
@@ -855,12 +861,6 @@ Repeat the current/given intervals as-is without accumulating equaves. Clears th
 #### Parameters:
 
 `times`, `scale`
-
-### flatten
-Flatten a nested array into a simple array.
-#### Parameters:
-
-`array`
 
 ### ftom
 Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).
