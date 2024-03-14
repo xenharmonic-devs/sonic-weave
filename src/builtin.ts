@@ -590,15 +590,20 @@ function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
     throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
   const monzo = relative.bind(this)(interval).value;
-  const node = asFJS(monzo, flavor);
+  const result = new Interval(monzo, 'logarithmic', {
+    type: 'AspiringFJS',
+    flavor,
+  });
+  const node = result.realizeNode(this.rootContext);
   if (node) {
-    return new Interval(monzo, 'logarithmic', node, interval);
+    result.node = node;
+    return result;
   }
   const approximation = monzo.approximateSimple();
   return new Interval(
     approximation,
     'logarithmic',
-    asFJS(approximation, ''),
+    asFJS(approximation, flavor),
     interval
   );
 }

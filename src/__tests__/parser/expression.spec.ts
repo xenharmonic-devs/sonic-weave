@@ -1268,4 +1268,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(tone.value.toFraction().toFraction()).toBe('9/8');
     expect(tone.label).toBe('D♮4');
   });
+
+  it('preserves ups in FJS conversion', () => {
+    const upSixth = evaluateExpression('str(FJS(^m6))', false);
+    expect(upSixth).toBe('^m6');
+  });
 });
