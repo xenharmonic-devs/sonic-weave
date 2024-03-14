@@ -355,6 +355,12 @@ Obtain all k-sized combinations in a set
 
 `set`, `k`
 
+### labelAbsoluteFJS
+Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.
+#### Parameters:
+
+`interval`, `flavor = ""`
+
 ### labelOf
 Return the label of the interval.
 #### Parameters:

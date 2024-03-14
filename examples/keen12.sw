@@ -13,8 +13,7 @@ sort()
 repeat()
 
 // Use semioctave notation and pick the nominals for labels.
-absoluteFJS
-label(map(i => str(i)[0]))
+labelAbsoluteFJS
 
 // See https://en.xen.wiki/w/Val#Sparse_Offset_Val_notation for the alternative notation for 12d.
 // Doesn't actually matter here because we're stacking fifths, but communicates the intended interpretation.

@@ -15,11 +15,8 @@ G&4
 ψ&4
 C5
 
-// Store nominals by stripping the octaves
-const labels = map(note => slice(str(note), 0, -1));
+// Use labels without octaves
+labelAbsoluteFJS
 
 // Temper to 313 equal tones
 313@
-
-// Apply labels
-label(labels)

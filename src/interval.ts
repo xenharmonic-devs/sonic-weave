@@ -526,6 +526,66 @@ export class Interval {
     return this.domain === other.domain && this.value.strictEquals(other.value);
   }
 
+  realizeNode(context: RootContext) {
+    if (!this.node) {
+      return this.node;
+    }
+    if (this.node.type === 'AspiringAbsoluteFJS') {
+      const C4 = context.C4;
+      const relativeToC4 = this.value.div(C4);
+      let ups = 0;
+      let lifts = 0;
+      let steps = 0;
+      if (context.up.isRealCents() && context.lift.isRealCents()) {
+        ({ups, lifts, steps} = countUpsAndLifts(
+          relativeToC4.cents,
+          context.up.cents,
+          context.lift.cents
+        ));
+        if (steps) {
+          return undefined;
+        }
+        relativeToC4.cents = 0;
+      }
+
+      const node = asAbsoluteFJS(relativeToC4, this.node.flavor);
+      if (!node) {
+        return undefined;
+      }
+      node.ups = ups;
+      node.lifts = lifts;
+      return node;
+    }
+    if (this.node.type === 'AspiringFJS') {
+      const value = this.value.clone();
+      let ups = 0;
+      let lifts = 0;
+      if (value.cents) {
+        let steps = 0;
+        if (context.up.isRealCents() && context.lift.isRealCents()) {
+          ({ups, lifts, steps} = countUpsAndLifts(
+            value.cents,
+            context.up.cents,
+            context.lift.cents
+          ));
+          if (steps) {
+            return undefined;
+          }
+          value.cents = 0;
+        }
+      }
+
+      const node = asFJS(value, this.node.flavor);
+      if (!node) {
+        return undefined;
+      }
+      node.ups = ups;
+      node.lifts = lifts;
+      return node;
+    }
+    return this.node;
+  }
+
   str(context?: RootContext) {
     if (this.node) {
       let node: IntervalLiteral | undefined = this.node;

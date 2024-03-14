@@ -1254,4 +1254,18 @@ describe('SonicWeave expression evaluator', () => {
     const no = parseSingle('isRadical(TAU)');
     expect(no.toString()).toBe('false');
   });
+
+  it('labels up-E-semiflat-super-11-neutral', () => {
+    const e = parseSingle('C4 = 1;labelAbsoluteFJS(11/9 * linear(1\\), "n")');
+    expect(e.label).toBe('^Ed^11n');
+    expect(e.color?.value).toBe('black');
+  });
+
+  it('breaks constructed absolute FJS', () => {
+    const tone = parseSingle(
+      'F4 = 1;const g = absoluteFJS(9/8);C4 = 1;g str(g)'
+    );
+    expect(tone.value.toFraction().toFraction()).toBe('9/8');
+    expect(tone.label).toBe('D♮4');
+  });
 });

@@ -739,12 +739,17 @@ function formatFJS(literal: FJS) {
   }${tailFJS(literal)}`;
 }
 
-function formatAbsoluteFJS(literal: AbsoluteFJS) {
+export function formatAbsoluteFJS(literal: AbsoluteFJS, octaves = true) {
   const base = formatUps(literal);
   const p = literal.pitch;
-  return `${base}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
-    literal
-  )}`;
+  if (octaves) {
+    return `${base}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
+      literal
+    )}`;
+  }
+  return `${base}${p.nominal === 'a' ? 'A' : p.nominal}${p.accidentals.join(
+    ''
+  )}${tailFJS(literal)}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {

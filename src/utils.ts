@@ -197,6 +197,9 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
     postfix += ` ${total > 0 ? '+' : '-'} ${Math.abs(total)}!c`;
   }
   return {
+    ups,
+    lifts,
+    steps,
     prefix,
     postfix,
   };

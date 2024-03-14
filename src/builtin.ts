@@ -17,11 +17,11 @@ import {
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
-import {type ExpressionVisitor} from './parser';
+import {ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
-import {asAbsoluteFJS, asFJS} from './fjs';
+import {asFJS} from './fjs';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
-import {NedjiLiteral, RadicalLiteral} from './expression';
+import {NedjiLiteral, RadicalLiteral, formatAbsoluteFJS} from './expression';
 import {TWO} from './utils';
 
 // Runtime
@@ -554,17 +554,17 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   } else {
     monzo = absolute.bind(this)(interval).value;
   }
-  let relativeToC4 = monzo.div(C4);
-  const node = asAbsoluteFJS(relativeToC4, flavor);
+  const result = new Interval(monzo, 'logarithmic', {
+    type: 'AspiringAbsoluteFJS',
+    flavor,
+  });
+  const node = result.realizeNode(this.rootContext);
   if (node) {
-    return new Interval(
-      monzo,
-      'logarithmic',
-      {type: 'AspiringAbsoluteFJS', flavor},
-      interval
-    );
+    result.node = node;
+    this.rootContext.fragiles.push(result);
+    return result;
   }
-  relativeToC4 = relativeToC4.approximateSimple();
+  const relativeToC4 = monzo.div(C4).approximateSimple();
   return new Interval(
     C4.mul(relativeToC4),
     'logarithmic',
@@ -604,6 +604,43 @@ function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
 }
 FJS.__doc__ = 'Convert interval to (relative) FJS.';
 FJS.__node__ = builtinNode(FJS);
+
+function labelAbsoluteFJS(
+  this: ExpressionVisitor,
+  interval: Interval,
+  flavor = ''
+) {
+  if (
+    !interval.node ||
+    (interval.node.type !== 'AbsoluteFJS' &&
+      interval.node.type !== 'AspiringAbsoluteFJS')
+  ) {
+    interval = absoluteFJS.bind(this)(interval, flavor);
+  } else {
+    interval = interval.shallowClone();
+  }
+  if (interval.node && interval.node.type === 'AspiringAbsoluteFJS') {
+    interval.node = interval.realizeNode(this.rootContext);
+  }
+  if (!interval.node || interval.node.type !== 'AbsoluteFJS') {
+    interval.label = '?';
+    interval.color = new Color('gray');
+    return interval;
+  }
+  interval.label = formatAbsoluteFJS(interval.node, false);
+  interval.color = new Color('white');
+  for (const accidental of interval.node.pitch.accidentals) {
+    if (accidental === '♮' || accidental === '=') {
+      continue;
+    }
+    interval.color = new Color('black');
+    break;
+  }
+  return interval;
+}
+labelAbsoluteFJS.__doc__ =
+  'Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.';
+labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const monzo = relative.bind(this)(interval).value;
@@ -1640,6 +1677,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   cents,
   absoluteFJS,
   FJS,
+  labelAbsoluteFJS,
   monzo: toMonzo,
   // Type detection
   isInterval,
