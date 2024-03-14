@@ -1970,12 +1970,19 @@ riff mul ...factors {
   return prod(factors);
 }
 
-riff cumsum array {
-  "Calculate the cumulative sums of the terms in the array.";
-  array;
+riff stackLinear array {
+  "Cumulatively sum the numbers of the current/given array.";
+  $ = array ?? $$;
   let i = 0;
   while (++i < length($))
     $[i] ~+= $[i-1];
+  return;
+}
+
+riff cumsum array {
+  "Calculate the cumulative sums of the terms in the array.";
+  array;
+  stackLinear();
 }
 
 riff stack array {

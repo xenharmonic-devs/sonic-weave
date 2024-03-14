@@ -1123,4 +1123,19 @@ describe('SonicWeave standard library', () => {
       '(2 hsl(0.000, 100.000, 50.000))',
     ]);
   });
+
+  it('stacks steps as plain numbers', () => {
+    const scale = parseSource(
+      '2;2;1;2;2;2;1;stackLinear();i => i \\ $[-1];str'
+    );
+    expect(scale).toEqual([
+      '2\\12',
+      '4\\12',
+      '5\\12',
+      '7\\12',
+      '9\\12',
+      '11\\12',
+      '12\\12',
+    ]);
+  });
 });

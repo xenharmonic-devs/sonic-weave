@@ -1210,6 +1210,12 @@ Obtain a copy of the current/given intervals cumulatively stacked on top of each
 
 `array`
 
+### stackLinear
+Cumulatively sum the numbers of the current/given array.
+#### Parameters:
+
+`array`
+
 ### stepReplaced
 Obtain a copy of the current/given scale with relative occurences of `step` replaced by `replacement`.
 #### Parameters:
