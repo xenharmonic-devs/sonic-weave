@@ -19,7 +19,6 @@ import {Color, Interval, Val} from './interval';
 import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
-import {asFJS} from './fjs';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
 import {NedjiLiteral, RadicalLiteral, formatAbsoluteFJS} from './expression';
 import {TWO} from './utils';
@@ -583,12 +582,8 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
     this.rootContext.fragiles.push(result);
     return result;
   }
-  const relativeToC4 = monzo.div(C4).approximateSimple();
-  return new Interval(
-    C4.mul(relativeToC4),
-    'logarithmic',
-    {type: 'AspiringAbsoluteFJS', flavor},
-    interval
+  throw new Error(
+    `Conversion failed. Try absoluteFJS(fraction(x, 1e-4), '${flavor}') to approximate.`
   );
 }
 absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
@@ -618,12 +613,8 @@ function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
     result.node = node;
     return result;
   }
-  const approximation = monzo.approximateSimple();
-  return new Interval(
-    approximation,
-    'logarithmic',
-    asFJS(approximation, flavor),
-    interval
+  throw new Error(
+    `Conversion failed. Try FJS(fraction(x, 1e-4), '${flavor}') to approximate.`
   );
 }
 FJS.__doc__ = 'Convert interval to (relative) FJS.';

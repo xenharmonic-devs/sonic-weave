@@ -267,8 +267,8 @@ describe('SonicWeave expression evaluator', () => {
     'fraction',
     'radical',
     'cents',
-    'FJS',
-    'absoluteFJS',
+    'FJS(fraction',
+    'absoluteFJS(fraction',
     'monzo',
   ])('has a string representation for variants of %s(pi)', (tier: string) => {
     let tolerance = '';
@@ -276,6 +276,10 @@ describe('SonicWeave expression evaluator', () => {
       tolerance = ', 1e-4';
     } else if (tier === 'radical') {
       tolerance = ', 5';
+    } else if (tier === 'FJS(fraction') {
+      tolerance = ', 1e-4)';
+    } else if (tier === 'absoluteFJS(fraction') {
+      tolerance = ', 1e-4)';
     }
     for (const hz of ['', ' Hz']) {
       for (const conversion of [

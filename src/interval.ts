@@ -536,13 +536,14 @@ export class Interval {
       let ups = 0;
       let lifts = 0;
       let steps = 0;
+      let residue = 0;
       if (context.up.isRealCents() && context.lift.isRealCents()) {
-        ({ups, lifts, steps} = countUpsAndLifts(
+        ({ups, lifts, steps, residue} = countUpsAndLifts(
           relativeToC4.cents,
           context.up.cents,
           context.lift.cents
         ));
-        if (steps) {
+        if (steps || residue) {
           return undefined;
         }
         relativeToC4.cents = 0;
@@ -562,13 +563,14 @@ export class Interval {
       let lifts = 0;
       if (value.cents) {
         let steps = 0;
+        let residue = 0;
         if (context.up.isRealCents() && context.lift.isRealCents()) {
-          ({ups, lifts, steps} = countUpsAndLifts(
+          ({ups, lifts, steps, residue} = countUpsAndLifts(
             value.cents,
             context.up.cents,
             context.lift.cents
           ));
-          if (steps) {
+          if (steps || residue) {
             return undefined;
           }
           value.cents = 0;

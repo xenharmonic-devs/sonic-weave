@@ -200,6 +200,7 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
     ups,
     lifts,
     steps,
+    residue: total,
     prefix,
     postfix,
   };
