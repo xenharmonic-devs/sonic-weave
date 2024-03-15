@@ -48,42 +48,46 @@ Program
     };
   }
 
-AndToken           = 'and'    !IdentifierPart
-ByToken            = 'by'     !IdentifierPart
-CentToken          = 'c'      !IdentifierPart
-ConstToken         = 'const'  !IdentifierPart
-DotToken           = 'dot'    !IdentifierPart
-ElseToken          = 'else'   !IdentifierPart
-FalseToken         = 'false'  !IdentifierPart
-ForToken           = 'for'    !IdentifierPart
-HertzToken         = 'Hz'     !IdentifierPart
-LowHertzToken      = 'hz'     !IdentifierPart
-IfToken            = 'if'     !IdentifierPart
-LetToken           = 'let'    !IdentifierPart
-MaxToken           = 'max'    !IdentifierPart
-MinToken           = 'min'    !IdentifierPart
-ModToken           = 'mod'    !IdentifierPart
-ModCeilingToken    = 'modc'   !IdentifierPart
-NoneToken          = 'niente' !IdentifierPart
-NotToken           = 'not'    !IdentifierPart
-OfToken            = 'of'     !IdentifierPart
-OrToken            = 'or'     !IdentifierPart
-ReduceToken        = 'rd'     !IdentifierPart
-ReduceCeilingToken = 'rdc'    !IdentifierPart
-ReturnToken        = 'return' !IdentifierPart
-FunctionToken      = 'riff'   !IdentifierPart
-FunctionAliasToken = 'fn'     !IdentifierPart
-SecondToken        = 's'      !IdentifierPart
-TensorToken        = 'tns'    !IdentifierPart
-ThrowToken         = 'throw'  !IdentifierPart
-ToToken            = 'to'     !IdentifierPart
-TrueToken          = 'true'   !IdentifierPart
-WhileToken         = 'while'  !IdentifierPart
+AndToken           = 'and'     !IdentifierPart
+ByToken            = 'by'      !IdentifierPart
+CatchToken         = 'catch'   !IdentifierPart
+CentToken          = 'c'       !IdentifierPart
+ConstToken         = 'const'   !IdentifierPart
+DotToken           = 'dot'     !IdentifierPart
+ElseToken          = 'else'    !IdentifierPart
+FalseToken         = 'false'   !IdentifierPart
+FinallyToken       = 'finally' !IdentifierPart
+ForToken           = 'for'     !IdentifierPart
+HertzToken         = 'Hz'      !IdentifierPart
+LowHertzToken      = 'hz'      !IdentifierPart
+IfToken            = 'if'      !IdentifierPart
+LetToken           = 'let'     !IdentifierPart
+MaxToken           = 'max'     !IdentifierPart
+MinToken           = 'min'     !IdentifierPart
+ModToken           = 'mod'     !IdentifierPart
+ModCeilingToken    = 'modc'    !IdentifierPart
+NoneToken          = 'niente'  !IdentifierPart
+NotToken           = 'not'     !IdentifierPart
+OfToken            = 'of'      !IdentifierPart
+OrToken            = 'or'      !IdentifierPart
+ReduceToken        = 'rd'      !IdentifierPart
+ReduceCeilingToken = 'rdc'     !IdentifierPart
+ReturnToken        = 'return'  !IdentifierPart
+FunctionToken      = 'riff'    !IdentifierPart
+FunctionAliasToken = 'fn'      !IdentifierPart
+SecondToken        = 's'       !IdentifierPart
+TensorToken        = 'tns'     !IdentifierPart
+ThrowToken         = 'throw'   !IdentifierPart
+ToToken            = 'to'      !IdentifierPart
+TryToken           = 'try'     !IdentifierPart
+TrueToken          = 'true'    !IdentifierPart
+WhileToken         = 'while'   !IdentifierPart
 
 // Tokens representing units can only appear along scalars so they're not reserved.
 ReservedWord
   = AndToken
   / ByToken
+  / CatchToken
   / ConstToken
   / DotToken
   / ElseToken
@@ -107,6 +111,7 @@ ReservedWord
   / TensorToken
   / ThrowToken
   / ToToken
+  / TryToken
   / TrueToken
   / WhileToken
 
@@ -129,6 +134,7 @@ Statement
   / WhileStatement
   / IfStatement
   / ForOfStatement
+  / TryStatement
   / EmptyStatement
 
 ReassignmentTail
@@ -338,6 +344,47 @@ ForOfStatement
       mutable: false,
     };
   }
+
+TryStatement
+  = TryToken _ body: Statement _ handler: CatchClause _ finalizer: TryFinalizer {
+    return {
+      type: 'TryStatement',
+      body,
+      handler,
+      finalizer,
+    };
+  }
+  / TryToken _ body: Statement _ handler: CatchClause {
+    return {
+      type: 'TryStatement',
+      body,
+      handler,
+    };
+  }
+  / TryToken _ body: Statement _ finalizer: TryFinalizer {
+    return {
+      type: 'TryStatement',
+      body,
+      finalizer,
+    };
+  }
+
+CatchClause
+  = CatchToken _ '(' _ param: Identifier _ ')' _ body: Statement {
+    return {
+      type: 'CatchClause',
+      param,
+      body,
+    };
+  }
+  / CatchToken _ body: Statement {
+    return {
+      type: 'CatchClause',
+      body,
+    };
+  }
+
+TryFinalizer = FinallyToken _ @Statement
 
 EmptyStatement
   = _ ';'

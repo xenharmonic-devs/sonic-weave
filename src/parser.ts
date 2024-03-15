@@ -89,6 +89,7 @@ import {
   ReturnStatement,
   Statement,
   ThrowStatement,
+  TryStatement,
   UnaryExpression,
   UpDeclaration,
   VariableDeclaration,
@@ -256,6 +257,8 @@ export class StatementVisitor {
         return this.visitIfStatement(node);
       case 'ForOfStatement':
         return this.visitForOfStatement(node);
+      case 'TryStatement':
+        return this.visitTryStatement(node);
       case 'ReturnStatement':
         return this.visitReturnStatement(node);
       case 'ThrowStatement':
@@ -695,6 +698,46 @@ export class StatementVisitor {
       const interrupt = loopVisitor.visit(node.body);
       if (interrupt) {
         return interrupt;
+      }
+    }
+    return undefined;
+  }
+
+  visitTryStatement(node: TryStatement) {
+    try {
+      const interrupt = this.visit(node.body);
+      if (interrupt) {
+        return interrupt;
+      }
+    } catch (e) {
+      if (node.handler && node.handler.param) {
+        if (e instanceof Error) {
+          // eslint-disable-next-line no-ex-assign
+          e = e.message;
+        }
+        const handlerVisitor = new StatementVisitor(this.rootContext, this);
+        handlerVisitor.mutables.delete('$'); // Collapse scope
+        handlerVisitor.immutables.set(
+          node.handler.param.id,
+          e as SonicWeaveValue
+        );
+        const interrupt = handlerVisitor.visit(node.handler.body);
+        if (interrupt) {
+          return interrupt;
+        }
+      } else if (node.handler) {
+        const interrupt = this.visit(node.handler.body);
+        if (interrupt) {
+          return interrupt;
+        }
+      }
+    } finally {
+      if (node.finalizer) {
+        const interrupt = this.visit(node.finalizer);
+        if (interrupt) {
+          // eslint-disable-next-line no-unsafe-finally
+          return interrupt;
+        }
       }
     }
     return undefined;

@@ -1001,4 +1001,19 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('^^vv/\\/\\B4;A4 "start";repr');
     expect(scale).toEqual(['B4', '(A4 "start")']);
   });
+
+  it('has try..catch..finally', () => {
+    const scale = parseSource(`
+      5/4
+      try {
+        pop()
+      } catch (e) {
+        3/2 e
+      } finally {
+        2/1
+      }
+      repr
+    `);
+    expect(scale).toEqual(['5/4', '(3/2 "Pop from an empty scale.")', '2/1']);
+  });
 });

@@ -723,6 +723,42 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       [5, ''],
     ]);
   });
+
+  it('has try..catch', () => {
+    const ast = parseSingle(
+      'try { throw "Stop trying to hit me, hit me!" } catch { "I know what you\'re trying to do..." }'
+    );
+    expect(ast).toEqual({
+      type: 'TryStatement',
+      body: {
+        type: 'BlockStatement',
+        body: [
+          {
+            type: 'ThrowStatement',
+            argument: {
+              type: 'StringLiteral',
+              value: 'Stop trying to hit me, hit me!',
+            },
+          },
+        ],
+      },
+      handler: {
+        type: 'CatchClause',
+        body: {
+          type: 'BlockStatement',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'StringLiteral',
+                value: "I know what you're trying to do...",
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

@@ -137,6 +137,19 @@ export type ForOfStatement = {
   mutable: boolean;
 };
 
+type CatchClause = {
+  type: 'CatchClause';
+  param?: Identifier;
+  body: Statement;
+};
+
+export type TryStatement = {
+  type: 'TryStatement';
+  body: Statement;
+  handler?: CatchClause;
+  finalizer?: Statement;
+};
+
 export type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -154,6 +167,7 @@ export type Statement =
   | WhileStatement
   | IfStatement
   | ForOfStatement
+  | TryStatement
   | ThrowStatement
   | ReturnStatement;
 
