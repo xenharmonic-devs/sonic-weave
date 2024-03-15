@@ -23,13 +23,6 @@ for (const riff of visitor.immutables.values()) {
   }
 }
 
-const int = visitor.immutables.get('int') as SonicWeaveFunction;
-const dummy = () => null;
-Object.defineProperty(dummy, 'name', {value: 'int', enumerable: false});
-dummy.__node__ = int.__node__;
-dummy.__doc__ = int.__doc__;
-builtins.push(dummy);
-
 function generateDocs(riffs: SonicWeaveFunction[]) {
   riffs.sort((a, b) =>
     a.name.localeCompare(b.name, 'en', {sensitivity: 'base'})

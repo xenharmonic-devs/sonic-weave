@@ -272,7 +272,7 @@ Insert an interval into the current/given scale keeping it sorted.
 `interval`, `scale`
 
 ### int
-Truncate value towards zero to the nearest integer.
+Convert value to an integer. Throws an error if conversion is impossible.
 #### Parameters:
 
 `value`
@@ -620,12 +620,6 @@ Obtain an array of the tracking IDs attached to the interval.
 #### Parameters:
 
 `interval`
-
-### trunc
-Truncate value towards zero to the nearest integer.
-#### Parameters:
-
-`value`
 
 ### trunc
 Truncate value towards zero to the nearest integer.

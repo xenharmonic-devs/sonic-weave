@@ -347,6 +347,15 @@ function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
 bool.__doc__ = 'Convert value to a boolean.';
 bool.__node__ = builtinNode(bool);
 
+// Coercion: None.
+function int(this: ExpressionVisitor, value: Interval) {
+  value = relative.bind(this)(value);
+  return Interval.fromInteger(value.toInteger());
+}
+int.__doc__ =
+  'Convert value to an integer. Throws an error if conversion is impossible.';
+int.__node__ = builtinNode(int);
+
 // Coercion: Minimally lossy in terms of size
 function decimal(
   this: ExpressionVisitor,
@@ -551,6 +560,7 @@ export function cents(
 cents.__doc__ = 'Convert interval to cents.';
 cents.__node__ = builtinNode(cents);
 
+// Coercion: None.
 function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
@@ -589,6 +599,7 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
 absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
 absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
+// Coercion: None.
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
@@ -620,6 +631,7 @@ function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
 FJS.__doc__ = 'Convert interval to (relative) FJS.';
 FJS.__node__ = builtinNode(FJS);
 
+// Coercion: None.
 function labelAbsoluteFJS(
   this: ExpressionVisitor,
   interval: Interval,
@@ -657,6 +669,7 @@ labelAbsoluteFJS.__doc__ =
   'Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.';
 labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 
+// Coercion: None.
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const monzo = relative.bind(this)(interval).value;
   let ups = 0;
@@ -1730,7 +1743,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   relative,
   // Type conversion
   bool,
-  int: trunc,
+  int,
   decimal,
   fraction,
   radical,

@@ -241,10 +241,8 @@ describe('SonicWeave expression evaluator', () => {
     expect(zeroCents.toString()).toBe('(0. "yes")');
   });
 
-  // TODO: Trunc instead, int should fail.
-  it('converts pi to an integer', () => {
-    const three = parseSingle('int(PI)');
-    expect(three.toString()).toBe('3');
+  it('fails to converts pi to an integer', () => {
+    expect(() => parseSingle('int(PI)')).toThrow();
   });
 
   it('converts pi to a real decimal', () => {
@@ -291,7 +289,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it.each([
     'bool',
-    'int',
+    'round',
     'decimal',
     'fraction',
     'radical',
