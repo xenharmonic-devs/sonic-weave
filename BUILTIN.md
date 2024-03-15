@@ -337,6 +337,12 @@ Return `true` if the interval is an nth root.
 
 `interval`
 
+### isRational
+Return `true` if the interval is a rational number.
+#### Parameters:
+
+`interval`
+
 ### isRelative
 Return `true` if the interval belongs to the relative echelon.
 #### Parameters:

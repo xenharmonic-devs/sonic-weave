@@ -1254,6 +1254,16 @@ describe('SonicWeave expression evaluator', () => {
     expect(no.toString()).toBe('false');
   });
 
+  it('knows that 7/5 is a rational number', () => {
+    const yes = parseSingle('isRational(14e-1)');
+    expect(yes.toString()).toBe('true');
+  });
+
+  it('knows that sqrt(15) is not rational', () => {
+    const no = parseSingle('isRational(15 /^ 2)');
+    expect(no.toString()).toBe('false');
+  });
+
   it('knows that sqrt(15) is a radical', () => {
     const sure = parseSingle('isRadical(15 /^ 2)');
     expect(sure.toString()).toBe('true');

@@ -728,6 +728,12 @@ function isInt(interval: Interval) {
 isInt.__doc__ = 'Return `true` if the interval is an integer.';
 isInt.__node__ = builtinNode(isInt);
 
+function isRational(interval: Interval) {
+  return sonicBool(interval.value.isFractional());
+}
+isRational.__doc__ = 'Return `true` if the interval is a rational number.';
+isRational.__node__ = builtinNode(isRational);
+
 function isRadical(interval: Interval) {
   return sonicBool(!interval.value.isNonAlgebraic());
 }
@@ -1712,6 +1718,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   isLogarithmic,
   // Value detection
   isInt,
+  isRational,
   isRadical,
   // Integer conversion
   floor,
