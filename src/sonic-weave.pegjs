@@ -955,7 +955,7 @@ SparseOffsetVal
     }
   }
 
-Rational = $(PositiveInteger ('/' PositiveInteger)?)
+Rational = $((PositiveInteger ('/' PositiveInteger)?) / '0' / '-1')
 
 DotJoinedRationals = Rational|.., '.'|
 

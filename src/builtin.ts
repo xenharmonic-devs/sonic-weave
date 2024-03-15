@@ -21,7 +21,7 @@ import {ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
 import {NedjiLiteral, RadicalLiteral, formatAbsoluteFJS} from './expression';
-import {TWO} from './utils';
+import {TWO, countUpsAndLifts} from './utils';
 
 // Runtime
 
@@ -659,9 +659,35 @@ labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
   const monzo = relative.bind(this)(interval).value;
-  monzo.cents = Math.round(monzo.cents);
-  monzo.residual = new Fraction(1);
-  const node = monzo.asMonzoLiteral();
+  let ups = 0;
+  let lifts = 0;
+  if (monzo.cents) {
+    const context = this.rootContext;
+    let steps = 0;
+    let residue = 0;
+    if (context.up.isRealCents() && context.lift.isRealCents()) {
+      ({ups, lifts, steps, residue} = countUpsAndLifts(
+        monzo.cents,
+        context.up.cents,
+        context.lift.cents
+      ));
+      if (steps || residue) {
+        throw new Error('Cannot convert real value to monzo.');
+      }
+    } else {
+      throw new Error('Cannot convert real value to monzo.');
+    }
+  }
+  const clone = monzo.clone();
+  clone.cents = 0;
+  const node = clone.asMonzoLiteral();
+  if (!node) {
+    throw new Error('Monzo conversion failed.');
+  }
+
+  node.ups = ups;
+  node.lifts = lifts;
+
   return new Interval(monzo, 'logarithmic', node, interval);
 }
 Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});

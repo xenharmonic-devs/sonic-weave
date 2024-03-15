@@ -201,7 +201,32 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert FJS to monzo', () => {
     const monzo = parseSingle('monzo(vm6_5)');
-    expect(monzo.toString()).toBe('[3 0 -1>-1\\');
+    expect(monzo.toString()).toBe('v[3 0 -1>');
+  });
+
+  it('can convert zero to subgroup monzo', () => {
+    const monzo = parseSingle('monzo(0)');
+    expect(monzo.toString()).toBe('[0 1>@2.0');
+  });
+
+  it('can parse the monzo representation of zero', () => {
+    const zero = parseSingle('[1>@0');
+    expect(zero.valueOf()).toBe(0);
+  });
+
+  it('can convert negative twelve to subgroup monzo', () => {
+    const monzo = parseSingle('monzo(-12)');
+    expect(monzo.toString()).toBe('[2 1 1>@2.3.-1');
+  });
+
+  it('can parse the monzo representation of negative unity', () => {
+    const minusOne = parseSingle('[1>@-1');
+    expect(minusOne.valueOf()).toBe(-1);
+  });
+
+  it('can convert 13231/13184 to monzo', () => {
+    const foo = parseSingle('monzo(13231/13184)');
+    expect(foo.toString()).toBe('[-7 1 -1>@2.13231.103');
   });
 
   it('can convert cents to boolean', () => {
@@ -257,7 +282,11 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('fails to convert pi to NEDJI', () => {
-    expect(() => parseSingle('nedji(PI')).toThrow();
+    expect(() => parseSingle('nedji(PI)')).toThrow();
+  });
+
+  it('fails to convert pi to monzo', () => {
+    expect(() => parseSingle('monzo(PI)')).toThrow();
   });
 
   it.each([
@@ -269,16 +298,14 @@ describe('SonicWeave expression evaluator', () => {
     'cents',
     'FJS(fraction',
     'absoluteFJS(fraction',
-    'monzo',
+    'monzo(fraction',
   ])('has a string representation for variants of %s(pi)', (tier: string) => {
     let tolerance = '';
     if (tier === 'fraction') {
       tolerance = ', 1e-4';
     } else if (tier === 'radical') {
       tolerance = ', 5';
-    } else if (tier === 'FJS(fraction') {
-      tolerance = ', 1e-4)';
-    } else if (tier === 'absoluteFJS(fraction') {
+    } else if (tier.endsWith('(fraction')) {
       tolerance = ', 1e-4)';
     }
     for (const hz of ['', ' Hz']) {

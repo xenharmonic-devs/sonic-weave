@@ -22,12 +22,18 @@ export function parseSubgroup(basisStrings: string[]) {
   const subgroup: Fraction[] = [];
 
   if (basisStrings.length === 1) {
-    const index = PRIMES.indexOf(parseInt(basisStrings[0], 10));
-    if (index < 0) {
-      throw new Error('Invalid prime limit');
-    }
-    for (const prime of PRIMES.slice(0, index + 1)) {
-      subgroup.push(new Fraction(prime));
+    if (basisStrings[0] === '0') {
+      subgroup.push(new Fraction(0));
+    } else if (basisStrings[0] === '-1') {
+      subgroup.push(new Fraction(-1));
+    } else {
+      const index = PRIMES.indexOf(parseInt(basisStrings[0], 10));
+      if (index < 0) {
+        throw new Error('Invalid prime limit');
+      }
+      for (const prime of PRIMES.slice(0, index + 1)) {
+        subgroup.push(new Fraction(prime));
+      }
     }
   } else if (basisStrings.length) {
     for (const basisString of basisStrings) {

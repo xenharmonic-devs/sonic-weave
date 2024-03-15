@@ -1625,9 +1625,6 @@ export class TimeMonzo {
     if (this.isNonAlgebraic()) {
       return undefined;
     }
-    if (!this.residual.isUnity()) {
-      return undefined;
-    }
     const components: VectorComponent[] = [];
     for (const pe of this.primeExponents) {
       const right = pe.d === 1 ? '' : pe.d.toString();
@@ -1644,7 +1641,37 @@ export class TimeMonzo {
     while (components.length && components[components.length - 1].left === 0) {
       components.pop();
     }
-    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis: []};
+    const numPrimes = components.length;
+    let basis: string[] = [];
+    if (this.residual.s === 0) {
+      components.push({sign: '', left: 1, right: '', exponent: null});
+      basis.push('0');
+    } else {
+      if (this.residual.n !== 1) {
+        components.push({sign: '', left: 1, right: '', exponent: null});
+        basis.push(this.residual.n.toString());
+      }
+      if (this.residual.d !== 1) {
+        components.push({sign: '-', left: 1, right: '', exponent: null});
+        basis.push(this.residual.d.toString());
+      }
+      if (this.residual.s < 0) {
+        components.push({sign: '', left: 1, right: '', exponent: null});
+        basis.push('-1');
+      }
+    }
+    if (basis.length) {
+      if (numPrimes) {
+        basis = PRIMES.slice(0, numPrimes)
+          .map(p => p.toString())
+          .concat(basis);
+      } else {
+        // Always include prime 2 to avoid ambiguity with prime limit syntax.
+        basis.unshift('2');
+        components.unshift({sign: '', left: 0, right: '', exponent: null});
+      }
+    }
+    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
   }
 
   /**
