@@ -335,6 +335,7 @@ relative.__node__ = builtinNode(relative);
 
 // == Type conversion ==
 
+// Coercion: Very lossy
 function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
   if (value instanceof Interval) {
     const b = sonicBool(sonicTruth(relative.bind(this)(value)));
@@ -347,6 +348,7 @@ function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
 bool.__doc__ = 'Convert value to a boolean.';
 bool.__node__ = builtinNode(bool);
 
+// Coercion: Minimally lossy in terms of size
 function decimal(
   this: ExpressionVisitor,
   interval: Interval,
@@ -367,12 +369,13 @@ function decimal(
 decimal.__doc__ = 'Convert interval to a decimal number.';
 decimal.__node__ = builtinNode(decimal);
 
+// Coercion: Only when epsilon given. Throw otherwise.
 function fraction(
   this: ExpressionVisitor,
   interval: Interval,
+  tolerance?: Interval,
   preferredNumerator?: Interval,
-  preferredDenominator?: Interval,
-  epsilon?: Interval
+  preferredDenominator?: Interval
 ) {
   const numerator = preferredNumerator
     ? preferredNumerator.value.toBigInteger()
@@ -381,17 +384,15 @@ function fraction(
     ? preferredDenominator.value.toBigInteger()
     : 0n;
   const converted = relative.bind(this)(interval);
-  let eps = 1e-4;
   let value: TimeMonzo | undefined;
-  if (epsilon === undefined) {
-    if (converted.value.isFractional()) {
-      value = converted.value.clone();
+  if (tolerance === undefined) {
+    if (!converted.value.isFractional()) {
+      throw new Error('Input is irrational and no tolerance given.');
     }
+    value = converted.value.clone();
   } else {
-    eps = epsilon.value.valueOf();
-  }
-  if (!value) {
-    const frac = new Fraction(converted.value.valueOf()).simplify(eps);
+    const epsilon = tolerance.valueOf();
+    const frac = new Fraction(converted.value.valueOf()).simplify(epsilon);
     value = TimeMonzo.fromFraction(frac);
   }
   const node = value.asFractionLiteral();
@@ -409,7 +410,8 @@ function fraction(
   }
   return new Interval(value, 'linear', node, interval);
 }
-fraction.__doc__ = 'Convert interval to a fraction.';
+fraction.__doc__ =
+  'Convert interval to a fraction. Throws an error if no tolerance for approximation is given.';
 fraction.__node__ = builtinNode(fraction);
 
 function radical(

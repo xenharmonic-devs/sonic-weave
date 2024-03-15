@@ -218,10 +218,10 @@ Round value down to the nearest integer.
 `value`
 
 ### fraction
-Convert interval to a fraction.
+Convert interval to a fraction. Throws an error if no tolerance for approximation is given.
 #### Parameters:
 
-`interval`, `preferredNumerator`, `preferredDenominator`, `epsilon`
+`interval`, `tolerance`, `preferredNumerator`, `preferredDenominator`
 
 ### fround
 Calculate fround x.

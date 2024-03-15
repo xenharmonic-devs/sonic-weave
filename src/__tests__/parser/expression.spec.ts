@@ -216,23 +216,28 @@ describe('SonicWeave expression evaluator', () => {
     expect(zeroCents.toString()).toBe('(0. "yes")');
   });
 
+  // TODO: Trunc instead, int should fail.
   it('converts pi to an integer', () => {
     const three = parseSingle('int(PI)');
     expect(three.toString()).toBe('3');
   });
 
-  it('converts pi to a hard decimal', () => {
+  it('converts pi to a real decimal', () => {
     const pi = parseSingle('decimal(PI)');
     expect(pi.toString()).toBe('3.141592653589793r');
   });
 
-  it('converts pi to a soft decimal', () => {
+  it('converts pi to a rational decimal', () => {
     const pi = parseSingle('decimal(PI, 5)');
     expect(pi.toString()).toBe('3.14159e');
   });
 
+  it('fails to convert pi to a fraction', () => {
+    expect(() => parseSingle('fraction(PI)')).toThrow();
+  });
+
   it('converts pi to a fraction', () => {
-    const approximation = parseSingle('fraction(PI)');
+    const approximation = parseSingle('fraction(PI, 1e-4)');
     expect(approximation.toString()).toBe('333/106');
   });
 
@@ -262,6 +267,10 @@ describe('SonicWeave expression evaluator', () => {
     'absoluteFJS',
     'monzo',
   ])('has a string representation for variants of %s(pi)', (tier: string) => {
+    let tolerance = '';
+    if (tier === 'fraction') {
+      tolerance = ', 1e-4';
+    }
     for (const hz of ['', ' Hz']) {
       for (const conversion of [
         'simplify',
@@ -271,7 +280,7 @@ describe('SonicWeave expression evaluator', () => {
         'logarithmic',
       ]) {
         const value = parseSingle(
-          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}))`
+          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`
         );
         const iterated = parseSingle(
           `A=4 = 440 Hz = 27/16; ${value.toString()}`
@@ -697,12 +706,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('supports fraction formatting preference (numerator)', () => {
-    const fifth = parseSingle('fraction(1.5e, 6)');
+    const fifth = parseSingle('fraction(1.5e, niente, 6)');
     expect(fifth.toString()).toBe('6/4');
   });
 
   it('supports fraction formatting preference (denominator)', () => {
-    const fifth = parseSingle('fraction(1.5e, 0, 6)');
+    const fifth = parseSingle('fraction(1.5e, niente, 0, 6)');
     expect(fifth.toString()).toBe('9/6');
   });
 
