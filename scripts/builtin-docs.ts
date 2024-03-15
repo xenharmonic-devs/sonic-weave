@@ -33,7 +33,9 @@ function generateDocs(riffs: SonicWeaveFunction[]) {
     stdout.write(riff.__doc__ + '\n');
     if (node.parameters.identifiers.length || node.parameters.rest) {
       stdout.write('#### Parameters:\n\n');
-      const names = node.parameters.identifiers.map(p => '`' + p.id + '`');
+      const names = node.parameters.identifiers.map(
+        p => '`' + (p.type === 'Identifier' ? p.id : '[...]') + '`'
+      );
       if (node.parameters.rest) {
         names.push('`...' + node.parameters.rest.id + '`');
       }
