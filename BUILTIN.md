@@ -218,7 +218,7 @@ Round value down to the nearest integer.
 `value`
 
 ### fraction
-Convert interval to a fraction. Throws an error if no tolerance for approximation is given.
+Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance for approximation is given.
 #### Parameters:
 
 `interval`, `tolerance`, `preferredNumerator`, `preferredDenominator`
@@ -488,7 +488,7 @@ Append an interval onto the current/given scale. Optionally an index to push aft
 `interval`, `scale`, `index`
 
 ### radical
-Convert interval to a radical expression.
+Convert interval to a radical expression. Throws an error if conversion is impossible and no maximum index (2 means square root, 3 means cube root, etc.) for approximation is given.
 #### Parameters:
 
 `interval`, `maxIndex`, `maxHeight`

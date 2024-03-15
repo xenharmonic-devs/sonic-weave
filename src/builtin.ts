@@ -411,9 +411,10 @@ function fraction(
   return new Interval(value, 'linear', node, interval);
 }
 fraction.__doc__ =
-  'Convert interval to a fraction. Throws an error if no tolerance for approximation is given.';
+  'Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance for approximation is given.';
 fraction.__node__ = builtinNode(fraction);
 
+// Coercion: Only when maxIndex and maxHeight are given. Throw otherwise.
 function radical(
   this: ExpressionVisitor,
   interval: Interval,
@@ -421,28 +422,37 @@ function radical(
   maxHeight?: Interval
 ) {
   const converted = relative.bind(this)(interval);
+  const maxIdx = maxIndex ? maxIndex.toInteger() : undefined;
   if (converted.value.isEqualTemperament()) {
     const node = converted.value.asRadicalLiteral();
-    if (node) {
+    if (maxIdx === undefined) {
+      if (node) {
+        return new Interval(converted.value.clone(), 'linear', node, interval);
+      }
+      throw new Error('Failed to convert to a radical.');
+    } else if (node && node.exponent.d <= maxIdx) {
       return new Interval(converted.value.clone(), 'linear', node, interval);
     }
+  } else if (maxIdx === undefined) {
+    throw new Error('Input is irrational and no maximum index given.');
   }
+  const maxH = maxHeight ? maxHeight.toInteger() : 50000;
   const {index, radicand} = approximateRadical(
     converted.value.valueOf(),
-    maxIndex === undefined ? undefined : maxIndex.toInteger(),
-    maxHeight === undefined ? undefined : maxHeight.toInteger()
+    maxIdx,
+    maxH
   );
   const value = TimeMonzo.fromFraction(radicand).pow(
     new Fraction(index).inverse()
   );
   const node = value.asRadicalLiteral();
-  if (node !== undefined) {
+  if (node) {
     return new Interval(value, 'linear', node, interval);
   } else {
     const frac = approximateRadical(
       converted.value.valueOf(),
       1,
-      maxHeight === undefined ? undefined : maxHeight.toInteger()
+      maxH
     ).radicand;
     const rational = TimeMonzo.fromFraction(frac);
     return new Interval(
@@ -453,7 +463,8 @@ function radical(
     );
   }
 }
-radical.__doc__ = 'Convert interval to a radical expression.';
+radical.__doc__ =
+  'Convert interval to a radical expression. Throws an error if conversion is impossible and no maximum index (2 means square root, 3 means cube root, etc.) for approximation is given.';
 radical.__node__ = builtinNode(radical);
 
 export function nedji(

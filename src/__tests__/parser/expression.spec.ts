@@ -242,7 +242,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to a radical (outside of prime limit)', () => {
-    const approximation = parseSingle('radical(PI)');
+    const approximation = parseSingle('radical(PI, 5)');
     expect(approximation.toString()).toBe('355/113');
   });
 
@@ -270,6 +270,8 @@ describe('SonicWeave expression evaluator', () => {
     let tolerance = '';
     if (tier === 'fraction') {
       tolerance = ', 1e-4';
+    } else if (tier === 'radical') {
+      tolerance = ', 5';
     }
     for (const hz of ['', ' Hz']) {
       for (const conversion of [
