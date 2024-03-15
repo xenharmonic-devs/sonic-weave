@@ -256,6 +256,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(approximation.toString()).toBe('1981.795');
   });
 
+  it('fails to convert pi to NEDJI', () => {
+    expect(() => parseSingle('nedji(PI')).toThrow();
+  });
+
   it.each([
     'bool',
     'int',
@@ -1301,5 +1305,21 @@ describe('SonicWeave expression evaluator', () => {
       false
     );
     expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+  });
+
+  it('converts a mixture of rational and irrational to real in cents conversion', () => {
+    const c = parseSingle('cents(3/2 % 1.00123r)');
+    expect(c.toString()).toBe('699.8268915041558rc');
+    expect(c.value.cents).toBeCloseTo(699.82689);
+  });
+
+  it('parses negative reals', () => {
+    const r = parseSingle('-1.23r');
+    expect(r.valueOf()).toBeCloseTo(-1.23);
+  });
+
+  it('parses negative real cents', () => {
+    const c = parseSingle('-1.23rc');
+    expect(c.totalCents()).toBeCloseTo(-1.23);
   });
 });

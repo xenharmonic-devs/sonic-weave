@@ -1860,7 +1860,9 @@ export class ExpressionVisitor {
   visitDecimalLiteral(node: DecimalLiteral): Interval {
     if (node.flavor === 'r') {
       const value = TimeMonzo.fromValue(
-        parseFloat(`${node.whole}.${node.fractional}e${node.exponent ?? '0'}`)
+        parseFloat(
+          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`
+        )
       );
       return new Interval(value, 'linear', node);
     }

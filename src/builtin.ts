@@ -467,6 +467,7 @@ radical.__doc__ =
   'Convert interval to a radical expression. Throws an error if conversion is impossible and no maximum index (2 means square root, 3 means cube root, etc.) for approximation is given.';
 radical.__node__ = builtinNode(radical);
 
+// Coercion: None.
 export function nedji(
   this: ExpressionVisitor,
   interval: Interval,
@@ -526,6 +527,7 @@ nedji.__doc__ =
   'Convert interval to N steps of equally divided just intonation.';
 nedji.__node__ = builtinNode(nedji);
 
+// Coercion: Minimally lossy in terms of size
 export function cents(
   this: ExpressionVisitor,
   interval: Interval,
@@ -540,6 +542,10 @@ export function cents(
     ]);
   }
   converted.node = converted.value.asCentsLiteral();
+  // XXX: Detect and follow grammar abuse.
+  if (converted.node.fractional.endsWith('rc')) {
+    converted.value = TimeMonzo.fromCents(converted.totalCents());
+  }
   converted.domain = 'logarithmic';
   return converted;
 }
