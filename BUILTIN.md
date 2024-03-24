@@ -115,7 +115,7 @@ Returns a new array with all sub-array elements concatenated into it recursively
 Round value down to the nearest integer.
 
 ### fraction(*interval*, *tolerance*, *preferredNumerator*, *preferredDenominator*)
-Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance for approximation is given.
+Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance (in cents) for approximation is given.
 
 ### fround(*x*)
 Calculate fround x.

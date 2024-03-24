@@ -260,7 +260,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to a fraction', () => {
-    const approximation = parseSingle('fraction(PI, 1e-4)');
+    const approximation = parseSingle('fraction(PI, 0.5)');
     expect(approximation.toString()).toBe('333/106');
   });
 
@@ -300,11 +300,11 @@ describe('SonicWeave expression evaluator', () => {
   ])('has a string representation for variants of %s(pi)', (tier: string) => {
     let tolerance = '';
     if (tier === 'fraction') {
-      tolerance = ', 1e-4';
+      tolerance = ', 3.5';
     } else if (tier === 'radical') {
       tolerance = ', 5';
     } else if (tier.endsWith('(fraction')) {
-      tolerance = ', 1e-4)';
+      tolerance = ', 3.5)';
     }
     for (const hz of ['', ' Hz']) {
       for (const conversion of [

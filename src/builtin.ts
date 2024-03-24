@@ -414,8 +414,9 @@ function fraction(
     }
     value = converted.value.clone();
   } else {
-    const epsilon = tolerance.valueOf();
-    const frac = new Fraction(converted.value.valueOf()).simplify(epsilon);
+    const frac = new Fraction(converted.value.valueOf()).simplifyRelative(
+      tolerance.totalCents()
+    );
     value = TimeMonzo.fromFraction(frac);
   }
   const node = value.asFractionLiteral();
@@ -434,7 +435,7 @@ function fraction(
   return new Interval(value, 'linear', node, interval);
 }
 fraction.__doc__ =
-  'Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance for approximation is given.';
+  'Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance (in cents) for approximation is given.';
 fraction.__node__ = builtinNode(fraction);
 
 // Coercion: Only when maxIndex and maxHeight are given. Throw otherwise.
