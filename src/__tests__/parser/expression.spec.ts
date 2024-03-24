@@ -326,6 +326,15 @@ describe('SonicWeave expression evaluator', () => {
     }
   });
 
+  it('has a string representation for an absurd absolute quantity', () => {
+    const value = parseSingle(
+      'A=4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))'
+    );
+    const iterated = parseSingle(value.toString());
+    expect(iterated.domain).toBe(value.domain);
+    expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
+  });
+
   it('can access builtin docs', () => {
     const doc = evaluateExpression('doc(primes)', false);
     expect(doc).toBe(

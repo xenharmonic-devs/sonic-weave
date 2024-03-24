@@ -1725,7 +1725,12 @@ export class TimeMonzo {
           if (this.isDecimal()) {
             return `${this.toFraction().toString()} Hz`;
           } else if (this.isFractional()) {
-            return `${this.toFraction().toFraction()} Hz`;
+            try {
+              const {numerator, denominator} = this.toBigNumeratorDenominator();
+              return `${numerator}/${denominator} Hz`;
+            } catch {
+              /* Fall through */
+            }
           } else if (this.isEqualTemperament()) {
             try {
               const {fractionOfEquave, equave} = this.toEqualTemperament();
