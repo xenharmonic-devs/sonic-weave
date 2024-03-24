@@ -150,10 +150,7 @@ atan2.__node__ = builtinNode(atan2);
 // Equivalent to atan2 but with swapped arguments.
 // Rationale is that atanXY(x, y) = log(x + i * y), x and y now coordinates.
 function atanXY(x: Interval, y: Interval) {
-  return new Interval(
-    TimeMonzo.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
-    'linear'
-  );
+  return atan2(y, x);
 }
 atanXY.__doc__ = 'Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.';
 atanXY.__node__ = builtinNode(atanXY);
