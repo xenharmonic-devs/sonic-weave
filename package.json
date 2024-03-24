@@ -49,7 +49,9 @@
     "test": "vitest",
     "prebench": "npm run compile",
     "bench": "vitest bench",
-    "doc": "typedoc src/index.ts . --name sonic-weave"
+    "doc": "typedoc src/index.ts . --name sonic-weave",
+    "preautodoc": "npm run precompile && tsc -p tsconfig-autodoc.json",
+    "autodoc": "node .temp/scripts/builtin-docs.js > BUILTIN.md"
   },
   "devDependencies": {
     "@types/node": "20.8.2",
