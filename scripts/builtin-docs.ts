@@ -35,8 +35,7 @@ function generateDocs(riffs: SonicWeaveFunction[]) {
     if (node.parameters.rest) {
       param_names.push('*...' + node.parameters.rest.id + '*');
     }
-    stdout.write('### ' + riff.name +
-                 '(' + param_names.join(', ') + ')\n');
+    stdout.write('### ' + riff.name + '(' + param_names.join(', ') + ')\n');
     stdout.write(riff.__doc__ + '\n\n');
   }
 }
