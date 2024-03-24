@@ -743,6 +743,8 @@ The accidentals associated with this bihexatonic scale are `r` and `p`.
 | `r`        | `[-19/2 6>` | `+11.730`     | **r**_aise_, _paja_**r**_a_ |
 | `p`        | `[19/2 -6>` | `-11.730`     | (flipped `b`), **p**_ajara_ |
 
+Tone-splitter and decanominals are associated with the `t` flavor of commas e.g. `17/12` may be spelled `ζ4^17t` (assuming `C4 = 1/1`).
+
 ### The interordinal semifourth
 When combined with neutral inflections the true tone-splitters induce the notation `m2.5` for the semifourth `P4 % 2` basically for free.
 

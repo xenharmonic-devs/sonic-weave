@@ -85,7 +85,7 @@ A [variant](http://www.tonalsoft.com/enc/h/hewm.aspx) of Helmholtz-Ellis by Jose
 The neutral FJS master algorithm can be generalized to semiquartals. Semifourths fill the spectrum unevenly and the primes align poorly with them so the inflections end up large in terms of size in cents. (A smaller radius of tolerance would make everything much more complex.)
 
 | Prime  | Comma                 | Monzo                          | Size in cents |
-| ------ | --------------------- | -------------------------------| ------------- |
+| ------ | --------------------- | ------------------------------ | ------------- |
 | `5q`   | `sqrt(25/27)`         | `[0 -3/2 1>`                   | `-66.619`     |
 | `7q`   | `sqrt(49/48)`         | `[-2 -1/2 0 1>`                | `+17.848`     |
 | `11q`  | `sqrt(121/108)`       | `[-1 -3/2 0 0 1>`              | `+98.385`     |
@@ -96,6 +96,18 @@ The neutral FJS master algorithm can be generalized to semiquartals. Semifourths
 | `29n`  | `sqrt(841/768)`       | `[-4 -1/2 0 0 0 0 0 0 0 1>`    | `+78.6`       |
 | `31n`  | `sqrt(233523/262144)` | `[-9 5/2 0 0 0 0 0 0 0 0 1>`   | `-100.077`    |
 | `37n`  | `sqrt(4107/4096)`     | `[-6 1/2 0 0 0 0 0 0 0 0 0 1>` | `+2.322`      |
+
+## Tone-splitter bridges
+
+Tone-splitter master algorithm is basically the plain FJS master shifted by a semioctave (with the semiapotome as the radius of tolerance).
+
+| Prime  | Comma             | Monzo                 | Size in cents |
+| ------ | ----------------- | ----------------------| ------------- |
+| `5t`   | `sqrt(2025/2048)` | `[-11/2 2 1>`         | `-9.776`      |
+| `7t`   | `sqrt(441/512)`   | `[-9/2 1 0 1>`        | `-129.219`    |
+| `11t`  | `sqrt(121/128)`   | `[-7/2 0 0 0 1>`      | `-48.682`     |
+| `13t`  | `sqrt(169/162)`   | `[-1/2 -2 0 0 0 1>`   | `+36.618`     |
+| `17t`  | `sqrt(289/288)`   | `[-5/2 -1 0 0 0 0 1>` | `+3.000`      |
 
 ## Lumi's irrational bridges
 

@@ -39,9 +39,14 @@ const NEUTRAL_BRIDGING_RADIUS = 92.1;
 // Tweaked manually to align with harmonic segments preferring the large limma.
 const SEMIQUARTAL_BRIDGING_RADIUS = 137.2;
 
+// XXX: Not much thought was given to this choice.
+const TONE_SPLITTER_BRIDGING_RADIUS = SEMIAPOTOME;
+
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
 const FOURTH = 2 * PRIME_CENTS[0] - PRIME_CENTS[1];
+
+const OCTAVE = PRIME_CENTS[0];
 
 function masterAlgorithm(
   primeCents: number,
@@ -130,7 +135,23 @@ function semiquartalMaster(primeCents: number): [number, number] {
   }
 }
 
-// TODO: pajaricMaster
+// Tone-splitter bridging comma master algorithm by frostburn
+function toneSplitterMaster(primeCents: number): [number, number] {
+  let pythagoras = 0.5 * OCTAVE;
+  // XXX: Abuse the fact that negative powers of two are exact in floating point.
+  let k = 0.5;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (circleDistance(primeCents, pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+      return [k, 0.5 - k];
+    }
+    if (circleDistance(primeCents, -pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+      return [-k, k - 0.5];
+    }
+    pythagoras += FIFTH;
+    k++;
+  }
+}
 
 function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
   let i = 2;
@@ -166,6 +187,11 @@ const semiquartalCommas = [
   TimeMonzo.fromFraction(1),
 ];
 
+const toneSplitterCommas = [
+  TimeMonzo.fromFraction(1),
+  TimeMonzo.fromFraction(1),
+];
+
 const commaIterator = commaGenerator(masterAlgorithm);
 
 const floraIterator = commaGenerator(primeCents =>
@@ -175,6 +201,8 @@ const floraIterator = commaGenerator(primeCents =>
 const neutralIterator = commaGenerator(neutralMaster);
 
 const semiquartalIterator = commaGenerator(semiquartalMaster);
+
+const toneSplitterIterator = commaGenerator(toneSplitterMaster);
 
 export function getFormalComma(index: number) {
   while (index >= formalCommas.length) {
@@ -220,6 +248,17 @@ export function getSemiquartalComma(index: number) {
   return semiquartalCommas[index];
 }
 
+export function getToneSplitterComma(index: number) {
+  while (index >= toneSplitterCommas.length) {
+    const iterand = toneSplitterIterator.next();
+    if (iterand.done) {
+      throw new Error('Out of primes');
+    }
+    toneSplitterCommas.push(iterand.value);
+  }
+  return toneSplitterCommas[index];
+}
+
 export function getInflection(
   superscripts: FJSInflection[],
   subscripts: FJSInflection[]
@@ -241,6 +280,8 @@ export function getInflection(
         result = result.mul(getNeutralComma(i).pow(monzo[i]));
       } else if (flavor === 'q') {
         result = result.mul(getSemiquartalComma(i).pow(monzo[i]));
+      } else if (flavor === 't') {
+        result = result.mul(getToneSplitterComma(i).pow(monzo[i]));
       } else if (flavor === '' || flavor === 'f') {
         result = result.mul(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
@@ -270,6 +311,8 @@ export function getInflection(
         result = result.div(getNeutralComma(i).pow(monzo[i]));
       } else if (flavor === 'q') {
         result = result.div(getSemiquartalComma(i).pow(monzo[i]));
+      } else if (flavor === 't') {
+        result = result.div(getToneSplitterComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
         result = result.div(getHelmholtzEllis(i).pow(monzo[i]));
       } else if (flavor === 'm') {

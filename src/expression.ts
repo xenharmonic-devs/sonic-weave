@@ -28,8 +28,20 @@ import {Fraction, lcm} from 'xen-dev-utils';
  * 's': Syntonic rastmic subchroma commas by Aura
  *
  * 'q': Semiquartal analogue of Neutral FJS by Lumi Pakkanen
+ *
+ * 't': Tone-splitter analogue of Neutral FJS by Lumi Pakkanen
  */
-export type FJSFlavor = '' | 'n' | 'l' | 'h' | 'm' | 's' | 'c' | 'f' | 'q';
+export type FJSFlavor =
+  | ''
+  | 'n'
+  | 'l'
+  | 'h'
+  | 'm'
+  | 's'
+  | 'c'
+  | 'f'
+  | 'q'
+  | 't';
 
 export type FJSInflection = [number, FJSFlavor];
 

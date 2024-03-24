@@ -1085,7 +1085,7 @@ SplitDemisemipythagorean
     };
   }
 
-InflectionFlavor = 'n' / 'l' / 'h' / 'm' / 's' / 'f' / 'c' / 'q' / ''
+InflectionFlavor = 'n' / 'l' / 'h' / 'm' / 's' / 'f' / 'c' / 'q' / 't' / ''
 
 Inflections
   = (BasicInteger InflectionFlavor)|.., ','|

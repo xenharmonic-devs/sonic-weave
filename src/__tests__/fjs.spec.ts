@@ -4,6 +4,7 @@ import {
   getFormalComma,
   getNeutralComma,
   getSemiquartalComma,
+  getToneSplitterComma,
   inflect,
 } from '../fjs';
 import {PRIMES} from 'xen-dev-utils';
@@ -140,6 +141,28 @@ describe('Semiquartal comma calculator', () => {
     [37, '4107/4096'], // Sematology comma
   ])('Has a semiquartal comma for prime %s', (prime, square) => {
     const comma = getSemiquartalComma(PRIMES.indexOf(prime))
+      .pow(2)
+      .toFraction();
+    expect(comma.equals(square), `${comma.toFraction()} != ${square}`).toBe(
+      true
+    );
+  });
+});
+
+describe('Tone-splitter comma calculator', () => {
+  it.each([
+    [5, '2025/2048'], // Diaschisma
+    [7, '441/512'],
+    [11, '121/128'], // Axirabian limma
+    [13, '169/162'],
+    [17, '289/288'], // Semitonisma
+    [19, '29241/32768'],
+    [23, '529/512'],
+    [29, '7569/8192'],
+    [31, '8649/8192'],
+    [37, '1369/1458'],
+  ])('Has a tone-splitter comma for prime %s', (prime, square) => {
+    const comma = getToneSplitterComma(PRIMES.indexOf(prime))
       .pow(2)
       .toFraction();
     expect(comma.equals(square), `${comma.toFraction()} != ${square}`).toBe(

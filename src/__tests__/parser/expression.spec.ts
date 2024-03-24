@@ -1391,4 +1391,14 @@ describe('SonicWeave expression evaluator', () => {
     const chiPound = parseSingle('C4 = 1;χ£4');
     expect(chiPound.value.toFraction().toFraction()).toBe('32/27');
   });
+
+  it('has a tone-splitter spelling for 24/23', () => {
+    const lesserVicesimotertial = parseSingle('n1.5_23t');
+    expect(lesserVicesimotertial.value.toFraction().toFraction()).toBe('24/23');
+  });
+
+  it('has semioctave spelling for 17/12', () => {
+    const zeta = parseSingle('C4 = 1; ζ4^17t');
+    expect(zeta.value.toFraction().toFraction()).toBe('17/12');
+  });
 });

@@ -576,7 +576,8 @@ function validateFlavor(flavor: string) {
     flavor !== 'h' &&
     flavor !== 'm' &&
     flavor !== 'n' &&
-    flavor !== 'q'
+    flavor !== 'q' &&
+    flavor !== 't'
   ) {
     throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
