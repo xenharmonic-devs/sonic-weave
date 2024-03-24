@@ -143,6 +143,10 @@ const ACCIDENTAL_VECTORS = new Map([
   // Manual Diamond-MOS accidentals
   ['&', [4, -2.5]],
   ['@', [-4, 2.5]],
+
+  // True semiquartal accidentals
+  ['¤', [-7, 4.5]],
+  ['£', [7, -4.5]],
 ]);
 
 for (const accidental of '♯#♭b') {
@@ -450,6 +454,59 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
     offCenter -= 8;
   }
   accidentals.push(...ACCIDENTAL_SPECTRUM[offCenter + 8]);
+
+  if (!accidentals.length) {
+    accidentals.push('♮');
+  }
+
+  return {
+    type: 'AbsolutePitch',
+    nominal,
+    accidentals: accidentals,
+    octave,
+  };
+}
+
+const SEMIQUARTAL_NOMINALS: AbsolutePitch['nominal'][] = [
+  'C',
+  'D',
+  'φ',
+  'χ',
+  'F',
+  'G',
+  'A',
+  'ψ',
+  'ω',
+];
+
+export function absoluteToSemiquartal(
+  monzo: TimeMonzo
+): AbsolutePitch | undefined {
+  const twos = monzo.primeExponents[0].valueOf();
+  const threes = monzo.primeExponents[1].valueOf();
+  const stepspan = twos * 9 + threes * 14;
+  const octave = BigInt(Math.floor(Math.abs(stepspan) / 9) + 4);
+
+  const spanRemainder = mmod(stepspan, 1);
+
+  let nominal: AbsolutePitch['nominal'];
+  if (spanRemainder === 0) {
+    nominal = SEMIQUARTAL_NOMINALS[mmod(stepspan, 9)];
+  } else {
+    return undefined;
+  }
+
+  let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 4.5;
+
+  const accidentals: string[] = [];
+  while (offCenter < 0) {
+    accidentals.push('£');
+    offCenter++;
+  }
+  while (offCenter > 0) {
+    accidentals.push('¤');
+    offCenter--;
+  }
 
   if (!accidentals.length) {
     accidentals.push('♮');

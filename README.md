@@ -791,10 +791,16 @@ The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the diff
 
 `χ` is equal to `F@` while `ω` is equal to `C@` of the next octave.
 
+Due to technical reasons the accidentals for the 5L 4s scale, *scarab* (`¤`) and *pound* (`£`), must also be defined despite their large size.
+
 | Accidental  | Monzo      | Size in cents |
 | ----------- | ---------- | ------------- |
 | `&`         | `[4 -5/2>` | `+45.112`     |
 | `@`         | `[-4 5/2>` | `-45.112`     |
+| `¤`         | `[-7 9/2>` | `+158.798`    |
+| `£`         | `[7 -9/2>` | `-158.798`    |
+
+Semiquartals are associated with the `q` comma flavor e.g. `7/6` can be spelled `φ4^7q` (assuming `C4 = 1/1`).
 
 ### Extra comma flavors
 Extra commas include extended Helmholtz-Ellis inflections and additional bridges from above irrationals to just intonation.

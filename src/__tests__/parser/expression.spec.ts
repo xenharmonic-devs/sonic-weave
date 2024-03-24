@@ -1351,4 +1351,44 @@ describe('SonicWeave expression evaluator', () => {
     const c = parseSingle('-1.23rc');
     expect(c.totalCents()).toBeCloseTo(-1.23);
   });
+
+  it('has a semiquartal spelling for 7/6 (relative parsing)', () => {
+    const q = parseSingle('m2.5^7q');
+    expect(q.value.toFraction().toFraction()).toBe('7/6');
+  });
+
+  it('has a semiquartal spelling for 7/6 (absolute parsing)', () => {
+    const q = parseSingle('C4 = 1;phi4^7q');
+    expect(q.value.toFraction().toFraction()).toBe('7/6');
+  });
+
+  it('has a semiquartal spelling for 7/6 (relative)', () => {
+    const q = evaluateExpression('str(FJS(7/6, "q"))', false);
+    expect(q).toBe('m2.5^7q');
+  });
+
+  it('has a semiquartal spelling for 7/6 (absolute)', () => {
+    const q = evaluateExpression('str(absoluteFJS(7/6, "q"))', false);
+    expect(q).toBe('φ♮4^7q');
+  });
+
+  it('has a simple semiquartal (canceling) spelling for 15/13', () => {
+    const q = evaluateExpression('str(FJS(15/13, "q"))', false);
+    expect(q).toBe('M2^5q_13q');
+  });
+
+  it('has a simple semiquartal (canceling) spelling for 17/15', () => {
+    const q = evaluateExpression('str(FJS(17/15, "q"))', false);
+    expect(q).toBe('m2^17q_5q');
+  });
+
+  it('has true semiquartal accidentals (scarab)', () => {
+    const phiScarab = parseSingle('C4 = 1;φ¤4');
+    expect(phiScarab.value.toFraction().toFraction()).toBe('81/64');
+  });
+
+  it('has true semiquartal accidentals (pound)', () => {
+    const chiPound = parseSingle('C4 = 1;χ£4');
+    expect(chiPound.value.toFraction().toFraction()).toBe('32/27');
+  });
 });

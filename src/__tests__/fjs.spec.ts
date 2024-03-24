@@ -1,5 +1,11 @@
 import {describe, it, expect} from 'vitest';
-import {getFloraComma, getFormalComma, getNeutralComma, inflect} from '../fjs';
+import {
+  getFloraComma,
+  getFormalComma,
+  getNeutralComma,
+  getSemiquartalComma,
+  inflect,
+} from '../fjs';
 import {PRIMES} from 'xen-dev-utils';
 import {
   AbsolutePitch,
@@ -117,6 +123,28 @@ describe('Neutral comma calculator', () => {
       comma.pow(2).toFraction().equals(square),
       `${comma.pow(2).toFraction().toFraction()} != ${square}`
     ).toBe(true);
+  });
+});
+
+describe('Semiquartal comma calculator', () => {
+  it.each([
+    [5, '25/27'], // Large limma
+    [7, '49/48'], // Slendro diesis
+    [11, '121/108'],
+    [13, '169/192'],
+    [17, '70227/65536'],
+    [19, '1083/1024'],
+    [23, '14283/16384'],
+    [29, '841/768'],
+    [31, '233523/262144'],
+    [37, '4107/4096'], // Sematology comma
+  ])('Has a semiquartal comma for prime %s', (prime, square) => {
+    const comma = getSemiquartalComma(PRIMES.indexOf(prime))
+      .pow(2)
+      .toFraction();
+    expect(comma.equals(square), `${comma.toFraction()} != ${square}`).toBe(
+      true
+    );
   });
 });
 

@@ -8,7 +8,11 @@ import {
 } from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
 import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression';
-import {absoluteToNode, monzoToNode} from './pythagorean';
+import {
+  absoluteToNode,
+  absoluteToSemiquartal,
+  monzoToNode,
+} from './pythagorean';
 import {
   HEJI_SWAPS,
   HEWM53_SWAPS,
@@ -30,25 +34,33 @@ const SEMIAPOTOME = 0.5 * valueToCents(2187 / 2048) + 1e-6;
 const NFJS_RADIUS = 13.5 * PRIME_CENTS[0] - 8.5 * PRIME_CENTS[1];
 
 // Tweaked manually to be as large as possible without disrupting original NFJS commas.
-const BRIDGING_RADIUS = 92.1;
+const NEUTRAL_BRIDGING_RADIUS = 92.1;
+
+// Tweaked manually to align with harmonic segments preferring the large limma.
+const SEMIQUARTAL_BRIDGING_RADIUS = 137.2;
 
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
-function masterAlgorithm(primeCents: number, radius = RADIUS_OF_TOLERANCE) {
+const FOURTH = 2 * PRIME_CENTS[0] - PRIME_CENTS[1];
+
+function masterAlgorithm(
+  primeCents: number,
+  radius = RADIUS_OF_TOLERANCE
+): [number, number] {
   let pythagoras = 0;
   let k = 0;
   if (circleDistance(primeCents, pythagoras) < radius) {
-    return k;
+    return [k, -k];
   }
   // eslint-disable-next-line no-constant-condition
   while (true) {
     pythagoras += FIFTH;
     k++;
     if (circleDistance(primeCents, pythagoras) < radius) {
-      return k;
+      return [k, -k];
     }
     if (circleDistance(primeCents, -pythagoras) < radius) {
-      return -k;
+      return [-k, k];
     }
   }
 }
@@ -82,29 +94,48 @@ function myacNeutralMaster(primeCents: number) {
   throw new Error('Unable to locate NFJS region');
 }
 
-// Bridging comma master algorithm by frostburn
-function neutralMaster(primeCents: number) {
+// Neutral bridging comma master algorithm by frostburn
+function neutralMaster(primeCents: number): [number, number] {
   let pythagoras = 0.5 * FIFTH;
   // XXX: Abuse the fact that negative powers of two are exact in floating point.
   let k = 0.5;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    if (circleDistance(primeCents, pythagoras) < BRIDGING_RADIUS) {
-      return k;
+    if (circleDistance(primeCents, pythagoras) < NEUTRAL_BRIDGING_RADIUS) {
+      return [k, -k];
     }
-    if (circleDistance(primeCents, -pythagoras) < BRIDGING_RADIUS) {
-      return -k;
+    if (circleDistance(primeCents, -pythagoras) < NEUTRAL_BRIDGING_RADIUS) {
+      return [-k, k];
     }
     pythagoras += FIFTH;
     k++;
   }
 }
 
+// Semiquartal bridging comma master algorithm by frostburn
+function semiquartalMaster(primeCents: number): [number, number] {
+  let pythagoras = 0.5 * FOURTH;
+  // XXX: Abuse the fact that negative powers of two are exact in floating point.
+  let k = 0.5;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (circleDistance(primeCents, pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+      return [-k - 0.5, k];
+    }
+    if (circleDistance(primeCents, -pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+      return [k + 0.5, -k];
+    }
+    pythagoras += FOURTH;
+    k++;
+  }
+}
+
+// TODO: pajaricMaster
+
 function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
   let i = 2;
   while (i < PRIME_CENTS.length) {
-    const threes = -master(PRIME_CENTS[i]);
-    let twos = threes;
+    let [twos, threes] = master(PRIME_CENTS[i]);
     let commaCents =
       PRIME_CENTS[i] + twos * PRIME_CENTS[0] + threes * PRIME_CENTS[1];
     while (commaCents > 600) {
@@ -130,6 +161,11 @@ const floraCommas = [TimeMonzo.fromFraction(1), TimeMonzo.fromFraction(1)];
 
 const neutralCommas = [TimeMonzo.fromFraction(1), TimeMonzo.fromFraction(1)];
 
+const semiquartalCommas = [
+  TimeMonzo.fromFraction(1),
+  TimeMonzo.fromFraction(1),
+];
+
 const commaIterator = commaGenerator(masterAlgorithm);
 
 const floraIterator = commaGenerator(primeCents =>
@@ -137,6 +173,8 @@ const floraIterator = commaGenerator(primeCents =>
 );
 
 const neutralIterator = commaGenerator(neutralMaster);
+
+const semiquartalIterator = commaGenerator(semiquartalMaster);
 
 export function getFormalComma(index: number) {
   while (index >= formalCommas.length) {
@@ -171,6 +209,17 @@ export function getNeutralComma(index: number) {
   return neutralCommas[index];
 }
 
+export function getSemiquartalComma(index: number) {
+  while (index >= semiquartalCommas.length) {
+    const iterand = semiquartalIterator.next();
+    if (iterand.done) {
+      throw new Error('Out of primes');
+    }
+    semiquartalCommas.push(iterand.value);
+  }
+  return semiquartalCommas[index];
+}
+
 export function getInflection(
   superscripts: FJSInflection[],
   subscripts: FJSInflection[]
@@ -190,6 +239,8 @@ export function getInflection(
         result = result.mul(getFormalComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.mul(getNeutralComma(i).pow(monzo[i]));
+      } else if (flavor === 'q') {
+        result = result.mul(getSemiquartalComma(i).pow(monzo[i]));
       } else if (flavor === '' || flavor === 'f') {
         result = result.mul(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
@@ -217,6 +268,8 @@ export function getInflection(
         result = result.div(getFloraComma(i).pow(monzo[i]));
       } else if (flavor === 'n') {
         result = result.div(getNeutralComma(i).pow(monzo[i]));
+      } else if (flavor === 'q') {
+        result = result.div(getSemiquartalComma(i).pow(monzo[i]));
       } else if (flavor === 'h') {
         result = result.div(getHelmholtzEllis(i).pow(monzo[i]));
       } else if (flavor === 'm') {
@@ -328,7 +381,10 @@ export function asAbsoluteFJS(
     }
   }
   const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
-  const pitch = absoluteToNode(pythagoreanMonzo);
+  const pitch =
+    flavor === 'q'
+      ? absoluteToSemiquartal(pythagoreanMonzo)
+      : absoluteToNode(pythagoreanMonzo);
   if (!pitch) {
     return undefined;
   }

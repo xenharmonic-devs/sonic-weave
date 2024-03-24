@@ -80,6 +80,23 @@ A [variant](http://www.tonalsoft.com/enc/h/hewm.aspx) of Helmholtz-Ellis by Jose
 | `47m` | `48/47`     | `+36.448`     |
 | `53m` | `54/53`     | `+32.360`     |
 
+## Semifourth bridges
+
+The neutral FJS master algorithm can be generalized to semiquartals. Semifourths fill the spectrum unevenly and the primes align poorly with them so the inflections end up large in terms of size in cents. (A smaller radius of tolerance would make everything much more complex.)
+
+| Prime  | Comma                 | Monzo                          | Size in cents |
+| ------ | --------------------- | -------------------------------| ------------- |
+| `5q`   | `sqrt(25/27)`         | `[0 -3/2 1>`                   | `-66.619`     |
+| `7q`   | `sqrt(49/48)`         | `[-2 -1/2 0 1>`                | `+17.848`     |
+| `11q`  | `sqrt(121/108)`       | `[-1 -3/2 0 0 1>`              | `+98.385`     |
+| `13q`  | `sqrt(169/192)`       | `[-3 -1/2 0 0 0 1>`            | `-110.45`     |
+| `17q`  | `sqrt(70227/6553)`    | `[-8 5/2 0 0 0 0 1>`           | `+59.843`     |
+| `19q`  | `sqrt(1083/1024)`     | `[-5 1/2 0 0 0 0 0 1>`         | `+48.491`     |
+| `23q`  | `sqrt(14283/16384)`   | `[-7 3/2 0 0 0 0 0 0 1>`       | `-118.793`    |
+| `29n`  | `sqrt(841/768)`       | `[-4 -1/2 0 0 0 0 0 0 0 1>`    | `+78.6`       |
+| `31n`  | `sqrt(233523/262144)` | `[-9 5/2 0 0 0 0 0 0 0 0 1>`   | `-100.077`    |
+| `37n`  | `sqrt(4107/4096)`     | `[-6 1/2 0 0 0 0 0 0 0 0 0 1>` | `+2.322`      |
+
 ## Lumi's irrational bridges
 
 A random collection of inflections to bridge from irrationals to just intonation by Lumi Pakkanen.

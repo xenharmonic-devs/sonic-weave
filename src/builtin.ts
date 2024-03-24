@@ -20,7 +20,12 @@ import {TimeMonzo, getNumberOfComponents, setNumberOfComponents} from './monzo';
 import {ExpressionVisitor} from './parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import type {ArrowFunction, FunctionDeclaration, Identifier} from './ast.d.ts';
-import {NedjiLiteral, RadicalLiteral, formatAbsoluteFJS} from './expression';
+import {
+  FJSFlavor,
+  NedjiLiteral,
+  RadicalLiteral,
+  formatAbsoluteFJS,
+} from './expression';
 import {TWO, countUpsAndLifts} from './utils';
 
 // Runtime
@@ -560,8 +565,7 @@ export function cents(
 cents.__doc__ = 'Convert interval to cents.';
 cents.__node__ = builtinNode(cents);
 
-// Coercion: None.
-function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+function validateFlavor(flavor: string) {
   if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
   }
@@ -571,10 +575,16 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
     flavor !== 'f' &&
     flavor !== 'h' &&
     flavor !== 'm' &&
-    flavor !== 'n'
+    flavor !== 'n' &&
+    flavor !== 'q'
   ) {
     throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
+}
+
+// Coercion: None.
+function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+  validateFlavor(flavor);
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
   if (C4.timeExponent.n === 0) {
@@ -584,7 +594,7 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   }
   const result = new Interval(monzo, 'logarithmic', {
     type: 'AspiringAbsoluteFJS',
-    flavor,
+    flavor: flavor as FJSFlavor,
   });
   const node = result.realizeNode(this.rootContext);
   if (node) {
@@ -601,23 +611,11 @@ absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 // Coercion: None.
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
-  if (flavor === 'l' || flavor === 's') {
-    throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
-  }
-  if (
-    flavor !== '' &&
-    flavor !== 'c' &&
-    flavor !== 'f' &&
-    flavor !== 'h' &&
-    flavor !== 'm' &&
-    flavor !== 'n'
-  ) {
-    throw new Error(`Unrecognized FJS flavor '${flavor}`);
-  }
+  validateFlavor(flavor);
   const monzo = relative.bind(this)(interval).value;
   const result = new Interval(monzo, 'logarithmic', {
     type: 'AspiringFJS',
-    flavor,
+    flavor: flavor as FJSFlavor,
   });
   const node = result.realizeNode(this.rootContext);
   if (node) {

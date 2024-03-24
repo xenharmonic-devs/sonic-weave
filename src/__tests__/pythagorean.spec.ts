@@ -6,6 +6,7 @@ import {
   AbsolutePitch,
   monzoToNode,
   absoluteToNode,
+  absoluteToSemiquartal,
 } from '../pythagorean';
 import {TimeMonzo} from '../monzo';
 
@@ -260,6 +261,40 @@ describe('Absolute monzo -> node converter', () => {
       type: 'AbsolutePitch',
       nominal: 'E',
       accidentals: ['d'],
+      octave: 4n,
+    });
+  });
+});
+
+describe('Absolute monzo -> semiquartal node converter', () => {
+  it.each([
+    ['9/8', 'D', '♮'],
+    ['32/27', 'χ', '£'],
+    ['81/64', 'φ', '¤'],
+    ['4/3', 'F', '♮'],
+    ['3/2', 'G', '♮'],
+    ['27/16', 'A', '♮'],
+    ['16/9', 'ω', '£'],
+    ['128/81', 'ψ', '£'],
+    ['243/128', 'ψ', '¤'],
+  ])('converts %s to %s%s4', (fraction, nominal, accidental) => {
+    const node = absoluteToSemiquartal(TimeMonzo.fromFraction(fraction));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal,
+      accidentals: [accidental],
+      octave: 4n,
+    });
+  });
+
+  it('converts phi4', () => {
+    const node = absoluteToSemiquartal(
+      TimeMonzo.fromEqualTemperament('1/2', '4/3')
+    );
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'φ',
+      accidentals: ['♮'],
       octave: 4n,
     });
   });
