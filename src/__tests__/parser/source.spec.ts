@@ -1016,4 +1016,16 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['5/4', '(3/2 "Pop from an empty scale.")', '2/1']);
   });
+
+  it('can softly convert a scale with a one-liner', () => {
+    const scale = parseSource(`
+      C4 = 1
+      9/8
+      E % 2r
+      G4
+      i => i lest FJS(i)
+      str
+    `);
+    expect(scale).toEqual(['M2', '1.3591409142295228r', 'P5']);
+  });
 });

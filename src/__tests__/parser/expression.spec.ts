@@ -1401,4 +1401,15 @@ describe('SonicWeave expression evaluator', () => {
     const zeta = parseSingle('C4 = 1; ζ4^17t');
     expect(zeta.value.toFraction().toFraction()).toBe('17/12');
   });
+
+  it('has inline analogue of try..catch (success)', () => {
+    const fif = parseSingle('[-1 1> lest fraction([-1 1>)');
+    expect(fif.toString()).toBe('3/2');
+  });
+
+  it('has an inline analogue of try..catch (failure)', () => {
+    const pi = parseSingle('PI lest fraction(PI)');
+    expect(pi.value.isFractional()).toBe(false);
+    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+  });
 });

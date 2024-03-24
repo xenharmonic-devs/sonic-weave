@@ -80,6 +80,7 @@ import {
   Identifier,
   IfStatement,
   LabeledExpression,
+  LestExpression,
   LiftDeclaration,
   NedjiProjection,
   Parameters_,
@@ -910,6 +911,8 @@ export class ExpressionVisitor {
   visit(node: Expression): SonicWeaveValue {
     this.rootContext.spendGas();
     switch (node.type) {
+      case 'LestExpression':
+        return this.visitLestExpression(node);
       case 'ConditionalExpression':
         return this.visitConditionalExpression(node);
       case 'ArrayAccess':
@@ -1141,6 +1144,14 @@ export class ExpressionVisitor {
       return this.visit(node.consequent);
     }
     return this.visit(node.alternate);
+  }
+
+  visitLestExpression(node: LestExpression) {
+    try {
+      return this.visit(node.primary);
+    } catch {
+      return this.visit(node.fallback);
+    }
   }
 
   visitComponent(component: VectorComponent) {

@@ -468,6 +468,27 @@ if (2 < 1) {
 }
 ```
 
+## Exception handling
+To resume execution after an error use `try`, `catch` and `finally`.
+```javascript
+try {
+  fraction(PI) // This throws because PI is irrational.
+  print("This won't print");
+} catch (e) {
+  print("Caught an exception!");
+  print(e); // Prints: "Input is irrational and no tolerance given."
+} finally {
+  print("This will print regardless.");
+}
+```
+
+## Lest expressions
+The inline version of `try..catch` is called `lest`. The latter expression is tried and replaced by the former on failure.
+```javascript
+P5 lest fraction(P5) // Successfully evaluates to 3/2
+PI lest fraction(PI) // Falls back to 3.141592653589793r
+```
+
 ## Implicit mapping
 The default action when encountering a function is to remap the current scale using it.
 ```javascript

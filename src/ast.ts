@@ -171,6 +171,12 @@ export type Statement =
   | ThrowStatement
   | ReturnStatement;
 
+export type LestExpression = {
+  type: 'LestExpression';
+  primary: Expression;
+  fallback: Expression;
+};
+
 export type ConditionalExpression = {
   type: 'ConditionalExpression';
   test: Expression;
@@ -304,6 +310,7 @@ export type StringLiteral = {
 };
 
 export type Expression =
+  | LestExpression
   | ConditionalExpression
   | ArrayAccess
   | ArraySlice

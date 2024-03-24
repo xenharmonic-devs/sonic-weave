@@ -61,6 +61,7 @@ ForToken           = 'for'     !IdentifierPart
 HertzToken         = 'Hz'      !IdentifierPart
 LowHertzToken      = 'hz'      !IdentifierPart
 IfToken            = 'if'      !IdentifierPart
+LestToken          = 'lest'    !IdentifierPart
 LetToken           = 'let'     !IdentifierPart
 MaxToken           = 'max'     !IdentifierPart
 MinToken           = 'min'     !IdentifierPart
@@ -94,6 +95,7 @@ ReservedWord
   / FalseToken
   / ForToken
   / IfToken
+  / LestToken
   / LetToken
   / MaxToken
   / MinToken
@@ -399,7 +401,19 @@ ExpressionStatement
   }
 
 Expression
-  = ConditionalExpression
+  = LestExpression
+
+LestExpression
+  = fallback: ConditionalExpression tail: (LestToken @ConditionalExpression)? {
+    if (tail) {
+      return {
+        type: 'LestExpression',
+        primary: tail,
+        fallback,
+      };
+    }
+    return fallback;
+  }
 
 ConditionalExpression
   = consequent: CoalescingExpression tail: (IfToken @CoalescingExpression ElseToken @CoalescingExpression)? {
