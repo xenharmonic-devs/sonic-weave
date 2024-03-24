@@ -143,14 +143,24 @@ for (const name of MATH_KEYS) {
   MATH_WRAPPERS[name as string] = wrapper;
 }
 
-function atan2(x: Interval, y: Interval) {
+function atan2(y: Interval, x: Interval) {
   return new Interval(
-    TimeMonzo.fromValue(Math.atan2(x.valueOf(), y.valueOf())),
+    TimeMonzo.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
     'linear'
   );
 }
-atan2.__doc__ = 'Calculate atan2(x, y).';
+atan2.__doc__ =
+  'Calculate atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.';
 atan2.__node__ = builtinNode(atan2);
+
+// Equivalent to atan2 but with swapped arguments.
+// Rationale is that atanXY(x, y) = log(x + i * y), x and y now coordinates.
+function atanXY(x: Interval, y: Interval) {
+  return atan2(y, x);
+}
+atanXY.__doc__ =
+  'Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.';
+atanXY.__node__ = builtinNode(atanXY);
 
 // == First-party wrappers ==
 function numComponents(value?: Interval) {
@@ -1712,6 +1722,7 @@ factorColor.__node__ = builtinNode(factorColor);
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   ...MATH_WRAPPERS,
   atan2,
+  atanXY,
   // Constants
   E,
   LN10,

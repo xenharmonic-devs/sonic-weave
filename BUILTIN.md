@@ -27,8 +27,11 @@ Calculate asin x.
 ### atan(*x*)
 Calculate atan x.
 
-### atan2(*x*, *y*)
-Calculate atan2(x, y).
+### atan2(*y*, *x*)
+Calculate atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.
+
+### atanXY(*x*, *y*)
+Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.
 
 ### bleach(*interval*)
 Get rid of interval coloring and label.

@@ -1412,4 +1412,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(pi.value.isFractional()).toBe(false);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
+
+  it('has atan2 with swapped arguments', () => {
+    const angle = parseSingle('atanXY(S5, -E)');
+    expect(angle.domain).toBe('linear');
+    expect(angle.valueOf()).toBeCloseTo(-1.2048493);
+  });
 });
