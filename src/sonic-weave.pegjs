@@ -51,15 +51,12 @@ Program
 AndToken           = 'and'     !IdentifierPart
 ByToken            = 'by'      !IdentifierPart
 CatchToken         = 'catch'   !IdentifierPart
-CentToken          = 'c'       !IdentifierPart
 ConstToken         = 'const'   !IdentifierPart
 DotToken           = 'dot'     !IdentifierPart
 ElseToken          = 'else'    !IdentifierPart
 FalseToken         = 'false'   !IdentifierPart
 FinallyToken       = 'finally' !IdentifierPart
 ForToken           = 'for'     !IdentifierPart
-HertzToken         = 'Hz'      !IdentifierPart
-LowHertzToken      = 'hz'      !IdentifierPart
 IfToken            = 'if'      !IdentifierPart
 LestToken          = 'lest'    !IdentifierPart
 LetToken           = 'let'     !IdentifierPart
@@ -76,7 +73,6 @@ ReduceCeilingToken = 'rdc'     !IdentifierPart
 ReturnToken        = 'return'  !IdentifierPart
 FunctionToken      = 'riff'    !IdentifierPart
 FunctionAliasToken = 'fn'      !IdentifierPart
-SecondToken        = 's'       !IdentifierPart
 TensorToken        = 'tns'     !IdentifierPart
 ThrowToken         = 'throw'   !IdentifierPart
 ToToken            = 'to'      !IdentifierPart
@@ -84,7 +80,6 @@ TryToken           = 'try'     !IdentifierPart
 TrueToken          = 'true'    !IdentifierPart
 WhileToken         = 'while'   !IdentifierPart
 
-// Tokens representing units can only appear along scalars so they're not reserved.
 ReservedWord
   = AndToken
   / ByToken
@@ -116,6 +111,12 @@ ReservedWord
   / TryToken
   / TrueToken
   / WhileToken
+
+// Tokens representing units can only appear along scalars so they're not reserved.
+CentToken     = 'c'  !IdentifierPart
+HertzToken    = 'Hz' !IdentifierPart
+LowHertzToken = 'hz' !IdentifierPart
+SecondToken   = 's'  !IdentifierPart
 
 Statements
   = head: Statement tail: (_ @Statement)* {
