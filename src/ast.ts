@@ -111,6 +111,14 @@ export type ReturnStatement = {
   argument?: Expression;
 };
 
+export type BreakStatement = {
+  type: 'BreakStatement';
+};
+
+export type ContinueStatement = {
+  type: 'ContinueStatement';
+};
+
 export type ThrowStatement = {
   type: 'ThrowStatement';
   argument: Expression;
@@ -169,6 +177,8 @@ export type Statement =
   | ForOfStatement
   | TryStatement
   | ThrowStatement
+  | BreakStatement
+  | ContinueStatement
   | ReturnStatement;
 
 export type LestExpression = {

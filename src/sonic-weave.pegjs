@@ -48,43 +48,47 @@ Program
     };
   }
 
-AndToken           = 'and'     !IdentifierPart
-ByToken            = 'by'      !IdentifierPart
-CatchToken         = 'catch'   !IdentifierPart
-ConstToken         = 'const'   !IdentifierPart
-DotToken           = 'dot'     !IdentifierPart
-ElseToken          = 'else'    !IdentifierPart
-FalseToken         = 'false'   !IdentifierPart
-FinallyToken       = 'finally' !IdentifierPart
-ForToken           = 'for'     !IdentifierPart
-IfToken            = 'if'      !IdentifierPart
-LestToken          = 'lest'    !IdentifierPart
-LetToken           = 'let'     !IdentifierPart
-MaxToken           = 'max'     !IdentifierPart
-MinToken           = 'min'     !IdentifierPart
-ModToken           = 'mod'     !IdentifierPart
-ModCeilingToken    = 'modc'    !IdentifierPart
-NoneToken          = 'niente'  !IdentifierPart
-NotToken           = 'not'     !IdentifierPart
-OfToken            = 'of'      !IdentifierPart
-OrToken            = 'or'      !IdentifierPart
-ReduceToken        = 'rd'      !IdentifierPart
-ReduceCeilingToken = 'rdc'     !IdentifierPart
-ReturnToken        = 'return'  !IdentifierPart
-FunctionToken      = 'riff'    !IdentifierPart
-FunctionAliasToken = 'fn'      !IdentifierPart
-TensorToken        = 'tns'     !IdentifierPart
-ThrowToken         = 'throw'   !IdentifierPart
-ToToken            = 'to'      !IdentifierPart
-TryToken           = 'try'     !IdentifierPart
-TrueToken          = 'true'    !IdentifierPart
-WhileToken         = 'while'   !IdentifierPart
+AndToken           = 'and'      !IdentifierPart
+BreakToken         = 'break'    !IdentifierPart
+ByToken            = 'by'       !IdentifierPart
+CatchToken         = 'catch'    !IdentifierPart
+ConstToken         = 'const'    !IdentifierPart
+ContinueToken      = 'continue' !IdentifierPart
+DotToken           = 'dot'      !IdentifierPart
+ElseToken          = 'else'     !IdentifierPart
+FalseToken         = 'false'    !IdentifierPart
+FinallyToken       = 'finally'  !IdentifierPart
+ForToken           = 'for'      !IdentifierPart
+IfToken            = 'if'       !IdentifierPart
+LestToken          = 'lest'     !IdentifierPart
+LetToken           = 'let'      !IdentifierPart
+MaxToken           = 'max'      !IdentifierPart
+MinToken           = 'min'      !IdentifierPart
+ModToken           = 'mod'      !IdentifierPart
+ModCeilingToken    = 'modc'     !IdentifierPart
+NoneToken          = 'niente'   !IdentifierPart
+NotToken           = 'not'      !IdentifierPart
+OfToken            = 'of'       !IdentifierPart
+OrToken            = 'or'       !IdentifierPart
+ReduceToken        = 'rd'       !IdentifierPart
+ReduceCeilingToken = 'rdc'      !IdentifierPart
+ReturnToken        = 'return'   !IdentifierPart
+FunctionToken      = 'riff'     !IdentifierPart
+FunctionAliasToken = 'fn'       !IdentifierPart
+TensorToken        = 'tns'      !IdentifierPart
+ThrowToken         = 'throw'    !IdentifierPart
+ToToken            = 'to'       !IdentifierPart
+TryToken           = 'try'      !IdentifierPart
+TrueToken          = 'true'     !IdentifierPart
+WhileToken         = 'while'    !IdentifierPart
 
 ReservedWord
   = AndToken
+  / BreakToken
   / ByToken
   / CatchToken
   / ConstToken
+  / ContinueToken
   / DotToken
   / ElseToken
   / FalseToken
@@ -134,6 +138,8 @@ Statement
   / BlockStatement
   / ThrowStatement
   / ReturnStatement
+  / BreakStatement
+  / ContinueStatement
   / WhileStatement
   / IfStatement
   / ForOfStatement
@@ -297,6 +303,16 @@ ReturnStatement
   }
   / ReturnToken EOS {
     return { type: 'ReturnStatement' };
+  }
+
+BreakStatement
+  = BreakToken EOS {
+    return { type: 'BreakStatement' };
+  }
+
+ContinueStatement
+  = ContinueToken EOS {
+    return { type: 'ContinueStatement' };
   }
 
 WhileStatement

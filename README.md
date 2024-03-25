@@ -391,6 +391,30 @@ for (const i of [1..5]) {
 ```
 results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
+## Break
+"While" and "for" loops can be broken out of using the `break` keyword.
+```javascript
+for (const i of [1..10]) {
+  i \ 6
+  if (i >= 6)
+    break
+}
+```
+results in `$ = [1\6, 2\6, 3\6, 4\6, 5\6, 6\6]`.
+
+## Continue
+The `continue` keyword terminates the execution of the current iteration of a "while" or "for" loop and continues with the next iteration.
+```javascript
+let i = 8;
+while (i++ < 16) {
+  if (i > 12 and i mod 2) {
+    continue
+  }
+  i % 8;
+}
+```
+results in `$ = [9/8, 10/8, 11/8, 12/8, 14/8, 16/8]`.
+
 ### Array comprehensions
 "For" loops have an inline counterpart in array comprehensions e.g.
 ```javascript

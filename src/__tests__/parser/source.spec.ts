@@ -1028,4 +1028,88 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['M2', '1.3591409142295228r', 'P5']);
   });
+
+  it('has while..break', () => {
+    const scale = parseSource(`
+      let i = 0;
+      while (i < 10) {
+        ++i;
+        if (i > 3)
+          break;
+        10 + i;
+      }
+      str;
+    `);
+    expect(scale).toEqual(['1', '11', '2', '12', '3', '13', '4']);
+  });
+
+  it('has while..continue', () => {
+    const scale = parseSource(`
+      let i = 0;
+      while (i < 10) {
+        ++i;
+        if (i > 3) {
+          continue;
+        }
+        10 + i;
+      }
+      str;
+    `);
+    expect(scale).toEqual([
+      '1',
+      '11',
+      '2',
+      '12',
+      '3',
+      '13',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+    ]);
+  });
+
+  it('has for..of..break', () => {
+    const scale = parseSource(`
+      for (const i of [1..10]) {
+        i;
+        if (i > 3) {
+          break;
+        }
+        10 + i;
+      }
+      str;
+    `);
+    expect(scale).toEqual(['1', '11', '2', '12', '3', '13', '4']);
+  });
+
+  it('has for..of..continue', () => {
+    const scale = parseSource(`
+      for (const i of [1..10]) {
+        i;
+        if (i > 3)
+          continue;
+        10 + i;
+      }
+      str;
+    `);
+    expect(scale).toEqual([
+      '1',
+      '11',
+      '2',
+      '12',
+      '3',
+      '13',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+    ]);
+  });
 });

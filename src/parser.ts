@@ -68,8 +68,10 @@ import {
   AssignmentStatement,
   BinaryExpression,
   BlockStatement,
+  BreakStatement,
   CallExpression,
   ConditionalExpression,
+  ContinueStatement,
   DownExpression,
   EnumeratedChord,
   Expression,
@@ -123,12 +125,19 @@ function includes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
 
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
-export class Interupt {
-  node: ReturnStatement;
+export class Interrupt {
+  node: ReturnStatement | BreakStatement | ContinueStatement;
   value?: SonicWeaveValue;
-  constructor(node: ReturnStatement, value?: SonicWeaveValue) {
+  constructor(
+    node: ReturnStatement | BreakStatement | ContinueStatement,
+    value?: SonicWeaveValue
+  ) {
     this.node = node;
     this.value = value;
+  }
+
+  get type() {
+    return this.node.type;
   }
 }
 
@@ -233,7 +242,7 @@ export class StatementVisitor {
     return `${base}${scaleLines.join('\n')}`;
   }
 
-  visit(node: Statement): Interupt | undefined {
+  visit(node: Statement): Interrupt | undefined {
     this.rootContext.spendGas();
     switch (node.type) {
       case 'VariableDeclaration':
@@ -262,6 +271,10 @@ export class StatementVisitor {
         return this.visitTryStatement(node);
       case 'ReturnStatement':
         return this.visitReturnStatement(node);
+      case 'BreakStatement':
+        return this.visitBreakStatement(node);
+      case 'ContinueStatement':
+        return this.visitContinueStatement(node);
       case 'ThrowStatement':
         throw this.visitThrowStatement(node);
     }
@@ -274,7 +287,15 @@ export class StatementVisitor {
       const subVisitor = this.createExpressionVisitor();
       value = subVisitor.visit(node.argument);
     }
-    return new Interupt(node, value);
+    return new Interrupt(node, value);
+  }
+
+  visitBreakStatement(node: BreakStatement) {
+    return new Interrupt(node);
+  }
+
+  visitContinueStatement(node: ContinueStatement) {
+    return new Interrupt(node);
   }
 
   visitThrowStatement(node: ThrowStatement) {
@@ -627,23 +648,30 @@ export class StatementVisitor {
     const subVisitor = new StatementVisitor(this.rootContext, this);
     const scale = this.getCurrentScale();
     subVisitor.mutables.set('$$', scale);
+    let interrupt: Interrupt | undefined = undefined;
     for (const statement of node.body) {
-      const interrupt = subVisitor.visit(statement);
-      if (interrupt) {
+      interrupt = subVisitor.visit(statement);
+      if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
+      } else if (interrupt) {
+        break;
       }
     }
     const subScale = subVisitor.getCurrentScale();
     scale.push(...subScale);
-    return undefined;
+    return interrupt;
   }
 
   visitWhileStatement(node: WhileStatement) {
     const subVisitor = this.createExpressionVisitor();
     while (sonicTruth(subVisitor.visit(node.test))) {
       const interrupt = this.visit(node.body);
-      if (interrupt) {
+      if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
+      } else if (interrupt?.type === 'BreakStatement') {
+        break;
+      } else if (interrupt?.type === 'ContinueStatement') {
+        continue;
       }
     }
     return undefined;
@@ -697,8 +725,12 @@ export class StatementVisitor {
     for (const value of array) {
       this.declareLoopElement(loopVisitor, node.element, value, node.mutable);
       const interrupt = loopVisitor.visit(node.body);
-      if (interrupt) {
+      if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
+      } else if (interrupt?.type === 'BreakStatement') {
+        break;
+      } else if (interrupt?.type === 'ContinueStatement') {
+        continue;
       }
     }
     return undefined;
@@ -782,8 +814,10 @@ export class StatementVisitor {
       localAssign(localVisitor, node.parameters, args as Interval[]);
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
-        if (interrupt && interrupt.node.type === 'ReturnStatement') {
+        if (interrupt?.type === 'ReturnStatement') {
           return interrupt.value;
+        } else if (interrupt) {
+          throw new Error(`Illegal ${interrupt.type}.`);
         }
       }
       return localVisitor.getCurrentScale();
@@ -2157,7 +2191,7 @@ export function evaluateSource(
   for (const statement of program.body) {
     const interrupt = visitor.visit(statement);
     if (interrupt) {
-      throw new Error('Illegal statement');
+      throw new Error(`Illegal ${interrupt.type}.`);
     }
   }
   return visitor;
@@ -2177,7 +2211,7 @@ export function evaluateExpression(
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
     if (interrupt) {
-      throw new Error('Illegal statement');
+      throw new Error(`Illegal ${interrupt.type}.`);
     }
   }
   const finalStatement = program.body[program.body.length - 1];
