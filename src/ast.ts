@@ -128,6 +128,7 @@ export type WhileStatement = {
   type: 'WhileStatement';
   test: Expression;
   body: Statement;
+  tail: null | Statement;
 };
 
 export type IfStatement = {
@@ -142,6 +143,7 @@ export type ForOfStatement = {
   element: Identifier | Parameters_;
   array: Expression;
   body: Statement;
+  tail: null | Statement;
   mutable: boolean;
 };
 

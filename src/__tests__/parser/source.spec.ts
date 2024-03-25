@@ -1112,4 +1112,33 @@ describe('SonicWeave parser', () => {
       '10',
     ]);
   });
+
+  it('has while..else', () => {
+    const scale = parseSource(`
+      for (const i of [2..12]) {
+        let j = 1;
+        while (++j < i) {
+          if (i mod j === 0) break;
+        } else {
+          i;
+        }
+      }
+      str;
+    `);
+    expect(scale).toEqual(['2', '3', '5', '7', '11']);
+  });
+
+  it('has for..of..else', () => {
+    const scale = parseSource(`
+      for (const i of [2..12]) {
+        for (const j of [2..i-1]) {
+          if (i mod j === 0) break;
+        } else {
+          i;
+        }
+      }
+      str;
+    `);
+    expect(scale).toEqual(['2', '3', '5', '7', '11']);
+  });
 });

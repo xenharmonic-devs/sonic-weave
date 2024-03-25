@@ -316,11 +316,12 @@ ContinueStatement
   }
 
 WhileStatement
-  = WhileToken _ '(' _ test: Expression _ ')' _ body: Statement {
+  = WhileToken _ '(' _ test: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'WhileStatement',
       test,
       body,
+      tail,
     };
   }
 
@@ -345,21 +346,23 @@ IfStatement
   }
 
 ForOfStatement
-  = ForToken _ '(' _ LetToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
+  = ForToken _ '(' _ LetToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'ForOfStatement',
       element,
       array,
       body,
+      tail,
       mutable: true,
     };
   }
-  / ForToken _ '(' _ ConstToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement {
+  / ForToken _ '(' _ ConstToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'ForOfStatement',
       element,
       array,
       body,
+      tail,
       mutable: false,
     };
   }

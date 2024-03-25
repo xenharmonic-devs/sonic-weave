@@ -363,6 +363,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             type: 'ExpressionStatement',
             expression: {type: 'Identifier', id: 'foo'},
           },
+          tail: null,
           mutable: false,
         },
       ],

@@ -415,6 +415,19 @@ while (i++ < 16) {
 ```
 results in `$ = [9/8, 10/8, 11/8, 12/8, 14/8, 16/8]`.
 
+## While..else and for..of..else
+The `else` branch of a "while" or "for" loop is executed if no `break` statement was encountered e.g. this computes all primes below 12:
+```javascript
+for (const i of [2..12]) {
+  for (const j of [2..i-1]) {
+    if (i mod j === 0) break;
+  } else {
+    i;
+  }
+}
+```
+result is `$ = [2, 3, 5, 7, 11]`.
+
 ### Array comprehensions
 "For" loops have an inline counterpart in array comprehensions e.g.
 ```javascript

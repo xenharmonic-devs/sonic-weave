@@ -664,15 +664,20 @@ export class StatementVisitor {
 
   visitWhileStatement(node: WhileStatement) {
     const subVisitor = this.createExpressionVisitor();
+    let executeTail = true;
     while (sonicTruth(subVisitor.visit(node.test))) {
       const interrupt = this.visit(node.body);
       if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
       } else if (interrupt?.type === 'BreakStatement') {
+        executeTail = false;
         break;
       } else if (interrupt?.type === 'ContinueStatement') {
         continue;
       }
+    }
+    if (executeTail && node.tail) {
+      return this.visit(node.tail);
     }
     return undefined;
   }
@@ -722,16 +727,21 @@ export class StatementVisitor {
     }
     const loopVisitor = new StatementVisitor(this.rootContext, this);
     loopVisitor.mutables.delete('$'); // Collapse scope
+    let executeTail = true;
     for (const value of array) {
       this.declareLoopElement(loopVisitor, node.element, value, node.mutable);
       const interrupt = loopVisitor.visit(node.body);
       if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
       } else if (interrupt?.type === 'BreakStatement') {
+        executeTail = false;
         break;
       } else if (interrupt?.type === 'ContinueStatement') {
         continue;
       }
+    }
+    if (executeTail && node.tail) {
+      return this.visit(node.tail);
     }
     return undefined;
   }
