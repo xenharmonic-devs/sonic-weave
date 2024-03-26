@@ -773,8 +773,8 @@ function formatDecimal(literal: DecimalLiteral) {
   const exponent = literal.exponent
     ? 'e' + literal.exponent.toString()
     : literal.flavor
-    ? ''
-    : 'e';
+      ? ''
+      : 'e';
   return `${result}${exponent}${literal.flavor}`;
 }
 

@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@types/node": "20.8.2",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
     "gts": "^5.2.0",
     "peggy": "^4.0.0",
     "typedoc": "^0.25.8",
