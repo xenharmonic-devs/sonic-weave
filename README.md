@@ -278,7 +278,9 @@ The flat signs (`b` and `♭`) correspond to the diminished unison e.g. `Eb4` is
 | `#`, `♯`   | `[-11 7>`  | `+113.685`    |
 | `x`, `𝄪`   | `[-22 14>` | `+227.370`    |
 | `b`, `♭`   | `[11 -7>`  | `-113.685`    |
-| `𝄫`        | `[22 -14>` | `-227.370`    |
+| `bb`, `𝄫`  | `[22 -14>` | `-227.370`    |
+
+Note that above `bb` is actually a combination of two accidentals. Similarly `#x` or `x#` would represent a triple sharp.
 
 ### Functional Just System
 [FJS](https://en.xen.wiki/w/Functional_Just_System) uses Pythagorean notation for powers of 2 and 3.
