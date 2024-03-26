@@ -955,7 +955,10 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('formats non-standard simplified vals', () => {
-    const orphanBohlenPierce = evaluateExpression('simplify(b13@)') as Val;
+    const orphanBohlenPierce = evaluateExpression(
+      'simplify(b13@)',
+      false
+    ) as Val;
     expect(orphanBohlenPierce.toString()).toBe(
       'withEquave(<8 13 19 23 28 30 34 35 37], 3)'
     );
@@ -963,7 +966,8 @@ describe('SonicWeave expression evaluator', () => {
 
   it('parses non-standard vals', () => {
     const orphanBohlenPierce = evaluateExpression(
-      'withEquave(<8 13 19 23], 3)'
+      'withEquave(<8 13 19 23], 3)',
+      false
     ) as Val;
     expect(orphanBohlenPierce.equave.toString()).toBe('3');
     expect(
@@ -1101,7 +1105,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has nested destructuring in array comprehensions', () => {
     const sums = evaluateExpression(
-      '[str(foo + bar + baz) for [foo [bar baz]] of [[1, [2, 3]], [4, [5, 6]]]]',
+      '[str(foo + bar + baz) for [foo, [bar, baz]] of [[1, [2, 3]], [4, [5, 6]]]]',
       false
     );
     expect(sums).toEqual(['6', '15']);
@@ -1149,12 +1153,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(P5).toBe('P5');
   });
 
-  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference)', () => {
+  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference A)', () => {
     const P5 = evaluateExpression('F#5 = 5ms; str(G3 - C3)', false);
     expect(P5).toBe('P5');
   });
 
-  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference)', () => {
+  it('evaluates the difference in absolute FJS as relative FJS (non-standard reference B)', () => {
     const P5 = evaluateExpression('F#5 = (1s)^5/2; str(G3 - C3)', false);
     expect(P5).toBe('P5');
   });

@@ -1,11 +1,13 @@
 import {describe, it, expect} from 'vitest';
 import {
+  ExpressionVisitor,
   evaluateExpression,
   evaluateSource,
   getSourceVisitor,
   parseAST,
 } from '../../parser';
 import {Interval} from '../../interval';
+import {builtinNode, track} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
@@ -1130,5 +1132,48 @@ describe('SonicWeave standard library', () => {
       '11\\12',
       '12\\12',
     ]);
+  });
+
+  it('has support for custom builtins', () => {
+    const view: number[][] = [];
+    function latticeView(this: ExpressionVisitor) {
+      view.length = 0;
+      const scale = this.getCurrentScale();
+      for (let i = 0; i < scale.length; ++i) {
+        scale[i] = track.bind(this)(scale[i]);
+      }
+      for (const interval of scale) {
+        view.push(interval.value.toIntegerMonzo(true));
+      }
+    }
+    latticeView.__doc__ =
+      'Store the current order of intervals for lattice visualization.';
+    latticeView.__node__ = builtinNode(latticeView);
+    const visitor = evaluateSource(
+      `
+      1
+      3
+      3
+      5/9
+      3
+      stack()
+      i => i rdc 2
+      latticeView()
+      sort()
+    `,
+      true,
+      {latticeView}
+    );
+    expect(view).toEqual([[1], [-1, 1], [-3, 2], [-2, 0, 1], [-3, 1, 1]]);
+    expect(visitor.getCurrentScale().map(i => i.toString())).toEqual([
+      '9/8',
+      '5/4',
+      '3/2',
+      '15/8',
+      '2',
+    ]);
+    expect(
+      visitor.getCurrentScale().map(i => Array.from(i.trackingIds)[0])
+    ).toEqual([3, 4, 2, 5, 1]);
   });
 });

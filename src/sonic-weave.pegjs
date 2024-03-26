@@ -196,25 +196,23 @@ VariableManipulationStatement
   }
 
 VariableDeclaration
-  = LetToken _ name: (Identifier / IdentifierArray) value: (_ '=' _ @Expression)? EOS {
+  = LetToken _ parameters: Parameters EOS {
     return {
       type: 'VariableDeclaration',
-      name,
-      value,
+      parameters,
       mutable: true,
     };
   }
-  / ConstToken _ name: (Identifier / IdentifierArray) _ '=' _ value: Expression EOS {
+  / ConstToken _ parameters: ParametersWithDefaults EOS {
     return {
       type: 'VariableDeclaration',
-      name,
-      value,
+      parameters,
       mutable: false,
     };
   }
 
 FunctionDeclaration
-  = (FunctionToken / FunctionAliasToken) _ name: Identifier _ parameters: Parameters _ body: BlockStatement {
+  = (FunctionToken / FunctionAliasToken) _ name: Identifier _ '(' _ parameters: Parameters _ ')' _ body: BlockStatement {
     return {
       type: 'FunctionDeclaration',
       name,
@@ -260,14 +258,69 @@ LiftDeclaration
     };
   }
 
-Parameters
-  = identifiers: (Identifier / IdentifierArray)|.., _| rest: (_ '...' _ @Identifier)? _ {
+Parameter
+  = identifier: Identifier defaultValue: (_ '=' _ @Expression)? {
     return {
-      type: 'Parameters',
-      identifiers,
-      rest,
+      ...identifier,
+      type: 'Parameter',
+      defaultValue,
     };
   }
+
+Parameters
+  = parameters: (Parameter / ParameterArray)|.., _ ',' _| rest: (_ ','? _ '...' _ @Parameter)? {
+    return {
+      type: 'Parameters',
+      parameters,
+      rest,
+      defaultValue: null,
+    };
+  }
+
+ParameterArray
+  = '[' _ parameters: Parameters _ ']' defaultValue: (_ '=' _ @Expression)? {
+    return {
+      ...parameters,
+      defaultValue,
+    };
+  }
+
+ParameterWithDefault
+  = identifier: Identifier _ '=' _ defaultValue: Expression {
+    return {
+      ...identifier,
+      type: 'Parameter',
+      defaultValue,
+    };
+  }
+
+ParametersWithDefaults
+  = parameters: (ParameterWithDefault / ParameterArrayWithDefault)|.., _ ',' _| {
+    return {
+      type: 'Parameters',
+      parameters,
+      defaultValue: null,
+    };
+  }
+
+ParameterArrayWithDefault
+  = '[' _ parameters: Parameters _ ']' _ '=' _ defaultValue: Expression {
+    return {
+      ...parameters,
+      defaultValue,
+    };
+  }
+
+Identifiers
+  = identifiers: (Identifier / IdentifierArray)|.., _ ',' _| rest: (_ ','? _ '...' _ @Identifier)? {
+    return {
+      type: 'Identifiers',
+      identifiers,
+      rest,
+    }
+  }
+
+IdentifierArray = '[' _ @Identifiers _ ']'
 
 Argument
   = spread: '...'? _ expression: Expression {
@@ -280,9 +333,6 @@ Argument
 
 ArgumentList
   = (@(Argument|.., _ ',' _|) _ ','? _)
-
-IdentifierArray
-  = '[' _ @Parameters _ ']'
 
 BlockStatement
   = '{' _ body: Statements? _ '}' _ {
@@ -346,7 +396,7 @@ IfStatement
   }
 
 ForOfStatement
-  = ForToken _ '(' _ LetToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
+  = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'ForOfStatement',
       element,
@@ -356,7 +406,7 @@ ForOfStatement
       mutable: true,
     };
   }
-  / ForToken _ '(' _ ConstToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
+  / ForToken _ '(' _ ConstToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'ForOfStatement',
       element,
@@ -392,10 +442,10 @@ TryStatement
   }
 
 CatchClause
-  = CatchToken _ '(' _ param: Identifier _ ')' _ body: Statement {
+  = CatchToken _ '(' _ parameter: Parameter _ ')' _ body: Statement {
     return {
       type: 'CatchClause',
-      param,
+      parameter,
       body,
     };
   }
@@ -744,6 +794,7 @@ Unit
 
 Primary
   = Quantity
+  / ArrowFunction
   / Range
   / ArrayComprehension
   / NoneLiteral
@@ -756,7 +807,6 @@ Primary
   / FJS
   / AbsoluteFJS
   / SquareSuperparticular
-  / ArrowFunction
   / Identifier
   / ArrayLiteral
   / StringLiteral
@@ -783,7 +833,7 @@ StepRange
 Range = StepRange / UnitStepRange
 
 Comprehension
-  = _ ForToken _ element: (Identifier / IdentifierArray) _ OfToken _ array: Expression _ {
+  = _ ForToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ {
     return {
       element,
       array,
@@ -1209,7 +1259,15 @@ SquareSuperparticular
   }
 
 ArrowFunction
-  = parameters: Parameters _ '=>' _ expression: Expression {
+  = '(' _ parameters: Parameters _ ')' _ '=>' _ expression: Expression {
+    return {
+      type: 'ArrowFunction',
+      parameters,
+      expression,
+      text: text(),
+    };
+  }
+  / parameters: Parameters _ '=>' _ expression: Expression {
     return {
       type: 'ArrowFunction',
       parameters,

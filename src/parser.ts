@@ -80,11 +80,13 @@ import {
   FunctionDeclaration,
   HarmonicSegment,
   Identifier,
+  Identifiers,
   IfStatement,
   LabeledExpression,
   LestExpression,
   LiftDeclaration,
   NedjiProjection,
+  Parameter,
   Parameters_,
   PitchDeclaration,
   Program,
@@ -143,19 +145,31 @@ export class Interrupt {
 
 function localAssign(
   localVisitor: StatementVisitor,
-  name: Identifier | Parameters_,
-  arg: SonicWeaveValue
+  subVisitor: ExpressionVisitor,
+  name: Parameter | Parameters_,
+  arg?: SonicWeaveValue
 ) {
+  if (arguments.length < 4 && name.defaultValue) {
+    arg = subVisitor.visit(name.defaultValue);
+  }
   if (name.type === 'Parameters') {
     if (!Array.isArray(arg)) {
       throw new Error('Expected an array to destructure.');
     }
-    for (let i = 0; i < name.identifiers.length; ++i) {
-      // XXX: Relies on arg[i] evaluating to undefined beyond bounds.
-      localAssign(localVisitor, name.identifiers[i], arg[i]);
+    for (let i = 0; i < name.parameters.length; ++i) {
+      if (i < arg.length) {
+        localAssign(localVisitor, subVisitor, name.parameters[i], arg[i]);
+      } else {
+        localAssign(localVisitor, subVisitor, name.parameters[i]);
+      }
     }
     if (name.rest) {
-      localAssign(localVisitor, name.rest, arg.slice(name.identifiers.length));
+      localAssign(
+        localVisitor,
+        subVisitor,
+        name.rest,
+        arg.slice(name.parameters.length)
+      );
     }
   } else {
     localVisitor.mutables.set(name.id, arg);
@@ -308,26 +322,43 @@ export class StatementVisitor {
   }
 
   declareVariable(
-    name: Identifier | Parameters_,
-    value: SonicWeaveValue,
-    mutable: boolean
+    subVisitor: ExpressionVisitor,
+    parameters: Parameter | Parameters_,
+    mutable: boolean,
+    value?: SonicWeaveValue
   ) {
-    if (name.type === 'Parameters') {
+    if (arguments.length < 4 && parameters.defaultValue) {
+      value = subVisitor.visit(parameters.defaultValue);
+    }
+    if (parameters.type === 'Parameters') {
       if (!Array.isArray(value)) {
-        throw new Error('Destructuring declaration must assign an array.');
-      }
-      for (let i = 0; i < name.identifiers.length; ++i) {
-        this.declareVariable(name.identifiers[i], value[i], mutable);
-      }
-      if (name.rest) {
-        this.declareVariable(
-          name.rest,
-          value.slice(name.identifiers.length),
-          mutable
-        );
+        for (let i = 0; i < parameters.parameters.length; ++i) {
+          this.declareVariable(subVisitor, parameters.parameters[i], mutable);
+        }
+      } else {
+        for (let i = 0; i < parameters.parameters.length; ++i) {
+          if (i < value.length) {
+            this.declareVariable(
+              subVisitor,
+              parameters.parameters[i],
+              mutable,
+              value[i]
+            );
+          } else {
+            this.declareVariable(subVisitor, parameters.parameters[i], mutable);
+          }
+        }
+        if (parameters.rest) {
+          this.declareVariable(
+            subVisitor,
+            parameters.rest,
+            mutable,
+            value.slice(parameters.parameters.length)
+          );
+        }
       }
     } else {
-      const id = name.id;
+      const id = parameters.id;
       if (this.immutables.has(id) || this.mutables.has(id)) {
         throw new Error('Cannot redeclare variable.');
       }
@@ -341,13 +372,12 @@ export class StatementVisitor {
 
   visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = this.createExpressionVisitor();
-    const value = node.value ? subVisitor.visit(node.value) : undefined;
-    this.declareVariable(node.name, value, node.mutable);
+    this.declareVariable(subVisitor, node.parameters, node.mutable);
     return undefined;
   }
 
-  assign(name: Identifier | Parameters_, value: SonicWeaveValue) {
-    if (name.type === 'Parameters') {
+  assign(name: Identifier | Identifiers, value: SonicWeaveValue) {
+    if (name.type === 'Identifiers') {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring assignment must use an array.');
       }
@@ -684,28 +714,43 @@ export class StatementVisitor {
 
   declareLoopElement(
     loopVisitor: StatementVisitor,
-    element: Identifier | Parameters_,
-    value: SonicWeaveValue,
-    mutable: boolean
+    subVisitor: ExpressionVisitor,
+    element: Parameter | Parameters_,
+    mutable: boolean,
+    value?: SonicWeaveValue
   ) {
+    if (arguments.length < 5 && element.defaultValue) {
+      value = subVisitor.visit(element.defaultValue);
+    }
     if (element.type === 'Parameters') {
       if (!Array.isArray(value)) {
         throw new Error('Must iterate over arrays when destructuring.');
       }
-      for (let i = 0; i < element.identifiers.length; ++i) {
-        this.declareLoopElement(
-          loopVisitor,
-          element.identifiers[i],
-          value[i],
-          mutable
-        );
+      for (let i = 0; i < element.parameters.length; ++i) {
+        if (i < value.length) {
+          this.declareLoopElement(
+            loopVisitor,
+            subVisitor,
+            element.parameters[i],
+            mutable,
+            value[i]
+          );
+        } else {
+          this.declareLoopElement(
+            loopVisitor,
+            subVisitor,
+            element.parameters[i],
+            mutable
+          );
+        }
       }
       if (element.rest) {
         this.declareLoopElement(
           loopVisitor,
+          subVisitor,
           element.rest,
-          value.slice(element.identifiers.length),
-          mutable
+          mutable,
+          value.slice(element.parameters.length)
         );
       }
     } else {
@@ -727,9 +772,16 @@ export class StatementVisitor {
     }
     const loopVisitor = new StatementVisitor(this.rootContext, this);
     loopVisitor.mutables.delete('$'); // Collapse scope
+    const loopSubVisitor = loopVisitor.createExpressionVisitor();
     let executeTail = true;
     for (const value of array) {
-      this.declareLoopElement(loopVisitor, node.element, value, node.mutable);
+      this.declareLoopElement(
+        loopVisitor,
+        loopSubVisitor,
+        node.element,
+        node.mutable,
+        value
+      );
       const interrupt = loopVisitor.visit(node.body);
       if (interrupt?.type === 'ReturnStatement') {
         return interrupt;
@@ -753,7 +805,7 @@ export class StatementVisitor {
         return interrupt;
       }
     } catch (e) {
-      if (node.handler && node.handler.param) {
+      if (node.handler && node.handler.parameter) {
         if (e instanceof Error) {
           // eslint-disable-next-line no-ex-assign
           e = e.message;
@@ -761,7 +813,7 @@ export class StatementVisitor {
         const handlerVisitor = new StatementVisitor(this.rootContext, this);
         handlerVisitor.mutables.delete('$'); // Collapse scope
         handlerVisitor.immutables.set(
-          node.handler.param.id,
+          node.handler.parameter.id,
           e as SonicWeaveValue
         );
         const interrupt = handlerVisitor.visit(node.handler.body);
@@ -821,7 +873,12 @@ export class StatementVisitor {
       localVisitor.mutables.set('$$', this.parent.getCurrentScale());
 
       // XXX: Poor type system gets abused again.
-      localAssign(localVisitor, node.parameters, args as Interval[]);
+      localAssign(
+        localVisitor,
+        localVisitor.createExpressionVisitor(),
+        node.parameters,
+        args as Interval[]
+      );
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
         if (interrupt?.type === 'ReturnStatement') {
@@ -1075,8 +1132,8 @@ export class ExpressionVisitor {
       localVisitor: StatementVisitor,
       index: number
     ) {
+      const localSubvisitor = localVisitor.createExpressionVisitor();
       if (index >= node.comprehensions.length) {
-        const localSubvisitor = localVisitor.createExpressionVisitor();
         if (node.test && !sonicTruth(localSubvisitor.visit(node.test))) {
           return;
         }
@@ -1090,7 +1147,7 @@ export class ExpressionVisitor {
       }
       const element = comprehension.element;
       for (const value of array) {
-        localAssign(localVisitor, element, value);
+        localAssign(localVisitor, localSubvisitor, element, value);
         comprehend.bind(this)(localVisitor, index + 1);
       }
     }
@@ -1894,7 +1951,12 @@ export class ExpressionVisitor {
       }
 
       // XXX: Poor type system gets abused again.
-      localAssign(localVisitor, node.parameters, args as Interval[]);
+      localAssign(
+        localVisitor,
+        localVisitor.createExpressionVisitor(),
+        node.parameters,
+        args as Interval[]
+      );
 
       return localVisitor.createExpressionVisitor().visit(node.expression);
     }

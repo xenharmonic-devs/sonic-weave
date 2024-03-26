@@ -9,7 +9,7 @@ Calculate the absolute value of the interval.
 ### absolute(*interval*)
 Convert interval to absolute representation.
 
-### absoluteFJS(*interval*, *flavor = ''*)
+### absoluteFJS(*interval*, *flavor = ""*)
 Convert interval to absolute FJS.
 
 ### acos(*x*)
@@ -66,7 +66,7 @@ Combine two or more arrays/strings.
 ### cos(*x*)
 Calculate cos x.
 
-### cosJIP(*val*, *weighting = 'tenney'*)
+### cosJIP(*val*, *weighting = "tenney"*)
 Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".
 
 ### decimal(*interval*, *fractionDigits*)
@@ -105,7 +105,7 @@ Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive wi
 ### filter(*tester*, *array*)
 Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.
 
-### FJS(*interval*, *flavor = ''*)
+### FJS(*interval*, *flavor = ""*)
 Convert interval to (relative) FJS.
 
 ### flatten(*array*, *depth*)
@@ -189,7 +189,7 @@ The Just Intonation Point. Converts intervals to real cents.
 ### kCombinations(*set*, *k*)
 Obtain all k-sized combinations in a set
 
-### labelAbsoluteFJS(*interval*, *flavor = ''*)
+### labelAbsoluteFJS(*interval*, *flavor = ""*)
 Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.
 
 ### labelOf(*interval*)
@@ -371,31 +371,31 @@ Calculate the frequency corresponding to the given number of beats per minute.
 ### cbrt(*x*)
 Calculate the cube root of the input.
 
-### circleDifference(*a*, *b*, *equave*)
+### circleDifference(*a*, *b*, *equave = 2*)
 Calculate the geometric difference of two intervals on a circle.
 
-### circleDistance(*a*, *b*, *equave*)
+### circleDistance(*a*, *b*, *equave = 2*)
 Calculate the geometric distance of two intervals on a circle.
 
-### coalesce(*tolerance*, *action*, *scale*)
+### coalesce(*tolerance = 3.5*, *action = "simplest"*, *scale = $$*)
 Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.
 
-### coalesced(*tolerance*, *action*, *scale*)
-Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` (default 3.5 cents) are coalesced into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.
+### coalesced(*tolerance = 3.5*, *action = "simplest"*, *scale = $$*)
+Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.
 
-### colorsOf(*scale*)
+### colorsOf(*scale = $$*)
 Obtain an array of colors of the current/given scale.
 
-### concordanceShell(*denominator*, *maxNumerator*, *divisions*, *tolerance*, *equave*)
-Generate a concordance shell i.e. a vertically aligned object reduced to an equal temperament (default `12`). Intervals are labeled by their harmonics. `tolerance` defaults to `5c`. `equave` defaults to `2/1`.
+### concordanceShell(*denominator*, *maxNumerator*, *divisions = 12*, *tolerance = 5.0*, *equave = 2*)
+Generate a concordance shell i.e. a vertically aligned object reduced to an equal temperament. Intervals are labeled by their harmonics.
 
 ### cosh(*x*)
 Calculate the hyperbolic cosine of x.
 
-### cps(*factors*, *count*, *equave*, *withUnity*)
+### cps(*factors*, *count*, *equave = 2*, *withUnity = false*)
 Generate a combination product set from the given factors and combination size.
 
-### csgs(*generators*, *ordinal*, *period*, *numPeriods*, *maxSize*)
+### csgs(*generators*, *ordinal = 1*, *period = 2*, *numPeriods = 1*, *maxSize = 100*)
 Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
 
 ### cumprod(*array*)
@@ -413,31 +413,31 @@ Calculate the (linear) differences between the terms.
 ### ed(*divisions*, *equave*)
 Generate an equal temperament with the given number of divisions of the given equave/octave.
 
-### edColors(*divisions*, *offset*, *equave*)
-Color every interval in the scale with hue repeating every step of an equal division (default `12` `divisions`) of `equave` (default `2`). `offset` rotates the hue wheel.
+### edColors(*divisions = 12*, *offset = 0*, *equave = 2*)
+Color every interval in the scale with hue repeating every step of an equal division of `equave`. `offset` rotates the hue wheel.
 
-### elevate(*scale*)
+### elevate(*scale = $$*)
 Remove denominators and make the root explicit in the current/given scale.
 
-### elevated(*scale*)
+### elevated(*scale = $$*)
 Obtain a copy of the current/given scale with denominators removed and the root made explicit.
 
-### enumerate(*array*)
+### enumerate(*array = $$*)
 Produce an array of [index, element] pairs from the given current/given array.
 
-### equalize(*divisions*, *scale*)
+### equalize(*divisions*, *scale = $$*)
 Quantize the current/given scale to given equal divisions of its equave.
 
-### equalized(*divisions*, *scale*)
+### equalized(*divisions*, *scale = $$*)
 Obtain a copy of the current/given scale quantized to given equal divisions of its equave.
 
-### eulerGenus(*guide*, *root*, *equave*)
+### eulerGenus(*guide*, *root = 1*, *equave = 2*)
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 ### exp(*x*)
 Calculate e raised to the power of x.
 
-### flatRepeat(*times*, *scale*)
+### flatRepeat(*times = 2*, *scale = $$*)
 Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.
 
 ### ftom(*freq*)
@@ -449,16 +449,16 @@ Calculate the geometric mean of the factors.
 ### geodiff(*array*)
 Calculate the geometric differences between the factors.
 
-### ground(*scale*)
+### ground(*scale = $$*)
 Use the first interval in the current/given scale as the implicit unison.
 
-### grounded(*scale*)
+### grounded(*scale = $$*)
 Obtain a copy of the current/given scale that uses the first interval as the implicit unison.
 
-### gs(*generators*, *size*, *period*, *numPeriods*)
+### gs(*generators*, *size*, *period = 2*, *numPeriods = 1*)
 Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.
 
-### harmonicsOf(*fundamental*, *scale*)
+### harmonicsOf(*fundamental*, *scale = $$*)
 Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.
 
 ### havg(*...terms*)
@@ -470,19 +470,19 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 ### hypot(*...args*)
 Calculate the square root of the sum of squares of the arguments.
 
-### keepUnique(*scale*)
+### keepUnique(*scale = $$*)
 Only keep unique intervals in the current/given scale.
 
-### label(*labels*, *scale*)
+### label(*labels*, *scale = $$*)
 Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.
 
-### labeled(*labels*, *scale*)
+### labeled(*labels*, *scale = $$*)
 Apply labels (or colors) from the first array to a copy of the current/given scale. Can also apply a single color to the whole scale.
 
-### labelsOf(*scale*)
+### labelsOf(*scale = $$*)
 Obtain an array of labels of the current/given scale.
 
-### log(*x*, *y*)
+### log(*x*, *y = E*)
 Calculate the logarithm of x base y. Base defaults to E.
 
 ### log10(*x*)
@@ -491,7 +491,7 @@ Calculate the logarithm of x base 10.
 ### log2(*x*)
 Calculate the logarithm of x base 2.
 
-### mergeOffset(*offsets*, *overflow*, *scale*)
+### mergeOffset(*offsets*, *overflow = "drop"*, *scale = $$*)
 Merge the given offset or polyoffset of the current/given scale onto itself. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 
 ### mos(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep*, *sizeOfSmallStep*, *up*, *down*, *equave*)
@@ -509,52 +509,52 @@ Convert interval to (relative) FJS using neutral comma flavors.
 ### numerator(*x*)
 Calculate the numerator of x in reduced form.
 
-### o(*scale*)
+### o(*scale = $$*)
 Obtain a copy of the current/given scale in the default overtonal interpretation.
 
-### octaplex(*b0*, *b1*, *b2*, *b3*, *equave*, *withUnity*)
+### octaplex(*b0*, *b1*, *b2*, *b3*, *equave = 2*, *withUnity = false*)
 Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 
-### oddLimit(*limit*, *equave*)
+### oddLimit(*limit*, *equave = 2*)
 Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive) and `equave` (inclusive).
 
-### oddLimitOf(*x*, *equave*)
-Calculate the odd limit of x. Here 'odd' means not divisible by the equave (default `2`).
+### oddLimitOf(*x*, *equave = 2*)
+Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 
-### parallelotope(*basis*, *ups*, *downs*, *equave*)
+### parallelotope(*basis*, *ups*, *downs*, *equave = 2*)
 Span a parallelotope by extending a basis combinatorically.
 
 ### periodiff(*array*)
 Calculate the geometric differences of the periodic interval pattern.
 
-### periostack(*guideGenerator*, *array*)
+### periostack(*guideGenerator*, *array = $$*)
 Stack the current/given inflections along with the guide generator into a periodic sequence of steps.
 
 ### pow(*x*, *y*)
 Calculate x to the power of y.
 
-### prod(*factors*)
+### prod(*factors = $$*)
 Calculate the (linear) product of the factors or the current scale i.e. the logarithmic sum.
 
-### randomVariance(*amount*, *varyEquave*, *scale*)
+### randomVariance(*amount*, *varyEquave = false*, *scale = $$*)
 Add random variance to the current/given scale.
 
-### randomVaried(*amount*, *varyEquave*, *scale*)
+### randomVaried(*amount*, *varyEquave = false*, *scale = $$*)
 Obtain a copy of the current/given scale with random variance added.
 
-### rank2(*generator*, *up*, *down*, *period*, *numPeriods*)
+### rank2(*generator*, *up*, *down = 0*, *period = 2*, *numPeriods = 1*)
 Generate a finite segment of a Rank-2 scale generated by stacking the given generator against the given period (or the octave `2/1` by default). `up` and `down` must be multiples of `numPeriods`.
 
-### reduce(*scale*)
+### reduce(*scale = $$*)
 Reduce the current/given scale by its equave.
 
-### reduced(*scale*)
+### reduced(*scale = $$*)
 Obtain a copy of the current/given scale reduced by its equave.
 
-### reflect(*scale*)
+### reflect(*scale = $$*)
 Reflect the current/given scale about unison.
 
-### reflected(*scale*)
+### reflected(*scale = $$*)
 Obtain a copy of the current/given scale reflected about unison.
 
 ### relin(*interval*)
@@ -563,37 +563,37 @@ Convert interval to relative linear representation.
 ### relog(*interval*)
 Convert interval to relative logarithmic representation.
 
-### repeat(*times*, *scale*)
+### repeat(*times = 2*, *scale = $$*)
 Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.
 
-### repeated(*times*, *scale*)
+### repeated(*times = 2*, *scale = $$*)
 Stack the current/given scale on top of itself.
 
-### replace(*interval*, *replacement*, *scale*)
+### replace(*interval*, *replacement*, *scale = $$*)
 Replace occurences of `interval` in the current/given scale by `replacement`.
 
-### replaced(*interval*, *replacement*, *scale*)
+### replaced(*interval*, *replacement*, *scale = $$*)
 Obtain a copy of the current/given scale with occurences of `interval` replaced by `replacement`.
 
-### replaceStep(*step*, *replacement*, *scale*)
+### replaceStep(*step*, *replacement*, *scale = $$*)
 Replace relative occurences of `step` in the current/given scale by `replacement`.
 
-### retrovert(*scale*)
+### retrovert(*scale = $$*)
 Retrovert the current/given scale (negative harmony i.e reflect and transpose).
 
-### retroverted(*scale*)
+### retroverted(*scale = $$*)
 Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).
 
-### revpose(*scale*)
+### revpose(*scale = $$*)
 Change the sounding direction. Converts a descending scale to an ascending one.
 
-### revposed(*scale*)
+### revposed(*scale = $$*)
 Obtain a copy of the current/given scale that sounds in the opposite direction.
 
-### rotate(*onto*, *scale*)
+### rotate(*onto = 1*, *scale = $$*)
 Rotate the current/given scale onto the given degree.
 
-### rotated(*onto*, *scale*)
+### rotated(*onto = 1*, *scale = $$*)
 Obtain a copy of the current/given scale rotated onto the given degree.
 
 ### sanitize(*interval*)
@@ -608,78 +608,78 @@ Calculate the hyperbolic sine of x.
 ### sqrt(*x*)
 Calculate the square root of the input.
 
-### stack(*array*)
+### stack(*array = $$*)
 Cumulatively stack the current/given intervals on top of each other.
 
 ### stacked(*array*)
 Obtain a copy of the current/given intervals cumulatively stacked on top of each other.
 
-### stackLinear(*array*)
+### stackLinear(*array = $$*)
 Cumulatively sum the numbers of the current/given array.
 
-### stepReplaced(*step*, *replacement*, *scale*)
+### stepReplaced(*step*, *replacement*, *scale = $$*)
 Obtain a copy of the current/given scale with relative occurences of `step` replaced by `replacement`.
 
-### stretch(*amount*, *scale*)
+### stretch(*amount*, *scale = $$*)
 Stretch the current/given scale by the given amount. A value of `1` corresponds to no change.
 
-### stretched(*amount*, *scale*)
+### stretched(*amount*, *scale = $$*)
 Obtain a copy of the current/given scale streched by the given amount. A value of `1` corresponds to no change.
 
 ### subharmonics(*start*, *end*)
 Generate a subharmonic segment including the given start and end points.
 
-### subharmonicsOf(*overtone*, *scale*)
+### subharmonicsOf(*overtone*, *scale = $$*)
 Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.
 
-### subset(*degrees*, *scale*)
+### subset(*degrees*, *scale = $$*)
 Only keep the given degrees of the current/given scale. Omitting the zero degree rotates the scale.
 
-### subsetOf(*degrees*, *scale*)
+### subsetOf(*degrees*, *scale = $$*)
 Obtain a copy of the current/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.
 
-### sum(*terms*)
+### sum(*terms = $$*)
 Calculate the (linear) sum of the terms or the current scale.
 
 ### tanh(*x*)
 Calculate the hyperbolic tangent of x.
 
-### toHarmonics(*fundamental*, *scale*)
+### toHarmonics(*fundamental*, *scale = $$*)
 Quantize the current/given scale to harmonics of the given fundamental.
 
-### toSubharmonics(*overtone*, *scale*)
+### toSubharmonics(*overtone*, *scale = $$*)
 Quantize the current/given scale to subharmonics of the given overtone.
 
-### tune(*a*, *b*, *numIter*, *weighting*)
+### tune(*a*, *b*, *numIter = 1*, *weighting = "tenney"*)
 Find a combination of two vals that is closer to just intonation.
 
-### tune3(*a*, *b*, *c*, *numIter*, *weighting*)
+### tune3(*a*, *b*, *c*, *numIter = 1*, *weighting = "tenney"*)
 Find a combination of three vals that is closer to just intonation.
 
-### u(*scale*)
+### u(*scale = $$*)
 Obtain a undertonal reflection of the current/given overtonal scale.
 
-### uniquesOf(*scale*)
+### uniquesOf(*scale = $$*)
 Obtain a copy of the current/given scale with only unique intervals kept.
 
-### unperiostack(*array*)
+### unperiostack(*array = $$*)
 Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.
 
-### unstack(*array*)
+### unstack(*array = $$*)
 Unstack the current/given scale into steps.
 
 ### unstacked(*array*)
 Calculate the relative steps in the current/given scale.
 
-### vao(*denominator*, *maxNumerator*, *divisions*, *tolerance*, *equave*)
+### vao(*denominator*, *maxNumerator*, *divisions = 12*, *tolerance = 5.0*, *equave = 2*)
 Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default `12`) within the given tolerance (default `5c`). Harmonics equated by the `equave` (default `2/1`) are only included once. The returned segment begins at unison.
 
 ### void()
 Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale.
 
-### wellTemperament(*commaFractions*, *comma*, *down*, *generator*, *period*)
+### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = 2*)
 Generate a well-temperament by cumulatively modifying the pure fifth `3/2` (or a given generator) by fractions of the syntonic/given comma.
 
-### withOffset(*offsets*, *overflow*, *scale*)
+### withOffset(*offsets*, *overflow = "drop"*, *scale = $$*)
 Obtain a copy of the current/given scale with the given offset or polyoffset merged into it. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 

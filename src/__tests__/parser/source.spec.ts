@@ -4,12 +4,11 @@ import {
   evaluateSource,
   StatementVisitor,
   getSourceVisitor,
-  ExpressionVisitor,
 } from '../../parser';
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
-import {builtinNode, relative, track} from '../../builtin';
+import {relative} from '../../builtin';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);
@@ -92,7 +91,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can declare functions', () => {
-    const ast = parseAST('riff plusOne x { x ~+ 1; }');
+    const ast = parseAST('riff plusOne (x) { x ~+ 1; }');
     const visitor = new StatementVisitor(new RootContext());
     visitor.visit(ast.body[0]);
     expect(visitor.immutables.has('plusOne')).toBe(true);
@@ -106,7 +105,7 @@ describe('SonicWeave parser', () => {
 
   it('can call a custom function', () => {
     const scale = parseSource(`
-      riff sqrt x { x ~^ 1/2; }
+      riff sqrt(x){ x ~^ 1/2; }
       sqrt(3);
     `);
     expect(scale).toHaveLength(1);
@@ -116,7 +115,7 @@ describe('SonicWeave parser', () => {
 
   it('can call custom functions as expressions', () => {
     const scale = parseSource(`
-      riff cbrt x { return x ~^ 1/3; }
+      riff cbrt( x ){ return x ~^ 1/3; }
       cbrt(5) * cbrt(5) * cbrt(5);
     `);
     expect(scale).toHaveLength(1);
@@ -132,7 +131,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can return from inside nested statements', () => {
-    const scale = parseSource('riff foo { while(1) return 2; } foo();');
+    const scale = parseSource('riff foo() { while(1) return 2; } foo();');
     expect(scale).toHaveLength(1);
     const interval = scale[0];
     expect(interval.value.toBigInteger()).toBe(2n);
@@ -340,7 +339,7 @@ describe('SonicWeave parser', () => {
 
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
-      riff rig i {
+      riff rig (i) {
         const ups = round(v{1r €} dot i);
         return i ~% (1r c * ups) ~* 81/80 ^ ups;
       }
@@ -564,16 +563,16 @@ describe('SonicWeave parser', () => {
   });
 
   it('can expand riffs', () => {
-    const visitor = evaluateSource('riff foo bar {bar + 3};foo(1)', false);
+    const visitor = evaluateSource('riff foo (bar) {bar + 3};foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
-      'riff foo bar {bar + 3}\n4'
+      'riff foo (bar) {bar + 3}\n4'
     );
   });
 
   it('can expand fns', () => {
-    const visitor = evaluateSource('fn foo bar {bar + 3};foo(1)', false);
+    const visitor = evaluateSource('fn foo(bar){bar + 3};foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
-      'fn foo bar {bar + 3}\n4'
+      'fn foo(bar){bar + 3}\n4'
     );
   });
 
@@ -658,7 +657,7 @@ describe('SonicWeave parser', () => {
 
   it('has rest syntax', () => {
     const scale = parseSource(`
-      riff fun foo ...bar {return foo + bar[1]}
+      riff fun(foo, ...bar) {return foo + bar[1]}
       fun(1, 2, 3, 4, 5, 6)
     `);
     expect(scale).toHaveLength(1);
@@ -747,10 +746,10 @@ describe('SonicWeave parser', () => {
     }
     const scale = parseSource(`
       const a = 1
-      riff foo {a}
+      riff foo() {a}
       {
         const a = 2
-        riff bar {a}
+        riff bar() {a}
         foo()
         bar()
       }
@@ -773,7 +772,7 @@ describe('SonicWeave parser', () => {
       const foo = => a
       {
         const a = 2
-        const bar = => a
+        const bar = () => a
         foo()
         bar()
       }
@@ -926,7 +925,7 @@ describe('SonicWeave parser', () => {
 
   it('has nested destructuring', () => {
     const scale = parseSource(`
-      const [foo [bar baz]] = [1, [2, 3]]
+      const [foo, [bar, baz]] = [1, [2, 3]]
       foo;bar;baz
       str
     `);
@@ -941,49 +940,6 @@ describe('SonicWeave parser', () => {
   it('has a fifth-apotome in 25edo', () => {
     const step = parseSource('P1^7l;25@')[0];
     expect(step.toString()).toBe('1\\25');
-  });
-
-  it('has support for custom builtins', () => {
-    const view: number[][] = [];
-    function latticeView(this: ExpressionVisitor) {
-      view.length = 0;
-      const scale = this.getCurrentScale();
-      for (let i = 0; i < scale.length; ++i) {
-        scale[i] = track.bind(this)(scale[i]);
-      }
-      for (const interval of scale) {
-        view.push(interval.value.toIntegerMonzo(true));
-      }
-    }
-    latticeView.__doc__ =
-      'Store the current order of intervals for lattice visualization.';
-    latticeView.__node__ = builtinNode(latticeView);
-    const visitor = evaluateSource(
-      `
-      1
-      3
-      3
-      5/9
-      3
-      stack()
-      i => i rdc 2
-      latticeView()
-      sort()
-    `,
-      true,
-      {latticeView}
-    );
-    expect(view).toEqual([[1], [-1, 1], [-3, 2], [-2, 0, 1], [-3, 1, 1]]);
-    expect(visitor.getCurrentScale().map(i => i.toString())).toEqual([
-      '9/8',
-      '5/4',
-      '3/2',
-      '15/8',
-      '2',
-    ]);
-    expect(
-      visitor.getCurrentScale().map(i => Array.from(i.trackingIds)[0])
-    ).toEqual([3, 4, 2, 5, 1]);
   });
 
   it('can keep track of tempered intervals', () => {
@@ -1140,5 +1096,68 @@ describe('SonicWeave parser', () => {
       str;
     `);
     expect(scale).toEqual(['2', '3', '5', '7', '11']);
+  });
+
+  it('can use $$ as a default value', () => {
+    const scale = parseSource(`
+      riff foo (scale = $$) {
+        scale[0];
+      }
+      1;
+      2;
+      foo();
+      str;
+    `);
+    expect(scale).toEqual(['1', '2', '1']);
+  });
+
+  it('assigns default values', () => {
+    const scale = parseSource(`
+      riff eulerGenus(guide, root = 1, equave = 2) {
+        "Span a lattice from all divisors of the guide-tone rotated to the root-tone.";
+        if (guide ~mod root) {
+          throw "Root must divide the guide tone.";
+        }
+      
+        let remainder = guide ~* 0;
+        while (++remainder < equave) {
+          let n = remainder;
+          while (n <= guide) {
+            if (not (guide ~mod n)) n;
+            n ~+= equave;
+          }
+        }
+        i => i ~% root ~rdc equave;
+        sort();
+        pop() colorOf(equave) labelOf(equave);
+      }
+      eulerGenus(45);
+      str;
+    `);
+    expect(scale).toEqual(['9/8', '5/4', '45/32', '3/2', '15/8', '2']);
+  });
+
+  it('has default values for variable declarations', () => {
+    const scale = parseSource(`
+      let foo = 1, [bar, baz, qux = 4] = [2], quux;
+      foo;
+      bar;
+      3 str(baz);
+      qux;
+      5 str(quux)
+      repr;
+    `);
+    expect(scale).toEqual(['1', '2', '(3 "niente")', '4', '(5 "niente")']);
+  });
+
+  it('has default values for loop elements', () => {
+    const scale = parseSource(`
+      for (const [a, b = 10] of [[1, 2], [3]]) {
+        a;
+        b;
+      }
+      str;
+    `);
+    expect(scale).toEqual(['1', '2', '3', '10']);
   });
 });
