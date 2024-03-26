@@ -896,3 +896,4 @@ export function literalToString(literal: IntervalLiteral) {
       throw new Error(`Cannot format ${literal.type}`);
   }
 }
+
