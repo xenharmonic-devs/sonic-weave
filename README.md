@@ -13,7 +13,7 @@ SonicWeave comes with some basic types.
 | Color    | `#ff00ff`                | CSS colors, short hexadecimal, and long hexadecimal colors supported. Used for note colors. |
 | Interval | `7/5`                    | There are many types of intervals with their own operator semantics. |
 | Scale    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals. |
-| Function | `riff plusOne x {x+1}` | _Riff_ is a music term for a short repeated phrase. |
+| Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase. |
 
 ### Basic interval types
 You can read more about domains and echelons [below](#interval-type-system).
@@ -475,16 +475,17 @@ Conditional expressions look similar but work inline e.g. `3 if true else 5` eva
 ## Function declaration
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
 ```javascript
-riff subharmonics start end {
+riff subharmonics(start, end) {
   return retroverted(start::end)
 }
 ```
 Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
 
+Default values for function parameters may be given using `param = value` syntax.
+
 Due to popular demand there's also the `fn` alias for function declaration.
 ```javascript
-fn pythagoras up down {
-  down ??= 0
+fn pythagoras(up, down = 0) {
   sorted([3^i rdc 2 for i of [-down..up]])
 }
 ```
@@ -492,10 +493,10 @@ fn pythagoras up down {
 ### Calling functions
 Once declared, functions can be called: `subharmonics(4, 8)` evaluates to `[8/7, 8/6, 8/5, 8/4]`,
 
-while `pythagoras(4)` evaluates to `[9/8, 81/64, 3/2, 27/16, 2]`. The missing `down` argument defaulted to `niente` and was coalesced to `0`.
+while `pythagoras(4)` evaluates to `[9/8, 81/64, 3/2, 27/16, 2]`. The missing `down` argument defaulted to `0`.
 
 ### Lambda expressions
-Functions can be defined inline using the arrow (`=>`). e.g. `subharmonics = (start end => retroverted(start::end))`.
+Functions can be defined inline using the arrow (`=>`). e.g. `const subharmonics = ((start, end) => retroverted(start::end))`.
 
 ## Throwing
 To interupt execution you can throw string messages.

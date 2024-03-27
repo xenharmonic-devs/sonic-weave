@@ -1,4 +1,4 @@
-import {IntervalLiteral} from './expression';
+import {IntervalLiteral, literalToString} from './expression';
 
 export type BinaryOperator =
   | '??'
@@ -50,31 +50,36 @@ export type Program = {
   body: Statement[];
 };
 
+export type Parameter = {
+  type: 'Parameter';
+  id: string;
+  defaultValue: null | Expression;
+};
+
 export type Parameters_ = {
   type: 'Parameters';
-  identifiers: (Identifier | Parameters_)[];
+  parameters: (Parameter | Parameters_)[];
+  rest?: Parameter;
+  defaultValue: null | Expression;
+};
+
+export type Identifiers = {
+  type: 'Identifiers';
+  identifiers: (Identifier | Identifiers)[];
   rest?: Identifier;
 };
 
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
-  name: Identifier | Parameters_ | ArrayAccess | ArraySlice;
+  name: Identifier | Identifiers | ArrayAccess | ArraySlice;
   value: Expression;
 };
 
-export type VariableDeclaration =
-  | {
-      type: 'VariableDeclaration';
-      name: Identifier | Parameters_;
-      value: Expression;
-      mutable: false;
-    }
-  | {
-      type: 'VariableDeclaration';
-      name: Identifier | Parameters_;
-      value?: Expression;
-      mutable: true;
-    };
+export type VariableDeclaration = {
+  type: 'VariableDeclaration';
+  parameters: Parameter | Parameters_;
+  mutable: boolean;
+};
 
 export type FunctionDeclaration = {
   type: 'FunctionDeclaration';
@@ -140,7 +145,7 @@ export type IfStatement = {
 
 export type ForOfStatement = {
   type: 'ForOfStatement';
-  element: Identifier | Parameters_;
+  element: Parameter | Parameters_;
   array: Expression;
   body: Statement;
   tail: null | Statement;
@@ -149,7 +154,7 @@ export type ForOfStatement = {
 
 type CatchClause = {
   type: 'CatchClause';
-  param?: Identifier;
+  parameter?: Parameter;
   body: Statement;
 };
 
@@ -300,7 +305,7 @@ export type Range = {
 };
 
 export type Comprehension = {
-  element: Identifier | Parameters_;
+  element: Parameter | Parameters_;
   array: Expression;
 };
 
@@ -343,3 +348,38 @@ export type Expression =
   | ArrayLiteral
   | StringLiteral
   | HarmonicSegment;
+
+export function expressionToString(node: Expression) {
+  switch (node.type) {
+    case 'IntegerLiteral':
+    case 'DecimalLiteral':
+    case 'FractionLiteral':
+    case 'RadicalLiteral':
+    case 'StepLiteral':
+    case 'NedjiLiteral':
+    case 'CentsLiteral':
+    case 'CentLiteral':
+    case 'ReciprocalCentLiteral':
+    case 'TrueLiteral':
+    case 'FalseLiteral':
+    case 'FJS':
+    case 'AspiringFJS':
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+    case 'HertzLiteral':
+    case 'SecondLiteral':
+    case 'MonzoLiteral':
+    case 'ValLiteral':
+    case 'SparseOffsetVal':
+    case 'WartsLiteral':
+    case 'SquareSuperparticular':
+      return literalToString(node);
+    case 'NoneLiteral':
+      return 'niente';
+    case 'Identifier':
+      return node.id;
+    case 'StringLiteral':
+      return JSON.stringify(node.value);
+  }
+  throw new Error(`Cannot convert ${node.type} to string.`);
+}

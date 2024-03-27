@@ -1,6 +1,7 @@
 import {stdout} from 'process';
 import {getSourceVisitor} from '../src/parser';
 import {SonicWeaveFunction} from '../src/builtin';
+import {expressionToString} from '../src/ast';
 
 const visitor = getSourceVisitor();
 
@@ -29,8 +30,12 @@ function generateDocs(riffs: SonicWeaveFunction[]) {
   );
   for (const riff of riffs) {
     const node = riff.__node__;
-    const param_names = node.parameters.identifiers.map(
-      p => '*' + (p.type === 'Identifier' ? p.id : '[...]') + '*'
+    const param_names = node.parameters.parameters.map(
+      p =>
+        '*' +
+        (p.type === 'Parameter' ? p.id : '[...]') +
+        (p.defaultValue ? ' = ' + expressionToString(p.defaultValue) : '') +
+        '*'
     );
     if (node.parameters.rest) {
       param_names.push('*...' + node.parameters.rest.id + '*');

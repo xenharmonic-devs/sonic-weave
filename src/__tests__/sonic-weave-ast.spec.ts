@@ -220,7 +220,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses a return statement', () => {
-    const ast = parse('riff foo{return;}');
+    const ast = parse('riff foo(){return;}');
     expect(ast).toEqual({
       type: 'Program',
       body: [
@@ -229,18 +229,19 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           name: {type: 'Identifier', id: 'foo'},
           parameters: {
             type: 'Parameters',
-            identifiers: [],
+            parameters: [],
             rest: null,
+            defaultValue: null,
           },
           body: [{type: 'ReturnStatement'}],
-          text: 'riff foo{return;}',
+          text: 'riff foo(){return;}',
         },
       ],
     });
   });
 
   it('parses rest syntax', () => {
-    const ast = parse('riff foo bar ...baz {}');
+    const ast = parse('riff foo(bar, ...baz ) {}');
     expect(ast).toEqual({
       type: 'Program',
       body: [
@@ -249,11 +250,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           name: {type: 'Identifier', id: 'foo'},
           parameters: {
             type: 'Parameters',
-            identifiers: [{type: 'Identifier', id: 'bar'}],
-            rest: {type: 'Identifier', id: 'baz'},
+            parameters: [{type: 'Parameter', id: 'bar', defaultValue: null}],
+            rest: {type: 'Parameter', id: 'baz', defaultValue: null},
+            defaultValue: null,
           },
           body: [],
-          text: 'riff foo bar ...baz {}',
+          text: 'riff foo(bar, ...baz ) {}',
         },
       ],
     });
@@ -357,7 +359,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       body: [
         {
           type: 'ForOfStatement',
-          element: {type: 'Identifier', id: 'foo'},
+          element: {type: 'Parameter', id: 'foo', defaultValue: null},
           array: {type: 'Identifier', id: 'bar'},
           body: {
             type: 'ExpressionStatement',
@@ -661,11 +663,11 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         },
         comprehensions: [
           {
-            element: {type: 'Identifier', id: 'foo'},
+            element: {type: 'Parameter', id: 'foo', defaultValue: null},
             array: {type: 'Identifier', id: 'baz'},
           },
           {
-            element: {type: 'Identifier', id: 'bar'},
+            element: {type: 'Parameter', id: 'bar', defaultValue: null},
             array: {type: 'Identifier', id: 'qux'},
           },
         ],
@@ -757,6 +759,81 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             },
           ],
         },
+      },
+    });
+  });
+
+  it('supports multiple const initializers', () => {
+    const ast = parseSingle('const a = 1, [b, c, d = 4] = [2, 3]');
+    expect(ast).toEqual({
+      type: 'VariableDeclaration',
+      parameters: {
+        type: 'Parameters',
+        defaultValue: null,
+        parameters: [
+          {
+            type: 'Parameter',
+            id: 'a',
+            defaultValue: {type: 'IntegerLiteral', value: 1n},
+          },
+          {
+            type: 'Parameters',
+            parameters: [
+              {type: 'Parameter', id: 'b', defaultValue: null},
+              {type: 'Parameter', id: 'c', defaultValue: null},
+              {
+                type: 'Parameter',
+                id: 'd',
+                defaultValue: {type: 'IntegerLiteral', value: 4n},
+              },
+            ],
+            rest: null,
+            defaultValue: {
+              type: 'ArrayLiteral',
+              elements: [
+                {
+                  type: 'Argument',
+                  spread: false,
+                  expression: {type: 'IntegerLiteral', value: 2n},
+                },
+                {
+                  type: 'Argument',
+                  spread: false,
+                  expression: {type: 'IntegerLiteral', value: 3n},
+                },
+              ],
+            },
+          },
+        ],
+      },
+      mutable: false,
+    });
+  });
+
+  it('parses arrow functions as call arguments', () => {
+    const ast = parseSingle('func((u) => u)');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {type: 'Identifier', id: 'func'},
+        args: [
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {
+              type: 'ArrowFunction',
+              parameters: {
+                type: 'Parameters',
+                parameters: [{type: 'Parameter', id: 'u', defaultValue: null}],
+                rest: null,
+                defaultValue: null,
+              },
+              expression: {type: 'Identifier', id: 'u'},
+              text: '(u) => u',
+            },
+          },
+        ],
       },
     });
   });
