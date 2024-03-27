@@ -105,6 +105,11 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
         type: 'StringLiteral',
         value: JSON.parse(defaultValue),
       };
+    } else if (parameter.id === 'scale') {
+      parameter.defaultValue = {
+        type: 'Identifier',
+        id: '$$',
+      };
     }
   }
   return {
@@ -114,6 +119,14 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
     body: [],
     text: `riff ${builtin.name} { [native riff] }`,
   };
+}
+
+export function requireParameters(parameters: Record<string, any>) {
+  for (const name of Object.keys(parameters)) {
+    if (parameters[name] === undefined) {
+      throw new Error(`Parameter '${name}' is required.`);
+    }
+  }
 }
 
 // === Library ===
@@ -152,13 +165,16 @@ const LOGS: (keyof Math)[] = ['acos', 'asin', 'atan', 'clz32', 'log1p'];
 
 for (const name of MATH_KEYS) {
   const fn = Math[name] as (x: number) => number;
-  const wrapper = (x: Interval) =>
-    new Interval(
+  // eslint-disable-next-line no-inner-declarations
+  function wrapper(x: Interval) {
+    requireParameters({x});
+    return new Interval(
       TimeMonzo.fromValue(fn(x.valueOf())),
       LOGS.includes(name) ? 'linear' : x.domain,
       undefined,
       x
     );
+  }
   Object.defineProperty(wrapper, 'name', {value: name, enumerable: false});
   wrapper.__doc__ = `Calculate ${String(name)} x.`;
   wrapper.__node__ = builtinNode(wrapper);
@@ -166,6 +182,7 @@ for (const name of MATH_KEYS) {
 }
 
 function atan2(y: Interval, x: Interval) {
+  requireParameters({y, x});
   return new Interval(
     TimeMonzo.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
     'linear'
@@ -198,24 +215,30 @@ numComponents.__node__ = builtinNode(numComponents);
 
 // == Third-party wrappers ==
 function kCombinations(set: any[], k: Interval) {
+  requireParameters({set, k});
+  if (!Array.isArray(set)) {
+    throw new Error('Set must be an array.');
+  }
   return xduKCombinations(set, k.toInteger());
 }
 kCombinations.__doc__ = 'Obtain all k-sized combinations in a set';
 kCombinations.__node__ = builtinNode(kCombinations);
 
 function isPrime(n: Interval) {
+  requireParameters({n});
   return xduIsPrime(n.valueOf());
 }
 isPrime.__doc__ = 'Return `true` if `n` is a prime number, `false` otherwise.';
 isPrime.__node__ = builtinNode(isPrime);
 
 function primes(start: Interval, end?: Interval) {
+  requireParameters({start});
   return xduPrimes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
     fromInteger(p)
   );
 }
 primes.__doc__ =
-  'Obtain an array of prime numbers such that start <= p <= end.';
+  'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.';
 primes.__node__ = builtinNode(primes);
 
 function mosSubset(
@@ -226,6 +249,7 @@ function mosSubset(
   up?: Interval,
   down?: Interval
 ) {
+  requireParameters({numberOfLargeSteps, numberOfSmallSteps});
   const options: MosOptions = {};
   if (sizeOfLargeStep !== undefined) {
     options.sizeOfLargeStep = sizeOfLargeStep.toInteger();
@@ -251,6 +275,7 @@ mosSubset.__doc__ =
 mosSubset.__node__ = builtinNode(mosSubset);
 
 function fareySequence(maxDenominator: Interval) {
+  requireParameters({maxDenominator});
   const result: Interval[] = [];
   for (const fraction of xduFareySequence(maxDenominator.toInteger())) {
     const value = TimeMonzo.fromFraction(fraction);
@@ -263,6 +288,7 @@ fareySequence.__doc__ =
 fareySequence.__node__ = builtinNode(fareySequence);
 
 function fareyInterior(maxDenominator: Interval) {
+  requireParameters({maxDenominator});
   const result: Interval[] = [];
   for (const fraction of xduFareyInterior(maxDenominator.toInteger())) {
     const value = TimeMonzo.fromFraction(fraction);
@@ -277,6 +303,7 @@ fareyInterior.__node__ = builtinNode(fareyInterior);
 // == Domain conversion ==
 
 export function simplify(interval: Interval | Val | boolean) {
+  requireParameters({interval});
   if (interval instanceof Val) {
     return new Val(interval.value.clone(), interval.equave.clone());
   }
@@ -294,6 +321,7 @@ simplify.__doc__ = 'Get rid of interval formatting.';
 simplify.__node__ = builtinNode(simplify);
 
 export function bleach(interval: Interval | boolean) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
   }
@@ -303,6 +331,7 @@ bleach.__doc__ = 'Get rid of interval coloring and label.';
 bleach.__node__ = builtinNode(bleach);
 
 export function linear(interval: Interval | boolean) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
   }
@@ -312,6 +341,7 @@ linear.__doc__ = 'Convert interval to linear representation.';
 linear.__node__ = builtinNode(linear);
 
 export function logarithmic(interval: Interval | boolean) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     interval = upcastBool(interval);
   }
@@ -326,6 +356,7 @@ logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
 export function cologarithmic(interval: Interval | boolean) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     interval = upcastBool(interval);
   }
@@ -338,6 +369,7 @@ export function absolute(
   this: ExpressionVisitor,
   interval: Interval | boolean
 ) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     interval = upcastBool(interval);
   }
@@ -369,6 +401,7 @@ export function relative(
   this: ExpressionVisitor,
   interval: Interval | boolean
 ) {
+  requireParameters({interval});
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
   }
@@ -400,15 +433,16 @@ relative.__node__ = builtinNode(relative);
 
 // Coercion: Very lossy
 function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
+  requireParameters({value});
   return sonicTruth(value);
 }
 bool.__doc__ = 'Convert value to a boolean.';
 bool.__node__ = builtinNode(bool);
 
 // Coercion: None.
-function int(this: ExpressionVisitor, value: Interval) {
-  value = relative.bind(this)(value);
-  return Interval.fromInteger(value.toInteger());
+function int(this: ExpressionVisitor, interval: Interval) {
+  interval = relative.bind(this)(interval);
+  return Interval.fromInteger(interval.toInteger());
 }
 int.__doc__ =
   'Convert value to an integer. Throws an error if conversion is impossible.';
@@ -762,30 +796,35 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Type detection ==
 function isInterval(value: SonicWeaveValue) {
+  requireParameters({value});
   return value instanceof Interval;
 }
 isInterval.__doc__ = 'Return `true` if the value is an interval.';
 isInterval.__node__ = builtinNode(isInterval);
 
 function isColor(value: SonicWeaveValue) {
+  requireParameters({value});
   return value instanceof Color;
 }
 isColor.__doc__ = 'Return `true` if the value is a color.';
 isColor.__node__ = builtinNode(isColor);
 
 function isString(value: SonicWeaveValue) {
+  requireParameters({value});
   return typeof value === 'string';
 }
 isString.__doc__ = 'Return `true` if the value is a string.';
 isString.__node__ = builtinNode(isString);
 
 function isBoolean(value: SonicWeaveValue) {
+  requireParameters({value});
   return typeof value === 'boolean';
 }
 isBoolean.__doc__ = 'Return `true` if the value is a boolean.';
 isBoolean.__node__ = builtinNode(isBoolean);
 
 function isFunction(value: SonicWeaveValue) {
+  requireParameters({value});
   return typeof value === 'function';
 }
 isFunction.__doc__ =
@@ -793,12 +832,14 @@ isFunction.__doc__ =
 isFunction.__node__ = builtinNode(isFunction);
 
 function isArray(value: SonicWeaveValue) {
+  requireParameters({value});
   return Array.isArray(value);
 }
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
 function isAbsolute(interval: Interval) {
+  requireParameters({interval});
   return interval.isAbsolute();
 }
 isAbsolute.__doc__ =
@@ -806,6 +847,7 @@ isAbsolute.__doc__ =
 isAbsolute.__node__ = builtinNode(isAbsolute);
 
 function isRelative(interval: Interval) {
+  requireParameters({interval});
   return interval.isRelative();
 }
 isRelative.__doc__ =
@@ -813,6 +855,7 @@ isRelative.__doc__ =
 isRelative.__node__ = builtinNode(isRelative);
 
 function isLinear(interval: Interval) {
+  requireParameters({interval});
   return interval.domain === 'linear';
 }
 isLinear.__doc__ =
@@ -820,6 +863,7 @@ isLinear.__doc__ =
 isLinear.__node__ = builtinNode(isLinear);
 
 function isLogarithmic(interval: Interval) {
+  requireParameters({interval});
   return interval.domain === 'logarithmic';
 }
 isLogarithmic.__doc__ =
@@ -829,18 +873,21 @@ isLogarithmic.__node__ = builtinNode(isLogarithmic);
 // == Value detection ==
 
 function isInt(interval: Interval) {
+  requireParameters({interval});
   return interval.value.isIntegral();
 }
 isInt.__doc__ = 'Return `true` if the interval is an integer.';
 isInt.__node__ = builtinNode(isInt);
 
 function isRational(interval: Interval) {
+  requireParameters({interval});
   return interval.value.isFractional();
 }
 isRational.__doc__ = 'Return `true` if the interval is a rational number.';
 isRational.__node__ = builtinNode(isRational);
 
 function isRadical(interval: Interval) {
+  requireParameters({interval});
   return !interval.value.isNonAlgebraic();
 }
 isRadical.__doc__ = 'Return `true` if the interval is an nth root.';
@@ -849,6 +896,7 @@ isRadical.__node__ = builtinNode(isRadical);
 // == Other ==
 
 export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
+  requireParameters({a, b});
   if (a.isRelative() && b.isRelative()) {
     return a.compare(b);
   }
@@ -861,6 +909,7 @@ export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
 }
 
 export function track(this: ExpressionVisitor, interval: Interval) {
+  requireParameters({interval});
   const result = interval.shallowClone();
   result.trackingIds.add(this.rootContext.nextTrackingId());
   return result;
@@ -869,6 +918,7 @@ track.__doc__ = 'Attach a tracking ID to the interval.';
 track.__node__ = builtinNode(track);
 
 function trackingIds(interval: Interval) {
+  requireParameters({interval});
   return Array.from(interval.trackingIds).map(id => fromInteger(id));
 }
 trackingIds.__doc__ =
@@ -876,6 +926,7 @@ trackingIds.__doc__ =
 trackingIds.__node__ = builtinNode(trackingIds);
 
 function flatten(array: SonicWeaveValue, depth?: Interval) {
+  requireParameters({array});
   if (Array.isArray(array)) {
     let d = Infinity;
     if (depth !== undefined) {
@@ -897,6 +948,7 @@ clear.__doc__ = 'Remove the contents of the current/given scale.';
 clear.__node__ = builtinNode(clear);
 
 function tail(this: ExpressionVisitor, interval: Interval, index: Interval) {
+  requireParameters({interval, index});
   return new Interval(
     interval.value.tail(index.toInteger()),
     interval.domain,
@@ -909,24 +961,28 @@ tail.__doc__ =
 tail.__node__ = builtinNode(tail);
 
 function colorOf(interval: Interval) {
+  requireParameters({interval});
   return interval.color;
 }
 colorOf.__doc__ = 'Return the color of the interval.';
 colorOf.__node__ = builtinNode(colorOf);
 
 function labelOf(interval: Interval) {
+  requireParameters({interval});
   return interval.label;
 }
 labelOf.__doc__ = 'Return the label of the interval.';
 labelOf.__node__ = builtinNode(labelOf);
 
 function equaveOf(val: Val) {
+  requireParameters({val});
   return new Interval(val.equave.clone(), 'linear');
 }
 equaveOf.__doc__ = 'Return the equave of the val.';
 equaveOf.__node__ = builtinNode(equaveOf);
 
 function withEquave(val: Val, equave: Interval) {
+  requireParameters({val, equave});
   return new Val(val.value.clone(), equave.value.clone());
 }
 withEquave.__doc__ = 'Change the equave of the val.';
@@ -937,6 +993,7 @@ function cosJIP(
   val: Val,
   weighting: 'none' | 'tenney' = 'tenney'
 ) {
+  requireParameters({val});
   const pe = val.value.primeExponents.map(e => e.valueOf());
   let value = 0;
   if (weighting.toLowerCase() === 'tenney') {
@@ -959,6 +1016,7 @@ cosJIP.__doc__ =
 cosJIP.__node__ = builtinNode(cosJIP);
 
 function JIP(this: ExpressionVisitor, interval: Interval) {
+  requireParameters({interval});
   const monzo = relative.bind(this)(interval).value;
   const pe = monzo.primeExponents.map(e => e.valueOf());
   const value = TimeMonzo.fromCents(
@@ -1031,6 +1089,9 @@ tenneyHeight.__node__ = builtinNode(tenneyHeight);
 function gcd(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
     intervals = this.getCurrentScale();
+  }
+  if (!intervals.length) {
+    return new Interval(ZERO_MONZO, 'linear');
   }
   return intervals.reduce(
     (a, b) => new Interval(a.value.gcd(b.value), 'linear')
@@ -1154,6 +1215,7 @@ function slice(
   indexStart: Interval,
   indexEnd?: Interval
 ) {
+  requireParameters({array, indexStart});
   return array.slice(
     indexStart.toInteger(),
     indexEnd === undefined ? undefined : indexEnd?.toInteger()
@@ -1202,40 +1264,41 @@ randomCents.__doc__ =
   'Obtain random cents between (logarithmic) 0.0c and 1.0c.';
 randomCents.__node__ = builtinNode(randomCents);
 
-function floor(this: ExpressionVisitor, value: Interval) {
-  value = relative.bind(this)(value);
-  const n = Math.floor(value.value.valueOf());
-  return Interval.fromInteger(n, value);
+function floor(this: ExpressionVisitor, interval: Interval) {
+  interval = relative.bind(this)(interval);
+  const n = Math.floor(interval.value.valueOf());
+  return Interval.fromInteger(n, interval);
 }
 floor.__doc__ = 'Round value down to the nearest integer.';
 floor.__node__ = builtinNode(floor);
 
-function round(this: ExpressionVisitor, value: Interval) {
-  value = relative.bind(this)(value);
-  const n = Math.round(value.value.valueOf());
-  return Interval.fromInteger(n, value);
+function round(this: ExpressionVisitor, interval: Interval) {
+  interval = relative.bind(this)(interval);
+  const n = Math.round(interval.value.valueOf());
+  return Interval.fromInteger(n, interval);
 }
 round.__doc__ = 'Round value to the nearest integer.';
 round.__node__ = builtinNode(round);
 
-function trunc(this: ExpressionVisitor, value: Interval) {
-  value = relative.bind(this)(value);
-  const n = Math.trunc(value.value.valueOf());
-  return Interval.fromInteger(n, value);
+function trunc(this: ExpressionVisitor, interval: Interval) {
+  interval = relative.bind(this)(interval);
+  const n = Math.trunc(interval.value.valueOf());
+  return Interval.fromInteger(n, interval);
 }
 trunc.__doc__ = 'Truncate value towards zero to the nearest integer.';
 trunc.__node__ = builtinNode(trunc);
 
-function ceil(this: ExpressionVisitor, value: Interval) {
-  value = relative.bind(this)(value);
-  const n = Math.ceil(value.value.valueOf());
-  return Interval.fromInteger(n, value);
+function ceil(this: ExpressionVisitor, interval: Interval) {
+  interval = relative.bind(this)(interval);
+  const n = Math.ceil(interval.value.valueOf());
+  return Interval.fromInteger(n, interval);
 }
 ceil.__doc__ = 'Round value up to the nearest integer.';
 ceil.__node__ = builtinNode(ceil);
 
-function abs(value: Interval) {
-  return value.abs();
+function abs(interval: Interval) {
+  requireParameters({interval});
+  return interval.abs();
 }
 abs.__doc__ = 'Calculate the absolute value of the interval.';
 abs.__node__ = builtinNode(abs);
@@ -1338,6 +1401,7 @@ function push(
   scale?: Interval[],
   index?: Interval
 ) {
+  requireParameters({interval});
   scale ??= this.getCurrentScale();
   if (index) {
     let i = index.toInteger();
@@ -1377,6 +1441,7 @@ function unshift(
   interval: Interval,
   scale?: Interval[]
 ) {
+  requireParameters({interval});
   scale ??= this.getCurrentScale();
   scale.unshift(interval);
 }
@@ -1389,6 +1454,7 @@ function insert(
   interval: Interval,
   scale?: Interval[]
 ) {
+  requireParameters({interval});
   scale ??= this.getCurrentScale();
   const cmp = compare.bind(this);
   for (let i = 0; i < scale.length; ++i) {
@@ -1408,6 +1474,7 @@ function dislodge(
   element: Interval,
   scale?: Interval[]
 ) {
+  requireParameters({element});
   scale ??= this.getCurrentScale();
   if (element instanceof Interval) {
     for (let i = 0; i < scale.length; ++i) {
@@ -1433,6 +1500,7 @@ function extend(
   first: Interval[],
   ...rest: Interval[][]
 ) {
+  requireParameters({first});
   for (const r of rest) {
     first.push(...r);
   }
@@ -1445,6 +1513,7 @@ function concat(
   first: SonicWeaveValue[] | string,
   ...rest: SonicWeaveValue[]
 ) {
+  requireParameters({first});
   if (typeof first === 'string') {
     return first.concat(
       ...rest.map(r => (typeof r === 'string' ? r : repr.bind(this)(r)))
@@ -1465,11 +1534,12 @@ length.__node__ = builtinNode(length);
 function map(
   this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
-  array?: any[]
+  scale?: any[]
 ) {
+  requireParameters({mapper});
   mapper = mapper.bind(this);
-  array ??= this.getCurrentScale();
-  return array.map((value, index, arr) =>
+  scale ??= this.getCurrentScale();
+  return scale.map((value, index, arr) =>
     mapper(value, fromInteger(index), arr)
   );
 }
@@ -1479,12 +1549,13 @@ map.__node__ = builtinNode(map);
 function remap(
   this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
-  array?: any[]
+  scale?: any[]
 ) {
-  array ??= this.getCurrentScale();
-  const mapped = map.bind(this)(mapper, array);
-  array.length = 0;
-  array.push(...mapped);
+  requireParameters({mapper});
+  scale ??= this.getCurrentScale();
+  const mapped = map.bind(this)(mapper, scale);
+  scale.length = 0;
+  scale.push(...mapped);
 }
 remap.__doc__ =
   'Map a riff over the given/current scale replacing the contents.';
@@ -1493,11 +1564,12 @@ remap.__node__ = builtinNode(remap);
 function filter(
   this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
-  array?: any[]
+  scale?: any[]
 ) {
+  requireParameters({tester});
   tester = tester.bind(this);
-  array ??= this.getCurrentScale();
-  return array.filter((value, index, arr) =>
+  scale ??= this.getCurrentScale();
+  return scale.filter((value, index, arr) =>
     sonicTruth(tester(value, fromInteger(index), arr))
   );
 }
@@ -1508,12 +1580,13 @@ filter.__node__ = builtinNode(filter);
 function distill(
   this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
-  array?: any[]
+  scale?: any[]
 ) {
-  array ??= this.getCurrentScale();
-  const filtered = filter.bind(this)(tester, array);
-  array.length = 0;
-  array.push(...filtered);
+  requireParameters({tester});
+  scale ??= this.getCurrentScale();
+  const filtered = filter.bind(this)(tester, scale);
+  scale.length = 0;
+  scale.push(...filtered);
 }
 distill.__doc__ =
   'Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.';
@@ -1527,22 +1600,23 @@ function arrayReduce(
     currentIndex: Interval,
     array: any[]
   ) => any,
-  array?: any[],
+  scale?: any[],
   initialValue?: any
 ) {
+  requireParameters({reducer});
   if (!(typeof reducer === 'function')) {
     throw new Error('The first argument of arrayReduce must be a function.');
   }
   reducer = reducer.bind(this);
-  array ??= this.getCurrentScale();
+  scale ??= this.getCurrentScale();
   if (arguments.length >= 3) {
-    return array.reduce(
+    return scale.reduce(
       (value, currentValue, currentIndex, arr) =>
         reducer(value, currentValue, fromInteger(currentIndex), arr),
       initialValue
     );
   } else {
-    return array.reduce((value, currentValue, currentIndex, arr) =>
+    return scale.reduce((value, currentValue, currentIndex, arr) =>
       reducer(value, currentValue, fromInteger(currentIndex), arr)
     );
   }
@@ -1554,17 +1628,18 @@ arrayReduce.__node__ = builtinNode(arrayReduce);
 function arrayRepeat(
   this: ExpressionVisitor,
   count: Interval,
-  array?: any[] | string
+  scale?: any[] | string
 ) {
+  requireParameters({count});
   const c = count.toInteger();
-  if (typeof array === 'string') {
-    return array.repeat(c);
+  if (typeof scale === 'string') {
+    return scale.repeat(c);
   }
   if (c === 0) {
     return [];
   }
-  array ??= this.getCurrentScale();
-  return [].concat(...Array(c).fill(array));
+  scale ??= this.getCurrentScale();
+  return [].concat(...Array(c).fill(scale));
 }
 arrayRepeat.__doc__ = 'Repeat the given/current array or string `count` times.';
 arrayRepeat.__node__ = builtinNode(arrayRepeat);
@@ -1633,12 +1708,14 @@ dir.__doc__ = 'Obtain the javascript representation of the value.';
 dir.__node__ = builtinNode(dir);
 
 function doc(riff: SonicWeaveFunction) {
+  requireParameters({riff});
   return riff.__doc__;
 }
 doc.__doc__ = 'Obtain the docstring of the given riff.';
 doc.__node__ = builtinNode(doc);
 
 function help(riff: SonicWeaveFunction) {
+  requireParameters({riff});
   console.log(`Help on ${riff.name}`);
   console.log(riff.__doc__);
   const params = riff.__node__.parameters;
@@ -1670,6 +1747,7 @@ function cc(x: Interval, fractionDigits = 3) {
 }
 
 function rgb(red: Interval, green: Interval, blue: Interval) {
+  requireParameters({red, green, blue});
   return new Color(`rgb(${cc(red)}, ${cc(green)}, ${cc(blue)})`);
 }
 rgb.__doc__ =
@@ -1677,6 +1755,7 @@ rgb.__doc__ =
 rgb.__node__ = builtinNode(rgb);
 
 function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
+  requireParameters({red, green, blue, alpha});
   return new Color(
     `rgba(${cc(red)}, ${cc(green)}, ${cc(blue)}, ${cc(alpha, 5)})`
   );
@@ -1686,6 +1765,7 @@ rgba.__doc__ =
 rgba.__node__ = builtinNode(rgba);
 
 function hsl(hue: Interval, saturation: Interval, lightness: Interval) {
+  requireParameters({hue, saturation, lightness});
   return new Color(`hsl(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%)`);
 }
 hsl.__doc__ =
@@ -1698,6 +1778,7 @@ function hsla(
   lightness: Interval,
   alpha: Interval
 ) {
+  requireParameters({hue, saturation, lightness, alpha});
   return new Color(
     `hsla(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%, ${cc(alpha, 5)})`
   );
@@ -1707,6 +1788,7 @@ hsla.__doc__ =
 hsla.__node__ = builtinNode(hsla);
 
 export function centsColor(interval: Interval) {
+  requireParameters({interval});
   const octaves = interval.totalCents() / 1200;
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
@@ -1756,6 +1838,7 @@ function tanh255(x: number) {
 }
 
 export function factorColor(interval: Interval) {
+  requireParameters({interval});
   let r = 0;
   let g = 0;
   let b = 0;
@@ -2280,10 +2363,10 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 }
 
 // == Scale generation ==
-riff ed(divisions, equave) {
+riff ed(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
   [1..divisions];
-  if (equave === niente) step => step \\ divisions;
+  if (equave === 2) step => step \\ divisions;
   else step => step \\ divisions < equave >;
 }
 
@@ -2292,15 +2375,14 @@ riff subharmonics(start, end) {
   /end::start;
 }
 
-riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down, equave) {
+riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmallStep = 1, up = niente, down = niente, equave = 2) {
   "Generate a Moment-Of-Symmetry scale with the given number number of large and small steps. \\
-  Size of the large step defaults to 2. Size of the small step defaults to 1. \\
   \`up\` defines the brightness of the mode i.e. the number of major intervals from the root. \\
   Alternatively \`down\` defines the darkness of the mode i.e. the number of minor intervals from the root. \\
   The default \`equave\` is the octave \`2/1\`.";
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = $[-1];
-  if (equave === niente) step => step \\ divisions;
+  if (equave === 2) step => step \\ divisions;
   else step => step \\ divisions < equave >;
 }
 
@@ -2352,8 +2434,8 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
   sort();
 }
 
-riff parallelotope(basis, ups, downs, equave = 2) {
-  "Span a parallelotope by extending a basis combinatorically.";
+riff parallelotope(basis, ups = niente, downs = niente, equave = 2) {
+  "Span a parallelotope by extending a basis combinatorically. \`ups\` defaults to all ones while \`downs\` defaults to all zeros.";
   basis = basis[..];
   ups = ups[..] if ups else [];
   downs = downs[..] if downs else [];

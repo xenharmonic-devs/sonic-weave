@@ -336,7 +336,7 @@ describe('SonicWeave expression evaluator', () => {
   it('can access builtin docs', () => {
     const doc = evaluateExpression('doc(primes)', false);
     expect(doc).toBe(
-      'Obtain an array of prime numbers such that start <= p <= end.'
+      'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.'
     );
   });
 
@@ -1443,5 +1443,20 @@ describe('SonicWeave expression evaluator', () => {
   it('can multiply boolean with an interval (right universal)', () => {
     const three = parseSingle('3 ~* true');
     expect(three.toString()).toBe('3');
+  });
+
+  it("throws if you don't pass arguments to sin", () => {
+    expect(() => parseSingle('sin()')).toThrow("Parameter 'x' is required.");
+  });
+
+  it("throws if you don't pass arguments to int", () => {
+    expect(() => parseSingle('int()')).toThrow(
+      "Parameter 'interval' is required."
+    );
+  });
+
+  it('has the empty gcd', () => {
+    const zero = parseSingle('gcd()');
+    expect(zero.toString()).toBe('0');
   });
 });
