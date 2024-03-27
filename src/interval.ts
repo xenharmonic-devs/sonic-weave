@@ -25,6 +25,7 @@ import {Domain, TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {RootContext} from './context';
 import {ONE, ZERO, countUpsAndLifts, setUnion} from './utils';
+import {FractionValue} from 'xen-dev-utils';
 
 export type IntervalDomain = Exclude<Domain, 'cologarithmic'>;
 
@@ -120,6 +121,17 @@ export class Interval {
       monzo,
       'linear',
       {type: 'IntegerLiteral', value},
+      convert
+    );
+  }
+
+  static fromFraction(value: FractionValue, convert?: Interval) {
+    const monzo = TimeMonzo.fromFraction(value);
+    const {numerator, denominator} = monzo.toBigNumeratorDenominator();
+    return new Interval(
+      monzo,
+      'linear',
+      {type: 'FractionLiteral', numerator, denominator},
       convert
     );
   }

@@ -2293,3 +2293,72 @@ export function evaluateExpression(
   const subVisitor = visitor.createExpressionVisitor();
   return subVisitor.visit(finalStatement.expression);
 }
+
+function convert(value: any): SonicWeaveValue {
+  switch (typeof value) {
+    case 'string':
+    case 'undefined':
+    case 'function':
+      return value;
+    case 'number':
+    case 'bigint':
+      return Interval.fromInteger(value);
+    case 'boolean':
+      return sonicBool(value);
+    case 'symbol':
+      throw new Error('Symbols cannot be converted.');
+    case 'object':
+      if (value instanceof Interval) {
+        return value;
+      } else if (value instanceof Fraction) {
+        return Interval.fromFraction(value);
+      } else if (value instanceof TimeMonzo) {
+        return new Interval(value, 'linear');
+      } else if (Array.isArray(value)) {
+        return value.map(convert) as Interval[];
+      }
+  }
+  throw new Error('Value cannot be converted.');
+}
+
+export function createTag(
+  includePrelude = true,
+  extraBuiltins?: Record<string, SonicWeaveValue>
+) {
+  function tag(strings: TemplateStringsArray, ...args: any[]) {
+    const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
+    const visitor = new StatementVisitor(
+      globalVisitor.rootContext,
+      globalVisitor
+    );
+    let source = strings.raw[0];
+    for (let i = 0; i < args.length; ++i) {
+      const arg = args[i];
+      const name = `__tagArg${i}_${Math.floor(46656 * Math.random()).toString(
+        36
+      )}`;
+      visitor.immutables.set(name, convert(arg));
+      source += name + strings.raw[i + 1];
+    }
+    const program = parseAST(source);
+    for (const statement of program.body.slice(0, -1)) {
+      const interrupt = visitor.visit(statement);
+      if (interrupt) {
+        throw new Error(`Illegal ${interrupt.type}.`);
+      }
+    }
+    const finalStatement = program.body[program.body.length - 1];
+    if (finalStatement.type !== 'ExpressionStatement') {
+      throw new Error(`Expected expression. Got ${finalStatement.type}`);
+    }
+    const subVisitor = visitor.createExpressionVisitor();
+    return subVisitor.visit(finalStatement.expression);
+  }
+  return tag;
+}
+
+export const sw = createTag();
+Object.defineProperty(sw, 'name', {
+  value: 'sw',
+  enumerable: false,
+});
