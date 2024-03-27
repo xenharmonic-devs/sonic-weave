@@ -136,6 +136,11 @@ export class Interval {
     );
   }
 
+  static fromValue(value: number, convert?: Interval) {
+    const monzo = TimeMonzo.fromValue(value);
+    return new Interval(monzo, 'linear', monzo.asDecimalLiteral(), convert);
+  }
+
   shallowClone(): Interval {
     return new Interval(this.value, this.domain, this.node, this);
   }

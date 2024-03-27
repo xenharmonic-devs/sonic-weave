@@ -2301,6 +2301,10 @@ function convert(value: any): SonicWeaveValue {
     case 'function':
       return value;
     case 'number':
+      if (Number.isInteger(value)) {
+        return Interval.fromInteger(value);
+      }
+      return Interval.fromValue(value);
     case 'bigint':
       return Interval.fromInteger(value);
     case 'boolean':
