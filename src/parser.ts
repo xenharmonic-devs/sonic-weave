@@ -1184,7 +1184,12 @@ export class ExpressionVisitor {
     return new Interval(value, 'logarithmic', node);
   }
 
-  down(operand: Interval | Interval[] | Val): Interval | Interval[] | Val {
+  down(
+    operand: boolean | Interval | (Interval | boolean)[] | Val
+  ): Interval | Interval[] | Val {
+    if (typeof operand === 'boolean') {
+      operand = upcastBool(operand);
+    }
     if (operand instanceof Interval || operand instanceof Val) {
       return operand.down(this.rootContext);
     }
@@ -1204,9 +1209,12 @@ export class ExpressionVisitor {
   }
 
   label(
-    object: Interval | Interval[],
+    object: boolean | Interval | (Interval | boolean)[],
     labels: (string | Color | undefined)[]
   ): Interval | Interval[] {
+    if (typeof object === 'boolean') {
+      object = upcastBool(object);
+    }
     if (object instanceof Interval) {
       object = object.shallowClone();
       for (const label of labels) {
@@ -1226,7 +1234,13 @@ export class ExpressionVisitor {
 
   visitLabeledExpression(node: LabeledExpression) {
     const object = this.visit(node.object);
-    if (!(object instanceof Interval || Array.isArray(object))) {
+    if (
+      !(
+        typeof object === 'boolean' ||
+        object instanceof Interval ||
+        Array.isArray(object)
+      )
+    ) {
       throw new Error('Labels can only be applied to intervals');
     }
     const labels: (string | Color | undefined)[] = [];
@@ -1317,9 +1331,12 @@ export class ExpressionVisitor {
   }
 
   project(
-    octaves: Interval | Interval[],
+    octaves: boolean | Interval | (Interval | boolean)[],
     base: Interval
   ): Interval | Interval[] {
+    if (typeof octaves === 'boolean') {
+      octaves = upcastBool(octaves);
+    }
     if (octaves instanceof Interval) {
       return octaves.project(base);
     }
@@ -1329,7 +1346,13 @@ export class ExpressionVisitor {
 
   visitNedjiProjection(node: NedjiProjection) {
     const octaves = this.visit(node.octaves);
-    if (!(octaves instanceof Interval || Array.isArray(octaves))) {
+    if (
+      !(
+        typeof octaves === 'boolean' ||
+        octaves instanceof Interval ||
+        Array.isArray(octaves)
+      )
+    ) {
       throw new Error(
         'Nedji steps must evaluate to an interval or an array of intervals'
       );
@@ -1390,7 +1413,39 @@ export class ExpressionVisitor {
     if (!Array.isArray(object) && typeof object !== 'string') {
       throw new Error('Array access on non-array.');
     }
-    const index = this.visit(node.index);
+    let index = this.visit(node.index);
+    if (Array.isArray(index)) {
+      index = index.flat(Infinity);
+      const result: (boolean | Interval | string)[] = [];
+      for (let i = 0; i < index.length; ++i) {
+        const idx = index[i];
+        if (idx === true) {
+          if (!node.nullish && i >= object.length) {
+            throw new Error('Indexing boolean out of range.');
+          }
+          result.push(object[i]);
+          continue;
+        } else if (idx === false) {
+          continue;
+        }
+        let j = idx.toInteger();
+        if (j < 0) {
+          j += object.length;
+        }
+        if (node.nullish) {
+          result.push(object[j]);
+          continue;
+        }
+        if (j < 0 || j >= object.length) {
+          throw new Error('Index out of range.');
+        }
+        result.push(object[j]);
+      }
+      if (typeof object === 'string') {
+        return result.join('');
+      }
+      return result as Interval[];
+    }
     if (!(index instanceof Interval)) {
       throw new Error('Array access with a non-integer.');
     }
@@ -1493,12 +1548,15 @@ export class ExpressionVisitor {
   }
 
   unaryOperate(
-    operand: Interval | Interval[] | Val,
+    operand: boolean | Interval | (Interval | boolean)[] | Val,
     node: UnaryExpression
   ): Interval | Interval[] | Val {
     if (Array.isArray(operand)) {
       const op = this.unaryOperate.bind(this);
       return operand.map(o => op(o, node)) as Interval[];
+    }
+    if (typeof operand === 'boolean') {
+      operand = upcastBool(operand);
     }
     if (node.uniform) {
       let value: TimeMonzo;
@@ -1575,10 +1633,16 @@ export class ExpressionVisitor {
   }
 
   tensor(
-    left: Interval | Interval[],
-    right: Interval | Interval[],
+    left: boolean | Interval | (Interval | boolean)[],
+    right: boolean | Interval | (Interval | boolean)[],
     node: BinaryExpression
   ): Interval | Interval[] {
+    if (typeof left === 'boolean') {
+      left = upcastBool(left);
+    }
+    if (typeof right === 'boolean') {
+      right = upcastBool(right);
+    }
     if (left instanceof Interval) {
       if (right instanceof Interval) {
         this.rootContext.spendGas();
@@ -1596,8 +1660,8 @@ export class ExpressionVisitor {
   }
 
   binaryOperate(
-    left: Interval | boolean | Interval[],
-    right: Interval | boolean | Interval[],
+    left: Interval | boolean | (Interval | boolean)[],
+    right: Interval | boolean | (Interval | boolean)[],
     node: BinaryExpression
   ): boolean | Interval | Interval[] {
     if (typeof left === 'boolean') {

@@ -43,7 +43,7 @@ export interface SonicWeaveFunction extends Function {
 export type SonicWeaveValue =
   | SonicWeaveFunction
   | Interval
-  | Interval[]
+  | (Interval | boolean)[]
   | Val
   | Color
   | string

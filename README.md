@@ -215,6 +215,17 @@ Use square brackets to access array elements. Indexing starts from zero. Negativ
 #### Nullish access
 Accessing an array out of bounds raises an exception. Javascript-like behavior is available using `~[]` e.g. `arr~[777]` evaluates to `niente` if the array doesn't have at least 778 elements.
 
+#### Using an array of indices
+To obtain a subset of an array use an array of indices e.g. `[1, 2, 3, 4][0, 2]` evaluates to `[1, 3]`.
+
+#### Using an array of booleans
+Another way to obtain a subset is to use an array of booleans. This works especially well with vectorized operators like `>` here:
+```javascript
+const smallPrimes = [2, 3, 5, 7, 11]
+smallPrimes[smallPrimes > 4]
+```
+results in `$ = [5, 7, 11]`
+
 ### Slices
 Range syntax inside array access gets a copy of a subset the array e.g. `[1, 2, 3, 4][2..3]` evaluates to `[3, 4]`.
 

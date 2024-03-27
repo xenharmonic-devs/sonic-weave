@@ -150,6 +150,9 @@ Return `true` if the interval belongs to the absolute echelon.
 ### isArray(*value*)
 Return `true` if the value is an array.
 
+### isBoolean(*value*)
+Return `true` if the value is a boolean.
+
 ### isColor(*value*)
 Return `true` if the value is a color.
 

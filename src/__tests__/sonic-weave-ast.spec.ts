@@ -837,6 +837,33 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses array access by arrays', () => {
+    const ast = parseSingle('foo[[true, false]]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArrayAccess',
+        object: {type: 'Identifier', id: 'foo'},
+        nullish: false,
+        index: {
+          type: 'ArrayLiteral',
+          elements: [
+            {
+              type: 'Argument',
+              spread: false,
+              expression: {type: 'TrueLiteral'},
+            },
+            {
+              type: 'Argument',
+              spread: false,
+              expression: {type: 'FalseLiteral'},
+            },
+          ],
+        },
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

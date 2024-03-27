@@ -1160,4 +1160,22 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['1', '2', '3', '10']);
   });
+
+  it('can access arrays with boolean arrays', () => {
+    const scale = parseSource(`
+      const foo = [1..10];
+      foo[foo < 5];
+      str;
+    `);
+    expect(scale).toEqual(['1', '2', '3', '4']);
+  });
+
+  it('can access arrays with integer arrays', () => {
+    const scale = parseSource(`
+      const foo = [1..10];
+      foo[[0, 2, 4, -1]];
+      str;
+    `);
+    expect(scale).toEqual(['1', '3', '5', '10']);
+  });
 });
