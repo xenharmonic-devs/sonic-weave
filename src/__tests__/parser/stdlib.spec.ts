@@ -1176,4 +1176,10 @@ describe('SonicWeave standard library', () => {
       visitor.getCurrentScale().map(i => Array.from(i.trackingIds)[0])
     ).toEqual([3, 4, 2, 5, 1]);
   });
+
+  it("throws if you don't pass arguments to sanitize", () => {
+    expect(() => parseSingle('sanitize()')).toThrow(
+      "Parameter 'interval' is required."
+    );
+  });
 });

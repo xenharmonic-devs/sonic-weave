@@ -3,7 +3,7 @@
 
 ## Built-in functions
 
-### abs(*value*)
+### abs(*interval*)
 Calculate the absolute value of the interval.
 
 ### absolute(*interval*)
@@ -15,10 +15,10 @@ Convert interval to absolute FJS.
 ### acos(*x*)
 Calculate acos x.
 
-### arrayReduce(*reducer*, *array*, *initialValue*)
+### arrayReduce(*reducer*, *scale = $$*, *initialValue*)
 Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.
 
-### arrayRepeat(*count*, *array*)
+### arrayRepeat(*count*, *scale = $$*)
 Repeat the given/current array or string `count` times.
 
 ### asin(*x*)
@@ -39,7 +39,7 @@ Get rid of interval coloring and label.
 ### bool(*value*)
 Convert value to a boolean.
 
-### ceil(*value*)
+### ceil(*interval*)
 Round value up to the nearest integer.
 
 ### cents(*interval*, *fractionDigits*)
@@ -48,7 +48,7 @@ Convert interval to cents.
 ### centsColor(*interval*)
 Color based on the size of the interval. Hue wraps around every 1200 cents.
 
-### clear(*scale*)
+### clear(*scale = $$*)
 Remove the contents of the current/given scale.
 
 ### clz32(*x*)
@@ -75,10 +75,10 @@ Convert interval to a decimal number.
 ### dir(*arg*)
 Obtain the javascript representation of the value.
 
-### dislodge(*element*, *scale*)
+### dislodge(*element*, *scale = $$*)
 Remove and return the first element equal to the given one from the current/given scale.
 
-### distill(*tester*, *array*)
+### distill(*tester*, *scale = $$*)
 Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.
 
 ### doc(*riff*)
@@ -102,7 +102,7 @@ Generate the interior of the n'th Farey sequence i.e. all fractions between 0 an
 ### fareySequence(*maxDenominator*)
 Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominater below or at the given limit.
 
-### filter(*tester*, *array*)
+### filter(*tester*, *scale = $$*)
 Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.
 
 ### FJS(*interval*, *flavor = ""*)
@@ -111,7 +111,7 @@ Convert interval to (relative) FJS.
 ### flatten(*array*, *depth*)
 Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `Infinity`).
 
-### floor(*value*)
+### floor(*interval*)
 Round value down to the nearest integer.
 
 ### fraction(*interval*, *tolerance*, *preferredNumerator*, *preferredDenominator*)
@@ -123,7 +123,7 @@ Calculate fround x.
 ### gcd(*...intervals*)
 Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
 
-### hasConstantStructure(*monzos*)
+### hasConstantStructure(*scale = $$*)
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
 
 ### help(*riff*)
@@ -138,10 +138,10 @@ HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alph
 ### imul(*x*)
 Calculate imul x.
 
-### insert(*interval*, *scale*)
+### insert(*interval*, *scale = $$*)
 Insert an interval into the current/given scale keeping it sorted.
 
-### int(*value*)
+### int(*interval*)
 Convert value to an integer. Throws an error if conversion is impossible.
 
 ### isAbsolute(*interval*)
@@ -201,7 +201,7 @@ Return the label of the interval.
 ### lcm(*...intervals*)
 Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.
 
-### length(*scale*)
+### length(*scale = $$*)
 Return the number of intervals in the scale.
 
 ### linear(*interval*)
@@ -213,7 +213,7 @@ Calculate log1p x.
 ### logarithmic(*interval*)
 Convert interval to logarithmic representation.
 
-### map(*mapper*, *array*)
+### map(*mapper*, *scale = $$*)
 Map a riff over the given/current scale producing a new scale.
 
 ### maximum(*...args*)
@@ -234,22 +234,22 @@ Convert interval to N steps of equally divided just intonation.
 ### numComponents(*value*)
 Get/set the number of prime exponents to support in monzos. Also sets the length of vals.
 
-### pop(*scale*, *index*)
+### pop(*scale = $$*, *index*)
 Remove and return the last interval in the current/given scale. Optionally an index to pop may be given.
 
-### popAll(*scale*)
+### popAll(*scale = $$*)
 Remove and return all intervals in the current/given scale.
 
 ### PrimeMapping(*...newPrimes*)
 Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.
 
 ### primes(*start*, *end*)
-Obtain an array of prime numbers such that start <= p <= end.
+Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.
 
 ### print(*...args*)
 Print the arguments to the console.
 
-### push(*interval*, *scale*, *index*)
+### push(*interval*, *scale = $$*, *index*)
 Append an interval onto the current/given scale. Optionally an index to push after may be given.
 
 ### radical(*interval*, *maxIndex*, *maxHeight*)
@@ -264,16 +264,16 @@ Obtain random cents between (logarithmic) 0.0c and 1.0c.
 ### relative(*interval*)
 Convert interval to relative representation.
 
-### remap(*mapper*, *array*)
+### remap(*mapper*, *scale = $$*)
 Map a riff over the given/current scale replacing the contents.
 
 ### repr(*value*)
 Obtain a string representation of the value (with color and label).
 
-### reverse(*scale*)
+### reverse(*scale = $$*)
 Reverse the order of the current/given scale.
 
-### reversed(*scale*)
+### reversed(*scale = $$*)
 Obtain a copy of the current/given scale in reversed order.
 
 ### rgb(*red*, *green*, *blue*)
@@ -282,10 +282,10 @@ RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).
 ### rgba(*red*, *green*, *blue*, *alpha*)
 RGBA color (Red range 0-255, Green range 0-255, Blue range 0-255, Alpha range 0-1).
 
-### round(*value*)
+### round(*interval*)
 Round value to the nearest integer.
 
-### shift(*scale*)
+### shift(*scale = $$*)
 Remove and return the first interval in the current/given scale.
 
 ### simplify(*interval*)
@@ -297,10 +297,10 @@ Calculate sin x.
 ### slice(*array*, *indexStart*, *indexEnd*)
 Obtain a slice of a string or scale between the given indices.
 
-### sort(*scale*, *compareFn*)
+### sort(*scale = $$*, *compareFn*)
 Sort the current/given scale in ascending order.
 
-### sorted(*scale*, *compareFn*)
+### sorted(*scale = $$*, *compareFn*)
 Obtain a sorted copy of the current/given scale in ascending order.
 
 ### str(*value*)
@@ -321,10 +321,10 @@ Attach a tracking ID to the interval.
 ### trackingIds(*interval*)
 Obtain an array of the tracking IDs attached to the interval.
 
-### trunc(*value*)
+### trunc(*interval*)
 Truncate value towards zero to the nearest integer.
 
-### unshift(*interval*, *scale*)
+### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
 
 ### withEquave(*val*, *equave*)
@@ -413,7 +413,7 @@ Calculate the denominator of x in reduced form.
 ### diff(*array*)
 Calculate the (linear) differences between the terms.
 
-### ed(*divisions*, *equave*)
+### ed(*divisions*, *equave = 2*)
 Generate an equal temperament with the given number of divisions of the given equave/octave.
 
 ### edColors(*divisions = 12*, *offset = 0*, *equave = 2*)
@@ -497,8 +497,8 @@ Calculate the logarithm of x base 2.
 ### mergeOffset(*offsets*, *overflow = "drop"*, *scale = $$*)
 Merge the given offset or polyoffset of the current/given scale onto itself. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 
-### mos(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep*, *sizeOfSmallStep*, *up*, *down*, *equave*)
-Generate a Moment-Of-Symmetry scale with the given number number of large and small steps.   Size of the large step defaults to 2. Size of the small step defaults to 1.   `up` defines the brightness of the mode i.e. the number of major intervals from the root.   Alternatively `down` defines the darkness of the mode i.e. the number of minor intervals from the root.   The default `equave` is the octave `2/1`.
+### mos(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep = 2*, *sizeOfSmallStep = 1*, *up = niente*, *down = niente*, *equave = 2*)
+Generate a Moment-Of-Symmetry scale with the given number number of large and small steps.   `up` defines the brightness of the mode i.e. the number of major intervals from the root.   Alternatively `down` defines the darkness of the mode i.e. the number of minor intervals from the root.   The default `equave` is the octave `2/1`.
 
 ### mtof(*index*)
 Convert MIDI note number to absolute frequency.
@@ -524,8 +524,8 @@ Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive
 ### oddLimitOf(*x*, *equave = 2*)
 Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 
-### parallelotope(*basis*, *ups*, *downs*, *equave = 2*)
-Span a parallelotope by extending a basis combinatorically.
+### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*)
+Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.
 
 ### periodiff(*array*)
 Calculate the geometric differences of the periodic interval pattern.

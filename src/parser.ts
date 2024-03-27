@@ -149,8 +149,12 @@ function localAssign(
   name: Parameter | Parameters_,
   arg?: SonicWeaveValue
 ) {
-  if (arguments.length < 4 && name.defaultValue) {
-    arg = subVisitor.visit(name.defaultValue);
+  if (arguments.length < 4) {
+    if (name.defaultValue) {
+      arg = subVisitor.visit(name.defaultValue);
+    } else if (name.type === 'Parameter') {
+      throw new Error(`Parameter '${name.id}' is required.`);
+    }
   }
   if (name.type === 'Parameters') {
     if (!Array.isArray(arg)) {
