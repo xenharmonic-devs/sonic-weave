@@ -273,7 +273,7 @@ The Pythagorean nominals from unison to the first octave are.
 | `E4`    | `C4 + M3` |
 | `F4`    | `C4 + P4` |
 | `G4`    | `C4 + P5` |
-| `a4`    | `C4 + M6` |
+| `A4`    | `C4 + M6` |
 | `B4`    | `C4 + M7` |
 | `C5`    | `C4 + P8` |
 
