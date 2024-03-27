@@ -1596,10 +1596,16 @@ export class ExpressionVisitor {
   }
 
   binaryOperate(
-    left: Interval | Interval[],
-    right: Interval | Interval[],
+    left: Interval | boolean | Interval[],
+    right: Interval | boolean | Interval[],
     node: BinaryExpression
   ): boolean | Interval | Interval[] {
+    if (typeof left === 'boolean') {
+      left = upcastBool(left);
+    }
+    if (typeof right === 'boolean') {
+      right = upcastBool(right);
+    }
     const operator = node.operator;
     if (left instanceof Interval) {
       if (right instanceof Interval) {
@@ -1774,12 +1780,14 @@ export class ExpressionVisitor {
       return left.map(l => op(l, right, node)) as Interval[];
     }
     const op = this.binaryOperate.bind(this);
-    return left.map((l, i) => op(l, right[i], node)) as Interval[];
+    return left.map((l, i) =>
+      op(l, (right as Interval[])[i], node)
+    ) as Interval[];
   }
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
-    const left = this.visit(node.left);
+    let left = this.visit(node.left);
     if (operator === '??') {
       if (left !== undefined) {
         return left;
@@ -1798,8 +1806,14 @@ export class ExpressionVisitor {
       }
       return this.visit(node.right);
     }
-    const right = this.visit(node.right);
+    let right = this.visit(node.right);
     if (operator === 'tns' || operator === '⊗') {
+      if (typeof left === 'boolean') {
+        left = upcastBool(left);
+      }
+      if (typeof right === 'boolean') {
+        right = upcastBool(right);
+      }
       if (!(left instanceof Interval) && !Array.isArray(left)) {
         throw new Error('Left tensor operand must be an interval or an array.');
       }
@@ -1853,7 +1867,10 @@ export class ExpressionVisitor {
         }
         throw new Error(`Operator '${operator}' not implemented between vals.`);
       }
-      if (right instanceof Interval) {
+      if (right instanceof Interval || typeof right === 'boolean') {
+        if (typeof right === 'boolean') {
+          right = upcastBool(right);
+        }
         switch (operator) {
           case '×':
           case '*':
@@ -1888,8 +1905,12 @@ export class ExpressionVisitor {
       }
     }
     if (
-      (left instanceof Interval || Array.isArray(left)) &&
-      (right instanceof Interval || Array.isArray(right))
+      (left instanceof Interval ||
+        typeof left === 'boolean' ||
+        Array.isArray(left)) &&
+      (right instanceof Interval ||
+        typeof right === 'boolean' ||
+        Array.isArray(right))
     ) {
       return this.binaryOperate(left, right, node);
     }

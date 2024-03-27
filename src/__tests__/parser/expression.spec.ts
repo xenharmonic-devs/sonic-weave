@@ -1429,4 +1429,19 @@ describe('SonicWeave expression evaluator', () => {
     expect(angle.domain).toBe('linear');
     expect(angle.valueOf()).toBeCloseTo(-1.2048493);
   });
+
+  it('can add booleans producing intervals', () => {
+    const zero = parseSingle('false + false');
+    expect(zero.toString()).toBe('0');
+  });
+
+  it('can multiply boolean with an interval (left domain-specific)', () => {
+    const three = parseSingle('true * 3');
+    expect(three.toString()).toBe('3');
+  });
+
+  it('can multiply boolean with an interval (right universal)', () => {
+    const three = parseSingle('3 ~* true');
+    expect(three.toString()).toBe('3');
+  });
 });
