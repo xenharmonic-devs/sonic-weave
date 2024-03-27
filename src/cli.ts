@@ -3,6 +3,7 @@ import {relative} from './builtin';
 import {Interval} from './interval';
 import {
   ExpressionVisitor,
+  StatementVisitor,
   evaluateSource,
   getSourceVisitor,
   parseAST,
@@ -51,7 +52,11 @@ export function toScalaScl(source: string) {
 const prompt = '𝄞 ';
 
 export function repl(start: (options?: string | ReplOptions) => REPLServer) {
-  const visitor = getSourceVisitor();
+  const globalVisitor = getSourceVisitor();
+  const visitor = new StatementVisitor(
+    globalVisitor.rootContext,
+    globalVisitor
+  );
 
   let numCurlies = 0;
   let currentCmd = '';
