@@ -47,7 +47,8 @@ export type SonicWeaveValue =
   | Val
   | Color
   | string
-  | undefined;
+  | undefined
+  | boolean;
 
 const ZERO = new Fraction(0);
 const ZERO_MONZO = new TimeMonzo(ZERO, [], ZERO);
@@ -62,6 +63,17 @@ function fromInteger(n: number) {
   return Interval.fromInteger(n);
 }
 
+/**
+ * Convert boolean value to a 1 or 0.
+ * @param b `true` or `false` to convert.
+ * @returns Interval literal representing either 1 or 0.
+ */
+export function upcastBool(b: boolean) {
+  return b
+    ? new Interval(ONE_MONZO, 'linear', {type: 'IntegerLiteral', value: 1n})
+    : new Interval(ZERO_MONZO, 'linear', {type: 'IntegerLiteral', value: 0n});
+}
+
 export function sonicTruth(test: SonicWeaveValue) {
   if (test instanceof Interval) {
     return Boolean(test.value.residual.n);
@@ -69,12 +81,6 @@ export function sonicTruth(test: SonicWeaveValue) {
     return Boolean(test.length);
   }
   return Boolean(test);
-}
-
-export function sonicBool(b: boolean) {
-  return b
-    ? new Interval(ONE_MONZO, 'linear', {type: 'TrueLiteral'})
-    : new Interval(ZERO_MONZO, 'linear', {type: 'FalseLiteral'});
 }
 
 export function linearOne() {
@@ -198,7 +204,7 @@ kCombinations.__doc__ = 'Obtain all k-sized combinations in a set';
 kCombinations.__node__ = builtinNode(kCombinations);
 
 function isPrime(n: Interval) {
-  return sonicBool(xduIsPrime(n.valueOf()));
+  return xduIsPrime(n.valueOf());
 }
 isPrime.__doc__ = 'Return `true` if `n` is a prime number, `false` otherwise.';
 isPrime.__node__ = builtinNode(isPrime);
@@ -270,9 +276,12 @@ fareyInterior.__node__ = builtinNode(fareyInterior);
 
 // == Domain conversion ==
 
-export function simplify(interval: Interval | Val) {
+export function simplify(interval: Interval | Val | boolean) {
   if (interval instanceof Val) {
     return new Val(interval.value.clone(), interval.equave.clone());
+  }
+  if (typeof interval === 'boolean') {
+    return upcastBool(interval);
   }
   return new Interval(
     interval.value.clone(),
@@ -284,19 +293,28 @@ export function simplify(interval: Interval | Val) {
 simplify.__doc__ = 'Get rid of interval formatting.';
 simplify.__node__ = builtinNode(simplify);
 
-export function bleach(interval: Interval) {
+export function bleach(interval: Interval | boolean) {
+  if (typeof interval === 'boolean') {
+    return upcastBool(interval);
+  }
   return new Interval(interval.value.clone(), interval.domain, interval.node);
 }
 bleach.__doc__ = 'Get rid of interval coloring and label.';
 bleach.__node__ = builtinNode(bleach);
 
-export function linear(interval: Interval) {
+export function linear(interval: Interval | boolean) {
+  if (typeof interval === 'boolean') {
+    return upcastBool(interval);
+  }
   return new Interval(interval.value.clone(), 'linear', undefined, interval);
 }
 linear.__doc__ = 'Convert interval to linear representation.';
 linear.__node__ = builtinNode(linear);
 
-export function logarithmic(interval: Interval) {
+export function logarithmic(interval: Interval | boolean) {
+  if (typeof interval === 'boolean') {
+    interval = upcastBool(interval);
+  }
   return new Interval(
     interval.value.clone(),
     'logarithmic',
@@ -307,13 +325,22 @@ export function logarithmic(interval: Interval) {
 logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
-export function cologarithmic(interval: Interval) {
+export function cologarithmic(interval: Interval | boolean) {
+  if (typeof interval === 'boolean') {
+    interval = upcastBool(interval);
+  }
   return new Val(interval.value.clone(), interval.value.clone());
 }
 cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
 cologarithmic.__node__ = builtinNode(cologarithmic);
 
-export function absolute(this: ExpressionVisitor, interval: Interval) {
+export function absolute(
+  this: ExpressionVisitor,
+  interval: Interval | boolean
+) {
+  if (typeof interval === 'boolean') {
+    interval = upcastBool(interval);
+  }
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
     return new Interval(
@@ -338,7 +365,13 @@ export function absolute(this: ExpressionVisitor, interval: Interval) {
 absolute.__doc__ = 'Convert interval to absolute representation.';
 absolute.__node__ = builtinNode(absolute);
 
-export function relative(this: ExpressionVisitor, interval: Interval) {
+export function relative(
+  this: ExpressionVisitor,
+  interval: Interval | boolean
+) {
+  if (typeof interval === 'boolean') {
+    return upcastBool(interval);
+  }
   if (interval.isRelative()) {
     return new Interval(
       interval.value.clone(),
@@ -367,13 +400,7 @@ relative.__node__ = builtinNode(relative);
 
 // Coercion: Very lossy
 function bool(this: ExpressionVisitor, value: SonicWeaveValue) {
-  if (value instanceof Interval) {
-    const b = sonicBool(sonicTruth(relative.bind(this)(value)));
-    b.color = value.color;
-    b.label = value.label;
-    return b;
-  }
-  return sonicBool(sonicTruth(value));
+  return sonicTruth(value);
 }
 bool.__doc__ = 'Convert value to a boolean.';
 bool.__node__ = builtinNode(bool);
@@ -570,7 +597,7 @@ nedji.__node__ = builtinNode(nedji);
 // Coercion: Minimally lossy in terms of size
 export function cents(
   this: ExpressionVisitor,
-  interval: Interval,
+  interval: Interval | boolean,
   fractionDigits?: Interval
 ) {
   const converted = relative.bind(this)(interval);
@@ -735,59 +762,65 @@ toMonzo.__node__ = builtinNode(toMonzo);
 
 // == Type detection ==
 function isInterval(value: SonicWeaveValue) {
-  return sonicBool(value instanceof Interval);
+  return value instanceof Interval;
 }
 isInterval.__doc__ = 'Return `true` if the value is an interval.';
 isInterval.__node__ = builtinNode(isInterval);
 
 function isColor(value: SonicWeaveValue) {
-  return sonicBool(value instanceof Color);
+  return value instanceof Color;
 }
 isColor.__doc__ = 'Return `true` if the value is a color.';
 isColor.__node__ = builtinNode(isColor);
 
 function isString(value: SonicWeaveValue) {
-  return sonicBool(typeof value === 'string');
+  return typeof value === 'string';
 }
 isString.__doc__ = 'Return `true` if the value is a string.';
 isString.__node__ = builtinNode(isString);
 
+function isBoolean(value: SonicWeaveValue) {
+  return typeof value === 'boolean';
+}
+isBoolean.__doc__ = 'Return `true` if the value is a boolean.';
+isBoolean.__node__ = builtinNode(isBoolean);
+
 function isFunction(value: SonicWeaveValue) {
-  return sonicBool(typeof value === 'function');
+  return typeof value === 'function';
 }
 isFunction.__doc__ =
   'Return `true` if the value is a riff or an arrow function.';
 isFunction.__node__ = builtinNode(isFunction);
 
 function isArray(value: SonicWeaveValue) {
-  return sonicBool(Array.isArray(value));
+  return Array.isArray(value);
 }
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
 function isAbsolute(interval: Interval) {
-  return sonicBool(interval.isAbsolute());
+  return interval.isAbsolute();
 }
 isAbsolute.__doc__ =
   'Return `true` if the interval belongs to the absolute echelon.';
 isAbsolute.__node__ = builtinNode(isAbsolute);
 
 function isRelative(interval: Interval) {
-  return sonicBool(interval.isRelative());
+  return interval.isRelative();
 }
 isRelative.__doc__ =
   'Return `true` if the interval belongs to the relative echelon.';
 isRelative.__node__ = builtinNode(isRelative);
 
 function isLinear(interval: Interval) {
-  return sonicBool(interval.domain === 'linear');
+  return interval.domain === 'linear';
 }
 isLinear.__doc__ =
   'Return `true` if the interval belongs to the linear domain.';
 isLinear.__node__ = builtinNode(isLinear);
 
 function isLogarithmic(interval: Interval) {
-  return sonicBool(interval.domain === 'logarithmic');
+  return interval.domain === 'logarithmic';
 }
 isLogarithmic.__doc__ =
   'Return `true` if the interval belongs to the logarithmic domain.';
@@ -796,19 +829,19 @@ isLogarithmic.__node__ = builtinNode(isLogarithmic);
 // == Value detection ==
 
 function isInt(interval: Interval) {
-  return sonicBool(interval.value.isIntegral());
+  return interval.value.isIntegral();
 }
 isInt.__doc__ = 'Return `true` if the interval is an integer.';
 isInt.__node__ = builtinNode(isInt);
 
 function isRational(interval: Interval) {
-  return sonicBool(interval.value.isFractional());
+  return interval.value.isFractional();
 }
 isRational.__doc__ = 'Return `true` if the interval is a rational number.';
 isRational.__node__ = builtinNode(isRational);
 
 function isRadical(interval: Interval) {
-  return sonicBool(!interval.value.isNonAlgebraic());
+  return !interval.value.isNonAlgebraic();
 }
 isRadical.__doc__ = 'Return `true` if the interval is an nth root.';
 isRadical.__node__ = builtinNode(isRadical);
@@ -1106,7 +1139,7 @@ function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
   const rel = relative.bind(this);
   const monzos = scale.map(i => rel(i).value);
-  return sonicBool(hasConstantStructure(monzos));
+  return hasConstantStructure(monzos);
 }
 Object.defineProperty(hasConstantStructure_, 'name', {
   value: 'hasConstantStructure',
@@ -1787,6 +1820,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   isInterval,
   isColor,
   isString,
+  isBoolean,
   isFunction,
   isArray,
   isAbsolute,

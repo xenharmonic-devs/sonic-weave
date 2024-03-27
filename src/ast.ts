@@ -326,6 +326,14 @@ export type StringLiteral = {
   value: string;
 };
 
+export type TrueLiteral = {
+  type: 'TrueLiteral';
+};
+
+export type FalseLiteral = {
+  type: 'FalseLiteral';
+};
+
 export type Expression =
   | LestExpression
   | ConditionalExpression
@@ -340,6 +348,8 @@ export type Expression =
   | ArrowFunction
   | IntervalLiteral
   | NoneLiteral
+  | TrueLiteral
+  | FalseLiteral
   | ColorLiteral
   | Identifier
   | EnumeratedChord
@@ -360,8 +370,6 @@ export function expressionToString(node: Expression) {
     case 'CentsLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
-    case 'TrueLiteral':
-    case 'FalseLiteral':
     case 'FJS':
     case 'AspiringFJS':
     case 'AbsoluteFJS':
@@ -374,6 +382,10 @@ export function expressionToString(node: Expression) {
     case 'WartsLiteral':
     case 'SquareSuperparticular':
       return literalToString(node);
+    case 'TrueLiteral':
+      return 'true';
+    case 'FalseLiteral':
+      return 'false';
     case 'NoneLiteral':
       return 'niente';
     case 'Identifier':

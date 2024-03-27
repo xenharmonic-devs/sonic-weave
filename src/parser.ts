@@ -37,7 +37,6 @@ import {
   sonicTruth,
   BUILTIN_CONTEXT,
   PRELUDE_SOURCE,
-  sonicBool,
   relative,
   linearOne,
   SonicWeaveFunction,
@@ -46,6 +45,7 @@ import {
   PRELUDE_VOLATILES,
   maximum,
   minimum,
+  upcastBool,
 } from './builtin';
 import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
@@ -645,6 +645,8 @@ export class StatementVisitor {
       } else {
         this.rootContext.title = value;
       }
+    } else if (typeof value === 'boolean') {
+      scale.push(upcastBool(value));
     } else {
       this.rootContext.spendGas(scale.length);
       const bound = value.bind(subVisitor);
@@ -1049,9 +1051,9 @@ export class ExpressionVisitor {
           type: 'ReciprocalCentLiteral',
         });
       case 'TrueLiteral':
-        return sonicBool(true);
+        return true;
       case 'FalseLiteral':
-        return sonicBool(false);
+        return false;
       case 'MonzoLiteral':
         return this.visitMonzoLiteral(node);
       case 'ValLiteral':
@@ -1560,7 +1562,7 @@ export class ExpressionVisitor {
   visitUnaryExpression(node: UnaryExpression) {
     const operand = this.visit(node.operand);
     if (node.operator === 'not') {
-      return sonicBool(!sonicTruth(operand));
+      return !sonicTruth(operand);
     }
     if (
       operand instanceof Interval ||
@@ -1597,7 +1599,7 @@ export class ExpressionVisitor {
     left: Interval | Interval[],
     right: Interval | Interval[],
     node: BinaryExpression
-  ): Interval | Interval[] {
+  ): boolean | Interval | Interval[] {
     const operator = node.operator;
     if (left instanceof Interval) {
       if (right instanceof Interval) {
@@ -1691,21 +1693,21 @@ export class ExpressionVisitor {
         }
         switch (operator) {
           case '===':
-            return sonicBool(left.strictEquals(right));
+            return left.strictEquals(right);
           case '!==':
-            return sonicBool(!left.strictEquals(right));
+            return !left.strictEquals(right);
           case '==':
-            return sonicBool(left.equals(right));
+            return left.equals(right);
           case '!=':
-            return sonicBool(!left.equals(right));
+            return !left.equals(right);
           case '<=':
-            return sonicBool(compare.bind(this)(left, right) <= 0);
+            return compare.bind(this)(left, right) <= 0;
           case '>=':
-            return sonicBool(compare.bind(this)(left, right) >= 0);
+            return compare.bind(this)(left, right) >= 0;
           case '<':
-            return sonicBool(compare.bind(this)(left, right) < 0);
+            return compare.bind(this)(left, right) < 0;
           case '>':
-            return sonicBool(compare.bind(this)(left, right) > 0);
+            return compare.bind(this)(left, right) > 0;
           case '+':
             return left.add(right);
           case '-':
@@ -1817,13 +1819,13 @@ export class ExpressionVisitor {
       if (Array.isArray(right)) {
         switch (operator) {
           case 'of':
-            return sonicBool(strictIncludes(left, right));
+            return strictIncludes(left, right);
           case 'not of':
-            return sonicBool(!strictIncludes(left, right));
+            return !strictIncludes(left, right);
           case '~of':
-            return sonicBool(includes(left, right));
+            return includes(left, right);
           case 'not ~of':
-            return sonicBool(!includes(left, right));
+            return !includes(left, right);
         }
       } else {
         throw new Error("Target of 'of' must be an array");
@@ -1834,13 +1836,13 @@ export class ExpressionVisitor {
       if (right instanceof Val) {
         switch (operator) {
           case '===':
-            return sonicBool(left.strictEquals(right));
+            return left.strictEquals(right);
           case '!==':
-            return sonicBool(!left.strictEquals(right));
+            return !left.strictEquals(right);
           case '==':
-            return sonicBool(left.equals(right));
+            return left.equals(right);
           case '!=':
-            return sonicBool(!left.equals(right));
+            return !left.equals(right);
           case '+':
             return left.add(right);
           case '-':
@@ -1893,15 +1895,15 @@ export class ExpressionVisitor {
     }
     switch (node.operator) {
       case '===':
-        return sonicBool(left === right);
+        return left === right;
       case '!==':
-        return sonicBool(left !== right);
+        return left !== right;
       case '==':
         // eslint-disable-next-line eqeqeq
-        return sonicBool(left == right);
+        return left == right;
       case '!=':
         // eslint-disable-next-line eqeqeq
-        return sonicBool(left != right);
+        return left != right;
     }
 
     if (left instanceof Color || right instanceof Color) {
@@ -2299,6 +2301,7 @@ function convert(value: any): SonicWeaveValue {
     case 'string':
     case 'undefined':
     case 'function':
+    case 'boolean':
       return value;
     case 'number':
       if (Number.isInteger(value)) {
@@ -2307,8 +2310,6 @@ function convert(value: any): SonicWeaveValue {
       return Interval.fromValue(value);
     case 'bigint':
       return Interval.fromInteger(value);
-    case 'boolean':
-      return sonicBool(value);
     case 'symbol':
       throw new Error('Symbols cannot be converted.');
     case 'object':

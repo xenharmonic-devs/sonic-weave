@@ -230,15 +230,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert cents to boolean', () => {
-    const yes = parseSingle('bool(0.0 red)');
-    expect(yes.color?.value).toBe('red');
-    expect(yes.toString()).toBe('(true red)');
+    const yes = evaluateExpression('bool(0.0 red)', false);
+    expect(yes).toBe(true);
   });
 
   it('can convert boolean to cents', () => {
-    const zeroCents = parseSingle('cents(true "yes")');
-    expect(zeroCents.label).toBe('yes');
-    expect(zeroCents.toString()).toBe('(0. "yes")');
+    const zeroCents = parseSingle('cents(true)');
+    expect(zeroCents.toString()).toBe('0.');
   });
 
   it('fails to converts pi to an integer', () => {
@@ -681,8 +679,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can add vals', () => {
-    const yes = parseSingle('24@7 + 5@7 === 29c@7');
-    expect(yes.toString()).toBe('true');
+    const yes = evaluateExpression('24@7 + 5@7 === 29c@7', false);
+    expect(yes).toBe(true);
   });
 
   it('knows how to calculate logarithms of negative values', () => {
@@ -1293,33 +1291,33 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('knows that 7 is an integer', () => {
-    const yes = parseSingle('isInt(7)');
-    expect(yes.toString()).toBe('true');
+    const yes = evaluateExpression('isInt(7)', false);
+    expect(yes).toBe(true);
   });
 
   it('knows that sqrt(15) is not an integer', () => {
-    const no = parseSingle('isInt(15 /^ 2)');
-    expect(no.toString()).toBe('false');
+    const no = evaluateExpression('isInt(15 /^ 2)', false);
+    expect(no).toBe(false);
   });
 
   it('knows that 7/5 is a rational number', () => {
-    const yes = parseSingle('isRational(14e-1)');
-    expect(yes.toString()).toBe('true');
+    const yes = evaluateExpression('isRational(14e-1)', false);
+    expect(yes).toBe(true);
   });
 
   it('knows that sqrt(15) is not rational', () => {
-    const no = parseSingle('isRational(15 /^ 2)');
-    expect(no.toString()).toBe('false');
+    const no = evaluateExpression('isRational(15 /^ 2)', false);
+    expect(no).toBe(false);
   });
 
   it('knows that sqrt(15) is a radical', () => {
-    const sure = parseSingle('isRadical(15 /^ 2)');
-    expect(sure.toString()).toBe('true');
+    const sure = evaluateExpression('isRadical(15 /^ 2)', false);
+    expect(sure).toBe(true);
   });
 
   it('knows that TAU is not a radical', () => {
-    const no = parseSingle('isRadical(TAU)');
-    expect(no.toString()).toBe('false');
+    const no = evaluateExpression('isRadical(TAU)', false);
+    expect(no).toBe(false);
   });
 
   it('labels up-E-semiflat-super-11-neutral', () => {

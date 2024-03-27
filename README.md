@@ -11,6 +11,7 @@ SonicWeave comes with some basic types.
 | None     | `niente`                 | _Niente_ is used in music notation and means _nothing_ in Italian. |
 | String   | `'hello'`                | Both single and double quoted strings are supported. Used for note labels. |
 | Color    | `#ff00ff`                | CSS colors, short hexadecimal, and long hexadecimal colors supported. Used for note colors. |
+| Boolean  | `true` or `false`        | Converted to `1` or `0` in scales. |
 | Interval | `7/5`                    | There are many types of intervals with their own operator semantics. |
 | Scale    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals. |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase. |
@@ -20,7 +21,6 @@ You can read more about domains and echelons [below](#interval-type-system).
 
 | Type         | Examples                | Domain        | Echelon  | Notes |
 | ------------ | ----------------------- | ------------- | -------- | ----- |
-| Boolean      | `true` or `false`       | Linear        | Relative | Basically the same as `1` or `0`. |
 | Integer      | `2`, `5`                | Linear        | Relative | Same as `2/1` or `5/1`. |
 | Decimal      | `1,2`, `1.4e0`          | Linear        | Relative | Decimal commas only work in isolation. |
 | Fraction     | `4/3`, `10/7`           | Linear        | Relative | |
@@ -337,7 +337,6 @@ In just intonation you might denote `16/9` as `4/3 * 4/3` if you wish to work in
 The *cologarithmic* domain mostly comes up in tempering. An expression like `12@ · P4` evaluating to `5` indicates that the perfect fourth is tempered to 5 steps of 12-tone equal temperament. In cologarithmic vector form (a.k.a. *val*) `12@` corresponds to `<12 19]` while `P4` corresponds to the prime exponents `[2 -1>` (a.k.a. *monzo*) so the expression `12@ · P4` reads `<12 19] · [2 -1>` = `12 * 2 + 19 * (-1)` = `5`.
 
 ### Tiers
- * boolean (`true` or `false`)
  * natural (`1`, `-3`, `7`, `P8`, etc.)
  * decimal (`1,2`, `3.14e0`, `5/4`, etc.)
  * rational (`5/3`, `P4`, `M2_7`, etc.)
