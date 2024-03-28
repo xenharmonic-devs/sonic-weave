@@ -123,7 +123,7 @@ Calculate fround x.
 ### gcd(*...intervals*)
 Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
 
-### hasConstantStructure(*monzos*)
+### hasConstantStructure(*scale = $$*)
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
 
 ### help(*riff*)
