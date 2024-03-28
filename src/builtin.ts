@@ -32,6 +32,7 @@ import {
   formatAbsoluteFJS,
 } from './expression';
 import {TWO, countUpsAndLifts} from './utils';
+import {stepString} from './words';
 
 // Runtime
 
@@ -1210,6 +1211,20 @@ hasConstantStructure_.__doc__ =
   'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
 hasConstantStructure_.__node__ = builtinNode(hasConstantStructure_);
 
+function stepString_(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.getCurrentScale();
+  const rel = relative.bind(this);
+  const monzos = scale.map(i => rel(i).value);
+  return stepString(monzos);
+}
+Object.defineProperty(stepString_, 'name', {
+  value: 'stepString',
+  enumerable: false,
+});
+stepString_.__doc__ =
+  'Obtain the step string associated with the scale e.g. "LLsLLLs" for Ionian.';
+stepString_.__node__ = builtinNode(stepString_);
+
 function slice(
   array: string | Interval[],
   indexStart: Interval,
@@ -1936,6 +1951,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   gcd,
   lcm,
   hasConstantStructure: hasConstantStructure_,
+  stepString: stepString_,
   str,
   repr,
   slice,

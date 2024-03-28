@@ -1,9 +1,45 @@
 import {mmod} from 'xen-dev-utils';
+import {TimeMonzo} from './monzo';
+import {ZERO} from './utils';
 
 /**
  * Step count vector indexed by strings representing distinct step sizes.
  */
 export type StepVector = Record<string, number>;
+
+/**
+ * Standard letters representing steps of positive size, arranged from smallest to largest indexed by variety.
+ */
+const POSITIVE_STEP_LETTERS_BY_VARIETY = [
+  [],
+  ['x'], // There's special handling for P if there are zero-sized or negative steps.
+  ['s', 'L'],
+  ['s', 'M', 'L'],
+  ['s', 'n', 'M', 'L'],
+  ['s', 'n', 'M', 'L', 'H'],
+  ['t', 's', 'n', 'M', 'L', 'H'],
+  ['t', 's', 'n', 'M', 'L', 'H', 'B'],
+  ['u', 't', 's', 'n', 'M', 'L', 'H', 'B'],
+  ['u', 't', 's', 'n', 'M', 'L', 'H', 'C', 'B'],
+  ['u', 't', 's', 'p', 'n', 'M', 'L', 'H', 'C', 'B'],
+  ['u', 't', 's', 'p', 'n', 'M', 'L', 'H', 'C', 'G', 'B'],
+  ['u', 't', 's', 'p', 'n', 'm', 'M', 'L', 'H', 'G', 'C', 'B'],
+  ['u', 't', 's', 'p', 'n', 'm', 'M', 'L', 'H', 'G', 'E', 'C', 'B'],
+  ['w', 'u', 't', 's', 'p', 'n', 'm', 'M', 'L', 'H', 'G', 'E', 'C', 'B'],
+  ['w', 'u', 't', 's', 'p', 'n', 'm', 'N', 'M', 'L', 'H', 'G', 'E', 'C', 'B'],
+];
+
+// Note it's important to get the codepoints correct here w.r.t. µ vs. μ
+/**
+ * Standard letters representing steps of negative size, arranged from most negative to least negative.
+ */
+const NEGATIVE_STEP_LETTERS_BY_VARIETY = [
+  [],
+  ['\u03bc'], // Greek mu
+  ['\u03bc', '\u03b5'], // Greek mu and epsilon
+];
+
+const ONE_MONZO = new TimeMonzo(ZERO, []);
 
 function sum(array: number[]) {
   let sum = 0;
@@ -208,4 +244,90 @@ export function letters(sv: StepVector): string[] {
  */
 export function norm(sv: StepVector): number {
   return sum(Object.values(sv).map(x => Math.abs(x)));
+}
+
+/**
+ * Break a scale with implicit unison into an implicitly repeating scale word.
+ * @param monzos Relative monzos representing intervals of the scale.
+ * @returns A scale word where each character represents a step of distinct size.
+ */
+export function stepString(monzos: TimeMonzo[]) {
+  if (!monzos.length) {
+    return '';
+  }
+  const steps = [monzos[0].clone()];
+  for (let i = 1; i < monzos.length; ++i) {
+    steps.push(monzos[i].div(monzos[i - 1]));
+  }
+  const orderedSteps = [...steps];
+  orderedSteps.sort((a, b) => a.compare(b));
+  const uniqueSteps = [orderedSteps.shift()!];
+  for (const step of orderedSteps) {
+    if (!step.equals(uniqueSteps[uniqueSteps.length - 1])) {
+      uniqueSteps.push(step);
+    }
+  }
+  let numNegative = 0;
+  let numZero = 0;
+  let numPositive = 0;
+  for (const step of uniqueSteps) {
+    const c = step.compare(ONE_MONZO);
+    if (c < 0) {
+      numNegative++;
+    } else if (c > 0) {
+      numPositive++;
+    } else {
+      numZero++;
+    }
+  }
+  const letters: string[] = [];
+  if (numNegative < NEGATIVE_STEP_LETTERS_BY_VARIETY.length) {
+    letters.push(...NEGATIVE_STEP_LETTERS_BY_VARIETY[numNegative]);
+  } else {
+    // Too many steps, use fillers.
+    while (numNegative > 25) {
+      letters.push('¿');
+      numNegative--;
+    }
+    for (let i = 0; i < numNegative; ++i) {
+      letters.unshift(String.fromCharCode(945 + i));
+    }
+  }
+
+  if (numZero) {
+    letters.push('z');
+  }
+
+  if (numPositive < POSITIVE_STEP_LETTERS_BY_VARIETY.length) {
+    if (numPositive === 1 && letters.length) {
+      letters.push('P');
+    } else {
+      letters.push(...POSITIVE_STEP_LETTERS_BY_VARIETY[numPositive]);
+    }
+  } else {
+    // Too many steps, use fillers.
+    // Not 52 because lowercase z is reserved. Uppercase Z can still be used.
+    while (numPositive > 51) {
+      letters.push('?');
+      numPositive--;
+    }
+
+    const numLower = Math.floor(numPositive / 2);
+    for (let i = numLower - 1; i >= 0; --i) {
+      letters.push(String.fromCharCode(97 + i));
+    }
+    const numUpper = Math.ceil(numPositive / 2);
+    for (let i = numUpper - 1; i >= 0; --i) {
+      letters.push(String.fromCharCode(65 + i));
+    }
+  }
+  let result = '';
+  for (const step of steps) {
+    for (let i = 0; i < uniqueSteps.length; ++i) {
+      if (step.strictEquals(uniqueSteps[i])) {
+        result += letters[i];
+      }
+    }
+  }
+  return result;
 }
