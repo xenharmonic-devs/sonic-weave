@@ -303,6 +303,9 @@ Sort the current/given scale in ascending order.
 ### sorted(*scale = $$*, *compareFn*)
 Obtain a sorted copy of the current/given scale in ascending order.
 
+### stepString(*scale = $$*)
+Obtain the step string associated with the scale e.g. "LLsLLLs" for Ionian.
+
 ### str(*value*)
 Obtain a string representation of the value (w/o color or label).
 
