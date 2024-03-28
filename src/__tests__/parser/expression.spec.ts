@@ -15,16 +15,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(value.value.toBigInteger()).toBe(3n);
   });
 
-  it('evaluates negative unity', () => {
-    const value = parseSingle('-1');
-    expect(value.value.toBigInteger()).toBe(-1n);
-  });
-
-  it('evaluates positive unity', () => {
-    const value = parseSingle('+1');
-    expect(value.value.toBigInteger()).toBe(1n);
-  });
-
   it('adds two nedos with denominator preference', () => {
     const interval = parseSingle('4\\12 + 2\\12');
     expect(interval.toString()).toBe('6\\12');

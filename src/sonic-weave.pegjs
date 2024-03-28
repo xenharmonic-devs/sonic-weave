@@ -935,7 +935,7 @@ NumericLiteral
     }
     return {
       type: 'IntegerLiteral',
-      value: sign === '-' ? -whole : whole,
+      value: whole,
     };
   }
   / !'..' sign: SignPart '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {

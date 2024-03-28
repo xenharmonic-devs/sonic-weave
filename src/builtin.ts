@@ -1208,7 +1208,7 @@ Object.defineProperty(hasConstantStructure_, 'name', {
 });
 hasConstantStructure_.__doc__ =
   'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
-hasConstantStructure_.__node__ = builtinNode(hasConstantStructure_);
+hasConstantStructure_.__node__ = builtinNode(hasConstantStructure);
 
 function slice(
   array: string | Interval[],
