@@ -524,9 +524,25 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast.left.type).toBe('AbsoluteFJS');
   });
 
-  it('is aware of interval qualities (no minor twelfth)', () => {
+  // The parser spends most of its time trying to tell identifiers from FJS so we sacrifice this distinction in interest of speed.
+  it.skip('is aware of interval qualities (no minor twelfth)', () => {
     const ast = parseSingle('m12');
     expect(ast.expression.type).toBe('Identifier');
+  });
+
+  it('differentiates FJS with subscripts from identifiers', () => {
+    const ast = parseSingle('m3_5');
+    expect(ast.expression.type).toBe('FJS');
+  });
+
+  it('differentiates AbsoluteFJS with subscripts from identifiers', () => {
+    const ast = parseSingle('Eb4_5');
+    expect(ast.expression.type).toBe('AbsoluteFJS');
+  });
+
+  it('differentiates S-expressions from identifiers', () => {
+    const ast = parseSingle('S37');
+    expect(ast.expression.type).toBe('SquareSuperparticular');
   });
 
   it('differentiates natural accidentals from variable declaration', () => {

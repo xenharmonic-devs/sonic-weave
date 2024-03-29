@@ -1276,8 +1276,14 @@ ArrowFunction
     };
   }
 
+// This rule is a faster version of the part of (FJS / AbsoluteFJS / SquareSuperparticular) which overlaps with identifiers.
+ReservedPattern
+  = [sqQ]? (AugmentedQuality / ImperfectQuality / MidQuality) [0-9]+ '_'? [0-9]*
+  / Nominal [sqQxdbrp]* [0-9]+ '_'? [0-9]*
+  / 'S' [0-9]+
+
 Identifier
-  = !(ReservedWord / FJS / AbsoluteFJS / SquareSuperparticular) id: IdentifierName {
+  = !(ReservedWord / ReservedPattern)  id: IdentifierName {
     return {
       type: 'Identifier',
       id,
