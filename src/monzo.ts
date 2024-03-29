@@ -41,7 +41,7 @@ import {
 export type FractionalMonzo = Fraction[];
 
 /**
- * Interval domain. Linear means that '+' means addition while logarithmic makes '+' correspond to multiplication of the underlying values.
+ * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
  * Cologarithmic values are meant for mapping between values, usually just intonation and steps of equal temperaments.
  */
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
@@ -1305,8 +1305,9 @@ export class TimeMonzo {
   }
 
   /**
-   * Convert the time monzo to cents.
-   * @returns Size of the time monzo in cents ignoring the time units.
+   * Convert a relative time monzo to cents.
+   * Conert an absosulte time monzo to the size in cents of the scalar of its time unit.
+   * @returns Size of the time monzo in cents.
    */
   totalCents() {
     let total = this.cents + valueToCents(this.residual.valueOf());
@@ -1317,8 +1318,9 @@ export class TimeMonzo {
   }
 
   /**
-   * Convert the time monzo to a frequency-space ratio.
-   * @returns The frequency-space multiplier corresponding to this time monzo.
+   * Convert a relative time monzo to a real number representing a ratio of frequencies.
+   * Convert an absolute time monzo to the scalar of its time unit.
+   * @returns A real number.
    */
   valueOf() {
     if (!this.residual.n) {

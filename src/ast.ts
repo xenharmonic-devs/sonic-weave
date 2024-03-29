@@ -152,7 +152,7 @@ export type ForOfStatement = {
   mutable: boolean;
 };
 
-type CatchClause = {
+export type CatchClause = {
   type: 'CatchClause';
   parameter?: Parameter;
   body: Statement;
@@ -359,6 +359,11 @@ export type Expression =
   | StringLiteral
   | HarmonicSegment;
 
+/**
+ * Convert an AST node to a string representation.
+ * @param node Expression node to convert.
+ * @returns Text representation of the expression.
+ */
 export function expressionToString(node: Expression) {
   switch (node.type) {
     case 'IntegerLiteral':
