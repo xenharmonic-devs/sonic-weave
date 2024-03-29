@@ -1515,4 +1515,9 @@ describe('SonicWeave expression evaluator', () => {
     const pattern = evaluateExpression('/30::60;stepString()');
     expect(pattern).toBe('ωψχφυτσςρποξνμλκιθηζεδγβα¿¿¿¿¿');
   });
+
+  it('uses w before u in step strings', () => {
+    const pattern = evaluateExpression('8::16;stepString()');
+    expect(pattern).toBe('BHLMnstw');
+  });
 });
