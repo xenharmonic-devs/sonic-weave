@@ -1363,6 +1363,33 @@ sorted.__doc__ =
   'Obtain a sorted copy of the current/given scale in ascending order.';
 sorted.__node__ = builtinNode(sorted);
 
+function uniquesOf(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.getCurrentScale();
+  const seen = new Set<number>();
+  const result: Interval[] = [];
+  for (const interval of scale) {
+    const value = interval.valueOf();
+    if (seen.has(value)) {
+      continue;
+    }
+    result.push(interval);
+    seen.add(value);
+  }
+  return result;
+}
+uniquesOf.__doc__ =
+  'Obtain a copy of the current/given scale with only unique intervals kept.';
+uniquesOf.__node__ = builtinNode(uniquesOf);
+
+function keepUnique(this: ExpressionVisitor, scale?: Interval[]) {
+  scale ??= this.getCurrentScale();
+  const uniques = uniquesOf.bind(this)(scale);
+  scale.length = 0;
+  scale.push(...uniques);
+}
+keepUnique.__doc__ = 'Only keep unique intervals in the current/given scale.';
+keepUnique.__node__ = builtinNode(keepUnique);
+
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.getCurrentScale();
   scale.reverse();
@@ -1964,6 +1991,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   randomCents,
   sort,
   sorted,
+  keepUnique,
+  uniquesOf,
   reverse,
   reversed,
   pop,
@@ -2809,28 +2838,6 @@ riff equalized(divisions, scale = $$) {
   equalize();
 }
 
-// Assumes a sorted scale
-riff keepUnique(scale = $$) {
-  "Only keep unique intervals in the current/given scale.";
-  let last = niente;
-  let i = length(scale);
-  while (i--) {
-    const current = shift(scale);
-    if (last != current) {
-      current;
-      last = current;
-    }
-  }
-  i => push(i, scale);
-  return;
-}
-
-riff uniquesOf(scale = $$) {
-  "Obtain a copy of the current/given scale with only unique intervals kept.";
-  scale;
-  keepUnique();
-}
-
 riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
   "Merge the given offset or polyoffset of the current/given scale onto itself. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
   if (not isArray(offsets)) offsets = [offsets];
@@ -2894,6 +2901,8 @@ riff randomVaried(amount, varyEquave = false, scale = $$) {
 
 riff coalesced(tolerance = 3.5, action = 'simplest', scale = $$) {
   "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` are coalesced into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.";
+  if (not scale) return [];
+
   let last;
   let group = [];
   for (const [i, interval] of enumerate(scale)) {
@@ -2918,6 +2927,8 @@ riff coalesced(tolerance = 3.5, action = 'simplest', scale = $$) {
     push(interval, group);
   }
   scale[-1];
+  if (length(scale) === 1) return;
+  while ($[-1] == $[-2]) void(pop());
 }
 
 riff coalesce(tolerance = 3.5, action = 'simplest', scale = $$) {
@@ -2961,5 +2972,21 @@ riff replaceStep(step, replacement, scale = $$) {
 riff stepReplaced(step, replacement, scale = $$) {
   "Obtain a copy of the current/given scale with relative occurences of \`step\` replaced by \`replacement\`.";
   return cumprod(replaced(step, replacement, geodiff(scale)));
+}
+
+riff organize(tolerance = niente, action = 'simplest', scale = $$) {
+  "Reduce the current/given scale by its last interval, sort the result and filter out duplicates. If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.";
+  $ = scale;
+  reduce();
+  if (tolerance === niente) keepUnique();
+  sort();
+  if (tolerance !== niente) coalesce(tolerance, action);
+  return;
+}
+
+riff organized(tolerance = niente, action = 'simplest', scale = $$) {
+  "Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out. If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.";
+  scale;
+  organize(tolerance, action);
 }
 `;

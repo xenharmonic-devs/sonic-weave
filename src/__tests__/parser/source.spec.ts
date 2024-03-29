@@ -1178,4 +1178,18 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['1', '3', '5', '10']);
   });
+
+  it('can filter out duplicate intervals from an unsorted scale', () => {
+    const scale = parseSource(`
+      6/5;
+      4/3;
+      6/5;
+      7/4;
+      7/4;
+      2/1;
+      keepUnique();
+      str;
+    `);
+    expect(scale).toEqual(['6/5', '4/3', '7/4', '2/1']);
+  });
 });

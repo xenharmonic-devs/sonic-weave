@@ -1182,4 +1182,43 @@ describe('SonicWeave standard library', () => {
       "Parameter 'interval' is required."
     );
   });
+
+  it('can organize a scale with a single command', () => {
+    const scale = parseSource('13;17;[1..12];13;2;organize();str;');
+    expect(scale).toEqual([
+      '17/16',
+      '9/8',
+      '5/4',
+      '11/8',
+      '3/2',
+      '13/8',
+      '7/4',
+      '2',
+    ]);
+  });
+
+  it('can organize a scale by coalescing near-duplicates', () => {
+    const scale = parseSource(
+      '4;[1, 3, 9] tns [1, 5, 25] tns [1, 7];2;organize(8.0);str;'
+    );
+    expect(scale).toEqual([
+      '525/512',
+      '35/32',
+      '9/8',
+      '75/64',
+      '315/256',
+      '5/4',
+      '21/16',
+      '175/128',
+      '45/32',
+      '3/2',
+      '1575/1024',
+      '25/16',
+      '105/64',
+      '7/4',
+      '15/8',
+      '63/32',
+      '2',
+    ]);
+  });
 });

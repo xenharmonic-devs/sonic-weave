@@ -192,6 +192,9 @@ The Just Intonation Point. Converts intervals to real cents.
 ### kCombinations(*set*, *k*)
 Obtain all k-sized combinations in a set
 
+### keepUnique(*scale = $$*)
+Only keep unique intervals in the current/given scale.
+
 ### labelAbsoluteFJS(*interval*, *flavor = ""*)
 Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.
 
@@ -326,6 +329,9 @@ Obtain an array of the tracking IDs attached to the interval.
 
 ### trunc(*interval*)
 Truncate value towards zero to the nearest integer.
+
+### uniquesOf(*scale = $$*)
+Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
@@ -476,9 +482,6 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 ### hypot(*...args*)
 Calculate the square root of the sum of squares of the arguments.
 
-### keepUnique(*scale = $$*)
-Only keep unique intervals in the current/given scale.
-
 ### label(*labels*, *scale = $$*)
 Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.
 
@@ -526,6 +529,12 @@ Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive
 
 ### oddLimitOf(*x*, *equave = 2*)
 Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
+
+### organize(*tolerance = niente*, *action = "simplest"*, *scale = $$*)
+Reduce the current/given scale by its last interval, sort the result and filter out duplicates. If `tolerance` is given near-duplicates are coalesced instead using the given `action`.
+
+### organized(*tolerance = niente*, *action = "simplest"*, *scale = $$*)
+Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out. If `tolerance` is given near-duplicates are coalesced instead using the given `action`.
 
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.
@@ -664,9 +673,6 @@ Find a combination of three vals that is closer to just intonation.
 
 ### u(*scale = $$*)
 Obtain a undertonal reflection of the current/given overtonal scale.
-
-### uniquesOf(*scale = $$*)
-Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unperiostack(*array = $$*)
 Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.
