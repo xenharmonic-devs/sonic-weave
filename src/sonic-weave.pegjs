@@ -630,11 +630,12 @@ ExponentiationExpression
     }
 
 Labels
-  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|.., __|
+  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
+// XXX: Don't know why that trailing __ has to be there.
 LabeledExpression
-  = object: UnaryExpression __ labels: Labels __ {
-    if (labels.length) {
+  = object: UnaryExpression labels: (' ' __ @Labels)? __ {
+    if (labels) {
       return {
         type: 'LabeledExpression',
         object,
@@ -645,8 +646,8 @@ LabeledExpression
   }
 
 LabeledCommaDecimal
-  = __ object: CommaDecimal __ labels: Labels __ {
-    if (labels.length) {
+  = __ object: CommaDecimal labels: (' ' __ @Labels)? __ {
+    if (labels) {
       return {
         type: 'LabeledExpression',
         object,
@@ -759,9 +760,12 @@ ArraySlice
   }
 
 ScalarMultiple
-  = scalar: ScalarLike operator: ' '? quantity: (__ @(Unit / Quantity))? {
+  = scalar: ScalarLike operator: ' ' __ quantity: (Unit / Quantity) {
+    return BinaryExpression(operator, scalar, quantity, false, false);
+  }
+  / scalar: ScalarLike quantity: (Unit / Quantity)? {
     if (quantity) {
-      return BinaryExpression(operator ?? ' ', scalar, quantity, false, false);
+      return BinaryExpression(' ', scalar, quantity, false, false);
     }
     if (scalar.type === 'DecimalLiteral') {
       if (scalar.exponent || scalar.flavor) {

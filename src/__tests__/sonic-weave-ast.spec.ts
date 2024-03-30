@@ -922,4 +922,8 @@ describe('Negative tests', () => {
   it('rejects trailing underscores in numbers', () => {
     expect(() => parse('7_')).toThrow();
   });
+
+  it('rejects labels without spaces', () => {
+    expect(() => parse('0$')).toThrow();
+  });
 });
