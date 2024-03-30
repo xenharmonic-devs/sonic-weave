@@ -1472,52 +1472,57 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can calculate the step string for Lydian', () => {
     const pattern = evaluateExpression(
-      '9/8;81/64;729/512;3/2;27/16;243/128;2/1;stepString()'
+      '9/8;81/64;729/512;3/2;27/16;243/128;2/1;stepString()',
+      false
     );
     expect(pattern).toBe('LLLsLLs');
   });
 
   it('can calculate the step string for pseudo-Ionian in 8edo', () => {
     const pattern = evaluateExpression(
-      '2\\8;4\\8;3\\8;5\\8;7\\8;9\\8;8\\8;stepString()'
+      '2\\8;4\\8;3\\8;5\\8;7\\8;9\\8;8\\8;stepString()',
+      false
     );
     expect(pattern).toBe('PPμPPPμ');
   });
 
   it('calculates step strings for scales with repeats', () => {
-    const pattern = evaluateExpression('5/4;3/2;3/2;2;stepString()');
+    const pattern = evaluateExpression('5/4;3/2;3/2;2;stepString()', false);
     expect(pattern).toBe('MszL');
   });
 
   it('uses uppercase P alongside the zilch step', () => {
-    const pattern = evaluateExpression('1\\4;2\\4;2\\4;3\\4;4\\4;stepString()');
+    const pattern = evaluateExpression(
+      '1\\4;2\\4;2\\4;3\\4;4\\4;stepString()',
+      false
+    );
     expect(pattern).toBe('PPzPP');
   });
 
   it('calculates step strings for scales of large variety (positive)', () => {
-    const pattern = evaluateExpression('16::32;stepString()');
+    const pattern = evaluateExpression('16::32;stepString()', false);
     expect(pattern).toBe('ABCDEFGHabcdefgh');
   });
 
   it('calculates step strings for scales of large variety (negative)', () => {
-    const pattern = evaluateExpression('/16::32;stepString()');
+    const pattern = evaluateExpression('/16::32;stepString()', false);
     expect(pattern).toBe('ποξνμλκιθηζεδγβα');
   });
 
   it('uses fillers in step strings when it runs out of letters (positive)', () => {
-    const pattern = evaluateExpression('53::106;stepString()');
+    const pattern = evaluateExpression('53::106;stepString()', false);
     expect(pattern).toBe(
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy??'
     );
   });
 
   it('uses fillers in step strings when it runs out of letters (negative)', () => {
-    const pattern = evaluateExpression('/30::60;stepString()');
+    const pattern = evaluateExpression('/30::60;stepString()', false);
     expect(pattern).toBe('ωψχφυτσςρποξνμλκιθηζεδγβα¿¿¿¿¿');
   });
 
   it('uses w before u in step strings', () => {
-    const pattern = evaluateExpression('8::16;stepString()');
+    const pattern = evaluateExpression('8::16;stepString()', false);
     expect(pattern).toBe('BHLMnstw');
   });
 });
