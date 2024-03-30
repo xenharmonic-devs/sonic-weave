@@ -155,29 +155,31 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 ]
 ```
 ### Interval
-| Name                   | Linear       | Result   | Logarithmic      | Result  |
-| ---------------------- | ------------ | -------- | ---------------- | ------- |
-| Addition               | `3 + 5`      | `8`      | _N/A_            |         |
-| Subtraction            | `5 - 3`      | `2`      | _N/A_            |         |
-| Modulo                 | `5 mod 3`    | `2`      | _N/A_            |         |
-| Ceiling modulo         | `0 modc 3`   | `3`      | _N/A_            |         |
-| Round (to multiple of) | `5 to 3`     | `6`      | _N/A_            |         |
-| Minimum                | `2 min 1`    | `1`      | `P8 min P1`      | `P1`    |
-| Maximum                | `2 max 1`    | `2`      | `P8 max P1`      | `P8`    |
-| Multiplication         | `2 * 3`      | `6`      | `P8 + P12`       | `P19`   |
-| Multiplication         | `110 Hz × 5` | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5` |
-| Division               | `6 % 2`      | `3`      | `P19 - P8`       | `P12`   |
-| Division               | `220 hz ÷ 2` | `110 Hz` | `A=3 - P8`       | `A=2`   |
-| Reduction              | `5 rd 2`     | `5/4`    | `M17^5 mod P8`   | `M3^5`  |
-| Ceiling reduction      | `2 rdc 2`    | `2`      | `P8 modc P8`     | `P8`    |
-| Exponentiation         | `3 ^ 2`      | `9`      | `P12 * 2`        | `M23`   |
-| Recipropower           | `9 /^ 2`     | `3`      | `M23 % 2`        | `P12`   |
-| Root taking            | `9 ^/ 2`     | `3`      | `M23 % 2`        | `P12`   |
-| Logarithm (in base of) | `9 /_ 3`     | `2`      | `M23 % P12`      | `2`     |
-| Round (to power of)    | `5 by 2`     | `4`      | `M17^5 to P8`    | `P15`   |
-| N of EDO               | `(5+2)\12`   | `7\12`   | _N/A_            |         |
-| NEDJI Projection       | `sqrt(2)<3>` | `1\2<3>` | _N/A_            |         |
-| Val product            | `12@ · 3/2`  | `7`      | `<12 19] dot P5` | `7`     |
+| Name                   | Linear         | Result   | Logarithmic      | Result     |
+| ---------------------- | -------------- | -------- | ---------------- | ---------- |
+| Addition               | `3 + 5`        | `8`      | _N/A_            |            |
+| Subtraction            | `5 - 3`        | `2`      | _N/A_            |            |
+| Modulo                 | `5 mod 3`      | `2`      | _N/A_            |            |
+| Ceiling modulo         | `0 modc 3`     | `3`      | _N/A_            |            |
+| Round (to multiple of) | `5 to 3`       | `6`      | _N/A_            |            |
+| Minimum                | `2 min 1`      | `1`      | `P8 min P1`      | `P1`       |
+| Maximum                | `2 max 1`      | `2`      | `P8 max P1`      | `P8`       |
+| Multiplication         | `2 * 3`        | `6`      | `P8 + P12`       | `P19`      |
+| Multiplication         | `110 Hz × 5`   | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5`    |
+| Division               | `6 % 2`        | `3`      | `P19 - P8`       | `P12`      |
+| Division               | `220 hz ÷ 2`   | `110 Hz` | `A=3 - P8`       | `A=2`      |
+| Reduction              | `5 rd 2`       | `5/4`    | `M17^5 mod P8`   | `M3^5`     |
+| Ceiling reduction      | `2 rdc 2`      | `2`      | `P8 modc P8`     | `P8`       |
+| Exponentiation         | `3 ^ 2`        | `9`      | `P12 * 2`        | `M23`      |
+| Recipropower           | `9 /^ 2`       | `3`      | `M23 % 2`        | `P12`      |
+| Root taking            | `9 ^/ 2`       | `3`      | `M23 % 2`        | `P12`      |
+| Logarithm (in base of) | `9 /_ 3`       | `2`      | `M23 % P12`      | `2`        |
+| Round (to power of)    | `5 by 2`       | `4`      | `M17^5 to P8`    | `P15`      |
+| N of EDO               | `(5+2)\12`     | `7\12`   | _N/A_            |            |
+| NEDJI Projection       | `sqrt(2) ed 3` | `1\2<3>` | `2\3 ed S3`      | `2\3<9/8>` |
+| Val product            | `12@ · 3/2`    | `7`      | `<12 19] dot P5` | `7`        |
+
+Of these NEDJI Projection is probably the most obtuse, so a few words are in order. In `octaves ed base` the `base` operand is raised to the two's exponent of `octaves`. Exponents of all other primes are discarded. The result is alway is in the logarithmic domain. e.g. `[7/13 1 1> ed 5` discards the `1` components and moves/projects the first component to the third slot (corresponding to prime five) resulting in `[0 0 7\13>`.
 
 #### Universal operators and preference
 

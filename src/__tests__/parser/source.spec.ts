@@ -1192,4 +1192,18 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['6/5', '4/3', '7/4', '2/1']);
   });
+
+  it('can approximate an entire harmonic segment', () => {
+    const scale = parseSource('8::16 by~ 1\\12;str');
+    expect(scale).toEqual([
+      '2\\12',
+      '4\\12',
+      '6\\12',
+      '7\\12',
+      '8\\12',
+      '10\\12',
+      '11\\12',
+      '12\\12',
+    ]);
+  });
 });

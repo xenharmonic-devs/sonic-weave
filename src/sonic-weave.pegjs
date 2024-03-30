@@ -55,6 +55,7 @@ CatchToken         = 'catch'    !IdentifierPart
 ConstToken         = 'const'    !IdentifierPart
 ContinueToken      = 'continue' !IdentifierPart
 DotToken           = 'dot'      !IdentifierPart
+EdToken            = 'ed'       !IdentifierPart
 ElseToken          = 'else'     !IdentifierPart
 FalseToken         = 'false'    !IdentifierPart
 FinallyToken       = 'finally'  !IdentifierPart
@@ -90,6 +91,7 @@ ReservedWord
   / ConstToken
   / ContinueToken
   / DotToken
+  / EdToken
   / ElseToken
   / FalseToken
   / ForToken
@@ -504,7 +506,10 @@ ConditionalExpression
 
 AssigningOperator
   = CoalescingOperator
+  / RoundingOperator
+  / ExtremumOperator
   / AdditiveOperator
+  / MiscOperator
   / MultiplicativeOperator
   / ExponentiationOperator
 
@@ -532,16 +537,24 @@ RelationalOperator
   / $('~' OfToken)
   / (NotToken __ '~' OfToken) { return 'not ~of'; }
 
-Segment
-  = __ @(HarmonicSegment / EnumeratedChord) __
-
 RelationalExpression
-  = head: Segment tail: (__ @RelationalOperator __ @Segment)* {
+  = head: RoundingExpression tail: (__ @RelationalOperator __ @RoundingExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
+RoundingOperator
+  = $(ToToken / ByToken)
+
+RoundingExpression
+  = head: Segment tail: (__ @'~'? @RoundingOperator @'~'? _ @Segment)* {
+    return tail.reduce(operatorReducer, head);
+  }
+
+Segment
+  = __ @(HarmonicSegment / EnumeratedChord) __
+
 HarmonicSegment
-  = mirror: '/'? __ root: AdditiveExpression _ '::' _ end: AdditiveExpression {
+  = mirror: '/'? __ root: ExtremumExpression _ '::' _ end: ExtremumExpression {
     return {
       type: 'HarmonicSegment',
       mirror: !!mirror,
@@ -551,14 +564,14 @@ HarmonicSegment
   }
 
 EnumeratedChord
-  = '/' __ intervals: AdditiveExpression|2.., _ ':' _| {
+  = '/' __ intervals: ExtremumExpression|2.., _ ':' _| {
     return {
       type: 'EnumeratedChord',
       mirror: true,
       intervals,
     };
   }
-  / intervals: AdditiveExpression|1.., _ ':' _| {
+  / intervals: ExtremumExpression|1.., _ ':' _| {
     if (intervals.length === 1) {
       return intervals[0];
     }
@@ -569,26 +582,32 @@ EnumeratedChord
     };
   }
 
+ExtremumOperator
+  = $(MaxToken / MinToken)
+
+ExtremumExpression
+  = head: AdditiveExpression tail: (__ @'~'? @ExtremumOperator @'~'? _ @AdditiveExpression)* {
+    return tail.reduce(operatorReducer, head);
+  }
+
 AdditiveOperator
-  = $('+' / '-' / ToToken / ByToken / MaxToken / MinToken / '/+' / '⊕' / '/-' / '⊖')
+  = $('+' / '-' / '/+' / '⊕' / '/-' / '⊖')
 
 AdditiveExpression
-  = head: MultiplicativeExpression tail: (NedjiProjector / AdditiveTail) {
-      if (Array.isArray(tail)) {
-        return tail.reduce(operatorReducer, head);
-      }
-      return {
-        type: 'NedjiProjection',
-        octaves: head,
-        base: tail.base,
-      };
-    }
+  = head: Term tail: (__ @'~'? @AdditiveOperator @'~'? _ @Term)* {
+    return tail.reduce(operatorReducer, head); 
+  }
 
-AdditiveTail
-  = (__ @'~'? @AdditiveOperator @'~'? _ @MultiplicativeExpression)*
+MiscOperator
+  = $(ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / EdToken)
+
+Term
+  = head: MultiplicativeExpression tail: (__ @'~'? @MiscOperator @'~'? _ @MultiplicativeExpression)* {
+    return tail.reduce(operatorReducer, head); 
+  }
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / '\\' / ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / '·' / DotToken / '⊗' / TensorToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
@@ -912,14 +931,6 @@ NedjiLiteral
       denominator,
       equaveNumerator: null,
       equaveDenominator: null,
-    };
-  }
-
-NedjiProjector
-  = '<' _ base: Expression _'>' {
-    return {
-      type: 'NedjiProjector',
-      base,
     };
   }
 

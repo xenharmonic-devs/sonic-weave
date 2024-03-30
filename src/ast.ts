@@ -36,6 +36,7 @@ export type BinaryOperator =
   | 'modc'
   | 'rd'
   | 'rdc'
+  | 'ed'
   | '/_'
   | '·'
   | 'dot'
@@ -250,12 +251,6 @@ export type LabeledExpression = {
   labels: (Identifier | ColorLiteral | StringLiteral | NoneLiteral)[];
 };
 
-export type NedjiProjection = {
-  type: 'NedjiProjection';
-  octaves: Expression;
-  base: Expression;
-};
-
 export type NoneLiteral = {
   type: 'NoneLiteral';
 };
@@ -348,7 +343,6 @@ export type Expression =
   | DownExpression
   | BinaryExpression
   | LabeledExpression
-  | NedjiProjection
   | CallExpression
   | ArrowFunction
   | IntervalLiteral

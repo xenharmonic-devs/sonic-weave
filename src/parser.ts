@@ -85,7 +85,6 @@ import {
   LabeledExpression,
   LestExpression,
   LiftDeclaration,
-  NedjiProjection,
   Parameter,
   Parameters_,
   PitchDeclaration,
@@ -1034,8 +1033,6 @@ export class ExpressionVisitor {
         return this.visitBinaryExpression(node);
       case 'LabeledExpression':
         return this.visitLabeledExpression(node);
-      case 'NedjiProjection':
-        return this.visitNedjiProjection(node);
       case 'CallExpression':
         return this.visitCallExpression(node);
       case 'ArrowFunction':
@@ -1348,26 +1345,6 @@ export class ExpressionVisitor {
     }
     const p = this.project.bind(this);
     return octaves.map(o => p(o, base)) as Interval[];
-  }
-
-  visitNedjiProjection(node: NedjiProjection) {
-    const octaves = this.visit(node.octaves);
-    if (
-      !(
-        typeof octaves === 'boolean' ||
-        octaves instanceof Interval ||
-        Array.isArray(octaves)
-      )
-    ) {
-      throw new Error(
-        'Nedji steps must evaluate to an interval or an array of intervals'
-      );
-    }
-    const base = this.visit(node.base);
-    if (!(base instanceof Interval)) {
-      throw new Error('Nedji base must evaluate to an interval');
-    }
-    return this.project(octaves, base);
   }
 
   visitWartsLiteral(node: WartsLiteral) {
@@ -1748,6 +1725,9 @@ export class ExpressionVisitor {
             case '⊖':
               value = left.value.lensSub(right.value);
               break;
+            case 'ed':
+              value = left.value.project(right.value);
+              break;
             case '\\':
               throw new Error('Preference not supported with backslahes');
             default:
@@ -1762,6 +1742,9 @@ export class ExpressionVisitor {
           // Special handling for domain crossing operations
           if (operator === '/_' || operator === 'dot' || operator === '·') {
             result.domain = 'linear';
+            result.node = undefined;
+          } else if (operator === 'ed') {
+            result.domain = 'logarithmic';
             result.node = undefined;
           }
 
@@ -1829,6 +1812,8 @@ export class ExpressionVisitor {
           case '/-':
           case '⊖':
             return left.lensSub(right);
+          case 'ed':
+            return left.project(right);
           case '??':
           case 'or':
           case 'and':
