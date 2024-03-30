@@ -295,6 +295,8 @@ export class StatementVisitor {
         return this.visitContinueStatement(node);
       case 'ThrowStatement':
         throw this.visitThrowStatement(node);
+      case 'EmptyStatement':
+        return;
     }
     node satisfies never;
   }

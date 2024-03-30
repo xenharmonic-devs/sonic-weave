@@ -69,6 +69,10 @@ export type Identifiers = {
   rest?: Identifier;
 };
 
+export type EmptyStatement = {
+  type: 'EmptyStatement';
+};
+
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
   name: Identifier | Identifiers | ArrayAccess | ArraySlice;
@@ -171,6 +175,7 @@ export type ExpressionStatement = {
 };
 
 export type Statement =
+  | EmptyStatement
   | AssignmentStatement
   | VariableDeclaration
   | ExpressionStatement

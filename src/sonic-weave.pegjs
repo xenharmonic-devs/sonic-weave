@@ -459,8 +459,11 @@ CatchClause
 TryFinalizer = FinallyToken _ @Statement
 
 EmptyStatement
-  = _ ';'
-  / __ SingleLineComment LineTerminatorSequence
+  = (_ ';' / __ SingleLineComment LineTerminatorSequence) {
+    return {
+      type: 'EmptyStatement',
+    };
+  }
 
 ExpressionStatement
   = !("{" / FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
