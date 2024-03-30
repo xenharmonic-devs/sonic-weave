@@ -750,9 +750,7 @@ export function formatAbsoluteFJS(literal: AbsoluteFJS, octaves = true) {
       literal
     )}`;
   }
-  return `${base}${p.nominal === 'a' ? 'A' : p.nominal}${p.accidentals.join(
-    ''
-  )}${tailFJS(literal)}`;
+  return `${base}${p.nominal}${p.accidentals.join('')}${tailFJS(literal)}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {

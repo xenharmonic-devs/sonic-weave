@@ -390,13 +390,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses negative intervals correctly', () => {
-    const interval = parseSingle('AA-2');
+    const interval = parseSingle('aa-2');
     expect(interval.totalCents()).toBeCloseTo(-431.28);
   });
 
   it('converts negative intervals correctly', () => {
     const interval = parseSingle('FJS([25 -16>)');
-    expect(interval.toString()).toBe('AA-2');
+    expect(interval.toString()).toBe('aa-2');
   });
 
   it('preserves ups and lifts on FJS', () => {
@@ -416,7 +416,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can add FJS', () => {
     const augmentedFifth = parseSingle('M3 + M3');
-    expect(augmentedFifth.toString()).toBe('A5');
+    expect(augmentedFifth.toString()).toBe('a5');
   });
 
   it('can mod FJS', () => {
@@ -1013,7 +1013,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has Helmholtz-Ellis 2020 comma flavors', () => {
-    const h17 = parseSingle('A1_17h');
+    const h17 = parseSingle('a1_17h');
     expect(h17.value.toFraction().toFraction()).toBe('17/16');
   });
 
@@ -1038,7 +1038,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has syntonic rastmic subchroma notation (relative artodemisharp)', () => {
-    const artodemi = parseSingle('sA1_1s');
+    const artodemi = parseSingle('sa1_1s');
     expect(artodemi.value.toFraction().toFraction()).toBe('33/32');
   });
 

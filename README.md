@@ -262,7 +262,9 @@ The octave `2/1` is divided into 7 degrees, some of which have two basic qualiti
 
 The cycle repeats at the perfect octave `P8` (exactly `1200.000` in size) e.g. `9/4` is a major ninth `M9` (or `1403.910`).
 
-Augmented intervals are `2187/2048` (or `113.685`) higher than their perfect/major counterparts e.g. `A4` is `729/512` (or `611.730`). Diminished intervals are correspondingly lower than their perfect/minor counterparts e.g. `d3` is `65536/59049` (or `180.450`).
+Augmented intervals are `2187/2048` (or `113.685`) higher than their perfect/major counterparts e.g. `a4` is `729/512` (or `611.730`). Diminished intervals are correspondingly lower than their perfect/minor counterparts e.g. `d3` is `65536/59049` (or `180.450`).
+
+The lowercase `a` is used to indicate the augmented quality to make absolute notation consistently uppercase. For visually uppercase augmented intervals you can use *Latin Capital Letter A with Circumflex* Â e.g. `Â4` for the augmented fourth. The mnemonic is that the circumflex points up and thus means a wider interval.
 
 ### Absolute notation
 Absolute notation is rooted on (relative) `C4 = 1/1` by default, but it is recommended that you set an absolute frequency like `C4 = mtof(60)` or `C4 = 261.6 Hz`.
@@ -275,13 +277,13 @@ The Pythagorean nominals from unison to the first octave are.
 | `E4`    | `C4 + M3` |
 | `F4`    | `C4 + P4` |
 | `G4`    | `C4 + P5` |
-| `a4`    | `C4 + M6` |
+| `A4`    | `C4 + M6` |
 | `B4`    | `C4 + M7` |
 | `C5`    | `C4 + P8` |
 
 The `a` nominal must be in lowercase or combined with a neutral sign (`=` or  `♮`) to distinguish it from the *augmented* inflection.
 
-The sharp signs (`#` and `♯`) correspond to the augmented unison e.g. `F#4` is `F4 + A1` or `729/512` relative to `C4`.
+The sharp signs (`#` and `♯`) correspond to the augmented unison e.g. `F#4` is `F4 + a1` or `729/512` relative to `C4`.
 
 The flat signs (`b` and `♭`) correspond to the diminished unison e.g. `Eb4` is `E4 + d1` or `32/27` relative to `C4`.
 
@@ -322,7 +324,7 @@ The first few prime harmonics in FJS are:
 | `13/8`            | `m6^13` | `A♭4^13`     |
 | `17/16`           | `m2^17` | `D♭4^17`     |
 | `19/16`           | `m3^19` | `E♭4^19`     |
-| `23/16`           | `A4^23` | `F♯4^23`     |
+| `23/16`           | `a4^23` | `F♯4^23`     |
 
 SonicWeave agrees with [FloraC's critique](https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System) and assigns `31/32` to `P1^31`. The classic inflection may be accessed using the `c` flavor i.e. `P1^31c` for `248/243`.
 
@@ -333,7 +335,7 @@ So a linear fact like S9 = S6/S8 is expressed as `S9 === S6-S8` in SonicWeave.
 
 Sums of consecutive S-expressions use the range syntax. E.g. `logarithmic(10/9)` is equivalent to `S5..8` i.e. `logarithmic(25/24 * 36/35 * 49/48 * 64/63)`
 
-In combination with FJS we can now spell `10/7` as `A4+S8-S9` or `12/11` as `M2-S9..11`.
+In combination with FJS we can now spell `10/7` as `a4+S8-S9` or `12/11` as `M2-S9..11`.
 
 ## Interval type system
 The interval type system is fairly complex in order to accomodate all types of quantities that can refer to musical pitch or frequency.
@@ -366,7 +368,7 @@ Multiplication of absolute quantities is interpreted as their geometric average:
 Same goes for logarithmic absolute quantities: `C♮4 + E♮4` corresponds to `D♮4` in the scale if you've declared `C♮4` as absolute quantity.
 
 ## Variable declaration
-Variables can be declared using the keyword `let` or `const` and a single *equals* sign e.g. `const k = logarithmic(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `A4+k` now corresponds to `10/7`.
+Variables can be declared using the keyword `let` or `const` and a single *equals* sign e.g. `const k = logarithmic(5120/5103)` defines a handy inflection such that `7/5` can be spelled `d5-k` while `a4+k` now corresponds to `10/7`.
 
 Only variables declared using `let` can be re-assigned later.
 
@@ -374,9 +376,9 @@ Only variables declared using `let` can be re-assigned later.
 Variables can be reassigned for example after `let i = 2` declaring `i += 3` sets `i` to `5`.
 
 ## Pitch declaration
-Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `a4 = 440 Hz`.
+Pitch declaration can be relative e.g. `C0 = 1/1` or absolute e.g. `A4 = 440 Hz`.
 
-Using a middle value determines the nature of absolute notation e.g. `a4 = 440 Hz = 27/16` sets `a4` to `logarithmic(440 Hz)` while `a4 = 27/16 = 440 Hz` sets `a4` to `M6` (i.e. `logarithmic(27/16)`).
+Using a middle value determines the nature of absolute notation e.g. `A4 = 440 Hz = 27/16` sets `A4` to `logarithmic(440 Hz)` while `A4 = 27/16 = 440 Hz` sets `A4` to `M6` (i.e. `logarithmic(27/16)`).
 
 The unison frequency is set implicitly when declaring pitch, but can be set explicitly too e.g. `1/1 = 420 Hz`.
 
@@ -707,12 +709,12 @@ Notable neutral intervals include:
 | Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
 | Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
 
-The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sA1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `n3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sA6` is `M6 + sA1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
+The major intervals are one semiaugmented unison (or `56.843`) above from their neutral center e.g. `M3` is `n3 + sa1` while minor intervals are semidiminished w.r.t. neutral e.g. `m3` is `n3 + sd1`. A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sa6` is `M6 + sa1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
 
-Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sA4` is simply `P4 + sA1` or `32/27^3/2` if expressed linearly.
+Perfect intervals are already at the center of their augmented and diminished variants so e.g. `sa4` is simply `P4 + sa1` or `32/27^3/2` if expressed linearly.
 
 #### Semisharps and semiflats
-The accidental associated with `sA1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
+The accidental associated with `sa1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
 
 For example the neutral third above `C4` is `Ed4`.
 
@@ -751,7 +753,7 @@ It does require an intermediary quality between major and neutral called _semima
 
 The quarter fifth `P5 % 4` is a semimajor second `sM2` (or `½M2`).
 
-The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-diminished (`qd`, `¼d`). Quarter-augmented plus semiaugmented is sesqui-semiaugmented (`QA`, `¾A`) and correspondingly sesqui-semidiminished (`Qd`, `¾d`).
+The new augmented qualities are quarter-augmented (`qa`, `¼A`) and quarter-diminished (`qd`, `¼d`). Quarter-augmented plus semiaugmented is sesqui-semiaugmented (`Qa`, `¾A`) and correspondingly sesqui-semidiminished (`Qd`, `¾d`).
 
 | Accidental             | Monzo          | Size in cents |
 | ---------------------- | -------------- | ------------- |
@@ -765,13 +767,13 @@ The new augmented qualities are quarter-augmented (`qA`, `¼A`) and quarter-dimi
 
 | Name           | Literal |  Recommended name    | Literal | Monzo        | Size in cents |
 | -------------- | ------- | -------------------- | ------- | ------------ | ------------- |
-| Neutral fourth | `n4`    | Semiaugmented fourth | `sA4`   | `[-7/2 5/2>` | `554.888`     |
+| Neutral fourth | `n4`    | Semiaugmented fourth | `sa4`   | `[-7/2 5/2>` | `554.888`     |
 | Neutral fifth  | `n5`    | Semidiminished fifth | `sd5`   | `[9/2 -5/2>` | `645.112`     |
 
 They are octave complements of each other: `n4` is `P8 - n5`.
 
 ### True tone-splitters
-Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `A1`). The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
+Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `a1`). The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
 
 The difference `n1.5 - m2` is only `11.730c` so true tone-splitters are not very useful in their untempered form, but they do provide the notation `n4.5` for the semioctave `P8 % 2` which is stable in all even equal divisions of the octave.
 
@@ -783,7 +785,7 @@ The basic tone-splitters are as follows:
 | Neutral third-and-a-halfth   | `n3.5`, `M2 * 5/2` | `9/8 ^ 5/2`       | `509.775`     |
 | Neutral fourth-and-a-halfth  | `n4.5`, `P8 % 2`   | `sqrt(2)`         | `600.000`     |
 | Neutral fifth-and-a-halfth   | `n5.5`, `M10 % 2`  | `sqrt(81/32)`     | `803.910`     |
-| Neutral sixth-and-a-halfth   | `n6.5`, `A12 % 2`  | `sqrt(6561/2048)` | `1007.82`     |
+| Neutral sixth-and-a-halfth   | `n6.5`, `a12 % 2`  | `sqrt(6561/2048)` | `1007.82`     |
 | Neutral seventh-and-a-halfth | `n7.5`, `m14 % 2`  | `sqrt(32/9)`      | `1098.045`    |
 
 ### Absolute semioctave dodecanominal notation

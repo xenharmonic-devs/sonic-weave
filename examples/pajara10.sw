@@ -11,7 +11,7 @@ E4
 ζ4
 G4
 η4
-A♮4
+A4
 α4
 
 // Repeat at the octave
