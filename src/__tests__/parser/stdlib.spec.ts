@@ -36,7 +36,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates equal temperaments', () => {
-    const scale = parseSource('ed(6);');
+    const scale = parseSource('tet(6);');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\6;2\\6;3\\6;4\\6;5\\6;6\\6'
@@ -44,7 +44,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates tritave equivalent equal temperaments', () => {
-    const scale = parseSource('ed(3,3);');
+    const scale = parseSource('tet(3,3);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\3<3>;2\\3<3>;3\\3<3>'
@@ -127,13 +127,13 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can take edo subsets', () => {
-    const scale = parseSource('ed(7);subset([0, 1, 2]);');
+    const scale = parseSource('tet(7);subset([0, 1, 2]);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('1\\7;2\\7;7\\7');
   });
 
   it('can take relative edo subsets', () => {
-    const scale = parseSource('ed(12);subset(cumsum([0, 2, 2, 1, 2, 2, 2]));');
+    const scale = parseSource('tet(12);subset(cumsum([0, 2, 2, 1, 2, 2, 2]));');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'

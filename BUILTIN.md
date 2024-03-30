@@ -422,9 +422,6 @@ Calculate the denominator of x in reduced form.
 ### diff(*array*)
 Calculate the (linear) differences between the terms.
 
-### ed(*divisions*, *equave = 2*)
-Generate an equal temperament with the given number of divisions of the given equave/octave.
-
 ### edColors(*divisions = 12*, *offset = 0*, *equave = 2*)
 Color every interval in the scale with hue repeating every step of an equal division of `equave`. `offset` rotates the hue wheel.
 
@@ -658,6 +655,9 @@ Calculate the (linear) sum of the terms or the current scale.
 
 ### tanh(*x*)
 Calculate the hyperbolic tangent of x.
+
+### tet(*divisions*, *equave = 2*)
+Generate an equal temperament with the given number of divisions of the given equave/octave.
 
 ### toHarmonics(*fundamental*, *scale = $$*)
 Quantize the current/given scale to harmonics of the given fundamental.

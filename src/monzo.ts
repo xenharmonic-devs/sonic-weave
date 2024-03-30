@@ -1284,6 +1284,15 @@ export class TimeMonzo {
   }
 
   /**
+   * Project the exponent of two to the given base.
+   * @param base New base to replace prime two.
+   * @returns N steps of equal divisions of the new base assuming this time monzo was N steps of an equally divided octave.
+   */
+  project(base: TimeMonzo) {
+    return base.pow(this.octaves);
+  }
+
+  /**
    * Check for strict equality between this and another time monzo.
    * @param other Another time monzo.
    * @returns `true` if the time monzos share the same time exponent, prime exponents, residual and cents offset.

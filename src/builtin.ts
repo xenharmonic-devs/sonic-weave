@@ -2408,11 +2408,11 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 }
 
 // == Scale generation ==
-riff ed(divisions, equave = 2) {
+riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
   [1..divisions];
   if (equave === 2) step => step \\ divisions;
-  else step => step \\ divisions < equave >;
+  else step => step \\ divisions ed equave;
 }
 
 riff subharmonics(start, end) {
@@ -2428,7 +2428,7 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = $[-1];
   if (equave === 2) step => step \\ divisions;
-  else step => step \\ divisions < equave >;
+  else step => step \\ divisions ed equave;
 }
 
 riff rank2(generator, up, down = 0, period = 2, numPeriods = 1) {
@@ -2595,7 +2595,7 @@ riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2)
 
 riff concordanceShell(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2) {
   "Generate a concordance shell i.e. a vertically aligned object reduced to an equal temperament. Intervals are labeled by their harmonics.";
-  let step = 1 \\ divisions <equave>;
+  let step = 1 \\ divisions ed equave;
   if (equave === 2) {
     step = 1 \\ divisions;
   }
@@ -2827,7 +2827,7 @@ riff equalize(divisions, scale = $$) {
   $ = scale;
   let step = 1 \\ divisions;
   if ($[-1] != 2)
-    step = step <$[-1]>;
+    step ed= $[-1];
   i => i by~ step colorOf(i) labelOf(i);
   return;
 }

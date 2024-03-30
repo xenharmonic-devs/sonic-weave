@@ -264,7 +264,7 @@ export class Interval {
   project(base: Interval) {
     const node = projectNodes(this.node, base.node);
     return new Interval(
-      base.value.pow(this.value.octaves),
+      this.value.project(base.value),
       'logarithmic',
       node,
       infect(this, base)

@@ -944,7 +944,10 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has quick nedji subset', () => {
-    const scale = evaluateExpression('[1, 2, 5] \\ 13<3>', false) as Interval[];
+    const scale = evaluateExpression(
+      '[1, 2, 5] \\ 13 ed 3',
+      false
+    ) as Interval[];
     expect(scale.map(i => i.toString())).toEqual([
       '1\\13<3>',
       '2\\13<3>',
@@ -1524,5 +1527,10 @@ describe('SonicWeave expression evaluator', () => {
   it('uses w before u in step strings', () => {
     const pattern = evaluateExpression('8::16;stepString()', false);
     expect(pattern).toBe('BHLMnstw');
+  });
+
+  it('has a comfortable precedence between addition, min and max', () => {
+    const five = parseSingle('2 + 1 min 3 - 4 max 5');
+    expect(five.toString()).toBe('5');
   });
 });
