@@ -1,8 +1,18 @@
 UnderscoreDigits
-  = num: $([_0-9]*) { return num.replace(/_/g, ''); }
+  = num: $([_0-9]*) {
+  if (num.endsWith('_')) {
+    error('Numeric separators are not allowed at the end of numeric literals.');
+  }
+  return num.replace(/_/g, '');
+}
 
 NonEmptyUnderscoreDigits
-  = num: $([_0-9]+) { return num.replace(/_/g, ''); }
+  = num: $([0-9] [_0-9]*) {
+  if (num.endsWith('_')) {
+    error('Numeric separators are not allowed at the end of numeric literals.');
+  }
+  return num.replace(/_/g, '');
+}
 
 PositiveInteger
   = num:([1-9] UnderscoreDigits) { return BigInt(num.join('')); }

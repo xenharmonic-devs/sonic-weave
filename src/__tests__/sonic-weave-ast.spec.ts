@@ -913,3 +913,13 @@ describe('Automatic semicolon insertion', () => {
     expect(ast.body).toHaveLength(2);
   });
 });
+
+describe('Negative tests', () => {
+  it('rejects numbers without digits', () => {
+    expect(() => parse('._')).toThrow();
+  });
+
+  it('rejects trailing underscores in numbers', () => {
+    expect(() => parse('7_')).toThrow();
+  });
+});
