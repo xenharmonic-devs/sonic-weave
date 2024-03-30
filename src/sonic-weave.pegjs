@@ -1122,7 +1122,7 @@ Demisemi
   = $('¼' / 'q' / '½' / 's' / '¾' / 'Q')
 
 AugmentedQuality
-  = $(Demisemi? 'd'+) / $(Demisemi? 'A'+)
+  = $(Demisemi? 'd'+) / $(Demisemi? [aÂ]+)
 
 ImperfectQuality
   = 'm' / 'sm' / '½m' / 'n' / '½M' / 'sM' / 'M'
@@ -1251,7 +1251,7 @@ Accidental
   = $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£] / (Demisemi [♯#♭b]))
 
 Nominal
-  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωaA-G])
+  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G])
 
 AbsolutePitch
   = nominal: Nominal accidentals: Accidental* octave: SignedBasicInteger {

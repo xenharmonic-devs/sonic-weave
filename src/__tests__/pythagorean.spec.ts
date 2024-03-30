@@ -31,19 +31,19 @@ describe('Pythagorean interval construction from parts', () => {
     ['M', 6, -4, 3],
     ['M', 3, -6, 4],
     ['M', 7, -7, 5],
-    ['A', 4, -9, 6],
-    ['A', 1, -11, 7],
-    ['A', 5, -12, 8],
-    ['A', 2, -14, 9],
-    ['A', 6, -15, 10],
-    ['A', 3, -17, 11],
-    ['A', 7, -18, 12],
+    ['a', 4, -9, 6],
+    ['a', 1, -11, 7],
+    ['a', 5, -12, 8],
+    ['a', 2, -14, 9],
+    ['a', 6, -15, 10],
+    ['a', 3, -17, 11],
+    ['a', 7, -18, 12],
     // Compound
     ['P', 8, 1, 0],
     // Negative
     ['M', -2, 3, -2],
     // Double augmented
-    ['AA', 1, -22, 14],
+    ['aa', 1, -22, 14],
     ['dd', 1, 22, -14],
     // Neutral
     ['sd', 2, 13.5, -8.5],
@@ -57,13 +57,13 @@ describe('Pythagorean interval construction from parts', () => {
     ['n', 6, 1.5, -0.5],
     ['n', 3, -0.5, 0.5],
     ['n', 7, -1.5, 1.5],
-    ['sA', 4, -3.5, 2.5],
-    ['sA', 1, -5.5, 3.5],
-    ['sA', 5, -6.5, 4.5],
-    ['sA', 2, -8.5, 5.5],
-    ['sA', 6, -9.5, 6.5],
-    ['sA', 3, -11.5, 7.5],
-    ['sA', 7, -12.5, 8.5],
+    ['sa', 4, -3.5, 2.5],
+    ['sa', 1, -5.5, 3.5],
+    ['sa', 5, -6.5, 4.5],
+    ['sa', 2, -8.5, 5.5],
+    ['sa', 6, -9.5, 6.5],
+    ['sa', 3, -11.5, 7.5],
+    ['sa', 7, -12.5, 8.5],
     // Tonesplitters
     ['sd', 3.5, 3.5, -2],
     ['n', 7.5, 2.5, -1],
@@ -73,7 +73,7 @@ describe('Pythagorean interval construction from parts', () => {
     ['n', 2.5, -4.5, 3],
     ['n', 6.5, -5.5, 4],
     ['n', 3.5, -7.5, 5],
-    ['sA', 7.5, -8.5, 6],
+    ['sa', 7.5, -8.5, 6],
     // Semiquartal
     ['d', 2.5, 12, -7.5],
     ['d', 6.5, 11, -6.5],
@@ -92,12 +92,14 @@ describe('Pythagorean interval construction from parts', () => {
     ['M', 2.5, -10, 6.5],
     ['M', 6.5, -11, 7.5],
     ['M', 3.5, -13, 8.5],
-    ['A', 7.5, -14, 9.5],
+    ['a', 7.5, -14, 9.5],
     // Quarter augmented
-    ['qA', 1, -2.75, 1.75],
-    ['QA', 1, -8.25, 5.25],
+    ['qa', 1, -2.75, 1.75],
+    ['Qa', 1, -8.25, 5.25],
     ['sm', 3, 2.25, -1.25],
     ['sM', 3, -3.25, 2.25],
+    // Circumflex alternate spelling
+    ['Â4', 4, -9, 6],
   ])('constructs %s%s', (quality, degree, twos, threes) => {
     const base = ((Math.abs(degree) - 1) % 7) + 1;
     const octaves = Math.floor((Math.abs(degree) - 1) / 7);
@@ -177,7 +179,7 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('4782969/2097152'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'AA',
+      quality: 'aa',
       imperfect: false,
       degree: {base: 1, negative: false, octaves: 1},
     });

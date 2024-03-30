@@ -514,18 +514,18 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('prefers augmented fourth over the absolute pitch A4', () => {
+  it('prefers absolute pitch A4 over augmented fourth', () => {
     const ast = parseSingle('A4');
-    expect(ast.expression.type).toBe('FJS');
-  });
-
-  it("has an alternative spelling for the absolute pitch nominal 'A'", () => {
-    const ast = parseSingle('a4');
     expect(ast.expression.type).toBe('AbsoluteFJS');
   });
 
+  it('has a lowercase spelling for the augmented fourth', () => {
+    const ast = parseSingle('a4');
+    expect(ast.expression.type).toBe('FJS');
+  });
+
   it('prefers pitch declaration over variable declaration', () => {
-    const ast = parseSingle('a4 = 440 Hz');
+    const ast = parseSingle('A4 = 440 Hz');
     expect(ast.type).toBe('PitchDeclaration');
     expect(ast.left.type).toBe('AbsoluteFJS');
   });

@@ -18,7 +18,6 @@ export type Pythagorean = {
 export type AbsolutePitch = {
   type: 'AbsolutePitch';
   nominal:
-    | 'a'
     | 'A'
     | 'B'
     | 'C'
@@ -73,7 +72,6 @@ const NOMINAL_VECTORS = new Map([
   ['C', [0, 0]],
   ['G', [-1, 1]],
   ['D', [-3, 2]],
-  ['a', [-4, 3]],
   ['A', [-4, 3]],
   ['E', [-6, 4]],
   ['B', [-7, 5]],
@@ -183,7 +181,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   // Non-perfect intervals need an extra half-augmented widening
   if (node.imperfect) {
     const last = quality[quality.length - 1];
-    if (last === 'A') {
+    if (last === 'a' || last === 'Â') {
       vector[0] -= 5.5;
       vector[1] += 3.5;
     } else if (last === 'd') {
@@ -203,7 +201,12 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   vector[0] += node.degree.octaves;
 
   // Quarter-augmented
-  if (quality.startsWith('qA') || quality.startsWith('¼A')) {
+  if (
+    quality.startsWith('qa') ||
+    quality.startsWith('¼a') ||
+    quality.startsWith('qÂ') ||
+    quality.startsWith('¼Â')
+  ) {
     quality = quality.slice(2);
     vector[0] -= 2.75;
     vector[1] += 1.75;
@@ -213,7 +216,12 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     vector[0] += 2.75;
     vector[1] -= 1.75;
   }
-  if (quality.startsWith('QA') || quality.startsWith('¾A')) {
+  if (
+    quality.startsWith('Qa') ||
+    quality.startsWith('¾a') ||
+    quality.startsWith('QÂ') ||
+    quality.startsWith('¾Â')
+  ) {
     quality = quality.slice(2);
     vector[0] -= 8.25;
     vector[1] += 5.25;
@@ -225,7 +233,12 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   }
 
   // Semi-augmented
-  if (quality.startsWith('sA') || quality.startsWith('½A')) {
+  if (
+    quality.startsWith('sa') ||
+    quality.startsWith('½a') ||
+    quality.startsWith('sÂ') ||
+    quality.startsWith('½Â')
+  ) {
     quality = quality.slice(2);
     vector[0] -= 5.5;
     vector[1] += 3.5;
@@ -237,7 +250,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   }
 
   // (Fully) augmented
-  while (quality.startsWith('A')) {
+  while (quality.startsWith('a') || quality.startsWith('Â')) {
     quality = quality.slice(1);
     vector[0] -= 11;
     vector[1] += 7;
@@ -312,10 +325,10 @@ const IMPERFECT_QUALITY_SPECTRUM = [
   'n',
   'sM',
   'M',
-  'qA',
-  'sA',
+  'qa',
+  'sa',
   'Qa',
-  'A',
+  'a',
 ];
 
 const PERFECT_QUALITY_SPECTRUM = [
@@ -324,10 +337,10 @@ const PERFECT_QUALITY_SPECTRUM = [
   'sd',
   'qd',
   'P',
-  'qA',
-  'sA',
+  'qa',
+  'sa',
   'Qa',
-  'A',
+  'a',
 ];
 
 export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
@@ -358,7 +371,7 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
       offCenter += 4;
     }
     while (offCenter > 6) {
-      quality += 'A';
+      quality += 'a';
       offCenter -= 4;
     }
     quality += IMPERFECT_QUALITY_SPECTRUM[offCenter + 6];
@@ -368,7 +381,7 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
       offCenter += 4;
     }
     while (offCenter > 4) {
-      quality += 'A';
+      quality += 'a';
       offCenter -= 4;
     }
     quality += PERFECT_QUALITY_SPECTRUM[offCenter + 4];
