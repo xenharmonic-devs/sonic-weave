@@ -926,4 +926,8 @@ describe('Negative tests', () => {
   it('rejects labels without spaces', () => {
     expect(() => parse('0$')).toThrow();
   });
+
+  it('rejects unary operations without operators', () => {
+    expect(() => parse('~3')).toThrow();
+  });
 });

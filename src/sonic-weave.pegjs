@@ -608,14 +608,23 @@ UniformUnaryExpression
       uniform: false,
     };
   }
-  / operator: UniformUnaryOperator? uniform: '~'? operand: ExponentiationExpression {
+  / operator: UniformUnaryOperator '~' operand: ExponentiationExpression {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: true,
+    };
+  }
+  / operator: UniformUnaryOperator? operand: ExponentiationExpression {
     if (operator) {
       return {
         type: 'UnaryExpression',
         operator,
         operand,
         prefix: true,
-        uniform: !!uniform,
+        uniform: false,
       };
     }
     return operand;
