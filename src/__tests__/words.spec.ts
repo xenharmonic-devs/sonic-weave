@@ -56,6 +56,10 @@ describe('add()', () => {
     expect(add(v1, v2)).toStrictEqual(sum);
     expect(add(v2, v1)).toStrictEqual(sum);
   });
+  it('is resistant to pathological JS behavior', () => {
+    const result = add({}, {toString: 1});
+    expect(result).toStrictEqual({toString: 1});
+  });
 });
 
 describe('scalarMult()', () => {
@@ -133,6 +137,10 @@ describe('sub()', () => {
     const v2 = {a: 1, b: 1, c: 1};
     const diff = {b: 1, c: -4};
     expect(sub(v1, v2)).toStrictEqual(diff);
+  });
+  it('is resistant to pathological JS behavior', () => {
+    const result = sub({}, {hasOwnProperty: 1, hasOwn: -2});
+    expect(result).toStrictEqual({hasOwnProperty: -1, hasOwn: 2});
   });
 });
 
