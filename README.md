@@ -879,6 +879,11 @@ Due to technical reasons the accidentals for the 5L 4s scale, *scarab* (`¤`) an
 
 Semiquartals are associated with the `q` comma flavor e.g. `7/6` can be spelled `φ4^7q` (assuming `C4 = 1/1`).
 
+### Eight fifth
+Introducing interordinals induces notation for `P5 % 8` namely the *quarter-minor sesquith* `qm1.5`.
+
+`Qm` and `¼M` interval qualities work as expected. Augmented and diminished may be prefixed with `⅛`, `⅜`, `⅝` or `⅞` and the same goes for the sharp and flat accidentals.
+
 ### Extra comma flavors
 Extra commas include extended Helmholtz-Ellis inflections and additional bridges from above irrationals to just intonation.
 

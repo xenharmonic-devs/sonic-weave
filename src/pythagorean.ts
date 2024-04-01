@@ -57,6 +57,7 @@ const MID_FIFTH = [4.5, -2.5];
 // Exponents for "neutral" interordinal intervals related to Pythagoras by a semioctave.
 // Splits the whole tone in half precisely in the middle.
 // Implicitly define semiquartal intervals.
+// Associated with eight sharps.
 const TONESPLITTER_VECTORS: number[][] = [
   [-1.5, 1],
   [-4.5, 3],
@@ -147,7 +148,7 @@ const ACCIDENTAL_VECTORS = new Map([
   ['£', [7, -4.5]],
 ]);
 
-for (const accidental of '♯#♭b') {
+for (const accidental of '♯#♭b𝄲‡t𝄳d') {
   for (const semi of '½s') {
     const vector = [...ACCIDENTAL_VECTORS.get(accidental)!];
     vector[0] *= 0.5;
@@ -166,6 +167,28 @@ for (const accidental of '♯#♭b') {
     vector[1] *= 0.75;
     ACCIDENTAL_VECTORS.set(sesqui + accidental, vector);
   }
+}
+for (const accidental of '♯#♭b') {
+  const vector = ACCIDENTAL_VECTORS.get(accidental)!;
+  let v = [...vector];
+  v[0] *= 0.125;
+  v[1] *= 0.125;
+  ACCIDENTAL_VECTORS.set('⅛' + accidental, v);
+
+  v = [...vector];
+  v[0] *= 0.375;
+  v[1] *= 0.375;
+  ACCIDENTAL_VECTORS.set('⅜' + accidental, v);
+
+  v = [...vector];
+  v[0] *= 0.625;
+  v[1] *= 0.625;
+  ACCIDENTAL_VECTORS.set('⅝' + accidental, v);
+
+  v = [...vector];
+  v[0] *= 0.875;
+  v[1] *= 0.875;
+  ACCIDENTAL_VECTORS.set('⅞' + accidental, v);
 }
 
 export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
@@ -199,6 +222,48 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   }
 
   vector[0] += node.degree.octaves;
+
+  // Eight-augmented
+  if (quality.startsWith('⅛a') || quality.startsWith('⅛Â')) {
+    quality = quality.slice(2);
+    vector[0] -= 1.375;
+    vector[1] += 0.875;
+  }
+  if (quality.startsWith('⅜a') || quality.startsWith('⅜Â')) {
+    quality = quality.slice(2);
+    vector[0] -= 4.125;
+    vector[1] += 2.625;
+  }
+  if (quality.startsWith('⅝a') || quality.startsWith('⅝Â')) {
+    quality = quality.slice(2);
+    vector[0] -= 6.875;
+    vector[1] += 4.375;
+  }
+  if (quality.startsWith('⅞a') || quality.startsWith('⅞Â')) {
+    quality = quality.slice(2);
+    vector[0] -= 9.625;
+    vector[1] += 6.125;
+  }
+  if (quality.startsWith('⅛d')) {
+    quality = quality.slice(2);
+    vector[0] += 1.375;
+    vector[1] -= 0.875;
+  }
+  if (quality.startsWith('⅜d')) {
+    quality = quality.slice(2);
+    vector[0] += 4.125;
+    vector[1] -= 2.625;
+  }
+  if (quality.startsWith('⅝d')) {
+    quality = quality.slice(2);
+    vector[0] += 6.875;
+    vector[1] -= 4.375;
+  }
+  if (quality.startsWith('⅞d')) {
+    quality = quality.slice(2);
+    vector[0] += 9.625;
+    vector[1] -= 6.125;
+  }
 
   // Quarter-augmented
   if (
@@ -281,6 +346,26 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     vector[0] += 2.75;
     vector[1] -= 1.75;
   }
+  // Quartermajor = eight-augmented
+  if (quality === 'qM' || quality === '¼M') {
+    vector[0] -= 1.375;
+    vector[1] += 0.875;
+  }
+  // Quarterminor = eight-diminished
+  if (quality === 'qm' || quality === '¼m') {
+    vector[0] += 1.375;
+    vector[1] -= 0.875;
+  }
+  // Sesquisemimajor = three-eights-augmented
+  if (quality === 'QM' || quality === '¾M') {
+    vector[0] -= 4.125;
+    vector[1] += 2.625;
+  }
+  // Sesquisemiminor = eight-augmented
+  if (quality === 'Qm' || quality === '¾m') {
+    vector[0] += 4.125;
+    vector[1] -= 2.625;
+  }
 
   // (Perfect, neutral and "empty" intervals need no further modifications.)
 
@@ -317,29 +402,49 @@ export function absoluteMonzo(node: AbsolutePitch) {
 
 const IMPERFECT_QUALITY_SPECTRUM = [
   'd',
+  '⅞d',
   'Qd',
+  '⅝d',
   'sd',
+  '⅜d',
   'qd',
+  '⅛d',
   'm',
+  'Qm',
   'sm',
+  'qm',
   'n',
+  'qM',
   'sM',
+  'QM',
   'M',
+  '⅛a',
   'qa',
+  '⅜a',
   'sa',
+  '⅝a',
   'Qa',
+  '⅞a',
   'a',
 ];
 
 const PERFECT_QUALITY_SPECTRUM = [
   'd',
+  '⅞d',
   'Qd',
+  '⅝d',
   'sd',
+  '⅜d',
   'qd',
+  '⅛d',
   'P',
+  '⅛a',
   'qa',
+  '⅜a',
   'sa',
+  '⅝a',
   'Qa',
+  '⅞a',
   'a',
 ];
 
@@ -357,34 +462,34 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   const octaves = Math.floor(stepspan / 7);
   let offCenter: number;
   if (Number.isInteger(stepspan)) {
-    offCenter = (threes - PYTH_VECTORS[base - 1][1]) / 1.75;
+    offCenter = (threes - PYTH_VECTORS[base - 1][1]) / 0.875;
   } else if (mmod(stepspan, 1) === 0.5) {
-    offCenter = (threes - TONESPLITTER_VECTORS[base - 1.5][1]) / 1.75;
+    offCenter = (threes - TONESPLITTER_VECTORS[base - 1.5][1]) / 0.875;
   } else {
     return undefined;
   }
   const imperfect = ![1, 4, 5].includes(base);
   let quality = '';
   if (imperfect) {
-    while (offCenter < -6) {
+    while (offCenter < -12) {
       quality += 'd';
-      offCenter += 4;
+      offCenter += 8;
     }
-    while (offCenter > 6) {
+    while (offCenter > 12) {
       quality += 'a';
-      offCenter -= 4;
+      offCenter -= 8;
     }
-    quality += IMPERFECT_QUALITY_SPECTRUM[offCenter + 6];
+    quality += IMPERFECT_QUALITY_SPECTRUM[offCenter + 12];
   } else {
-    while (offCenter < -4) {
+    while (offCenter < -8) {
       quality += 'd';
-      offCenter += 4;
+      offCenter += 8;
     }
-    while (offCenter > 4) {
+    while (offCenter > 8) {
       quality += 'a';
-      offCenter -= 4;
+      offCenter -= 8;
     }
-    quality += PERFECT_QUALITY_SPECTRUM[offCenter + 4];
+    quality += PERFECT_QUALITY_SPECTRUM[offCenter + 8];
   }
   return {
     type: 'Pythagorean',
@@ -420,21 +525,37 @@ const TONESPLITTER_NOMINALS: AbsolutePitch['nominal'][] = [
 
 const ACCIDENTAL_SPECTRUM = [
   ['𝄫'],
+  ['⅞♭', '♭'],
   ['¾♭', '♭'],
-  ['d♭'],
+  ['⅝♭', '♭'],
+  ['d', '♭'],
+  ['⅜♭', '♭'],
   ['¼♭', '♭'],
+  ['⅛♭', '♭'],
   ['♭'],
+  ['⅞♭'],
   ['¾♭'],
+  ['⅝♭'],
   ['d'],
+  ['⅜♭'],
   ['¼♭'],
+  ['⅛♭'],
   [],
+  ['⅛♯'],
   ['¼♯'],
+  ['⅜♯'],
   ['‡'],
+  ['⅝♯'],
   ['¾♯'],
+  ['⅞♯'],
   ['♯'],
+  ['⅛♯', '♯'],
   ['¼♯', '♯'],
+  ['⅜♯', '♯'],
   ['‡', '♯'],
+  ['⅝♯', '♯'],
   ['¾♯', '♯'],
+  ['⅞♯', '♯'],
   ['𝄪'],
 ];
 
@@ -455,18 +576,18 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
     return undefined;
   }
 
-  let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 1.75;
+  let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 0.875;
 
   const accidentals: string[] = [];
-  while (offCenter < -8) {
+  while (offCenter < -16) {
     accidentals.push('𝄫');
-    offCenter += 8;
+    offCenter += 16;
   }
-  while (offCenter > 8) {
+  while (offCenter > 16) {
     accidentals.push('𝄪');
-    offCenter -= 8;
+    offCenter -= 16;
   }
-  accidentals.push(...ACCIDENTAL_SPECTRUM[offCenter + 8]);
+  accidentals.push(...ACCIDENTAL_SPECTRUM[offCenter + 16]);
 
   if (!accidentals.length) {
     accidentals.push('♮');

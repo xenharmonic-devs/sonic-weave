@@ -1115,17 +1115,17 @@ ColorLiteral
     };
   }
 
-Semi
-  = $('½' / 's')
+Hemidemisemi
+  = $('⅛' / '¼' / 'q' / '⅜' / '½' / 's' / '⅝' / '¾' / 'Q' / '⅞')
 
 Demisemi
   = $('¼' / 'q' / '½' / 's' / '¾' / 'Q')
 
 AugmentedQuality
-  = $(Demisemi? 'd'+) / $(Demisemi? [aÂ]+)
+  = $(Hemidemisemi? 'd'+) / $(Hemidemisemi? [aÂ]+)
 
 ImperfectQuality
-  = 'm' / 'sm' / '½m' / 'n' / '½M' / 'sM' / 'M'
+  = 'm' / '¾m' / 'Qm' / '½m' / 'sm' / '¼m' / 'qm' / 'n' / '¼M' / 'qM' / '½M' / 'sM' / '¾M' / 'QM' / 'M'
 
 // Neutral is mid or ~ from ups-and-downs
 MidQuality = 'P' / 'n'
@@ -1162,7 +1162,7 @@ HalfDegree
     return {...degree, base: degree.base + 0.5};
   }
 
-SplitDemisemipythagorean
+SplitHemidemisemipythagorean
   = quality: (AugmentedQuality / ImperfectQuality) degree: HalfDegree {
     return {
       type: 'Pythagorean',
@@ -1236,7 +1236,7 @@ Hyperscripts
 
 FJS
   = upsAndDowns: UpsAndDowns
-    pythagorean: SplitDemisemipythagorean
+    pythagorean: SplitHemidemisemipythagorean
     hyperscripts: Hyperscripts {
     return {
       ...upsAndDowns,
@@ -1248,7 +1248,7 @@ FJS
   }
 
 Accidental
-  = $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£] / (Demisemi [♯#♭b]))
+  = $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£] / (Hemidemisemi [♯#♭b]) / (Demisemi ('𝄲' / '𝄳' / [‡td])))
 
 Nominal
   = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G])
