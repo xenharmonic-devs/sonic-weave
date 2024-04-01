@@ -1533,4 +1533,46 @@ describe('SonicWeave expression evaluator', () => {
     const five = parseSingle('2 + 1 min 3 - 4 max 5');
     expect(five.toString()).toBe('5');
   });
+
+  it('has a string representation for the eight fifth (relative)', () => {
+    const soSplit = parseSingle('P5 % 8');
+    expect(soSplit.toString()).toBe('qm1.5');
+  });
+
+  it('parses the eight fifth', () => {
+    const quarterMinorSesquith = parseSingle('qm1.5');
+    expect(quarterMinorSesquith.value.primeExponents[0].toFraction()).toBe(
+      '-1/8'
+    );
+    expect(quarterMinorSesquith.value.primeExponents[1].toFraction()).toBe(
+      '1/8'
+    );
+  });
+
+  it('has a string representation for the eight fifth (absolute)', () => {
+    const gamma = parseSingle('absoluteFJS(P5 % 8)');
+    expect(gamma.toString()).toBe('γ⅛♭4');
+  });
+
+  it('parses the absolute eight fifth (eight flat)', () => {
+    const gamma = parseSingle('γ⅛♭4');
+    expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
+    expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');
+  });
+
+  it('parses the absolute eight fifth (quarter semiflat)', () => {
+    const gamma = parseSingle('gammaqd4');
+    expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
+    expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');
+  });
+
+  it("is kind of weird how 4/8 - 11/8 is -7/8 and how it pairs up with 7/8 of the three's exponent", () => {
+    const huh = parseSingle('8 * relative(zeta⅛#4) - 7 * P5');
+    expect(huh.totalCents()).toBe(0);
+  });
+
+  it('correctly gives up on FJS with the sixteenth fifth', () => {
+    const tooSplit = parseSingle('P5 % 16');
+    expect(tooSplit.toString()).toBe('1\\16<3/2>');
+  });
 });
