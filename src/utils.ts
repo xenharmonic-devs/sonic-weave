@@ -263,3 +263,16 @@ export function parseDecimal(num: number | Fraction) {
     exponent,
   };
 }
+
+/**
+ * Returns `true` if the specified object has the indicated property as its own property. If the property is inherited, or does not exist, the function returns `false`.
+ * @param object The JavaScript object instance to test.
+ * @param property The `String` name or `Symbol` of the property to test.
+ * @returns `true` if the specified object has directly defined the specified property. Otherwise `false`
+ */
+export function hasOwn(object: Object, property: PropertyKey) {
+  if ('hasOwn' in Object) {
+    return (Object as any).hasOwn(object, property);
+  }
+  return Object.prototype.hasOwnProperty.call(object, property);
+}

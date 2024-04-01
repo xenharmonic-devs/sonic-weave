@@ -1,6 +1,6 @@
 import {mmod} from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
-import {ZERO} from './utils';
+import {ZERO, hasOwn} from './utils';
 
 /**
  * Step count vector indexed by strings representing distinct step sizes.
@@ -69,7 +69,7 @@ export function add(v1: StepVector, v2: StepVector): StepVector {
   for (const [letter, value] of Object.entries(v2)) {
     // For each entry,
     // if `result` does not have the entry then add the component from v2 as an entry.
-    if (!(letter in v1)) {
+    if (!hasOwn(v1, letter)) {
       result[letter] = value;
     }
     // If `result` has a nonzero coefficient for that entry:
@@ -142,10 +142,14 @@ export function rotate(str: string, offset: number): string {
 /**
  * Obtain the step vector associated it the given interval class of the given word.
  * @param word A mode of a (periodic) scale given as a string where each character represents a (geometric) step.
- * @param intervalClass Which subtension from root position to calculate.
+ * @param intervalClass Which subtension from root position to calculate (defaults to the whole word).
  * @returns A {@link StepVector} instance representing the interval class in terms of the word characters.
  */
-export function getStepVector(word: string, intervalClass: number): StepVector {
+export function getStepVector(
+  word: string,
+  intervalClass?: number
+): StepVector {
+  intervalClass ??= word.length;
   if (word.length === 0) {
     // Always return the zero vector if `word` is empty
     return zeroVector();
@@ -165,10 +169,10 @@ export function getStepVector(word: string, intervalClass: number): StepVector {
     // For each letter encountered, if `letter` is not already in `result`,
     // then create a new entry for key `letter`; otherwise increment existing value for `letter`.
     Array.from(slice).forEach(letter => {
-      if (!(letter in result)) {
-        result[letter] = 1;
-      } else {
+      if (hasOwn(result, letter)) {
         result[letter]++;
+      } else {
+        result[letter] = 1;
       }
     });
     return result;
@@ -186,10 +190,10 @@ export function stepSignature(word: string): StepVector {
   }
   const result = zeroVector();
   Array.from(word).forEach(letter => {
-    if (!(letter in result)) {
-      result[letter] = 1;
-    } else {
+    if (hasOwn(result, letter)) {
       result[letter]++;
+    } else {
+      result[letter] = 1;
     }
   });
   return result;
