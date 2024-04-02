@@ -41,15 +41,20 @@ export interface SonicWeaveFunction extends Function {
   __node__: FunctionDeclaration | ArrowFunction;
 }
 
-export type SonicWeaveValue =
+export type SonicWeavePrimitive =
   | SonicWeaveFunction
   | Interval
-  | (Interval | boolean)[]
   | Val
   | Color
   | string
   | undefined
   | boolean;
+
+// The type hierarchy is actually recursive, but this is easier on TypeScript.
+export type SonicWeaveValue =
+  | SonicWeavePrimitive
+  | SonicWeavePrimitive[]
+  | Record<string, SonicWeavePrimitive>;
 
 const ZERO = new Fraction(0);
 const ZERO_MONZO = new TimeMonzo(ZERO, [], ZERO);
@@ -1332,7 +1337,7 @@ export function maximum(this: ExpressionVisitor, ...args: Interval[]) {
 maximum.__doc__ = 'Obtain the argument with the maximum value.';
 maximum.__node__ = builtinNode(maximum);
 
-function sort(
+export function sort(
   this: ExpressionVisitor,
   scale?: Interval[],
   compareFn?: Function
@@ -1349,7 +1354,7 @@ function sort(
 sort.__doc__ = 'Sort the current/given scale in ascending order.';
 sort.__node__ = builtinNode(sort);
 
-function sorted(
+export function sorted(
   this: ExpressionVisitor,
   scale?: Interval[],
   compareFn?: Function
@@ -1716,8 +1721,35 @@ function repr_(
   if (value instanceof Color || value instanceof Val) {
     return value.toString();
   }
+  if (typeof value === 'object') {
+    const s = repr_.bind(this);
+    return (
+      '{' +
+      Object.entries(value)
+        .map(([k, v]) => `${s(k)}: ${s(v)}`)
+        .join(', ') +
+      '}'
+    );
+  }
   return `${value}`;
 }
+
+export function entries(record: SonicWeaveValue) {
+  if (typeof record !== 'object') {
+    throw new Error('A record expected.');
+  }
+  if (
+    Array.isArray(record) ||
+    record instanceof Color ||
+    record instanceof Interval ||
+    record instanceof Val
+  ) {
+    throw new Error('A record expected.');
+  }
+  return Object.entries(record);
+}
+entries.__doc__ = 'Obtain an array of `[key, value]` pairs of the record.';
+entries.__node__ = builtinNode(entries);
 
 export function repr(this: ExpressionVisitor, value: SonicWeaveValue) {
   return repr_.bind(this)(value);
@@ -2016,6 +2048,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   arrayReduce,
   arrayRepeat,
   kCombinations,
+  entries,
   // CSS color generation
   rgb,
   rgba,
@@ -2069,6 +2102,16 @@ riff absoluteHEJI(interval) {
 
 export const PRELUDE_SOURCE = `
 // == Functions ==
+riff keys(record) {
+  "Obtain an array of keys of the record.";
+  return map([key] => key, entries(record));
+}
+
+riff values(record) {
+  "Obtain an array of values of the record.";
+  return map([_, value] => value, entries(record));
+}
+
 riff sanitize(interval) {
   "Get rid of interval formatting, color and label.";
   return bleach(simplify(interval));

@@ -1575,4 +1575,78 @@ describe('SonicWeave expression evaluator', () => {
     const tooSplit = parseSingle('P5 % 16');
     expect(tooSplit.toString()).toBe('1\\16<3/2>');
   });
+
+  it('has record syntax', () => {
+    const record = evaluateExpression(
+      '{foo: "a", "bar": "b", "here be spaces": "c"}',
+      false
+    );
+    expect(record).toEqual({bar: 'b', 'here be spaces': 'c', foo: 'a'});
+  });
+
+  it('has record access', () => {
+    const fif = parseSingle('{foo: 3/2}["foo"]');
+    expect(fif.toString()).toBe('3/2');
+  });
+
+  it('has the empty record', () => {
+    const blank = evaluateExpression('{}', false);
+    expect(blank).toEqual({});
+  });
+
+  it('has nullish record access', () => {
+    const nothing = evaluateExpression('{}~["zero nothings"]', false);
+    expect(nothing).toBe(undefined);
+  });
+
+  it('is resistant to pathological JS record keys', () => {
+    expect(() => evaluateExpression('{}["toString"]', false)).toThrow(
+      'Key error.'
+    );
+  });
+
+  it('has string representation of records', () => {
+    const str = evaluateExpression('str({foo: 1})', false);
+    expect(str).toBe('{"foo": 1}');
+  });
+
+  it('can assign record keys', () => {
+    const record = evaluateExpression(
+      'const rec = {foo: "a"};rec["bar"] = "b";rec',
+      false
+    );
+    expect(record).toEqual({foo: 'a', bar: 'b'});
+  });
+
+  it('can re-assign record values', () => {
+    const record = evaluateExpression(
+      'const rec = {foo: 1, bar: 2};rec["bar"] *= 3; rec',
+      false
+    ) as Record<string, Interval>;
+    expect(record['foo'].toString()).toBe('1');
+    expect(record['bar'].toString()).toBe('6');
+  });
+
+  it('can get the entries of a record', () => {
+    const entries = evaluateExpression(
+      'entries({foo: "a", bar: "b"})',
+      false
+    ) as unknown as [string, string][];
+    entries.sort((a, b) => a[1].localeCompare(b[1]));
+    expect(entries).toEqual([
+      ['foo', 'a'],
+      ['bar', 'b'],
+    ]);
+  });
+
+  it('can test for presence of keys in a record', () => {
+    const yes = evaluateExpression('"foo" in {foo: 1}');
+    expect(yes).toBe(true);
+  });
+
+  it('has a record shorthand', () => {
+    const record = evaluateExpression('const foo = "a";{foo}');
+    const foo = 'a';
+    expect(record).toEqual({foo});
+  });
 });

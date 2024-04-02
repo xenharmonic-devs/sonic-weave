@@ -1206,4 +1206,13 @@ describe('SonicWeave parser', () => {
       '12\\12',
     ]);
   });
+
+  it('has inline labels for ordered scales using records', () => {
+    const scale = parseSource('{third: 6/5, "The Octave": 2/1, fif: 3/2};repr');
+    expect(scale).toEqual([
+      '(6/5 "third")',
+      '(3/2 "fif")',
+      '(2/1 "The Octave")',
+    ]);
+  });
 });

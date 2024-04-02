@@ -1221,4 +1221,16 @@ describe('SonicWeave standard library', () => {
       '2',
     ]);
   });
+
+  it('can get the keys of a record', () => {
+    const keys = evaluateExpression('keys({foo: 1, bar: 2})') as string[];
+    keys.sort();
+    expect(keys).toEqual(['bar', 'foo']);
+  });
+
+  it('can get the values of a record', () => {
+    const keys = evaluateExpression('values({foo: "a", bar: "b"})') as string[];
+    keys.sort();
+    expect(keys).toEqual(['a', 'b']);
+  });
 });
