@@ -11,6 +11,7 @@ import {
 import {repr} from './builtin';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
+import {parse as parenCounter} from './paren-counter';
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
@@ -58,7 +59,6 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
     globalVisitor
   );
 
-  let numCurlies = 0;
   let currentCmd = '';
 
   function evaluateStatement(
@@ -70,16 +70,29 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   ) {
     currentCmd += evalCmd;
 
-    numCurlies += (evalCmd.match(/{/g) ?? []).length;
-    numCurlies -= (evalCmd.match(/}/g) ?? []).length;
-    if (numCurlies < 0) {
+    const counts = parenCounter(currentCmd);
+
+    if (counts.curlies < 0) {
       currentCmd = '';
       cb(new Error('Unmatched closing curly bracket'), undefined);
       return;
     }
-    if (numCurlies > 0) {
+    if (counts.squares < 0) {
+      currentCmd = '';
+      cb(new Error('Unmatched closing square bracket'), undefined);
       return;
     }
+    if (counts.parens < 0) {
+      currentCmd = '';
+      cb(new Error('Unmatched closing parenthesis'), undefined);
+      return;
+    }
+    if (counts.parens || counts.squares || counts.curlies) {
+      this.setPrompt('... ');
+      this.displayPrompt();
+      return;
+    }
+    this.setPrompt(prompt);
     try {
       const program = parseAST(currentCmd);
       currentCmd = '';
@@ -124,5 +137,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
     prompt,
     eval: evaluateStatement,
     writer: repr.bind(visitor.createExpressionVisitor()),
+    terminal: true,
+    completer: () => [],
   });
 }
