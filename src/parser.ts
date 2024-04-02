@@ -46,8 +46,18 @@ import {
   maximum,
   minimum,
   upcastBool,
+  SonicWeavePrimitive,
+  sort,
 } from './builtin';
-import {bigGcd, metricExponent, ZERO, ONE, NEGATIVE_ONE, TWO} from './utils';
+import {
+  bigGcd,
+  metricExponent,
+  ZERO,
+  ONE,
+  NEGATIVE_ONE,
+  TWO,
+  hasOwn,
+} from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
 import {
@@ -60,7 +70,7 @@ import {
 import {RootContext} from './context';
 import {
   Argument,
-  ArrayAccess,
+  AccessExpression,
   ArrayComprehension,
   ArrayLiteral,
   ArraySlice,
@@ -76,7 +86,7 @@ import {
   EnumeratedChord,
   Expression,
   ExpressionStatement,
-  ForOfStatement,
+  IterationStatement,
   FunctionDeclaration,
   HarmonicSegment,
   Identifier,
@@ -90,6 +100,7 @@ import {
   PitchDeclaration,
   Program,
   Range,
+  RecordLiteral,
   ReturnStatement,
   Statement,
   ThrowStatement,
@@ -98,6 +109,7 @@ import {
   UpDeclaration,
   VariableDeclaration,
   WhileStatement,
+  IterationKind,
 } from './ast';
 
 function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
@@ -140,6 +152,46 @@ export class Interrupt {
   get type() {
     return this.node.type;
   }
+}
+
+function arrayRecordOrString(
+  value: SonicWeaveValue,
+  message = 'Array, record or string expected.'
+) {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (
+    typeof value !== 'object' ||
+    value instanceof Interval ||
+    value instanceof Val ||
+    value instanceof Color
+  ) {
+    throw new Error(message);
+  }
+  return value;
+}
+
+function containerToArray(container: SonicWeaveValue, kind: IterationKind) {
+  container = arrayRecordOrString(
+    container,
+    'Can only iterate over arrays, records or strings.'
+  );
+  if (typeof container === 'string') {
+    container = [...container];
+  }
+  if (Array.isArray(container)) {
+    if (kind === 'in') {
+      container = container.map((_, i) => Interval.fromInteger(i));
+    }
+  } else {
+    if (kind === 'of') {
+      container = Object.values(container);
+    } else {
+      container = Object.keys(container);
+    }
+  }
+  return container;
 }
 
 function localAssign(
@@ -282,8 +334,8 @@ export class StatementVisitor {
         return this.visitWhileStatement(node);
       case 'IfStatement':
         return this.visitIfStatement(node);
-      case 'ForOfStatement':
-        return this.visitForOfStatement(node);
+      case 'IterationStatement':
+        return this.visitIterationStatement(node);
       case 'TryStatement':
         return this.visitTryStatement(node);
       case 'ReturnStatement':
@@ -408,7 +460,9 @@ export class StatementVisitor {
       if (!Array.isArray(value)) {
         throw new Error('Slice assignment with a non-array.');
       }
-      const object = subVisitor.visit(node.name.object);
+      const object = subVisitor.visit(
+        node.name.object
+      ) as (SonicWeavePrimitive | null)[];
       if (!Array.isArray(object)) {
         throw new Error('Array slice on non-array.');
       }
@@ -487,21 +541,32 @@ export class StatementVisitor {
         return undefined;
       }
       throw new Error('Slice step must not be zero');
-    } else if (node.name.type === 'ArrayAccess') {
-      const object = subVisitor.visit(node.name.object);
-      if (!Array.isArray(object)) {
-        throw new Error('Array access on non-array.');
+    } else if (node.name.type === 'AccessExpression') {
+      const object = arrayRecordOrString(
+        subVisitor.visit(node.name.object),
+        'Can only assign elements of arrays or records.'
+      );
+      if (typeof object === 'string') {
+        throw new Error('Strings are immutable.');
       }
-      const index = subVisitor.visit(node.name.index);
-      if (!(index instanceof Interval)) {
-        throw new Error('Array access with a non-integer.');
+      if (Array.isArray(object)) {
+        const index = subVisitor.visit(node.name.key);
+        if (!(index instanceof Interval)) {
+          throw new Error('Array access with a non-integer.');
+        }
+        let i = index.toInteger();
+        if (i < 0) {
+          i += object.length;
+        }
+        // XXX: Abuses the type system.
+        object[i] = value as SonicWeavePrimitive;
+        return undefined;
       }
-      let i = index.toInteger();
-      if (i < 0) {
-        i += object.length;
+      const key = subVisitor.visit(node.name.key);
+      if (!(typeof key === 'string')) {
+        throw new Error('Record keys must be strings.');
       }
-      // XXX: Abuses the type system.
-      object[i] = value as Interval;
+      object[key] = value as SonicWeavePrimitive;
     } else {
       this.assign(node.name, value);
     }
@@ -652,6 +717,12 @@ export class StatementVisitor {
       }
     } else if (typeof value === 'boolean') {
       scale.push(upcastBool(value));
+    } else if (typeof value === 'object') {
+      for (const [key, subValue] of Object.entries(value)) {
+        this.handleValue(subValue, subVisitor);
+        this.handleValue(key, subVisitor);
+      }
+      sort.bind(subVisitor)(scale);
     } else {
       this.rootContext.spendGas(scale.length);
       const bound = value.bind(subVisitor);
@@ -771,12 +842,9 @@ export class StatementVisitor {
     }
   }
 
-  visitForOfStatement(node: ForOfStatement) {
+  visitIterationStatement(node: IterationStatement) {
     const subVisitor = this.createExpressionVisitor();
-    const array = subVisitor.visit(node.array);
-    if (!Array.isArray(array)) {
-      throw new Error('Can only iterate over arrays.');
-    }
+    const array = containerToArray(subVisitor.visit(node.container), node.kind);
     const loopVisitor = new StatementVisitor(this.rootContext, this);
     loopVisitor.mutables.delete('$'); // Collapse scope
     const loopSubVisitor = loopVisitor.createExpressionVisitor();
@@ -1023,8 +1091,8 @@ export class ExpressionVisitor {
         return this.visitLestExpression(node);
       case 'ConditionalExpression':
         return this.visitConditionalExpression(node);
-      case 'ArrayAccess':
-        return this.visitArrayAccess(node);
+      case 'AccessExpression':
+        return this.visitAccessExpression(node);
       case 'ArraySlice':
         return this.visitArraySlice(node);
       case 'UnaryExpression':
@@ -1085,6 +1153,8 @@ export class ExpressionVisitor {
         return this.visitHarmonicSegment(node);
       case 'ArrayLiteral':
         return this.visitArrayLiteral(node);
+      case 'RecordLiteral':
+        return this.visitRecordLiteral(node);
       case 'StringLiteral':
         return node.value;
       case 'NoneLiteral':
@@ -1146,10 +1216,10 @@ export class ExpressionVisitor {
         return;
       }
       const comprehension = node.comprehensions[index];
-      const array = this.visit(comprehension.array);
-      if (!Array.isArray(array)) {
-        throw new Error('Can only iterate over arrays.');
-      }
+      const array = containerToArray(
+        this.visit(comprehension.container),
+        comprehension.kind
+      );
       const element = comprehension.element;
       for (const value of array) {
         localAssign(localVisitor, localSubvisitor, element, value);
@@ -1182,37 +1252,39 @@ export class ExpressionVisitor {
     return this.spread(node.elements);
   }
 
+  visitRecordLiteral(node: RecordLiteral): Record<string, SonicWeavePrimitive> {
+    const result: Record<string, SonicWeavePrimitive> = {};
+    for (const [key, value] of node.properties) {
+      result[key] = this.visit(value) as SonicWeavePrimitive;
+    }
+    return result;
+  }
+
   visitStepLiteral(node: StepLiteral) {
     const value = new TimeMonzo(ZERO, [], undefined, Number(node.count));
     return new Interval(value, 'logarithmic', node);
   }
 
-  down(
-    operand: boolean | Interval | (Interval | boolean)[] | Val
-  ): Interval | Interval[] | Val {
+  down(operand: SonicWeaveValue): Interval | Interval[] | Val {
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
     if (operand instanceof Interval || operand instanceof Val) {
       return operand.down(this.rootContext);
     }
-    return operand.map(this.down.bind(this)) as Interval[];
-  }
-
-  visitDownExpression(node: DownExpression) {
-    const operand = this.visit(node.operand);
-    if (
-      operand instanceof Interval ||
-      operand instanceof Val ||
-      Array.isArray(operand)
-    ) {
-      return this.down(operand);
+    if (Array.isArray(operand)) {
+      return operand.map(this.down.bind(this)) as Interval[];
     }
     throw new Error('Can only apply down arrows to intervals and vals');
   }
 
+  visitDownExpression(node: DownExpression) {
+    const operand = this.visit(node.operand);
+    return this.down(operand);
+  }
+
   label(
-    object: boolean | Interval | (Interval | boolean)[],
+    object: SonicWeaveValue,
     labels: (string | Color | undefined)[]
   ): Interval | Interval[] {
     if (typeof object === 'boolean') {
@@ -1231,21 +1303,15 @@ export class ExpressionVisitor {
       }
       return object;
     }
-    const l = this.label.bind(this);
-    return object.map(o => l(o, labels)) as Interval[];
+    if (Array.isArray(object)) {
+      const l = this.label.bind(this);
+      return object.map(o => l(o, labels)) as Interval[];
+    }
+    throw new Error('Labels can only be applied to intervals.');
   }
 
   visitLabeledExpression(node: LabeledExpression) {
     const object = this.visit(node.object);
-    if (
-      !(
-        typeof object === 'boolean' ||
-        object instanceof Interval ||
-        Array.isArray(object)
-      )
-    ) {
-      throw new Error('Labels can only be applied to intervals');
-    }
     const labels: (string | Color | undefined)[] = [];
     for (const label of node.labels) {
       const l = this.visit(label);
@@ -1391,17 +1457,35 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitArrayAccess(node: ArrayAccess): SonicWeaveValue {
-    const object = this.visit(node.object);
+  visitAccessExpression(node: AccessExpression): SonicWeaveValue {
+    const object = arrayRecordOrString(
+      this.visit(node.object),
+      'Can only access arrays, records or strings.'
+    );
     if (!Array.isArray(object) && typeof object !== 'string') {
-      throw new Error('Array access on non-array.');
+      const key = this.visit(node.key);
+      if (!(typeof key === 'string')) {
+        throw new Error('Record keys must be strings.');
+      }
+      if (!hasOwn(object, key)) {
+        if (node.nullish) {
+          return undefined;
+        }
+        throw new Error('Key error.');
+      }
+      return object[key];
     }
-    let index = this.visit(node.index);
+    let index = this.visit(node.key);
     if (Array.isArray(index)) {
       index = index.flat(Infinity);
-      const result: (boolean | Interval | string)[] = [];
+      const result: SonicWeavePrimitive[] = [];
       for (let i = 0; i < index.length; ++i) {
         const idx = index[i];
+        if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
+          throw new Error(
+            'Only booleans and intervals can be used as indices.'
+          );
+        }
         if (idx === true) {
           if (!node.nullish && i >= object.length) {
             throw new Error('Indexing boolean out of range.');
@@ -1531,7 +1615,7 @@ export class ExpressionVisitor {
   }
 
   unaryOperate(
-    operand: boolean | Interval | (Interval | boolean)[] | Val,
+    operand: SonicWeaveValue,
     node: UnaryExpression
   ): Interval | Interval[] | Val {
     if (Array.isArray(operand)) {
@@ -1540,6 +1624,11 @@ export class ExpressionVisitor {
     }
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
+    }
+    if (!(operand instanceof Interval || operand instanceof Val)) {
+      throw new Error(
+        `${node.operator} can only operate on intervals and vals.`
+      );
     }
     if (node.uniform) {
       let value: TimeMonzo;
@@ -1605,19 +1694,12 @@ export class ExpressionVisitor {
     if (node.operator === 'not') {
       return !sonicTruth(operand);
     }
-    if (
-      operand instanceof Interval ||
-      Array.isArray(operand) ||
-      operand instanceof Val
-    ) {
-      return this.unaryOperate(operand, node);
-    }
-    throw new Error(`${node.operator} can only operate on intervals`);
+    return this.unaryOperate(operand, node);
   }
 
   tensor(
-    left: boolean | Interval | (Interval | boolean)[],
-    right: boolean | Interval | (Interval | boolean)[],
+    left: SonicWeaveValue,
+    right: SonicWeaveValue,
     node: BinaryExpression
   ): Interval | Interval[] {
     if (typeof left === 'boolean') {
@@ -1626,7 +1708,13 @@ export class ExpressionVisitor {
     if (typeof right === 'boolean') {
       right = upcastBool(right);
     }
+    if (!(left instanceof Interval || Array.isArray(left))) {
+      throw new Error('Can only tensor intervals or arrays.');
+    }
     if (left instanceof Interval) {
+      if (!(right instanceof Interval || Array.isArray(right))) {
+        throw new Error('Can only tensor intervals or arrays.');
+      }
       if (right instanceof Interval) {
         this.rootContext.spendGas();
         if (node.preferLeft || node.preferRight) {
@@ -1643,8 +1731,8 @@ export class ExpressionVisitor {
   }
 
   binaryOperate(
-    left: Interval | boolean | (Interval | boolean)[],
-    right: Interval | boolean | (Interval | boolean)[],
+    left: SonicWeaveValue,
+    right: SonicWeaveValue,
     node: BinaryExpression
   ): boolean | Interval | Interval[] {
     if (typeof left === 'boolean') {
@@ -1821,14 +1909,24 @@ export class ExpressionVisitor {
           case 'not of':
           case '~of':
           case 'not ~of':
+          case 'in':
+          case 'not in':
+          case '~in':
+          case 'not ~in':
           case '⊗':
           case 'tns':
             throw new Error('Unexpected code flow.');
         }
         operator satisfies never;
       }
+      if (!Array.isArray(right)) {
+        throw new Error('Heterogenous broadcasting not supported.');
+      }
       const op = this.binaryOperate.bind(this);
       return right.map(r => op(left, r, node)) as Interval[];
+    }
+    if (!Array.isArray(left)) {
+      throw new Error('Heterogenous broadcasting not supported.');
     }
     if (right instanceof Interval) {
       const op = this.binaryOperate.bind(this);
@@ -1842,7 +1940,7 @@ export class ExpressionVisitor {
 
   visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
-    let left = this.visit(node.left);
+    const left = this.visit(node.left);
     if (operator === '??') {
       if (left !== undefined) {
         return left;
@@ -1863,20 +1961,6 @@ export class ExpressionVisitor {
     }
     let right = this.visit(node.right);
     if (operator === 'tns' || operator === '⊗') {
-      if (typeof left === 'boolean') {
-        left = upcastBool(left);
-      }
-      if (typeof right === 'boolean') {
-        right = upcastBool(right);
-      }
-      if (!(left instanceof Interval) && !Array.isArray(left)) {
-        throw new Error('Left tensor operand must be an interval or an array.');
-      }
-      if (!(right instanceof Interval) && !Array.isArray(right)) {
-        throw new Error(
-          'Right tensor operand must be an interval or an array.'
-        );
-      }
       return this.tensor(left, right, node);
     }
     if (
@@ -1885,21 +1969,58 @@ export class ExpressionVisitor {
       operator === '~of' ||
       operator === 'not ~of'
     ) {
-      if (Array.isArray(right)) {
-        switch (operator) {
-          case 'of':
-            return strictIncludes(left, right);
-          case 'not of':
-            return !strictIncludes(left, right);
-          case '~of':
-            return includes(left, right);
-          case 'not ~of':
-            return !includes(left, right);
-        }
-      } else {
-        throw new Error("Target of 'of' must be an array");
+      right = arrayRecordOrString(
+        right,
+        `Target of ${operator} must be an array, record or a string.`
+      );
+      if (typeof right === 'string') {
+        right = [...right];
+      } else if (!Array.isArray(right)) {
+        right = Object.values(right);
+      }
+      switch (operator) {
+        case 'of':
+          return strictIncludes(left, right);
+        case 'not of':
+          return !strictIncludes(left, right);
+        case '~of':
+          return includes(left, right);
+        case 'not ~of':
+          return !includes(left, right);
       }
       operator satisfies never;
+    }
+    if (
+      operator === 'in' ||
+      operator === 'not in' ||
+      operator === '~in' ||
+      operator === 'not ~in'
+    ) {
+      right = arrayRecordOrString(
+        right,
+        `Target of ${operator} must be an array, record or a string.`
+      );
+      if (Array.isArray(right) || typeof right === 'string') {
+        if (!(left instanceof Interval && left.value.isIntegral())) {
+          throw new Error('Can only test for integer keys.');
+        }
+        const index = left.toInteger();
+        switch (operator) {
+          case 'in':
+            return index >= 0 && index < right.length;
+          case 'not in':
+            return index < 0 || index >= right.length;
+          case '~in':
+            return index >= -right.length && index < right.length;
+          case 'not ~in':
+            return index < -right.length || index > right.length;
+        }
+        operator satisfies never;
+      }
+      if (typeof left !== 'string') {
+        throw new Error('Can only test for string keys in records.');
+      }
+      return hasOwn(right, left);
     }
     if (left instanceof Val) {
       if (right instanceof Val) {
@@ -2005,8 +2126,8 @@ export class ExpressionVisitor {
     if (node.callee.type === 'Identifier') {
       const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
       return callee.bind(this)(...args);
-    } else if (node.callee.type === 'ArrayAccess') {
-      const callee = this.visitArrayAccess(node.callee);
+    } else if (node.callee.type === 'AccessExpression') {
+      const callee = this.visitAccessExpression(node.callee);
       return (callee as SonicWeaveFunction).bind(this)(...args);
     } else {
       throw new Error('Invalid callee.');

@@ -16,6 +16,10 @@ export type BinaryOperator =
   | 'not of'
   | '~of'
   | 'not ~of'
+  | 'in'
+  | 'not in'
+  | '~in'
+  | 'not ~in'
   | '+'
   | '-'
   | 'max'
@@ -45,6 +49,8 @@ export type BinaryOperator =
   | '^'
   | '/^'
   | '^/';
+
+export type IterationKind = 'in' | 'of';
 
 export type Program = {
   type: 'Program';
@@ -76,7 +82,7 @@ export type EmptyStatement = {
 
 export type AssignmentStatement = {
   type: 'AssignmentStatement';
-  name: Identifier | Identifiers | ArrayAccess | ArraySlice;
+  name: Identifier | Identifiers | AccessExpression | ArraySlice;
   value: Expression;
 };
 
@@ -148,10 +154,11 @@ export type IfStatement = {
   alternate?: Statement;
 };
 
-export type ForOfStatement = {
-  type: 'ForOfStatement';
+export type IterationStatement = {
+  type: 'IterationStatement';
   element: Parameter | Parameters_;
-  array: Expression;
+  kind: IterationKind;
+  container: Expression;
   body: Statement;
   tail: null | Statement;
   mutable: boolean;
@@ -187,7 +194,7 @@ export type Statement =
   | BlockStatement
   | WhileStatement
   | IfStatement
-  | ForOfStatement
+  | IterationStatement
   | TryStatement
   | ThrowStatement
   | BreakStatement
@@ -207,11 +214,11 @@ export type ConditionalExpression = {
   alternate: Expression;
 };
 
-export type ArrayAccess = {
-  type: 'ArrayAccess';
+export type AccessExpression = {
+  type: 'AccessExpression';
   object: Expression;
   nullish: boolean;
-  index: Expression;
+  key: Expression;
 };
 
 export type ArraySlice = {
@@ -306,7 +313,8 @@ export type Range = {
 
 export type Comprehension = {
   element: Parameter | Parameters_;
-  array: Expression;
+  kind: IterationKind;
+  container: Expression;
 };
 
 export type ArrayComprehension = {
@@ -319,6 +327,11 @@ export type ArrayComprehension = {
 export type ArrayLiteral = {
   type: 'ArrayLiteral';
   elements: Argument[];
+};
+
+export type RecordLiteral = {
+  type: 'RecordLiteral';
+  properties: [string, Expression][];
 };
 
 export type StringLiteral = {
@@ -337,7 +350,7 @@ export type FalseLiteral = {
 export type Expression =
   | LestExpression
   | ConditionalExpression
-  | ArrayAccess
+  | AccessExpression
   | ArraySlice
   | UnaryExpression
   | DownExpression
@@ -355,6 +368,7 @@ export type Expression =
   | Range
   | ArrayComprehension
   | ArrayLiteral
+  | RecordLiteral
   | StringLiteral
   | HarmonicSegment;
 

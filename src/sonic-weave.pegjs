@@ -3,7 +3,7 @@
 {{
   const TYPES_TO_PROPERTY_NAMES = {
     CallExpression: "callee",
-    ArrayAccess: "object",
+    AccessExpression: "object",
     ArraySlice: "object",
   };
 
@@ -61,6 +61,7 @@ FalseToken         = 'false'    !IdentifierPart
 FinallyToken       = 'finally'  !IdentifierPart
 ForToken           = 'for'      !IdentifierPart
 IfToken            = 'if'       !IdentifierPart
+InToken            = 'in'       !IdentifierPart
 LestToken          = 'lest'     !IdentifierPart
 LetToken           = 'let'      !IdentifierPart
 MaxToken           = 'max'      !IdentifierPart
@@ -96,6 +97,7 @@ ReservedWord
   / FalseToken
   / ForToken
   / IfToken
+  / InToken
   / LestToken
   / LetToken
   / MaxToken
@@ -144,7 +146,7 @@ Statement
   / ContinueStatement
   / WhileStatement
   / IfStatement
-  / ForOfStatement
+  / IterationStatement
   / TryStatement
   / EmptyStatement
 
@@ -166,7 +168,7 @@ VariableManipulationStatement
       value,
     };
   }
-  / name: ArrayAccess tail: ReassignmentTail? EOS {
+  / name: AccessExpression tail: ReassignmentTail? EOS {
     if (!tail) {
       return {
         type: 'ExpressionStatement',
@@ -174,7 +176,7 @@ VariableManipulationStatement
       }
     }
     const {preferLeft, preferRight, operator, value} = tail;
-    if (name.type === 'ArrayAccess' || name.type === 'ArraySlice' || name.type === 'Identifier') {
+    if (name.type === 'AccessExpression' || name.type === 'ArraySlice' || name.type === 'Identifier') {
       if (operator) {
         return {
           type: 'AssignmentStatement',
@@ -397,22 +399,26 @@ IfStatement
     }
   }
 
-ForOfStatement
-  = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
+IterationKind = $(OfToken / InToken)
+
+IterationStatement
+  = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
-      type: 'ForOfStatement',
+      type: 'IterationStatement',
       element,
-      array,
+      kind,
+      container,
       body,
       tail,
       mutable: true,
     };
   }
-  / ForToken _ '(' _ ConstToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
+  / ForToken _ '(' _ ConstToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
-      type: 'ForOfStatement',
+      type: 'IterationStatement',
       element,
-      array,
+      kind,
+      container,
       body,
       tail,
       mutable: false,
@@ -536,6 +542,10 @@ RelationalOperator
   / (NotToken __ OfToken) { return 'not of'; }
   / $('~' OfToken)
   / (NotToken __ '~' OfToken) { return 'not ~of'; }
+  / $(InToken)
+  / (NotToken __ InToken) { return 'not in'; }
+  / $('~' InToken)
+  / (NotToken __ '~' InToken) { return 'not ~in'; }
 
 RelationalExpression
   = head: RoundingExpression tail: (__ @RelationalOperator __ @RoundingExpression)* {
@@ -658,7 +668,7 @@ ExponentiationExpression
     }
 
 Labels
-  = (CallExpression / TrueArrayAccess / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
+  = (CallExpression / TrueAccessExpression / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
 // XXX: Don't know why that trailing __ has to be there.
 LabeledExpression
@@ -687,7 +697,7 @@ LabeledCommaDecimal
 
 Secondary
   = CallExpression
-  / ArrayAccess
+  / AccessExpression
 
 ChainableUnaryOperator
   = $NotToken / '^' / '/' / '\\'
@@ -735,15 +745,15 @@ UnaryExpression
 
 CallExpression
   = head: (
-    callee: ArrayAccess __ '(' _ args: ArgumentList _ ')' {
+    callee: AccessExpression __ '(' _ args: ArgumentList _ ')' {
       return { type: 'CallExpression', callee, args };
     }
   ) tail: (
     __ '(' _ args: ArgumentList _ ')' {
       return { type: 'CallExpression', args };
     }
-    / __ '[' _ index: Expression _ ']' {
-      return { type: 'ArrayAccess', index };
+    / __ '[' _ key: Expression _ ']' {
+      return { type: 'AccessExpression', key };
     }
     / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ '..' _ end: Expression? _ ']' {
       return { type: 'ArraySlice', start, second, end };
@@ -756,26 +766,26 @@ CallExpression
     }, head);
   }
 
-ArrayAccess
+AccessExpression
   = head: ArraySlice tail: (__ @('~'?) '[' _ @Expression _ ']')* {
-    return tail.reduce( (object, [nullish, index]) => {
+    return tail.reduce( (object, [nullish, key]) => {
       return {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         object,
         nullish: !!nullish,
-        index,
+        key,
       };
     }, head);
   }
 
-TrueArrayAccess
+TrueAccessExpression
   = head: Primary tail: (__ '[' _ @Expression _ ']')+ {
-    return tail.reduce( (object, index) => {
+    return tail.reduce( (object, key) => {
       return {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         object,
         nullish: false,
-        index
+        key
       };
     }, head);
   }
@@ -844,6 +854,7 @@ Primary
   / SquareSuperparticular
   / Identifier
   / ArrayLiteral
+  / RecordLiteral
   / StringLiteral
 
 UnitStepRange
@@ -868,10 +879,11 @@ StepRange
 Range = StepRange / UnitStepRange
 
 Comprehension
-  = _ ForToken _ element: (Parameter / ParameterArray) _ OfToken _ array: Expression _ {
+  = _ ForToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ {
     return {
       element,
-      array,
+      kind,
+      container,
     };
   }
 
@@ -895,7 +907,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger '\\' __ denominator: (ParenthesizedExpression / CallExpression / TrueArrayAccess / Identifier)? {
+  = count: BasicInteger '\\' __ denominator: (ParenthesizedExpression / CallExpression / TrueAccessExpression / Identifier)? {
     if (denominator) {
       return BinaryExpression(
         '\\',
@@ -1324,6 +1336,41 @@ ArrayLiteral
       elements,
     }
   }
+
+RecordLiteral
+  = '{' _ '}' {
+    return {
+      type: 'RecordLiteral',
+      properties: [],
+    };
+  }
+  / '{' _ properties: PropertyNameAndValueList _ (',' _)? '}' {
+    return {
+      type: 'RecordLiteral',
+      properties,
+    };
+  }
+
+PropertyNameAndValueList
+  = head: PropertyAssignment tail: (_ ',' _ @PropertyAssignment)* {
+    return tail.concat([head]);
+  }
+
+PropertyAssignment
+  = key: PropertyName _ ':' _ value: Expression {
+    if (key.type === 'StringLiteral') {
+      key = key.value;
+    } else if (key.type === 'Identifier') {
+      key = key.id;
+    }
+    return [key, value];
+  }
+  / identifier: Identifier {
+    return [identifier.id, identifier];
+  }
+
+PropertyName
+  = StringLiteral / Identifier
 
 ParenthesizedExpression
   = '(' _ @Expression _ ')'

@@ -13,7 +13,8 @@ SonicWeave comes with some basic types.
 | Color    | `#ff00ff`                | CSS colors, short hexadecimal, and long hexadecimal colors supported. Used for note colors. |
 | Boolean  | `true` or `false`        | Converted to `1` or `0` in scales. |
 | Interval | `7/5`                    | There are many types of intervals with their own operator semantics. |
-| Scale    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals. |
+| Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals. |
+| Record   | `{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings. |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase. |
 
 ### Basic interval types
@@ -233,6 +234,14 @@ Range syntax inside array access gets a copy of a subset the array e.g. `[1, 2, 
 
 In slice syntax the end points are optional e.g. `[1, 2, 3][..]` evaluates to `[1, 2, 3]` (a new copy).
 
+## Records
+Record literals are constructed using `key: value` pairs inside curly brackets e.g. `{fif: 3/2, "my octave": 2/1}`.
+
+### Record access
+Records are accessed with the same syntax as arrays but using string indices e.g. `{fif: 3/2}["fif"]` evaluates to `3/2`.
+
+Nullish access is supported e.g. `{}~["nothing here"]` evaluates to `niente`.
+
 ## Metric prefixes
 Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`.
 
@@ -399,13 +408,22 @@ while (--i) {
 results in `$ = [4, 3, 2, 1]`.
 
 ## For...of
-"For" loops iterate over array contents e.g.
+"For..of" loops iterate over array contents or record values e.g.
 ```javascript
 for (const i of [1..5]) {
   2 ^ (i % 5)
 }
 ```
 results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
+
+## For..in
+"For..in" loops iterate over array indices or record keys e.g.
+```javascript
+for (const k in {a: 123, b: 456}) {
+  1 k
+}
+```
+results in `$ = [1 "b", 1 "a"]`. The order is indeterministic.
 
 ## Break
 "While" and "for" loops can be broken out of using the `break` keyword.

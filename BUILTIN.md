@@ -84,6 +84,9 @@ Remove intervals from the given/current scale that evaluate to `false` according
 ### doc(*riff*)
 Obtain the docstring of the given riff.
 
+### entries(*record*)
+Obtain an array of `[key, value]` pairs of the record.
+
 ### equaveOf(*val*)
 Return the equave of the val.
 
@@ -479,6 +482,9 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 ### hypot(*...args*)
 Calculate the square root of the sum of squares of the arguments.
 
+### keys(*record*)
+Obtain an array of keys of the record.
+
 ### label(*labels*, *scale = $$*)
 Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.
 
@@ -682,6 +688,9 @@ Unstack the current/given scale into steps.
 
 ### unstacked(*array*)
 Calculate the relative steps in the current/given scale.
+
+### values(*record*)
+Obtain an array of values of the record.
 
 ### vao(*denominator*, *maxNumerator*, *divisions = 12*, *tolerance = 5.0*, *equave = 2*)
 Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default `12`) within the given tolerance (default `5c`). Harmonics equated by the `equave` (default `2/1`) are only included once. The returned segment begins at unison.

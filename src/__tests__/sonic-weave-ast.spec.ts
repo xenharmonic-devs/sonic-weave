@@ -314,15 +314,15 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         object: {
-          type: 'ArrayAccess',
+          type: 'AccessExpression',
           object: {type: 'Identifier', id: 'x'},
           nullish: false,
-          index: {type: 'Identifier', id: 'i'},
+          key: {type: 'Identifier', id: 'i'},
         },
         nullish: true,
-        index: {type: 'IntegerLiteral', value: 2n},
+        key: {type: 'IntegerLiteral', value: 2n},
       },
     });
   });
@@ -332,7 +332,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         nullish: false,
         object: {
           type: 'ArraySlice',
@@ -347,7 +347,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           second: null,
           end: {type: 'IntegerLiteral', value: 2n},
         },
-        index: {type: 'IntegerLiteral', value: 0n},
+        key: {type: 'IntegerLiteral', value: 0n},
       },
     });
   });
@@ -358,9 +358,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'Program',
       body: [
         {
-          type: 'ForOfStatement',
+          type: 'IterationStatement',
           element: {type: 'Parameter', id: 'foo', defaultValue: null},
-          array: {type: 'Identifier', id: 'bar'},
+          kind: 'of',
+          container: {type: 'Identifier', id: 'bar'},
           body: {
             type: 'ExpressionStatement',
             expression: {type: 'Identifier', id: 'foo'},
@@ -422,10 +423,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'AssignmentStatement',
       name: {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         object: {type: 'Identifier', id: 'arr'},
         nullish: false,
-        index: {type: 'IntegerLiteral', value: 1n},
+        key: {type: 'IntegerLiteral', value: 1n},
       },
       value: {type: 'IntegerLiteral', value: 2n},
     });
@@ -438,10 +439,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'CallExpression',
         callee: {
-          type: 'ArrayAccess',
+          type: 'AccessExpression',
           object: {type: 'Identifier', id: 'arr'},
           nullish: false,
-          index: {type: 'IntegerLiteral', value: 1n},
+          key: {type: 'IntegerLiteral', value: 1n},
         },
         args: [],
       },
@@ -455,7 +456,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'CallExpression',
         callee: {
-          type: 'ArrayAccess',
+          type: 'AccessExpression',
           nullish: false,
           object: {
             type: 'ArraySlice',
@@ -464,7 +465,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             second: null,
             end: null,
           },
-          index: {type: 'IntegerLiteral', value: 1n},
+          key: {type: 'IntegerLiteral', value: 1n},
         },
         args: [],
       },
@@ -671,7 +672,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           for
             foo of baz
           for
-            bar of qux
+            bar in qux
       ]
     `);
     expect(ast).toEqual({
@@ -686,11 +687,13 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         comprehensions: [
           {
             element: {type: 'Parameter', id: 'foo', defaultValue: null},
-            array: {type: 'Identifier', id: 'baz'},
+            kind: 'of',
+            container: {type: 'Identifier', id: 'baz'},
           },
           {
             element: {type: 'Parameter', id: 'bar', defaultValue: null},
-            array: {type: 'Identifier', id: 'qux'},
+            kind: 'in',
+            container: {type: 'Identifier', id: 'qux'},
           },
         ],
         test: null,
@@ -710,7 +713,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
 
   it('accepts array access spanning multiple rows', () => {
     const ast = parseSingle('foo[\nbar\n]');
-    expect(ast.expression.type).toBe('ArrayAccess');
+    expect(ast.expression.type).toBe('AccessExpression');
   });
 
   it('accepts array slice spanning multiple rows', () => {
@@ -865,10 +868,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'ArrayAccess',
+        type: 'AccessExpression',
         object: {type: 'Identifier', id: 'foo'},
         nullish: false,
-        index: {
+        key: {
           type: 'ArrayLiteral',
           elements: [
             {
@@ -883,6 +886,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             },
           ],
         },
+      },
+    });
+  });
+
+  it('parses record literals', () => {
+    const ast = parseSingle('{foo: 1, "bar": 2}');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'RecordLiteral',
+        properties: [
+          ['bar', {type: 'IntegerLiteral', value: 2n}],
+          ['foo', {type: 'IntegerLiteral', value: 1n}],
+        ],
       },
     });
   });
