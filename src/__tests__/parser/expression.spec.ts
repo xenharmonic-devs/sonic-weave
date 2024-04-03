@@ -1534,12 +1534,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(five.toString()).toBe('5');
   });
 
-  it('has a string representation for the eight fifth (relative)', () => {
+  it('has a string representation for the eighth fifth (relative)', () => {
     const soSplit = parseSingle('P5 % 8');
     expect(soSplit.toString()).toBe('qm1.5');
   });
 
-  it('parses the eight fifth', () => {
+  it('parses the eighth fifth', () => {
     const quarterMinorSesquith = parseSingle('qm1.5');
     expect(quarterMinorSesquith.value.primeExponents[0].toFraction()).toBe(
       '-1/8'
@@ -1549,18 +1549,18 @@ describe('SonicWeave expression evaluator', () => {
     );
   });
 
-  it('has a string representation for the eight fifth (absolute)', () => {
+  it('has a string representation for the eighth fifth (absolute)', () => {
     const gamma = parseSingle('absoluteFJS(P5 % 8)');
     expect(gamma.toString()).toBe('γ⅛♭4');
   });
 
-  it('parses the absolute eight fifth (eight flat)', () => {
+  it('parses the absolute eighth fifth (eighth flat)', () => {
     const gamma = parseSingle('γ⅛♭4');
     expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
     expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');
   });
 
-  it('parses the absolute eight fifth (quarter semiflat)', () => {
+  it('parses the absolute eighth fifth (quarter semiflat)', () => {
     const gamma = parseSingle('gammaqd4');
     expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
     expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');

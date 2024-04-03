@@ -57,7 +57,7 @@ const MID_FIFTH = [4.5, -2.5];
 // Exponents for "neutral" interordinal intervals related to Pythagoras by a semioctave.
 // Splits the whole tone in half precisely in the middle.
 // Implicitly define semiquartal intervals.
-// Associated with eight sharps.
+// Associated with eighth sharps.
 const TONESPLITTER_VECTORS: number[][] = [
   [-1.5, 1],
   [-4.5, 3],
@@ -223,7 +223,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
 
   vector[0] += node.degree.octaves;
 
-  // Eight-augmented
+  // Eighth-augmented
   if (quality.startsWith('⅛a') || quality.startsWith('⅛Â')) {
     quality = quality.slice(2);
     vector[0] -= 1.375;
@@ -346,22 +346,22 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     vector[0] += 2.75;
     vector[1] -= 1.75;
   }
-  // Quartermajor = eight-augmented
+  // Quartermajor = eighth-augmented
   if (quality === 'qM' || quality === '¼M') {
     vector[0] -= 1.375;
     vector[1] += 0.875;
   }
-  // Quarterminor = eight-diminished
+  // Quarterminor = eighth-diminished
   if (quality === 'qm' || quality === '¼m') {
     vector[0] += 1.375;
     vector[1] -= 0.875;
   }
-  // Sesquisemimajor = three-eights-augmented
+  // Sesquisemimajor = three-eighths-augmented
   if (quality === 'QM' || quality === '¾M') {
     vector[0] -= 4.125;
     vector[1] += 2.625;
   }
-  // Sesquisemiminor = three-eights-augmented
+  // Sesquisemiminor = three-eighths-augmented
   if (quality === 'Qm' || quality === '¾m') {
     vector[0] += 4.125;
     vector[1] -= 2.625;
