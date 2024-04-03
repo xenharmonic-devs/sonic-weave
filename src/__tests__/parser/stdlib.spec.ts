@@ -1236,7 +1236,7 @@ describe('SonicWeave standard library', () => {
 
   it('realizes a scale word', () => {
     const scale = parseSource(
-      'realizeScaleWord("LLsLLLs", {L: 9/8, s: 256/243});str'
+      'realizeWord("LLsLLLs", {L: 9/8, s: 256/243});str'
     );
     expect(scale).toEqual([
       '9/8',
@@ -1250,7 +1250,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes a scale word with a missing step', () => {
-    const scale = parseSource('realizeScaleWord("sLsLsLs", {L: 2\\10});str');
+    const scale = parseSource('realizeWord("sLsLsLs", {L: 2\\10});str');
     expect(scale).toEqual([
       '1\\10',
       '3\\10',
@@ -1264,7 +1264,7 @@ describe('SonicWeave standard library', () => {
 
   it('gracefully handles extra step sizes in the record', () => {
     const scale = parseSource(
-      'realizeScaleWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80});str'
+      'realizeWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80});str'
     );
     expect(scale).toEqual([
       '9/8',
@@ -1277,13 +1277,13 @@ describe('SonicWeave standard library', () => {
     ]);
   });
 
-  it('realizes edge cases of `realizeScaleWord`', () => {
-    const emptiness = parseSource('realizeScaleWord("", {L: 2});str');
+  it('realizes edge cases of `realizeWord`', () => {
+    const emptiness = parseSource('realizeWord("", {L: 2});str');
     expect(emptiness).toEqual([]);
-    const octave = parseSource('realizeScaleWord("L", {});str');
+    const octave = parseSource('realizeWord("L", {});str');
     expect(octave).toEqual(['2']);
     const threeWholeTones = parseSource(
-      'realizeScaleWord("LLL", {L: 9/8});str'
+      'realizeWord("LLL", {L: 9/8});str'
     );
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
   });
