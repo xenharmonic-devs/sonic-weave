@@ -2684,7 +2684,7 @@ riff oddLimit(limit, equave = 2) {
   sort();
 }
 
-riff realizeScaleWord(word, sizes, equave = niente) {
+riff realizeWord(word, sizes, equave = niente) {
   'Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes. One step size may be omitted and inferred based on the size of the \`equave\` (default \`2\`).';
   const signature = stepSignature(word);
   let numMissing = 0;
