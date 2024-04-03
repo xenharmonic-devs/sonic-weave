@@ -361,7 +361,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     vector[0] -= 4.125;
     vector[1] += 2.625;
   }
-  // Sesquisemiminor = eight-augmented
+  // Sesquisemiminor = three-eights-augmented
   if (quality === 'Qm' || quality === '¾m') {
     vector[0] += 4.125;
     vector[1] -= 2.625;
