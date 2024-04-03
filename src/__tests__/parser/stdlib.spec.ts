@@ -1261,4 +1261,30 @@ describe('SonicWeave standard library', () => {
       '10\\10',
     ]);
   });
+
+  it('gracefully handles extra step sizes in the record', () => {
+    const scale = parseSource(
+      'realizeScaleWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80});str'
+    );
+    expect(scale).toEqual([
+      '9/8',
+      '81/64',
+      '4/3',
+      '3/2',
+      '27/16',
+      '243/128',
+      '2',
+    ]);
+  });
+
+  it('realizes edge cases of `realizeScaleWord`', () => {
+    const emptiness = parseSource('realizeScaleWord("", {L: 2});str');
+    expect(emptiness).toEqual([]);
+    const octave = parseSource('realizeScaleWord("L", {});str');
+    expect(octave).toEqual(['2']);
+    const threeWholeTones = parseSource(
+      'realizeScaleWord("LLL", {L: 9/8});str'
+    );
+    expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
+  });
 });
