@@ -1233,4 +1233,32 @@ describe('SonicWeave standard library', () => {
     keys.sort();
     expect(keys).toEqual(['a', 'b']);
   });
+
+  it('realizes a scale word', () => {
+    const scale = parseSource(
+      'realizeScaleWord("LLsLLLs", {L: 9/8, s: 256/243});str'
+    );
+    expect(scale).toEqual([
+      '9/8',
+      '81/64',
+      '4/3',
+      '3/2',
+      '27/16',
+      '243/128',
+      '2',
+    ]);
+  });
+
+  it('realizes a scale word with a missing step', () => {
+    const scale = parseSource('realizeScaleWord("sLsLsLs", {L: 2\\10});str');
+    expect(scale).toEqual([
+      '1\\10',
+      '3\\10',
+      '4\\10',
+      '6\\10',
+      '7\\10',
+      '9\\10',
+      '10\\10',
+    ]);
+  });
 });

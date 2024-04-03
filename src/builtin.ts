@@ -32,7 +32,7 @@ import {
   formatAbsoluteFJS,
 } from './expression';
 import {TWO, countUpsAndLifts} from './utils';
-import {stepString} from './words';
+import {stepString, stepSignature as wordsStepSignature} from './words';
 
 // Runtime
 
@@ -218,6 +218,16 @@ function numComponents(value?: Interval) {
 numComponents.__doc__ =
   'Get/set the number of prime exponents to support in monzos. Also sets the length of vals.';
 numComponents.__node__ = builtinNode(numComponents);
+
+function stepSignature(word: string) {
+  const result: Record<string, Interval> = {};
+  for (const [letter, count] of Object.entries(wordsStepSignature(word))) {
+    result[letter] = fromInteger(count);
+  }
+  return result;
+}
+stepSignature.__doc__ = 'Calculate the step signature of an entire scale word.';
+stepSignature.__node__ = builtinNode(stepSignature);
 
 // == Third-party wrappers ==
 function kCombinations(set: any[], k: Interval) {
@@ -1947,6 +1957,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   Infinity: INFINITY,
   // First-party wrappers
   numComponents,
+  stepSignature,
   // Third-party wrappers
   mosSubset,
   isPrime,
@@ -2671,6 +2682,46 @@ riff oddLimit(limit, equave = 2) {
   [n % d for n of odds for d of odds if gcd(n, d) === 1];
   i => i rdc equave;
   sort();
+}
+
+riff realizeScaleWord(word, sizes, equave = niente) {
+  'Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes. One step size may be omitted and inferred based on the size of the \`equave\` (default \`2\`).';
+  const signature = stepSignature(word);
+  let numMissing = 0;
+  let missingLetter = niente;
+  for (const letter in signature) {
+    if (letter not in sizes) {
+      numMissing += 1;
+      missingLetter = letter;
+    }
+  }
+  if (numMissing > 1) {
+    throw "Only a single step size may be omitted.";
+  }
+  if (numMissing === 1) {
+    equave ??= 2;
+    let total = 1;
+    for (const [letter, count] of entries(signature)) {
+      if (letter === missingLetter)
+        continue;
+      total = total *~ sizes[letter] ~^ count;
+    }
+    sizes = {...sizes};
+    sizes[missingLetter] = (equave %~ total) ~/^ signature[missingLetter];
+  } else if (equave !== niente) {
+    let total = 1;
+    for (const [letter, count] of entries(signature)) {
+      total = total *~ sizes[letter] ~^ count;
+    }
+    if (total !== equave) {
+      throw "Given sizes must be compatible with an explicit equave.";
+    }
+  }
+  for (const letter of word) {
+    sizes[letter];
+  }
+  stack();
+  i => simplify(i) if isLinear(i) else i;
 }
 
 // == Scale modification ==
