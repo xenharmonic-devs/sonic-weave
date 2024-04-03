@@ -427,7 +427,7 @@ function aspireNodes(
   b: IntervalLiteral
 ): IntervalLiteral | undefined {
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
-    if (b.type === 'FJS' || b.type === 'AspiringAbsoluteFJS') {
+    if (b.type === 'FJS' || b.type === 'AspiringFJS') {
       return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(a, b)};
     }
     if (b.type === 'SquareSuperparticular') {

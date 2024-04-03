@@ -1649,4 +1649,22 @@ describe('SonicWeave expression evaluator', () => {
     const foo = 'a';
     expect(record).toEqual({foo});
   });
+
+  it('has sanity limits in Pythagorean formatting (relative descending)', () => {
+    const pleaseDont = parseSingle('9001 * d1');
+    expect(pleaseDont.toString()).toBe('-9001\\1<2187/2048>');
+  });
+
+  it('has sanity limits in Pythagorean formatting (absolute ascending)', () => {
+    const doNotWant = evaluateExpression(
+      'A4 = 440 Hz; str(C2 + 9001 * Â1)',
+      false
+    );
+    expect(doNotWant).toBe('logarithmic(1Hz)+[-99006 63004 1 0 1>');
+  });
+
+  it('can format a weighted sum of absolute and relative intervals', () => {
+    const doWant = evaluateExpression('A4 = 440 Hz; str(C2 + 9 * Â1)', false);
+    expect(doWant).toBe('C𝄪𝄪𝄪𝄪♯6');
+  });
 });

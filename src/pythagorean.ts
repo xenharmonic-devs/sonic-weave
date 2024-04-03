@@ -2,6 +2,9 @@ import {Fraction, mmod} from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
 
+// Maximum deviation from a central interval measured in eighth sharps.
+const MAX_OFFSET = 1000;
+
 export type Degree = {
   negative: boolean;
   base: number;
@@ -468,6 +471,10 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   } else {
     return undefined;
   }
+  // Enforce sanity limits
+  if (Math.abs(offCenter) > MAX_OFFSET) {
+    return undefined;
+  }
   const imperfect = ![1, 4, 5].includes(base);
   let quality = '';
   if (imperfect) {
@@ -577,6 +584,11 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   }
 
   let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 0.875;
+
+  // Enforce sanity limits
+  if (Math.abs(offCenter) > MAX_OFFSET) {
+    return undefined;
+  }
 
   const accidentals: string[] = [];
   while (offCenter < -16) {
