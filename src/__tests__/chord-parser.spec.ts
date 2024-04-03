@@ -54,6 +54,16 @@ describe('Chord input parser', () => {
       result[0].value.primeExponents.slice(0, 4).map(pe => pe.toFraction())
     ).toEqual(['-5', '5', '0', '-1']);
   });
+
+  it('has the monzo of logarithmic zero', () => {
+    const result = parseChord('[1>@0')[0];
+    expect(result.valueOf()).toBe(0);
+  });
+
+  it('has the monzo of logarithmic negative unity', () => {
+    const result = parseChord('[1>@-1')[0];
+    expect(result.valueOf()).toBe(-1);
+  });
 });
 
 describe('Val input parser', () => {
