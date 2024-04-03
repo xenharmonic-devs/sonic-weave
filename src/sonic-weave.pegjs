@@ -1368,6 +1368,9 @@ PropertyAssignment
   / identifier: Identifier {
     return [identifier.id, identifier];
   }
+  / '...' __ spread: Expression {
+    return [null, spread];
+  }
 
 PropertyName
   = StringLiteral / Identifier

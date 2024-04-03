@@ -1255,7 +1255,23 @@ export class ExpressionVisitor {
   visitRecordLiteral(node: RecordLiteral): Record<string, SonicWeavePrimitive> {
     const result: Record<string, SonicWeavePrimitive> = {};
     for (const [key, value] of node.properties) {
-      result[key] = this.visit(value) as SonicWeavePrimitive;
+      if (key === null) {
+        const spread = this.visit(value);
+        if (
+          typeof spread !== 'object' ||
+          spread instanceof Interval ||
+          spread instanceof Val ||
+          spread instanceof Color ||
+          Array.isArray(spread)
+        ) {
+          throw new Error('Spread argument must be a record.');
+        }
+        for (const [subKey, subValue] of Object.entries(spread)) {
+          result[subKey] = subValue;
+        }
+      } else {
+        result[key] = this.visit(value) as SonicWeavePrimitive;
+      }
     }
     return result;
   }
@@ -2020,7 +2036,10 @@ export class ExpressionVisitor {
       if (typeof left !== 'string') {
         throw new Error('Can only test for string keys in records.');
       }
-      return hasOwn(right, left);
+      if (operator === 'in' || operator === '~in') {
+        return hasOwn(right, left);
+      }
+      return !hasOwn(right, left);
     }
     if (left instanceof Val) {
       if (right instanceof Val) {
@@ -2118,7 +2137,7 @@ export class ExpressionVisitor {
     if (left === undefined || right === undefined) {
       throw new Error('Cannot operate on nothing');
     }
-    throw new Error('Unhandled binary operation');
+    throw new Error(`Unhandled binary operation '${node.operator}'.`);
   }
 
   visitCallExpression(node: CallExpression) {

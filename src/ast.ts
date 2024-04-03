@@ -331,7 +331,7 @@ export type ArrayLiteral = {
 
 export type RecordLiteral = {
   type: 'RecordLiteral';
-  properties: [string, Expression][];
+  properties: [string | null, Expression][];
 };
 
 export type StringLiteral = {
