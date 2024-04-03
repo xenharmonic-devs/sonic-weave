@@ -1282,9 +1282,7 @@ describe('SonicWeave standard library', () => {
     expect(emptiness).toEqual([]);
     const octave = parseSource('realizeWord("L", {});str');
     expect(octave).toEqual(['2']);
-    const threeWholeTones = parseSource(
-      'realizeWord("LLL", {L: 9/8});str'
-    );
+    const threeWholeTones = parseSource('realizeWord("LLL", {L: 9/8});str');
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
   });
 });
