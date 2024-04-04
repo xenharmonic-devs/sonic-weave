@@ -471,6 +471,10 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   } else {
     return undefined;
   }
+  // Bail out if the offset was not a multiple of 1/8.
+  if (!Number.isInteger(offCenter)) {
+    return undefined;
+  }
   // Enforce sanity limits
   if (Math.abs(offCenter) > MAX_OFFSET) {
     return undefined;
@@ -584,6 +588,11 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   }
 
   let offCenter = (threes - NOMINAL_VECTORS.get(nominal)![1]) / 0.875;
+
+  // Bail out if the offset was not a multiple of 1/8.
+  if (!Number.isInteger(offCenter)) {
+    return undefined;
+  }
 
   // Enforce sanity limits
   if (Math.abs(offCenter) > MAX_OFFSET) {

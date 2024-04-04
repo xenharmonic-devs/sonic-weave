@@ -1667,4 +1667,18 @@ describe('SonicWeave expression evaluator', () => {
     const doWant = evaluateExpression('A4 = 440 Hz; str(C2 + 9 * Â1)', false);
     expect(doWant).toBe('C𝄪𝄪𝄪𝄪♯6');
   });
+
+  it('has formatting for fractions of the apotome (relative)', () => {
+    for (let i = 1; i < 20; ++i) {
+      const str = evaluateExpression(`str(a1 % ${i})`, false);
+      expect(str).not.toContain('undefined');
+    }
+  });
+
+  it('has formatting for fractions of the apotome (absolute)', () => {
+    for (let i = 1; i < 20; ++i) {
+      const str = evaluateExpression(`A4 = 440Hz; str(C4 + a1 % ${i})`, false);
+      expect(str).not.toContain('undefined');
+    }
+  });
 });
