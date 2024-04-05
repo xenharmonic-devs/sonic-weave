@@ -214,9 +214,12 @@ export class Interval {
     return !!this.value.timeExponent.n;
   }
 
-  /** Return the size of the interval in cents. */
-  totalCents() {
-    return this.value.totalCents();
+  /**
+   * Return the size of the interval in cents.
+   * @param ignoreSign Compute the size of the absolute value.
+   */
+  totalCents(ignoreSign = false) {
+    return this.value.totalCents(ignoreSign);
   }
 
   /**

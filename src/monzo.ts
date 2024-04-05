@@ -509,13 +509,14 @@ export class TimeMonzo {
 
   /**
    * Convert the time monzo to cents.
+   * @param ignoreSign Compute the size of the absolute value.
    * @returns Size of the time monzo in cents.
    */
-  toCents() {
+  toCents(ignoreSign = false) {
     if (this.timeExponent.n) {
       throw new Error('Unable to convert a non-scalar to cents.');
     }
-    return this.totalCents();
+    return this.totalCents(ignoreSign);
   }
 
   /**
@@ -1316,10 +1317,15 @@ export class TimeMonzo {
   /**
    * Convert a relative time monzo to cents.
    * Conert an absosulte time monzo to the size in cents of the scalar of its time unit.
+   * @param ignoreSign Compute the size of the absolute value.
    * @returns Size of the time monzo in cents.
    */
-  totalCents() {
-    let total = this.cents + valueToCents(this.residual.valueOf());
+  totalCents(ignoreSign = false) {
+    let residualValue = this.residual.valueOf();
+    if (ignoreSign) {
+      residualValue = Math.abs(residualValue);
+    }
+    let total = this.cents + valueToCents(residualValue);
     for (let i = 0; i < this.primeExponents.length; ++i) {
       total += this.primeExponents[i].valueOf() * PRIME_CENTS[i];
     }
@@ -1336,9 +1342,7 @@ export class TimeMonzo {
       return 0;
     }
     if (this.residual.s < 0) {
-      const clone = this.clone();
-      clone.residual.s = -clone.residual.s;
-      return -centsToValue(clone.totalCents());
+      return -centsToValue(this.totalCents(true));
     }
     return centsToValue(this.totalCents());
   }

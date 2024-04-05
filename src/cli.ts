@@ -36,7 +36,7 @@ export function toScalaScl(source: string) {
     if (value.isFractional()) {
       sclValue = value.toFraction().abs().toFraction();
     } else {
-      sclValue = value.totalCents().toFixed(6);
+      sclValue = value.totalCents(true).toFixed(6);
     }
     const label = interval.label ? ' ' + interval.label : '';
     lines.push(` ${sclValue}${label}`);

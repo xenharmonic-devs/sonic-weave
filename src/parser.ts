@@ -697,7 +697,7 @@ export class StatementVisitor {
       const mapped = scale.map(i => {
         const t = i.value.tail(value.value.numberOfComponents);
         const result = rel(i).dot(value).mul(step);
-        if (t.totalCents()) {
+        if (t.totalCents(true)) {
           return new Interval(t, 'logarithmic').add(result);
         }
         return result;
