@@ -578,7 +578,7 @@ export class StatementVisitor {
       node.middle?.type === 'AbsoluteFJS' ||
       node.right.type === 'AbsoluteFJS'
     ) {
-      throw new Error('Declared pitch must be on the left');
+      throw new Error('Declared pitch must be on the left.');
     }
 
     const subVisitor = this.createExpressionVisitor();
@@ -586,7 +586,7 @@ export class StatementVisitor {
     if (node.left.type === 'AbsoluteFJS') {
       const value = subVisitor.visit(node.middle ?? node.right);
       if (!(value instanceof Interval)) {
-        throw new Error('Pitch declaration must evaluate to an interval');
+        throw new Error('Pitch declaration must evaluate to an interval.');
       }
 
       const pitch = subVisitor.visit(node.left) as Interval;
@@ -615,14 +615,14 @@ export class StatementVisitor {
     const left = subVisitor.visit(node.middle ?? node.left);
     const right = subVisitor.visit(node.right);
     if (!(left instanceof Interval && right instanceof Interval)) {
-      throw new Error('Pitch declaration must evaluato an interval');
+      throw new Error('Pitch declaration must evaluate to an interval.');
     }
     let absolute: TimeMonzo;
     let relative: TimeMonzo;
     if (left.value.timeExponent.n) {
       absolute = left.value;
       if (right.value.timeExponent.n) {
-        throw new Error('Cannot assign absolute pitch to absolute pitch');
+        throw new Error('Cannot assign absolute pitch to absolute pitch.');
       }
       relative = right.value;
     } else {
@@ -639,7 +639,7 @@ export class StatementVisitor {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
-      throw new Error('Up declaration must evaluate to an interval');
+      throw new Error('Up declaration must evaluate to an interval.');
     }
     this.rootContext.up = value.value;
     return undefined;
@@ -649,7 +649,7 @@ export class StatementVisitor {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
-      throw new Error('Lift declaration must evaluate to an interval');
+      throw new Error('Lift declaration must evaluate to an interval.');
     }
     this.rootContext.lift = value.value;
     return undefined;
