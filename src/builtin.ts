@@ -1172,29 +1172,42 @@ export function subtensions(monzos: TimeMonzo[]): Subtender[] {
   return result;
 }
 
+/**
+ * Determine if a scale has constant structure i.e. you can tell the interval class from the size of an interval.
+ * @param monzos Musical intervals given as relative monzos not including the implicit unison at the start, but including the interval of repetition at the end.
+ * @returns `true` if the scale has constant structure.
+ */
 export function hasConstantStructure(monzos: TimeMonzo[]) {
-  if (monzos.length < 1) {
-    return false;
+  const n = monzos.length;
+  if (!n) {
+    return true;
   }
   const numComponents = Math.max(...monzos.map(m => m.numberOfComponents));
-  monzos = monzos.map(m => m.clone());
-  const equave = monzos.pop()!;
-  monzos.unshift(equave.pow(0));
-  for (const monzo of monzos) {
+  const scale = monzos.map(m => m.clone());
+  for (const monzo of scale) {
     monzo.numberOfComponents = numComponents;
   }
-  const subtensions: [TimeMonzo, number][] = [];
-  // Against 1/1
-  for (let i = 1; i < monzos.length; ++i) {
-    subtensions.push([monzos[i], i]);
+  const period = scale[n - 1];
+  for (const monzo of [...scale]) {
+    scale.push(period.mul(monzo));
   }
-  // Against each other
-  for (let i = 1; i < monzos.length; ++i) {
-    for (let j = 1; j < monzos.length; ++j) {
-      let width = monzos[mmod(i + j, monzos.length)].div(monzos[i]);
-      if (i + j >= monzos.length) {
-        width = width.mul(equave);
+
+  const subtensions: [TimeMonzo, number][] = [];
+
+  // Against 1/1
+  for (let i = 0; i < n; ++i) {
+    for (const [existing] of subtensions) {
+      if (existing.strictEquals(scale[i])) {
+        return false;
       }
+    }
+    subtensions.push([scale[i], i + 1]);
+  }
+
+  // Against each other
+  for (let i = 0; i < n - 1; ++i) {
+    for (let j = 1; j < n; ++j) {
+      const width = scale[i + j].div(scale[i]);
       let unique = true;
       for (const [existing, subtension] of subtensions) {
         if (width.strictEquals(existing)) {
