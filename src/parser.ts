@@ -2120,6 +2120,14 @@ export class ExpressionVisitor {
       case '!=':
         // eslint-disable-next-line eqeqeq
         return left != right;
+      case '<=':
+        return (left as any) <= (right as any);
+      case '<':
+        return (left as any) < (right as any);
+      case '>=':
+        return (left as any) >= (right as any);
+      case '>':
+        return (left as any) > (right as any);
     }
 
     if (left instanceof Color || right instanceof Color) {

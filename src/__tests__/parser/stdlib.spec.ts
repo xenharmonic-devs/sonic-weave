@@ -1285,4 +1285,24 @@ describe('SonicWeave standard library', () => {
     const threeWholeTones = parseSource('realizeWord("LLL", {L: 9/8});str');
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
   });
+
+  // XXX: This only works because reduce is in PRELUDE_VOLATILES
+  it('lets you override builtins for hooking purposes', () => {
+    let capturedWarning = '';
+    function warn(message: string) {
+      capturedWarning = message;
+    }
+    warn.__doc__ = 'Show a warning to the user.';
+    warn.__node__ = builtinNode(warn);
+    evaluateSource('6/4;6/3;reduce()', true, {warn});
+    expect(capturedWarning).toBe(
+      "The scale was already reduced by its equave. Did you mean 'simplify'?"
+    );
+  });
+
+  it('throws an error if you use reduce as a mapper', () => {
+    expect(() => parseSource('3/2;4/2;reduce')).toThrow(
+      'Can only iterate over arrays, records or strings.'
+    );
+  });
 });

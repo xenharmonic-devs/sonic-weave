@@ -1215,4 +1215,22 @@ describe('SonicWeave parser', () => {
       '(2/1 "The Octave")',
     ]);
   });
+
+  it('throws an error if you try to call simplify without arguments', () => {
+    expect(() => parseSource('simplify()')).toThrow(
+      "Parameter 'interval' is required."
+    );
+  });
+
+  it('throws an error if you try to call simplify with an array argument', () => {
+    expect(() => parseSource('6/4;6/3;simplify($)')).toThrow(
+      'An interval, val or boolean is required.'
+    );
+  });
+
+  it('throws an error if you use sort as a mapper', () => {
+    expect(() => parseSource('2/1;3/2;sort')).toThrow(
+      'Only arrays can be sorted.'
+    );
+  });
 });

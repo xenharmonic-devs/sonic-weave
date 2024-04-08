@@ -1681,4 +1681,17 @@ describe('SonicWeave expression evaluator', () => {
       expect(str).not.toContain('undefined');
     }
   });
+
+  it('can compare strings', () => {
+    const aBeforeB = evaluateExpression('"a" < "b"', false);
+    expect(aBeforeB).toBe(true);
+  });
+
+  it('can sort an array of strings', () => {
+    const swac = evaluateExpression(
+      'sorted([..."SonicWeave"])',
+      false
+    ) as string[];
+    expect(swac.join('')).toBe('SWaceeinov');
+  });
 });

@@ -320,6 +320,15 @@ fareyInterior.__node__ = builtinNode(fareyInterior);
 
 export function simplify(interval: Interval | Val | boolean) {
   requireParameters({interval});
+  if (
+    !(
+      typeof interval === 'boolean' ||
+      interval instanceof Interval ||
+      interval instanceof Val
+    )
+  ) {
+    throw new Error('An interval, val or boolean is required.');
+  }
   if (interval instanceof Val) {
     return new Val(interval.value.clone(), interval.equave.clone());
   }
@@ -911,8 +920,33 @@ isRadical.__node__ = builtinNode(isRadical);
 
 // == Other ==
 
-export function compare(this: ExpressionVisitor, a: Interval, b: Interval) {
+export function compare(
+  this: ExpressionVisitor,
+  a: SonicWeavePrimitive,
+  b: SonicWeavePrimitive
+) {
   requireParameters({a, b});
+  if (typeof a === 'string') {
+    if (typeof b !== 'string') {
+      throw new Error('Only strings can be compared with other strings.');
+    }
+    if (a < b) {
+      return -1;
+    }
+    if (a > b) {
+      return 1;
+    }
+    return 0;
+  }
+  if (typeof a === 'boolean') {
+    a = upcastBool(a);
+  }
+  if (typeof b === 'boolean') {
+    b = upcastBool(b);
+  }
+  if (!(a instanceof Interval && b instanceof Interval)) {
+    throw new Error('Only strings or intervals can be compared.');
+  }
   if (a.isRelative() && b.isRelative()) {
     return a.compare(b);
   }
@@ -1362,10 +1396,13 @@ maximum.__node__ = builtinNode(maximum);
 
 export function sort(
   this: ExpressionVisitor,
-  scale?: Interval[],
+  scale?: SonicWeaveValue,
   compareFn?: Function
 ) {
   scale ??= this.getCurrentScale();
+  if (!Array.isArray(scale)) {
+    throw new Error('Only arrays can be sorted.');
+  }
   if (compareFn === undefined) {
     scale.sort(compare.bind(this));
   } else {
@@ -1793,10 +1830,17 @@ str.__node__ = builtinNode(str);
 
 function print(this: ExpressionVisitor, ...args: any[]) {
   const s = repr.bind(this);
-  console.log(...args.map(a => s(a)));
+  console.log(...args.map(a => (typeof a === 'string' ? a : s(a))));
 }
 print.__doc__ = 'Print the arguments to the console.';
 print.__node__ = builtinNode(print);
+
+function warn(this: ExpressionVisitor, ...args: any[]) {
+  const s = repr.bind(this);
+  console.log(...args.map(a => (typeof a === 'string' ? a : s(a))));
+}
+warn.__doc__ = 'Print the arguments to the console with "warning" emphasis.';
+warn.__node__ = builtinNode(warn);
 
 function dir(arg: any) {
   console.dir(arg, {depth: null});
@@ -2062,6 +2106,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   concat,
   length,
   print,
+  warn,
   dir,
   doc,
   help,
@@ -2121,6 +2166,19 @@ riff HEJI(interval) {
 riff absoluteHEJI(interval) {
   "Convert interval to absolute FJS using HEJI comma flavors."
   return absoluteFJS(interval, 'h');
+}
+
+// XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn().
+riff reduce(scale = $$) {
+  "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
+  for (const i of scale) {
+    if (i < 1 or i > scale[-1])
+      break;
+  } else {
+    warn("The scale was already reduced by its equave. Did you mean 'simplify'?");
+    return;
+  }
+  equaveReduce(scale);
 }
 `;
 
@@ -2520,7 +2578,7 @@ riff cps(factors, count, equave = 2, withUnity = false) {
   sort();
   if (not withUnity) ground();
   equave;
-  reduce();
+  equaveReduce();
   sort();
 }
 
@@ -2542,7 +2600,7 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
     accumulator;
   }
   period;
-  reduce();
+  equaveReduce();
   sort();
 }
 
@@ -2603,7 +2661,7 @@ riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
   sort();
   if (not withUnity) ground();
   equave;
-  reduce();
+  equaveReduce();
   sort();
 }
 
@@ -2617,7 +2675,7 @@ riff gs(generators, size, period = 2, numPeriods = 1) {
   simplify;
   stack();
   period;
-  reduce();
+  equaveReduce();
   sort();
   repeat(numPeriods);
 }
@@ -2627,7 +2685,7 @@ riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
   cumprod(map(simplify, generators));
   let accumulator = $[-1];
   period;
-  reduce();
+  equaveReduce();
   sort();
   let i = 0;
   while (ordinal) {
@@ -2738,15 +2796,21 @@ riff realizeWord(word, sizes, equave = niente) {
 }
 
 // == Scale modification ==
-riff reduce(scale = $$) {
+riff equaveReduce(scale = $$) {
   "Reduce the current/given scale by its equave.";
   $ = scale;
   i => i ~rdc $[-1];
   return;
 }
 
-riff reduced(scale = $$) {
+riff equaveReduced(scale = $$) {
   "Obtain a copy of the current/given scale reduced by its equave.";
+  scale;
+  equaveReduce();
+}
+
+riff reduced(scale = $$) {
+  "Obtain a copy of the current/given scale reduced by its equave. Issue a warning if the scale was already reduced.";
   scale;
   reduce();
 }
@@ -3084,7 +3148,7 @@ riff stepReplaced(step, replacement, scale = $$) {
 riff organize(tolerance = niente, action = 'simplest', scale = $$) {
   "Reduce the current/given scale by its last interval, sort the result and filter out duplicates. If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.";
   $ = scale;
-  reduce();
+  equaveReduce();
   if (tolerance === niente) keepUnique();
   sort();
   if (tolerance !== niente) coalesce(tolerance, action);
