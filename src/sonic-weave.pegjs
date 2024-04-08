@@ -663,9 +663,14 @@ ExponentiationOperator
   = $('^/' / '^' / '/_' / '/^')
 
 ExponentiationExpression
-  = head: LabeledExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
+  = head: FractionExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
       return tail.reduce(operatorReducer, head);
     }
+
+FractionExpression
+  = head: LabeledExpression tail: (__ @'~'? @'/' !('+' / '-' / '^' / '_') @'~'? _ @LabeledExpression)* {
+    return tail.reduce(operatorReducer, head);
+  }
 
 Labels
   = (CallExpression / TrueAccessExpression / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|

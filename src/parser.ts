@@ -1789,6 +1789,7 @@ export class ExpressionVisitor {
               break;
             case '÷':
             case '%':
+            case '/':
               value = left.value.div(right.value);
               break;
             case 'rd':
@@ -1881,6 +1882,7 @@ export class ExpressionVisitor {
             return left.mul(right);
           case '÷':
           case '%':
+          case '/':
             return left.div(right);
           case '^':
             return left.pow(right);
@@ -2073,6 +2075,7 @@ export class ExpressionVisitor {
             return left.mul(right);
           case '÷':
           case '%':
+          case '/':
             return left.div(right);
           case '·':
           case 'dot':

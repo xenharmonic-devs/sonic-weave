@@ -48,7 +48,8 @@ export type BinaryOperator =
   | 'tns'
   | '^'
   | '/^'
-  | '^/';
+  | '^/'
+  | '/';
 
 export type IterationKind = 'in' | 'of';
 

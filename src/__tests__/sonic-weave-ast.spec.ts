@@ -903,6 +903,38 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('has to concede grammar space from the slash (no negative denominators)', () => {
+    const ast = parseSingle('a/-b');
+    expect(ast.expression.operator).toBe('/-');
+  });
+
+  it('has to concede grammar space from the slash (no upshimmered denominators)', () => {
+    const ast = parseSingle('a/^b');
+    expect(ast.expression.operator).toBe('/^');
+  });
+
+  it('has to concede grammar space from the slash (no lodash denominators)', () => {
+    const ast = parseSingle('a/_b');
+    expect(ast.expression.operator).toBe('/_');
+    expect(ast.expression.right.id).toBe('b');
+  });
+
+  it('can use spaces with the slash for negative denominators', () => {
+    const ast = parseSingle('a / -b');
+    expect(ast.expression.operator).toBe('/');
+  });
+
+  it('can use spaces with the slash for upshimmered denominators', () => {
+    const ast = parseSingle('a / ^b');
+    expect(ast.expression.operator).toBe('/');
+  });
+
+  it('can use spaces with the slash for lodash denominators', () => {
+    const ast = parseSingle('a / _b');
+    expect(ast.expression.operator).toBe('/');
+    expect(ast.expression.right.id).toBe('_b');
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
@@ -952,5 +984,9 @@ describe('Negative tests', () => {
 
   it('rejects unary operations without operators', () => {
     expect(() => parse('~3')).toThrow();
+  });
+
+  it('rejects variable substitution in NEDJI', () => {
+    expect(() => parse('a\\b<c/d>')).toThrow();
   });
 });

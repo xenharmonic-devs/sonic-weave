@@ -1694,4 +1694,11 @@ describe('SonicWeave expression evaluator', () => {
     ) as string[];
     expect(swac.join('')).toBe('SWaceeinov');
   });
+
+  it('has a tightly binding fractional slash operator', () => {
+    const tritonus = parseSingle(
+      'const Diabolus = 7; const unus = 1; const musica = 5; const duo = 2; Diabolus/musica ^ duo/unus'
+    );
+    expect(tritonus.value.toFraction().toFraction()).toBe('49/25');
+  });
 });

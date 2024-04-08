@@ -142,10 +142,18 @@ Increment/decrement assumes that you've declared `let i = 2` originally.
 | Strict exclusion | `not of`  |
 | Inclusion        | `~of`     |
 | Exclusion        | `not ~of` |
+| Key inclusion    | `in`      |
+| Key exclusion    | `not in`  |
+| Index inclusion  | `~in`     |
+| Index exclusion  | `not ~in` |
 | Outer product    | `tns`     |
 | Outer product    | `⊗`      |
 
 Inclusion is similar to Python's `in` operator e.g. `2 of [1, 2, 3]` evaluates to `true`.
+
+Key inclusion is similar to JavaScript's `in` operator e.g. `"foo" in {foo: 1, bar: 2}` evaluates to `true`.
+
+Index inclusion allows for negative indices `-1 in [0]` evaluates to `false` while `-1 ~in [0]` evaluates to `true`.
 
 Outer product a.k.a. tensoring expands all possible products in two arrays into an array of arrays e.g. `[2, 3, 5] tns [7, 11]` evaluates to
 ```javascript
@@ -169,6 +177,7 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Multiplication         | `110 Hz × 5`   | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5`    |
 | Division               | `6 % 2`        | `3`      | `P19 - P8`       | `P12`      |
 | Division               | `220 hz ÷ 2`   | `110 Hz` | `A=3 - P8`       | `A=2`      |
+| Fractions              | `(1+2)/2`      | `3/2`    | `P12 - P8`       | `P5`       |
 | Reduction              | `5 rd 2`       | `5/4`    | `M17^5 mod P8`   | `M3^5`     |
 | Ceiling reduction      | `2 rdc 2`      | `2`      | `P8 modc P8`     | `P8`       |
 | Exponentiation         | `3 ^ 2`        | `9`      | `P12 * 2`        | `M23`      |
@@ -179,6 +188,8 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | N of EDO               | `(5+2)\12`     | `7\12`   | _N/A_            |            |
 | NEDJI Projection       | `sqrt(2) ed 3` | `1\2<3>` | `2\3 ed S3`      | `2\3<9/8>` |
 | Val product            | `12@ · 3/2`    | `7`      | `<12 19] dot P5` | `7`        |
+
+Fractions and their powers are used a lot in just intonation so `4/3 ^ 2/1` means `(4/3) ^ (2/1)` i.e. `16/9`. The other division symbols (`÷` and its ASCII counterpart `%`) have the usual precedence from mathematics: `4÷3^2÷1` means `4 ÷ (3^2) ÷ 1` i.e. `4/9`. In other words `/` binds stronger than `^` which binds stronger than `÷`.
 
 Of these NEDJI Projection is probably the most obtuse, so a few words are in order. In `octaves ed base` the `base` operand is raised to the two's exponent of `octaves`. Exponents of all other primes are discarded. The result is alway is in the logarithmic domain. e.g. `[7/13 1 1> ed 5` discards the `1` components and moves/projects the first component to the third slot (corresponding to prime five) resulting in `[0 0 7\13>`.
 
