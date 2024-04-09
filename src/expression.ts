@@ -737,7 +737,9 @@ function tailFJS(literal: FJS | AbsoluteFJS) {
 function formatFJS(literal: FJS) {
   const base = formatUps(literal);
   const d = literal.pythagorean.degree;
-  return `${base}${literal.pythagorean.quality}${d.negative ? '-' : ''}${
+  const q = literal.pythagorean.quality;
+  const aa = (literal.pythagorean.augmentations ?? []).join('');
+  return `${base}${q.fraction}${q.quality}${aa}${d.negative ? '-' : ''}${
     d.base + 7 * d.octaves
   }${tailFJS(literal)}`;
 }
@@ -745,12 +747,13 @@ function formatFJS(literal: FJS) {
 export function formatAbsoluteFJS(literal: AbsoluteFJS, octaves = true) {
   const base = formatUps(literal);
   const p = literal.pitch;
+  const acs = p.accidentals
+    .map(ac => `${ac.fraction}${ac.accidental}`)
+    .join('');
   if (octaves) {
-    return `${base}${p.nominal}${p.accidentals.join('')}${p.octave}${tailFJS(
-      literal
-    )}`;
+    return `${base}${p.nominal}${acs}${p.octave}${tailFJS(literal)}`;
   }
-  return `${base}${p.nominal}${p.accidentals.join('')}${tailFJS(literal)}`;
+  return `${base}${p.nominal}${acs}${tailFJS(literal)}`;
 }
 
 function formatDecimal(literal: DecimalLiteral) {

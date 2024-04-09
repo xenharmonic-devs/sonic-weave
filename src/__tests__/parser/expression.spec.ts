@@ -1536,7 +1536,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a string representation for the eighth fifth (relative)', () => {
     const soSplit = parseSingle('P5 % 8');
-    expect(soSplit.toString()).toBe('qm1.5');
+    expect(soSplit.toString()).toBe('¼m1.5');
   });
 
   it('parses the eighth fifth', () => {
@@ -1665,7 +1665,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can format a weighted sum of absolute and relative intervals', () => {
     const doWant = evaluateExpression('A4 = 440 Hz; str(C2 + 9 * Â1)', false);
-    expect(doWant).toBe('C𝄪𝄪𝄪𝄪♯6');
+    expect(doWant).toBe('C♯𝄪𝄪𝄪𝄪6');
   });
 
   it('has formatting for fractions of the apotome (relative)', () => {
@@ -1700,5 +1700,55 @@ describe('SonicWeave expression evaluator', () => {
       'const Diabolus = 7; const unus = 1; const musica = 5; const duo = 2; Diabolus/musica ^ duo/unus'
     );
     expect(tritonus.value.toFraction().toFraction()).toBe('49/25');
+  });
+
+  it('formats the relative third fourth', () => {
+    const thirdFourth = parseSingle('P4 % 3');
+    expect(thirdFourth.toString()).toBe('⅓M2');
+  });
+
+  it('parses the relative third fourth', () => {
+    const thirdFourth = parseSingle('⅓M2');
+    const {fractionOfEquave, equave} = thirdFourth.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('1/3');
+    expect(equave.toFraction()).toBe('4/3');
+  });
+
+  it('formats the absolute fifth sixth', () => {
+    const deeFifthFlat = evaluateExpression('C4 = 1;str(C4 + M6 / 5)', false);
+    expect(deeFifthFlat).toBe('D⅕♭4');
+  });
+
+  it('parses the absolute fifth sixth', () => {
+    const deeFifthFlat = parseSingle('C4 = 1;D⅕♭4');
+    const {fractionOfEquave, equave} = deeFifthFlat.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('1/5');
+    expect(equave.toFraction()).toBe('27/16');
+  });
+
+  it('can split the scarab for no particular reason', () => {
+    const whatever = parseSingle('C4 = 1;ψ⅒¤3');
+    expect(whatever.value.primeExponents[0].toFraction()).toBe('-17/10');
+    expect(whatever.value.primeExponents[1].toFraction()).toBe('19/20');
+  });
+
+  it('has "Aug" as an alternative spelling for "a"', () => {
+    const theLargerFourth = parseSingle('Aug4');
+    expect(theLargerFourth.toFraction().toFraction()).toBe('729/512');
+  });
+
+  it('has "dim" as an alternative spelling for "d"', () => {
+    const theSmallerFifth = parseSingle('dim5');
+    expect(theSmallerFifth.toFraction().toFraction()).toBe('1024/729');
+  });
+
+  it('has a porkupine inflection', () => {
+    const twoThirdsFourth = parseSingle('⅓m3_6l');
+    expect(twoThirdsFourth.toFraction().toFraction()).toBe('6/5');
+  });
+
+  it('is a wizard, Harry!', () => {
+    const thirdFourth = parseSingle('⅓M2_7l');
+    expect(thirdFourth.toFraction().toFraction()).toBe('11/10');
   });
 });

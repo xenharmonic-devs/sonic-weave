@@ -1132,22 +1132,49 @@ ColorLiteral
     };
   }
 
-Hemidemisemi
-  = $('⅛' / '¼' / 'q' / '⅜' / '½' / 's' / '⅝' / '¾' / 'Q' / '⅞')
+VulgarFraction
+  = $('¼' / 'q' / '½' / 's' / '¾' / 'Q' / [⅐-⅞] / '')
 
-Demisemi
-  = $('¼' / 'q' / '½' / 's' / '¾' / 'Q')
+AugmentedToken = $('dim' / 'aug' / 'Aug' / [daÂ])
 
 AugmentedQuality
-  = $(Hemidemisemi? 'd'+) / $(Hemidemisemi? [aÂ]+)
+  = fraction: VulgarFraction quality: AugmentedToken {
+    return {
+      fraction,
+      quality,
+    };
+  }
 
 ImperfectQuality
-  = 'm' / '¾m' / 'Qm' / '½m' / 'sm' / '¼m' / 'qm' / 'n' / '¼M' / 'qM' / '½M' / 'sM' / '¾M' / 'QM' / 'M'
+  = 'n' {
+    return {
+      fraction: '',
+      quality: 'n',
+    };
+  }
+  / fraction: VulgarFraction quality: [mM] {
+    return {
+      fraction,
+      quality,
+    };
+  }
 
 // Neutral is mid or ~ from ups-and-downs
-MidQuality = 'P' / 'n'
+MidQuality
+  = quality: ('P' / 'n') {
+  return {
+    fraction: '',
+    quality,
+  };
+}
 
-PerfectQuality = 'P'
+PerfectQuality
+  = 'P' {
+  return {
+    fraction: '',
+    quality: 'P',
+  };
+}
 
 Degree
   = sign: '-'? num: PositiveBasicInteger {
@@ -1179,8 +1206,26 @@ HalfDegree
     return {...degree, base: degree.base + 0.5};
   }
 
-SplitHemidemisemipythagorean
-  = quality: (AugmentedQuality / ImperfectQuality) degree: HalfDegree {
+SplitPythagorean
+  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (HalfDegree / ImperfectDegree) {
+    return {
+      type: 'Pythagorean',
+      quality,
+      augmentations,
+      degree,
+      imperfect: true,
+    };
+  }
+  / quality: AugmentedQuality augmentations: AugmentedToken* degree: (MidDegree / PerfectDegree) {
+    return {
+      type: 'Pythagorean',
+      quality,
+      augmentations,
+      degree,
+      imperfect: false,
+    };
+  }
+  / quality: ImperfectQuality degree: (HalfDegree / ImperfectDegree) {
     return {
       type: 'Pythagorean',
       quality,
@@ -1188,15 +1233,7 @@ SplitHemidemisemipythagorean
       imperfect: true,
     };
   }
-  / quality: (AugmentedQuality / ImperfectQuality) degree: ImperfectDegree {
-    return {
-      type: 'Pythagorean',
-      quality,
-      degree,
-      imperfect: true,
-    };
-  }
-  / quality: (AugmentedQuality / MidQuality) degree: MidDegree {
+  / quality: MidQuality degree: MidDegree {
     return {
       type: 'Pythagorean',
       quality,
@@ -1204,7 +1241,7 @@ SplitHemidemisemipythagorean
       imperfect: false,
     };
   }
-  / quality: (AugmentedQuality / PerfectQuality) degree: PerfectDegree {
+  / quality: PerfectQuality degree: PerfectDegree {
     return {
       type: 'Pythagorean',
       quality,
@@ -1253,7 +1290,7 @@ Hyperscripts
 
 FJS
   = upsAndDowns: UpsAndDowns
-    pythagorean: SplitHemidemisemipythagorean
+    pythagorean: SplitPythagorean
     hyperscripts: Hyperscripts {
     return {
       ...upsAndDowns,
@@ -1265,7 +1302,12 @@ FJS
   }
 
 Accidental
-  = $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£] / (Hemidemisemi [♯#♭b]) / (Demisemi ('𝄲' / '𝄳' / [‡td])))
+  = fraction: VulgarFraction accidental: $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£]) {
+    return {
+      fraction,
+      accidental,
+    };
+  }
 
 Nominal
   = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G])
@@ -1322,7 +1364,7 @@ ArrowFunction
 
 // This rule is a faster version of the part of (FJS / AbsoluteFJS / SquareSuperparticular) which overlaps with identifiers.
 ReservedPattern
-  = [sqQ]? (AugmentedQuality / ImperfectQuality / MidQuality) [0-9]+ '_'? [0-9]*
+  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ '_'? [0-9]*
   / Nominal [sqQxdbrp]* [0-9]+ '_'? [0-9]*
   / 'S' [0-9]+
 

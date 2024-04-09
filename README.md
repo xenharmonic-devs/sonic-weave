@@ -908,11 +908,14 @@ Due to technical reasons the accidentals for the 5L 4s scale, *scarab* (`¤`) an
 
 Semiquartals are associated with the `q` comma flavor e.g. `7/6` can be spelled `φ4^7q` (assuming `C4 = 1/1`).
 
-### Eighth fifth
-Introducing interordinals induces notation for `P5 % 8` namely the *quarter-minor sesquith* `qm1.5`.
+### Further splits
+Vulgar fraction modifiers like `⅓` or `⅔` can be applied to augmented, major, minor and diminished interval qualities and the accidentals.
 
-`Qm` and `¼M` interval qualities work as expected. Augmented and diminished may be prefixed with `⅛`, `⅜`, `⅝` or `⅞` and the same goes for the sharp and flat accidentals.
+You may encounter them when splitting Pythagorean intervals like the *third-major second* `⅓M2` resulting from splitting the fourth into three parts `P4 / 3`.
 
+You can even make interordinals like the *quarter-minor sesquith* `qm1.5` by splitting the fifth eight ways `P5 / 8`.
+
+Absolute notation works too `C4 + M6 / 5` happens to be *Dee fifth-flat four* `D⅕♭4`.
 ### Extra comma flavors
 Extra commas include extended Helmholtz-Ellis inflections and additional bridges from above irrationals to just intonation.
 

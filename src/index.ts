@@ -5,11 +5,20 @@ export * from './cli';
 export * from './context';
 export * from './css-colors';
 export * from './expression';
-export * from './fjs';
 export * from './interval';
 export * from './monzo';
 export * from './parser';
-export * from './pythagorean';
+export {
+  type Degree,
+  type AugmentedQuality,
+  type VulgarFraction,
+  type IntervalQuality,
+  type Pythagorean,
+  type Accidental,
+  type SplitAccidental,
+  type Nominal,
+  type AbsolutePitch,
+} from './pythagorean';
 export * from './utils';
 export * from './warts';
 export * from './words';
