@@ -1,26 +1,20 @@
 import {Fraction, PRIMES} from 'xen-dev-utils';
 
-export const ZERO = new Fraction(0);
-export const ONE = new Fraction(1);
-export const NEGATIVE_ONE = new Fraction(-1);
-export const TWO = new Fraction(2);
-
-function protectFraction(fraction: Fraction) {
-  Object.defineProperty(fraction, 's', {writable: false});
-  Object.defineProperty(fraction, 'n', {writable: false});
-  Object.defineProperty(fraction, 'd', {writable: false});
-}
-protectFraction(ZERO);
-protectFraction(ONE);
-protectFraction(NEGATIVE_ONE);
-protectFraction(TWO);
+export const ZERO = Object.freeze(new Fraction(0));
+export const ONE = Object.freeze(new Fraction(1));
+export const NEGATIVE_ONE = Object.freeze(new Fraction(-1));
 
 export const FRACTION_PRIMES: Fraction[] = [];
 for (const prime of PRIMES) {
-  const p = new Fraction(prime);
-  protectFraction(p);
+  const p = Object.freeze(new Fraction(prime));
   FRACTION_PRIMES.push(p);
 }
+
+export const TWO = FRACTION_PRIMES[0];
+export const THREE = FRACTION_PRIMES[1];
+export const FIVE = FRACTION_PRIMES[2];
+export const SEVEN = FRACTION_PRIMES[3];
+export const ELEVEN = FRACTION_PRIMES[4];
 
 /**
  * Greatest common divisor of two integers.

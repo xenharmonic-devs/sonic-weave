@@ -10,7 +10,10 @@ import {
 import {PRIMES} from 'xen-dev-utils';
 import {
   AbsolutePitch,
+  Accidental,
+  AugmentedQuality,
   Pythagorean,
+  VulgarFraction,
   absoluteMonzo,
   pythagoreanMonzo,
 } from '../pythagorean';
@@ -216,12 +219,23 @@ describe('FJS interval inflector', () => {
   ])(
     'Inflects %s%s%s%s',
     (quality, degree, superscripts: unknown, subscripts: unknown, fraction) => {
+      let vulgar: VulgarFraction = '';
+      const augmentations: AugmentedQuality[] = [];
+      if (quality.length > 1) {
+        if (quality[0] === 'a' || quality[0] === 'd') {
+          augmentations.push(quality[0] as AugmentedQuality);
+        } else {
+          vulgar = quality[0] as VulgarFraction;
+        }
+        quality = quality[1];
+      }
       const base = ((Math.abs(degree) - 1) % 7) + 1;
       const octaves = Math.floor((Math.abs(degree) - 1) / 7);
       const imperfect = ![1, 4, 5].includes(degree);
       const node: Pythagorean = {
         type: 'Pythagorean',
-        quality,
+        quality: {fraction: vulgar, quality: quality as any},
+        augmentations,
         degree: {base, octaves, negative: false},
         imperfect,
       };
@@ -249,8 +263,11 @@ describe('Absolute FJS pitch inflector', () => {
       const node: AbsolutePitch = {
         type: 'AbsolutePitch',
         nominal: nominal as AbsolutePitch['nominal'],
-        accidentals,
-        octave: BigInt(octave),
+        accidentals: accidentals.map(a => ({
+          fraction: '',
+          accidental: a as Accidental,
+        })),
+        octave: octave,
       };
       const monzo = absoluteMonzo(node);
       const interval = inflect(

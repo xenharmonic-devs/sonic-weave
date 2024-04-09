@@ -25,7 +25,7 @@ import {TimeMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {RootContext} from './context';
 import {ONE, ZERO, countUpsAndLifts, setUnion} from './utils';
-import {FractionValue} from 'xen-dev-utils';
+import {Fraction, FractionValue} from 'xen-dev-utils';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
@@ -202,6 +202,11 @@ export class Interval {
   /** Convert the interval to an integer. */
   toInteger(): number {
     return Number(this.value.toBigInteger());
+  }
+
+  /** Convert the interval to a fraction in linear space. */
+  toFraction(): Fraction {
+    return this.value.toFraction();
   }
 
   /** Return `true` if the interval represents a ratio of frequencies. */

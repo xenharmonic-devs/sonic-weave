@@ -7,6 +7,9 @@ import {
   monzoToNode,
   absoluteToNode,
   absoluteToSemiquartal,
+  VulgarFraction,
+  AugmentedQuality,
+  SplitAccidental,
 } from '../pythagorean';
 import {TimeMonzo} from '../monzo';
 
@@ -99,14 +102,25 @@ describe('Pythagorean interval construction from parts', () => {
     ['sm', 3, 2.25, -1.25],
     ['sM', 3, -3.25, 2.25],
     // Circumflex alternate spelling
-    ['Â4', 4, -9, 6],
+    ['Â', 4, -9, 6],
   ])('constructs %s%s', (quality, degree, twos, threes) => {
+    let fraction: VulgarFraction = '';
+    const augmentations: AugmentedQuality[] = [];
+    if (quality.length > 1) {
+      if (quality[0] === 'a' || quality[0] === 'd') {
+        augmentations.push(quality[0] as AugmentedQuality);
+      } else {
+        fraction = quality[0] as VulgarFraction;
+      }
+      quality = quality[1];
+    }
     const base = ((Math.abs(degree) - 1) % 7) + 1;
     const octaves = Math.floor((Math.abs(degree) - 1) / 7);
     const imperfect = ![1, 4, 5].includes(base);
     const node: Pythagorean = {
       type: 'Pythagorean',
-      quality,
+      quality: {fraction, quality: quality as any},
+      augmentations,
       imperfect,
       degree: {negative: degree < 0, base, octaves},
     };
@@ -129,16 +143,16 @@ describe('Absolute Pythagorean interval construction from parts', () => {
     ['C', [], 4, 0, 0],
     ['F', [], 4, 2, -1],
     ['G', [], 4, -1, 1],
-    ['B', ['b'], 3, 3, -2],
-    ['E', ['d'], 4, -0.5, 0.5],
-    ['C', ['q#'], 4, -2.75, 1.75],
-    ['C', ['='], 5, 1, 0],
+    ['B', [{fraction: '', accidental: 'b'}], 3, 3, -2],
+    ['E', [{fraction: '', accidental: 'd'}], 4, -0.5, 0.5],
+    ['C', [{fraction: 'q', accidental: '#'}], 4, -2.75, 1.75],
+    ['C', [{fraction: '', accidental: '='}], 5, 1, 0],
   ])('constructs %s%s', (nominal, accidentals, octave, twos, threes) => {
     const node: AbsolutePitch = {
       type: 'AbsolutePitch',
       nominal: nominal as AbsolutePitch['nominal'],
-      accidentals,
-      octave: BigInt(octave),
+      accidentals: accidentals as SplitAccidental[],
+      octave: octave,
     };
     const monzo = absoluteMonzo(node);
     expect(
@@ -159,7 +173,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('3/2'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'P',
+      quality: {
+        fraction: '',
+        quality: 'P',
+      },
+      augmentations: [],
       imperfect: false,
       degree: {base: 5, negative: false, octaves: 0},
     });
@@ -169,7 +187,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('81/64'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'M',
+      quality: {
+        fraction: '',
+        quality: 'M',
+      },
+      augmentations: [],
       imperfect: true,
       degree: {base: 3, negative: false, octaves: 0},
     });
@@ -179,7 +201,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('4782969/2097152'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'aa',
+      quality: {
+        fraction: '',
+        quality: 'a',
+      },
+      augmentations: ['a'],
       imperfect: false,
       degree: {base: 1, negative: false, octaves: 1},
     });
@@ -189,7 +215,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('67108864/43046721'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'dd',
+      quality: {
+        fraction: '',
+        quality: 'd',
+      },
+      augmentations: ['d'],
       imperfect: true,
       degree: {base: 7, negative: false, octaves: 0},
     });
@@ -199,7 +229,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromEqualTemperament('1/2', '3/2'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'n',
+      quality: {
+        fraction: '',
+        quality: 'n',
+      },
+      augmentations: [],
       imperfect: true,
       degree: {base: 3, negative: false, octaves: 0},
     });
@@ -209,7 +243,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromEqualTemperament('1/2'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'n',
+      quality: {
+        fraction: '',
+        quality: 'n',
+      },
+      augmentations: [],
       imperfect: true,
       degree: {base: 4.5, negative: false, octaves: 0},
     });
@@ -219,7 +257,11 @@ describe('Monzo -> node converter', () => {
     const node = monzoToNode(TimeMonzo.fromFraction('129140163/134217728'));
     expect(node).toEqual({
       type: 'Pythagorean',
-      quality: 'dd',
+      quality: {
+        fraction: '',
+        quality: 'd',
+      },
+      augmentations: ['d'],
       imperfect: true,
       degree: {base: 3, negative: true, octaves: 0},
     });
@@ -232,8 +274,8 @@ describe('Absolute monzo -> node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal: 'D',
-      accidentals: ['♮'],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental: '♮'}],
+      octave: 4,
     });
   });
 
@@ -242,8 +284,8 @@ describe('Absolute monzo -> node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal: 'ζ',
-      accidentals: ['♮'],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental: '♮'}],
+      octave: 4,
     });
   });
 
@@ -252,8 +294,8 @@ describe('Absolute monzo -> node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal: 'α',
-      accidentals: ['d'],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental: 'd'}],
+      octave: 4,
     });
   });
 
@@ -262,8 +304,25 @@ describe('Absolute monzo -> node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal: 'E',
-      accidentals: ['d'],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental: 'd'}],
+      octave: 4,
+    });
+  });
+
+  it('converts C⅓#4', () => {
+    const node = absoluteToNode(
+      TimeMonzo.fromEqualTemperament('1/3', '2187/2048')
+    );
+    expect(node).toEqual({
+      accidentals: [
+        {
+          accidental: '♯',
+          fraction: '⅓',
+        },
+      ],
+      nominal: 'C',
+      octave: 4,
+      type: 'AbsolutePitch',
     });
   });
 });
@@ -284,8 +343,8 @@ describe('Absolute monzo -> semiquartal node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal,
-      accidentals: [accidental],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental}],
+      octave: 4,
     });
   });
 
@@ -296,8 +355,8 @@ describe('Absolute monzo -> semiquartal node converter', () => {
     expect(node).toEqual({
       type: 'AbsolutePitch',
       nominal: 'φ',
-      accidentals: ['♮'],
-      octave: 4n,
+      accidentals: [{fraction: '', accidental: '♮'}],
+      octave: 4,
     });
   });
 });

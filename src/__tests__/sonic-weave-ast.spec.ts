@@ -989,4 +989,10 @@ describe('Negative tests', () => {
   it('rejects variable substitution in NEDJI', () => {
     expect(() => parse('a\\b<c/d>')).toThrow();
   });
+
+  // XXX: Without the parenthesis this is actually a valid block statement containing an enumeration.
+  // Might need to rethink record syntax if this causes more issues.
+  it('rejects dim5 as an identifier', () => {
+    expect(() => parse('({dim5: "no good"})')).toThrow();
+  });
 });
