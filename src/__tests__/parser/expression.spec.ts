@@ -1757,4 +1757,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(tooLong.isAbsolute()).toBe(true);
     expect(tooLong.valueOf()).toBeCloseTo(3 * 1024 ** 8);
   });
+
+  it('has a "lift" operator because the template tag requires a "drop" operator, but I guess it is useful for enumerated chords where mirroring would take precedence...', () => {
+    const rootLift = evaluateExpression('lift 4:5:6', false) as Interval[];
+    expect(rootLift).toHaveLength(2);
+    expect(rootLift[0].valueOf()).toBe(1.2463950666682366);
+    expect(rootLift[1].valueOf()).toBe(1.4956740800018837);
+  });
 });

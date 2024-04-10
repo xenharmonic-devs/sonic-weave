@@ -1,5 +1,19 @@
 import {IntervalLiteral, literalToString} from './expression';
 
+export type UnaryOperator =
+  | '+'
+  | '-'
+  | '%'
+  | '÷'
+  | 'not'
+  | '^'
+  | '/'
+  | 'lift'
+  | '\\'
+  | 'drop'
+  | '++'
+  | '--';
+
 export type BinaryOperator =
   | '??'
   | 'or'
@@ -36,6 +50,7 @@ export type BinaryOperator =
   | '%'
   | '÷'
   | '\\'
+  | '°'
   | 'mod'
   | 'modc'
   | 'rd'
@@ -232,7 +247,7 @@ export type ArraySlice = {
 
 export type UnaryExpression = {
   type: 'UnaryExpression';
-  operator: '+' | '-' | '%' | '÷' | 'not' | '^' | '/' | '\\' | '++' | '--';
+  operator: UnaryOperator;
   operand: Expression;
   prefix: boolean;
   uniform: boolean;
@@ -271,6 +286,11 @@ export type ColorLiteral = {
 export type Identifier = {
   type: 'Identifier';
   id: string;
+};
+
+export type TemplateArgument = {
+  type: 'TemplateArgument';
+  index: number;
 };
 
 export type Argument = {
@@ -365,6 +385,7 @@ export type Expression =
   | FalseLiteral
   | ColorLiteral
   | Identifier
+  | TemplateArgument
   | EnumeratedChord
   | Range
   | ArrayComprehension
@@ -409,6 +430,8 @@ export function expressionToString(node: Expression) {
       return 'niente';
     case 'Identifier':
       return node.id;
+    case 'TemplateArgument':
+      return `£${node.index}`;
     case 'StringLiteral':
       return JSON.stringify(node.value);
   }

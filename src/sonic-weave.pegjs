@@ -55,6 +55,7 @@ CatchToken         = 'catch'    !IdentifierPart
 ConstToken         = 'const'    !IdentifierPart
 ContinueToken      = 'continue' !IdentifierPart
 DotToken           = 'dot'      !IdentifierPart
+DropToken          = 'drop'     !IdentifierPart
 EdToken            = 'ed'       !IdentifierPart
 ElseToken          = 'else'     !IdentifierPart
 FalseToken         = 'false'    !IdentifierPart
@@ -64,6 +65,7 @@ IfToken            = 'if'       !IdentifierPart
 InToken            = 'in'       !IdentifierPart
 LestToken          = 'lest'     !IdentifierPart
 LetToken           = 'let'      !IdentifierPart
+LiftToken          = 'lift'     !IdentifierPart
 MaxToken           = 'max'      !IdentifierPart
 MinToken           = 'min'      !IdentifierPart
 ModToken           = 'mod'      !IdentifierPart
@@ -92,6 +94,7 @@ ReservedWord
   / ConstToken
   / ContinueToken
   / DotToken
+  / DropToken
   / EdToken
   / ElseToken
   / FalseToken
@@ -100,6 +103,7 @@ ReservedWord
   / InToken
   / LestToken
   / LetToken
+  / LiftToken
   / MaxToken
   / MinToken
   / ModToken
@@ -255,7 +259,7 @@ UpDeclaration
   }
 
 LiftDeclaration
-  = '/' _ '=' _ value: Expression EOS {
+  = ('/' / LiftToken) _ '=' _ value: Expression EOS {
     return {
       type: 'LiftDeclaration',
       value,
@@ -617,7 +621,7 @@ Term
   }
 
 MultiplicativeOperator
-  = $('*' / '×' / '%' / '÷' / '\\' / '·' / DotToken / '⊗' / TensorToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
@@ -673,7 +677,7 @@ FractionExpression
   }
 
 Labels
-  = (CallExpression / TrueAccessExpression / Identifier / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
+  = (CallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
 // XXX: Don't know why that trailing __ has to be there.
 LabeledExpression
@@ -705,7 +709,7 @@ Secondary
   / AccessExpression
 
 ChainableUnaryOperator
-  = $NotToken / '^' / '/' / '\\'
+  = $(NotToken / '^' / '/' / LiftToken / '\\' / DropToken)
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: Secondary {
@@ -858,6 +862,7 @@ Primary
   / AbsoluteFJS
   / SquareSuperparticular
   / Identifier
+  / TemplateArgument
   / ArrayLiteral
   / RecordLiteral
   / StringLiteral
@@ -912,7 +917,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger '\\' __ denominator: (ParenthesizedExpression / CallExpression / TrueAccessExpression / Identifier)? {
+  = count: BasicInteger ('\\' / '°') __ denominator: (ParenthesizedExpression / CallExpression / TrueAccessExpression / Identifier / TemplateArgument)? {
     if (denominator) {
       return BinaryExpression(
         '\\',
@@ -932,7 +937,7 @@ StepLiteral
   }
 
 NedjiLiteral
-  = numerator: BasicInteger '\\' denominator: PositiveBasicInteger '<' equaveNumerator: PositiveBasicInteger equaveDenominator: ('/' @PositiveBasicInteger)? '>' {
+  = numerator: BasicInteger ('\\' / '°') denominator: PositiveBasicInteger '<' equaveNumerator: PositiveBasicInteger equaveDenominator: ('/' @PositiveBasicInteger)? '>' {
     return {
       type: 'NedjiLiteral',
       numerator,
@@ -941,7 +946,7 @@ NedjiLiteral
       equaveDenominator,
     };
   }
-  / numerator: BasicInteger '\\' denominator: PositiveBasicInteger {
+  / numerator: BasicInteger ('\\' / '°') denominator: PositiveBasicInteger {
     return {
       type: 'NedjiLiteral',
       numerator,
@@ -1373,6 +1378,14 @@ Identifier
     return {
       type: 'Identifier',
       id,
+    };
+  }
+
+TemplateArgument
+  = '£' index: BasicInteger {
+    return {
+      type: 'TemplateArgument',
+      index,
     };
   }
 
