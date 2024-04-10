@@ -1,7 +1,6 @@
 import {
   Fraction,
   kCombinations as xduKCombinations,
-  mmod,
   isPrime as xduIsPrime,
   primes as xduPrimes,
   approximateRadical,
@@ -1163,38 +1162,54 @@ lcm.__doc__ =
   'Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.';
 lcm.__node__ = builtinNode(lcm);
 
+/**
+ * Result from {@link subtensions} consisting of a relative interval and all of the spans it subtends (a set of 0-indexed interval classes).
+ */
 export type Subtender = {
   monzo: TimeMonzo;
   subtensions: Set<number>;
 };
 
+/**
+ * Calculate all subtensions i.e 0-indexed interval classes associated with relative intervals.
+ * @param monzos Musical intervals given as relative monzos not including the implicit unison at the start, but including the interval of repetition at the end.
+ * @returns An array of subtensions associated with each interval found in the scale.
+ */
 export function subtensions(monzos: TimeMonzo[]): Subtender[] {
-  if (monzos.length < 1) {
+  const n = monzos.length;
+  if (!n) {
     return [];
   }
   const numComponents = Math.max(...monzos.map(m => m.numberOfComponents));
-  monzos = monzos.map(m => m.clone());
-  const equave = monzos.pop()!;
-  monzos.unshift(equave.pow(0));
-  for (const monzo of monzos) {
+  const scale = monzos.map(m => m.clone());
+  for (const monzo of scale) {
     monzo.numberOfComponents = numComponents;
   }
-  const result: Subtender[] = [];
-  // Against 1/1
-  for (let i = 1; i < monzos.length; ++i) {
-    result.push({monzo: monzos[i], subtensions: new Set([i])});
+  const period = scale[n - 1];
+  for (const monzo of [...scale]) {
+    scale.push(period.mul(monzo));
   }
-  // Against each other
-  for (let i = 1; i < monzos.length; ++i) {
-    for (let j = 1; j < monzos.length; ++j) {
-      let width = monzos[mmod(i + j, monzos.length)].div(monzos[i]);
-      if (i + j >= monzos.length) {
-        width = width.mul(equave);
+
+  const result: Subtender[] = [];
+
+  // Against 1/1
+  for (let i = 0; i < n; ++i) {
+    for (const {monzo, subtensions} of result) {
+      if (monzo.strictEquals(scale[i])) {
+        subtensions.add(i + 1);
       }
+    }
+    result.push({monzo: scale[i], subtensions: new Set([i + 1])});
+  }
+
+  // Against each other
+  for (let i = 0; i < n - 1; ++i) {
+    for (let j = 1; j < n; ++j) {
+      const width = scale[i + j].div(scale[i]);
       let unique = true;
-      for (const subtender of result) {
-        if (width.strictEquals(subtender.monzo)) {
-          subtender.subtensions.add(j);
+      for (const {monzo, subtensions} of result) {
+        if (width.strictEquals(monzo)) {
+          subtensions.add(j);
           unique = false;
         }
       }
