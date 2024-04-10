@@ -141,7 +141,46 @@ export function metricExponent(prefix: MetricPrefix): number {
     case 'q':
       return -30;
     default:
-      throw new Error(`Unrecognized prefix ${prefix}`);
+      throw new Error(`Unrecognized prefix ${prefix}.`);
+  }
+}
+
+export type BinaryPrefix =
+  | 'Ki'
+  | 'Mi'
+  | 'Gi'
+  | 'Ti'
+  | 'Pi'
+  | 'Ei'
+  | 'Zi'
+  | 'Yi'
+  | 'Ri'
+  | 'Qi';
+
+export function binaryExponent(prefix: BinaryPrefix): number {
+  switch (prefix) {
+    case 'Ki':
+      return 1;
+    case 'Mi':
+      return 2;
+    case 'Gi':
+      return 3;
+    case 'Ti':
+      return 4;
+    case 'Pi':
+      return 5;
+    case 'Ei':
+      return 6;
+    case 'Zi':
+      return 7;
+    case 'Yi':
+      return 8;
+    case 'Ri':
+      return 9;
+    case 'Qi':
+      return 10;
+    default:
+      throw new Error(`Unrecognized prefix ${prefix}.`);
   }
 }
 

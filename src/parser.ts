@@ -57,6 +57,9 @@ import {
   NEGATIVE_ONE,
   TWO,
   hasOwn,
+  binaryExponent,
+  MetricPrefix,
+  BinaryPrefix,
 } from './utils';
 import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
 import {inflect} from './fjs';
@@ -1016,6 +1019,7 @@ export class StatementVisitor {
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
+const KIBI_MONZO = new TimeMonzo(ZERO, [new Fraction(10)]);
 const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
 
@@ -2273,13 +2277,23 @@ export class ExpressionVisitor {
   }
 
   visitHertzLiteral(node: HertzLiteral): Interval {
-    const value = TEN_MONZO.pow(metricExponent(node.prefix));
+    let value: TimeMonzo;
+    if (node.prefix.endsWith('i')) {
+      value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
+    } else {
+      value = TEN_MONZO.pow(metricExponent(node.prefix as MetricPrefix));
+    }
     value.timeExponent = NEGATIVE_ONE;
     return new Interval(value, 'linear', node);
   }
 
   visitSecondLiteral(node: SecondLiteral): Interval {
-    const value = TEN_MONZO.pow(metricExponent(node.prefix));
+    let value: TimeMonzo;
+    if (node.prefix.endsWith('i')) {
+      value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
+    } else {
+      value = TEN_MONZO.pow(metricExponent(node.prefix as MetricPrefix));
+    }
     value.timeExponent = ONE;
     return new Interval(value, 'linear', node);
   }

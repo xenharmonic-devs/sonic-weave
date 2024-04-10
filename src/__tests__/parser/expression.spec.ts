@@ -1751,4 +1751,10 @@ describe('SonicWeave expression evaluator', () => {
     const thirdFourth = parseSingle('⅓M2_7l');
     expect(thirdFourth.toFraction().toFraction()).toBe('11/10');
   });
+
+  it('has binary prefixes for mild amusement', () => {
+    const tooLong = parseSingle('3 Yis');
+    expect(tooLong.isAbsolute()).toBe(true);
+    expect(tooLong.valueOf()).toBeCloseTo(3 * 1024 ** 8);
+  });
 });

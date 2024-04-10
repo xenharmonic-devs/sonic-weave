@@ -1097,7 +1097,7 @@ HertzLiteral
       prefix: '',
     }
   }
-  / prefix: MetricPrefix? (HertzToken / LowHertzToken) {
+  / prefix: (BinaryPrefix / MetricPrefix)? (HertzToken / LowHertzToken) {
     return {
       type: 'HertzLiteral',
       prefix,
@@ -1105,7 +1105,7 @@ HertzLiteral
   }
 
 SecondLiteral
-  = prefix: MetricPrefix? SecondToken {
+  = prefix: (BinaryPrefix / MetricPrefix)? SecondToken {
     return {
       type: 'SecondLiteral',
       prefix,
@@ -1427,6 +1427,10 @@ ParenthesizedExpression
 
 MetricPrefix
   = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
+
+// Note: According to Wikipedia Ri and Qi are still under review.
+BinaryPrefix
+  = $([KMGTPEZYRQ] 'i')
 
 StringLiteral
   = '"' chars: DoubleStringCharacter* '"' { return { type: 'StringLiteral', value: chars.join('') }; }

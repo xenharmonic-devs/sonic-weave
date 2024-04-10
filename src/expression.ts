@@ -1,5 +1,6 @@
 import {
   ABSURD_EXPONENT,
+  BinaryPrefix,
   MetricPrefix,
   Sign,
   bigAbs,
@@ -104,12 +105,12 @@ export type ReciprocalCentLiteral = {
 
 export type HertzLiteral = {
   type: 'HertzLiteral';
-  prefix: MetricPrefix;
+  prefix: MetricPrefix | BinaryPrefix;
 };
 
 export type SecondLiteral = {
   type: 'SecondLiteral';
-  prefix: MetricPrefix;
+  prefix: MetricPrefix | BinaryPrefix;
 };
 
 export type FJS = {

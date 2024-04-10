@@ -254,7 +254,7 @@ Records are accessed with the same syntax as arrays but using string indices e.g
 Nullish access is supported e.g. `{}~["nothing here"]` evaluates to `niente`.
 
 ## Metric prefixes
-Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`.
+Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`. [Binary prefixes](https://en.wikipedia.org/wiki/Binary_prefix) are also supported for no particular reason.
 
 ## Numeric frequency flavor
 The space is mandatory in frequency literals like `123 hz` but there is a numeric *flavor* 'z' for quick input i.e. `123z`.
