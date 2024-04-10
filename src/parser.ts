@@ -1177,6 +1177,8 @@ export class ExpressionVisitor {
         return this.visitArrayComprehension(node);
       case 'SquareSuperparticular':
         return this.visitSquareSuperparticular(node);
+      case 'TemplateArgument':
+        return this.rootContext.templateArguments[node.index];
     }
     node satisfies never;
   }
@@ -1650,15 +1652,16 @@ export class ExpressionVisitor {
         `${node.operator} can only operate on intervals and vals.`
       );
     }
+    const operator = node.operator;
     if (node.uniform) {
       let value: TimeMonzo;
       let newNode = operand.node;
-      switch (node.operator) {
+      switch (operator) {
         case '-':
           value = operand.value.neg();
           break;
         case '%':
-        case '\u00F7':
+        case '÷':
           value = operand.value.inverse();
           newNode = uniformInvertNode(newNode);
           break;
@@ -1671,32 +1674,37 @@ export class ExpressionVisitor {
       }
       return new Interval(value, operand.domain, newNode, operand);
     }
-    switch (node.operator) {
+    switch (operator) {
       case '+':
         return operand;
       case '-':
         return operand.neg();
       case '%':
-      case '\u00F7':
+      case '÷':
         return operand.inverse();
       case '^':
         return operand.up(this.rootContext);
       case '/':
+      case 'lift':
         return operand.lift(this.rootContext);
       case '\\':
+      case 'drop':
         return operand.drop(this.rootContext);
     }
     if (!(operand instanceof Interval)) {
       throw new Error('Unsupported unary operation.');
     }
-    let newValue: Interval | undefined;
-    if (node.operator === '++') {
-      newValue = operand.add(linearOne());
-    } else if (node.operator === '--') {
-      newValue = operand.sub(linearOne());
-    } else {
+    if (operator === 'not') {
       // The runtime shouldn't let you get here.
       throw new Error('Unexpected unary operation.');
+    }
+    operator satisfies '++' | '--';
+
+    let newValue: Interval;
+    if (operator === '++') {
+      newValue = operand.add(linearOne());
+    } else {
+      newValue = operand.sub(linearOne());
     }
     if (node.operand.type !== 'Identifier') {
       throw new Error('Cannot increment/decrement a value.');
@@ -1838,6 +1846,7 @@ export class ExpressionVisitor {
               value = left.value.project(right.value);
               break;
             case '\\':
+            case '°':
               throw new Error('Preference not supported with backslahes');
             default:
               throw new Error(
@@ -1896,6 +1905,7 @@ export class ExpressionVisitor {
           case '/_':
             return left.log(right);
           case '\\':
+          case '°':
             return left.backslash(right);
           case 'mod':
             return left.mmod(right);
@@ -2569,22 +2579,20 @@ function convert(value: any): SonicWeaveValue {
 
 export function createTag(
   includePrelude = true,
-  extraBuiltins?: Record<string, SonicWeaveValue>
+  extraBuiltins?: Record<string, SonicWeaveValue>,
+  escapeStrings = false
 ) {
   function tag(strings: TemplateStringsArray, ...args: any[]) {
+    const fragments = escapeStrings ? strings : strings.raw;
     const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
     const visitor = new StatementVisitor(
       globalVisitor.rootContext,
       globalVisitor
     );
-    let source = strings.raw[0];
+    let source = fragments[0];
     for (let i = 0; i < args.length; ++i) {
-      const arg = args[i];
-      const name = `__tagArg${i}_${Math.floor(46656 * Math.random()).toString(
-        36
-      )}`;
-      visitor.immutables.set(name, convert(arg));
-      source += name + strings.raw[i + 1];
+      visitor.rootContext.templateArguments[i] = convert(args[i]);
+      source += `£${i}` + fragments[i + 1];
     }
     const program = parseAST(source);
     for (const statement of program.body.slice(0, -1)) {
@@ -2603,7 +2611,13 @@ export function createTag(
   return tag;
 }
 
-export const sw = createTag();
+export const swr = createTag();
+Object.defineProperty(swr, 'name', {
+  value: 'swr',
+  enumerable: false,
+});
+
+export const sw = createTag(true, undefined, true);
 Object.defineProperty(sw, 'name', {
   value: 'sw',
   enumerable: false,

@@ -1,3 +1,4 @@
+import {SonicWeaveValue} from './builtin';
 import {Val, type Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
@@ -11,6 +12,7 @@ export class RootContext {
   gas: number;
   fragiles: (Interval | Val)[];
   trackingIndex: number;
+  templateArguments: SonicWeaveValue[];
 
   constructor(gas?: number) {
     this.title = '';
@@ -20,6 +22,7 @@ export class RootContext {
     this.gas = gas ?? Infinity;
     this.fragiles = [];
     this.trackingIndex = 0;
+    this.templateArguments = [];
   }
 
   get C4() {
