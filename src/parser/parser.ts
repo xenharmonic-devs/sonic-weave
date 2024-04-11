@@ -197,37 +197,6 @@ function containerToArray(container: SonicWeaveValue, kind: IterationKind) {
   return container;
 }
 
-function localAssign(
-  localVisitor: ExpressionVisitor,
-  name: Parameter | Parameters_,
-  arg?: SonicWeaveValue
-) {
-  if (arguments.length < 3) {
-    if (name.defaultValue) {
-      arg = localVisitor.visit(name.defaultValue);
-    } else if (name.type === 'Parameter') {
-      throw new Error(`Parameter '${name.id}' is required.`);
-    }
-  }
-  if (name.type === 'Parameters') {
-    if (!Array.isArray(arg)) {
-      throw new Error('Expected an array to destructure.');
-    }
-    for (let i = 0; i < name.parameters.length; ++i) {
-      if (i < arg.length) {
-        localAssign(localVisitor, name.parameters[i], arg[i]);
-      } else {
-        localAssign(localVisitor, name.parameters[i]);
-      }
-    }
-    if (name.rest) {
-      localAssign(localVisitor, name.rest, arg.slice(name.parameters.length));
-    }
-  } else {
-    localVisitor.mutables.set(name.id, arg);
-  }
-}
-
 export class StatementVisitor {
   rootContext: RootContext;
   parent?: StatementVisitor;
@@ -948,7 +917,7 @@ export class StatementVisitor {
       const localSubvisitor = localVisitor.createExpressionVisitor();
       // XXX: Abuse variable injection.
       localSubvisitor.mutables = localVisitor.mutables;
-      localAssign(localSubvisitor, node.parameters, args as Interval[]);
+      localSubvisitor.localAssign(node.parameters, args as Interval[]);
 
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
@@ -1200,30 +1169,56 @@ export class ExpressionVisitor {
     );
   }
 
-  visitArrayComprehension(node: ArrayComprehension) {
-    const result: Interval[] = [];
-
-    function comprehend(this: ExpressionVisitor, index: number) {
-      if (index >= node.comprehensions.length) {
-        if (node.test && !sonicTruth(this.visit(node.test))) {
-          return;
-        }
-        result.push(this.visit(node.expression) as Interval);
-        return;
-      }
-      const comprehension = node.comprehensions[index];
-      const array = containerToArray(
-        this.visit(comprehension.container),
-        comprehension.kind
-      );
-      const element = comprehension.element;
-      for (const value of array) {
-        localAssign(this, element, value);
-        comprehend.bind(this)(index + 1);
+  localAssign(name: Parameter | Parameters_, arg?: SonicWeaveValue) {
+    if (arguments.length < 2) {
+      if (name.defaultValue) {
+        arg = this.visit(name.defaultValue);
+      } else if (name.type === 'Parameter') {
+        throw new Error(`Parameter '${name.id}' is required.`);
       }
     }
+    if (name.type === 'Parameters') {
+      if (!Array.isArray(arg)) {
+        throw new Error('Expected an array to destructure.');
+      }
+      for (let i = 0; i < name.parameters.length; ++i) {
+        if (i < arg.length) {
+          this.localAssign(name.parameters[i], arg[i]);
+        } else {
+          this.localAssign(name.parameters[i]);
+        }
+      }
+      if (name.rest) {
+        this.localAssign(name.rest, arg.slice(name.parameters.length));
+      }
+    } else {
+      this.mutables.set(name.id, arg);
+    }
+  }
 
-    comprehend.bind(this)(0);
+  comprehend(node: ArrayComprehension, result: Interval[], index: number) {
+    if (index >= node.comprehensions.length) {
+      if (node.test && !sonicTruth(this.visit(node.test))) {
+        return;
+      }
+      result.push(this.visit(node.expression) as Interval);
+      return;
+    }
+    const comprehension = node.comprehensions[index];
+    const array = containerToArray(
+      this.visit(comprehension.container),
+      comprehension.kind
+    );
+    const element = comprehension.element;
+    for (const value of array) {
+      this.localAssign(element, value);
+      this.comprehend(node, result, index + 1);
+    }
+  }
+
+  visitArrayComprehension(node: ArrayComprehension) {
+    const result: Interval[] = [];
+    this.comprehend(node, result, 0);
     this.mutables.clear();
 
     return result;
@@ -2171,7 +2166,7 @@ export class ExpressionVisitor {
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
       // XXX: Poor type system gets abused again.
-      localAssign(scopeVisitor, node.parameters, args as Interval[]);
+      scopeVisitor.localAssign(node.parameters, args as Interval[]);
 
       const result = scopeVisitor.visit(node.expression);
       scopeVisitor.mutables.clear();
