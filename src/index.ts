@@ -1,13 +1,12 @@
 export * from './ast';
 export * from './stdlib';
-export * from './chord-parser';
+export * from './parser';
 export * from './cli';
 export * from './context';
 export * from './css-colors';
 export * from './expression';
 export * from './interval';
 export * from './monzo';
-export * from './parser';
 export {
   type Degree,
   type AugmentedQuality,

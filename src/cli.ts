@@ -7,10 +7,11 @@ import {
   evaluateSource,
   getSourceVisitor,
   parseAST,
-} from './parser';
+} from './parser/parser';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
-import {parse as parenCounter} from './paren-counter';
+import {parenCounter} from './parser';
+// TODO: Import version from package.json
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);

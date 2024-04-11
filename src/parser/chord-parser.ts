@@ -1,8 +1,8 @@
 import {parse} from './sonic-weave-chord';
 import {evaluateExpression, evaluateSource, parseAST} from './parser';
-import {Interval} from './interval';
-import {parseSubgroup, sparseOffsetToVal, wartsToVal} from './warts';
-import {TimeMonzo} from './monzo';
+import {Interval} from '../interval';
+import {parseSubgroup, sparseOffsetToVal, wartsToVal} from '../warts';
+import {TimeMonzo} from '../monzo';
 
 export function parseChord(input: string, includePrelude = true): Interval[] {
   const parts: string[] = parse(input) as any;

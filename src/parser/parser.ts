@@ -19,7 +19,7 @@ import {
   IntervalLiteral,
   SparseOffsetVal,
   SquareSuperparticular,
-} from './expression';
+} from '../expression';
 import {
   Interval,
   Color,
@@ -28,10 +28,10 @@ import {
   log,
   Val,
   IntervalDomain,
-} from './interval';
-import {TimeMonzo} from './monzo';
+} from '../interval';
+import {TimeMonzo} from '../monzo';
 import {parse} from './sonic-weave-ast';
-import {CSS_COLOR_CONTEXT} from './css-colors';
+import {CSS_COLOR_CONTEXT} from '../css-colors';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -48,7 +48,7 @@ import {
   upcastBool,
   SonicWeavePrimitive,
   sort,
-} from './stdlib';
+} from '../stdlib';
 import {
   bigGcd,
   metricExponent,
@@ -60,17 +60,17 @@ import {
   binaryExponent,
   MetricPrefix,
   BinaryPrefix,
-} from './utils';
-import {pythagoreanMonzo, absoluteMonzo} from './pythagorean';
-import {inflect} from './fjs';
+} from '../utils';
+import {pythagoreanMonzo, absoluteMonzo} from '../pythagorean';
+import {inflect} from '../fjs';
 import {
   inferEquave,
   parseSubgroup,
   sparseOffsetToVal,
   valToTimeMonzo,
   wartsToVal,
-} from './warts';
-import {RootContext} from './context';
+} from '../warts';
+import {RootContext} from '../context';
 import {
   Argument,
   AccessExpression,
@@ -113,7 +113,7 @@ import {
   VariableDeclaration,
   WhileStatement,
   IterationKind,
-} from './ast';
+} from '../ast';
 
 function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
   if (element instanceof Interval) {
