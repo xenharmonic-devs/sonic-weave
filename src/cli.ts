@@ -7,10 +7,10 @@ import {
   evaluateSource,
   getSourceVisitor,
   parseAST,
-} from './parser/parser';
+} from './parser';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
-import {parenCounter} from './parser';
+import {parse as parenCounter} from './parser/paren-counter';
 // TODO: Import version from package.json
 
 export function toScalaScl(source: string) {
@@ -70,7 +70,17 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   ) {
     currentCmd += evalCmd;
 
-    const counts = parenCounter(currentCmd);
+    let counts: any;
+    try {
+      counts = parenCounter(currentCmd);
+    } catch (e) {
+      if (e instanceof Error) {
+        cb(e, undefined);
+      } else {
+        throw e;
+      }
+      return;
+    }
 
     if (counts.curlies < 0) {
       currentCmd = '';
