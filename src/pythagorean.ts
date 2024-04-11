@@ -2,6 +2,7 @@ import {Fraction, mmod} from 'xen-dev-utils';
 import {TimeMonzo} from './monzo';
 import {
   ELEVEN,
+  F,
   FIVE,
   NEGATIVE_ONE,
   ONE,
@@ -161,10 +162,6 @@ export type AbsolutePitch = {
 };
 
 type PythInflection = [Fraction, Fraction];
-
-function F(n: number, d: number) {
-  return Object.freeze(new Fraction(n, d));
-}
 
 const HALF = F(1, 2);
 const q = F(1, 4);

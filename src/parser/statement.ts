@@ -367,7 +367,7 @@ export class StatementVisitor {
         );
         return undefined;
       }
-      throw new Error('Slice step must not be zero');
+      throw new Error('Slice step must not be zero.');
     } else if (node.name.type === 'AccessExpression') {
       const object = arrayRecordOrString(
         subVisitor.visit(node.name.object),
@@ -545,11 +545,15 @@ export class StatementVisitor {
     } else if (typeof value === 'boolean') {
       scale.push(upcastBool(value));
     } else if (typeof value === 'object') {
-      for (const [key, subValue] of Object.entries(value)) {
+      const entries = Object.entries(value);
+      for (const [key, subValue] of entries) {
         this.handleValue(subValue, subVisitor);
         this.handleValue(key, subVisitor);
       }
-      sort.bind(subVisitor)(scale);
+      const tail = scale.slice(-entries.length);
+      scale.length = scale.length - tail.length;
+      sort.bind(subVisitor)(tail);
+      scale.push(...tail);
     } else {
       this.rootContext.spendGas(scale.length);
       const bound = value.bind(subVisitor);
@@ -812,7 +816,7 @@ export class StatementVisitor {
       }
       parent = parent.parent;
     }
-    throw new Error(`Undeclared variable ${name}`);
+    throw new Error(`Undeclared variable ${name}.`);
   }
 
   set(name: string, value: SonicWeaveValue) {

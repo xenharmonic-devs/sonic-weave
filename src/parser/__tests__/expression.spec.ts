@@ -1601,7 +1601,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('is resistant to pathological JS record keys', () => {
     expect(() => evaluateExpression('{}["toString"]', false)).toThrow(
-      'Key error.'
+      'Key error: "toString"'
     );
   });
 

@@ -8,6 +8,7 @@ import {
   BUILTIN_CONTEXT,
   PRELUDE_SOURCE,
   PRELUDE_VOLATILES,
+  SonicWeavePrimitive,
 } from '../stdlib';
 import {RootContext} from '../context';
 import {Program} from '../ast';
@@ -148,6 +149,12 @@ function convert(value: any): SonicWeaveValue {
         return new Interval(value, 'linear');
       } else if (Array.isArray(value)) {
         return value.map(convert) as Interval[];
+      } else {
+        const result: Record<string, SonicWeavePrimitive> = {};
+        for (const [key, subValue] of Object.entries(value)) {
+          result[key] = convert(subValue) as SonicWeavePrimitive;
+        }
+        return result;
       }
   }
   throw new Error('Value cannot be converted.');

@@ -44,6 +44,16 @@ describe('SonicWeave template tag', () => {
     const value = sw`\\${fraction}` as Interval;
     expect(value.valueOf()).toBe(1.4956740800018837);
   });
+
+  it('evaluates access to a record passed in', () => {
+    const value = sw`${{
+      third: new Fraction('6/5'),
+      fifth: new Fraction('3/2'),
+      octave: 2,
+    }}['fifth']` as Interval;
+    expect(value.domain).toBe('linear');
+    expect(value.valueOf()).toBe(1.5);
+  });
 });
 
 describe('SonicWeave raw template tag', () => {

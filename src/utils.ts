@@ -2,14 +2,17 @@
 
 import {Fraction, PRIMES} from 'xen-dev-utils';
 
-export const ZERO = Object.freeze(new Fraction(0));
-export const ONE = Object.freeze(new Fraction(1));
-export const NEGATIVE_ONE = Object.freeze(new Fraction(-1));
+export function F(n: number, d?: number) {
+  return Object.freeze(new Fraction(n, d));
+}
+
+export const ZERO = F(0);
+export const ONE = F(1);
+export const NEGATIVE_ONE = F(-1);
 
 export const FRACTION_PRIMES: Fraction[] = [];
 for (const prime of PRIMES) {
-  const p = Object.freeze(new Fraction(prime));
-  FRACTION_PRIMES.push(p);
+  FRACTION_PRIMES.push(F(prime));
 }
 
 export const TWO = FRACTION_PRIMES[0];

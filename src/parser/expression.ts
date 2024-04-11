@@ -51,6 +51,7 @@ import {
   binaryExponent,
   MetricPrefix,
   BinaryPrefix,
+  F,
 } from '../utils';
 import {pythagoreanMonzo, absoluteMonzo} from '../pythagorean';
 import {inflect} from '../fjs';
@@ -159,9 +160,9 @@ function includes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
-const KIBI_MONZO = new TimeMonzo(ZERO, [new Fraction(10)]);
-const CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1, 1200)]);
-const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [new Fraction(1200)]);
+const KIBI_MONZO = new TimeMonzo(ZERO, [F(10)]);
+const CENT_MONZO = new TimeMonzo(ZERO, [F(1, 1200)]);
+const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [F(1200)]);
 
 function typesCompatible(
   a: IntervalLiteral | undefined,
@@ -374,12 +375,16 @@ export class ExpressionVisitor {
     }
   }
 
-  comprehend(node: ArrayComprehension, result: Interval[], index: number) {
+  comprehend(
+    node: ArrayComprehension,
+    result: SonicWeavePrimitive[],
+    index: number
+  ) {
     if (index >= node.comprehensions.length) {
       if (node.test && !sonicTruth(this.visit(node.test))) {
         return;
       }
-      result.push(this.visit(node.expression) as Interval);
+      result.push(this.visit(node.expression) as SonicWeavePrimitive);
       return;
     }
     const comprehension = node.comprehensions[index];
@@ -395,27 +400,27 @@ export class ExpressionVisitor {
   }
 
   visitArrayComprehension(node: ArrayComprehension) {
-    const result: Interval[] = [];
+    const result: SonicWeavePrimitive[] = [];
     this.comprehend(node, result, 0);
     this.mutables.clear();
 
     return result;
   }
 
-  spread(args: Argument[]): Interval[] {
-    const result: Interval[] = [];
+  spread(args: Argument[]): SonicWeavePrimitive[] {
+    const result: SonicWeavePrimitive[] = [];
     for (const arg of args) {
       if (arg.spread) {
-        result.push(...(this.visit(arg.expression) as Interval[]));
+        result.push(...(this.visit(arg.expression) as SonicWeavePrimitive[]));
       } else {
-        result.push(this.visit(arg.expression) as Interval);
+        result.push(this.visit(arg.expression) as SonicWeavePrimitive);
       }
     }
     return result;
   }
 
   // We cheat here to simplify the type hierarchy definition (no nested arrays).
-  visitArrayLiteral(node: ArrayLiteral): Interval[] {
+  visitArrayLiteral(node: ArrayLiteral): SonicWeavePrimitive[] {
     return this.spread(node.elements);
   }
 
@@ -444,11 +449,11 @@ export class ExpressionVisitor {
   }
 
   visitStepLiteral(node: StepLiteral) {
-    const value = new TimeMonzo(ZERO, [], undefined, Number(node.count));
+    const value = new TimeMonzo(ZERO, [], undefined, node.count);
     return new Interval(value, 'logarithmic', node);
   }
 
-  down(operand: SonicWeaveValue): Interval | Interval[] | Val {
+  down(operand: SonicWeaveValue): Interval | Val | Interval[] {
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
@@ -654,7 +659,7 @@ export class ExpressionVisitor {
         if (node.nullish) {
           return undefined;
         }
-        throw new Error('Key error.');
+        throw new Error(`Key error: "${key}".`);
       }
       return object[key];
     }
@@ -715,7 +720,7 @@ export class ExpressionVisitor {
   visitArraySlice(node: ArraySlice): Interval[] | string {
     const object = this.visit(node.object);
     if (!Array.isArray(object) && typeof object !== 'string') {
-      throw new Error('Array slice on non-array');
+      throw new Error('Array slice on non-array.');
     }
 
     const empty = typeof object === 'string' ? '' : [];
@@ -731,7 +736,7 @@ export class ExpressionVisitor {
     if (node.start) {
       const interval = this.visit(node.start);
       if (!(interval instanceof Interval)) {
-        throw new Error('Slice indices must consist of intervals');
+        throw new Error('Slice indices must consist of intervals.');
       }
       start = Number(interval.value.toBigInteger());
     }
@@ -739,7 +744,7 @@ export class ExpressionVisitor {
     if (node.end) {
       const interval = this.visit(node.end);
       if (!(interval instanceof Interval)) {
-        throw new Error('Slice indices must consist of intervals');
+        throw new Error('Slice indices must consist of intervals.');
       }
       end = Number(interval.value.toBigInteger());
     }
@@ -747,7 +752,7 @@ export class ExpressionVisitor {
     if (node.second) {
       const second = this.visit(node.second);
       if (!(second instanceof Interval)) {
-        throw new Error('Slice indices must consist of intervals');
+        throw new Error('Slice indices must consist of intervals.');
       }
       step = Number(second.value.toBigInteger()) - start;
     }
@@ -794,7 +799,7 @@ export class ExpressionVisitor {
       }
       return result as Interval[];
     }
-    throw new Error('Slice step must not be zero');
+    throw new Error('Slice step must not be zero.');
   }
 
   unaryOperate(
@@ -1013,7 +1018,7 @@ export class ExpressionVisitor {
               throw new Error(
                 `${node.preferLeft ? '~' : ''}${node.operator}${
                   node.preferRight ? '~' : ''
-                } unimplemented`
+                } unimplemented.`
               );
           }
           const result = resolvePreference(value, left, right, node, simplify);
@@ -1164,7 +1169,7 @@ export class ExpressionVisitor {
     ) {
       right = arrayRecordOrString(
         right,
-        `Target of ${operator} must be an array, record or a string.`
+        `Target of '${operator}' must be an array, record or a string.`
       );
       if (typeof right === 'string') {
         right = [...right];
@@ -1191,7 +1196,7 @@ export class ExpressionVisitor {
     ) {
       right = arrayRecordOrString(
         right,
-        `Target of ${operator} must be an array, record or a string.`
+        `Target of '${operator}' must be an array, record or a string.`
       );
       if (Array.isArray(right) || typeof right === 'string') {
         if (!(left instanceof Interval && left.value.isIntegral())) {
@@ -1342,9 +1347,9 @@ export class ExpressionVisitor {
   visitArrowFunction(node: ArrowFunction) {
     const scopeVisitor = this.parent.createExpressionVisitor();
 
-    function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
+    function realization(...args: SonicWeaveValue[]) {
       // XXX: Poor type system gets abused again.
-      scopeVisitor.localAssign(node.parameters, args as Interval[]);
+      scopeVisitor.localAssign(node.parameters, args as SonicWeavePrimitive[]);
 
       const result = scopeVisitor.visit(node.expression);
       scopeVisitor.mutables.clear();
@@ -1464,13 +1469,16 @@ export class ExpressionVisitor {
     const domains: IntervalDomain[] = [];
     const monzos: TimeMonzo[] = [];
     for (const expression of node.intervals) {
-      const interval = this.visit(expression);
+      let interval = this.visit(expression);
+      if (typeof interval === 'boolean') {
+        interval = upcastBool(interval);
+      }
       if (interval instanceof Interval) {
         intervals.push(interval);
         monzos.push(interval.value);
         domains.push(interval.domain);
       } else {
-        throw new Error('Type error: Can only stack intervals in a chord');
+        throw new Error('Type error: Can only stack intervals in a chord.');
       }
     }
     const rootInterval = intervals.shift()!;
@@ -1508,14 +1516,14 @@ export class ExpressionVisitor {
     const start = this.visit(node.start);
     const end = this.visit(node.end);
     if (!(start instanceof Interval && end instanceof Interval)) {
-      throw new Error('Ranges must consist of intervals');
+      throw new Error('Ranges must consist of intervals.');
     }
 
     let step = linearOne();
     if (node.second) {
       const second = this.visit(node.second);
       if (!(second instanceof Interval)) {
-        throw new Error('Ranges must consist of intervals');
+        throw new Error('Ranges must consist of intervals.');
       }
       step = second.sub(start);
     }
@@ -1549,14 +1557,20 @@ export class ExpressionVisitor {
       }
       return result;
     }
-    throw new Error('Range step must not be zero');
+    throw new Error('Range step must not be zero.');
   }
 
   visitHarmonicSegment(node: HarmonicSegment): Interval[] {
-    const root = this.visit(node.root);
-    const end = this.visit(node.end);
+    let root = this.visit(node.root);
+    let end = this.visit(node.end);
+    if (typeof root === 'boolean') {
+      root = upcastBool(root);
+    }
+    if (typeof end === 'boolean') {
+      end = upcastBool(end);
+    }
     if (!(root instanceof Interval && end instanceof Interval)) {
-      throw new Error('Harmonic segments must be built from intervals');
+      throw new Error('Harmonic segments must be built from intervals.');
     }
     this.rootContext.spendGas(
       Math.abs(end.value.valueOf() - root.value.valueOf())
