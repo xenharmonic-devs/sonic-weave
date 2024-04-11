@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {parseChord, parseVals} from '../chord-parser';
-import {MonzoLiteral} from '../expression';
+import {MonzoLiteral} from '../../expression';
 
 describe('Chord input parser', () => {
   it.each(['1 2 3', '1|2|3', '1&2&3', '1;2;3', '1,2,3', '1:2:3'])(

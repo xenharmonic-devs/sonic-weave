@@ -1,4 +1,4 @@
-const {parse} = require('../src/sonic-weave-ast');
+const {parse} = require('../src/parser/sonic-weave-ast');
 const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout,

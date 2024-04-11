@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression} from '../../parser';
+import {evaluateExpression} from '..';
 import {Color, Interval, Val} from '../../interval';
 import {TimeMonzo} from '../../monzo';
 
