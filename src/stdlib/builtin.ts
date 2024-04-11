@@ -29,7 +29,7 @@ import {
   RadicalLiteral,
   formatAbsoluteFJS,
 } from '../expression';
-import {TWO, ZERO, countUpsAndLifts} from '../utils';
+import {NEGATIVE_ONE, TWO, ZERO, countUpsAndLifts} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
 import {hasConstantStructure} from '../tools';
 import {
@@ -226,6 +226,11 @@ fareyInterior.__node__ = builtinNode(fareyInterior);
 
 // == Domain conversion ==
 
+/**
+ * Get rid of interval formatting. Simplifies a ratio to lowest terms.
+ * @param interval Interval or val to simplify.
+ * @returns The interval without a virtual AST node to bias formatting.
+ */
 export function simplify(interval: Interval | Val | boolean) {
   requireParameters({interval});
   if (
@@ -250,9 +255,15 @@ export function simplify(interval: Interval | Val | boolean) {
     interval
   );
 }
-simplify.__doc__ = 'Get rid of interval formatting.';
+simplify.__doc__ =
+  'Get rid of interval formatting. Simplifies a ratio to lowest terms.';
 simplify.__node__ = builtinNode(simplify);
 
+/**
+ * Get rid of interval coloring and label.
+ * @param interval Interval to bleach.
+ * @returns The interval without color or label information.
+ */
 export function bleach(interval: Interval | boolean) {
   requireParameters({interval});
   if (typeof interval === 'boolean') {
@@ -263,20 +274,36 @@ export function bleach(interval: Interval | boolean) {
 bleach.__doc__ = 'Get rid of interval coloring and label.';
 bleach.__node__ = builtinNode(bleach);
 
+/**
+ * Convert interval to linear representation.
+ * @param interval Interval to convert.
+ * @returns The interval in the linear domain with the underlying value unmodified.
+ */
 export function linear(interval: Interval | boolean) {
   requireParameters({interval});
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
+  }
+  if (interval.domain === 'linear') {
+    return interval.shallowClone();
   }
   return new Interval(interval.value.clone(), 'linear', undefined, interval);
 }
 linear.__doc__ = 'Convert interval to linear representation.';
 linear.__node__ = builtinNode(linear);
 
+/**
+ * Convert interval to logarithmic representation.
+ * @param interval Interval to convert.
+ * @returns The interval in the logarithmic domain with the underlying value unmodified.
+ */
 export function logarithmic(interval: Interval | boolean) {
   requireParameters({interval});
   if (typeof interval === 'boolean') {
     interval = upcastBool(interval);
+  }
+  if (interval.domain === 'logarithmic') {
+    return interval.shallowClone();
   }
   return new Interval(
     interval.value.clone(),
@@ -288,16 +315,12 @@ export function logarithmic(interval: Interval | boolean) {
 logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
-export function cologarithmic(interval: Interval | boolean) {
-  requireParameters({interval});
-  if (typeof interval === 'boolean') {
-    interval = upcastBool(interval);
-  }
-  return new Val(interval.value.clone(), interval.value.clone());
-}
-cologarithmic.__doc__ = 'Convert interval to cologarithmic representation.';
-cologarithmic.__node__ = builtinNode(cologarithmic);
-
+/**
+ * Convert interval to absolute representation. Normalized to a frequency.
+ * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param interval Interval to convert.
+ * @returns The interval as a frequency in its respective domain.
+ */
 export function absolute(
   this: ExpressionVisitor,
   interval: Interval | boolean
@@ -308,6 +331,9 @@ export function absolute(
   }
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
+    if (te.equals(NEGATIVE_ONE)) {
+      return interval.shallowClone();
+    }
     return new Interval(
       interval.value.pow(te.inverse().neg()),
       interval.domain,
@@ -317,7 +343,7 @@ export function absolute(
   }
   if (this.rootContext.unisonFrequency === undefined) {
     throw new Error(
-      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz'
+      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz.'
     );
   }
   return new Interval(
@@ -327,9 +353,16 @@ export function absolute(
     interval
   );
 }
-absolute.__doc__ = 'Convert interval to absolute representation.';
+absolute.__doc__ =
+  'Convert interval to absolute representation. Normalized to a frequency.';
 absolute.__node__ = builtinNode(absolute);
 
+/**
+ * Convert interval to relative representation. Normalized to a frequency ratio.
+ * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param interval Interval to convert.
+ * @returns The interval as a frequency ratio in its respective domain.
+ */
 export function relative(
   this: ExpressionVisitor,
   interval: Interval | boolean
@@ -339,12 +372,7 @@ export function relative(
     return upcastBool(interval);
   }
   if (interval.isRelative()) {
-    return new Interval(
-      interval.value.clone(),
-      interval.domain,
-      undefined,
-      interval
-    );
+    return interval.shallowClone();
   }
   if (this.rootContext.unisonFrequency === undefined) {
     throw new Error(
@@ -502,6 +530,16 @@ radical.__doc__ =
 radical.__node__ = builtinNode(radical);
 
 // Coercion: None.
+/**
+ * Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.
+ * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param interval Interval to convert.
+ * @param preferredNumerator Preferred number of steps.
+ * @param preferredDenominator Preferred number of steps per equave.
+ * @param preferredEquaveNumerator Prefferred numerator of the equave.
+ * @param preferredEquaveDenominator Prefferred denominator of the equave.
+ * @returns The interval converted to relative NEDJI in the logarithmic domain.
+ */
 export function nedji(
   this: ExpressionVisitor,
   interval: Interval,
@@ -558,10 +596,17 @@ export function nedji(
   return new Interval(rad.value, 'logarithmic', node, interval);
 }
 nedji.__doc__ =
-  'Convert interval to N steps of equally divided just intonation.';
+  'Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.';
 nedji.__node__ = builtinNode(nedji);
 
 // Coercion: Minimally lossy in terms of size
+/**
+ * Convert interval to cents i.e. centisemitones of 12-tone equal temperament.
+ * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param interval Interval to convert.
+ * @param fractionDigits Number of decimal digits in the cents representation. May produce non-algebraic (real) results if not given.
+ * @returns The interval converted to relative cents in the logarithmic domain.
+ */
 export function cents(
   this: ExpressionVisitor,
   interval: Interval | boolean,
@@ -583,10 +628,11 @@ export function cents(
   converted.domain = 'logarithmic';
   return converted;
 }
-cents.__doc__ = 'Convert interval to cents.';
+cents.__doc__ =
+  'Convert interval to cents. `fractionDigits` represents the number of decimal digits in the cents representation. May produce non-algebraic (real) results if number of digits is not given.';
 cents.__node__ = builtinNode(cents);
 
-function validateFlavor(flavor: string) {
+function validateFlavor(flavor: string): FJSFlavor {
   if (flavor === 'l' || flavor === 's') {
     throw new Error(`Conversion not implemented for FJS flavor '${flavor}'.`);
   }
@@ -602,11 +648,11 @@ function validateFlavor(flavor: string) {
   ) {
     throw new Error(`Unrecognized FJS flavor '${flavor}`);
   }
+  return flavor;
 }
 
 // Coercion: None.
 function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
-  validateFlavor(flavor);
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo;
   if (C4.timeExponent.n === 0) {
@@ -616,7 +662,7 @@ function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   }
   const result = new Interval(monzo, 'logarithmic', {
     type: 'AspiringAbsoluteFJS',
-    flavor: flavor as FJSFlavor,
+    flavor: validateFlavor(flavor),
   });
   const node = result.realizeNode(this.rootContext);
   if (node) {
@@ -633,11 +679,10 @@ absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 // Coercion: None.
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
-  validateFlavor(flavor);
   const monzo = relative.bind(this)(interval).value;
   const result = new Interval(monzo, 'logarithmic', {
     type: 'AspiringFJS',
-    flavor: flavor as FJSFlavor,
+    flavor: validateFlavor(flavor),
   });
   const node = result.realizeNode(this.rootContext);
   if (node) {
@@ -828,11 +873,18 @@ isRadical.__node__ = builtinNode(isRadical);
 
 // == Other ==
 
+/**
+ * Compare two primitive values.
+ * @param this {@link ExpressionVisitor} providing context for comparing across echelons.
+ * @param a Left value.
+ * @param b Right value.
+ * @returns A negative number if a is less than b, a positive number if a is greater than b, zero if equal.
+ */
 export function compare(
   this: ExpressionVisitor,
   a: SonicWeavePrimitive,
   b: SonicWeavePrimitive
-) {
+): number {
   requireParameters({a, b});
   if (typeof a === 'string') {
     if (typeof b !== 'string') {
@@ -866,6 +918,12 @@ export function compare(
   return r(a).compare(r(b));
 }
 
+/**
+ * Attach a tracking ID to the interval.
+ * @param this {@link ExpressionVisitor} instance providing context for the next tracking ID.
+ * @param interval Interval to track.
+ * @returns A copy of the interval that can be tracked e.g. for changes in scale order.
+ */
 export function track(this: ExpressionVisitor, interval: Interval) {
   requireParameters({interval});
   const result = interval.shallowClone();
@@ -1029,6 +1087,12 @@ PrimeMapping.__doc__ =
   'Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
 
+/**
+ * Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
+ * @param this {@link ExpressionVisitor} instance providing context for the height of absolute intervals.
+ * @param interval Interval to measure.
+ * @returns Relative linear interval representing the Tenney height.
+ */
 export function tenneyHeight(this: ExpressionVisitor, interval: Interval) {
   const monzo = relative.bind(this)(interval).value;
   const height =
@@ -1192,6 +1256,12 @@ function abs(interval: Interval) {
 abs.__doc__ = 'Calculate the absolute value of the interval.';
 abs.__node__ = builtinNode(abs);
 
+/**
+ * Obtain the argument with the minimum value.'
+ * @param this {@link ExpressionVisitor} instance providing context for comparing across echelons.
+ * @param args Arguments to find the smallest of.
+ * @returns Smallest argument.
+ */
 export function minimum(this: ExpressionVisitor, ...args: Interval[]) {
   const c = compare.bind(this);
   return args.slice(1).reduce((a, b) => (c(a, b) <= 0 ? a : b), args[0]);
@@ -1199,6 +1269,12 @@ export function minimum(this: ExpressionVisitor, ...args: Interval[]) {
 minimum.__doc__ = 'Obtain the argument with the minimum value.';
 minimum.__node__ = builtinNode(minimum);
 
+/**
+ * Obtain the argument with the maximum value.'
+ * @param this {@link ExpressionVisitor} instance providing context for comparing across echelons.
+ * @param args Arguments to find the largest of.
+ * @returns Largest argument.
+ */
 export function maximum(this: ExpressionVisitor, ...args: Interval[]) {
   const c = compare.bind(this);
   return args.slice(1).reduce((a, b) => (c(a, b) >= 0 ? a : b), args[0]);
@@ -1206,6 +1282,12 @@ export function maximum(this: ExpressionVisitor, ...args: Interval[]) {
 maximum.__doc__ = 'Obtain the argument with the maximum value.';
 maximum.__node__ = builtinNode(maximum);
 
+/**
+ * Sort the current/given scale in ascending order (in place).
+ * @param this {@link ExpressionVisitor} instance providing the current scale and context for comparing across echelons.
+ * @param scale Musical scale to sort (defaults to context scale).
+ * @param compareFn SonicWeave riff for comparing elements.
+ */
 export function sort(
   this: ExpressionVisitor,
   scale?: SonicWeaveValue,
@@ -1226,6 +1308,12 @@ export function sort(
 sort.__doc__ = 'Sort the current/given scale in ascending order.';
 sort.__node__ = builtinNode(sort);
 
+/**
+ * Obtain a sorted copy of the current/given scale in ascending order.
+ * @param this {@link ExpressionVisitor} instance providing the current scale and context for comparing across echelons.
+ * @param scale Musical scale to sort (defaults to context scale).
+ * @param compareFn SonicWeave riff for comparing elements.
+ */
 export function sorted(
   this: ExpressionVisitor,
   scale?: Interval[],
@@ -1606,6 +1694,11 @@ function repr_(
   return `${value}`;
 }
 
+/**
+ * Obtain an array of `[key, value]` pairs of the record.
+ * @param record SonicWeave record.
+ * @returns Entries in the record.
+ */
 export function entries(record: SonicWeaveValue) {
   if (typeof record !== 'object') {
     throw new Error('A record expected.');
@@ -1623,6 +1716,12 @@ export function entries(record: SonicWeaveValue) {
 entries.__doc__ = 'Obtain an array of `[key, value]` pairs of the record.';
 entries.__node__ = builtinNode(entries);
 
+/**
+ * Obtain a string representation of the value (with color and label).
+ * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param value Value to represent.
+ * @returns String that evaluates to the value.
+ */
 export function repr(this: ExpressionVisitor, value: SonicWeaveValue) {
   return repr_.bind(this)(value);
 }
@@ -1630,6 +1729,12 @@ repr.__doc__ =
   'Obtain a string representation of the value (with color and label).';
 repr.__node__ = builtinNode(repr);
 
+/**
+ * Obtain a string representation of the value (w/o color or label).
+ * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param value Value to represent.
+ * @returns String that evaluates to the value.
+ */
 export function str(this: ExpressionVisitor, value: SonicWeaveValue) {
   if (value instanceof Interval) {
     return value.str(this.rootContext);
@@ -1740,6 +1845,11 @@ hsla.__doc__ =
   'HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alpha range 0-1).';
 hsla.__node__ = builtinNode(hsla);
 
+/**
+ * Color based on the size of the interval. Hue wraps around every 1200 cents.
+ * @param interval Interval to measure.
+ * @returns Color corresponding to the size of the interval.
+ */
 export function centsColor(interval: Interval) {
   requireParameters({interval});
   const octaves = interval.totalCents() / 1200;
@@ -1790,6 +1900,11 @@ function tanh255(x: number) {
   return (127.5 * Math.tanh(x / 300 - 0.75) + 127.5).toFixed(3);
 }
 
+/**
+ * Color an interval based on its prime factors.
+ * @param interval Interval to factor.
+ * @returns RBG color combination that reflects the factors of the interval.
+ */
 export function factorColor(interval: Interval) {
   requireParameters({interval});
   let r = 0;
@@ -1808,6 +1923,9 @@ export function factorColor(interval: Interval) {
 factorColor.__doc__ = 'Color an interval based on its prime factors.';
 factorColor.__node__ = builtinNode(factorColor);
 
+/**
+ * Ambient builtin constants and functions that are always present in SonicWeave DSL.
+ */
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   ...MATH_WRAPPERS,
   atan2,
@@ -1838,7 +1956,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   bleach,
   linear,
   logarithmic,
-  cologarithmic,
   absolute,
   relative,
   // Type conversion

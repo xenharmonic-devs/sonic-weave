@@ -199,6 +199,19 @@ export class Interval {
     return new Interval(this.value, this.domain, this.node, this);
   }
 
+  /**
+   * Clone this {@link Interval instance} including the value.
+   * @returns An interval like this one but mutating the value won't change the original.
+   */
+  clone(): Interval {
+    return new Interval(
+      this.value.clone(),
+      this.domain,
+      {...this.node} as IntervalLiteral,
+      this
+    );
+  }
+
   /** Convert the interval to an integer. */
   toInteger(): number {
     return Number(this.value.toBigInteger());

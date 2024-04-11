@@ -7,7 +7,7 @@
 Calculate the absolute value of the interval.
 
 ### absolute(*interval*)
-Convert interval to absolute representation.
+Convert interval to absolute representation. Normalized to a frequency.
 
 ### absoluteFJS(*interval*, *flavor = ""*)
 Convert interval to absolute FJS.
@@ -43,7 +43,7 @@ Convert value to a boolean.
 Round value up to the nearest integer.
 
 ### cents(*interval*, *fractionDigits*)
-Convert interval to cents.
+Convert interval to cents. `fractionDigits` represents the number of decimal digits in the cents representation. May produce non-algebraic (real) results if number of digits is not given.
 
 ### centsColor(*interval*)
 Color based on the size of the interval. Hue wraps around every 1200 cents.
@@ -53,9 +53,6 @@ Remove the contents of the current/given scale.
 
 ### clz32(*x*)
 Calculate clz32 x.
-
-### cologarithmic(*interval*)
-Convert interval to cologarithmic representation.
 
 ### colorOf(*interval*)
 Return the color of the interval.
@@ -235,7 +232,7 @@ Convert interval to a prime count vector a.k.a. monzo.
 Calculate a subset of equally tempered degrees with maximum variety two per scale degree.
 
 ### nedji(*interval*, *preferredNumerator*, *preferredDenominator*, *preferredEquaveNumerator*, *preferredEquaveDenominator*)
-Convert interval to N steps of equally divided just intonation.
+Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.
 
 ### numComponents(*value*)
 Get/set the number of prime exponents to support in monzos. Also sets the length of vals.
@@ -295,7 +292,7 @@ Round value to the nearest integer.
 Remove and return the first interval in the current/given scale.
 
 ### simplify(*interval*)
-Get rid of interval formatting.
+Get rid of interval formatting. Simplifies a ratio to lowest terms.
 
 ### sin(*x*)
 Calculate sin x.
