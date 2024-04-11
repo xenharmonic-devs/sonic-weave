@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {hasConstantStructure, subtensions} from '../builtin';
+import {hasConstantStructure, subtensions} from '../tools';
 import {TimeMonzo} from '../monzo';
 
 describe('Constant structure checker', () => {

@@ -1,4 +1,4 @@
-import {SonicWeaveValue} from './builtin';
+import {SonicWeaveValue} from './stdlib';
 import {Val, type Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';

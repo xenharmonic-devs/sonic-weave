@@ -1,3 +1,5 @@
+/** Utilities and constants used internally. */
+
 import {Fraction, PRIMES} from 'xen-dev-utils';
 
 export const ZERO = Object.freeze(new Fraction(0));

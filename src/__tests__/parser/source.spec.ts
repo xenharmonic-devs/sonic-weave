@@ -8,7 +8,7 @@ import {
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
 import {RootContext} from '../../context';
-import {relative} from '../../builtin';
+import {relative} from '../../stdlib';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);

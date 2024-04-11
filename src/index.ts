@@ -1,5 +1,5 @@
 export * from './ast';
-export * from './builtin';
+export * from './stdlib';
 export * from './chord-parser';
 export * from './cli';
 export * from './context';
@@ -19,6 +19,7 @@ export {
   type Nominal,
   type AbsolutePitch,
 } from './pythagorean';
+export * from './tools';
 export * from './utils';
 export * from './warts';
 export * from './words';
