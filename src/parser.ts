@@ -48,7 +48,7 @@ import {
   upcastBool,
   SonicWeavePrimitive,
   sort,
-} from './builtin';
+} from './stdlib';
 import {
   bigGcd,
   metricExponent,

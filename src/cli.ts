@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {relative} from './builtin';
+import {relative, repr} from './stdlib';
 import {Interval} from './interval';
 import {
   ExpressionVisitor,
@@ -8,7 +8,6 @@ import {
   getSourceVisitor,
   parseAST,
 } from './parser';
-import {repr} from './builtin';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
 import {parse as parenCounter} from './paren-counter';

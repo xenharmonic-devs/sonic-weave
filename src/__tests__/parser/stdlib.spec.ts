@@ -7,7 +7,7 @@ import {
   parseAST,
 } from '../../parser';
 import {Interval} from '../../interval';
-import {builtinNode, track} from '../../builtin';
+import {builtinNode, track} from '../../stdlib';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
