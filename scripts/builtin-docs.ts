@@ -1,6 +1,6 @@
 import {stdout} from 'process';
 import {getSourceVisitor} from '../src/parser';
-import {SonicWeaveFunction} from '../src/builtin';
+import {SonicWeaveFunction} from '../src/stdlib';
 import {expressionToString} from '../src/ast';
 
 const visitor = getSourceVisitor();
