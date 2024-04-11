@@ -325,6 +325,16 @@ describe('Absolute monzo -> node converter', () => {
       type: 'AbsolutePitch',
     });
   });
+
+  it('converts C3', () => {
+    const node = absoluteToNode(TimeMonzo.fromFraction(0.5));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'C',
+      accidentals: [{fraction: '', accidental: '♮'}],
+      octave: 3,
+    });
+  });
 });
 
 describe('Absolute monzo -> semiquartal node converter', () => {
@@ -357,6 +367,16 @@ describe('Absolute monzo -> semiquartal node converter', () => {
       nominal: 'φ',
       accidentals: [{fraction: '', accidental: '♮'}],
       octave: 4,
+    });
+  });
+
+  it('converts C3', () => {
+    const node = absoluteToNode(TimeMonzo.fromFraction(0.5));
+    expect(node).toEqual({
+      type: 'AbsolutePitch',
+      nominal: 'C',
+      accidentals: [{fraction: '', accidental: '♮'}],
+      octave: 3,
     });
   });
 });

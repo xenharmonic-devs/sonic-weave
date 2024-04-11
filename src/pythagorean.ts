@@ -566,7 +566,7 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   const twos = monzo.primeExponents[0];
   const threes = monzo.primeExponents[1];
   const stepspan = twos.mul(SEVEN).add(threes.mul(ELEVEN)).valueOf();
-  const octave = Math.floor(Math.abs(stepspan) / 7) + 4;
+  const octave = Math.floor(stepspan / 7) + 4;
 
   // Abuse the fact that halves are exact in floating point.
   const spanRemainder = mmod(stepspan, 1);
@@ -637,7 +637,7 @@ export function absoluteToSemiquartal(
   const twos = monzo.primeExponents[0];
   const threes = monzo.primeExponents[1];
   const stepspan = twos.mul(NINE).add(threes.mul(FOURTEEN)).valueOf();
-  const octave = Math.floor(Math.abs(stepspan) / 9) + 4;
+  const octave = Math.floor(stepspan / 9) + 4;
 
   if (!Number.isInteger(stepspan)) {
     return undefined;

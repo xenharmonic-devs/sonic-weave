@@ -1665,7 +1665,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can format a weighted sum of absolute and relative intervals', () => {
     const doWant = evaluateExpression('A4 = 440 Hz; str(C2 + 9 * Â1)', false);
-    expect(doWant).toBe('C♯𝄪𝄪𝄪𝄪6');
+    expect(doWant).toBe('C♯𝄪𝄪𝄪𝄪2');
   });
 
   it('has formatting for fractions of the apotome (relative)', () => {
