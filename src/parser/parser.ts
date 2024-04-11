@@ -198,14 +198,13 @@ function containerToArray(container: SonicWeaveValue, kind: IterationKind) {
 }
 
 function localAssign(
-  localVisitor: StatementVisitor,
-  subVisitor: ExpressionVisitor,
+  localVisitor: ExpressionVisitor,
   name: Parameter | Parameters_,
   arg?: SonicWeaveValue
 ) {
-  if (arguments.length < 4) {
+  if (arguments.length < 3) {
     if (name.defaultValue) {
-      arg = subVisitor.visit(name.defaultValue);
+      arg = localVisitor.visit(name.defaultValue);
     } else if (name.type === 'Parameter') {
       throw new Error(`Parameter '${name.id}' is required.`);
     }
@@ -216,18 +215,13 @@ function localAssign(
     }
     for (let i = 0; i < name.parameters.length; ++i) {
       if (i < arg.length) {
-        localAssign(localVisitor, subVisitor, name.parameters[i], arg[i]);
+        localAssign(localVisitor, name.parameters[i], arg[i]);
       } else {
-        localAssign(localVisitor, subVisitor, name.parameters[i]);
+        localAssign(localVisitor, name.parameters[i]);
       }
     }
     if (name.rest) {
-      localAssign(
-        localVisitor,
-        subVisitor,
-        name.rest,
-        arg.slice(name.parameters.length)
-      );
+      localAssign(localVisitor, name.rest, arg.slice(name.parameters.length));
     }
   } else {
     localVisitor.mutables.set(name.id, arg);
@@ -951,12 +945,11 @@ export class StatementVisitor {
       localVisitor.mutables.set('$$', this.parent.getCurrentScale());
 
       // XXX: Poor type system gets abused again.
-      localAssign(
-        localVisitor,
-        localVisitor.createExpressionVisitor(),
-        node.parameters,
-        args as Interval[]
-      );
+      const localSubvisitor = localVisitor.createExpressionVisitor();
+      // XXX: Abuse variable injection.
+      localSubvisitor.mutables = localVisitor.mutables;
+      localAssign(localSubvisitor, node.parameters, args as Interval[]);
+
       for (const statement of node.body) {
         const interrupt = localVisitor.visit(statement);
         if (interrupt?.type === 'ReturnStatement') {
@@ -1074,17 +1067,19 @@ function resolvePreference(
 }
 
 export class ExpressionVisitor {
+  mutables: VisitorContext;
   parent: StatementVisitor;
 
   constructor(parent: StatementVisitor) {
+    this.mutables = new Map();
     this.parent = parent;
   }
 
-  get rootContext() {
+  get rootContext(): RootContext {
     return this.parent.rootContext;
   }
 
-  getCurrentScale() {
+  getCurrentScale(): Interval[] {
     return this.parent.getCurrentScale();
   }
 
@@ -1208,17 +1203,12 @@ export class ExpressionVisitor {
   visitArrayComprehension(node: ArrayComprehension) {
     const result: Interval[] = [];
 
-    function comprehend(
-      this: ExpressionVisitor,
-      localVisitor: StatementVisitor,
-      index: number
-    ) {
-      const localSubvisitor = localVisitor.createExpressionVisitor();
+    function comprehend(this: ExpressionVisitor, index: number) {
       if (index >= node.comprehensions.length) {
-        if (node.test && !sonicTruth(localSubvisitor.visit(node.test))) {
+        if (node.test && !sonicTruth(this.visit(node.test))) {
           return;
         }
-        result.push(localSubvisitor.visit(node.expression) as Interval);
+        result.push(this.visit(node.expression) as Interval);
         return;
       }
       const comprehension = node.comprehensions[index];
@@ -1228,15 +1218,13 @@ export class ExpressionVisitor {
       );
       const element = comprehension.element;
       for (const value of array) {
-        localAssign(localVisitor, localSubvisitor, element, value);
-        comprehend.bind(this)(localVisitor, index + 1);
+        localAssign(this, element, value);
+        comprehend.bind(this)(index + 1);
       }
     }
 
-    const localVisitor = new StatementVisitor(this.rootContext, this.parent);
-    localVisitor.mutables.delete('$'); // Collapse scope
-
-    comprehend.bind(this)(localVisitor, 0);
+    comprehend.bind(this)(0);
+    this.mutables.clear();
 
     return result;
   }
@@ -1710,7 +1698,7 @@ export class ExpressionVisitor {
       throw new Error('Cannot increment/decrement a value.');
     }
     const name = node.operand.id;
-    this.parent.set(name, newValue);
+    this.set(name, newValue);
     if (node.prefix) {
       return newValue;
     }
@@ -2168,7 +2156,7 @@ export class ExpressionVisitor {
   visitCallExpression(node: CallExpression) {
     const args = this.spread(node.args);
     if (node.callee.type === 'Identifier') {
-      const callee = this.parent.get(node.callee.id) as SonicWeaveFunction;
+      const callee = this.get(node.callee.id) as SonicWeaveFunction;
       return callee.bind(this)(...args);
     } else if (node.callee.type === 'AccessExpression') {
       const callee = this.visitAccessExpression(node.callee);
@@ -2179,29 +2167,15 @@ export class ExpressionVisitor {
   }
 
   visitArrowFunction(node: ArrowFunction) {
-    const scopeParent = this.parent;
+    const scopeVisitor = this.parent.createExpressionVisitor();
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localVisitor = new StatementVisitor(
-        scopeParent.rootContext,
-        scopeParent
-      );
-
-      // Manipulate immediate scope
-      localVisitor.mutables.set('$', this.get('$'));
-      if (this.parent.mutables.has('$$')) {
-        localVisitor.mutables.set('$$', this.get('$$'));
-      }
-
       // XXX: Poor type system gets abused again.
-      localAssign(
-        localVisitor,
-        localVisitor.createExpressionVisitor(),
-        node.parameters,
-        args as Interval[]
-      );
+      localAssign(scopeVisitor, node.parameters, args as Interval[]);
 
-      return localVisitor.createExpressionVisitor().visit(node.expression);
+      const result = scopeVisitor.visit(node.expression);
+      scopeVisitor.mutables.clear();
+      return result;
     }
     Object.defineProperty(realization, 'name', {
       value: '(lambda)',
@@ -2309,7 +2283,7 @@ export class ExpressionVisitor {
   }
 
   visitIdentifier(node: Identifier): SonicWeaveValue {
-    return this.parent.get(node.id);
+    return this.get(node.id);
   }
 
   visitEnumeratedChord(node: EnumeratedChord): Interval[] {
@@ -2432,8 +2406,19 @@ export class ExpressionVisitor {
     return result;
   }
 
-  get(name: string) {
+  get(name: string): SonicWeaveValue {
+    if (this.mutables.has(name)) {
+      return this.mutables.get(name);
+    }
     return this.parent.get(name);
+  }
+
+  // Note: Local mutable variables should be initialized directly.
+  set(name: string, value: SonicWeaveValue) {
+    if (this.mutables.has(name)) {
+      this.mutables.set(name, value);
+    }
+    this.parent.set(name, value);
   }
 }
 
