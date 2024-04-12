@@ -1,6 +1,7 @@
 import {describe, bench} from 'vitest';
 import {StatementVisitor, parseAST} from '../parser';
-import {BUILTIN_CONTEXT, PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../builtin';
+import {BUILTIN_CONTEXT} from '../stdlib';
+import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
 import {RootContext} from '../context';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
 
