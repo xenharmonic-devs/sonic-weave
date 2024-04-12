@@ -3,7 +3,6 @@ export * from './stdlib';
 export * from './parser';
 export * from './cli';
 export * from './context';
-export * from './css-colors';
 export * from './expression';
 export * from './interval';
 export * from './monzo';

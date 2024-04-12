@@ -3,13 +3,8 @@ import {Interval} from '../interval';
 import {TimeMonzo} from '../monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
-import {
-  SonicWeaveValue,
-  BUILTIN_CONTEXT,
-  PRELUDE_SOURCE,
-  PRELUDE_VOLATILES,
-  SonicWeavePrimitive,
-} from '../stdlib';
+import {SonicWeaveValue, BUILTIN_CONTEXT, SonicWeavePrimitive} from '../stdlib';
+import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
 import {RootContext} from '../context';
 import {Program} from '../ast';
 import {StatementVisitor} from './statement';

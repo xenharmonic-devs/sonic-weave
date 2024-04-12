@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import {
   ABSURD_EXPONENT,
   BinaryPrefix,
@@ -242,6 +244,7 @@ export type IntervalLiteral =
  * Validate AST literal for display formatting.
  * @param node Interval literal to validate.
  * @throws An error if the literal is too complex to display.
+ * @hidden
  */
 export function validateNode(node?: IntervalLiteral) {
   if (!node) {
@@ -300,6 +303,7 @@ function inferFJSFlavor(
  * Compute the node corresponding to the multiplicative inverse of the input (ignoring domain).
  * @param node AST node to find the inverse of.
  * @returns The inverse node or `undefined` if default formatting is enough.
+ * @hidden
  */
 export function uniformInvertNode(
   node?: IntervalLiteral
@@ -331,6 +335,7 @@ export function uniformInvertNode(
 
 const OPPOSITE_SIGN: Record<Sign, Sign> = {'': '-', '+': '-', '-': ''};
 
+/** @hidden */
 export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   if (!node) {
     return undefined;
@@ -385,6 +390,7 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   return undefined;
 }
 
+/** @hidden */
 export function invertNode(node?: IntervalLiteral) {
   if (!node) {
     return undefined;
@@ -395,6 +401,7 @@ export function invertNode(node?: IntervalLiteral) {
   return undefined;
 }
 
+/** @hidden */
 export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   if (!node) {
     return undefined;
@@ -466,6 +473,7 @@ function aspireNodes(
   return undefined;
 }
 
+/** @hidden */
 export function addNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -501,6 +509,7 @@ export function addNodes(
   return aspireNodes(a, b);
 }
 
+/** @hidden */
 export function subNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -528,6 +537,7 @@ export function subNodes(
   return aspireNodes(a, b);
 }
 
+/** @hidden */
 export function modNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -544,6 +554,7 @@ export function modNodes(
   return undefined;
 }
 
+/** @hidden */
 export function roundToNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -560,6 +571,7 @@ export function roundToNodes(
   return undefined;
 }
 
+/** @hidden */
 export function divNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -577,6 +589,7 @@ export function divNodes(
   return undefined;
 }
 
+/** @hidden */
 export function mulNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -625,6 +638,7 @@ export function mulNodes(
   return undefined;
 }
 
+/** @hidden */
 export function projectNodes(
   octaves?: IntervalLiteral,
   base?: IntervalLiteral
@@ -649,6 +663,7 @@ export function projectNodes(
   return undefined;
 }
 
+/** @hidden */
 export function powNodes(
   a?: IntervalLiteral,
   b?: IntervalLiteral
@@ -695,32 +710,32 @@ export function powNodes(
 
 // == Placeholders for future implementation ==
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function ipowNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function logNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function reduceNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function lensAddNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function lensSubNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** @hidden */
 export function pitchRoundToNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
@@ -761,6 +776,7 @@ function formatFJS(literal: FJS) {
   }${tailFJS(literal)}`;
 }
 
+/** @hidden */
 export function formatAbsoluteFJS(literal: AbsoluteFJS, octaves = true) {
   const base = formatUps(literal);
   const p = literal.pitch;
@@ -786,6 +802,7 @@ function formatDecimal(literal: DecimalLiteral) {
   return `${result}${exponent}${literal.flavor}`;
 }
 
+/** @hidden */
 export function formatComponent(component: VectorComponent) {
   const {sign, left, separator, right, exponent} = component;
   const exponentPart = exponent ? `e${exponent}` : '';
