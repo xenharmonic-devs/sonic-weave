@@ -150,6 +150,10 @@ export function metricExponent(prefix: MetricPrefix): number {
   }
 }
 
+/**
+ * One of the binary prefixes listed here: https://en.wikipedia.org/wiki/Binary_prefix
+ * Goes from kibi = 1024 to quebi = 1024^10.
+ */
 export type BinaryPrefix =
   | 'Ki'
   | 'Mi'
@@ -162,6 +166,11 @@ export type BinaryPrefix =
   | 'Ri'
   | 'Qi';
 
+/**
+ * Optain the exponent of 1024 associated with the given prefix.
+ * @param prefix Prefix to find exponent for.
+ * @returns The exponent of 1024 associated with the prefix.
+ */
 export function binaryExponent(prefix: BinaryPrefix): number {
   switch (prefix) {
     case 'Ki':
@@ -259,6 +268,12 @@ export function validateBigInt(n: bigint) {
   }
 }
 
+/**
+ * Polyfill for `Set.union()`.
+ * @param a First set.
+ * @param b Second set.
+ * @returns New set that contains elements of both sets (without duplicates).
+ */
 function setUnionPolyfill<T>(a: Set<T>, b: Set<T>) {
   const result = new Set<T>();
   for (const value of a) {
@@ -270,6 +285,12 @@ function setUnionPolyfill<T>(a: Set<T>, b: Set<T>) {
   return result;
 }
 
+/**
+ * Wrapper around `Set.union()` because TypeScript or something.
+ * @param a First set.
+ * @param b Second set.
+ * @returns New set that contains elements of both sets (without duplicates).
+ */
 function setUnionNative<T>(a: Set<T>, b: Set<T>): Set<T> {
   return (a as any).union(b);
 }

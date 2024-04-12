@@ -19,7 +19,17 @@ export {
   type AbsolutePitch,
 } from './pythagorean';
 export * from './tools';
-export * from './utils';
+export {
+  bigGcd,
+  bigLcm,
+  bigAbs,
+  MetricPrefix,
+  metricExponent,
+  BinaryPrefix,
+  binaryExponent,
+  setUnion,
+  hasOwn,
+} from './utils';
 export * from './warts';
 export * from './words';
 export * from './scale-workshop-2-parser';
