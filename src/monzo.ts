@@ -33,6 +33,10 @@ import {
   DecimalLiteral,
   RadicalLiteral,
   numberToDecimalLiteral,
+  BasisElement,
+  fractionToVectorComponent,
+  literalToString,
+  ValLiteral,
 } from './expression';
 
 /**
@@ -1626,59 +1630,76 @@ export class TimeMonzo {
 
   /**
    * Obtain an AST node representing the time monzo as a monzo literal.
-   * @returns Monzo literal or `undefined` if representation fails.
+   * @returns Monzo literal.
    */
-  asMonzoLiteral(): MonzoLiteral | undefined {
-    if (this.isNonAlgebraic()) {
-      return undefined;
-    }
+  asMonzoLiteral(trimTail = true): MonzoLiteral {
     const components: VectorComponent[] = [];
-    for (const pe of this.primeExponents) {
-      const right = pe.d === 1 ? '' : pe.d.toString();
-      const separator = pe.d === 1 ? undefined : '/';
-      const component: VectorComponent = {
-        sign: pe.s < 0 ? '-' : '',
-        left: pe.n,
-        right,
-        separator,
-        exponent: null,
-      };
-      components.push(component);
-    }
-    while (components.length && components[components.length - 1].left === 0) {
-      components.pop();
-    }
-    const numPrimes = components.length;
-    let basis: string[] = [];
-    if (this.residual.s === 0) {
+    const basis: BasisElement[] = [];
+    if (this.timeExponent.equals(NEGATIVE_ONE)) {
+      basis.push('Hz');
       components.push({sign: '', left: 1, right: '', exponent: null});
-      basis.push('0');
-    } else {
-      if (this.residual.n !== 1) {
+    } else if (this.timeExponent.n) {
+      basis.push('s');
+      components.push(fractionToVectorComponent(this.timeExponent));
+    }
+    if (this.cents) {
+      basis.push('rc');
+      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+        this.cents,
+        'r'
+      );
+      components.push({
+        sign,
+        left: Number(whole),
+        separator: '.',
+        right: fractional,
+        exponent,
+      });
+    }
+    if (!this.residual.isUnity()) {
+      const {s, n, d} = this.residual;
+      if (d === 1) {
+        basis.push({numerator: s * n, denominator: null});
         components.push({sign: '', left: 1, right: '', exponent: null});
-        basis.push(this.residual.n.toString());
-      }
-      if (this.residual.d !== 1) {
+      } else if (n === 1) {
+        basis.push({numerator: s * d, denominator: null});
         components.push({sign: '-', left: 1, right: '', exponent: null});
-        basis.push(this.residual.d.toString());
-      }
-      if (this.residual.s < 0) {
+      } else {
+        basis.push({numerator: s * n, denominator: d});
         components.push({sign: '', left: 1, right: '', exponent: null});
-        basis.push('-1');
       }
     }
-    if (basis.length) {
-      if (numPrimes) {
-        basis = PRIMES.slice(0, numPrimes)
-          .map(p => p.toString())
-          .concat(basis);
-      } else {
-        // Always include prime 2 to avoid ambiguity with prime limit syntax.
-        basis.unshift('2');
-        components.unshift({sign: '', left: 0, right: '', exponent: null});
+    const pe = [...this.primeExponents];
+    if (trimTail) {
+      while (pe.length && !pe[pe.length - 1].n) {
+        pe.pop();
+      }
+    }
+    if (pe.length && basis.length) {
+      let index = 0;
+      while (!pe[0].n) {
+        pe.shift();
+        index++;
+      }
+      basis.push({numerator: PRIMES[index], denominator: null});
+      if (pe.length > 1) {
+        // Two dots looks better IMO...
+        basis.push('');
+        basis.push('');
+      }
+      for (const e of pe) {
+        components.push(fractionToVectorComponent(e));
+      }
+    } else {
+      for (const e of pe) {
+        components.push(fractionToVectorComponent(e));
       }
     }
     return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+  }
+
+  asValLiteral(): ValLiteral {
+    return {...this.asMonzoLiteral(false), type: 'ValLiteral'};
   }
 
   /**
@@ -1798,56 +1819,8 @@ export class TimeMonzo {
           return '0c';
         }
       }
-      const terms: string[] = [];
-      if (this.timeExponent.equals(NEGATIVE_ONE)) {
-        terms.push('logarithmic(1Hz)');
-      } else if (this.timeExponent.n) {
-        terms.push(`${this.timeExponent.toFraction()}*logarithmic(1s)`);
-      }
-      const pe = [...this.primeExponents];
-      while (pe.length && !pe[pe.length - 1].n) {
-        pe.pop();
-      }
-      terms.push('[' + pe.map(f => f.toFraction()).join(' ') + '>');
-      if (this.residual.compare(ONE)) {
-        terms.push(`logarithmic(${this.residual.toFraction()})`);
-      }
-      if (this.cents) {
-        const steps = Math.round(this.cents);
-        if (steps === this.cents) {
-          terms.push(`${steps}\\`);
-        } else {
-          terms.push(`${this.cents}rc`);
-        }
-      }
-      return [terms[0]]
-        .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
-        .join('');
+      return literalToString(this.asMonzoLiteral());
     }
-    const terms: string[] = [];
-    if (this.timeExponent.equals(NEGATIVE_ONE)) {
-      terms.push('cologarithmic(1Hz)');
-    } else if (this.timeExponent.n) {
-      terms.push(`${this.timeExponent.toFraction()}*cologarithmic(1s)`);
-    }
-    const pe = [...this.primeExponents];
-    while (pe.length && !pe[pe.length - 1].n) {
-      pe.pop();
-    }
-    terms.push('<' + pe.map(f => f.toFraction()).join(' ') + ']');
-    if (this.residual.compare(ONE)) {
-      terms.push(`cologarithmic(${this.residual.toFraction()})`);
-    }
-    if (this.cents) {
-      const steps = Math.round(this.cents);
-      if (steps === this.cents) {
-        terms.push(`cologarithmic(${steps}\\)`);
-      } else {
-        terms.push(`${this.cents}r€`);
-      }
-    }
-    return [terms[0]]
-      .concat(terms.slice(1).map(t => (t.startsWith('-') ? t : '+' + t)))
-      .join('');
+    return literalToString(this.asValLiteral());
   }
 }

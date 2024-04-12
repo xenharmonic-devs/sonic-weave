@@ -636,7 +636,7 @@ describe('SonicWeave parser', () => {
 
       ^ = 81/80
     `);
-    expect(oopsFourth.toString()).toBe('[2 -1>+1\\');
+    expect(oopsFourth.toString()).toBe('[1. 2 -1>@rc.2..');
   });
 
   it('has syntax for subharmonic segments', () => {
@@ -831,7 +831,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('leaves higher prime limits alone in implicit tempering', () => {
-    const scale = parseSource('5/4 "3rd";7/5;3/2;2/1;101 "big";12@5');
+    const scale = parseSource('5/4 "3rd";7/5;3/2;2/1;101 "big";12@.5');
     expect(scale[0].totalCents()).toBeCloseTo(400);
     expect(scale[1].totalCents()).toBeCloseTo(3368.825906469125 - 2800);
     expect(scale[2].totalCents()).toBeCloseTo(700);

@@ -2,6 +2,7 @@ import {describe, it, expect} from 'vitest';
 import {evaluateExpression} from '..';
 import {Color, Interval, Val} from '../../interval';
 import {TimeMonzo} from '../../monzo';
+import {valueToCents} from 'xen-dev-utils';
 
 function parseSingle(source: string) {
   const value = evaluateExpression(source, false);
@@ -216,7 +217,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert zero to subgroup monzo', () => {
     const monzo = parseSingle('monzo(0)');
-    expect(monzo.toString()).toBe('[0 1>@2.0');
+    expect(monzo.toString()).toBe('[1>@0');
   });
 
   it('can parse the monzo representation of zero', () => {
@@ -226,7 +227,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert negative twelve to subgroup monzo', () => {
     const monzo = parseSingle('monzo(-12)');
-    expect(monzo.toString()).toBe('[2 1 1>@2.3.-1');
+    expect(monzo.toString()).toBe('[1 2 1>@-1.2..');
   });
 
   it('can parse the monzo representation of negative unity', () => {
@@ -236,7 +237,18 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert 13231/13184 to monzo', () => {
     const foo = parseSingle('monzo(13231/13184)');
-    expect(foo.toString()).toBe('[-7 1 -1>@2.13231.103');
+    expect(foo.toString()).toBe('[1 -7>@13231/103.2');
+  });
+
+  it('can convert 1 Hz to monzo', () => {
+    const pulse = parseSingle('monzo(1z)');
+    expect(pulse.toString()).toBe('[1>@Hz');
+  });
+
+  it('can parse the monzo representation of 1 Hz', () => {
+    const pulse = parseSingle('[1>@Hz');
+    expect(pulse.valueOf()).toBe(1);
+    expect(pulse.value.timeExponent.equals(-1)).toBe(true);
   });
 
   it('can convert cents to boolean', () => {
@@ -291,8 +303,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(() => parseSingle('nedji(PI)')).toThrow();
   });
 
-  it('fails to convert pi to monzo', () => {
-    expect(() => parseSingle('monzo(PI)')).toThrow();
+  it('converts pi to monzo', () => {
+    const realMonzo = parseSingle('monzo(PI)');
+    expect(realMonzo.toString()).toBe('[1981.7953553667824>@rc');
+  });
+
+  it('parses a real monzo', () => {
+    const pi = parseSingle('[1981.7953553667824>@rc');
+    expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 
   it.each([
@@ -302,6 +320,7 @@ describe('SonicWeave expression evaluator', () => {
     'fraction',
     'radical',
     'cents',
+    'monzo',
     'FJS(fraction',
     'absoluteFJS(fraction',
     'monzo(fraction',
@@ -445,10 +464,10 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can measure the quality of vals', () => {
-    const prettyGood = parseSingle('cosJIP(12@5)');
+    const prettyGood = parseSingle('cosJIP(12@.5)');
     expect(prettyGood.valueOf()).toBeCloseTo(1, 5);
 
-    const great = parseSingle('cosJIP(53@5)');
+    const great = parseSingle('cosJIP(53@.5)');
     expect(great.valueOf()).toBeCloseTo(1, 7);
   });
 
@@ -682,14 +701,13 @@ describe('SonicWeave expression evaluator', () => {
     expect(blueBP.color?.value).toBe('blue');
   });
 
-  // This is somewhat hopeless to fix.
-  it.skip('can color nedji projection', () => {
-    const blueBP = parseSingle('9\\13<(3)> blue');
+  it('can color nedji projection', () => {
+    const blueBP = parseSingle('9\\13 ed 3 blue');
     expect(blueBP.color?.value).toBe('blue');
   });
 
   it('can add vals', () => {
-    const yes = evaluateExpression('24@7 + 5@7 === 29c@7', false);
+    const yes = evaluateExpression('24@.7 + 5@.7 === 29c@.7', false);
     expect(yes).toBe(true);
   });
 
@@ -1660,7 +1678,7 @@ describe('SonicWeave expression evaluator', () => {
       'A4 = 440 Hz; str(C2 + 9001 * Â1)',
       false
     );
-    expect(doNotWant).toBe('logarithmic(1Hz)+[-99006 63004 1 0 1>');
+    expect(doNotWant).toBe('[1 -99006 63004 1 0 1>@Hz.2..');
   });
 
   it('can format a weighted sum of absolute and relative intervals', () => {
@@ -1763,5 +1781,55 @@ describe('SonicWeave expression evaluator', () => {
     expect(rootLift).toHaveLength(2);
     expect(rootLift[0].valueOf()).toBe(1.2463950666682366);
     expect(rootLift[1].valueOf()).toBe(1.4956740800018837);
+  });
+
+  it('can longtail monzo components starting from a prime', () => {
+    const tooMuch = parseSingle('[1 -2 3 -4 5 -6 7 -8 9>@31..');
+    const pe = tooMuch.value.primeExponents.map(e => e.toFraction());
+    expect(pe).toEqual([
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '1',
+      '-2',
+      '3',
+      '-4',
+      '5',
+      '-6',
+      '7',
+      '-8',
+      '9',
+    ]);
+  });
+
+  it('has near-universal vals', () => {
+    const why = evaluateExpression('<1 2 3 4 5 6 7]@Hz.rc.2..', false) as Val;
+    expect(why.domain).toBe('cologarithmic');
+    expect(why.value.timeExponent.toFraction()).toBe('-1');
+    expect(why.value.cents).toBe(2);
+    expect(why.value.primeExponents.map(pe => pe.toFraction())).toEqual([
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+    ]);
+  });
+
+  it("measures timeness using second's val", () => {
+    const negativeHalf = parseSingle('<1]@s dot 1z ^ 1/2');
+    expect(negativeHalf.valueOf()).toBe(-0.5);
+  });
+
+  it("measures non-algebraic size using the (true un-upped) real cent's val", () => {
+    const stillCentsOfPi = parseSingle('v<1]@rc dot PI');
+    expect(stillCentsOfPi.valueOf()).toBeCloseTo(valueToCents(Math.PI));
   });
 });

@@ -24,6 +24,9 @@ Integer
 SignPart
   = $([+-]?)
 
+SignedInteger
+  = num: ([+-]? ('0' / ([1-9] UnderscoreDigits))) { return BigInt(num.flat().join('')); }
+
 ExponentIndicator
   = 'e'i
 

@@ -64,6 +64,15 @@ export type NumericFlavor = '' | 'r' | 'e' | 'E' | 'z';
 
 export type Sign = '' | '+' | '-';
 
+export type BasisFraction = {
+  numerator: number;
+  denominator: number | null;
+};
+
+export type WartBasisElement = BasisFraction | '';
+
+export type BasisElement = WartBasisElement | 's' | 'Hz' | 'hz' | 'rc';
+
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
   value: bigint;
@@ -172,20 +181,20 @@ export type WartsLiteral = {
   equave: string;
   divisions: number;
   warts: string[];
-  basis: string[];
+  basis: WartBasisElement[];
 };
 
 export type PatentTweak = {
-  rational: 'string';
+  element: BasisFraction;
   tweak: number;
 };
 
 export type SparseOffsetVal = {
   type: 'SparseOffsetVal';
-  equave: string;
+  equave: BasisFraction;
   divisions: number;
   tweaks: PatentTweak[];
-  basis: string[];
+  basis: WartBasisElement[];
 };
 
 export type VectorComponent = {
@@ -201,7 +210,7 @@ export type MonzoLiteral = {
   components: VectorComponent[];
   ups: number;
   lifts: number;
-  basis: string[];
+  basis: BasisElement[];
 };
 
 export type ValLiteral = {
@@ -209,7 +218,7 @@ export type ValLiteral = {
   components: VectorComponent[];
   ups: number;
   lifts: number;
-  basis: string[];
+  basis: BasisElement[];
 };
 
 export type SquareSuperparticular = {
@@ -826,11 +835,24 @@ function formatNedji(literal: NedjiLiteral) {
   return `${literal.numerator}\\${literal.denominator}<${equave}>`;
 }
 
+function formatBasisFraction(fraction: BasisFraction) {
+  if (fraction.denominator) {
+    return `${fraction.numerator}/${fraction.denominator}`;
+  }
+  return fraction.numerator.toString();
+}
+
+function formatSubgroupBasis(basis: BasisElement[]) {
+  return basis
+    .map(b => (typeof b === 'string' ? b : formatBasisFraction(b)))
+    .join('.');
+}
+
 function formatPatentTweak(tweak: PatentTweak) {
   if (tweak.tweak > 0) {
-    return '+'.repeat(tweak.tweak) + tweak.rational;
+    return '^'.repeat(tweak.tweak) + formatBasisFraction(tweak.element);
   }
-  return '-'.repeat(-tweak.tweak) + tweak.rational;
+  return 'v'.repeat(-tweak.tweak) + formatBasisFraction(tweak.element);
 }
 
 function formatSparseOffsetVal(literal: SparseOffsetVal) {
@@ -842,13 +864,13 @@ function formatSparseOffsetVal(literal: SparseOffsetVal) {
   if (literal.tweaks) {
     result += '[' + literal.tweaks.map(formatPatentTweak).join(',') + ']';
   }
-  return result + '@' + literal.basis.join('.');
+  return result + '@' + formatSubgroupBasis(literal.basis);
 }
 
 function formatMonzo(literal: MonzoLiteral) {
   let result = `${formatUps(literal)}[${formatComponents(literal.components)}>`;
   if (literal.basis.length) {
-    result += `@${literal.basis.join('.')}`;
+    result += `@${formatSubgroupBasis(literal.basis)}`;
   }
   return result;
 }
@@ -856,7 +878,7 @@ function formatMonzo(literal: MonzoLiteral) {
 function formatVal(literal: ValLiteral) {
   let result = `${formatUps(literal)}<${formatComponents(literal.components)}]`;
   if (literal.basis.length) {
-    result += `@${literal.basis.join('.')}`;
+    result += `@${formatSubgroupBasis(literal.basis)}`;
   }
   return result;
 }
@@ -898,7 +920,7 @@ export function literalToString(literal: IntervalLiteral) {
     case 'WartsLiteral':
       return `${literal.equave}${literal.divisions}${literal.warts.join(
         ''
-      )}@${literal.basis.join('.')}`;
+      )}@${formatSubgroupBasis(literal.basis)}`;
     case 'SparseOffsetVal':
       return formatSparseOffsetVal(literal);
     case 'HertzLiteral':
@@ -949,5 +971,17 @@ export function numberToDecimalLiteral(
     whole,
     fractional,
     exponent,
+  };
+}
+
+export function fractionToVectorComponent(fraction: Fraction): VectorComponent {
+  const right = fraction.d === 1 ? '' : fraction.d.toString();
+  const separator = fraction.d === 1 ? undefined : '/';
+  return {
+    sign: fraction.s < 0 ? '-' : '',
+    left: fraction.n,
+    right,
+    separator,
+    exponent: null,
   };
 }
