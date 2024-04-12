@@ -1138,7 +1138,7 @@ describe('SonicWeave standard library', () => {
     const view: number[][] = [];
     function latticeView(this: ExpressionVisitor) {
       view.length = 0;
-      const scale = this.getCurrentScale();
+      const scale = this.currentScale;
       for (let i = 0; i < scale.length; ++i) {
         scale[i] = track.bind(this)(scale[i]);
       }
@@ -1165,16 +1165,16 @@ describe('SonicWeave standard library', () => {
       {latticeView}
     );
     expect(view).toEqual([[1], [-1, 1], [-3, 2], [-2, 0, 1], [-3, 1, 1]]);
-    expect(visitor.getCurrentScale().map(i => i.toString())).toEqual([
+    expect(visitor.currentScale.map(i => i.toString())).toEqual([
       '9/8',
       '5/4',
       '3/2',
       '15/8',
       '2',
     ]);
-    expect(
-      visitor.getCurrentScale().map(i => Array.from(i.trackingIds)[0])
-    ).toEqual([3, 4, 2, 5, 1]);
+    expect(visitor.currentScale.map(i => Array.from(i.trackingIds)[0])).toEqual(
+      [3, 4, 2, 5, 1]
+    );
   });
 
   it("throws if you don't pass arguments to sanitize", () => {

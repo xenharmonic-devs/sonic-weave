@@ -89,6 +89,9 @@ import {
 } from '../ast';
 import {type StatementVisitor} from './statement';
 
+/**
+ * Local context within a SonicWeave code block or a function.
+ */
 export type VisitorContext = Map<string, SonicWeaveValue>;
 
 export function arrayRecordOrString(
@@ -214,23 +217,64 @@ function resolvePreference(
   );
 }
 
+/**
+ * Abstract syntax tree visitor for SonicWeave expressions.
+ */
 export class ExpressionVisitor {
+  /**
+   * Local context inside arrow functions and array comprehensions.
+   */
   mutables: VisitorContext;
+  /**
+   * Parent context containing a particular expression statement.
+   */
   parent: StatementVisitor;
 
+  /**
+   * Construct a new visitor for an {@link ExpressionStatement} inside the AST.
+   * @param parent Parent context containing the expression statement to be visited.
+   */
   constructor(parent: StatementVisitor) {
     this.mutables = new Map();
     this.parent = parent;
   }
 
+  /**
+   * Get the root context with the current values of the root pitch, ups, lifts, etc.
+   */
   get rootContext(): RootContext {
     return this.parent.rootContext;
   }
 
-  getCurrentScale(): Interval[] {
-    return this.parent.getCurrentScale();
+  /**
+   * Set the root context with the current values of the root pitch, ups, lifts, etc.
+   *
+   * Warning: Modifies parent context!
+   */
+  set rootContext(context: RootContext) {
+    this.parent.rootContext = context;
   }
 
+  /**
+   * Get the array of {@link Interval} instances accumulated in the current context.
+   * @returns An array of intervals. (Assuming the user hasn't corrupted the context.)
+   */
+  get currentScale(): Interval[] {
+    return this.parent.currentScale;
+  }
+
+  /**
+   * Set an array of {@link Interval} instances as the current scale where new intervals are accumulated.
+   */
+  set currentScale(scale: Interval[]) {
+    this.parent.currentScale = scale;
+  }
+
+  /**
+   * Visit a node in the abstract syntax tree and evaluate to a value.
+   * @param node The AST node of the expression to evaluate.
+   * @returns The result of evaluation.
+   */
   visit(node: Expression): SonicWeaveValue {
     this.rootContext.spendGas();
     switch (node.type) {
@@ -326,7 +370,7 @@ export class ExpressionVisitor {
     node satisfies never;
   }
 
-  visitSquareSuperparticular(node: SquareSuperparticular) {
+  protected visitSquareSuperparticular(node: SquareSuperparticular) {
     if (node.end) {
       let numerator = 2n * node.end;
       let denominator = node.end + 1n;
@@ -348,6 +392,11 @@ export class ExpressionVisitor {
     );
   }
 
+  /**
+   * Assign arguments to their corresponding parameter(s) in the current context.
+   * @param name Name(s) of the parameters and their default values.
+   * @param arg The argument/value to assign to the local variables.
+   */
   localAssign(name: Parameter | Parameters_, arg?: SonicWeaveValue) {
     if (arguments.length < 2) {
       if (name.defaultValue) {
@@ -375,7 +424,7 @@ export class ExpressionVisitor {
     }
   }
 
-  comprehend(
+  protected comprehend(
     node: ArrayComprehension,
     result: SonicWeavePrimitive[],
     index: number
@@ -399,7 +448,7 @@ export class ExpressionVisitor {
     }
   }
 
-  visitArrayComprehension(node: ArrayComprehension) {
+  protected visitArrayComprehension(node: ArrayComprehension) {
     const result: SonicWeavePrimitive[] = [];
     this.comprehend(node, result, 0);
     this.mutables.clear();
@@ -407,7 +456,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  spread(args: Argument[]): SonicWeavePrimitive[] {
+  protected spread(args: Argument[]): SonicWeavePrimitive[] {
     const result: SonicWeavePrimitive[] = [];
     for (const arg of args) {
       if (arg.spread) {
@@ -420,11 +469,13 @@ export class ExpressionVisitor {
   }
 
   // We cheat here to simplify the type hierarchy definition (no nested arrays).
-  visitArrayLiteral(node: ArrayLiteral): SonicWeavePrimitive[] {
+  protected visitArrayLiteral(node: ArrayLiteral): SonicWeavePrimitive[] {
     return this.spread(node.elements);
   }
 
-  visitRecordLiteral(node: RecordLiteral): Record<string, SonicWeavePrimitive> {
+  protected visitRecordLiteral(
+    node: RecordLiteral
+  ): Record<string, SonicWeavePrimitive> {
     const result: Record<string, SonicWeavePrimitive> = {};
     for (const [key, value] of node.properties) {
       if (key === null) {
@@ -448,12 +499,12 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitStepLiteral(node: StepLiteral) {
+  protected visitStepLiteral(node: StepLiteral) {
     const value = new TimeMonzo(ZERO, [], undefined, node.count);
     return new Interval(value, 'logarithmic', node);
   }
 
-  down(operand: SonicWeaveValue): Interval | Val | Interval[] {
+  protected down(operand: SonicWeaveValue): Interval | Val | Interval[] {
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
@@ -466,12 +517,12 @@ export class ExpressionVisitor {
     throw new Error('Can only apply down arrows to intervals and vals');
   }
 
-  visitDownExpression(node: DownExpression) {
+  protected visitDownExpression(node: DownExpression) {
     const operand = this.visit(node.operand);
     return this.down(operand);
   }
 
-  label(
+  protected label(
     object: SonicWeaveValue,
     labels: (string | Color | undefined)[]
   ): Interval | Interval[] {
@@ -498,7 +549,7 @@ export class ExpressionVisitor {
     throw new Error('Labels can only be applied to intervals.');
   }
 
-  visitLabeledExpression(node: LabeledExpression) {
+  protected visitLabeledExpression(node: LabeledExpression) {
     const object = this.visit(node.object);
     const labels: (string | Color | undefined)[] = [];
     for (const label of node.labels) {
@@ -512,7 +563,7 @@ export class ExpressionVisitor {
     return this.label(object, labels);
   }
 
-  visitConditionalExpression(node: ConditionalExpression) {
+  protected visitConditionalExpression(node: ConditionalExpression) {
     const test = this.visit(node.test);
     if (sonicTruth(test)) {
       return this.visit(node.consequent);
@@ -520,7 +571,7 @@ export class ExpressionVisitor {
     return this.visit(node.alternate);
   }
 
-  visitLestExpression(node: LestExpression) {
+  protected visitLestExpression(node: LestExpression) {
     try {
       return this.visit(node.primary);
     } catch {
@@ -528,12 +579,12 @@ export class ExpressionVisitor {
     }
   }
 
-  visitComponent(component: VectorComponent) {
+  protected visitComponent(component: VectorComponent) {
     // XXX: This is so backwards...
     return new Fraction(formatComponent(component));
   }
 
-  upLift(
+  protected upLift(
     monzo: TimeMonzo,
     node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS
   ) {
@@ -542,7 +593,7 @@ export class ExpressionVisitor {
       .mul(this.rootContext.lift.pow(node.lifts));
   }
 
-  visitMonzoLiteral(node: MonzoLiteral) {
+  protected visitMonzoLiteral(node: MonzoLiteral) {
     const exponents = node.components.map(this.visitComponent);
     let value: TimeMonzo;
     if (node.basis.length) {
@@ -565,7 +616,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitValLiteral(node: ValLiteral) {
+  protected visitValLiteral(node: ValLiteral) {
     const val = node.components.map(this.visitComponent);
     let value: TimeMonzo;
     let equave = TWO_MONZO;
@@ -587,7 +638,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  project(
+  protected project(
     octaves: boolean | Interval | (Interval | boolean)[],
     base: Interval
   ): Interval | Interval[] {
@@ -601,7 +652,7 @@ export class ExpressionVisitor {
     return octaves.map(o => p(o, base)) as Interval[];
   }
 
-  visitWartsLiteral(node: WartsLiteral) {
+  protected visitWartsLiteral(node: WartsLiteral) {
     const val = wartsToVal(node);
     const equave = inferEquave(node);
     if (!equave) {
@@ -610,7 +661,7 @@ export class ExpressionVisitor {
     return new Val(val, TimeMonzo.fromFraction(equave), node);
   }
 
-  visitSparseOffsetVal(node: SparseOffsetVal) {
+  protected visitSparseOffsetVal(node: SparseOffsetVal) {
     const val = sparseOffsetToVal(node);
     let equave = TWO_MONZO;
     if (node.equave) {
@@ -619,7 +670,7 @@ export class ExpressionVisitor {
     return new Val(val, equave, node);
   }
 
-  visitFJS(node: FJS) {
+  protected visitFJS(node: FJS) {
     const monzo = inflect(
       pythagoreanMonzo(node.pythagorean),
       node.superscripts,
@@ -630,7 +681,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitAbsoluteFJS(node: AbsoluteFJS) {
+  protected visitAbsoluteFJS(node: AbsoluteFJS) {
     const relativeToC4 = inflect(
       absoluteMonzo(node.pitch),
       node.superscripts,
@@ -645,7 +696,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitAccessExpression(node: AccessExpression): SonicWeaveValue {
+  protected visitAccessExpression(node: AccessExpression): SonicWeaveValue {
     const object = arrayRecordOrString(
       this.visit(node.object),
       'Can only access arrays, records or strings.'
@@ -717,7 +768,7 @@ export class ExpressionVisitor {
     return object[i];
   }
 
-  visitArraySlice(node: ArraySlice): Interval[] | string {
+  protected visitArraySlice(node: ArraySlice): Interval[] | string {
     const object = this.visit(node.object);
     if (!Array.isArray(object) && typeof object !== 'string') {
       throw new Error('Array slice on non-array.');
@@ -802,7 +853,7 @@ export class ExpressionVisitor {
     throw new Error('Slice step must not be zero.');
   }
 
-  unaryOperate(
+  protected unaryOperate(
     operand: SonicWeaveValue,
     node: UnaryExpression
   ): Interval | Interval[] | Val {
@@ -883,7 +934,7 @@ export class ExpressionVisitor {
     return operand;
   }
 
-  visitUnaryExpression(node: UnaryExpression) {
+  protected visitUnaryExpression(node: UnaryExpression) {
     const operand = this.visit(node.operand);
     if (node.operator === 'not') {
       return !sonicTruth(operand);
@@ -891,7 +942,7 @@ export class ExpressionVisitor {
     return this.unaryOperate(operand, node);
   }
 
-  tensor(
+  protected tensor(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
     node: BinaryExpression
@@ -924,7 +975,7 @@ export class ExpressionVisitor {
     return left.map(l => tns(l, right, node)) as Interval[];
   }
 
-  binaryOperate(
+  protected binaryOperate(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
     node: BinaryExpression
@@ -1136,7 +1187,7 @@ export class ExpressionVisitor {
     ) as Interval[];
   }
 
-  visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
+  protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
     const left = this.visit(node.left);
     if (operator === '??') {
@@ -1331,7 +1382,7 @@ export class ExpressionVisitor {
     throw new Error(`Unhandled binary operation '${node.operator}'.`);
   }
 
-  visitCallExpression(node: CallExpression) {
+  protected visitCallExpression(node: CallExpression) {
     const args = this.spread(node.args);
     if (node.callee.type === 'Identifier') {
       const callee = this.get(node.callee.id) as SonicWeaveFunction;
@@ -1344,7 +1395,7 @@ export class ExpressionVisitor {
     }
   }
 
-  visitArrowFunction(node: ArrowFunction) {
+  protected visitArrowFunction(node: ArrowFunction) {
     const scopeVisitor = this.parent.createExpressionVisitor();
 
     function realization(...args: SonicWeaveValue[]) {
@@ -1364,12 +1415,12 @@ export class ExpressionVisitor {
     return realization as SonicWeaveFunction;
   }
 
-  visitIntegerLiteral(node: IntegerLiteral): Interval {
+  protected visitIntegerLiteral(node: IntegerLiteral): Interval {
     const value = TimeMonzo.fromBigInt(node.value);
     return new Interval(value, 'linear', node);
   }
 
-  visitDecimalLiteral(node: DecimalLiteral): Interval {
+  protected visitDecimalLiteral(node: DecimalLiteral): Interval {
     if (node.flavor === 'r') {
       const value = TimeMonzo.fromValue(
         parseFloat(
@@ -1397,7 +1448,7 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitCentsLiteral(node: CentsLiteral): Interval {
+  protected visitCentsLiteral(node: CentsLiteral): Interval {
     let numerator: bigint | number = node.whole;
     let denominator: bigint | number = 1200n;
     for (const c of node.fractional) {
@@ -1416,7 +1467,7 @@ export class ExpressionVisitor {
     return new Interval(value, 'logarithmic', node);
   }
 
-  visitFractionLiteral(node: FractionLiteral): Interval {
+  protected visitFractionLiteral(node: FractionLiteral): Interval {
     const value = TimeMonzo.fromBigNumeratorDenominator(
       node.numerator,
       node.denominator
@@ -1424,7 +1475,7 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitNedjiLiteral(node: NedjiLiteral): Interval {
+  protected visitNedjiLiteral(node: NedjiLiteral): Interval {
     let value: TimeMonzo;
     const fractionOfEquave = new Fraction(node.numerator, node.denominator);
     if (node.equaveNumerator !== null) {
@@ -1438,7 +1489,7 @@ export class ExpressionVisitor {
     return new Interval(value, 'logarithmic', node);
   }
 
-  visitHertzLiteral(node: HertzLiteral): Interval {
+  protected visitHertzLiteral(node: HertzLiteral): Interval {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
       value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
@@ -1449,7 +1500,7 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitSecondLiteral(node: SecondLiteral): Interval {
+  protected visitSecondLiteral(node: SecondLiteral): Interval {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
       value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
@@ -1460,11 +1511,11 @@ export class ExpressionVisitor {
     return new Interval(value, 'linear', node);
   }
 
-  visitIdentifier(node: Identifier): SonicWeaveValue {
+  protected visitIdentifier(node: Identifier): SonicWeaveValue {
     return this.get(node.id);
   }
 
-  visitEnumeratedChord(node: EnumeratedChord): Interval[] {
+  protected visitEnumeratedChord(node: EnumeratedChord): Interval[] {
     const intervals: Interval[] = [];
     const domains: IntervalDomain[] = [];
     const monzos: TimeMonzo[] = [];
@@ -1512,7 +1563,7 @@ export class ExpressionVisitor {
     return result;
   }
 
-  visitRange(node: Range): Interval[] {
+  protected visitRange(node: Range): Interval[] {
     const start = this.visit(node.start);
     const end = this.visit(node.end);
     if (!(start instanceof Interval && end instanceof Interval)) {
@@ -1560,7 +1611,7 @@ export class ExpressionVisitor {
     throw new Error('Range step must not be zero.');
   }
 
-  visitHarmonicSegment(node: HarmonicSegment): Interval[] {
+  protected visitHarmonicSegment(node: HarmonicSegment): Interval[] {
     let root = this.visit(node.root);
     let end = this.visit(node.end);
     if (typeof root === 'boolean') {
@@ -1593,6 +1644,12 @@ export class ExpressionVisitor {
     return result;
   }
 
+  /**
+   * Get the value of a variable in the current context.
+   * @param name Name of the variable.
+   * @returns Value of the variable.
+   * @throws An error if there is no variable declared under the given name.
+   */
   get(name: string): SonicWeaveValue {
     if (this.mutables.has(name)) {
       return this.mutables.get(name);
@@ -1600,7 +1657,14 @@ export class ExpressionVisitor {
     return this.parent.get(name);
   }
 
-  // Note: Local mutable variables should be initialized directly.
+  // Note: Local mutable variables should be initialized directly by manipulating `this.mutables`.
+
+  /**
+   * Set the value of a variable in the current context.
+   * @param name Name of the variable.
+   * @param value Value for the variable.
+   * @throws An error if there is no variable declared under the given name or the given variable is declared constant.
+   */
   set(name: string, value: SonicWeaveValue) {
     if (this.mutables.has(name)) {
       this.mutables.set(name, value);

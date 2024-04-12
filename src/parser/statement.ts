@@ -78,7 +78,7 @@ export class StatementVisitor {
     const result = new StatementVisitor(this.rootContext);
     result.mutables = new Map(this.mutables);
     result.immutables = new Map(this.immutables);
-    const scale = this.getCurrentScale();
+    const scale = this.currentScale;
     result.mutables.set('$', [...scale]);
     result.expandable = this.expandable;
     return result;
@@ -126,7 +126,7 @@ export class StatementVisitor {
     if (variableLines.length) {
       base += variableLines.join('\n') + '\n';
     }
-    const scale = this.getCurrentScale();
+    const scale = this.currentScale;
     const scaleLines = scale.map(interval =>
       interval.toString(this.rootContext)
     );
@@ -490,7 +490,7 @@ export class StatementVisitor {
   }
 
   handleValue(value: SonicWeaveValue, subVisitor: ExpressionVisitor) {
-    const scale = this.getCurrentScale();
+    const scale = this.currentScale;
     if (value instanceof Color) {
       if (scale.length) {
         scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
@@ -585,7 +585,7 @@ export class StatementVisitor {
 
   visitBlockStatement(node: BlockStatement) {
     const subVisitor = new StatementVisitor(this.rootContext, this);
-    const scale = this.getCurrentScale();
+    const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
     let interrupt: Interrupt | undefined = undefined;
     for (const statement of node.body) {
@@ -596,7 +596,7 @@ export class StatementVisitor {
         break;
       }
     }
-    const subScale = subVisitor.getCurrentScale();
+    const subScale = subVisitor.currentScale;
     scale.push(...subScale);
     return interrupt;
   }
@@ -776,7 +776,7 @@ export class StatementVisitor {
         scopeParent.rootContext,
         scopeParent
       );
-      localVisitor.mutables.set('$$', this.parent.getCurrentScale());
+      localVisitor.mutables.set('$$', this.parent.currentScale);
 
       // XXX: Poor type system gets abused again.
       const localSubvisitor = localVisitor.createExpressionVisitor();
@@ -792,7 +792,7 @@ export class StatementVisitor {
           throw new Error(`Illegal ${interrupt.type}.`);
         }
       }
-      return localVisitor.getCurrentScale();
+      return localVisitor.currentScale;
     }
     Object.defineProperty(realization, 'name', {
       value: node.name.id,
@@ -835,11 +835,18 @@ export class StatementVisitor {
     throw new Error('Assignment to an undeclared variable.');
   }
 
-  getCurrentScale(): Interval[] {
+  get currentScale(): Interval[] {
     const result = this.get('$') as Interval[];
     if (!Array.isArray(result)) {
       throw new Error('Context corruption detected.');
     }
     return result;
+  }
+
+  set currentScale(scale: Interval[]) {
+    if (!Array.isArray(scale)) {
+      throw new Error('Context corruption not allowed.');
+    }
+    this.set('$', scale);
   }
 }

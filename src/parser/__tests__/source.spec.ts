@@ -898,7 +898,7 @@ describe('SonicWeave parser', () => {
     for (const statement of ast.body) {
       visitor.visit(statement);
     }
-    const E5 = visitor.getCurrentScale()[0];
+    const E5 = visitor.currentScale[0];
     expect(E5.toString(visitor.rootContext)).toBe('E♮5_23m');
     expect(E5.valueOf()).toBeCloseTo(440 * (23 / 16));
   });
