@@ -7,7 +7,7 @@ import {TimeMonzo} from '../monzo';
 export function parseChord(input: string, includePrelude = true): Interval[] {
   const parts: string[] = parse(input) as any;
   const visitor = evaluateSource(`[${parts.join(', ')}]`, includePrelude);
-  const result = visitor.getCurrentScale();
+  const result = visitor.currentScale;
   return result.filter(i => i instanceof Interval);
 }
 

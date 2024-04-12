@@ -958,7 +958,7 @@ flatten.__doc__ =
 flatten.__node__ = builtinNode(flatten);
 
 function clear(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   scale.length = 0;
 }
 clear.__doc__ = 'Remove the contents of the current/given scale.';
@@ -1111,7 +1111,7 @@ tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
 function gcd(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
-    intervals = this.getCurrentScale();
+    intervals = this.currentScale;
   }
   if (!intervals.length) {
     return fromInteger(0);
@@ -1126,7 +1126,7 @@ gcd.__node__ = builtinNode(gcd);
 
 function lcm(this: ExpressionVisitor, ...intervals: Interval[]) {
   if (!intervals.length) {
-    intervals = this.getCurrentScale();
+    intervals = this.currentScale;
   }
   return intervals.reduce(
     (a, b) => new Interval(a.value.lcm(b.value), 'linear')
@@ -1137,7 +1137,7 @@ lcm.__doc__ =
 lcm.__node__ = builtinNode(lcm);
 
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const rel = relative.bind(this);
   const monzos = scale.map(i => rel(i).value);
   return hasConstantStructure(monzos);
@@ -1151,7 +1151,7 @@ hasConstantStructure_.__doc__ =
 hasConstantStructure_.__node__ = builtinNode(hasConstantStructure_);
 
 function stepString_(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const rel = relative.bind(this);
   const monzos = scale.map(i => rel(i).value);
   return stepString(monzos);
@@ -1294,7 +1294,7 @@ export function sort(
   scale?: SonicWeaveValue,
   compareFn?: Function
 ) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (!Array.isArray(scale)) {
     throw new Error('Only arrays can be sorted.');
   }
@@ -1320,7 +1320,7 @@ export function sorted(
   scale?: Interval[],
   compareFn?: Function
 ) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   scale = [...scale];
   sort.bind(this)(scale, compareFn);
   return scale;
@@ -1330,7 +1330,7 @@ sorted.__doc__ =
 sorted.__node__ = builtinNode(sorted);
 
 function uniquesOf(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const seen = new Set<number>();
   const result: Interval[] = [];
   for (const interval of scale) {
@@ -1348,7 +1348,7 @@ uniquesOf.__doc__ =
 uniquesOf.__node__ = builtinNode(uniquesOf);
 
 function keepUnique(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const uniques = uniquesOf.bind(this)(scale);
   scale.length = 0;
   scale.push(...uniques);
@@ -1357,14 +1357,14 @@ keepUnique.__doc__ = 'Only keep unique intervals in the current/given scale.';
 keepUnique.__node__ = builtinNode(keepUnique);
 
 function reverse(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   scale.reverse();
 }
 reverse.__doc__ = 'Reverse the order of the current/given scale.';
 reverse.__node__ = builtinNode(reverse);
 
 function reversed(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   scale = [...scale];
   reverse.bind(this)(scale);
   return scale;
@@ -1374,7 +1374,7 @@ reversed.__doc__ =
 reversed.__node__ = builtinNode(reversed);
 
 function pop(this: ExpressionVisitor, scale?: Interval[], index?: Interval) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (!scale.length) {
     throw new Error('Pop from an empty scale.');
   }
@@ -1395,7 +1395,7 @@ pop.__doc__ =
 pop.__node__ = builtinNode(pop);
 
 function popAll(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const result = [...scale];
   scale.length = 0;
   return result;
@@ -1410,7 +1410,7 @@ function push(
   index?: Interval
 ) {
   requireParameters({interval});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (index) {
     let i = index.toInteger();
     if (i < 0) {
@@ -1434,7 +1434,7 @@ push.__doc__ =
 push.__node__ = builtinNode(push);
 
 function shift(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (!scale.length) {
     throw new Error('Shift from an empty scale');
   }
@@ -1450,7 +1450,7 @@ function unshift(
   scale?: Interval[]
 ) {
   requireParameters({interval});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   scale.unshift(interval);
 }
 unshift.__doc__ =
@@ -1463,7 +1463,7 @@ function insert(
   scale?: Interval[]
 ) {
   requireParameters({interval});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const cmp = compare.bind(this);
   for (let i = 0; i < scale.length; ++i) {
     if (cmp(interval, scale[i]) < 0) {
@@ -1483,7 +1483,7 @@ function dislodge(
   scale?: Interval[]
 ) {
   requireParameters({element});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (element instanceof Interval) {
     for (let i = 0; i < scale.length; ++i) {
       if (element.strictEquals(scale[i])) {
@@ -1533,7 +1533,7 @@ concat.__doc__ = 'Combine two or more arrays/strings.';
 concat.__node__ = builtinNode(concat);
 
 function length(this: ExpressionVisitor, scale?: Interval[]) {
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   return fromInteger(scale.length);
 }
 length.__doc__ = 'Return the number of intervals in the scale.';
@@ -1546,7 +1546,7 @@ function map(
 ) {
   requireParameters({mapper});
   mapper = mapper.bind(this);
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   return scale.map((value, index, arr) =>
     mapper(value, fromInteger(index), arr)
   );
@@ -1560,7 +1560,7 @@ function remap(
   scale?: any[]
 ) {
   requireParameters({mapper});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const mapped = map.bind(this)(mapper, scale);
   scale.length = 0;
   scale.push(...mapped);
@@ -1576,7 +1576,7 @@ function filter(
 ) {
   requireParameters({tester});
   tester = tester.bind(this);
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   return scale.filter((value, index, arr) =>
     sonicTruth(tester(value, fromInteger(index), arr))
   );
@@ -1591,7 +1591,7 @@ function distill(
   scale?: any[]
 ) {
   requireParameters({tester});
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   const filtered = filter.bind(this)(tester, scale);
   scale.length = 0;
   scale.push(...filtered);
@@ -1616,7 +1616,7 @@ function arrayReduce(
     throw new Error('The first argument of arrayReduce must be a function.');
   }
   reducer = reducer.bind(this);
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   if (arguments.length >= 3) {
     return scale.reduce(
       (value, currentValue, currentIndex, arr) =>
@@ -1646,7 +1646,7 @@ function arrayRepeat(
   if (c === 0) {
     return [];
   }
-  scale ??= this.getCurrentScale();
+  scale ??= this.currentScale;
   return [].concat(...Array(c).fill(scale));
 }
 arrayRepeat.__doc__ = 'Repeat the given/current array or string `count` times.';
