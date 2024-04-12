@@ -2,7 +2,6 @@ import {
   ABSURD_EXPONENT,
   BinaryPrefix,
   MetricPrefix,
-  Sign,
   bigAbs,
   validateBigInt,
 } from './utils';
@@ -46,6 +45,23 @@ export type FJSFlavor =
 
 export type FJSInflection = [number, FJSFlavor];
 
+/**
+ * Numeric flavor of a {@link DecimalLiteral}.
+ *
+ * '': Rational number with a power of ten denominator. (Requires a decimal comma or an explicit exponent to use.)
+ *
+ * 'r': Real (non-algebraic) number.
+ *
+ * 'e': Rational number with a power of ten denominator. (Indicates an exponent of 0.)
+ *
+ * 'E': Rational number with a power of ten denominator. (Indicates an exponent of 0.)
+ *
+ * 'z': Absolute frequency that is a decimal multiple of 1 Hz.
+ */
+export type NumericFlavor = '' | 'r' | 'e' | 'E' | 'z';
+
+export type Sign = '' | '+' | '-';
+
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
   value: bigint;
@@ -57,7 +73,7 @@ export type DecimalLiteral = {
   whole: bigint;
   fractional: string;
   exponent: number | null;
-  flavor: '' | 'r' | 'e' | 'E' | 'z';
+  flavor: NumericFlavor;
 };
 
 export type FractionLiteral = {
@@ -883,4 +899,38 @@ export function literalToString(literal: IntervalLiteral) {
     default:
       throw new Error(`Cannot format ${literal.type}`);
   }
+}
+
+/**
+ * Convert a floating point number or a Fraction instance to a decimal literal.
+ * @param num Number to convert. Fractions should have a power of ten denominator unless flavor is 'r'.
+ * @param flavor Numeric flavor of the literal.
+ * @returns Virtual AST node representing a decimal literal.
+ */
+export function numberToDecimalLiteral(
+  num: number | Fraction,
+  flavor: NumericFlavor
+): DecimalLiteral {
+  let [wholeStr, fractional] = num.toString().split('.');
+  let sign: Sign = '';
+  let whole = BigInt(wholeStr);
+  let exponent: number | null = null;
+  fractional ??= '';
+  if (whole < 0n) {
+    sign = '-';
+    whole = -whole;
+  }
+  if (fractional.includes('e')) {
+    let expStr: string;
+    [fractional, expStr] = fractional.split('e');
+    exponent = parseInt(expStr, 10);
+  }
+  return {
+    type: 'DecimalLiteral',
+    flavor,
+    sign,
+    whole,
+    fractional,
+    exponent,
+  };
 }

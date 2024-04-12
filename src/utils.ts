@@ -277,31 +277,6 @@ function setUnionNative<T>(a: Set<T>, b: Set<T>): Set<T> {
 export const setUnion =
   'union' in Set.prototype ? setUnionNative : setUnionPolyfill;
 
-export type Sign = '' | '+' | '-';
-
-export function parseDecimal(num: number | Fraction) {
-  let [wholeStr, fractional] = num.toString().split('.');
-  let sign: Sign = '';
-  let whole = BigInt(wholeStr);
-  let exponent: number | null = null;
-  fractional ??= '';
-  if (whole < 0n) {
-    sign = '-';
-    whole = -whole;
-  }
-  if (fractional.includes('e')) {
-    let expStr: string;
-    [fractional, expStr] = fractional.split('e');
-    exponent = parseInt(expStr, 10);
-  }
-  return {
-    sign,
-    whole,
-    fractional,
-    exponent,
-  };
-}
-
 /**
  * Returns `true` if the specified object has the indicated property as its own property. If the property is inherited, or does not exist, the function returns `false`.
  * @param object The JavaScript object instance to test.

@@ -21,7 +21,6 @@ import {
   TWO,
   ZERO,
   bigGcd,
-  parseDecimal,
   validateBigInt,
 } from './utils';
 import {
@@ -33,6 +32,7 @@ import {
   VectorComponent,
   DecimalLiteral,
   RadicalLiteral,
+  numberToDecimalLiteral,
 } from './expression';
 
 /**
@@ -1470,17 +1470,9 @@ export class TimeMonzo {
    */
   asDecimalLiteral(): DecimalLiteral {
     if (this.isDecimal()) {
-      return {
-        type: 'DecimalLiteral',
-        flavor: 'e',
-        ...parseDecimal(this.toFraction()),
-      };
+      return numberToDecimalLiteral(this.toFraction(), 'e');
     }
-    return {
-      type: 'DecimalLiteral',
-      flavor: 'r',
-      ...parseDecimal(this.valueOf()),
-    };
+    return numberToDecimalLiteral(this.valueOf(), 'r');
   }
 
   /**
@@ -1511,7 +1503,7 @@ export class TimeMonzo {
     if (this.isPowerOfTwo()) {
       const cents = this.octaves.mul(1200);
       if (isDecimal(cents)) {
-        const {sign, whole, fractional} = parseDecimal(cents);
+        const {sign, whole, fractional} = numberToDecimalLiteral(cents, 'e');
         return {type: 'CentsLiteral', sign, whole, fractional};
       }
     }
@@ -1522,7 +1514,7 @@ export class TimeMonzo {
     if (!isFinite(cents)) {
       throw new Error('Cannot represent Infinity in cents.');
     }
-    let {sign, whole, fractional} = parseDecimal(cents);
+    let {sign, whole, fractional} = numberToDecimalLiteral(cents, 'r');
     // Note: This abuses the grammar
     fractional += 'rc';
     return {type: 'CentsLiteral', sign, whole, fractional};
