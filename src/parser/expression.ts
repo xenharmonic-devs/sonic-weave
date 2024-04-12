@@ -234,8 +234,8 @@ export class ExpressionVisitor {
    * Construct a new visitor for an {@link ExpressionStatement} inside the AST.
    * @param parent Parent context containing the expression statement to be visited.
    */
-  constructor(parent: StatementVisitor) {
-    this.mutables = new Map();
+  constructor(parent: StatementVisitor, mutables?: VisitorContext) {
+    this.mutables = mutables ?? new Map();
     this.parent = parent;
   }
 

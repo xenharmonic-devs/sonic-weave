@@ -42,9 +42,24 @@ import {
   containerToArray,
 } from './expression';
 
+/**
+ * An interrupt representing a return, break or continue statement.
+ */
 export class Interrupt {
+  /**
+   * The abstract syntax tree node that triggered the break in code flow.
+   */
   node: ReturnStatement | BreakStatement | ContinueStatement;
+  /**
+   * Value of a return statement if present.
+   */
   value?: SonicWeaveValue;
+
+  /**
+   * Construct a new interrupt.
+   * @param node AST node corresponding to the interrupting statement.
+   * @param value Return value if present.
+   */
   constructor(
     node: ReturnStatement | BreakStatement | ContinueStatement,
     value?: SonicWeaveValue
@@ -53,18 +68,44 @@ export class Interrupt {
     this.value = value;
   }
 
+  /**
+   * Get the type of the interrupt.
+   */
   get type() {
     return this.node.type;
   }
 }
 
+/**
+ * Abstract syntax tree visitor for statements in a SonicWeave program.
+ */
 export class StatementVisitor {
+  /**
+   * The root context with the current values of the root pitch, ups, lifts, etc.
+   */
   rootContext: RootContext;
+  /**
+   * Parent context of the surrounding code block.
+   */
   parent?: StatementVisitor;
+  /**
+   * Local context for mutable (let) variables.
+   */
   mutables: VisitorContext;
+  /**
+   * Local context for immutable (const) variables.
+   */
   immutables: VisitorContext;
+  /**
+   * Whether or not the state of the visitor can be represented as text. The global context doesn't have a representation because the builtins are not written in the SonicWeave DSL.
+   */
   expandable: boolean;
 
+  /**
+   * Construct a new visitor for a block of code inside the AST.
+   * @param rootContext The root context with the current values of the root pitch, ups, lifts, etc.
+   * @param parent Parent context of the surrounding code block.
+   */
   constructor(rootContext: RootContext, parent?: StatementVisitor) {
     this.rootContext = rootContext;
     this.parent = parent;
@@ -74,6 +115,10 @@ export class StatementVisitor {
     this.expandable = true;
   }
 
+  /**
+   * Create an independent (shallow) clone of the visitor useable as a cache of runtime state.
+   * @returns A {@link StatementVisitor} in the same state as this one.
+   */
   clone() {
     const result = new StatementVisitor(this.rootContext);
     result.mutables = new Map(this.mutables);
@@ -84,10 +129,23 @@ export class StatementVisitor {
     return result;
   }
 
-  createExpressionVisitor() {
+  /**
+   * Construct a visitor for evaluating the contents of an {@link ExpressionStatement}.
+   * @param inheritVariables If `true` the expression visitor will share context of the variables with this one.
+   * @returns A new visitor for the AST of an expression.
+   */
+  createExpressionVisitor(inheritVariables = false) {
+    if (inheritVariables) {
+      return new ExpressionVisitor(this, this.mutables);
+    }
     return new ExpressionVisitor(this);
   }
 
+  /**
+   * Convert the state of this statement visitor into a block of text in the SonicWeave DSL. Only intended for the user scope just above the global scope.
+   * @param defaultRootContext Root context for determining if root pitch declaration must be included.
+   * @returns A string that when evaluated should recreate the same runtime state.
+   */
   expand(defaultRootContext: RootContext) {
     if (!this.expandable) {
       throw new Error('The global scope cannot be expanded.');
@@ -138,6 +196,11 @@ export class StatementVisitor {
     return `${base}${scaleLines.join('\n')}`;
   }
 
+  /**
+   * Visit a node in the abstract syntax tree.
+   * @param node The AST node of the statement to evaluate.
+   * @returns An interrupt if encountered. `undefined` otherwise.
+   */
   visit(node: Statement): Interrupt | undefined {
     this.rootContext.spendGas();
     switch (node.type) {
@@ -179,7 +242,7 @@ export class StatementVisitor {
     node satisfies never;
   }
 
-  visitReturnStatement(node: ReturnStatement) {
+  protected visitReturnStatement(node: ReturnStatement) {
     let value: SonicWeaveValue;
     if (node.argument) {
       const subVisitor = this.createExpressionVisitor();
@@ -188,15 +251,15 @@ export class StatementVisitor {
     return new Interrupt(node, value);
   }
 
-  visitBreakStatement(node: BreakStatement) {
+  protected visitBreakStatement(node: BreakStatement) {
     return new Interrupt(node);
   }
 
-  visitContinueStatement(node: ContinueStatement) {
+  protected visitContinueStatement(node: ContinueStatement) {
     return new Interrupt(node);
   }
 
-  visitThrowStatement(node: ThrowStatement) {
+  protected visitThrowStatement(node: ThrowStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.argument);
     if (typeof value === 'string') {
@@ -205,7 +268,7 @@ export class StatementVisitor {
     throw value;
   }
 
-  declareVariable(
+  protected declareVariable(
     subVisitor: ExpressionVisitor,
     parameters: Parameter | Parameters_,
     mutable: boolean,
@@ -254,13 +317,13 @@ export class StatementVisitor {
     }
   }
 
-  visitVariableDeclaration(node: VariableDeclaration) {
+  protected visitVariableDeclaration(node: VariableDeclaration) {
     const subVisitor = this.createExpressionVisitor();
     this.declareVariable(subVisitor, node.parameters, node.mutable);
     return undefined;
   }
 
-  assign(name: Identifier | Identifiers, value: SonicWeaveValue) {
+  protected assign(name: Identifier | Identifiers, value: SonicWeaveValue) {
     if (name.type === 'Identifiers') {
       if (!Array.isArray(value)) {
         throw new Error('Destructuring assignment must use an array.');
@@ -280,7 +343,7 @@ export class StatementVisitor {
     }
   }
 
-  visitAssignmentStatement(node: AssignmentStatement) {
+  protected visitAssignmentStatement(node: AssignmentStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (node.name.type === 'ArraySlice') {
@@ -400,7 +463,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitPitchDeclaration(node: PitchDeclaration) {
+  protected visitPitchDeclaration(node: PitchDeclaration) {
     if (
       node.middle?.type === 'AbsoluteFJS' ||
       node.right.type === 'AbsoluteFJS'
@@ -462,7 +525,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitUpDeclaration(node: UpDeclaration) {
+  protected visitUpDeclaration(node: UpDeclaration) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
@@ -472,7 +535,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitLiftDeclaration(node: LiftDeclaration) {
+  protected visitLiftDeclaration(node: LiftDeclaration) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
@@ -482,13 +545,18 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitExpression(node: ExpressionStatement) {
+  protected visitExpression(node: ExpressionStatement) {
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.expression);
     this.handleValue(value, subVisitor);
     return undefined;
   }
 
+  /**
+   * Handle a value by pushing it to the current scale or taking some other action depending on the type of the value.
+   * @param value Value understood by the SonicWeave runtime.
+   * @param subVisitor Currently active expression evaluator.
+   */
   handleValue(value: SonicWeaveValue, subVisitor: ExpressionVisitor) {
     const scale = this.currentScale;
     if (value instanceof Color) {
@@ -563,7 +631,7 @@ export class StatementVisitor {
     }
   }
 
-  flattenArray(value: any): Interval[] {
+  protected flattenArray(value: any): Interval[] {
     const result: any[] = [];
     for (const subvalue of value) {
       if (Array.isArray(subvalue)) {
@@ -583,7 +651,7 @@ export class StatementVisitor {
     return result;
   }
 
-  visitBlockStatement(node: BlockStatement) {
+  protected visitBlockStatement(node: BlockStatement) {
     const subVisitor = new StatementVisitor(this.rootContext, this);
     const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
@@ -601,7 +669,7 @@ export class StatementVisitor {
     return interrupt;
   }
 
-  visitWhileStatement(node: WhileStatement) {
+  protected visitWhileStatement(node: WhileStatement) {
     const subVisitor = this.createExpressionVisitor();
     let executeTail = true;
     while (sonicTruth(subVisitor.visit(node.test))) {
@@ -621,7 +689,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  declareLoopElement(
+  protected declareLoopElement(
     loopVisitor: StatementVisitor,
     subVisitor: ExpressionVisitor,
     element: Parameter | Parameters_,
@@ -673,7 +741,7 @@ export class StatementVisitor {
     }
   }
 
-  visitIterationStatement(node: IterationStatement) {
+  protected visitIterationStatement(node: IterationStatement) {
     const subVisitor = this.createExpressionVisitor();
     const array = containerToArray(subVisitor.visit(node.container), node.kind);
     const loopVisitor = new StatementVisitor(this.rootContext, this);
@@ -704,7 +772,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitTryStatement(node: TryStatement) {
+  protected visitTryStatement(node: TryStatement) {
     try {
       const interrupt = this.visit(node.body);
       if (interrupt) {
@@ -744,7 +812,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitIfStatement(node: IfStatement) {
+  protected visitIfStatement(node: IfStatement) {
     const subVisitor = this.createExpressionVisitor();
     if (sonicTruth(subVisitor.visit(node.test))) {
       return this.visit(node.consequent);
@@ -755,7 +823,7 @@ export class StatementVisitor {
     return undefined;
   }
 
-  visitFunctionDeclaration(node: FunctionDeclaration) {
+  protected visitFunctionDeclaration(node: FunctionDeclaration) {
     // Extract docstring
     node = {...node};
     node.body = [...node.body];
@@ -779,9 +847,8 @@ export class StatementVisitor {
       localVisitor.mutables.set('$$', this.parent.currentScale);
 
       // XXX: Poor type system gets abused again.
-      const localSubvisitor = localVisitor.createExpressionVisitor();
-      // XXX: Abuse variable injection.
-      localSubvisitor.mutables = localVisitor.mutables;
+      // XXX: Abuse variable injection by sharing state.
+      const localSubvisitor = localVisitor.createExpressionVisitor(true);
       localSubvisitor.localAssign(node.parameters, args as Interval[]);
 
       for (const statement of node.body) {
@@ -804,37 +871,49 @@ export class StatementVisitor {
     return undefined;
   }
 
-  get(name: string) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let parent: StatementVisitor | undefined = this;
-    while (parent) {
-      if (parent.immutables.has(name)) {
-        return parent.immutables.get(name)!;
-      }
-      if (parent.mutables.has(name)) {
-        return parent.mutables.get(name)!;
-      }
-      parent = parent.parent;
+  /**
+   * Get the value of a variable in the current context.
+   * @param name Name of the variable.
+   * @returns Value of the variable.
+   * @throws An error if there is no variable declared under the given name.
+   */
+  get(name: string): SonicWeaveValue {
+    if (this.immutables.has(name)) {
+      return this.immutables.get(name);
+    }
+    if (this.mutables.has(name)) {
+      return this.mutables.get(name);
+    }
+    if (this.parent) {
+      return this.parent.get(name);
     }
     throw new Error(`Undeclared variable ${name}.`);
   }
 
-  set(name: string, value: SonicWeaveValue) {
+  /**
+   * Set the value of a variable in the current context.
+   * @param name Name of the variable.
+   * @param value Value for the variable.
+   * @throws An error if there is no variable declared under the given name or the given variable is declared constant.
+   */
+  set(name: string, value: SonicWeaveValue): undefined {
     if (this.immutables.has(name)) {
       throw new Error('Assignment to a constant variable.');
     }
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let parent: StatementVisitor | undefined = this;
-    while (parent) {
-      if (parent.mutables.has(name)) {
-        parent.mutables.set(name, value);
-        return;
-      }
-      parent = parent.parent;
+    if (this.mutables.has(name)) {
+      this.mutables.set(name, value);
+      return;
     }
-    throw new Error('Assignment to an undeclared variable.');
+    if (this.parent) {
+      return this.parent.set(name, value);
+    }
+    throw new Error(`Assignment to an undeclared variable ${name}.`);
   }
 
+  /**
+   * Get the array of {@link Interval} instances accumulated in the current context.
+   * @returns An array of intervals. (Assuming the user hasn't corrupted the context.)
+   */
   get currentScale(): Interval[] {
     const result = this.get('$') as Interval[];
     if (!Array.isArray(result)) {
@@ -843,6 +922,9 @@ export class StatementVisitor {
     return result;
   }
 
+  /**
+   * Set an array of {@link Interval} instances as the current scale where new intervals are accumulated.
+   */
   set currentScale(scale: Interval[]) {
     if (!Array.isArray(scale)) {
       throw new Error('Context corruption not allowed.');

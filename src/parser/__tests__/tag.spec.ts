@@ -54,6 +54,11 @@ describe('SonicWeave template tag', () => {
     expect(value.domain).toBe('linear');
     expect(value.valueOf()).toBe(1.5);
   });
+
+  it('evaluates the TypeDoc example', () => {
+    const interval = sw`7\\12` as Interval;
+    expect(interval.totalCents()).toBe(700);
+  });
 });
 
 describe('SonicWeave raw template tag', () => {
@@ -100,5 +105,10 @@ describe('SonicWeave raw template tag', () => {
     // See above why swr`\${fraction}` just won't do...
     const value = swr`drop${fraction}` as Interval;
     expect(value.valueOf()).toBe(1.4956740800018837);
+  });
+
+  it('evaluates the TypeDoc example', () => {
+    const interval = swr`7\12` as Interval;
+    expect(interval.totalCents()).toBe(700);
   });
 });

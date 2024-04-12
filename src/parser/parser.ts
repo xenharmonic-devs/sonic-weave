@@ -14,6 +14,11 @@ import {RootContext} from '../context';
 import {Program} from '../ast';
 import {StatementVisitor} from './statement';
 
+/**
+ * Parse a string of text written in the SonicWeave domain specific language into an abstract syntax tree.
+ * @param source Source code for a SonicWeave program.
+ * @returns The program as the root node of the AST.
+ */
 export function parseAST(source: string): Program {
   return parse(source);
 }
@@ -23,6 +28,12 @@ let SOURCE_VISITOR_WITH_PRELUDE: StatementVisitor | null = null;
 let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
 let VOLATILES: Program | null = null;
 
+/**
+ * Obtain a runtime visitor for the body of a program produced by {@link parseAST}.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
+ * @returns A SonicWeave statement evaluator.
+ */
 export function getSourceVisitor(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
@@ -78,6 +89,13 @@ export function getSourceVisitor(
   }
 }
 
+/**
+ * Evaluate a SonicWeave program and return a {@link StatementVisitor} representing the final runtime state.
+ * @param source Source code for a SonicWeave program.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
+ * @returns A SonicWeave statement visitor after evaluating all of the statements in the program.
+ */
 export function evaluateSource(
   source: string,
   includePrelude = true,
@@ -99,6 +117,14 @@ export function evaluateSource(
   return visitor;
 }
 
+/**
+ * Evaluate a SonicWeave program and return the value of the final expression.
+ * @param source Source code for a SonicWeave program.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
+ * @returns Value of the final expression in the program.
+ * @throws An error if the final statement in the program is not an expression.
+ */
 export function evaluateExpression(
   source: string,
   includePrelude = true,
@@ -160,6 +186,13 @@ function convert(value: any): SonicWeaveValue {
   throw new Error('Value cannot be converted.');
 }
 
+/**
+ * Create a tag for [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) to evaluate SonicWeave programs inside JavaScript code.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
+ * @param escapeStrings If `true` all escape sequences are evaluated before interpreting the literal as a SonicWeave program.
+ * @returns A tag that can be attached to template literals in order to evaluate them.
+ */
 export function createTag(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>,
@@ -186,7 +219,7 @@ export function createTag(
     }
     const finalStatement = program.body[program.body.length - 1];
     if (finalStatement.type !== 'ExpressionStatement') {
-      throw new Error(`Expected expression. Got ${finalStatement.type}`);
+      throw new Error(`Expected expression. Got ${finalStatement.type}.`);
     }
     const subVisitor = visitor.createExpressionVisitor();
     return subVisitor.visit(finalStatement.expression);
@@ -194,12 +227,32 @@ export function createTag(
   return tag;
 }
 
+/**
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave programs.
+ * Has raw (unescaped) semantics.
+ *
+ * Example:
+ * ```ts
+ * const interval = swr`7\12` as Interval;
+ * console.log(interval.totalCents()); // 700
+ * ```
+ */
 export const swr = createTag();
 Object.defineProperty(swr, 'name', {
   value: 'swr',
   enumerable: false,
 });
 
+/**
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave programs.
+ * Evaluates escapes before interpreting the program so e.g. a double backslash means only a single backslash within the program.
+ *
+ * Example:
+ * ```ts
+ * const interval = sw`7\\12` as Interval;
+ * console.log(interval.totalCents()); // 700
+ * ```
+ */
 export const sw = createTag(true, undefined, true);
 Object.defineProperty(sw, 'name', {
   value: 'sw',
