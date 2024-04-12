@@ -128,6 +128,7 @@ ReservedWord
 CentToken     = 'c'  !IdentifierPart
 HertzToken    = 'Hz' !IdentifierPart
 LowHertzToken = 'hz' !IdentifierPart
+RealCentToken = 'rc' !IdentifierPart
 SecondToken   = 's'  !IdentifierPart
 
 Statements
@@ -1007,6 +1008,14 @@ FractionLiteral
     };
   }
 
+Fraction
+  = numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
+    return {
+      numerator,
+      denominator,
+    };
+  }
+
 VectorComponent
   = sign: SignPart left: BasicInteger separator: '/' right: $(PositiveBasicInteger) {
     return {sign, left, separator, right, exponent: null};
@@ -1031,7 +1040,7 @@ UpsAndDowns
   }
 
 MonzoLiteral
-  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
+  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ '>' basis: ('@' @SubgroupBasis)? {
     return {
       ...upsAndDowns,
       type: 'MonzoLiteral',
@@ -1041,7 +1050,7 @@ MonzoLiteral
   }
 
 ValLiteral
-  = upsAndDowns: UpsAndDowns '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
+  = upsAndDowns: UpsAndDowns '<' _ components: VectorComponents _ ']' basis: ('@' @SubgroupBasis)? {
     return {
       ...upsAndDowns,
       type: 'ValLiteral',
@@ -1051,7 +1060,7 @@ ValLiteral
   }
 
 WartsLiteral
-  = equave: [a-z]i? divisions: PositiveBasicInteger warts: [a-z]i* '@' basis: DotJoinedRationals {
+  = equave: [a-z]i? divisions: PositiveBasicInteger warts: [a-z]i* '@' basis: WartBasis {
     return {
       type: 'WartsLiteral',
       equave: (equave ?? '').toLowerCase(),
@@ -1062,15 +1071,15 @@ WartsLiteral
   }
 
 PatentTweak
-  = wide: ('+' / '^')+ rational: Rational {
+  = wide: ('+' / '^')+ element: Fraction {
     return {
-      rational,
+      element,
       tweak: wide.length,
     };
   }
-  / narrow: ('-' / 'v')* rational: Rational {
+  / narrow: ('-' / 'v')* element: Fraction {
     return {
-      rational,
+      element,
       tweak: -narrow.length,
     };
   }
@@ -1078,7 +1087,7 @@ PatentTweak
 PatentTweaks = PatentTweak|.., _ ',' _|
 
 SparseOffsetVal
-  = equave: ('[' @Rational ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: DotJoinedRationals {
+  = equave: ('[' @Fraction ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
     return {
       type: 'SparseOffsetVal',
       equave: equave ?? '',
@@ -1088,9 +1097,11 @@ SparseOffsetVal
     }
   }
 
-Rational = $((PositiveInteger ('/' PositiveInteger)?) / '0' / '-1')
+BasisElement = Fraction / $SecondToken / $HertzToken / $LowHertzToken / $RealCentToken / ''
 
-DotJoinedRationals = Rational|.., '.'|
+SubgroupBasis = BasisElement|.., '.'|
+
+WartBasis = (Fraction / '')|.., '.'|
 
 CentLiteral
   = (CentToken / '¢') { return { type: 'CentLiteral' }; }

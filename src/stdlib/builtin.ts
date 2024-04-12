@@ -737,7 +737,7 @@ labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 
 // Coercion: None.
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
-  const monzo = relative.bind(this)(interval).value;
+  const monzo = interval.value;
   let ups = 0;
   let lifts = 0;
   if (monzo.cents) {
@@ -751,18 +751,25 @@ function toMonzo(this: ExpressionVisitor, interval: Interval) {
         context.lift.cents
       ));
       if (steps || residue) {
-        throw new Error('Cannot convert real value to monzo.');
+        return new Interval(
+          monzo,
+          'logarithmic',
+          monzo.asMonzoLiteral(),
+          interval
+        );
       }
     } else {
-      throw new Error('Cannot convert real value to monzo.');
+      return new Interval(
+        monzo,
+        'logarithmic',
+        monzo.asMonzoLiteral(),
+        interval
+      );
     }
   }
   const clone = monzo.clone();
   clone.cents = 0;
   const node = clone.asMonzoLiteral();
-  if (!node) {
-    throw new Error('Monzo conversion failed.');
-  }
 
   node.ups = ups;
   node.lifts = lifts;

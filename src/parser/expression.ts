@@ -597,13 +597,13 @@ export class ExpressionVisitor {
     const exponents = node.components.map(this.visitComponent);
     let value: TimeMonzo;
     if (node.basis.length) {
-      const basis = parseSubgroup(node.basis)[0];
-      if (exponents.length > basis.length) {
+      const {subgroup} = parseSubgroup(node.basis, exponents.length);
+      if (exponents.length > subgroup.length) {
         throw new Error('Too many monzo components for given subgroup.');
       }
       value = new TimeMonzo(ZERO, []);
       for (let i = 0; i < exponents.length; ++i) {
-        value = value.mul(TimeMonzo.fromFraction(basis[i]).pow(exponents[i]));
+        value = value.mul(subgroup[i].pow(exponents[i]));
       }
     } else {
       value = new TimeMonzo(ZERO, exponents);
@@ -621,12 +621,12 @@ export class ExpressionVisitor {
     let value: TimeMonzo;
     let equave = TWO_MONZO;
     if (node.basis.length) {
-      const basis = parseSubgroup(node.basis)[0];
-      if (val.length !== basis.length) {
+      const {subgroup} = parseSubgroup(node.basis, val.length);
+      if (val.length !== subgroup.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
-      value = valToTimeMonzo(val, basis);
-      equave = TimeMonzo.fromFraction(basis[0]);
+      value = valToTimeMonzo(val, subgroup);
+      equave = subgroup[0];
     } else {
       value = new TimeMonzo(ZERO, val);
     }
@@ -658,14 +658,16 @@ export class ExpressionVisitor {
     if (!equave) {
       throw new Error('Failed to infer wart equave.');
     }
-    return new Val(val, TimeMonzo.fromFraction(equave), node);
+    return new Val(val, equave, node);
   }
 
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
     const val = sparseOffsetToVal(node);
     let equave = TWO_MONZO;
     if (node.equave) {
-      equave = TimeMonzo.fromFraction(node.equave);
+      equave = TimeMonzo.fromFraction(
+        new Fraction(node.equave.numerator, node.equave.denominator ?? 1)
+      );
     }
     return new Val(val, equave, node);
   }

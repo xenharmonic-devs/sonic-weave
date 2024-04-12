@@ -1025,9 +1025,6 @@ export class Val {
    * @param node Node in the abstract syntax tree used for string representation.
    */
   constructor(value: TimeMonzo, equave: TimeMonzo, node?: IntervalLiteral) {
-    if (value.timeExponent.n || equave.timeExponent.n) {
-      throw new Error('Only relative vals implemented.');
-    }
     this.value = value;
     this.equave = equave;
     this.node = node;

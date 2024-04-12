@@ -349,7 +349,7 @@ describe('Extended Monzo', () => {
       1.25
     );
     expect(value.toString('logarithmic')).toBe(
-      '-3/2*logarithmic(1s)+[3/2 -5/3>+logarithmic(31/23)+1.25rc'
+      '[-3/2 1.25 1 3/2 -5/3>@s.rc.31/23.2..'
     );
   });
 
@@ -360,8 +360,9 @@ describe('Extended Monzo', () => {
       new Fraction(31, 23),
       2.25
     );
+    // It should be impossible to produce this value for a val, but the expression should be meaningful.
     expect(value.toString('cologarithmic')).toBe(
-      '-3/2*cologarithmic(1s)+<3/2 -5/3]+cologarithmic(31/23)+2.25r€'
+      '<-3/2 2.25 1 3/2 -5/3]@s.rc.31/23.2..'
     );
   });
 
