@@ -11,13 +11,13 @@ import {
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
 import {parse as parenCounter} from './parser/paren-counter';
-// TODO: Import version from package.json
+const {version} = require('../package.json');
 
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
   const keyColors = [];
   let useColors = false;
-  const lines = ['!Created using SonicWeave v0.0.0 alpha', '!'];
+  const lines = [`!Created using SonicWeave ${version}`, '!'];
   lines.push(visitor.rootContext.title || 'Untitled tuning');
   const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);

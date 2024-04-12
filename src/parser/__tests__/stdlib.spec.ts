@@ -1305,4 +1305,9 @@ describe('SonicWeave standard library', () => {
       'Can only iterate over arrays, records or strings.'
     );
   });
+
+  it('can access the application version', () => {
+    const v = evaluateExpression('VERSION');
+    expect(v).toContain('.');
+  });
 });

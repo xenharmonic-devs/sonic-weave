@@ -42,6 +42,7 @@ import {
   sonicTruth,
   upcastBool,
 } from './runtime';
+const {version: VERSION} = require('../../package.json');
 
 // === Library ===
 
@@ -1942,6 +1943,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   TAU,
   NaN: NAN,
   Infinity: INFINITY,
+  VERSION,
   // First-party wrappers
   numComponents,
   stepSignature,
