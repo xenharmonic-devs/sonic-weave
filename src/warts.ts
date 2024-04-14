@@ -1,11 +1,18 @@
 import {Fraction, PRIMES, primeLimit} from 'xen-dev-utils';
-import {TimeMonzo, getNumberOfComponents} from './monzo';
-import {BasisElement, SparseOffsetVal, WartsLiteral} from './expression';
+import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
+import {
+  BasisElement,
+  SparseOffsetVal,
+  ValBasisElement,
+  WartsLiteral,
+} from './expression';
 import {NEGATIVE_ONE, ONE, ZERO} from './utils';
 
 const SECOND_MONZO = new TimeMonzo(ONE, []);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
-const REAL_CENT_MONZO = new TimeMonzo(ZERO, [], ONE, 1);
+const REAL_CENT_MONZO = new TimeReal(0, 1.0005777895065548);
+
+export const STEP_ELEMENT = Symbol();
 
 function wartToBasisElement(
   wart: string,
@@ -26,7 +33,7 @@ function wartToBasisElement(
 }
 
 export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
-  const subgroup: TimeMonzo[] = [];
+  const subgroup: (TimeMonzo | TimeReal | typeof STEP_ELEMENT)[] = [];
   const nonPrimes: TimeMonzo[] = [];
 
   let low = 0;
@@ -48,6 +55,9 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
       checkSpan();
     } else if (element === 'rc') {
       subgroup.push(REAL_CENT_MONZO);
+      checkSpan();
+    } else if (element === '1\\' || element === '1°') {
+      subgroup.push(STEP_ELEMENT);
       checkSpan();
     } else if (element === '') {
       span = true;
@@ -101,8 +111,18 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
   };
 }
 
+export function parseValSubgroup(
+  basis: ValBasisElement[],
+  targetSize?: number
+): {subgroup: TimeMonzo[]; nonPrimes: TimeMonzo[]} {
+  return parseSubgroup(basis, targetSize) as {
+    subgroup: TimeMonzo[];
+    nonPrimes: TimeMonzo[];
+  };
+}
+
 export function inferEquave(node: WartsLiteral) {
-  const {subgroup, nonPrimes} = parseSubgroup(node.basis);
+  const {subgroup, nonPrimes} = parseValSubgroup(node.basis);
 
   return wartToBasisElement(node.equave, subgroup, nonPrimes);
 }
@@ -172,7 +192,7 @@ export function valToTimeMonzo(
     for (let j = 0; j < i; ++j) {
       orthoBasis[i] = orthoBasis[i].div(
         orthoBasis[j].pow(dualBasis[j].dot(orthoBasis[i]))
-      );
+      ) as TimeMonzo;
     }
     dualBasis.push(orthoBasis[i].geometricInverse());
   }
@@ -185,7 +205,7 @@ export function valToTimeMonzo(
       dualBasis[i].pow(
         missingWeight.mul(val[i]).div(subgroup[i].dot(dualBasis[i]))
       )
-    );
+    ) as TimeMonzo;
   }
   return result;
 }
@@ -201,7 +221,7 @@ function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
 }
 
 export function wartsToVal(node: WartsLiteral) {
-  const {subgroup, nonPrimes} = parseSubgroup(node.basis);
+  const {subgroup, nonPrimes} = parseValSubgroup(node.basis);
 
   const equave = wartToBasisElement(node.equave, subgroup, nonPrimes);
 
@@ -241,7 +261,7 @@ export function wartsToVal(node: WartsLiteral) {
 }
 
 export function sparseOffsetToVal(node: SparseOffsetVal) {
-  const {subgroup} = parseSubgroup(node.basis);
+  const {subgroup} = parseValSubgroup(node.basis);
   if (node.equave) {
     const equave = TimeMonzo.fromFraction(
       new Fraction(node.equave.numerator, node.equave.denominator ?? 1)

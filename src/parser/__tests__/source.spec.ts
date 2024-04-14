@@ -44,7 +44,7 @@ describe('SonicWeave parser', () => {
   it('can call built-in functions', () => {
     const scale = parseSource('7;1;2;TAU;1\\2;sort();');
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1;1\\2;2;6.283185307179587r;7'
+      '1;1\\2;2;6.283185307179586r;7'
     );
   });
 
@@ -340,8 +340,8 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig (i) {
-        const ups = round(v{1r €} dot i);
-        return i ~% (1r c * ups) ~* 81/80 ^ ups;
+        const ups = round(1° dot i);
+        return i ~% (1° * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;
       rig;
@@ -350,16 +350,6 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('5/4;3/2;2');
-  });
-
-  it('can construct the hard cotritave', () => {
-    const scale = parseSource(`
-      const tritave = 1r * logarithmic(3);
-      const cotritave = v{%tritave};
-      tritave dot cotritave;
-    `);
-    expect(scale).toHaveLength(1);
-    expect(scale.map(i => i.toString()).join(';')).toBe('1');
   });
 
   it('has CSS colors', () => {
@@ -543,9 +533,9 @@ describe('SonicWeave parser', () => {
       [
         'C4 = 256 Hz',
         '1/1 = 432 Hz',
-        '^ = 2\\',
+        '^ = 2°',
         'const syn = 81/80',
-        '^D♮4^5,11 - 1\\',
+        '[1 1 4 -1 1 0 1>@1°.Hz.2..',
         'vD♮4_5',
         '5',
       ].join('\n')
@@ -636,7 +626,7 @@ describe('SonicWeave parser', () => {
 
       ^ = 81/80
     `);
-    expect(oopsFourth.toString()).toBe('[1. 2 -1>@rc.2..');
+    expect(oopsFourth.toString()).toBe('[1 2 -1>@1°.2..');
   });
 
   it('has syntax for subharmonic segments', () => {
@@ -825,7 +815,7 @@ describe('SonicWeave parser', () => {
     expect(scale).toEqual([
       '551.3179423647571rc',
       '701.955',
-      '917.547762931591rc',
+      '917.5477629315908rc',
       '1200.',
     ]);
   });
@@ -982,7 +972,7 @@ describe('SonicWeave parser', () => {
       i => i lest FJS(i)
       str
     `);
-    expect(scale).toEqual(['M2', '1.3591409142295228r', 'P5']);
+    expect(scale).toEqual(['M2', '1.3591409142295225r', 'P5']);
   });
 
   it('has while..break', () => {

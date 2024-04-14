@@ -1053,9 +1053,8 @@ MonzoLiteral
   }
 
 ValLiteral
-  = upsAndDowns: UpsAndDowns '<' _ components: VectorComponents _ ']' basis: ('@' @SubgroupBasis)? {
+  = '<' _ components: VectorComponents _ ']' basis: ('@' @ValBasis)? {
     return {
-      ...upsAndDowns,
       type: 'ValLiteral',
       components,
       basis: basis ?? [],
@@ -1100,7 +1099,11 @@ SparseOffsetVal
     }
   }
 
-BasisElement = Fraction / $SecondToken / $HertzToken / $LowHertzToken / $RealCentToken / ''
+ValBasisElement = Fraction / $SecondToken / $HertzToken / $LowHertzToken
+
+BasisElement = ValBasisElement / $RealCentToken / '1\\' / '1°' / ''
+
+ValBasis = (ValBasisElement / '')|.., '.'|
 
 SubgroupBasis = BasisElement|.., '.'|
 

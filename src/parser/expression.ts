@@ -23,13 +23,13 @@ import {
 import {
   Interval,
   Color,
-  timeMonzoAs,
+  intervalValueAs,
   infect,
   log,
   Val,
   IntervalDomain,
 } from '../interval';
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -56,8 +56,10 @@ import {
 import {pythagoreanMonzo, absoluteMonzo} from '../pythagorean';
 import {inflect} from '../fjs';
 import {
+  STEP_ELEMENT,
   inferEquave,
   parseSubgroup,
+  parseValSubgroup,
   sparseOffsetToVal,
   valToTimeMonzo,
   wartsToVal,
@@ -184,7 +186,7 @@ function typesCompatible(
 }
 
 function resolvePreference(
-  value: TimeMonzo,
+  value: TimeMonzo | TimeReal,
   left: Interval,
   right: Interval,
   node: BinaryExpression,
@@ -197,22 +199,24 @@ function resolvePreference(
     }
     let resolvedNode: IntervalLiteral | undefined = undefined;
     if (typesCompatible(left.node, right.node)) {
-      resolvedNode = timeMonzoAs(value, left.node, simplify);
+      resolvedNode = intervalValueAs(value, left.node, simplify);
     }
-    return new Interval(value, domain, resolvedNode, infect(left, right));
+    return new Interval(value, domain, 0, resolvedNode, infect(left, right));
   }
   if (node.preferLeft) {
     return new Interval(
       value,
       left.domain,
-      timeMonzoAs(value, left.node, simplify),
+      0,
+      intervalValueAs(value, left.node, simplify),
       left
     );
   }
   return new Interval(
     value,
     right.domain,
-    timeMonzoAs(value, right.node, simplify),
+    0,
+    intervalValueAs(value, right.node, simplify),
     right
   );
 }
@@ -307,7 +311,9 @@ export class ExpressionVisitor {
       case 'CentsLiteral':
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
-        return new Interval(CENT_MONZO, 'logarithmic', {type: 'CentLiteral'});
+        return new Interval(CENT_MONZO, 'logarithmic', 0, {
+          type: 'CentLiteral',
+        });
       case 'ReciprocalCentLiteral':
         return new Val(RECIPROCAL_CENT_MONZO, TWO_MONZO, {
           type: 'ReciprocalCentLiteral',
@@ -381,6 +387,7 @@ export class ExpressionVisitor {
       return new Interval(
         TimeMonzo.fromBigNumeratorDenominator(numerator, denominator),
         'logarithmic',
+        0,
         node
       );
     }
@@ -388,6 +395,7 @@ export class ExpressionVisitor {
     return new Interval(
       TimeMonzo.fromBigNumeratorDenominator(s, s - 1n),
       'logarithmic',
+      0,
       node
     );
   }
@@ -500,15 +508,15 @@ export class ExpressionVisitor {
   }
 
   protected visitStepLiteral(node: StepLiteral) {
-    const value = new TimeMonzo(ZERO, [], undefined, node.count);
-    return new Interval(value, 'logarithmic', node);
+    const value = new TimeMonzo(ZERO, []);
+    return new Interval(value, 'logarithmic', node.count, node);
   }
 
-  protected down(operand: SonicWeaveValue): Interval | Val | Interval[] {
+  protected down(operand: SonicWeaveValue): Interval | Interval[] {
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
-    if (operand instanceof Interval || operand instanceof Val) {
+    if (operand instanceof Interval) {
       return operand.down(this.rootContext);
     }
     if (Array.isArray(operand)) {
@@ -585,17 +593,25 @@ export class ExpressionVisitor {
   }
 
   protected upLift(
-    monzo: TimeMonzo,
-    node: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS
+    value: TimeMonzo | TimeReal,
+    node: MonzoLiteral | FJS | AbsoluteFJS
   ) {
-    return monzo
-      .mul(this.rootContext.up.pow(node.ups))
-      .mul(this.rootContext.lift.pow(node.lifts));
+    value = value
+      .mul(this.rootContext.up.value.pow(node.ups))
+      .mul(this.rootContext.lift.value.pow(node.lifts));
+    return new Interval(
+      value,
+      'logarithmic',
+      this.rootContext.up.steps * node.ups +
+        this.rootContext.lift.steps * node.lifts,
+      node
+    );
   }
 
   protected visitMonzoLiteral(node: MonzoLiteral) {
     const exponents = node.components.map(this.visitComponent);
-    let value: TimeMonzo;
+    let value: TimeMonzo | TimeReal;
+    let steps = ZERO;
     if (node.basis.length) {
       const {subgroup} = parseSubgroup(node.basis, exponents.length);
       if (exponents.length > subgroup.length) {
@@ -603,13 +619,21 @@ export class ExpressionVisitor {
       }
       value = new TimeMonzo(ZERO, []);
       for (let i = 0; i < exponents.length; ++i) {
-        value = value.mul(subgroup[i].pow(exponents[i]));
+        const element = subgroup[i];
+        if (element === STEP_ELEMENT) {
+          steps = steps.add(exponents[i]);
+        } else {
+          value = value.mul(element.pow(exponents[i]));
+        }
       }
     } else {
       value = new TimeMonzo(ZERO, exponents);
     }
-    value = this.upLift(value, node);
-    const result = new Interval(value, 'logarithmic', node);
+    const result = this.upLift(value, node);
+    if (steps.d !== 1) {
+      throw new Error('Cannot create fractional steps.');
+    }
+    result.steps += steps.valueOf();
     if (node.ups || node.lifts) {
       this.rootContext.fragiles.push(result);
     }
@@ -621,7 +645,7 @@ export class ExpressionVisitor {
     let value: TimeMonzo;
     let equave = TWO_MONZO;
     if (node.basis.length) {
-      const {subgroup} = parseSubgroup(node.basis, val.length);
+      const {subgroup} = parseValSubgroup(node.basis, val.length);
       if (val.length !== subgroup.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
@@ -630,12 +654,7 @@ export class ExpressionVisitor {
     } else {
       value = new TimeMonzo(ZERO, val);
     }
-    value = this.upLift(value, node);
-    const result = new Val(value, equave, node);
-    if (node.ups || node.lifts) {
-      this.rootContext.fragiles.push(result);
-    }
-    return result;
+    return new Val(value, equave, node);
   }
 
   protected project(
@@ -678,7 +697,7 @@ export class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
-    const result = new Interval(this.upLift(monzo, node), 'logarithmic', node);
+    const result = this.upLift(monzo, node);
     this.rootContext.fragiles.push(result);
     return result;
   }
@@ -689,9 +708,11 @@ export class ExpressionVisitor {
       node.superscripts,
       node.subscripts
     );
+    const upLifted = this.upLift(relativeToC4, node);
     const result = new Interval(
-      this.rootContext.C4.mul(this.upLift(relativeToC4, node)),
+      this.rootContext.C4.mul(upLifted.value),
       'logarithmic',
+      upLifted.steps,
       node
     );
     this.rootContext.fragiles.push(result);
@@ -873,7 +894,7 @@ export class ExpressionVisitor {
     }
     const operator = node.operator;
     if (node.uniform) {
-      let value: TimeMonzo;
+      let value: TimeMonzo | TimeReal;
       let newNode = operand.node;
       switch (operator) {
         case '-':
@@ -889,9 +910,12 @@ export class ExpressionVisitor {
           throw new Error('Uniform operation not supported.');
       }
       if (operand.domain === 'cologarithmic') {
-        return new Val(value, operand.equave, newNode);
+        if (value instanceof TimeMonzo) {
+          return new Val(value, operand.equave, newNode);
+        }
+        throw new Error('Val unary operation failed.');
       }
-      return new Interval(value, operand.domain, newNode, operand);
+      return new Interval(value, operand.domain, 0, newNode, operand);
     }
     switch (operator) {
       case '+':
@@ -901,6 +925,11 @@ export class ExpressionVisitor {
       case '%':
       case '÷':
         return operand.inverse();
+    }
+    if (operand instanceof Val) {
+      throw new Error(`Unary operation '${operator} not supported on vals.`);
+    }
+    switch (operator) {
       case '^':
       case '∧':
         return operand.up(this.rootContext);
@@ -912,9 +941,6 @@ export class ExpressionVisitor {
       case '\\':
       case 'drop':
         return operand.drop(this.rootContext);
-    }
-    if (!(operand instanceof Interval)) {
-      throw new Error('Unsupported unary operation.');
     }
     if (operator === 'not') {
       // The runtime shouldn't let you get here.
@@ -995,8 +1021,9 @@ export class ExpressionVisitor {
     if (left instanceof Interval) {
       if (right instanceof Interval) {
         if (node.preferLeft || node.preferRight) {
-          let value: TimeMonzo;
+          let value: TimeMonzo | TimeReal;
           let simplify = false;
+          let steps = 0;
           switch (operator) {
             case '+':
               value = left.value.add(right.value);
@@ -1020,11 +1047,13 @@ export class ExpressionVisitor {
             case '*':
             case ' ':
               value = left.value.mul(right.value);
+              steps = left.steps + right.steps;
               break;
             case '÷':
             case '%':
             case '/':
               value = left.value.div(right.value);
+              steps = left.steps - right.steps;
               break;
             case 'rd':
               value = left.value.reduce(right.value);
@@ -1034,11 +1063,13 @@ export class ExpressionVisitor {
               break;
             case '^':
               value = left.value.pow(right.value);
+              steps = Math.round(left.steps * right.valueOf());
               simplify = true;
               break;
             case '/^':
             case '^/':
               value = left.value.pow(right.value.inverse());
+              steps = Math.round(left.steps / right.valueOf());
               simplify = true;
               break;
             case 'mod':
@@ -1078,6 +1109,10 @@ export class ExpressionVisitor {
               );
           }
           const result = resolvePreference(value, left, right, node, simplify);
+          if (steps) {
+            result.steps = steps;
+            result.break();
+          }
 
           // Special handling for domain crossing operations
           if (operator === '/_' || operator === 'dot' || operator === '·') {
@@ -1422,17 +1457,17 @@ export class ExpressionVisitor {
 
   protected visitIntegerLiteral(node: IntegerLiteral): Interval {
     const value = TimeMonzo.fromBigInt(node.value);
-    return new Interval(value, 'linear', node);
+    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitDecimalLiteral(node: DecimalLiteral): Interval {
     if (node.flavor === 'r') {
-      const value = TimeMonzo.fromValue(
+      const value = TimeReal.fromValue(
         parseFloat(
           `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`
         )
       );
-      return new Interval(value, 'linear', node);
+      return new Interval(value, 'linear', 0, node);
     }
     let numerator = node.whole;
     let denominator = 1n;
@@ -1450,7 +1485,7 @@ export class ExpressionVisitor {
     if (node.flavor === 'z') {
       value.timeExponent = NEGATIVE_ONE;
     }
-    return new Interval(value, 'linear', node);
+    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitCentsLiteral(node: CentsLiteral): Interval {
@@ -1463,13 +1498,13 @@ export class ExpressionVisitor {
     const factor = bigGcd(numerator, denominator);
     numerator = Number(numerator / factor);
     denominator = Number(denominator / factor);
-    let value: TimeMonzo;
+    let value: TimeMonzo | TimeReal;
     try {
       value = new TimeMonzo(ZERO, [new Fraction(numerator, denominator)]);
     } catch {
-      value = TimeMonzo.fromCents((1200 * numerator) / denominator);
+      value = TimeReal.fromCents((1200 * numerator) / denominator);
     }
-    return new Interval(value, 'logarithmic', node);
+    return new Interval(value, 'logarithmic', 0, node);
   }
 
   protected visitFractionLiteral(node: FractionLiteral): Interval {
@@ -1477,7 +1512,7 @@ export class ExpressionVisitor {
       node.numerator,
       node.denominator
     );
-    return new Interval(value, 'linear', node);
+    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitNedjiLiteral(node: NedjiLiteral): Interval {
@@ -1491,29 +1526,37 @@ export class ExpressionVisitor {
     } else {
       value = TimeMonzo.fromEqualTemperament(fractionOfEquave);
     }
-    return new Interval(value, 'logarithmic', node);
+    return new Interval(value, 'logarithmic', 0, node);
   }
 
   protected visitHertzLiteral(node: HertzLiteral): Interval {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
-      value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
+      value = KIBI_MONZO.pow(
+        binaryExponent(node.prefix as BinaryPrefix)
+      ) as TimeMonzo;
     } else {
-      value = TEN_MONZO.pow(metricExponent(node.prefix as MetricPrefix));
+      value = TEN_MONZO.pow(
+        metricExponent(node.prefix as MetricPrefix)
+      ) as TimeMonzo;
     }
     value.timeExponent = NEGATIVE_ONE;
-    return new Interval(value, 'linear', node);
+    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitSecondLiteral(node: SecondLiteral): Interval {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
-      value = KIBI_MONZO.pow(binaryExponent(node.prefix as BinaryPrefix));
+      value = KIBI_MONZO.pow(
+        binaryExponent(node.prefix as BinaryPrefix)
+      ) as TimeMonzo;
     } else {
-      value = TEN_MONZO.pow(metricExponent(node.prefix as MetricPrefix));
+      value = TEN_MONZO.pow(
+        metricExponent(node.prefix as MetricPrefix)
+      ) as TimeMonzo;
     }
     value.timeExponent = ONE;
-    return new Interval(value, 'linear', node);
+    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitIdentifier(node: Identifier): SonicWeaveValue {
@@ -1523,7 +1566,7 @@ export class ExpressionVisitor {
   protected visitEnumeratedChord(node: EnumeratedChord): Interval[] {
     const intervals: Interval[] = [];
     const domains: IntervalDomain[] = [];
-    const monzos: TimeMonzo[] = [];
+    const monzos: (TimeMonzo | TimeReal)[] = [];
     for (const expression of node.intervals) {
       let interval = this.visit(expression);
       if (typeof interval === 'boolean') {
@@ -1555,10 +1598,12 @@ export class ExpressionVisitor {
             : intervals[i].sub(rootInterval)
         );
       } else {
+        const steps = intervals[i].steps - rootInterval.steps;
         result.push(
           new Interval(
             node.mirror ? root.div(monzos[i]) : monzos[i].div(root),
             domains[i],
+            node.mirror ? -steps : steps,
             undefined,
             infect(intervals[i], rootInterval)
           )
@@ -1582,6 +1627,10 @@ export class ExpressionVisitor {
         throw new Error('Ranges must consist of intervals.');
       }
       step = second.sub(start);
+    }
+    if (step.value instanceof TimeReal) {
+      // TODO: Re-enable.
+      throw new Error('Irrational ranges disabled for now.');
     }
     if (step.value.residual.s !== 0) {
       this.rootContext.spendGas(

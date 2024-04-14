@@ -4,7 +4,7 @@ import {
   type Parameter,
 } from '../ast';
 import {Color, Interval, Val} from '../interval';
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 import {ZERO} from '../utils';
 
 /**
@@ -69,6 +69,9 @@ export function upcastBool(b: boolean) {
  */
 export function sonicTruth(test: SonicWeaveValue) {
   if (test instanceof Interval) {
+    if (test.value instanceof TimeReal) {
+      return Boolean(test.value.value);
+    }
     return Boolean(test.value.residual.n);
   } else if (Array.isArray(test)) {
     return Boolean(test.length);

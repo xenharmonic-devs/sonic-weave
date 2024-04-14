@@ -180,11 +180,11 @@ describe('Line parser', () => {
   it('parses composites (any)', () => {
     const result = parseLine('3\\15 + 103/101 + 6.9');
     const vector = Array(DEFAULT_NUMBER_OF_COMPONENTS).fill(new Fraction(0));
-    vector[0] = new Fraction(3, 15);
+    vector[0] = new Fraction(3, 15).add('69/12000');
     expect(
       result.equals(
         new Interval(
-          new TimeMonzo(new Fraction(0), vector, new Fraction(103, 101), 6.9),
+          new TimeMonzo(new Fraction(0), vector, new Fraction(103, 101)),
           'logarithmic'
         )
       )

@@ -6,7 +6,7 @@ import {
   getSourceVisitor,
   parseAST,
 } from '../../parser';
-import {Interval} from '../../interval';
+import {Interval, Val} from '../../interval';
 import {builtinNode, track} from '../../stdlib';
 
 function parseSource(source: string) {
@@ -368,16 +368,12 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can combine two vals to approach the JIP', () => {
-    const thirtyOne = evaluateExpression('tune(12@.5, 19@.5)') as Interval;
-    expect(thirtyOne.value.cents).toBe(0);
+    const thirtyOne = evaluateExpression('tune(12@.5, 19@.5)') as Val;
     expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
   });
 
   it('can combine three vals to approach the JIP', () => {
-    const fourtyOne = evaluateExpression(
-      'tune3(5@.7, 17@.7, 19@.7)'
-    ) as Interval;
-    expect(fourtyOne.value.cents).toBe(0);
+    const fourtyOne = evaluateExpression('tune3(5@.7, 17@.7, 19@.7)') as Val;
     expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
   });
 
@@ -1017,7 +1013,7 @@ describe('SonicWeave standard library', () => {
 
   it('has tanh', () => {
     const budgetUnity = parseSingle('tanh(10)');
-    expect(budgetUnity.toString()).toBe('0.9999999958776934r');
+    expect(budgetUnity.toString()).toBe('0.9999999958776926r');
   });
 
   it('is stacked', () => {

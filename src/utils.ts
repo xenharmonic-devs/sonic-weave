@@ -199,15 +199,20 @@ export function binaryExponent(prefix: BinaryPrefix): number {
 }
 
 /**
- * Break a cents offset into lifts, ups, steps and real cents in that order of preference.
- * @param total Total cents offset.
- * @param up Value of the 'up' inflection in cents.
- * @param lift Value of the 'lift' inflection in cents.
- * @returns The prefix and postfix for recreating the cents offset according to the given context.
+ * Break a steps offset into lifts, ups and steps in that order of preference.
+ * @param total Total steps offset.
+ * @param up Value of the 'up' inflection in steps.
+ * @param lift Value of the 'lift' inflection in steps.
+ * @returns The prefix and postfix for recreating the steps offset according to the given context.
  */
 export function countUpsAndLifts(total: number, up: number, lift: number) {
   let lifts: number;
   let ups: number;
+
+  if (!Number.isInteger(total)) {
+    throw new Error('Unable to notate fractional steps.');
+  }
+
   if (up <= 0 || lift <= 0) {
     lifts = 0;
     ups = 0;
@@ -234,20 +239,15 @@ export function countUpsAndLifts(total: number, up: number, lift: number) {
     prefix += 'v'.repeat(-ups);
   }
 
-  const steps = Math.round(total);
-  total -= steps;
+  const steps = total;
   let postfix = '';
   if (steps) {
     postfix += ` ${steps > 0 ? '+' : '-'} ${Math.abs(steps)}\\`;
-  }
-  if (total) {
-    postfix += ` ${total > 0 ? '+' : '-'} ${Math.abs(total)}!c`;
   }
   return {
     ups,
     lifts,
     steps,
-    residue: total,
     prefix,
     postfix,
   };

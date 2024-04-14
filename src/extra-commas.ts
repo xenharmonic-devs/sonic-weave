@@ -105,7 +105,7 @@ export function getSyntonicRastmic(id: number) {
   let result = UNITY;
   for (const key of id.toString()) {
     if (SYNTONIC_RASTMIC_MAP.has(key)) {
-      result = result.mul(SYNTONIC_RASTMIC_MAP.get(key)!);
+      result = result.mul(SYNTONIC_RASTMIC_MAP.get(key)!) as TimeMonzo;
     }
   }
   return result;
@@ -126,7 +126,7 @@ export function getLumisComma(id: number) {
   let result = UNITY;
   for (const key of id.toString()) {
     if (LUMIS_MAP.has(key)) {
-      result = result.mul(LUMIS_MAP.get(key)!);
+      result = result.mul(LUMIS_MAP.get(key)!) as TimeMonzo;
     }
   }
   return result;

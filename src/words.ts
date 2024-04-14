@@ -1,5 +1,5 @@
 import {mmod} from 'xen-dev-utils';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo, TimeReal} from './monzo';
 import {ZERO, hasOwn} from './utils';
 
 /**
@@ -255,7 +255,7 @@ export function norm(sv: StepVector): number {
  * @param monzos Relative monzos representing intervals of the scale.
  * @returns A scale word where each character represents a step of distinct size.
  */
-export function stepString(monzos: TimeMonzo[]) {
+export function stepString(monzos: (TimeMonzo | TimeReal)[]) {
   if (!monzos.length) {
     return '';
   }

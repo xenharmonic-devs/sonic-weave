@@ -1,5 +1,5 @@
 import {SonicWeaveValue} from './stdlib';
-import {Val, type Interval} from './interval';
+import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
 
@@ -22,7 +22,7 @@ export class RootContext {
   /**
    * Values that depend on the current root pitch or up/lift inflections.
    */
-  fragiles: (Interval | Val)[];
+  fragiles: Interval[];
   /**
    * Current tracking ID.
    */
@@ -33,8 +33,8 @@ export class RootContext {
   templateArguments: SonicWeaveValue[];
 
   private C4_: TimeMonzo;
-  private up_: TimeMonzo;
-  private lift_: TimeMonzo;
+  private up_: Interval;
+  private lift_: Interval;
 
   /**
    * Create a new root context.
@@ -43,8 +43,8 @@ export class RootContext {
   constructor(gas?: number) {
     this.title = '';
     this.C4_ = new TimeMonzo(ZERO, []);
-    this.up_ = new TimeMonzo(ZERO, [], undefined, 1);
-    this.lift_ = new TimeMonzo(ZERO, [], undefined, 5);
+    this.up_ = new Interval(new TimeMonzo(ZERO, []), 'logarithmic', 1);
+    this.lift_ = new Interval(new TimeMonzo(ZERO, []), 'logarithmic', 5);
     this.gas = gas ?? Infinity;
     this.fragiles = [];
     this.trackingIndex = 0;
@@ -68,7 +68,7 @@ export class RootContext {
   get up() {
     return this.up_;
   }
-  set up(value: TimeMonzo) {
+  set up(value: Interval) {
     this.up_ = value;
     this.breakFragiles();
   }
@@ -80,7 +80,7 @@ export class RootContext {
   get lift() {
     return this.lift_;
   }
-  set lift(value: TimeMonzo) {
+  set lift(value: Interval) {
     this.lift_ = value;
     this.breakFragiles();
   }
@@ -144,11 +144,11 @@ export class RootContext {
         lines.push(`1/1 = ${this.unisonFrequency.toString()}`);
       }
     }
-    if (this.up.compare(defaults.up)) {
-      lines.push(`^ = ${this.up.toString('logarithmic')}`);
+    if (!this.up.strictEquals(defaults.up)) {
+      lines.push(`^ = ${this.up.toString()}`);
     }
-    if (this.lift.compare(defaults.lift)) {
-      lines.push(`/ = ${this.lift.toString('logarithmic')}`);
+    if (!this.lift.strictEquals(defaults.lift)) {
+      lines.push(`/ = ${this.lift.toString()}`);
     }
     return lines.join('\n');
   }
