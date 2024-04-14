@@ -1736,7 +1736,11 @@ export class TimeMonzo {
     if (domain === 'linear') {
       if (this.isScalar()) {
         if (this.isIntegral()) {
-          return this.toBigInteger().toString();
+          try {
+            return this.toBigInteger().toString();
+          } catch {
+            /* Fall through */
+          }
         } else if (this.isFractional()) {
           try {
             const {numerator, denominator} = this.toBigNumeratorDenominator();
@@ -1755,7 +1759,11 @@ export class TimeMonzo {
       } else {
         if (this.timeExponent.equals(NEGATIVE_ONE)) {
           if (this.isDecimal()) {
-            return `${this.toFraction().toString()} Hz`;
+            try {
+              return `${this.toFraction().toString()} Hz`;
+            } catch {
+              /* Fall through */
+            }
           } else if (this.isFractional()) {
             try {
               const {numerator, denominator} = this.toBigNumeratorDenominator();

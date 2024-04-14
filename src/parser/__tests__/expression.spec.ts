@@ -1800,4 +1800,9 @@ describe('SonicWeave expression evaluator', () => {
       'Time unit exponent too complex.'
     );
   });
+
+  it('it formats one quebihertz', () => {
+    const fallback = evaluate('str(1 QiHz)');
+    expect(fallback).toBe('2^100*1Hz');
+  });
 });
