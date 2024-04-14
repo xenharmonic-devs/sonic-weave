@@ -1775,4 +1775,23 @@ describe('SonicWeave expression evaluator', () => {
     const major6 = parseSingle('^ = 81/80; ∨27/16');
     expect(major6.toFraction().toFraction()).toBe('5/3');
   });
+
+  it('evaluates patent val of agnostic tetracot', () => {
+    const val = evaluate('4@3/2') as Val;
+    expect(val.divisions.toFraction()).toBe('4');
+    expect(val.equave.toFraction().toFraction()).toBe('3/2');
+  });
+
+  it('can create 4@3/2.10/9 that behaves as expected', () => {
+    const val = evaluate('4@3/2.10/9') as Val;
+    expect(val.divisions.toFraction()).toBe('4');
+    expect(val.value.dot(TimeMonzo.fromFraction('10/9')).toFraction()).toBe(
+      '1'
+    );
+  });
+
+  it('knows the tetracot comma is tempered out in 4@3/2.10/9', () => {
+    const zero = parseSingle('20000/19683 dot 4@3/2.10/9');
+    expect(zero.valueOf()).toBe(0);
+  });
 });

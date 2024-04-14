@@ -7,9 +7,13 @@ const SECOND_MONZO = new TimeMonzo(ONE, []);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
 const REAL_CENT_MONZO = new TimeMonzo(ZERO, [], ONE, 1);
 
-function wartToBasisElement(wart: string, nonPrimes: TimeMonzo[]) {
+function wartToBasisElement(
+  wart: string,
+  subgroup: TimeMonzo[],
+  nonPrimes: TimeMonzo[]
+) {
   if (!wart) {
-    return TimeMonzo.fromFraction(2);
+    return subgroup[0];
   }
   const index = wart.charCodeAt(0) - 97;
   if (index < 15) {
@@ -95,49 +99,12 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
     subgroup,
     nonPrimes,
   };
-
-  /*
-  if (basisStrings.length === 1) {
-    if (basisStrings[0] === '0') {
-      subgroup.push(new Fraction(0));
-    } else if (basisStrings[0] === '-1') {
-      subgroup.push(new Fraction(-1));
-    } else {
-      const index = PRIMES.indexOf(parseInt(basisStrings[0], 10));
-      if (index < 0) {
-        throw new Error('Invalid prime limit');
-      }
-      for (const prime of PRIMES.slice(0, index + 1)) {
-        subgroup.push(new Fraction(prime));
-      }
-    }
-  } else if (basisStrings.length) {
-    for (const basisString of basisStrings) {
-      subgroup.push(new Fraction(basisString));
-    }
-  }
-
-  const nonPrimes: Fraction[] = [];
-  for (const basis of subgroup) {
-    if (basis.d > 1 || !PRIMES.includes(basis.n)) {
-      nonPrimes.push(basis);
-    }
-  }
-
-  if (!subgroup.length) {
-    for (let i = 0; i < getNumberOfComponents(); ++i) {
-      subgroup.push(new Fraction(PRIMES[i]));
-    }
-  }
-
-  return [subgroup, nonPrimes];
-  */
 }
 
 export function inferEquave(node: WartsLiteral) {
-  const {nonPrimes} = parseSubgroup(node.basis);
+  const {subgroup, nonPrimes} = parseSubgroup(node.basis);
 
-  return wartToBasisElement(node.equave, nonPrimes);
+  return wartToBasisElement(node.equave, subgroup, nonPrimes);
 }
 
 function patentVal(divisions: number, subgroup: TimeMonzo[]) {
@@ -192,11 +159,33 @@ export function valToTimeMonzo(
     throw new Error('Unable to determine val prime limit.');
   }
 
+  // XXX: This should be fine...
+  for (const element of subgroup) {
+    element.numberOfComponents = numberOfComponents;
+  }
+
+  // Perform Gram–Schmidt process
+  const orthoBasis = [...subgroup];
+  const dualBasis: TimeMonzo[] = [];
+
+  for (let i = 0; i < orthoBasis.length; ++i) {
+    for (let j = 0; j < i; ++j) {
+      orthoBasis[i] = orthoBasis[i].div(
+        orthoBasis[j].pow(dualBasis[j].dot(orthoBasis[i]))
+      );
+    }
+    dualBasis.push(orthoBasis[i].geometricInverse());
+  }
+
+  // Build the cologarithmic vector adjusting dual basis weights as necessary.
   let result = new TimeMonzo(ZERO, Array(numberOfComponents).fill(ZERO));
   for (let i = 0; i < subgroup.length; ++i) {
-    // XXX: This should be fine...
-    subgroup[i].numberOfComponents = numberOfComponents;
-    result = result.mul(subgroup[i].geometricInverse().pow(val[i]));
+    const missingWeight = ONE.sub(subgroup[i].dot(result));
+    result = result.mul(
+      dualBasis[i].pow(
+        missingWeight.mul(val[i]).div(subgroup[i].dot(dualBasis[i]))
+      )
+    );
   }
   return result;
 }
@@ -214,7 +203,7 @@ function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
 export function wartsToVal(node: WartsLiteral) {
   const {subgroup, nonPrimes} = parseSubgroup(node.basis);
 
-  const equave = wartToBasisElement(node.equave, nonPrimes);
+  const equave = wartToBasisElement(node.equave, subgroup, nonPrimes);
 
   if (equave) {
     shiftEquave(equave, subgroup);
@@ -226,7 +215,7 @@ export function wartsToVal(node: WartsLiteral) {
   const modification = Array(subgroup.length).fill(0);
 
   for (const wart of node.warts) {
-    const wartMonzo = wartToBasisElement(wart, nonPrimes);
+    const wartMonzo = wartToBasisElement(wart, subgroup, nonPrimes);
     if (!wartMonzo) {
       continue;
     }
