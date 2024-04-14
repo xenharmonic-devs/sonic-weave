@@ -134,7 +134,6 @@ describe('Pythagorean interval construction from parts', () => {
       `${monzo.primeExponents[1].valueOf()} != ${threes}`
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
-    expect(monzo.cents).toBeCloseTo(0);
   });
 });
 
@@ -164,7 +163,6 @@ describe('Absolute Pythagorean interval construction from parts', () => {
       `${monzo.primeExponents[1].valueOf()} != ${threes}`
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
-    expect(monzo.cents).toBeCloseTo(0);
   });
 });
 

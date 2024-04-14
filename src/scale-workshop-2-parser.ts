@@ -1,5 +1,5 @@
-import {Fraction, PRIMES, PRIME_CENTS} from 'xen-dev-utils';
-import {Domain, TimeMonzo, getNumberOfComponents} from './monzo';
+import {Fraction, PRIMES, PRIME_CENTS, dot, valueToCents} from 'xen-dev-utils';
+import {Domain, TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
 import {parse} from './scale-workshop-2-ast';
 import {Interval} from './interval';
 import {
@@ -95,7 +95,7 @@ function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {
     denominator,
     numberOfComponents
   );
-  return new Interval(value, 'linear', node);
+  return new Interval(value, 'linear', 0, node);
 }
 
 function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
@@ -114,14 +114,14 @@ function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
   const factor = bigGcd(numerator, denominator);
   numerator = Number(numerator / factor);
   denominator = Number(denominator / factor);
-  let value: TimeMonzo;
+  let value: TimeMonzo | TimeReal;
   try {
     value = new TimeMonzo(ZERO, [new Fraction(numerator, denominator)]);
+    value.numberOfComponents = numberOfComponents;
   } catch {
-    value = TimeMonzo.fromCents((1200 * numerator) / denominator);
+    value = TimeReal.fromCents((1200 * numerator) / denominator);
   }
-  value.numberOfComponents = numberOfComponents;
-  return new Interval(value, 'logarithmic', node);
+  return new Interval(value, 'logarithmic', 0, node);
 }
 
 /**
@@ -162,6 +162,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
       return new Interval(
         TimeMonzo.fromBigInt(ast.value, numberOfComponents),
         'linear',
+        0,
         {
           type: 'IntegerLiteral',
           value: ast.value,
@@ -179,6 +180,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
           numberOfComponents
         ),
         'linear',
+        0,
         {
           type: 'FractionLiteral',
           numerator: ast.numerator,
@@ -211,6 +213,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         numberOfComponents
       ),
       'logarithmic',
+      0,
       node
     );
   } else if (ast.type === 'Monzo') {
@@ -229,15 +232,30 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         residual = residual.mul(factor);
       }
     }
-    return new Interval(
-      new TimeMonzo(ZERO, components, residual, cents),
-      'logarithmic'
-    );
+    if (cents) {
+      return new Interval(
+        TimeReal.fromCents(
+          dot(
+            PRIME_CENTS,
+            components.map(f => f.valueOf())
+          ) +
+            cents +
+            valueToCents(residual.valueOf())
+        ),
+        'logarithmic'
+      );
+    } else {
+      return new Interval(
+        new TimeMonzo(ZERO, components, residual),
+        'logarithmic'
+      );
+    }
   } else if (ast.type === 'UnaryExpression') {
     const operand = evaluateAst(ast.operand, numberOfComponents);
     return new Interval(
       operand.value.inverse(),
       operand.domain,
+      0,
       uniformInvertNode(operand.node),
       operand
     );

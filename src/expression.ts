@@ -71,7 +71,9 @@ export type BasisFraction = {
 
 export type WartBasisElement = BasisFraction | '';
 
-export type BasisElement = WartBasisElement | 's' | 'Hz' | 'hz' | 'rc';
+export type ValBasisElement = WartBasisElement | 's' | 'Hz' | 'hz';
+
+export type BasisElement = ValBasisElement | 'rc' | '1\\' | '1°';
 
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
@@ -216,9 +218,7 @@ export type MonzoLiteral = {
 export type ValLiteral = {
   type: 'ValLiteral';
   components: VectorComponent[];
-  ups: number;
-  lifts: number;
-  basis: BasisElement[];
+  basis: ValBasisElement[];
 };
 
 export type SquareSuperparticular = {
@@ -271,7 +271,13 @@ export function validateNode(node?: IntervalLiteral) {
   }
 }
 
-function inferFJSFlavor(
+/**
+ * Infer the FJS flavor of an AST node or a pair of AST nodes.
+ * @param a First node.
+ * @param b Second node (optional).
+ * @returns The FJS flavor that best corresponds to the input(s).
+ */
+export function inferFJSFlavor(
   a: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS,
   b?: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS
 ): FJSFlavor {
@@ -389,6 +395,8 @@ export function negNode(node?: IntervalLiteral): IntervalLiteral | undefined {
     case 'MonzoLiteral':
       return {
         ...node,
+        ups: -node.ups,
+        lifts: -node.lifts,
         components: node.components.map(c => ({
           ...c,
           sign: OPPOSITE_SIGN[c.sign],
@@ -514,6 +522,12 @@ export function addNodes(
       equaveDenominator: a.equaveDenominator,
     };
   }
+  if (a.type === 'StepLiteral' && b.type === 'StepLiteral') {
+    return {
+      type: a.type,
+      count: a.count + b.count,
+    };
+  }
 
   return aspireNodes(a, b);
 }
@@ -541,6 +555,12 @@ export function subNodes(
     if (b.type === 'AbsoluteFJS' || b.type === 'AspiringAbsoluteFJS') {
       return {type: 'AspiringFJS', flavor: inferFJSFlavor(a, b)};
     }
+  }
+  if (a.type === 'StepLiteral' && b.type === 'StepLiteral') {
+    return {
+      type: a.type,
+      count: a.count - b.count,
+    };
   }
 
   return aspireNodes(a, b);
@@ -623,6 +643,11 @@ export function mulNodes(
         sign: a.value < 0n ? '-' : '',
         whole: bigAbs(a.value),
         fractional: '',
+      };
+    } else if (b.type === 'StepLiteral') {
+      return {
+        type: 'StepLiteral',
+        count: Number(a.value) * b.count,
       };
     }
     return undefined;
@@ -749,7 +774,7 @@ export function pitchRoundToNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-function formatUps(literal: MonzoLiteral | ValLiteral | FJS | AbsoluteFJS) {
+function formatUps(literal: MonzoLiteral | FJS | AbsoluteFJS) {
   let result: string;
   if (literal.lifts < 0) {
     result = '\\'.repeat(-literal.lifts);
@@ -876,7 +901,7 @@ function formatMonzo(literal: MonzoLiteral) {
 }
 
 function formatVal(literal: ValLiteral) {
-  let result = `${formatUps(literal)}<${formatComponents(literal.components)}]`;
+  let result = `<${formatComponents(literal.components)}]`;
   if (literal.basis.length) {
     result += `@${formatSubgroupBasis(literal.basis)}`;
   }
@@ -900,7 +925,7 @@ export function literalToString(literal: IntervalLiteral) {
     case 'NedjiLiteral':
       return formatNedji(literal);
     case 'StepLiteral':
-      return `${literal.count}\\`;
+      return `${literal.count}°`;
     case 'FractionLiteral':
       return `${literal.numerator}/${literal.denominator}`;
     case 'RadicalLiteral':
@@ -982,6 +1007,15 @@ export function fractionToVectorComponent(fraction: Fraction): VectorComponent {
     left: fraction.n,
     right,
     separator,
+    exponent: null,
+  };
+}
+
+export function integerToVectorComponent(num: number): VectorComponent {
+  return {
+    sign: num < 0 ? '-' : '',
+    left: Math.abs(num),
+    right: '',
     exponent: null,
   };
 }

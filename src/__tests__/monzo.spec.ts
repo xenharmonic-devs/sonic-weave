@@ -1,9 +1,29 @@
 import {describe, it, expect} from 'vitest';
-import {Fraction, valueToCents} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils';
 
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 
-describe('Extended Monzo', () => {
+describe('Real value with time', () => {
+  it('can be constructed from cents', () => {
+    const result = TimeReal.fromCents(1200);
+    expect(result.timeExponent).toBe(0);
+    expect(result.value).toBe(2);
+  });
+
+  it('can represent NaN', () => {
+    const nan = TimeReal.fromValue(NaN);
+    expect(nan.value).toBeNaN();
+    expect(nan.toString()).toBe('NaN');
+  });
+
+  it('can represent Infinity', () => {
+    const inf = TimeReal.fromValue(Infinity);
+    expect(inf.value).toBe(Infinity);
+    expect(inf.toString()).toBe('Infinity');
+  });
+});
+
+describe('Extended monzo with time', () => {
   it('can be constructed from an integer', () => {
     const result = TimeMonzo.fromFraction(75, 3);
     expect(result.primeExponents.length).toBe(3);
@@ -11,7 +31,6 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents[1].equals(1)).toBeTruthy();
     expect(result.primeExponents[2].equals(2)).toBeTruthy();
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
   it('can be constructed from an integer with residual', () => {
     const result = TimeMonzo.fromFraction(75, 2);
@@ -19,7 +38,6 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents[0].equals(0)).toBeTruthy();
     expect(result.primeExponents[1].equals(1)).toBeTruthy();
     expect(result.residual.equals(25)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
   it('can be constructed from a fraction', () => {
     const result = TimeMonzo.fromFraction(new Fraction(3, 2), 2);
@@ -27,7 +45,6 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents[0].equals(-1)).toBeTruthy();
     expect(result.primeExponents[1].equals(1)).toBeTruthy();
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
   it('can be constructed from a fraction with residual', () => {
     const result = TimeMonzo.fromFraction(new Fraction(33, 28), 2);
@@ -35,14 +52,8 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents[0].equals(-2)).toBeTruthy();
     expect(result.primeExponents[1].equals(1)).toBeTruthy();
     expect(result.residual.equals(new Fraction(11, 7))).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
-  it('can be constructed from cents', () => {
-    const result = TimeMonzo.fromCents(1200, 0);
-    expect(result.primeExponents.length).toBe(0);
-    expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(1200);
-  });
+
   it('can be constructed from n of edo', () => {
     const fifthOfTwelveEdo = new Fraction(7, 12);
     const octave = new Fraction(2);
@@ -51,7 +62,6 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents[0].equals(new Fraction(7, 12))).toBeTruthy();
     expect(result.primeExponents[1].equals(0)).toBeTruthy();
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
   it('can be constructed from n of edo without default octave', () => {
     const flatFifth = new Fraction(13, 23);
@@ -59,7 +69,6 @@ describe('Extended Monzo', () => {
     expect(result.primeExponents.length).toBe(1);
     expect(result.primeExponents[0].equals(new Fraction(13, 23))).toBeTruthy();
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
 
   it('can be converted to a fraction', () => {
@@ -142,16 +151,15 @@ describe('Extended Monzo', () => {
 
     expect(aMonzo.pow(b).strictEquals(aToThePowerOfBMonzo)).toBeTruthy();
   });
-  it('it implicitly converts unrepresentable exponentiation to cents', () => {
+  it('it implicitly converts unrepresentable exponentiation to reals', () => {
     const a = 6;
     const b = new Fraction(1, 2);
 
-    const result = TimeMonzo.fromFraction(a, 1).pow(b);
+    const result = TimeMonzo.fromFraction(a, 1).pow(b) as TimeReal;
 
-    expect(result.primeExponents.length).toBe(1);
-    expect(result.primeExponents[0].equals(new Fraction(1, 2))).toBeTruthy();
-    expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBeCloseTo(valueToCents(3 ** 0.5));
+    expect(result).toBeInstanceOf(TimeReal);
+
+    expect(result.value).toBeCloseTo(6 ** 0.5);
   });
   it('respects the ordering of rational numbers', () => {
     const majorThird = new Fraction(5, 4);
@@ -206,7 +214,7 @@ describe('Extended Monzo', () => {
   });
   it('can be stretched', () => {
     const octave = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
-    expect(octave.stretch(1.01).toCents()).toBeCloseTo(1212);
+    expect(octave.pow(1.01).toCents()).toBeCloseTo(1212);
   });
   it('can be approximated by a harmonic', () => {
     const majorSecond = TimeMonzo.fromEqualTemperament(
@@ -257,7 +265,6 @@ describe('Extended Monzo', () => {
       expect(component.compare(10)).toBeLessThan(0);
     });
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
 
   it('can represent even bigger numbers', () => {
@@ -267,7 +274,6 @@ describe('Extended Monzo', () => {
       expect(component.compare(10)).toBeLessThan(0);
     });
     expect(result.residual.equals(1)).toBeTruthy();
-    expect(result.cents).toBe(0);
   });
 
   it('can combine equal temperament steps exactly', () => {
@@ -281,33 +287,23 @@ describe('Extended Monzo', () => {
     expect(octave.equals(2)).toBeTruthy();
   });
 
-  it('can be ambiquous in terms of total size', () => {
-    const tritaveJI = new TimeMonzo(new Fraction(0), [
-      new Fraction(0),
-      new Fraction(1),
-    ]);
-    const tritaveCents = new TimeMonzo(
-      new Fraction(0),
-      [],
-      undefined,
-      valueToCents(3)
-    );
-    expect(tritaveJI.strictEquals(tritaveCents)).toBeFalsy();
-    expect(tritaveJI.equals(tritaveCents)).toBeTruthy();
+  it('can be ambiquous in terms of total size compared to reals', () => {
+    const octaveJI = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
+    const octaveReal = new TimeReal(0, 2);
+    expect(octaveJI.strictEquals(octaveReal)).toBeFalsy();
+    expect(octaveJI.equals(octaveReal)).toBeTruthy();
   });
 
   it("doesn't throw for zero (number)", () => {
     const zero = TimeMonzo.fromFraction(0, 1);
     expect(zero.primeExponents[0].equals(0)).toBeTruthy();
     expect(zero.residual.equals(0)).toBeTruthy();
-    expect(zero.cents).toBe(0);
   });
 
   it('throws for zero (fraction)', () => {
     const zero = TimeMonzo.fromFraction(new Fraction(0), 1);
     expect(zero.primeExponents[0].equals(0)).toBeTruthy();
     expect(zero.residual.equals(0)).toBeTruthy();
-    expect(zero.cents).toBe(0);
   });
 
   it('can be tested for being a power of two (residual)', () => {
@@ -333,36 +329,29 @@ describe('Extended Monzo', () => {
         new Fraction(0),
         new Fraction(-5, 3),
       ],
-      new Fraction(-31, 23),
-      -1.25
+      new Fraction(-31, 23)
     );
-    expect(value.toString()).toBe(
-      '2^2*3^3/2*7^-5/3*-31/23*0.9992782322866353r*(1s)^1/2'
-    );
+    expect(value.toString()).toBe('2^2*3^3/2*7^-5/3*-31/23*(1s)^1/2');
   });
 
   it('has a generic representation for logarithmic quantities', () => {
     const value = new TimeMonzo(
       new Fraction(-3, 2),
       [new Fraction(3, 2), new Fraction(-5, 3)],
-      new Fraction(31, 23),
-      1.25
+      new Fraction(31, 23)
     );
-    expect(value.toString('logarithmic')).toBe(
-      '[-3/2 1.25 1 3/2 -5/3>@s.rc.31/23.2..'
-    );
+    expect(value.toString('logarithmic')).toBe('[-3/2 1 3/2 -5/3>@s.31/23.2..');
   });
 
   it('has a generic representation for cologarithmic quantities', () => {
     const value = new TimeMonzo(
       new Fraction(-3, 2),
       [new Fraction(3, 2), new Fraction(-5, 3)],
-      new Fraction(31, 23),
-      2.25
+      new Fraction(31, 23)
     );
     // It should be impossible to produce this value for a val, but the expression should be meaningful.
     expect(value.toString('cologarithmic')).toBe(
-      '<-3/2 2.25 1 3/2 -5/3]@s.rc.31/23.2..'
+      '<-3/2 1 3/2 -5/3]@s.31/23.2..'
     );
   });
 
@@ -378,7 +367,7 @@ describe('Extended Monzo', () => {
     let n = 1n;
     let d = 1n;
     for (let i = 0; i < 50; ++i) {
-      accumulator = accumulator.mul(generator).reduce(period);
+      accumulator = accumulator.mul(generator).reduce(period) as TimeMonzo;
       n *= 3n;
       while (n > 2n * d) {
         d *= 2n;
@@ -396,7 +385,7 @@ describe('Extended Monzo', () => {
   });
 
   it('survives repeated multiplication of higher primes', () => {
-    let trouble = TimeMonzo.fromFraction('113/110');
+    let trouble: TimeMonzo | TimeReal = TimeMonzo.fromFraction('113/110');
     const cents = trouble.totalCents();
     trouble = trouble.mul(trouble);
     trouble = trouble.mul(trouble);
@@ -406,7 +395,7 @@ describe('Extended Monzo', () => {
   });
 
   it('survives repeated division by higher primes', () => {
-    let foo = TimeMonzo.fromFraction('3/2');
+    let foo: TimeMonzo | TimeReal = TimeMonzo.fromFraction('3/2');
     const originalCents = foo.totalCents();
     const bar = TimeMonzo.fromFraction('103/101');
     const stepCents = bar.totalCents();
@@ -426,17 +415,5 @@ describe('Extended Monzo', () => {
   it('has zero as the identity element for gcd', () => {
     const twelve = TimeMonzo.fromBigInt(0n).gcd(TimeMonzo.fromBigInt(12n));
     expect(twelve.toBigInteger()).toBe(12n);
-  });
-
-  it('can represent NaN', () => {
-    const nan = TimeMonzo.fromValue(NaN);
-    expect(nan.cents).toBeNaN();
-    expect(nan.toString()).toBe('NaN');
-  });
-
-  it('can represent Infinity', () => {
-    const inf = TimeMonzo.fromValue(Infinity);
-    expect(inf.cents).toBe(Infinity);
-    expect(inf.toString()).toBe('Infinity');
   });
 });

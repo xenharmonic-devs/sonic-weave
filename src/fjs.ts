@@ -6,7 +6,7 @@ import {
   toMonzo,
   valueToCents,
 } from 'xen-dev-utils';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo, TimeReal} from './monzo';
 import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression';
 import {
   absoluteToNode,
@@ -171,7 +171,7 @@ function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
       new Fraction(twos),
       new Fraction(threes),
     ]);
-    yield timeMonzo.mul(TimeMonzo.fromFraction(PRIMES[i]));
+    yield timeMonzo.mul(TimeMonzo.fromFraction(PRIMES[i])) as TimeMonzo;
     i++;
   }
 }
@@ -263,7 +263,7 @@ export function getInflection(
   superscripts: FJSInflection[],
   subscripts: FJSInflection[]
 ) {
-  let result = TimeMonzo.fromFraction(1);
+  let result: TimeMonzo | TimeReal = TimeMonzo.fromFraction(1);
   for (const [s, flavor] of superscripts) {
     if (flavor === 'l') {
       result = result.mul(getLumisComma(s));
@@ -322,6 +322,9 @@ export function getInflection(
       }
     }
   }
+  if (result instanceof TimeReal) {
+    throw new Error('FJS inflection failed.');
+  }
   return result;
 }
 
@@ -378,6 +381,9 @@ export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
     /* empty */
   }
   const pythagoreanMonzo = monzo.div(getInflection(superscripts, subscripts));
+  if (pythagoreanMonzo instanceof TimeReal) {
+    throw new Error('FJS uninflection failed.');
+  }
   return {
     pythagoreanMonzo,
     superscripts,
@@ -386,9 +392,6 @@ export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
 }
 
 export function asFJS(monzo: TimeMonzo, flavor: FJSFlavor): FJS | undefined {
-  if (monzo.cents) {
-    return undefined;
-  }
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
     if (pe[i].d > 1) {
@@ -414,9 +417,6 @@ export function asAbsoluteFJS(
   monzo: TimeMonzo,
   flavor: FJSFlavor
 ): AbsoluteFJS | undefined {
-  if (monzo.cents) {
-    return undefined;
-  }
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
     if (pe[i].d > 1) {

@@ -9,14 +9,15 @@ import {
   valueToCents,
   LOG_PRIMES,
   norm,
-  centsToNats,
   BIG_INT_PRIMES,
   fareySequence as xduFareySequence,
   fareyInterior as xduFareyInterior,
+  hasMarginConstantStructure,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
   TimeMonzo,
+  TimeReal,
   getNumberOfComponents,
   setNumberOfComponents,
 } from '../monzo';
@@ -29,7 +30,7 @@ import {
   RadicalLiteral,
   formatAbsoluteFJS,
 } from '../expression';
-import {NEGATIVE_ONE, TWO, ZERO, countUpsAndLifts} from '../utils';
+import {NEGATIVE_ONE, TWO, ZERO} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
 import {hasConstantStructure} from '../tools';
 import {
@@ -47,17 +48,17 @@ const {version: VERSION} = require('../../package.json');
 // === Library ===
 
 // == Constants
-const E = new Interval(TimeMonzo.fromValue(Math.E), 'linear');
-const LN10 = new Interval(TimeMonzo.fromValue(Math.LN10), 'linear');
-const LN2 = new Interval(TimeMonzo.fromValue(Math.LN2), 'linear');
-const LOG10E = new Interval(TimeMonzo.fromValue(Math.LOG10E), 'linear');
-const LOG2E = new Interval(TimeMonzo.fromValue(Math.LOG2E), 'linear');
-const PI = new Interval(TimeMonzo.fromValue(Math.PI), 'linear');
+const E = new Interval(TimeReal.fromValue(Math.E), 'linear');
+const LN10 = new Interval(TimeReal.fromValue(Math.LN10), 'linear');
+const LN2 = new Interval(TimeReal.fromValue(Math.LN2), 'linear');
+const LOG10E = new Interval(TimeReal.fromValue(Math.LOG10E), 'linear');
+const LOG2E = new Interval(TimeReal.fromValue(Math.LOG2E), 'linear');
+const PI = new Interval(TimeReal.fromValue(Math.PI), 'linear');
 const SQRT1_2 = new Interval(TimeMonzo.fromEqualTemperament('-1/2'), 'linear');
 const SQRT2 = new Interval(TimeMonzo.fromEqualTemperament('1/2'), 'linear');
-const TAU = new Interval(TimeMonzo.fromValue(2 * Math.PI), 'linear');
-const NAN = new Interval(TimeMonzo.fromValue(NaN), 'linear');
-const INFINITY = new Interval(TimeMonzo.fromValue(Infinity), 'linear');
+const TAU = new Interval(TimeReal.fromValue(2 * Math.PI), 'linear');
+const NAN = new Interval(TimeReal.fromValue(NaN), 'linear');
+const INFINITY = new Interval(TimeReal.fromValue(Infinity), 'linear');
 
 // == Real-valued Math wrappers ==
 const MATH_WRAPPERS: Record<string, SonicWeaveFunction> = {};
@@ -84,8 +85,9 @@ for (const name of MATH_KEYS) {
   function wrapper(x: Interval) {
     requireParameters({x});
     return new Interval(
-      TimeMonzo.fromValue(fn(x.valueOf())),
+      TimeReal.fromValue(fn(x.valueOf())),
       LOGS.includes(name) ? 'linear' : x.domain,
+      0,
       undefined,
       x
     );
@@ -99,7 +101,7 @@ for (const name of MATH_KEYS) {
 function atan2(y: Interval, x: Interval) {
   requireParameters({y, x});
   return new Interval(
-    TimeMonzo.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
+    TimeReal.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
     'linear'
   );
 }
@@ -204,7 +206,7 @@ function fareySequence(maxDenominator: Interval) {
   const result: Interval[] = [];
   for (const fraction of xduFareySequence(maxDenominator.toInteger())) {
     const value = TimeMonzo.fromFraction(fraction);
-    result.push(new Interval(value, 'linear', value.asFractionLiteral()));
+    result.push(new Interval(value, 'linear', 0, value.asFractionLiteral()));
   }
   return result;
 }
@@ -217,7 +219,7 @@ function fareyInterior(maxDenominator: Interval) {
   const result: Interval[] = [];
   for (const fraction of xduFareyInterior(maxDenominator.toInteger())) {
     const value = TimeMonzo.fromFraction(fraction);
-    result.push(new Interval(value, 'linear', value.asFractionLiteral()));
+    result.push(new Interval(value, 'linear', 0, value.asFractionLiteral()));
   }
   return result;
 }
@@ -252,6 +254,7 @@ export function simplify(interval: Interval | Val | boolean) {
   return new Interval(
     interval.value.clone(),
     interval.domain,
+    interval.steps,
     undefined,
     interval
   );
@@ -270,7 +273,12 @@ export function bleach(interval: Interval | boolean) {
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
   }
-  return new Interval(interval.value.clone(), interval.domain, interval.node);
+  return new Interval(
+    interval.value.clone(),
+    interval.domain,
+    interval.steps,
+    interval.node
+  );
 }
 bleach.__doc__ = 'Get rid of interval coloring and label.';
 bleach.__node__ = builtinNode(bleach);
@@ -288,7 +296,13 @@ export function linear(interval: Interval | boolean) {
   if (interval.domain === 'linear') {
     return interval.shallowClone();
   }
-  return new Interval(interval.value.clone(), 'linear', undefined, interval);
+  return new Interval(
+    interval.value.clone(),
+    'linear',
+    interval.steps,
+    undefined,
+    interval
+  );
 }
 linear.__doc__ = 'Convert interval to linear representation.';
 linear.__node__ = builtinNode(linear);
@@ -309,6 +323,7 @@ export function logarithmic(interval: Interval | boolean) {
   return new Interval(
     interval.value.clone(),
     'logarithmic',
+    interval.steps,
     undefined,
     interval
   );
@@ -332,12 +347,13 @@ export function absolute(
   }
   if (interval.isAbsolute()) {
     const te = interval.value.timeExponent;
-    if (te.equals(NEGATIVE_ONE)) {
+    if (NEGATIVE_ONE.equals(te)) {
       return interval.shallowClone();
     }
     return new Interval(
-      interval.value.pow(te.inverse().neg()),
+      interval.value.pow(te instanceof Fraction ? te.inverse().neg() : -1 / te),
       interval.domain,
+      interval.steps,
       undefined,
       interval
     );
@@ -350,6 +366,7 @@ export function absolute(
   return new Interval(
     interval.value.mul(this.rootContext.unisonFrequency),
     interval.domain,
+    interval.steps,
     undefined,
     interval
   );
@@ -384,6 +401,7 @@ export function relative(
   return new Interval(
     absolut.value.div(this.rootContext.unisonFrequency),
     interval.domain,
+    interval.steps,
     undefined,
     interval
   );
@@ -448,7 +466,7 @@ function fraction(
   const converted = relative.bind(this)(interval);
   let value: TimeMonzo;
   if (tolerance === undefined) {
-    if (!converted.value.isFractional()) {
+    if (converted.value instanceof TimeReal) {
       throw new Error('Input is irrational and no tolerance given.');
     }
     value = converted.value.clone();
@@ -471,7 +489,7 @@ function fraction(
     node.numerator *= factor;
     node.denominator = denominator;
   }
-  return new Interval(value, 'linear', node, interval);
+  return new Interval(value, 'linear', 0, node, interval);
 }
 fraction.__doc__ =
   'Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance (in cents) for approximation is given.';
@@ -490,11 +508,17 @@ function radical(
     const node = converted.value.asRadicalLiteral();
     if (maxIdx === undefined) {
       if (node) {
-        return new Interval(converted.value.clone(), 'linear', node, interval);
+        return new Interval(
+          converted.value.clone(),
+          'linear',
+          0,
+          node,
+          interval
+        );
       }
       throw new Error('Failed to convert to a radical.');
     } else if (node && node.exponent.d <= maxIdx) {
-      return new Interval(converted.value.clone(), 'linear', node, interval);
+      return new Interval(converted.value.clone(), 'linear', 0, node, interval);
     }
   } else if (maxIdx === undefined) {
     throw new Error('Input is irrational and no maximum index given.');
@@ -510,7 +534,7 @@ function radical(
   );
   const node = value.asRadicalLiteral();
   if (node) {
-    return new Interval(value, 'linear', node, interval);
+    return new Interval(value, 'linear', 0, node, interval);
   } else {
     const frac = approximateRadical(
       converted.value.valueOf(),
@@ -521,6 +545,7 @@ function radical(
     return new Interval(
       rational,
       'linear',
+      0,
       rational.asFractionLiteral(),
       interval
     );
@@ -594,7 +619,7 @@ export function nedji(
     node.equaveNumerator = null;
     node.equaveDenominator = null;
   }
-  return new Interval(rad.value, 'logarithmic', node, interval);
+  return new Interval(rad.value, 'logarithmic', 0, node, interval);
 }
 nedji.__doc__ =
   'Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.';
@@ -624,7 +649,7 @@ export function cents(
   converted.node = converted.value.asCentsLiteral();
   // XXX: Detect and follow grammar abuse.
   if (converted.node.fractional.endsWith('rc')) {
-    converted.value = TimeMonzo.fromCents(converted.totalCents());
+    converted.value = TimeReal.fromCents(converted.totalCents());
   }
   converted.domain = 'logarithmic';
   return converted;
@@ -655,13 +680,13 @@ function validateFlavor(flavor: string): FJSFlavor {
 // Coercion: None.
 function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   const C4 = this.rootContext.C4;
-  let monzo: TimeMonzo;
+  let monzo: TimeMonzo | TimeReal;
   if (C4.timeExponent.n === 0) {
     monzo = relative.bind(this)(interval).value;
   } else {
     monzo = absolute.bind(this)(interval).value;
   }
-  const result = new Interval(monzo, 'logarithmic', {
+  const result = new Interval(monzo, 'logarithmic', interval.steps, {
     type: 'AspiringAbsoluteFJS',
     flavor: validateFlavor(flavor),
   });
@@ -681,7 +706,7 @@ absoluteFJS.__node__ = builtinNode(absoluteFJS);
 // Coercion: None.
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
   const monzo = relative.bind(this)(interval).value;
-  const result = new Interval(monzo, 'logarithmic', {
+  const result = new Interval(monzo, 'logarithmic', interval.steps, {
     type: 'AspiringFJS',
     flavor: validateFlavor(flavor),
   });
@@ -737,44 +762,16 @@ labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 
 // Coercion: None.
 function toMonzo(this: ExpressionVisitor, interval: Interval) {
-  const monzo = interval.value;
-  let ups = 0;
-  let lifts = 0;
-  if (monzo.cents) {
-    const context = this.rootContext;
-    let steps = 0;
-    let residue = 0;
-    if (context.up.isRealCents() && context.lift.isRealCents()) {
-      ({ups, lifts, steps, residue} = countUpsAndLifts(
-        monzo.cents,
-        context.up.cents,
-        context.lift.cents
-      ));
-      if (steps || residue) {
-        return new Interval(
-          monzo,
-          'logarithmic',
-          monzo.asMonzoLiteral(),
-          interval
-        );
-      }
-    } else {
-      return new Interval(
-        monzo,
-        'logarithmic',
-        monzo.asMonzoLiteral(),
-        interval
-      );
-    }
+  if (interval.node?.type === 'MonzoLiteral') {
+    return interval.shallowClone();
   }
-  const clone = monzo.clone();
-  clone.cents = 0;
-  const node = clone.asMonzoLiteral();
-
-  node.ups = ups;
-  node.lifts = lifts;
-
-  return new Interval(monzo, 'logarithmic', node, interval);
+  return new Interval(
+    interval.value,
+    'logarithmic',
+    interval.steps,
+    interval.asMonzoLiteral(),
+    interval
+  );
 }
 Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});
 toMonzo.__doc__ = 'Convert interval to a prime count vector a.k.a. monzo.';
@@ -874,7 +871,7 @@ isRational.__node__ = builtinNode(isRational);
 
 function isRadical(interval: Interval) {
   requireParameters({interval});
-  return !interval.value.isNonAlgebraic();
+  return interval.value instanceof TimeMonzo;
 }
 isRadical.__doc__ = 'Return `true` if the interval is an nth root.';
 isRadical.__node__ = builtinNode(isRadical);
@@ -976,6 +973,7 @@ function tail(this: ExpressionVisitor, interval: Interval, index: Interval) {
   return new Interval(
     interval.value.tail(index.toInteger()),
     interval.domain,
+    interval.steps,
     undefined,
     interval
   );
@@ -1007,6 +1005,9 @@ equaveOf.__node__ = builtinNode(equaveOf);
 
 function withEquave(val: Val, equave: Interval) {
   requireParameters({val, equave});
+  if (equave.value instanceof TimeReal) {
+    throw new Error('Irrational equaves not supported.');
+  }
   return new Val(val.value.clone(), equave.value.clone());
 }
 withEquave.__doc__ = 'Change the equave of the val.';
@@ -1033,7 +1034,7 @@ function cosJIP(
     const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
     value = dot(LOG_PRIMES, pe) / peNorm / jipNorm;
   }
-  return new Interval(TimeMonzo.fromValue(value), 'linear');
+  return new Interval(TimeReal.fromValue(value), 'linear');
 }
 cosJIP.__doc__ =
   'Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".';
@@ -1042,16 +1043,17 @@ cosJIP.__node__ = builtinNode(cosJIP);
 function JIP(this: ExpressionVisitor, interval: Interval) {
   requireParameters({interval});
   const monzo = relative.bind(this)(interval).value;
+  if (monzo instanceof TimeReal) {
+    return new Interval(monzo, 'logarithmic', 0, undefined, interval);
+  }
   const pe = monzo.primeExponents.map(e => e.valueOf());
-  const value = TimeMonzo.fromCents(
-    dot(PRIME_CENTS, pe) +
-      valueToCents(Math.abs(monzo.residual.valueOf())) +
-      monzo.cents
+  const value = TimeReal.fromCents(
+    dot(PRIME_CENTS, pe) + valueToCents(Math.abs(monzo.residual.valueOf()))
   );
   if (monzo.residual.s < 0) {
-    value.residual.s = -1;
+    value.value = -value.value;
   }
-  return new Interval(value, 'logarithmic', undefined, interval);
+  return new Interval(value, 'logarithmic', 0, undefined, interval);
 }
 JIP.__doc__ = 'The Just Intonation Point. Converts intervals to real cents.';
 JIP.__node__ = builtinNode(JIP);
@@ -1067,8 +1069,17 @@ function PrimeMapping(
 
   function mapper(this: ExpressionVisitor, interval: Interval) {
     const monzo = relative.bind(this)(interval).value;
+    if (monzo instanceof TimeReal) {
+      return new Interval(
+        monzo,
+        'logarithmic',
+        interval.steps,
+        monzo.asCentsLiteral(),
+        interval
+      );
+    }
     monzo.numberOfComponents = np.length;
-    let mapped = new TimeMonzo(ZERO, [], monzo.residual, monzo.cents);
+    let mapped: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], monzo.residual);
     while (mapped.primeExponents.length < np.length) {
       mapped.primeExponents.push(ZERO);
     }
@@ -1078,6 +1089,7 @@ function PrimeMapping(
     return new Interval(
       mapped,
       'logarithmic',
+      interval.steps,
       mapped.asCentsLiteral(),
       interval
     );
@@ -1103,14 +1115,16 @@ PrimeMapping.__node__ = builtinNode(PrimeMapping);
  */
 export function tenneyHeight(this: ExpressionVisitor, interval: Interval) {
   const monzo = relative.bind(this)(interval).value;
+  if (monzo instanceof TimeReal) {
+    return new Interval(TimeReal.fromValue(Infinity), 'linear');
+  }
   const height =
-    centsToNats(Math.abs(monzo.cents)) +
     Math.log(monzo.residual.n * monzo.residual.d) +
     monzo.primeExponents.reduce(
       (total, pe, i) => total + Math.abs(pe.valueOf()) * LOG_PRIMES[i],
       0
     );
-  return new Interval(TimeMonzo.fromValue(height), 'linear');
+  return new Interval(TimeReal.fromValue(height), 'linear');
 }
 tenneyHeight.__doc__ =
   'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
@@ -1147,7 +1161,16 @@ function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
   const rel = relative.bind(this);
   const monzos = scale.map(i => rel(i).value);
-  return hasConstantStructure(monzos);
+  for (const monzo of monzos) {
+    if (monzo instanceof TimeReal) {
+      // XXX: Margin CS is not realiable with zero margin, but whatever.
+      return hasMarginConstantStructure(
+        monzos.map(m => m.totalCents()),
+        0
+      );
+    }
+  }
+  return hasConstantStructure(monzos as TimeMonzo[]);
 }
 Object.defineProperty(hasConstantStructure_, 'name', {
   value: 'hasConstantStructure',
@@ -1211,14 +1234,14 @@ zipLongest.__doc__ =
 zipLongest.__node__ = builtinNode(zipLongest);
 
 function random() {
-  const value = TimeMonzo.fromValue(Math.random());
+  const value = TimeReal.fromValue(Math.random());
   return new Interval(value, 'linear');
 }
 random.__doc__ = 'Obtain a random value between (linear) 0 and 1.';
 random.__node__ = builtinNode(random);
 
 function randomCents() {
-  const value = TimeMonzo.fromCents(Math.random());
+  const value = TimeReal.fromCents(Math.random());
   return new Interval(value, 'logarithmic');
 }
 randomCents.__doc__ =
@@ -1918,13 +1941,15 @@ export function factorColor(interval: Interval) {
   let r = 0;
   let g = 0;
   let b = 0;
-  const monzo = interval.value.primeExponents.map(f => f.valueOf());
-  for (let i = 0; i < Math.min(monzo.length, PRIME_RGB.length); ++i) {
-    const prgb = monzo[i] > 0 ? PRIME_RGB[i][0] : PRIME_RGB[i][1];
-    const m = Math.abs(monzo[i]);
-    r += prgb[0] * m;
-    g += prgb[1] * m;
-    b += prgb[2] * m;
+  if (interval.value instanceof TimeMonzo) {
+    const monzo = interval.value.primeExponents.map(f => f.valueOf());
+    for (let i = 0; i < Math.min(monzo.length, PRIME_RGB.length); ++i) {
+      const prgb = monzo[i] > 0 ? PRIME_RGB[i][0] : PRIME_RGB[i][1];
+      const m = Math.abs(monzo[i]);
+      r += prgb[0] * m;
+      g += prgb[1] * m;
+      b += prgb[2] * m;
+    }
   }
   return new Color(`rgb(${tanh255(r)}, ${tanh255(g)}, ${tanh255(b)})`);
 }

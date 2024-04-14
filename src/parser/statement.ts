@@ -1,5 +1,5 @@
 import {Interval, Color, Val} from '../interval';
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -483,21 +483,28 @@ export class StatementVisitor {
 
       const C4: TimeMonzo = this.rootContext.C4;
 
-      this.rootContext.C4 = C4.mul(value.value).div(pitch.value);
+      const newC4 = C4.mul(value.value).div(pitch.value);
+      if (newC4 instanceof TimeReal) {
+        throw new Error('Cannot declare a non-algebraic pitch.');
+      }
+      this.rootContext.C4 = newC4;
       // Coerce absolute reference to Hz
       if (this.rootContext.C4.timeExponent.n) {
         this.rootContext.C4 = this.rootContext.C4.pow(
           this.rootContext.C4.timeExponent.inverse().neg()
-        );
+        ) as TimeMonzo;
       }
 
       if (!node.middle) {
+        if (value.value instanceof TimeReal) {
+          throw new Error('Cannot declare non-algebraic unison.');
+        }
         // Implicit 1/1
         if (value.value.timeExponent.n) {
           const absolute = value.value;
           this.rootContext.unisonFrequency = absolute.pow(
             absolute.timeExponent.inverse().neg()
-          );
+          ) as TimeMonzo;
         }
         return undefined;
       }
@@ -506,6 +513,12 @@ export class StatementVisitor {
     const right = subVisitor.visit(node.right);
     if (!(left instanceof Interval && right instanceof Interval)) {
       throw new Error('Pitch declaration must evaluate to an interval.');
+    }
+    if (left.value instanceof TimeReal) {
+      throw new Error('Cannot declare non-algebraic pitch.');
+    }
+    if (right.value instanceof TimeReal) {
+      throw new Error('Cannot declare non-algebraic reference frequency.');
     }
     let absolute: TimeMonzo;
     let relative: TimeMonzo;
@@ -521,7 +534,7 @@ export class StatementVisitor {
     }
     this.rootContext.unisonFrequency = absolute
       .pow(absolute.timeExponent.inverse().neg())
-      .div(relative);
+      .div(relative) as TimeMonzo;
     return undefined;
   }
 
@@ -531,7 +544,7 @@ export class StatementVisitor {
     if (!(value instanceof Interval)) {
       throw new Error('Up declaration must evaluate to an interval.');
     }
-    this.rootContext.up = value.value;
+    this.rootContext.up = value.shallowClone();
     return undefined;
   }
 
@@ -541,7 +554,7 @@ export class StatementVisitor {
     if (!(value instanceof Interval)) {
       throw new Error('Lift declaration must evaluate to an interval.');
     }
-    this.rootContext.lift = value.value;
+    this.rootContext.lift = value.shallowClone();
     return undefined;
   }
 
@@ -580,6 +593,7 @@ export class StatementVisitor {
       const step = new Interval(
         TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
         'logarithmic',
+        0,
         {
           type: 'NedjiLiteral',
           numerator: divisions.d,

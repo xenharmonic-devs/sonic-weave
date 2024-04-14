@@ -2,12 +2,25 @@ import {describe, it, expect} from 'vitest';
 import {evaluateExpression} from '..';
 import {Color, Interval, Val} from '../../interval';
 import {TimeMonzo} from '../../monzo';
-import {valueToCents} from 'xen-dev-utils';
 
 function parseSingle(source: string) {
-  const value = evaluateExpression(source, false);
-  expect(value).toBeInstanceOf(Interval);
-  return value as Interval;
+  const interval = evaluateExpression(source, false);
+  expect(interval).toBeInstanceOf(Interval);
+  if (interval instanceof Interval) {
+    expect(interval.value).toBeInstanceOf(TimeMonzo);
+    if (interval.value instanceof TimeMonzo) {
+      let fraction: undefined | string = undefined;
+      if (interval.value.isFractional()) {
+        try {
+          fraction = interval.value.toFraction().toFraction();
+        } catch {
+          /** empty */
+        }
+      }
+      return {interval, value: interval.value, fraction};
+    }
+  }
+  throw new Error('Unreachable.');
 }
 
 function evaluate(source: string) {
@@ -31,29 +44,28 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('adds two nedos with denominator preference', () => {
-    const interval = parseSingle('4\\12 + 2\\12');
+    const {interval} = parseSingle('4\\12 + 2\\12');
     expect(interval.toString()).toBe('6\\12');
   });
 
   it('adds a number to nedo (left preference)', () => {
-    const interval = parseSingle('2 ~+ 3\\3');
+    const {interval} = parseSingle('2 ~+ 3\\3');
     expect(interval.toString()).toBe('4');
   });
 
   it('adds a number to nedo (right preference)', () => {
-    const interval = parseSingle('2 +~ 3\\3');
+    const {interval} = parseSingle('2 +~ 3\\3');
     expect(interval.toString()).toBe('6\\3');
   });
 
   it('adds a number to nedo (impossible right preference)', () => {
-    const interval = parseSingle('1 +~ 3\\3');
+    const {interval} = parseSingle('1 +~ 3\\3');
     expect(interval.toString()).toBe('1\\1<3>');
   });
 
   it('accesses variables', () => {
-    const interval = parseSingle('TAU');
-    // The correct value is actually 6.283185307179586, but it gets mushed a bit along the way.
-    expect(interval.toString()).toBe('6.283185307179587r');
+    const interval = evaluate('TAU') as Interval;
+    expect(interval.toString()).toBe('6.283185307179586r');
   });
 
   it('evaluates a color', () => {
@@ -63,19 +75,19 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('adds hertz', () => {
-    const interval = parseSingle('69 mHz + 420 Hz + 9 kHz');
+    const {interval} = parseSingle('69 mHz + 420 Hz + 9 kHz');
     expect(interval.toString()).toBe('9420.069 Hz');
   });
 
   it('subtracts cents', () => {
-    const interval = parseSingle('1.955 - 1c');
+    const {interval} = parseSingle('1.955 - 1c');
     expect(interval.totalCents()).toBeCloseTo(0.955);
   });
 
   it('supports pythagorean relative notation', () => {
-    const sixth = parseSingle('M6');
-    expect(sixth.value.toFraction().toFraction()).toBe('27/16');
-    expect(sixth.toString()).toBe('M6');
+    const {interval, fraction} = parseSingle('M6');
+    expect(fraction).toBe('27/16');
+    expect(interval.toString()).toBe('M6');
   });
 
   it('supports neutral intervals', () => {
@@ -110,13 +122,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses monzos', () => {
-    const monzo = parseSingle('[+7, 11e-1, 1.4>');
-    expect(monzo.domain).toBe('logarithmic');
-    const pe = monzo.value.primeExponents;
+    const {interval, value} = parseSingle('[+7, 11e-1, 1.4>');
+    expect(interval.domain).toBe('logarithmic');
+    const pe = value.primeExponents;
     expect(pe[0].toFraction()).toBe('7');
     expect(pe[1].toFraction()).toBe('11/10');
     expect(pe[2].toFraction()).toBe('7/5');
-    expect(monzo.toString()).toBe('[7 11e-1 1.4>');
+    expect(interval.toString()).toBe('[7 11e-1 1.4>');
   });
 
   it('parses vals', () => {
@@ -138,20 +150,20 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a reciprocal cent', () => {
-    const one = parseSingle('1c dot €');
-    expect(one.toString()).toBe('1');
+    const {interval} = parseSingle('1c dot €');
+    expect(interval.toString()).toBe('1');
   });
 
   it('supports relative FJS', () => {
-    const third = parseSingle('M3^5');
-    expect(third.value.toFraction().toFraction()).toBe('5/4');
-    expect(third.toString()).toBe('M3^5');
+    const {interval, fraction} = parseSingle('M3^5');
+    expect(fraction).toBe('5/4');
+    expect(interval.toString()).toBe('M3^5');
   });
 
   it('supports neutral FJS', () => {
-    const sixth = parseSingle('n6_11n');
-    expect(sixth.value.toFraction().toFraction()).toBe('18/11');
-    expect(sixth.toString()).toBe('n6_11n');
+    const {interval, fraction} = parseSingle('n6_11n');
+    expect(fraction).toBe('18/11');
+    expect(interval.toString()).toBe('n6_11n');
   });
 
   it('has access to NFJS accidentals on rationals (relative)', () => {
@@ -170,89 +182,89 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses the cursed tritone', () => {
-    const tritone = parseSingle('14E-1');
-    expect(tritone.value.toFraction().toFraction()).toBe('7/5');
-    expect(tritone.toString()).toBe('14e-1');
+    const {interval, fraction} = parseSingle('14E-1');
+    expect(fraction).toBe('7/5');
+    expect(interval.toString()).toBe('14e-1');
   });
 
   it('parses nedji', () => {
-    const darkFifth = parseSingle('7\\5<4/3>');
-    const {fractionOfEquave, equave} = darkFifth.value.toEqualTemperament();
+    const {interval, value} = parseSingle('7\\5<4/3>');
+    const {fractionOfEquave, equave} = value.toEqualTemperament();
     expect(fractionOfEquave.toFraction()).toBe('7/5');
     expect(equave.toFraction()).toBe('4/3');
-    expect(darkFifth.toString()).toBe('7\\5<4/3>');
+    expect(interval.toString()).toBe('7\\5<4/3>');
   });
 
   it('can color and label an interval directly', () => {
-    const greenFifth = parseSingle('1.5e0 green "fifth"');
-    expect(greenFifth.color?.value).toBe('green');
-    expect(greenFifth.label).toBe('fifth');
+    const {interval} = parseSingle('1.5e0 green "fifth"');
+    expect(interval.color?.value).toBe('green');
+    expect(interval.label).toBe('fifth');
   });
 
   it('can format the half eleventh', () => {
-    const neutralSixth = parseSingle('P11 % 2');
-    expect(neutralSixth.toString()).toBe('n6');
+    const {interval} = parseSingle('P11 % 2');
+    expect(interval.toString()).toBe('n6');
   });
 
   it('can format the double tone', () => {
-    const majorThird = parseSingle('M2 * 2');
-    expect(majorThird.toString()).toBe('M3');
+    const {interval} = parseSingle('M2 * 2');
+    expect(interval.toString()).toBe('M3');
   });
 
   it('can format the half twelfth', () => {
-    const majorSixAndAHalfth = parseSingle('P12 % 2');
-    expect(majorSixAndAHalfth.toString()).toBe('m6.5');
+    const {interval} = parseSingle('P12 % 2');
+    expect(interval.toString()).toBe('m6.5');
   });
 
   it("bails out when there's no Pythagorean to match", () => {
-    const thirdFifth = parseSingle('P5 % 3');
-    expect(thirdFifth.toString()).toBe('1\\3<3/2>');
+    const {interval} = parseSingle('P5 % 3');
+    expect(interval.toString()).toBe('1\\3<3/2>');
   });
 
   it('can format a decimal', () => {
-    const minorThird = parseSingle('1,2');
-    expect(minorThird.toString()).toBe('1.2e');
+    const {interval} = parseSingle('1,2');
+    expect(interval.toString()).toBe('1.2e');
   });
 
   it('can convert FJS to monzo', () => {
-    const monzo = parseSingle('monzo(vm6_5)');
-    expect(monzo.toString()).toBe('v[3 0 -1>');
+    const {interval} = parseSingle('monzo(vm6_5)');
+    expect(interval.toString()).toBe('[-1 3 0 -1>@1°.2..');
   });
 
   it('can convert zero to subgroup monzo', () => {
-    const monzo = parseSingle('monzo(0)');
-    expect(monzo.toString()).toBe('[1>@0');
+    const {interval} = parseSingle('monzo(0)');
+    expect(interval.toString()).toBe('[1>@0');
   });
 
   it('can parse the monzo representation of zero', () => {
-    const zero = parseSingle('[1>@0');
-    expect(zero.valueOf()).toBe(0);
+    const {interval} = parseSingle('[1>@0');
+    expect(interval.valueOf()).toBe(0);
   });
 
   it('can convert negative twelve to subgroup monzo', () => {
-    const monzo = parseSingle('monzo(-12)');
-    expect(monzo.toString()).toBe('[1 2 1>@-1.2..');
+    const {interval} = parseSingle('monzo(-12)');
+    expect(interval.toString()).toBe('[1 2 1>@-1.2..');
   });
 
   it('can parse the monzo representation of negative unity', () => {
-    const minusOne = parseSingle('[1>@-1');
-    expect(minusOne.valueOf()).toBe(-1);
+    const {interval} = parseSingle('[1>@-1');
+    expect(interval.valueOf()).toBe(-1);
   });
 
   it('can convert 13231/13184 to monzo', () => {
-    const foo = parseSingle('monzo(13231/13184)');
-    expect(foo.toString()).toBe('[1 -7>@13231/103.2');
+    const {interval} = parseSingle('monzo(13231/13184)');
+    expect(interval.toString()).toBe('[1 -7>@13231/103.2');
   });
 
   it('can convert 1 Hz to monzo', () => {
-    const pulse = parseSingle('monzo(1z)');
-    expect(pulse.toString()).toBe('[1>@Hz');
+    const {interval} = parseSingle('monzo(1z)');
+    expect(interval.toString()).toBe('[1>@Hz');
   });
 
   it('can parse the monzo representation of 1 Hz', () => {
-    const pulse = parseSingle('[1>@Hz');
-    expect(pulse.valueOf()).toBe(1);
-    expect(pulse.value.timeExponent.equals(-1)).toBe(true);
+    const {interval, value} = parseSingle('[1>@Hz');
+    expect(interval.valueOf()).toBe(1);
+    expect(value.timeExponent.equals(-1)).toBe(true);
   });
 
   it('can convert cents to boolean', () => {
@@ -261,8 +273,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert boolean to cents', () => {
-    const zeroCents = parseSingle('cents(true)');
-    expect(zeroCents.toString()).toBe('0.');
+    const {interval} = parseSingle('cents(true)');
+    expect(interval.toString()).toBe('0.');
   });
 
   it('fails to converts pi to an integer', () => {
@@ -270,13 +282,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to a real decimal', () => {
-    const pi = parseSingle('decimal(PI)');
-    expect(pi.toString()).toBe('3.141592653589793r');
+    const interval = evaluate('decimal(PI)') as Interval;
+    expect(interval.toString()).toBe('3.141592653589793r');
   });
 
   it('converts pi to a rational decimal', () => {
-    const pi = parseSingle('decimal(PI, 5)');
-    expect(pi.toString()).toBe('3.14159e');
+    const {interval} = parseSingle('decimal(PI, 5)');
+    expect(interval.toString()).toBe('3.14159e');
   });
 
   it('fails to convert pi to a fraction', () => {
@@ -284,23 +296,23 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to a fraction', () => {
-    const approximation = parseSingle('fraction(PI, 0.5)');
-    expect(approximation.toString()).toBe('333/106');
+    const {interval} = parseSingle('fraction(PI, 0.5)');
+    expect(interval.toString()).toBe('333/106');
   });
 
   it('converts pi to a radical (outside of prime limit)', () => {
-    const approximation = parseSingle('radical(PI, 5)');
-    expect(approximation.toString()).toBe('355/113');
+    const {interval} = parseSingle('radical(PI, 5)');
+    expect(interval.toString()).toBe('355/113');
   });
 
   it('converts pi to a radical (within prime limit)', () => {
-    const approximation = parseSingle('radical(PI, 10, 1000)');
-    expect(approximation.toString()).toBe('306^1/5');
+    const {interval} = parseSingle('radical(PI, 10, 1000)');
+    expect(interval.toString()).toBe('306^1/5');
   });
 
   it('converts pi to soft cents', () => {
-    const approximation = parseSingle('cents(PI, 3)');
-    expect(approximation.toString()).toBe('1981.795');
+    const {interval} = parseSingle('cents(PI, 3)');
+    expect(interval.toString()).toBe('1981.795');
   });
 
   it('fails to convert pi to NEDJI', () => {
@@ -308,13 +320,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts pi to monzo', () => {
-    const realMonzo = parseSingle('monzo(PI)');
-    expect(realMonzo.toString()).toBe('[1981.7953553667824>@rc');
+    const interval = evaluate('monzo(PI)') as Interval;
+    expect(interval.toString()).toBe('[1981.7953553667824>@rc');
   });
 
   it('parses a real monzo', () => {
-    const pi = parseSingle('[1981.7953553667824>@rc');
-    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+    const interval = evaluate('[1981.7953553667824>@rc') as Interval;
+    expect(interval.valueOf()).toBeCloseTo(Math.PI);
   });
 
   it.each([
@@ -345,12 +357,12 @@ describe('SonicWeave expression evaluator', () => {
         'linear',
         'logarithmic',
       ]) {
-        const value = parseSingle(
+        const value = evaluate(
           `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`
-        );
-        const iterated = parseSingle(
+        ) as Interval;
+        const iterated = evaluate(
           `A=4 = 440 Hz = 27/16; ${value.toString()}`
-        );
+        ) as Interval;
         expect(iterated.domain).toBe(value.domain);
         expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
       }
@@ -358,10 +370,10 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a string representation for an absurd absolute quantity', () => {
-    const value = parseSingle(
+    const value = evaluate(
       'A=4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))'
-    );
-    const iterated = parseSingle(value.toString());
+    ) as Interval;
+    const iterated = evaluate(value.toString()) as Interval;
     expect(iterated.domain).toBe(value.domain);
     expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
   });
@@ -380,45 +392,45 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has lifts', () => {
-    const liftUnison = parseSingle('/P1');
-    expect(liftUnison.value.cents).toBe(5);
-    expect(liftUnison.totalCents()).toBe(5);
+    const {interval} = parseSingle('/P1');
+    expect(interval.steps).toBe(5);
+    expect(interval.totalCents()).toBe(0);
   });
 
   it('has drops', () => {
-    const liftUnison = parseSingle('\\P1');
-    expect(liftUnison.value.cents).toBe(-5);
-    expect(liftUnison.totalCents()).toBe(-5);
+    const {interval} = parseSingle('\\P1');
+    expect(interval.steps).toBe(-5);
+    expect(interval.totalCents()).toBe(0);
   });
 
   it('has steps', () => {
-    const seven = parseSingle('7\\');
-    expect(seven.value.cents).toBe(7);
-    expect(seven.totalCents()).toBe(7);
+    const {interval} = parseSingle('7\\');
+    expect(interval.steps).toBe(7);
+    expect(interval.totalCents()).toBe(0);
   });
 
   it('has gcd', () => {
-    const six = parseSingle('gcd(30, 84)');
-    expect(six.toString()).toBe('6');
+    const {interval} = parseSingle('gcd(30, 84)');
+    expect(interval.toString()).toBe('6');
   });
 
   it('has lcm', () => {
-    const fourTwenty = parseSingle('lcm(30, 84)');
-    expect(fourTwenty.toString()).toBe('420');
+    const {interval} = parseSingle('lcm(30, 84)');
+    expect(interval.toString()).toBe('420');
   });
 
   it('has a just intonation point', () => {
-    const marvelCents = parseSingle('JIP(225/224)');
-    expect(marvelCents.toString()).toBe('7.711522991319271rc');
+    const marvelCents = evaluate('JIP(225/224)') as Interval;
+    expect(marvelCents.toString()).toBe('7.711522991319323rc');
   });
 
   it('parses negative intervals correctly', () => {
-    const interval = parseSingle('aa-2');
+    const {interval} = parseSingle('aa-2');
     expect(interval.totalCents()).toBeCloseTo(-431.28);
   });
 
   it('converts negative intervals correctly', () => {
-    const interval = parseSingle('FJS([25 -16>)');
+    const {interval} = parseSingle('FJS([25 -16>)');
     expect(interval.toString()).toBe('aa-2');
   });
 
@@ -433,45 +445,45 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a fancy cent', () => {
-    const centisemioctave = parseSingle('1¢');
-    expect(centisemioctave.toString()).toBe('1.');
+    const {interval} = parseSingle('1¢');
+    expect(interval.toString()).toBe('1.');
   });
 
   it('can add FJS', () => {
-    const augmentedFifth = parseSingle('M3 + M3');
-    expect(augmentedFifth.toString()).toBe('a5');
+    const {interval} = parseSingle('M3 + M3');
+    expect(interval.toString()).toBe('a5');
   });
 
   it('can mod FJS', () => {
-    const majorThird = parseSingle('M17^5 mod P8');
-    expect(majorThird.toString()).toBe('M3^5');
+    const {interval} = parseSingle('M17^5 mod P8');
+    expect(interval.toString()).toBe('M3^5');
   });
 
   it('can round FJS', () => {
-    const doubleOctave = parseSingle('M17^5 to P8');
-    expect(doubleOctave.toString()).toBe('P15');
+    const {interval} = parseSingle('M17^5 to P8');
+    expect(interval.toString()).toBe('P15');
   });
 
   it('can multiply FJS', () => {
-    const majorThird = parseSingle('M2 * 2');
-    expect(majorThird.toString()).toBe('M3');
+    const {interval} = parseSingle('M2 * 2');
+    expect(interval.toString()).toBe('M3');
   });
 
   it('can split FJS', () => {
-    const perfectFourth = parseSingle('m7 % 2');
-    expect(perfectFourth.toString()).toBe('P4');
+    const {interval} = parseSingle('m7 % 2');
+    expect(interval.toString()).toBe('P4');
   });
 
   it('can wing sum FJS', () => {
-    const eight = parseSingle('P12 ~+~ M17^5');
-    expect(eight.toString()).toBe('P22');
+    const {interval} = parseSingle('P12 ~+~ M17^5');
+    expect(interval.toString()).toBe('P22');
   });
 
   it('can measure the quality of vals', () => {
-    const prettyGood = parseSingle('cosJIP(12@.5)');
+    const prettyGood = evaluate('cosJIP(12@.5)') as Interval;
     expect(prettyGood.valueOf()).toBeCloseTo(1, 5);
 
-    const great = parseSingle('cosJIP(53@.5)');
+    const great = evaluate('cosJIP(53@.5)') as Interval;
     expect(great.valueOf()).toBeCloseTo(1, 7);
   });
 
@@ -489,13 +501,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('produces a cents literal from cent multiplication (integer)', () => {
-    const eightyEight = parseSingle('88 c');
-    expect(eightyEight?.toString()).toBe('88.');
+    const {interval} = parseSingle('88 c');
+    expect(interval.toString()).toBe('88.');
   });
 
   it('produces a cents literal from cent multiplication (decimal)', () => {
-    const eightyEight = parseSingle('12.03 c');
-    expect(eightyEight?.toString()).toBe('12.03');
+    const {interval} = parseSingle('12.03 c');
+    expect(interval.toString()).toBe('12.03');
   });
 
   it('preserves absolute FJS formatting', () => {
@@ -504,8 +516,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('preserves lifts on monzos', () => {
-    const liftFifth = parseSingle('/[-1 1>');
-    expect(liftFifth?.toString()).toBe('/[-1 1>');
+    const {interval} = parseSingle('/[-1 1>');
+    expect(interval.toString()).toBe('/[-1 1>');
   });
 
   it('preserves neutral FJS formatting', () => {
@@ -529,51 +541,51 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a lower-case hertz literal', () => {
-    const ninety = parseSingle('90hz');
-    expect(ninety.isAbsolute()).toBe(true);
-    expect(ninety.value.valueOf()).toBeCloseTo(90);
+    const {interval} = parseSingle('90hz');
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.value.valueOf()).toBeCloseTo(90);
   });
 
   it('has zepto hertz', () => {
-    const smol = parseSingle('1 zhz');
-    expect(smol.isAbsolute()).toBe(true);
-    expect(smol.value.valueOf()).toBeCloseTo(1e-21);
+    const {interval} = parseSingle('1 zhz');
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.value.valueOf()).toBeCloseTo(1e-21);
   });
 
   it('has hecto hertz', () => {
-    const chonk = parseSingle('1hHz');
-    expect(chonk.isAbsolute()).toBe(true);
-    expect(chonk.value.valueOf()).toBeCloseTo(100);
+    const {interval} = parseSingle('1hHz');
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.value.valueOf()).toBeCloseTo(100);
   });
 
   it('has exponentiation as a binary operation', () => {
-    const nine = parseSingle('3 ^ 2');
-    expect(nine.toInteger()).toBe(9);
+    const {interval} = parseSingle('3 ^ 2');
+    expect(interval.toInteger()).toBe(9);
   });
 
   it('has inverse exponentiation as a binary operation', () => {
-    const three = parseSingle('9 /^ 2');
-    expect(three.toInteger()).toBe(3);
+    const {interval} = parseSingle('9 /^ 2');
+    expect(interval.toInteger()).toBe(3);
   });
 
   it('has inverse exponentiation as a binary operation (alternative spelling)', () => {
-    const three = parseSingle('9 ^/ 2');
-    expect(three.toInteger()).toBe(3);
+    const {interval} = parseSingle('9 ^/ 2');
+    expect(interval.toInteger()).toBe(3);
   });
 
   it('has the logarithm as a binary operation', () => {
-    const two = parseSingle('9 /_ 3');
-    expect(two.toInteger()).toBe(2);
+    const {interval} = parseSingle('9 /_ 3');
+    expect(interval.toInteger()).toBe(2);
   });
 
   it('supports underscores as separators (integer)', () => {
-    const million = parseSingle('1_000_000');
-    expect(million.toInteger()).toBe(1_000_000);
+    const {interval} = parseSingle('1_000_000');
+    expect(interval.toInteger()).toBe(1_000_000);
   });
 
   it('supports underscores as separators (fraction)', () => {
-    const comma = parseSingle('1_000_001/1_000_000');
-    expect(comma.toString()).toBe('1000001/1000000');
+    const {interval} = parseSingle('1_000_001/1_000_000');
+    expect(interval.toString()).toBe('1000001/1000000');
   });
 
   it('supports hsl colors', () => {
@@ -616,24 +628,24 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('preserves labels based on preference (left)', () => {
-    const limeTone = parseSingle('(9 lime) ~rd (2 tomato)');
-    expect(limeTone.color?.value).toBe('lime');
+    const {interval} = parseSingle('(9 lime) ~rd (2 tomato)');
+    expect(interval.color?.value).toBe('lime');
   });
 
   it('preserves labels based on preference (right)', () => {
-    const limeTone = parseSingle('(9 lime) rd~ (2 tomato)');
-    expect(limeTone.color?.value).toBe('tomato');
+    const {interval} = parseSingle('(9 lime) rd~ (2 tomato)');
+    expect(interval.color?.value).toBe('tomato');
   });
 
   it('resolves labels based on preference (wings)', () => {
-    const limeTone = parseSingle('(9 lime) ~rd~ (2 tomato)');
-    expect(limeTone.color?.value).toBe('lime');
+    const {interval} = parseSingle('(9 lime) ~rd~ (2 tomato)');
+    expect(interval.color?.value).toBe('lime');
   });
 
   it('has infectious labels', () => {
-    const redTone = parseSingle('(8 "redtone") % (7 red)');
-    expect(redTone.color?.value).toBe('red');
-    expect(redTone.label).toBe('redtone');
+    const {interval} = parseSingle('(8 "redtone") % (7 red)');
+    expect(interval.color?.value).toBe('red');
+    expect(interval.label).toBe('redtone');
   });
 
   it('can simplify formatting', () => {
@@ -671,28 +683,28 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has ceiling modulo', () => {
-    const negativeFour = parseSingle('(-4) modc (-4)');
-    expect(negativeFour.toInteger()).toBe(-4);
+    const {interval} = parseSingle('(-4) modc (-4)');
+    expect(interval.toInteger()).toBe(-4);
   });
 
   it("doesn't let you color pi (variable)", () => {
-    const purePi = parseSingle('PI chocolate;PI');
+    const purePi = evaluate('PI chocolate;PI') as Interval;
     expect(purePi.color?.value).toBe(undefined);
   });
 
   it("doesn't let you color pi (scale)", () => {
-    const purePi = parseSingle('PI;chocolate;PI');
+    const purePi = evaluate('PI;chocolate;PI') as Interval;
     expect(purePi.color?.value).toBe(undefined);
   });
 
   it('can color nedji', () => {
-    const blueBP = parseSingle('9\\13<3> blue');
-    expect(blueBP.color?.value).toBe('blue');
+    const {interval} = parseSingle('9\\13<3> blue');
+    expect(interval.color?.value).toBe('blue');
   });
 
   it('can color nedji projection', () => {
-    const blueBP = parseSingle('9\\13 ed 3 blue');
-    expect(blueBP.color?.value).toBe('blue');
+    const {interval} = parseSingle('9\\13 ed 3 blue');
+    expect(interval.color?.value).toBe('blue');
   });
 
   it('can add vals', () => {
@@ -701,38 +713,38 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('knows how to calculate logarithms of negative values', () => {
-    const three = parseSingle('(-8) /_ (-2)');
-    expect(three.toString()).toBe('3');
+    const {interval} = parseSingle('(-8) /_ (-2)');
+    expect(interval.toString()).toBe('3');
   });
 
   it('knows how to calculate logarithms of negative radicals', () => {
-    const three = parseSingle('(-2^3/2) /_ (-2^1/2)');
-    expect(three.toString()).toBe('3');
+    const {interval} = parseSingle('(-2^3/2) /_ (-2^1/2)');
+    expect(interval.toString()).toBe('3');
   });
 
   it('knows how to calculate negative logarithms', () => {
-    const minusTwo = parseSingle('1/9 /_ 3');
-    expect(minusTwo.toString()).toBe('-2');
+    const {interval} = parseSingle('1/9 /_ 3');
+    expect(interval.toString()).toBe('-2');
   });
 
   it('has an accurate rdc', () => {
-    const thirtyOne = parseSingle('29791 rdc 31');
-    expect(thirtyOne.toString()).toBe('31');
+    const {interval} = parseSingle('29791 rdc 31');
+    expect(interval.toString()).toBe('31');
   });
 
   it('can calculate log pi base two', () => {
-    const logPi = parseSingle('PI /_ 2');
+    const logPi = evaluate('PI /_ 2') as Interval;
     expect(logPi.toString()).toBe('1.6514961294723187r');
   });
 
   it('can calculate log 2 base pi', () => {
-    const logPi = parseSingle('2 /_ PI');
+    const logPi = evaluate('2 /_ PI') as Interval;
     expect(logPi.toString()).toBe('0.6055115613982802r');
   });
 
   it('calculates geometric absolute value', () => {
-    const six = parseSingle('abs(logarithmic(-1/6))');
-    expect(six.toString()).toBe('1\\1<6>');
+    const {interval} = parseSingle('abs(logarithmic(-1/6))');
+    expect(interval.toString()).toBe('1\\1<6>');
   });
 
   it('can put variables into arrays', () => {
@@ -741,12 +753,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('reduces 6 by 3', () => {
-    const two = parseSingle('6 rdc 3');
-    expect(two.toString()).toBe('2');
+    const {interval} = parseSingle('6 rdc 3');
+    expect(interval.toString()).toBe('2');
   });
 
   it('calculates tenney height of 5/3', () => {
-    const value = parseSingle('tenneyHeight(5/3)');
+    const value = evaluate('tenneyHeight(5/3)') as Interval;
     expect(value.valueOf()).toBeCloseTo(2.70805);
   });
 
@@ -756,24 +768,24 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('clears colors using niente', () => {
-    const myFifth = parseSingle('1,5 lime "my fifth" niente');
-    expect(myFifth.color).toBeUndefined;
-    expect(myFifth.label).toBe('my fifth');
+    const {interval} = parseSingle('1,5 lime "my fifth" niente');
+    expect(interval.color).toBeUndefined;
+    expect(interval.label).toBe('my fifth');
   });
 
   it('supports fraction formatting preference (numerator)', () => {
-    const fifth = parseSingle('fraction(1.5e, niente, 6)');
-    expect(fifth.toString()).toBe('6/4');
+    const {interval} = parseSingle('fraction(1.5e, niente, 6)');
+    expect(interval.toString()).toBe('6/4');
   });
 
   it('supports fraction formatting preference (denominator)', () => {
-    const fifth = parseSingle('fraction(1.5e, niente, 0, 6)');
-    expect(fifth.toString()).toBe('9/6');
+    const {interval} = parseSingle('fraction(1.5e, niente, 0, 6)');
+    expect(interval.toString()).toBe('9/6');
   });
 
   it('supports nedji formatting preference', () => {
-    const third = parseSingle('nedji(1\\3, 0, 12)');
-    expect(third.toString()).toBe('4\\12');
+    const {interval} = parseSingle('nedji(1\\3, 0, 12)');
+    expect(interval.toString()).toBe('4\\12');
   });
 
   it('can use "s" as a handy inflection', () => {
@@ -792,23 +804,23 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has harmonic addition', () => {
-    const value = parseSingle('3/2 /+ 5/3');
-    expect(value.toString()).toBe('15/19');
+    const {interval} = parseSingle('3/2 /+ 5/3');
+    expect(interval.toString()).toBe('15/19');
   });
 
   it('has harmonic subtraction', () => {
-    const value = parseSingle('15/19 /- 5/3');
-    expect(value.toString()).toBe('3/2');
+    const {interval} = parseSingle('15/19 /- 5/3');
+    expect(interval.toString()).toBe('3/2');
   });
 
   it('has something better left unnamed', () => {
-    const ghost = parseSingle('P5 /+ M3^5');
-    expect(ghost.toString()).toBe('1\\11<6075/512>');
+    const {interval} = parseSingle('P5 /+ M3^5');
+    expect(interval.toString()).toBe('1\\11<6075/512>');
   });
 
   it('has something even stranger', () => {
-    const third = parseSingle('1\\11<6075/512> /- P5');
-    expect(third.toString()).toBe('1\\1<5/4>');
+    const {interval} = parseSingle('1\\11<6075/512> /- P5');
+    expect(interval.toString()).toBe('1\\1<5/4>');
   });
 
   it('has flat multiple array comprehensions', () => {
@@ -845,19 +857,19 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('produces cents from addition', () => {
-    const nineHundred = parseSingle('894.9 + 5.1');
-    expect(nineHundred.toString()).toBe('900.');
+    const {interval} = parseSingle('894.9 + 5.1');
+    expect(interval.toString()).toBe('900.');
   });
 
   it('produces cents from subtraction', () => {
-    const nineHundred = parseSingle('905.1 - 5.1');
-    expect(nineHundred.toString()).toBe('900.');
+    const {interval} = parseSingle('905.1 - 5.1');
+    expect(interval.toString()).toBe('900.');
   });
 
   it('has explicit subgroups for monzos', () => {
-    const semifourth = parseSingle('[0, 1, -1>@2.3.13/5');
-    expect(semifourth.toString()).toBe('[0 1 -1>@2.3.13/5');
-    expect(semifourth.value.toFraction().toFraction()).toBe('15/13');
+    const {interval, fraction} = parseSingle('[0, 1, -1>@2.3.13/5');
+    expect(interval.toString()).toBe('[0 1 -1>@2.3.13/5');
+    expect(fraction).toBe('15/13');
   });
 
   it('has explicit subgroups for vals', () => {
@@ -877,8 +889,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has trivial tensoring', () => {
-    const fifteen = parseSingle('3 tns 5');
-    expect(fifteen.toString()).toBe('15');
+    const {interval} = parseSingle('3 tns 5');
+    expect(interval.toString()).toBe('15');
   });
 
   it('has rank-1 tensoring (left)', () => {
@@ -946,13 +958,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses binary nedo over a step literal (identifier)', () => {
-    const tritone = parseSingle('const two = 2;1\\two');
-    expect(tritone.toString()).toBe('1\\2');
+    const {interval} = parseSingle('const two = 2;1\\two');
+    expect(interval.toString()).toBe('1\\2');
   });
 
   it('parses binary nedo over a step literal (call)', () => {
-    const tritone = parseSingle('1\\trunc(2.2e)');
-    expect(tritone.toString()).toBe('1\\2');
+    const {interval} = parseSingle('1\\trunc(2.2e)');
+    expect(interval.toString()).toBe('1\\2');
   });
 
   it('formats non-standard simplified vals', () => {
@@ -971,21 +983,21 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has square superparticulars', () => {
-    const archy = parseSingle('S8');
-    expect(archy.domain).toBe('logarithmic');
-    expect(archy.value.toFraction().toFraction()).toBe('64/63');
+    const {interval} = parseSingle('S8');
+    expect(interval.domain).toBe('logarithmic');
+    expect(interval.value.toFraction().toFraction()).toBe('64/63');
   });
 
   it('does S-expressions in the logarithmic domain', () => {
-    const syntonic = parseSingle('S6-S8');
-    expect(syntonic.domain).toBe('logarithmic');
-    expect(syntonic.value.toFraction().toFraction()).toBe('81/80');
+    const {interval} = parseSingle('S6-S8');
+    expect(interval.domain).toBe('logarithmic');
+    expect(interval.value.toFraction().toFraction()).toBe('81/80');
   });
 
   it('can use square superparticulars as inflections', () => {
-    const n2 = parseSingle('M2-S9..11');
-    expect(n2.domain).toBe('logarithmic');
-    expect(n2.value.toFraction().toFraction()).toBe('12/11');
+    const {interval} = parseSingle('M2-S9..11');
+    expect(interval.domain).toBe('logarithmic');
+    expect(interval.value.toFraction().toFraction()).toBe('12/11');
   });
 
   it('evaluates S2..16 correctly', () => {
@@ -1042,9 +1054,9 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert just intonation to HEWM53', () => {
-    const M2 = parseSingle('FJS(19/16, "m")');
-    expect(M2.toString()).toBe('M2^19m');
-    expect(M2.value.toFraction().toFraction()).toBe('19/16');
+    const {interval} = parseSingle('FJS(19/16, "m")');
+    expect(interval.toString()).toBe('M2^19m');
+    expect(interval.value.toFraction().toFraction()).toBe('19/16');
   });
 
   it('can parenthesize nedo denominator', () => {
@@ -1068,21 +1080,21 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a representation for a harmonic segment in FJS', () => {
     for (let i = 49; i <= 96; ++i) {
-      const fjs = parseSingle(`FJS(${i}/48)`);
-      expect(fjs.valueOf()).toBeGreaterThan(1);
-      expect(fjs.valueOf()).toBeLessThanOrEqual(2);
-      const retry = parseSingle(fjs.toString());
-      expect(fjs.equals(retry)).toBe(true);
+      const {interval} = parseSingle(`FJS(${i}/48)`);
+      expect(interval.valueOf()).toBeGreaterThan(1);
+      expect(interval.valueOf()).toBeLessThanOrEqual(2);
+      const retry = parseSingle(interval.toString()).interval;
+      expect(interval.equals(retry)).toBe(true);
     }
   });
 
   it('has a representation for a harmonic segment in FJS using HEWM53 flavors', () => {
     for (let i = 30; i <= 58; ++i) {
-      const hewm = parseSingle(`FJS(${i}/29, 'm')`);
-      expect(hewm.valueOf()).toBeGreaterThan(1);
-      expect(hewm.valueOf()).toBeLessThanOrEqual(2);
-      const retry = parseSingle(hewm.toString());
-      expect(hewm.equals(retry)).toBe(true);
+      const {interval} = parseSingle(`FJS(${i}/29, 'm')`);
+      expect(interval.valueOf()).toBeGreaterThan(1);
+      expect(interval.valueOf()).toBeLessThanOrEqual(2);
+      const retry = parseSingle(interval.toString()).interval;
+      expect(interval.equals(retry)).toBe(true);
     }
   });
 
@@ -1116,20 +1128,20 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("can do FJS conversion to with FloraC's flavors", () => {
-    const thing = parseSingle('FJS(157/128, "f")');
-    expect(thing.toString()).toBe('M3^157f');
+    const {interval} = parseSingle('FJS(157/128, "f")');
+    expect(interval.toString()).toBe('M3^157f');
   });
 
   it('switches domains while converting JI to cents', () => {
-    const octave = parseSingle('cents(2)');
-    expect(octave.totalCents()).toBeCloseTo(1200);
-    expect(octave.domain).toBe('logarithmic');
+    const {interval} = parseSingle('cents(2)');
+    expect(interval.totalCents()).toBeCloseTo(1200);
+    expect(interval.domain).toBe('logarithmic');
   });
 
   it('switched domains while converting cents to decimals', () => {
-    const octave = parseSingle('decimal(1200.)');
-    expect(octave.value.valueOf()).toBeCloseTo(2);
-    expect(octave.domain).toBe('linear');
+    const {interval} = parseSingle('decimal(1200.)');
+    expect(interval.value.valueOf()).toBeCloseTo(2);
+    expect(interval.domain).toBe('linear');
   });
 
   it('evaluates the difference in absolute FJS as relative FJS (default)', () => {
@@ -1158,56 +1170,55 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has C5 an octave above C4 even with non-standard reference', () => {
-    const C4 = parseSingle('C4 = 10ms; relative(C5)');
-    expect(C4.toString()).toBe('1\\1');
+    const {interval} = parseSingle('C4 = 10ms; relative(C5)');
+    expect(interval.toString()).toBe('1\\1');
   });
 
   it('has not-a-number', () => {
-    const nan = parseSingle('NaN');
+    const nan = evaluate('NaN') as Interval;
     expect(nan.valueOf()).toBeNaN();
     expect(nan.toString()).toBe('NaN');
   });
 
   it('has negative infinity', () => {
-    const inf = parseSingle('-Infinity');
-    expect(inf.value.cents).toBe(Infinity);
-    expect(inf.value.residual.s).toBe(-1);
+    const inf = evaluate('-Infinity') as Interval;
+    expect(inf.valueOf()).toBe(-Infinity);
     expect(inf.toString()).toBe('-Infinity');
   });
 
   it('has root half', () => {
-    const half = parseSingle('SQRT1_2 ^ 2');
-    expect(half.toString()).toBe('1/2');
+    const {interval} = parseSingle('SQRT1_2 ^ 2');
+    expect(interval.toString()).toBe('1/2');
   });
 
   it('has sine', () => {
-    const sinRad = parseSingle('sin(1)');
+    const sinRad = evaluate('sin(1)') as Interval;
     expect(sinRad.toString()).toBe('0.8414709848078965r');
   });
 
   it('produces nan from asin', () => {
-    const wishIwasAcomplexNumber = parseSingle('asin(2)');
+    const wishIwasAcomplexNumber = evaluate('asin(2)') as Interval;
     expect(wishIwasAcomplexNumber.toString()).toBe('NaN');
   });
 
   it('has domain-crossing acos', () => {
-    const acosHalf = parseSingle('acos(-P8)');
+    const acosHalf = evaluate('acos(-P8)') as Interval;
     expect(acosHalf.toString()).toBe('1.0471975511965979r');
   });
 
   it('formats uniformly inverted NEDJI', () => {
-    const descending3rd = parseSingle('%~4\\12');
-    expect(descending3rd.toString()).toBe('-4\\12');
+    const {interval} = parseSingle('%~4\\12');
+    expect(interval.toString()).toBe('-4\\12');
   });
 
   it('adds S-expressions to FJS (plain)', () => {
-    const minorThird = parseSingle('m3+S9');
-    expect(minorThird.toString()).toBe('m3_5');
+    const {interval} = parseSingle('m3+S9');
+    expect(interval.toString()).toBe('m3_5');
   });
 
   it('adds S-expressions to FJS (flavored)', () => {
-    const minorThird = parseSingle('m3_19h+S9');
-    expect(minorThird.toString()).toBe('m3^5h_19h');
+    const {interval} = parseSingle('m3_19h+S9');
+    expect(interval.toString()).toBe('m3^5h_19h');
   });
 
   it('subtracts S-expressions from absoluteFJS', () => {
@@ -1216,28 +1227,28 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has linear universal logarithm', () => {
-    const three = parseSingle('6\\12 ~/_ 2\\12');
-    expect(three.toString()).toBe('3');
+    const {interval} = parseSingle('6\\12 ~/_ 2\\12');
+    expect(interval.toString()).toBe('3');
   });
 
   it('has linear universal dot product', () => {
-    const negThree = parseSingle('4/3 dot~ 3/2');
-    expect(negThree.toString()).toBe('-3');
+    const {interval} = parseSingle('4/3 dot~ 3/2');
+    expect(interval.toString()).toBe('-3');
   });
 
   it('has negative cents', () => {
-    const some = parseSingle('-123.4');
-    expect(some.toString()).toBe('-123.4');
+    const {interval} = parseSingle('-123.4');
+    expect(interval.toString()).toBe('-123.4');
   });
 
   it('has moves negation to the degree in FJS and flips scripts', () => {
-    const downwards3rd = parseSingle('-M3^5');
-    expect(downwards3rd.toString()).toBe('M-3_5');
+    const {interval} = parseSingle('-M3^5');
+    expect(interval.toString()).toBe('M-3_5');
   });
 
   it('distributes monzo negation', () => {
-    const syntonic = parseSingle('-[4 -4 1>');
-    expect(syntonic.toString()).toBe('[-4 4 -1>');
+    const {interval} = parseSingle('-[4 -4 1>');
+    expect(interval.toString()).toBe('[-4 4 -1>');
   });
 
   it("uses FloraC's FJS inflections by default", () => {
@@ -1246,23 +1257,23 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has negative sub-unity cents', () => {
-    const tiny = parseSingle('-.4');
-    expect(tiny.toString()).toBe('-0.4');
+    const {interval} = parseSingle('-.4');
+    expect(interval.toString()).toBe('-0.4');
   });
 
   it('has negative sub-unity comma-decimals', () => {
-    const tiny = parseSingle('-,99');
-    expect(tiny.toString()).toBe('-0.99e');
+    const {interval} = parseSingle('-,99');
+    expect(interval.toString()).toBe('-0.99e');
   });
 
   it('has lens absorbing logarithmic unison (addition)', () => {
-    const unison = parseSingle('0\\12 /+ 5\\12');
-    expect(unison.totalCents()).toBeCloseTo(0);
+    const {interval} = parseSingle('0\\12 /+ 5\\12');
+    expect(interval.totalCents()).toBeCloseTo(0);
   });
 
   it('has lens absorbing logarithmic unison (subtraction)', () => {
-    const unison = parseSingle('7\\12 /- 0\\12');
-    expect(unison.totalCents()).toBeCloseTo(0);
+    const {interval} = parseSingle('7\\12 /- 0\\12');
+    expect(interval.totalCents()).toBeCloseTo(0);
   });
 
   it('can slice niente arrays', () => {
@@ -1278,8 +1289,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('aspires to preserve FJS flavor', () => {
-    const seventh = parseSingle('P5 + n3^11n');
-    expect(seventh.toString()).toBe('n7^11n');
+    const {interval} = parseSingle('P5 + n3^11n');
+    expect(interval.toString()).toBe('n7^11n');
   });
 
   it('knows that 7 is an integer', () => {
@@ -1313,17 +1324,19 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('labels up-E-semiflat-super-11-neutral', () => {
-    const e = parseSingle('C4 = 1;labelAbsoluteFJS(11/9 * linear(1\\), "n")');
-    expect(e.label).toBe('^Ed^11n');
-    expect(e.color?.value).toBe('black');
+    const {interval} = parseSingle(
+      'C4 = 1;labelAbsoluteFJS(11/9 * linear(1\\), "n")'
+    );
+    expect(interval.label).toBe('^Ed^11n');
+    expect(interval.color?.value).toBe('black');
   });
 
   it('breaks constructed absolute FJS', () => {
-    const tone = parseSingle(
+    const {interval} = parseSingle(
       'F4 = 1;const g = absoluteFJS(9/8);C4 = 1;g str(g)'
     );
-    expect(tone.value.toFraction().toFraction()).toBe('9/8');
-    expect(tone.label).toBe('D♮4');
+    expect(interval.value.toFraction().toFraction()).toBe('9/8');
+    expect(interval.label).toBe('D♮4');
   });
 
   it('preserves ups in FJS conversion', () => {
@@ -1339,24 +1352,24 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts a mixture of rational and irrational to real in cents conversion', () => {
-    const c = parseSingle('cents(3/2 % 1.00123r)');
-    expect(c.toString()).toBe('699.8268915041558rc');
-    expect(c.value.cents).toBeCloseTo(699.82689);
+    const c = evaluate('cents(3/2 % 1.00123r)') as Interval;
+    expect(c.toString()).toBe('699.8268915041559rc');
+    expect(c.value.totalCents()).toBeCloseTo(699.82689);
   });
 
   it('parses negative reals', () => {
-    const r = parseSingle('-1.23r');
+    const r = evaluate('-1.23r') as Interval;
     expect(r.valueOf()).toBeCloseTo(-1.23);
   });
 
   it('parses negative real cents', () => {
-    const c = parseSingle('-1.23rc');
+    const c = evaluate('-1.23rc') as Interval;
     expect(c.totalCents()).toBeCloseTo(-1.23);
   });
 
   it('has a semiquartal spelling for 7/6 (relative parsing)', () => {
-    const q = parseSingle('m2.5^7q');
-    expect(q.value.toFraction().toFraction()).toBe('7/6');
+    const {interval} = parseSingle('m2.5^7q');
+    expect(interval.value.toFraction().toFraction()).toBe('7/6');
   });
 
   it('has a semiquartal spelling for 7/6 (absolute parsing)', () => {
@@ -1405,35 +1418,35 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has inline analogue of try..catch (success)', () => {
-    const fif = parseSingle('[-1 1> lest fraction([-1 1>)');
-    expect(fif.toString()).toBe('3/2');
+    const {interval} = parseSingle('[-1 1> lest fraction([-1 1>)');
+    expect(interval.toString()).toBe('3/2');
   });
 
   it('has an inline analogue of try..catch (failure)', () => {
-    const pi = parseSingle('PI lest fraction(PI)');
+    const pi = evaluate('PI lest fraction(PI)') as Interval;
     expect(pi.value.isFractional()).toBe(false);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 
   it('has atan2 with swapped arguments', () => {
-    const angle = parseSingle('atanXY(S5, -E)');
-    expect(angle.domain).toBe('linear');
-    expect(angle.valueOf()).toBeCloseTo(-1.2048493);
+    const interval = evaluate('atanXY(S5, -E)') as Interval;
+    expect(interval.domain).toBe('linear');
+    expect(interval.valueOf()).toBeCloseTo(-1.2048493);
   });
 
   it('can add booleans producing intervals', () => {
-    const zero = parseSingle('false + false');
-    expect(zero.toString()).toBe('0');
+    const {interval} = parseSingle('false + false');
+    expect(interval.toString()).toBe('0');
   });
 
   it('can multiply boolean with an interval (left domain-specific)', () => {
-    const three = parseSingle('true * 3');
-    expect(three.toString()).toBe('3');
+    const {interval} = parseSingle('true * 3');
+    expect(interval.toString()).toBe('3');
   });
 
   it('can multiply boolean with an interval (right universal)', () => {
-    const three = parseSingle('3 ~* true');
-    expect(three.toString()).toBe('3');
+    const {interval} = parseSingle('3 ~* true');
+    expect(interval.toString()).toBe('3');
   });
 
   it("throws if you don't pass arguments to sin", () => {
@@ -1447,8 +1460,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has the empty gcd', () => {
-    const zero = parseSingle('gcd()');
-    expect(zero.toString()).toBe('0');
+    const {interval} = parseSingle('gcd()');
+    expect(interval.toString()).toBe('0');
   });
 
   it('can calculate the step string for Lydian', () => {
@@ -1501,13 +1514,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a comfortable precedence between addition, min and max', () => {
-    const five = parseSingle('2 + 1 min 3 - 4 max 5');
-    expect(five.toString()).toBe('5');
+    const {interval} = parseSingle('2 + 1 min 3 - 4 max 5');
+    expect(interval.toString()).toBe('5');
   });
 
   it('has a string representation for the eighth fifth (relative)', () => {
-    const soSplit = parseSingle('P5 % 8');
-    expect(soSplit.toString()).toBe('¼m1.5');
+    const {interval} = parseSingle('P5 % 8');
+    expect(interval.toString()).toBe('¼m1.5');
   });
 
   it('parses the eighth fifth', () => {
@@ -1521,8 +1534,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a string representation for the eighth fifth (absolute)', () => {
-    const gamma = parseSingle('absoluteFJS(P5 % 8)');
-    expect(gamma.toString()).toBe('γ⅛♭4');
+    const {interval} = parseSingle('absoluteFJS(P5 % 8)');
+    expect(interval.toString()).toBe('γ⅛♭4');
   });
 
   it('parses the absolute eighth fifth (eighth flat)', () => {
@@ -1538,13 +1551,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("is kind of weird how 4/8 - 11/8 is -7/8 and how it pairs up with 7/8 of the three's exponent", () => {
-    const huh = parseSingle('8 * relative(zeta⅛#4) - 7 * P5');
-    expect(huh.totalCents()).toBe(0);
+    const {interval} = parseSingle('8 * relative(zeta⅛#4) - 7 * P5');
+    expect(interval.totalCents()).toBe(0);
   });
 
   it('correctly gives up on FJS with the sixteenth fifth', () => {
-    const tooSplit = parseSingle('P5 % 16');
-    expect(tooSplit.toString()).toBe('1\\16<3/2>');
+    const {interval} = parseSingle('P5 % 16');
+    expect(interval.toString()).toBe('1\\16<3/2>');
   });
 
   it('has record syntax', () => {
@@ -1553,8 +1566,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has record access', () => {
-    const fif = parseSingle('{foo: 3/2}["foo"]');
-    expect(fif.toString()).toBe('3/2');
+    const {interval} = parseSingle('{foo: 3/2}["foo"]');
+    expect(interval.toString()).toBe('3/2');
   });
 
   it('has the empty record', () => {
@@ -1613,8 +1626,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has sanity limits in Pythagorean formatting (relative descending)', () => {
-    const pleaseDont = parseSingle('9001 * d1');
-    expect(pleaseDont.toString()).toBe('-9001\\1<2187/2048>');
+    const {interval} = parseSingle('9001 * d1');
+    expect(interval.toString()).toBe('-9001\\1<2187/2048>');
   });
 
   it('has sanity limits in Pythagorean formatting (absolute ascending)', () => {
@@ -1659,8 +1672,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('formats the relative third fourth', () => {
-    const thirdFourth = parseSingle('P4 % 3');
-    expect(thirdFourth.toString()).toBe('⅓M2');
+    const {interval} = parseSingle('P4 % 3');
+    expect(interval.toString()).toBe('⅓M2');
   });
 
   it('parses the relative third fourth', () => {
@@ -1689,36 +1702,37 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has "Aug" as an alternative spelling for "a"', () => {
-    const theLargerFourth = parseSingle('Aug4');
-    expect(theLargerFourth.toFraction().toFraction()).toBe('729/512');
+    const {interval} = parseSingle('Aug4');
+    expect(interval.toFraction().toFraction()).toBe('729/512');
   });
 
   it('has "dim" as an alternative spelling for "d"', () => {
-    const theSmallerFifth = parseSingle('dim5');
-    expect(theSmallerFifth.toFraction().toFraction()).toBe('1024/729');
+    const {interval} = parseSingle('dim5');
+    expect(interval.toFraction().toFraction()).toBe('1024/729');
   });
 
   it('has a porkupine inflection', () => {
-    const twoThirdsFourth = parseSingle('⅓m3_6l');
-    expect(twoThirdsFourth.toFraction().toFraction()).toBe('6/5');
+    const {interval} = parseSingle('⅓m3_6l');
+    expect(interval.toFraction().toFraction()).toBe('6/5');
   });
 
   it('is a wizard, Harry!', () => {
-    const thirdFourth = parseSingle('⅓M2_7l');
-    expect(thirdFourth.toFraction().toFraction()).toBe('11/10');
+    const {interval} = parseSingle('⅓M2_7l');
+    expect(interval.toFraction().toFraction()).toBe('11/10');
   });
 
   it('has binary prefixes for mild amusement', () => {
-    const tooLong = parseSingle('3 Yis');
-    expect(tooLong.isAbsolute()).toBe(true);
-    expect(tooLong.valueOf()).toBeCloseTo(3 * 1024 ** 8);
+    const {interval} = parseSingle('3 Yis');
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.valueOf()).toBeCloseTo(3 * 1024 ** 8);
   });
 
   it('has a "lift" operator because the template tag requires a "drop" operator, but I guess it is useful for enumerated chords where mirroring would take precedence...', () => {
     const rootLift = evaluate('lift 4:5:6') as Interval[];
+    // TODO: Actually observe the drop
     expect(rootLift).toHaveLength(2);
-    expect(rootLift[0].valueOf()).toBe(1.2463950666682366);
-    expect(rootLift[1].valueOf()).toBe(1.4956740800018837);
+    expect(rootLift[0].valueOf()).toBe(1.25);
+    expect(rootLift[1].valueOf()).toBe(1.5);
   });
 
   it('can longtail monzo components starting from a prime', () => {
@@ -1748,11 +1762,11 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has near-universal vals', () => {
-    const why = evaluate('<1 2 3 4 5 6 7]@Hz.rc.2..') as Val;
+    const why = evaluate('<1 2 3 4 5 6 7]@Hz.2..') as Val;
     expect(why.domain).toBe('cologarithmic');
     expect(why.value.timeExponent.toFraction()).toBe('-1');
-    expect(why.value.cents).toBe(2);
     expect(why.value.primeExponents.map(pe => pe.toFraction())).toEqual([
+      '2',
       '3',
       '4',
       '5',
@@ -1762,18 +1776,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("measures timeness using second's val", () => {
-    const negativeHalf = parseSingle('<1]@s dot 1z ^ 1/2');
-    expect(negativeHalf.valueOf()).toBe(-0.5);
-  });
-
-  it("measures non-algebraic size using the (true un-upped) real cent's val", () => {
-    const stillCentsOfPi = parseSingle('v<1]@rc dot PI');
-    expect(stillCentsOfPi.valueOf()).toBeCloseTo(valueToCents(Math.PI));
+    const {interval} = parseSingle('<1]@s dot 1z ^ 1/2');
+    expect(interval.valueOf()).toBe(-0.5);
   });
 
   it('has unicode down operator', () => {
-    const major6 = parseSingle('^ = 81/80; ∨27/16');
-    expect(major6.toFraction().toFraction()).toBe('5/3');
+    const {interval} = parseSingle('^ = 81/80; ∨27/16');
+    expect(interval.toFraction().toFraction()).toBe('5/3');
   });
 
   it('evaluates patent val of agnostic tetracot', () => {
@@ -1791,18 +1800,31 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('knows the tetracot comma is tempered out in 4@3/2.10/9', () => {
-    const zero = parseSingle('20000/19683 dot 4@3/2.10/9');
-    expect(zero.valueOf()).toBe(0);
+    const {interval} = parseSingle('20000/19683 dot 4@3/2.10/9');
+    expect(interval.valueOf()).toBe(0);
   });
 
-  it('has low-hanging sanity limits', () => {
-    expect(() => parseSingle('1 = 440Hz; relative([10000>@Hz)')).toThrow(
-      'Time unit exponent too complex.'
-    );
+  it('has insane units', () => {
+    const miksiTeitSen = evaluate(
+      '1 = 440Hz; relative([10000>@Hz)'
+    ) as Interval;
+    expect(miksiTeitSen.toString()).toBe('-10537.63165622959rc');
   });
 
   it('it formats one quebihertz', () => {
     const fallback = evaluate('str(1 QiHz)');
     expect(fallback).toBe('2^100*1Hz');
+  });
+
+  it('can multiply a step literal', () => {
+    const {interval} = parseSingle('2° * 3');
+    expect(interval.steps).toBe(6);
+    expect(interval.toString()).toBe('6°');
+  });
+
+  it('can multiply a step literal (universal)', () => {
+    const {interval} = parseSingle('2° ~^ 3');
+    expect(interval.steps).toBe(6);
+    expect(interval.toString()).toBe('6°');
   });
 });

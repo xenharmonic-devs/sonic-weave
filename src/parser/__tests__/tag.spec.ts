@@ -42,7 +42,8 @@ describe('SonicWeave template tag', () => {
   it('evaluates drop of a fraction passed in', () => {
     const fraction = new Fraction('3/2');
     const value = sw`\\${fraction}` as Interval;
-    expect(value.valueOf()).toBe(1.4956740800018837);
+    expect(value.steps).toBe(-5);
+    expect(value.valueOf()).toBe(1.5);
   });
 
   it('evaluates access to a record passed in', () => {
@@ -104,7 +105,8 @@ describe('SonicWeave raw template tag', () => {
     const fraction = new Fraction('3/2');
     // See above why swr`\${fraction}` just won't do...
     const value = swr`drop${fraction}` as Interval;
-    expect(value.valueOf()).toBe(1.4956740800018837);
+    expect(value.steps).toBe(-5);
+    expect(value.valueOf()).toBe(1.5);
   });
 
   it('evaluates the TypeDoc example', () => {

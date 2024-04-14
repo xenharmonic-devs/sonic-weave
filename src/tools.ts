@@ -27,7 +27,7 @@ export function subtensions(monzos: TimeMonzo[]): Subtender[] {
   }
   const period = scale[n - 1];
   for (const monzo of [...scale]) {
-    scale.push(period.mul(monzo));
+    scale.push(period.mul(monzo) as TimeMonzo);
   }
 
   const result: Subtender[] = [];
@@ -54,7 +54,7 @@ export function subtensions(monzos: TimeMonzo[]): Subtender[] {
         }
       }
       if (unique) {
-        result.push({monzo: width, subtensions: new Set([j])});
+        result.push({monzo: width as TimeMonzo, subtensions: new Set([j])});
       }
     }
   }
@@ -78,7 +78,7 @@ export function hasConstantStructure(monzos: TimeMonzo[]) {
   }
   const period = scale[n - 1];
   for (const monzo of [...scale]) {
-    scale.push(period.mul(monzo));
+    scale.push(period.mul(monzo) as TimeMonzo);
   }
 
   const subtensions: [TimeMonzo, number][] = [];
@@ -107,7 +107,7 @@ export function hasConstantStructure(monzos: TimeMonzo[]) {
         }
       }
       if (unique) {
-        subtensions.push([width, j]);
+        subtensions.push([width as TimeMonzo, j]);
       }
     }
   }

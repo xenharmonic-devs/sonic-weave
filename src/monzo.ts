@@ -50,6 +50,11 @@ export type FractionalMonzo = Fraction[];
  */
 export type Domain = 'linear' | 'logarithmic' | 'cologarithmic';
 
+export type EqualTemperament = {
+  fractionOfEquave: Fraction;
+  equave: Fraction;
+};
+
 const MAX_POW_DENOMINATOR = 10000;
 
 let NUMBER_OF_COMPONENTS = 9; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
@@ -134,28 +139,698 @@ function min(a: Fraction, b: Fraction) {
 }
 
 /**
- * Fractional monzo with multiplicative residue and arbitrary cents offset measured in time-related units (usually Hz).
+ * Arbitrary (but inaccurate) value measured in time-related units (usually Hz).
  *
- * Used to represent the value of musical objects like 432Hz, 5/3, 7\12 (N-of-EDO) or arbitrary intervals measured in cents.
+ * Used to represent irrational frequencies and values like pi.
+ */
+export class TimeReal {
+  timeExponent: number;
+  value: number;
+
+  /**
+   * Construct a time real.
+   * @param timeExponent Exponent of the seconds unit.
+   * @param value Multiplier of the time unit.
+   */
+  constructor(timeExponent: number, value: number) {
+    this.timeExponent = timeExponent;
+    this.value = value;
+  }
+
+  /**
+   * Create a real-valued scalar.
+   * @param value Linear value of the scalar.
+   * @returns Scalar in the relative echelon.
+   */
+  static fromValue(value: number) {
+    return new TimeReal(0, value);
+  }
+
+  /**
+   * Create a real-valued scalar from cents (1 cent = 1 centisemitone or 1200th of an octave).
+   * @param cents Width of a musical interval in cents i.e. logarithmic size.
+   * @returns Scalar in the relative echelon.
+   */
+  static fromCents(cents: number) {
+    return new TimeReal(0, centsToValue(cents));
+  }
+
+  /**
+   * Create a real-valued frequency.
+   * @param frequency Frequency of a musical note measuder in hertz.
+   * @returns Frequency value in the absolute echelon.
+   */
+  static fromFrequency(frequency: number) {
+    return new TimeReal(-1, frequency);
+  }
+
+  /**
+   * Create a copy of this {@link TimeReal} instance.
+   * @returns Independent clone.
+   */
+  clone() {
+    return new TimeReal(this.timeExponent, this.value);
+  }
+
+  /**
+   * Convert a relative scalar to cents.
+   * @param ignoreSign Ignore the linear sign of of the scalar.
+   * @returns Size of this interval in cents.
+   */
+  toCents(ignoreSign = false) {
+    if (this.timeExponent) {
+      throw new Error('Unable to convert a non-scalar to cents.');
+    }
+    return this.totalCents(ignoreSign);
+  }
+
+  /**
+   * Convert value to cents ignoring the time exponent.
+   * @param ignoreSign Ignore the linear sign of of the scalar.
+   * @returns Size of this interval in cents (only makes sense if relative).
+   */
+  totalCents(ignoreSign = false) {
+    if (ignoreSign) {
+      return valueToCents(Math.abs(this.value));
+    }
+    return valueToCents(this.value);
+  }
+
+  /**
+   * Check if the time real lacks units of time/frequency.
+   * @return `true` if the time real isn't expressed in units of time.
+   */
+  isScalar() {
+    return this.timeExponent === 0;
+  }
+
+  /**
+   * Return the frequency-space negative of the time real.
+   * @returns The linear negative of the time real.
+   */
+  neg() {
+    return new TimeReal(this.timeExponent, -this.value);
+  }
+
+  /**
+   * Return a pitch-space negative of the time real.
+   * @returns The frequency-space inverse of the time real.
+   */
+  inverse() {
+    return new TimeReal(-this.timeExponent, 1 / this.value);
+  }
+
+  /**
+   * Linear space absolute value of the time real.
+   * @returns The time real unchanged or negated if negative originally.
+   */
+  abs() {
+    return new TimeReal(this.timeExponent, Math.abs(this.value));
+  }
+
+  /**
+   * Pitch space absolute value of the time real.
+   * @returns The time real unchanged or inverted if less than one originally.
+   */
+  pitchAbs() {
+    const value = Math.abs(this.value);
+    if (value < 1) {
+      return new TimeReal(this.timeExponent, 1 / value);
+    }
+    return new TimeReal(this.timeExponent, value);
+  }
+
+  /**
+   * Convert a relative time real to a real number representing a ratio of frequencies.
+   * Convert an absolute time real to the scalar of its time unit.
+   * @returns A real number.
+   */
+  valueOf() {
+    return this.value;
+  }
+
+  /**
+   * Check if this time real has the same size as another.
+   * @param other Another time real or time monzo.
+   * @returns `true` if the inputs are of equal size.
+   */
+  equals(other: TimeMonzo | TimeReal) {
+    return this.value === other.valueOf();
+  }
+
+  /**
+   * Check for strict equality between this and another time real.
+   * @param other Another time real.
+   * @returns `true` if the time reals share the same time exponent, and value.
+   */
+  strictEquals(other: TimeMonzo | TimeReal) {
+    if (other instanceof TimeMonzo) {
+      return false;
+    }
+    // Philosophically this goes against the idea that TimeReals are supposed to be floating point noisy.
+    // Can't have this cake and eat it too...
+    return (
+      this.timeExponent === other.timeExponent && this.value === other.value
+    );
+  }
+
+  /**
+   * Compare this time real with another.
+   * @param other Another time real or time monzo.
+   * @returns Result < 0 if other is larger than this. Result > 0 if other is smaller than this. Result == 0 if other is equal to this in size.
+   */
+  compare(other: TimeMonzo | TimeReal) {
+    return this.value - other.valueOf();
+  }
+
+  /**
+   * Raise this time real to the power of another.
+   * @param other Another time real or a fractional value.
+   * @returns This multiplied by itself `other` times.
+   */
+  pow(other: FractionValue | TimeMonzo | TimeReal) {
+    if (other instanceof TimeMonzo || other instanceof TimeReal) {
+      if (other.timeExponent.valueOf()) {
+        throw new Error('Cannot raise to a non-scalar power.');
+      }
+      const exponent = other.valueOf();
+      return new TimeReal(this.timeExponent * exponent, this.value ** exponent);
+    }
+    if (typeof other === 'number') {
+      if (!other) {
+        return new TimeMonzo(ZERO, []);
+      }
+      return new TimeReal(this.timeExponent * other, this.value ** other);
+    }
+    const exponent = new Fraction(other).valueOf();
+    if (!exponent) {
+      return new TimeMonzo(ZERO, []);
+    }
+    return new TimeReal(this.timeExponent * exponent, this.value ** exponent);
+  }
+
+  /** @hidden */
+  lpow(other: TimeMonzo) {
+    if (this.timeExponent) {
+      throw new Error('Cannot rais to a non-scalar power.');
+    }
+    return new TimeReal(
+      other.timeExponent.valueOf() * this.value,
+      other.valueOf() ** this.value
+    );
+  }
+
+  /**
+   * Calculate the logarithm in the given base if it exists.
+   * @param other Base of the logarithm.
+   * @returns `x` such that `this ** x === other`.
+   */
+  log(other: FractionValue | TimeMonzo | TimeReal) {
+    if (this.timeExponent) {
+      if (other instanceof TimeMonzo || other instanceof TimeReal) {
+        if (other.timeExponent.valueOf() === 0) {
+          throw new Error(
+            'Cannot take a scalar logarithm of a value with time units.'
+          );
+        }
+      } else {
+        throw new Error(
+          'Cannot take a scalar logarithm of a value with time units.'
+        );
+      }
+      const solution = this.timeExponent / other.timeExponent.valueOf();
+      const valueSolution = this.totalCents() / other.totalCents();
+      if (solution !== valueSolution) {
+        throw new Error("Logarithm doesn't exist.");
+      }
+      return solution;
+    }
+    if (other instanceof TimeMonzo || other instanceof TimeReal) {
+      return this.totalCents() / other.totalCents();
+    }
+    if (typeof other === 'number') {
+      return this.totalCents() / valueToCents(other);
+    }
+    other = new Fraction(other);
+    return this.totalCents() / valueToCents((other as Fraction).valueOf());
+  }
+
+  /**
+   * Combine the time real with another in linear space.
+   * @param other Another time real.
+   * @returns The linear sum of the time reals.
+   */
+  add(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in addition.');
+    }
+    return new TimeReal(this.timeExponent, this.value + other.valueOf());
+  }
+
+  /**
+   * Subrtact another time real from this one in linear space.
+   * @param other Another time real.
+   * @returns The linear difference of the time reals.
+   */
+  sub(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in subtraction.');
+    }
+    return new TimeReal(this.timeExponent, this.value - other.valueOf());
+  }
+
+  /** @hidden */
+  lsub(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in addition.');
+    }
+    return new TimeReal(this.timeExponent, other.valueOf() - this.value);
+  }
+
+  /**
+   * Perform harmonic addition according to the thin lens equation f⁻¹ = u⁻¹ + v⁻¹.
+   * @param other Another time real.
+   * @returns The reciprocal of the sum of the reciprocals.
+   */
+  lensAdd(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in addition.');
+    }
+    if (this.value) {
+      const o = other.valueOf();
+      return new TimeReal(
+        this.timeExponent,
+        (this.value * o) / (this.value + o)
+      );
+    }
+    return new TimeReal(this.timeExponent, 0);
+  }
+
+  /**
+   * Perform harmonic subtraction f⁻¹ = u⁻¹ - v⁻¹ (a variation of the thin lens equation).
+   * @param other Another time real.
+   * @returns The reciprocal of the difference of the reciprocals.
+   */
+  lensSub(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in subtraction.');
+    }
+    if (this.value) {
+      const o = other.valueOf();
+      return new TimeReal(
+        this.timeExponent,
+        (this.value * o) / (o - this.value)
+      );
+    }
+    return new TimeReal(this.timeExponent, 0);
+  }
+
+  /** @hidden */
+  leftLensSub(other: TimeMonzo | TimeReal) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in subtraction.');
+    }
+    if (this.value) {
+      const o = other.valueOf();
+      return new TimeReal(
+        this.timeExponent,
+        (this.value * o) / (this.value - o)
+      );
+    }
+    return new TimeReal(this.timeExponent, 0);
+  }
+
+  /**
+   * Multiply the time real with another in linear space i.e. add in logarithmic space.
+   * @param other Another time real.
+   * @returns The product of the time reals in linear space.
+   */
+  mul(other: TimeMonzo | TimeReal) {
+    return new TimeReal(
+      this.timeExponent + other.timeExponent.valueOf(),
+      this.value * other.valueOf()
+    );
+  }
+
+  /**
+   * Divide the time real with another in linear space i.e. subtract in logarithmic space.
+   * @param other Another time real.
+   * @returns This real divided by the other in linear space.
+   */
+  div(other: TimeMonzo | TimeReal) {
+    return new TimeReal(
+      this.timeExponent - other.timeExponent.valueOf(),
+      this.value / other.valueOf()
+    );
+  }
+
+  /** @hidden */
+  ldiv(other: TimeMonzo | TimeReal) {
+    return new TimeReal(
+      other.timeExponent.valueOf() - this.timeExponent,
+      other.valueOf() / this.value
+    );
+  }
+
+  /**
+   * Round the time real to a multiple of another.
+   * @param other Another time real.
+   * @returns The closest multiple of the other to this one.
+   */
+  roundTo(other: TimeMonzo | TimeReal) {
+    const multiplier = Math.round(this.div(other).valueOf());
+    return other.mul(TimeMonzo.fromFraction(multiplier));
+  }
+
+  /**
+   * Round the time real to a power of another.
+   * @param other Another time real.
+   * @returns The closest power of the other to this one.
+   */
+  pitchRoundTo(other: TimeMonzo | TimeReal) {
+    const multiplier = Math.round(this.totalCents() / other.totalCents());
+    return other.pow(multiplier);
+  }
+
+  // Consistent with Mathematics not with JS x % y.
+  /**
+   * Calculate modulus with respect to another time real.
+   * @param other Another time real.
+   * @param ceiling If `true` `x.mmod(x)` evaluates to `x`.
+   * @returns This modulo the other.
+   */
+  mmod(other: TimeMonzo | TimeReal, ceiling = false) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in modulo.');
+    }
+    const modulus = other.valueOf();
+    if (ceiling) {
+      return new TimeReal(
+        this.timeExponent,
+        mmod(this.value, modulus) || modulus
+      );
+    }
+    return new TimeReal(this.timeExponent, mmod(this.value, modulus));
+  }
+
+  /** @hidden */
+  lmmod(other: TimeMonzo | TimeReal, ceiling = false) {
+    if (other.timeExponent.valueOf() !== this.timeExponent) {
+      throw new Error('Time exponents must match in modulo.');
+    }
+    if (ceiling) {
+      return new TimeReal(
+        this.timeExponent,
+        mmod(other.valueOf(), this.value) || this.value
+      );
+    }
+    return new TimeReal(this.timeExponent, mmod(other.valueOf(), this.value));
+  }
+
+  /**
+   * Calculate modulus in pitch space with respect to another time real.
+   * @param other Another time real.
+   * @param ceiling If `true` `x.reduce(x)` evaluates to `x`.
+   * @returns This reduced by the other.
+   */
+  reduce(other: TimeMonzo | TimeReal, ceiling = false) {
+    const log = this.log(other);
+    let multiplier: TimeReal | TimeMonzo;
+    if (ceiling) {
+      multiplier = other.pow(1 - Math.ceil(log));
+    }
+    multiplier = other.pow(-Math.floor(log));
+
+    if (multiplier instanceof TimeMonzo) {
+      return this.mul(multiplier);
+    }
+    return new TimeReal(
+      this.timeExponent + multiplier.timeExponent,
+      this.value * multiplier.value
+    );
+  }
+
+  /**
+   * Calculate the product of this time real's time exponents with another's.
+   * @param other Another time real.
+   * @returns Product of the time exponents as a fraction.
+   */
+  dot(other: TimeMonzo | TimeReal): Fraction {
+    // We consider irrational values to have such a high prime limit and be so sparsely expressed that there's no contribution to the dot product.
+    // To get more philosophical: The dot product of PI with itself would probably be infinite,
+    // but if there's even a little bit of floating point noise then the chance of the sparse monzos lining up
+    // is near zero in PI dot (PI +- epsilon).
+
+    const timeExponent = new Fraction(this.timeExponent).simplify(1e-8);
+    if (other instanceof TimeReal) {
+      return timeExponent.mul(new Fraction(other.timeExponent).simplify(1e-8));
+    }
+    return timeExponent.mul(other.timeExponent);
+  }
+
+  /**
+   * Obtain an AST node representing the time real as a decimal.
+   * @returns Real decimal literal.
+   */
+  asDecimalLiteral(): DecimalLiteral | undefined {
+    if (this.timeExponent) {
+      return undefined;
+    }
+    return numberToDecimalLiteral(this.valueOf(), 'r');
+  }
+
+  /**
+   * Obtain an AST node representing the time monzo as a cents literal.
+   * @returns Cents literal or a hacky real cents literal if necessary.
+   */
+  asCentsLiteral(): CentsLiteral {
+    const cents = this.totalCents();
+    if (isNaN(cents)) {
+      throw new Error('Cannot represent NaN in cents.');
+    }
+    if (!isFinite(cents)) {
+      throw new Error('Cannot represent Infinity in cents.');
+    }
+    let {sign, whole, fractional} = numberToDecimalLiteral(cents, 'r');
+    // Note: This abuses the grammar
+    fractional += 'rc';
+    return {type: 'CentsLiteral', sign, whole, fractional};
+  }
+
+  /**
+   * Obtain an AST node representing the time real as a monzo literal.
+   * @returns Monzo literal.
+   */
+  asMonzoLiteral(): MonzoLiteral {
+    const components: VectorComponent[] = [];
+    const basis: BasisElement[] = [];
+    if (this.timeExponent === -1) {
+      basis.push('Hz');
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    } else if (this.timeExponent) {
+      basis.push('s');
+      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+        this.timeExponent,
+        'r'
+      );
+      components.push({
+        sign,
+        left: Number(whole),
+        separator: '.',
+        right: fractional,
+        exponent,
+      });
+    }
+    if (this.value < 0) {
+      basis.push({numerator: -1, denominator: null});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    }
+    if (this.value !== 0) {
+      basis.push('rc');
+      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+        this.totalCents(true),
+        'r'
+      );
+      components.push({
+        sign,
+        left: Number(whole),
+        separator: '.',
+        right: fractional,
+        exponent,
+      });
+    }
+    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+  }
+
+  /**
+   * Faithful string representation of the time real.
+   * @param domain Domain of representation.
+   * @returns String that evaluates to the same value as this time real.
+   */
+  toString(domain: Domain = 'linear') {
+    if (domain === 'cologarithmic') {
+      throw new Error("Real numbers don't have a co-domain.");
+    }
+    if (isNaN(this.value)) {
+      switch (domain) {
+        case 'linear':
+          return 'NaN';
+        case 'logarithmic':
+          return 'logarithmic(NaN)';
+      }
+    }
+    if (!isFinite(this.value)) {
+      const value = this.value < 0 ? '-Infinity' : 'Infinity';
+      switch (domain) {
+        case 'linear':
+          return value;
+        case 'logarithmic':
+          return `logarithmic(${value})`;
+      }
+    }
+    if (domain === 'linear') {
+      const scalar = this.clone();
+      scalar.timeExponent = 0;
+      const value = literalToString(scalar.asDecimalLiteral()!);
+      if (!this.timeExponent) {
+        return value;
+      } else if (this.timeExponent === -1) {
+        return `${value}Hz`;
+      } else if (this.timeExponent === 1) {
+        return `${value}s`;
+      } else {
+        return `${value}s^${literalToString(
+          numberToDecimalLiteral(this.timeExponent, 'r')
+        )}`;
+      }
+      return value;
+    }
+    if (!this.timeExponent) {
+      return literalToString(this.asCentsLiteral());
+    }
+    return literalToString(this.asMonzoLiteral());
+  }
+
+  // Dummy methods to conform to the API of TimeMonzo.
+
+  /** @hidden */
+  isIntegral() {
+    // We're interpreting integer values as floating point noisy.
+    return false;
+  }
+
+  /** @hidden */
+  isFractional() {
+    return false;
+  }
+
+  /** @hidden */
+  isEqualTemperament() {
+    return false;
+  }
+
+  /** @hidden */
+  isUnity() {
+    return false;
+  }
+
+  // TypeScript be like
+  /** @hidden */
+  toBigInteger(): bigint {
+    throw new Error('Cannot convert irrational value to integer.');
+  }
+
+  /** @hidden */
+  toFraction(): Fraction {
+    throw new Error('Cannot convert irrational value to a fraction.');
+  }
+
+  /** @hidden */
+  toIntegerMonzo(): number[] {
+    throw new Error(
+      'Cannot convert irrational value to a monzo with integer components.'
+    );
+  }
+
+  /** @hidden */
+  toEqualTemperament(): EqualTemperament {
+    throw new Error('Cannot convert real value to equal temperament.');
+  }
+
+  /** @hidden */
+  tail() {
+    return this.clone();
+  }
+
+  /** @hidden */
+  gcd(other: TimeMonzo | TimeReal) {
+    // Not sure if what interpretation makes sense here. Let's just return the conventional identity.
+    return new TimeReal(
+      Math.min(this.timeExponent, other.timeExponent.valueOf()),
+      0
+    );
+  }
+
+  /** @hidden */
+  lcm(other: TimeMonzo | TimeReal) {
+    // Division by zero due to how gcd was interpreted.
+    return new TimeReal(
+      Math.max(this.timeExponent, other.timeExponent.valueOf()),
+      NaN
+    );
+  }
+
+  /** @hidden */
+  get octaves() {
+    return new Fraction(0);
+  }
+
+  /** @hidden */
+  project() {
+    return new TimeMonzo(ZERO, []);
+  }
+
+  /** @hidden */
+  asIntegerLiteral() {
+    return undefined;
+  }
+
+  /** @hidden */
+  asFractionLiteral() {
+    return undefined;
+  }
+
+  /** @hidden */
+  asNedjiLiteral() {
+    return undefined;
+  }
+
+  /** @hidden */
+  asRadicalLiteral() {
+    return undefined;
+  }
+}
+
+/**
+ * Fractional monzo with multiplicative residue measured in time-related units (usually Hz).
+ *
+ * Used to represent the value of musical objects like 432Hz, 5/3 or 7\12 (N-of-EDO).
  */
 export class TimeMonzo {
   timeExponent: Fraction;
   primeExponents: FractionalMonzo;
   residual: Fraction;
-  cents: number;
 
   /**
-   * Construct a fractional monzo with multiplicative residue and arbitrary cents offset.
+   * Construct a fractional monzo with multiplicative residue.
    * @param timeExponent Exponent of the seconds unit.
    * @param primeExponents Fractional monzo part.
    * @param residual Multiplicative residue that is too complex to fit in the vector part.
-   * @param cents Cents offset.
    */
   constructor(
     timeExponent: Fraction,
     primeExponents: FractionalMonzo,
-    residual?: Fraction,
-    cents = 0
+    residual?: Fraction
   ) {
     if (residual === undefined) {
       residual = new Fraction(1);
@@ -163,7 +838,6 @@ export class TimeMonzo {
     this.timeExponent = timeExponent;
     this.primeExponents = primeExponents;
     this.residual = residual;
-    this.cents = cents;
   }
 
   /**
@@ -182,28 +856,6 @@ export class TimeMonzo {
       vector.map(c => new Fraction(c)),
       residual
     );
-  }
-
-  /**
-   * Construct a time monzo from an interval measured in cents.
-   * @param cents The amount of cents to convert. An octave (2/1) divided into 12 semitones 100 cents each.
-   * @param numberOfComponents Number of components in the monzo vector part.
-   * @returns Time monzo with a zero vector part and the specified cents offset.
-   */
-  static fromCents(cents: number, numberOfComponents?: number) {
-    numberOfComponents ??= NUMBER_OF_COMPONENTS;
-    const vector: FractionalMonzo = [];
-    while (vector.length < numberOfComponents) {
-      vector.push(new Fraction(0));
-    }
-    const residual = new Fraction(1);
-    // Normalize representation of zero.
-    if (cents === -Infinity) {
-      residual.s = 0;
-      residual.n = 0;
-      cents = 0;
-    }
-    return new TimeMonzo(new Fraction(0), vector, residual, cents);
   }
 
   /**
@@ -244,34 +896,6 @@ export class TimeMonzo {
   }
 
   /**
-   * Constuct a time monzo from a value measured in frequency ratio space.
-   * @param value Musical ratio in frequency-space.
-   * @param numberOfComponents Number of components in the monzo vector part.
-   * @returns Time monzo with a zero vector part and the specified value converted to a cents offset.
-   */
-  static fromValue(value: number, numberOfComponents?: number) {
-    numberOfComponents ??= NUMBER_OF_COMPONENTS;
-    const vector: FractionalMonzo = [];
-    while (vector.length < numberOfComponents) {
-      vector.push(new Fraction(0));
-    }
-    if (value === 0) {
-      return new TimeMonzo(new Fraction(0), vector, new Fraction(0));
-    }
-    const residual = new Fraction(1);
-    if (value < 0) {
-      residual.s = -1;
-      value = -value;
-    }
-    return new TimeMonzo(
-      new Fraction(0),
-      vector,
-      residual,
-      valueToCents(value)
-    );
-  }
-
-  /**
    * Construct a time monzo from a value that's a rational multiple of 1 Hz.
    * @param frequency Frequency measured in oscillations per second.
    * @param numberOfComponents Number of components in the monzo vector part.
@@ -282,21 +906,6 @@ export class TimeMonzo {
     numberOfComponents?: number
   ) {
     const result = TimeMonzo.fromFraction(frequency, numberOfComponents);
-    result.timeExponent = new Fraction(-1);
-    return result;
-  }
-
-  /**
-   * Construct a time monzo from a value measured in Hz.
-   * @param frequency Frequency measured in oscillations per second.
-   * @param numberOfComponents Number of components in the monzo vector part.
-   * @returns Time monzo representing the frequency.
-   */
-  static fromArbitraryFrequency(
-    frequency: number,
-    numberOfComponents?: number
-  ) {
-    const result = TimeMonzo.fromValue(frequency, numberOfComponents);
     result.timeExponent = new Fraction(-1);
     return result;
   }
@@ -373,7 +982,7 @@ export class TimeMonzo {
       if (pe.d === 1) {
         this.residual = this.residual.mul(FRACTION_PRIMES[index].pow(pe)!);
       } else {
-        this.cents += PRIME_CENTS[index] * pe.valueOf();
+        throw new Error('Cannot truncate fractional monzo.');
       }
     }
     if (this.primeExponents.length < value) {
@@ -422,8 +1031,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       this.timeExponent.clone(),
       vector,
-      this.residual.clone(),
-      this.cents
+      this.residual.clone()
     );
   }
 
@@ -433,9 +1041,6 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as a ratio.
    */
   toFraction() {
-    if (this.isNonAlgebraic()) {
-      throw new Error('Unable to convert irrational number to fraction');
-    }
     if (!this.primeExponents.length) {
       return this.residual.clone();
     }
@@ -443,7 +1048,7 @@ export class TimeMonzo {
     this.primeExponents.forEach((component, i) => {
       const factor = FRACTION_PRIMES[i].pow(component);
       if (factor === null) {
-        throw new Error('Unable to convert irrational number to fraction');
+        throw new Error('Unable to convert irrational number to fraction.');
       }
       result = result.mul(factor);
     });
@@ -456,9 +1061,6 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as a ratio.
    */
   toBigNumeratorDenominator() {
-    if (this.isNonAlgebraic()) {
-      throw new Error('Unable to convert irrational number to fraction.');
-    }
     let numerator = BigInt(this.residual.n * this.residual.s);
     let denominator = BigInt(this.residual.d);
     this.primeExponents.forEach((component, i) => {
@@ -487,9 +1089,6 @@ export class TimeMonzo {
    * @throws An error if the time monzo cannot be represented as an integer.
    */
   toBigInteger() {
-    if (this.isNonAlgebraic()) {
-      throw new Error('Unable to convert irrational number to integer.');
-    }
     if (this.residual.d !== 1) {
       throw new Error('Unable to convert fractional number to integer.');
     }
@@ -528,12 +1127,7 @@ export class TimeMonzo {
    * @returns Pair of the pitch-space fraction and the equave as a frequency-space fraction.
    * @throws An error if the time monzo cannot be represented as an EDJI interval.
    */
-  toEqualTemperament() {
-    if (this.isNonAlgebraic()) {
-      throw new Error(
-        'Unable to convert non-algebraic number to equal temperament.'
-      );
-    }
+  toEqualTemperament(): EqualTemperament {
     if (!this.residual.isUnity()) {
       throw new Error(
         'Unable to convert non-representable fraction to equal temperament.'
@@ -570,7 +1164,11 @@ export class TimeMonzo {
       };
     }
     const fractionOfEquave = new Fraction(numerator, denominator);
-    const equave = this.pow(fractionOfEquave.inverse()).toFraction();
+    const equaveMonzo = this.pow(fractionOfEquave.inverse());
+    if (!(equaveMonzo instanceof TimeMonzo && equaveMonzo.isFractional())) {
+      throw new Error('Equal temperament conversion failed.');
+    }
+    const equave = equaveMonzo.toFraction();
 
     if (equave.compare(ONE) < 0) {
       return {
@@ -595,9 +1193,6 @@ export class TimeMonzo {
     if (!this.residual.isUnity()) {
       throw new Error('Cannot convert monzo with residual to integers.');
     }
-    if (this.isNonAlgebraic()) {
-      throw new Error('Cannot convert monzo with offset to integers.');
-    }
     const result: number[] = [];
     for (const component of this.primeExponents) {
       if (component.d !== 1) {
@@ -612,6 +1207,22 @@ export class TimeMonzo {
   }
 
   /**
+   * Check if the time monzo represents the number one.
+   * @returns `true` if the time monzo represents musical unison ignoring units of time.
+   */
+  isUnity() {
+    if (!this.residual.isUnity()) {
+      return false;
+    }
+    for (const component of this.primeExponents) {
+      if (component.n) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Check if the time monzo lacks units of time/frequency.
    * @return `true` if the time monzo isn't expressed in units of time.
    */
@@ -620,22 +1231,10 @@ export class TimeMonzo {
   }
 
   /**
-   * Check if the time monzo is not algebraic.
-   * @returns `true` if the time monzo has a non-zero real cents offset.
-   */
-  isNonAlgebraic() {
-    // This form has the intended behavior with NaN.
-    return !(this.cents === 0);
-  }
-
-  /**
    * Check if the time monzo represents a whole number.
    * @returns `true` if the time monzo represents an integer ignoring units of time.
    */
   isIntegral() {
-    if (this.isNonAlgebraic()) {
-      return false;
-    }
     if (this.residual.d !== 1) {
       return false;
     }
@@ -652,9 +1251,6 @@ export class TimeMonzo {
    * @returns `true` if the time monzo represents a decimal number ignoring units of time.
    */
   isDecimal() {
-    if (this.isNonAlgebraic()) {
-      return false;
-    }
     if (!isDecimal(this.residual)) {
       return false;
     }
@@ -682,9 +1278,6 @@ export class TimeMonzo {
    * @returns `true` if the time monzo can be interpreted as a ratio in frequency-space.
    */
   isFractional() {
-    if (this.isNonAlgebraic()) {
-      return false;
-    }
     for (const component of this.primeExponents) {
       if (component.d !== 1) {
         return false;
@@ -698,25 +1291,6 @@ export class TimeMonzo {
    * @returns `true` if the time monzo can be interpreted as pitch-space fraction of a frequency-space fraction.
    */
   isEqualTemperament() {
-    if (this.isNonAlgebraic()) {
-      return false;
-    }
-    return this.residual.isUnity();
-  }
-
-  /**
-   * Check if the time monzo is expressed solely in terms of real cents.
-   * @returns `true` if the time monzo is a plain real number.
-   */
-  isRealCents() {
-    if (this.timeExponent.n) {
-      return false;
-    }
-    for (const pe of this.primeExponents) {
-      if (pe.n) {
-        return false;
-      }
-    }
     return this.residual.isUnity();
   }
 
@@ -725,9 +1299,6 @@ export class TimeMonzo {
    * @returns `true` if the time monzo is a power of two.
    */
   isPowerOfTwo() {
-    if (this.isNonAlgebraic()) {
-      return false;
-    }
     if (!this.primeExponents.length) {
       return isPowerOfTwo(this.residual.n) && isPowerOfTwo(this.residual.d);
     }
@@ -760,7 +1331,7 @@ export class TimeMonzo {
     const timeExponent = this.timeExponent.neg();
     const vector = this.primeExponents.map(component => component.neg());
     const residual = this.residual.inverse();
-    return new TimeMonzo(timeExponent, vector, residual, -this.cents);
+    return new TimeMonzo(timeExponent, vector, residual);
   }
 
   /**
@@ -768,23 +1339,27 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The linear sum of the time monzos.
    */
-  add(other: TimeMonzo): TimeMonzo {
+  add(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.add(this);
+    }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(
         `Cannot add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
       );
     }
-    let result: TimeMonzo;
     if (this.isFractional() && other.isFractional()) {
-      result = TimeMonzo.fromFraction(
+      const result = TimeMonzo.fromFraction(
         this.toFraction().add(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-    } else {
-      result = TimeMonzo.fromValue(this.valueOf() + other.valueOf());
+      result.timeExponent = this.timeExponent.clone();
+      return result;
     }
-    result.timeExponent = this.timeExponent;
-    return result;
+    return new TimeReal(
+      this.timeExponent.valueOf(),
+      this.valueOf() + other.valueOf()
+    );
   }
 
   /**
@@ -792,23 +1367,27 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The linear difference of the time monzos.
    */
-  sub(other: TimeMonzo): TimeMonzo {
+  sub(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.lsub(this);
+    }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
         `Cannot subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
       );
     }
-    let result: TimeMonzo;
     if (this.isFractional() && other.isFractional()) {
-      result = TimeMonzo.fromFraction(
+      const result = TimeMonzo.fromFraction(
         this.toFraction().sub(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-    } else {
-      result = TimeMonzo.fromValue(this.valueOf() - other.valueOf());
+      result.timeExponent = this.timeExponent.clone();
+      return result;
     }
-    result.timeExponent = this.timeExponent;
-    return result;
+    return new TimeReal(
+      this.timeExponent.valueOf(),
+      this.valueOf() - other.valueOf()
+    );
   }
 
   /**
@@ -816,29 +1395,30 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The reciprocal of the sum of the reciprocals.
    */
-  lensAdd(other: TimeMonzo): TimeMonzo {
+  lensAdd(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.lensAdd(this);
+    }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
         `Cannot lens add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
       );
     }
-    let result: TimeMonzo;
     if (this.isFractional() && other.isFractional()) {
-      result = TimeMonzo.fromFraction(
+      const result = TimeMonzo.fromFraction(
         this.toFraction().lensAdd(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-    } else {
-      const t = this.valueOf();
-      if (t) {
-        const o = other.valueOf();
-        result = TimeMonzo.fromValue((t * o) / (t + o));
-      } else {
-        result = TimeMonzo.fromValue(0);
-      }
+      result.timeExponent = this.timeExponent.clone();
+      return result;
     }
-    result.timeExponent = this.timeExponent;
-    return result;
+    const t = this.valueOf();
+    if (t) {
+      const o = other.valueOf();
+      return new TimeReal(this.timeExponent.valueOf(), (t * o) / (t + o));
+    } else {
+      return new TimeReal(this.timeExponent.valueOf(), 0);
+    }
   }
 
   /**
@@ -846,29 +1426,30 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The reciprocal of the difference of the reciprocals.
    */
-  lensSub(other: TimeMonzo): TimeMonzo {
+  lensSub(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.leftLensSub(this);
+    }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
         `Cannot lens subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
       );
     }
-    let result: TimeMonzo;
     if (this.isFractional() && other.isFractional()) {
-      result = TimeMonzo.fromFraction(
+      const result = TimeMonzo.fromFraction(
         this.toFraction().lensSub(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-    } else {
-      const t = this.valueOf();
-      if (t) {
-        const o = other.valueOf();
-        result = TimeMonzo.fromValue((t * o) / (o - t));
-      } else {
-        result = TimeMonzo.fromValue(0);
-      }
+      result.timeExponent = this.timeExponent.clone();
+      return result;
     }
-    result.timeExponent = this.timeExponent;
-    return result;
+    const t = this.valueOf();
+    if (t) {
+      const o = other.valueOf();
+      return new TimeReal(this.timeExponent.valueOf(), (t * o) / (o - t));
+    } else {
+      return new TimeReal(this.timeExponent.valueOf(), 0);
+    }
   }
 
   /**
@@ -876,7 +1457,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The product of the time monzos in linear space.
    */
-  mul(other: TimeMonzo): TimeMonzo {
+  mul(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.mul(this);
+    }
     if (this.primeExponents.length < other.primeExponents.length) {
       return other.mul(this);
     }
@@ -888,23 +1472,19 @@ export class TimeMonzo {
     for (let i = 0; i < other.primeExponents.length; ++i) {
       vector.push(this.primeExponents[i].add(other.primeExponents[i]));
     }
-    let residual = new Fraction(1);
-    let cents = this.cents + other.cents;
     try {
-      residual = this.residual.mul(other.residual);
-    } catch {
-      cents += valueToCents(
-        (this.residual.n * other.residual.n) /
-          (this.residual.d * other.residual.d)
+      const residual = this.residual.mul(other.residual);
+      return new TimeMonzo(
+        this.timeExponent.add(other.timeExponent),
+        vector,
+        residual
       );
-      residual.s = this.residual.s * other.residual.s;
+    } catch {
+      return new TimeReal(
+        this.timeExponent.valueOf() + other.timeExponent.valueOf(),
+        this.valueOf() * other.valueOf()
+      );
     }
-    return new TimeMonzo(
-      this.timeExponent.add(other.timeExponent),
-      vector,
-      residual,
-      cents
-    );
   }
 
   /**
@@ -912,7 +1492,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The largest multiplicative factor shared by both monzos.
    */
-  gcd(other: TimeMonzo): TimeMonzo {
+  gcd(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.gcd(this);
+    }
     if (this.primeExponents.length < other.primeExponents.length) {
       return other.gcd(this);
     }
@@ -934,8 +1517,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       min(this.timeExponent, other.timeExponent),
       vector,
-      residual,
-      Math.min(this.cents, other.cents)
+      residual
     );
   }
 
@@ -944,7 +1526,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The smallest monzo that has both monzos as factors.
    */
-  lcm(other: TimeMonzo): TimeMonzo {
+  lcm(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.lcm(this);
+    }
     if (this.primeExponents.length < other.primeExponents.length) {
       return other.lcm(this);
     }
@@ -960,8 +1545,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       max(this.timeExponent, other.timeExponent),
       vector,
-      residual,
-      Math.max(this.cents, other.cents)
+      residual
     );
   }
 
@@ -970,7 +1554,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns This monzo divided by the other monzo in linear space.
    */
-  div(other: TimeMonzo) {
+  div(other: TimeMonzo | TimeReal) {
+    if (other instanceof TimeReal) {
+      return other.ldiv(this);
+    }
     if (!other.residual.n) {
       throw new Error('Division by zero.');
     }
@@ -987,26 +1574,30 @@ export class TimeMonzo {
     for (let i = 0; i < other.primeExponents.length; ++i) {
       vector.push(self.primeExponents[i].sub(other.primeExponents[i]));
     }
-    let residual = new Fraction(1);
-    let cents = self.cents - other.cents;
     try {
-      residual = self.residual.div(other.residual);
-    } catch {
-      cents += valueToCents(
-        (self.residual.n * other.residual.d) /
-          (self.residual.d * other.residual.n)
+      const residual = self.residual.div(other.residual);
+      return new TimeMonzo(
+        self.timeExponent.sub(other.timeExponent),
+        vector,
+        residual
       );
-      residual.s = self.residual.s * other.residual.s;
+    } catch {
+      return new TimeReal(
+        this.timeExponent.valueOf() - other.timeExponent.valueOf(),
+        this.valueOf() / other.valueOf()
+      );
     }
-    return new TimeMonzo(
-      self.timeExponent.sub(other.timeExponent),
-      vector,
-      residual,
-      cents
-    );
   }
 
-  pow(other: FractionValue | TimeMonzo) {
+  /**
+   * Raise this time monzo to the power of another.
+   * @param other Another time monzo or a fractional value.
+   * @returns This multiplied by itself `other` times.
+   */
+  pow(other: FractionValue | TimeMonzo | TimeReal): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.lpow(this);
+    }
     if (other instanceof TimeMonzo) {
       if (other.timeExponent.n !== 0) {
         throw new Error('Can only raise to a scalar power.');
@@ -1014,10 +1605,11 @@ export class TimeMonzo {
       if (other.isFractional()) {
         other = other.toFraction();
       } else {
-        if (this.timeExponent.n) {
-          throw new Error('Cannot raise time units to an irrational power.');
-        }
-        return TimeMonzo.fromCents(this.totalCents() * other.valueOf());
+        const exponent = other.valueOf();
+        return new TimeReal(
+          this.timeExponent.valueOf() * exponent,
+          this.valueOf() ** exponent
+        );
       }
     }
     const scalar = new Fraction(other);
@@ -1025,28 +1617,21 @@ export class TimeMonzo {
       const vector = this.primeExponents.map(component =>
         component.mul(scalar)
       );
-      let residual: Fraction | null | undefined = this.residual.pow(scalar);
-      let cents = this.cents;
+      const residual: Fraction | null | undefined = this.residual.pow(scalar);
       if (residual === null) {
-        cents += valueToCents(this.residual.valueOf());
-        residual = undefined;
+        const exponent = scalar.valueOf();
+        return new TimeReal(
+          this.timeExponent.valueOf() * exponent,
+          this.valueOf() ** exponent
+        );
       }
-      cents *= scalar.valueOf();
-      return new TimeMonzo(
-        this.timeExponent.mul(scalar),
-        vector,
-        residual,
-        cents
-      );
+      return new TimeMonzo(this.timeExponent.mul(scalar), vector, residual);
     }
-    if (this.timeExponent.n !== 0) {
-      if (other instanceof Fraction) {
-        throw new Error('Time unit exponent too complex.');
-      } else {
-        throw new Error('Cannot raise time units to an irrational power.');
-      }
-    }
-    return TimeMonzo.fromCents(this.totalCents() * scalar.valueOf());
+    const exponent = scalar.valueOf();
+    return new TimeReal(
+      this.timeExponent.valueOf() * exponent,
+      this.valueOf() ** exponent
+    );
   }
 
   /**
@@ -1054,7 +1639,10 @@ export class TimeMonzo {
    * @param other Base of the logarithm.
    * @returns `x` such that `this ** x === other`.
    */
-  log(other: FractionValue | TimeMonzo): Fraction | number {
+  log(other: FractionValue | TimeMonzo | TimeReal): Fraction | number {
+    if (other instanceof TimeReal) {
+      return 1 / other.log(this);
+    }
     if (this.timeExponent.n !== 0) {
       if (other instanceof TimeMonzo) {
         if (other.timeExponent.n === 0) {
@@ -1097,9 +1685,6 @@ export class TimeMonzo {
       return solution;
     }
     if (other instanceof TimeMonzo) {
-      if (this.isNonAlgebraic() || other.isNonAlgebraic()) {
-        return this.totalCents() / other.totalCents();
-      }
       let self: TimeMonzo = this;
       if (self.numberOfComponents < other.numberOfComponents) {
         self = this.clone();
@@ -1159,7 +1744,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The sum of the pairwise products of the vector parts.
    */
-  dot(other: TimeMonzo): Fraction {
+  dot(other: TimeMonzo | TimeReal): Fraction {
+    if (other instanceof TimeReal) {
+      return other.dot(this);
+    }
     if (this.numberOfComponents < other.numberOfComponents) {
       return other.dot(this);
     }
@@ -1169,12 +1757,7 @@ export class TimeMonzo {
     }
 
     if (this.residual.isUnity() || other.residual.isUnity()) {
-      // Including real cents doesn't really make sense.
-      // In any sensible context one of them is zero anyway.
-      // Real cents are simply co-opted for ups-and-downs by giving vals a unity cents component.
-      let result = new Fraction(this.cents * other.cents).simplify(1e-8);
-      // Not sure if time should have zero metric or not.
-      result = result.add(this.timeExponent.mul(other.timeExponent));
+      let result = this.timeExponent.mul(other.timeExponent);
       for (let i = 0; i < this.primeExponents.length; ++i) {
         result = result.add(
           this.primeExponents[i].mul(other.primeExponents[i])
@@ -1194,26 +1777,11 @@ export class TimeMonzo {
     if (magnitude.n === 0) {
       throw new Error('No geometric inverse exists.');
     }
-    return this.pow(magnitude.inverse());
-  }
-
-  // Same as pow, but the offset is accumulated in cents
-  /**
-   * Rescale the time monzo in pitch-space and store the offset as cents.
-   * @param scalar Scaling factor.
-   * @returns The rescaled time monzo where only the cents offset differs from the original.
-   */
-  stretch(scalar: number): TimeMonzo {
-    if (this.timeExponent.n) {
-      throw new Error('Only scalars can be stretched.');
+    const result = this.pow(magnitude.inverse());
+    if (result instanceof TimeMonzo) {
+      return result;
     }
-    const offset = this.totalCents() * (scalar - 1);
-    return new TimeMonzo(
-      new Fraction(0),
-      this.primeExponents.map(c => c.clone()),
-      this.residual.clone(),
-      this.cents + offset
-    );
+    throw new Error('Failed to compute geometric inverse.');
   }
 
   /**
@@ -1250,26 +1818,32 @@ export class TimeMonzo {
    * @param ceiling If `true` `x.mmod(x)` evaluates to `x`.
    * @returns This modulo the other.
    */
-  mmod(other: TimeMonzo, ceiling = false) {
+  mmod(other: TimeMonzo | TimeReal, ceiling = false): TimeMonzo | TimeReal {
+    if (other instanceof TimeReal) {
+      return other.lmmod(this, ceiling);
+    }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(
         `Cannot mod time monzos with disparate units. Have s^${this.timeExponent.toFraction()} mod s^${other.timeExponent.toFraction()}.`
       );
     }
-    let result: TimeMonzo;
     if (this.isFractional() && other.isFractional()) {
-      result = TimeMonzo.fromFraction(
+      const result = TimeMonzo.fromFraction(
         this.toFraction().mmod(other.toFraction()),
         Math.max(this.numberOfComponents, other.numberOfComponents)
       );
-    } else {
-      result = TimeMonzo.fromValue(mmod(this.valueOf(), other.valueOf()));
+      if (ceiling && !result.residual.n) {
+        return other.clone();
+      }
+      result.timeExponent = this.timeExponent.clone();
+      return result;
     }
-    if (ceiling && !result.residual.n) {
-      return other.clone();
+    const modulus = other.valueOf();
+    let value = mmod(this.valueOf(), modulus);
+    if (ceiling) {
+      value = value || modulus;
     }
-    result.timeExponent = this.timeExponent;
-    return result;
+    return new TimeReal(this.timeExponent.valueOf(), value);
   }
 
   /**
@@ -1278,18 +1852,29 @@ export class TimeMonzo {
    * @param ceiling If `true` `x.reduce(x)` evaluates to `x`.
    * @returns This reduced by the other.
    */
-  reduce(other: TimeMonzo, ceiling = false) {
+  reduce(other: TimeMonzo | TimeReal, ceiling = false) {
     const log = this.log(other);
+    let multiplier: TimeMonzo | TimeReal;
     if (typeof log === 'number') {
       if (ceiling) {
-        return this.mul(other.pow(1 - Math.ceil(log)));
+        multiplier = other.pow(1 - Math.ceil(log));
+      } else {
+        multiplier = other.pow(-Math.floor(log));
       }
-      return this.div(other.pow(Math.floor(log)));
+    } else {
+      if (ceiling) {
+        multiplier = other.pow(ONE.sub(log.ceil()));
+      } else {
+        multiplier = other.pow(-log.floor());
+      }
     }
-    if (ceiling) {
-      return this.mul(other.pow(ONE.sub(log.ceil())));
+    if (multiplier instanceof TimeMonzo) {
+      return this.mul(multiplier);
     }
-    return this.div(other.pow(log.floor()));
+    return new TimeReal(
+      this.timeExponent.valueOf() + multiplier.timeExponent,
+      this.valueOf() * multiplier.value
+    );
   }
 
   /**
@@ -1297,7 +1882,7 @@ export class TimeMonzo {
    * @param base New base to replace prime two.
    * @returns N steps of equal divisions of the new base assuming this time monzo was N steps of an equally divided octave.
    */
-  project(base: TimeMonzo) {
+  project(base: TimeMonzo | TimeReal) {
     return base.pow(this.octaves);
   }
 
@@ -1306,7 +1891,10 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns `true` if the time monzos share the same time exponent, prime exponents, residual and cents offset.
    */
-  strictEquals(other: TimeMonzo): boolean {
+  strictEquals(other: TimeMonzo | TimeReal): boolean {
+    if (other instanceof TimeReal) {
+      return false;
+    }
     if (this.numberOfComponents < other.numberOfComponents) {
       return other.strictEquals(this);
     }
@@ -1317,8 +1905,7 @@ export class TimeMonzo {
     return (
       this.timeExponent.equals(other.timeExponent) &&
       monzosEqual(this.primeExponents, other.primeExponents) &&
-      this.residual.equals(other.residual) &&
-      this.cents === other.cents
+      this.residual.equals(other.residual)
     );
   }
 
@@ -1333,7 +1920,7 @@ export class TimeMonzo {
     if (ignoreSign) {
       residualValue = Math.abs(residualValue);
     }
-    let total = this.cents + valueToCents(residualValue);
+    let total = valueToCents(residualValue);
     for (let i = 0; i < this.primeExponents.length; ++i) {
       total += this.primeExponents[i].valueOf() * PRIME_CENTS[i];
     }
@@ -1371,7 +1958,7 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns `true` if the time monzos are of equal size.
    */
-  equals(other: TimeMonzo) {
+  equals(other: TimeMonzo | TimeReal) {
     return this.valueOf() === other.valueOf();
   }
 
@@ -1380,7 +1967,7 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns Result < 0 if other is larger than this. Result > 0 if other is smaller than this. Result == 0 if other is equal to this in size.
    */
-  compare(other: TimeMonzo) {
+  compare(other: TimeMonzo | TimeReal) {
     if (this.strictEquals(other)) {
       return 0;
     }
@@ -1392,7 +1979,7 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The closest multiple of the other to this one.
    */
-  roundTo(other: TimeMonzo) {
+  roundTo(other: TimeMonzo | TimeReal) {
     const multiplier = Math.round(this.div(other).valueOf());
     return other.mul(TimeMonzo.fromFraction(multiplier));
   }
@@ -1402,7 +1989,7 @@ export class TimeMonzo {
    * @param other Another time monzo.
    * @returns The closest power of the other to this one.
    */
-  pitchRoundTo(other: TimeMonzo) {
+  pitchRoundTo(other: TimeMonzo | TimeReal) {
     const multiplier = Math.round(this.totalCents() / other.totalCents());
     return other.pow(multiplier);
   }
@@ -1468,7 +2055,6 @@ export class TimeMonzo {
     for (let i = 0; i < index; ++i) {
       result.primeExponents[i] = ZERO;
     }
-    result.cents = 0;
     return result;
   }
 
@@ -1476,7 +2062,10 @@ export class TimeMonzo {
    * Obtain an AST node representing the time monzo as a decimal.
    * @returns Decimal literal or a real decimal literal if necessary.
    */
-  asDecimalLiteral(): DecimalLiteral {
+  asDecimalLiteral(): DecimalLiteral | undefined {
+    if (!this.isScalar()) {
+      return undefined;
+    }
     if (this.isDecimal()) {
       return numberToDecimalLiteral(this.toFraction(), 'e');
     }
@@ -1646,20 +2235,6 @@ export class TimeMonzo {
       basis.push('s');
       components.push(fractionToVectorComponent(this.timeExponent));
     }
-    if (this.cents) {
-      basis.push('rc');
-      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
-        this.cents,
-        'r'
-      );
-      components.push({
-        sign,
-        left: Number(whole),
-        separator: '.',
-        right: fractional,
-        exponent,
-      });
-    }
     if (!this.residual.isUnity()) {
       const {s, n, d} = this.residual;
       if (d === 1) {
@@ -1703,7 +2278,8 @@ export class TimeMonzo {
   }
 
   asValLiteral(): ValLiteral {
-    return {...this.asMonzoLiteral(false), type: 'ValLiteral'};
+    // TODO: Check that the basis is legal.
+    return {...this.asMonzoLiteral(false), type: 'ValLiteral'} as ValLiteral;
   }
 
   /**
@@ -1712,27 +2288,6 @@ export class TimeMonzo {
    * @returns String that evaluates to the same value as this time monzo.
    */
   toString(domain: Domain = 'linear') {
-    if (isNaN(this.cents)) {
-      switch (domain) {
-        case 'linear':
-          return 'NaN';
-        case 'logarithmic':
-          return 'logarithmic(NaN)';
-        case 'cologarithmic':
-          return 'cologarithmic(NaN)';
-      }
-    }
-    if (!isFinite(this.cents)) {
-      const value = this.residual.s < 0 ? '-Infinity' : 'Infinity';
-      switch (domain) {
-        case 'linear':
-          return value;
-        case 'logarithmic':
-          return `logarithmic(${value})`;
-        case 'cologarithmic':
-          return `cologarithmic(${value})`;
-      }
-    }
     if (domain === 'linear') {
       if (this.isScalar()) {
         if (this.isIntegral()) {
@@ -1793,9 +2348,6 @@ export class TimeMonzo {
       if (this.residual.compare(ONE)) {
         factors.push(this.residual.toFraction());
       }
-      if (this.cents) {
-        factors.push(centsToValue(this.cents) + 'r');
-      }
       if (this.timeExponent.equals(NEGATIVE_ONE)) {
         factors.push('1Hz');
       } else if (this.timeExponent.n) {
@@ -1822,12 +2374,6 @@ export class TimeMonzo {
           this.residual.equals(ONE) &&
           this.primeExponents.every(pe => !pe.n)
         ) {
-          if (this.cents) {
-            if (this.cents === Math.round(this.cents)) {
-              return this.cents.toString() + '\\';
-            }
-            return this.cents.toString() + 'rc';
-          }
           return '0c';
         }
       }

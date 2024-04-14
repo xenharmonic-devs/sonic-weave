@@ -20,10 +20,13 @@ import {
   ipowNodes,
   logNodes,
   reduceNodes,
+  inferFJSFlavor,
+  integerToVectorComponent,
+  MonzoLiteral,
 } from './expression';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo, TimeReal} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
-import {RootContext} from './context';
+import {type RootContext} from './context';
 import {ONE, ZERO, countUpsAndLifts, setUnion} from './utils';
 import {Fraction, FractionValue} from 'xen-dev-utils';
 
@@ -59,11 +62,22 @@ function logLinMul(
   node?: IntervalLiteral,
   zombie?: Interval
 ) {
-  if (linear.node?.type === 'DecimalLiteral' && linear.node.flavor === 'r') {
+  if (linear.steps) {
+    throw new Error('Cannot multiply with a stepful scalar.');
+  }
+  let steps = 0;
+  if (logarithmic.steps) {
+    steps = logarithmic.steps * linear.valueOf();
+    if (!Number.isInteger(steps)) {
+      throw new Error('Cannot create fractional steps.');
+    }
+  }
+  if (linear.value instanceof TimeReal) {
     const size = logarithmic.totalCents();
     return new Interval(
-      TimeMonzo.fromCents(size * linear.value.valueOf()),
+      TimeReal.fromCents(size * linear.value.valueOf()),
       logarithmic.domain,
+      steps,
       node,
       zombie
     );
@@ -75,7 +89,7 @@ function logLinMul(
   ) {
     node = {type: 'AspiringFJS', flavor: ''};
   }
-  return new Interval(value, logarithmic.domain, node, zombie);
+  return new Interval(value, logarithmic.domain, steps, node, zombie);
 }
 
 /**
@@ -95,13 +109,19 @@ export function infect(left: Interval, right: Interval) {
  * Calculate the logarithm of the first value in the base of the second value.
  * @param left Logarithmand.
  * @param right Logdividend.
- * @returns Left value divided by the right value as a {@link TimeMonzo}.
+ * @returns Left value divided by the right value as a {@link TimeMonzo} or {@link TimeReal}.
  */
 export function log(left: Interval, right: Interval) {
   const log = left.value.log(right.value);
   if (typeof log === 'number') {
-    return TimeMonzo.fromValue(log);
+    if (left.steps || right.steps) {
+      throw new Error('Steps do not match in logarithm.');
+    }
+    return TimeReal.fromValue(log);
   } else {
+    if (!log.mul(right.steps).equals(left.steps)) {
+      throw new Error('Steps do not match in logarithm.');
+    }
     return TimeMonzo.fromFraction(log);
   }
 }
@@ -110,8 +130,9 @@ export function log(left: Interval, right: Interval) {
  * A musical interval associated with a domain, an AST node, CSS color, note label and tracking identifiers.
  */
 export class Interval {
-  value: TimeMonzo;
+  value: TimeMonzo | TimeReal;
   domain: IntervalDomain;
+  steps: number;
   node?: IntervalLiteral;
   color?: Color;
   label: string;
@@ -121,18 +142,21 @@ export class Interval {
    * Construct a musical interval.
    * @param value A time monzo representing the size and echelon (frequency vs. frequency ratio) of the interval.
    * @param domain Domain determining what addition means.
+   * @param steps A steps offset used in tempering.
    * @param node Node in the abstract syntax tree used for string representation.
    * @param convert Another {@link Interval} instance to obtain CSS color, note label and tracking information from.
    */
   constructor(
-    value: TimeMonzo,
+    value: TimeMonzo | TimeReal,
     domain: IntervalDomain,
+    steps = 0,
     node?: IntervalLiteral,
     convert?: Interval
   ) {
     validateNode(node);
     this.value = value;
     this.domain = domain;
+    this.steps = steps;
     this.node = node;
     this.trackingIds = new Set();
     if (convert !== undefined) {
@@ -158,6 +182,7 @@ export class Interval {
     return new Interval(
       monzo,
       'linear',
+      0,
       {type: 'IntegerLiteral', value},
       convert
     );
@@ -175,6 +200,7 @@ export class Interval {
     return new Interval(
       monzo,
       'linear',
+      0,
       {type: 'FractionLiteral', numerator, denominator},
       convert
     );
@@ -187,8 +213,8 @@ export class Interval {
    * @returns Musical interval representing a (possibly irrational) frequency ratio.
    */
   static fromValue(value: number, convert?: Interval) {
-    const monzo = TimeMonzo.fromValue(value);
-    return new Interval(monzo, 'linear', monzo.asDecimalLiteral(), convert);
+    const real = TimeReal.fromValue(value);
+    return new Interval(real, 'linear', 0, real.asDecimalLiteral(), convert);
   }
 
   /**
@@ -196,7 +222,7 @@ export class Interval {
    * @returns An interval like this one but replacing any of the parts won't change the original.
    */
   shallowClone(): Interval {
-    return new Interval(this.value, this.domain, this.node, this);
+    return new Interval(this.value, this.domain, this.steps, this.node, this);
   }
 
   /**
@@ -207,6 +233,7 @@ export class Interval {
     return new Interval(
       this.value.clone(),
       this.domain,
+      this.steps,
       {...this.node} as IntervalLiteral,
       this
     );
@@ -224,12 +251,12 @@ export class Interval {
 
   /** Return `true` if the interval represents a ratio of frequencies. */
   isRelative() {
-    return !this.value.timeExponent.n;
+    return !this.value.timeExponent.valueOf();
   }
 
   /** Return `true` if the interval could be interpreted as a frequency. */
   isAbsolute() {
-    return !!this.value.timeExponent.n;
+    return !!this.value.timeExponent.valueOf();
   }
 
   /**
@@ -247,9 +274,21 @@ export class Interval {
   neg() {
     const node = negNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.neg(), this.domain, node, this);
+      return new Interval(
+        this.value.neg(),
+        this.domain,
+        this.steps, // Iffy, but not wrong.
+        node,
+        this
+      );
     }
-    return new Interval(this.value.inverse(), this.domain, node, this);
+    return new Interval(
+      this.value.inverse(),
+      this.domain,
+      -this.steps,
+      node,
+      this
+    );
   }
 
   /**
@@ -259,7 +298,16 @@ export class Interval {
   inverse() {
     const node = invertNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.inverse(), this.domain, node, this);
+      return new Interval(
+        this.value.inverse(),
+        this.domain,
+        -this.steps,
+        node,
+        this
+      );
+    }
+    if (this.value instanceof TimeReal) {
+      throw new Error('Unable to convert irrational number to val.');
     }
     // This overload should be fine because multiplication is not implemented in the logarithmic domain.
     return new Val(this.value.geometricInverse(), this.value.clone(), node);
@@ -270,11 +318,14 @@ export class Interval {
    * @returns Absolute value of this interval.
    */
   abs() {
+    if (this.steps) {
+      throw new Error('Steps are ambiguous in abs().');
+    }
     const node = absNode(this.node);
     if (this.domain === 'linear') {
-      return new Interval(this.value.abs(), this.domain, node, this);
+      return new Interval(this.value.abs(), this.domain, 0, node, this);
     }
-    return new Interval(this.value.pitchAbs(), this.domain, node, this);
+    return new Interval(this.value.pitchAbs(), this.domain, 0, node, this);
   }
 
   /**
@@ -283,10 +334,18 @@ export class Interval {
    * @returns N steps of equal divisions of the new base assuming this interval was N steps of an equally divided octave.
    */
   project(base: Interval) {
-    const node = projectNodes(this.node, base.node);
+    const steps = this.value.octaves.mul(base.steps);
+    if (steps.d !== 1) {
+      throw new Error('Cannot create fractional steps.');
+    }
+    let node: undefined | IntervalLiteral;
+    if (!steps.n) {
+      node = projectNodes(this.node, base.node);
+    }
     return new Interval(
       this.value.project(base.value),
       'logarithmic',
+      steps.valueOf(),
       node,
       infect(this, base)
     );
@@ -299,7 +358,10 @@ export class Interval {
    */
   add(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in addition');
+      throw new Error('Domains must match in addition.');
+    }
+    if (this.domain === 'linear' && (this.steps || other.steps)) {
+      throw new Error('Linear addition of steps is not allowed.');
     }
     let node = addNodes(this.node, other.node);
     const value =
@@ -307,10 +369,16 @@ export class Interval {
         ? this.value.add(other.value)
         : this.value.mul(other.value);
     if (!node && this.node?.type === other.node?.type) {
-      node = timeMonzoAs(value, this.node, true);
+      node = intervalValueAs(value, this.node, true);
     }
     const zombie = infect(this, other);
-    return new Interval(value, this.domain, node, zombie);
+    return new Interval(
+      value,
+      this.domain,
+      this.steps + other.steps,
+      node,
+      zombie
+    );
   }
 
   /**
@@ -322,16 +390,25 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in subtraction');
     }
+    if (this.domain === 'linear' && (this.steps || other.steps)) {
+      throw new Error('Linear subtraction of steps is not allowed.');
+    }
     let node = subNodes(this.node, other.node);
     const value =
       this.domain === 'linear'
         ? this.value.sub(other.value)
         : this.value.div(other.value);
     if (!node && this.node?.type === other.node?.type) {
-      node = timeMonzoAs(value, this.node, true);
+      node = intervalValueAs(value, this.node, true);
     }
     const zombie = infect(this, other);
-    return new Interval(value, this.domain, node, zombie);
+    return new Interval(
+      value,
+      this.domain,
+      this.steps - other.steps,
+      node,
+      zombie
+    );
   }
 
   /**
@@ -355,33 +432,39 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in harmonic addition');
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in harmonic addition.');
+    }
     const node = lensAddNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.lensAdd(other.value),
         this.domain,
+        0,
         node,
         zombie
       );
     }
+    if (this.value instanceof TimeReal || other.value instanceof TimeReal) {
+      throw new Error('Irrational logarithmic lens addition not implemented.');
+    }
     const magnitude = this.value.dot(this.value);
     if (!magnitude.n) {
-      return new Interval(this.value.clone(), this.domain, node, zombie);
+      return new Interval(this.value.clone(), this.domain, 0, node, zombie);
     }
     const otherMagnitude = other.value.dot(other.value);
     if (!otherMagnitude.n) {
-      return new Interval(other.value.clone(), this.domain, node, zombie);
+      return new Interval(other.value.clone(), this.domain, 0, node, zombie);
     }
-    return new Interval(
-      this.value
-        .pow(magnitude.inverse())
-        .mul(other.value.pow(otherMagnitude.inverse()))
-        .geometricInverse(),
-      this.domain,
-      node,
-      zombie
-    );
+    const value = this.value
+      .pow(magnitude.inverse())
+      .mul(other.value.pow(otherMagnitude.inverse()));
+
+    if (value instanceof TimeReal) {
+      throw new Error('Logarithmic lens addition failed.');
+    }
+    return new Interval(value.geometricInverse(), this.domain, 0, node, zombie);
   }
 
   /**
@@ -393,33 +476,40 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in harmonic subtraction');
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in harmonic subtraction.');
+    }
     const node = lensSubNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.lensSub(other.value),
         this.domain,
+        0,
         node,
         zombie
       );
     }
+    if (this.value instanceof TimeReal || other.value instanceof TimeReal) {
+      throw new Error(
+        'Irrational logarithmic lens subtraction not implemented.'
+      );
+    }
     const magnitude = this.value.dot(this.value);
     if (!magnitude.n) {
-      return new Interval(this.value.clone(), this.domain, node, zombie);
+      return new Interval(this.value.clone(), this.domain, 0, node, zombie);
     }
     const otherMagnitude = other.value.dot(other.value);
     if (!otherMagnitude.n) {
-      return new Interval(other.value.clone(), this.domain, node, zombie);
+      return new Interval(other.value.clone(), this.domain, 0, node, zombie);
     }
-    return new Interval(
-      this.value
-        .pow(magnitude.inverse())
-        .div(other.value.pow(otherMagnitude.inverse()))
-        .geometricInverse(),
-      this.domain,
-      node,
-      zombie
-    );
+    const value = this.value
+      .pow(magnitude.inverse())
+      .div(other.value.pow(otherMagnitude.inverse()));
+    if (value instanceof TimeReal) {
+      throw new Error('Logarithmic lens subtraction failed.');
+    }
+    return new Interval(value.geometricInverse(), this.domain, 0, node, zombie);
   }
 
   /**
@@ -431,12 +521,16 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in rounding');
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in rounding.');
+    }
     const node = roundToNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.roundTo(other.value),
         this.domain,
+        0,
         node,
         zombie
       );
@@ -444,6 +538,7 @@ export class Interval {
     return new Interval(
       this.value.pitchRoundTo(other.value),
       this.domain,
+      0,
       node,
       zombie
     );
@@ -459,12 +554,16 @@ export class Interval {
     if (this.domain !== other.domain) {
       throw new Error('Domains must match in modulo');
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in modulo.');
+    }
     const node = modNodes(this.node, other.node);
     const zombie = infect(this, other);
     if (this.domain === 'linear') {
       return new Interval(
         this.value.mmod(other.value, ceiling),
         this.domain,
+        0,
         node,
         zombie
       );
@@ -472,6 +571,7 @@ export class Interval {
     return new Interval(
       this.value.reduce(other.value, ceiling),
       this.domain,
+      0,
       node,
       zombie
     );
@@ -488,6 +588,9 @@ export class Interval {
         'Exponential rounding not implemented in logarithmic domain'
       );
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in pitch rounding.');
+    }
     if (!other.value.isScalar()) {
       throw new Error('Only scalar exponential rounding implemented');
     }
@@ -495,6 +598,7 @@ export class Interval {
     return new Interval(
       this.value.pitchRoundTo(other.value),
       this.domain,
+      0,
       node,
       infect(this, other)
     );
@@ -522,7 +626,13 @@ export class Interval {
     if (this.domain === 'logarithmic') {
       return logLinMul(this, other, node, zombie);
     }
-    return new Interval(this.value.mul(other.value), this.domain, node, zombie);
+    return new Interval(
+      this.value.mul(other.value),
+      this.domain,
+      this.steps + other.steps,
+      node,
+      zombie
+    );
   }
 
   /**
@@ -538,16 +648,31 @@ export class Interval {
       if (this.domain !== 'logarithmic') {
         throw new Error('Domains must match in non-scalar division');
       }
-      return new Interval(log(this, other), 'linear', node, zombie);
+      // Log throws an error if this won't work.
+      const steps = this.steps / (other.steps || 1);
+      return new Interval(log(this, other), 'linear', steps, node, zombie);
     }
     if (this.domain === 'logarithmic') {
+      let steps = 0;
+      if (this.steps) {
+        steps = this.steps / other.valueOf();
+        if (!Number.isInteger(steps)) {
+          throw new Error('Cannot create fractional steps.');
+        }
+      }
       const value = this.value.pow(other.value.inverse());
       if (this.node?.type === 'FJS' || this.node?.type === 'AspiringFJS') {
         node = {type: 'AspiringFJS', flavor: ''};
       }
-      return new Interval(value, this.domain, node, zombie);
+      return new Interval(value, this.domain, steps, node, zombie);
     }
-    return new Interval(this.value.div(other.value), this.domain, node, zombie);
+    return new Interval(
+      this.value.div(other.value),
+      this.domain,
+      this.steps - other.steps,
+      node,
+      zombie
+    );
   }
 
   /**
@@ -568,25 +693,21 @@ export class Interval {
    * @returns Linear domain interval representing the cosine of the unweighted angle between the prime counts.
    */
   dot(other: Interval | Val) {
-    let monzo: TimeMonzo;
-    let val: TimeMonzo;
-    // Rig ups and downs.
+    let product: Fraction;
     if (other.domain === 'cologarithmic') {
-      monzo = this.value;
-      val = other.value.clone();
-      val.cents++;
+      // Rig ups and downs.
+      product = this.value.dot(other.value).add(this.steps);
     } else {
-      monzo = this.value;
-      val = other.value;
+      product = this.value.dot(other.value).add(this.steps * other.steps);
     }
 
-    const product = monzo.dot(val);
     const zombie = other instanceof Interval ? infect(this, other) : this;
     if (product.d === 1) {
       const value = BigInt(product.s * product.n);
       return new Interval(
         TimeMonzo.fromBigInt(value),
         'linear',
+        0,
         {
           type: 'IntegerLiteral',
           value,
@@ -597,6 +718,7 @@ export class Interval {
     return new Interval(
       TimeMonzo.fromFraction(product),
       'linear',
+      0,
       {
         type: 'FractionLiteral',
         numerator: BigInt(product.s * product.n),
@@ -613,15 +735,23 @@ export class Interval {
    */
   pow(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
-      throw new Error('Exponentiation not implemented in logarithmic domain');
+      throw new Error('Exponentiation not implemented in logarithmic domain.');
     }
-    if (!other.value.isScalar()) {
-      throw new Error('Only scalar exponentiation implemented');
+    if (!other.value.isScalar() || other.steps) {
+      throw new Error('Only scalar exponentiation implemented.');
     }
     const node = powNodes(this.node, other.node);
+    let steps = 0;
+    if (this.steps) {
+      steps = this.steps * other.valueOf();
+      if (!Number.isInteger(steps)) {
+        throw new Error('Cannot create fractional steps.');
+      }
+    }
     return new Interval(
       this.value.pow(other.value),
       this.domain,
+      steps,
       node,
       infect(this, other)
     );
@@ -635,16 +765,25 @@ export class Interval {
   ipow(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(
-        'Inverse exponentiation not implemented in logarithmic domain'
+        'Inverse exponentiation not implemented in logarithmic domain.'
       );
     }
-    if (!other.value.isScalar()) {
-      throw new Error('Only scalar inverse exponentiation implemented');
+    if (!other.value.isScalar() || other.steps) {
+      throw new Error('Only scalar inverse exponentiation implemented.');
     }
     const node = ipowNodes(this.node, other.node);
+    const exponent = other.value.inverse();
+    let steps = 0;
+    if (this.steps) {
+      steps = this.steps * exponent.valueOf();
+      if (!Number.isInteger(steps)) {
+        throw new Error('Cannot create fractional steps.');
+      }
+    }
     return new Interval(
-      this.value.pow(other.value.inverse()),
+      this.value.pow(exponent),
       this.domain,
+      steps,
       node,
       infect(this, other)
     );
@@ -661,10 +800,13 @@ export class Interval {
         'Logarithm not implemented in the (already) logarithmic domain.'
       );
     }
+    // Log fails if this won't work.
+    const steps = this.steps / (other.steps || 1);
     const node = logNodes(this.node, other.node);
     return new Interval(
       log(this, other),
       this.domain,
+      steps,
       node,
       infect(this, other)
     );
@@ -680,10 +822,14 @@ export class Interval {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error('Reduction not implemented in logarithmic domain.');
     }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in reduction.');
+    }
     const node = reduceNodes(this.node, other.node);
     return new Interval(
       this.value.reduce(other.value, ceiling),
       this.domain,
+      0,
       node,
       infect(this, other)
     );
@@ -699,7 +845,10 @@ export class Interval {
       throw new Error('Only scalars can be backslashed.');
     }
     if (this.domain !== 'linear' || other.domain !== 'linear') {
-      throw new Error('Only linear backslashing implemented');
+      throw new Error('Only linear backslashing implemented.');
+    }
+    if (this.steps || other.steps) {
+      throw new Error('Steps not supported in backslashing.');
     }
     const value = TWO.pow(this.value.div(other.value));
     let node: NedjiLiteral | undefined;
@@ -712,7 +861,7 @@ export class Interval {
         equaveDenominator: null,
       };
     }
-    return new Interval(value, 'logarithmic', node, infect(this, other));
+    return new Interval(value, 'logarithmic', 0, node, infect(this, other));
   }
 
   /**
@@ -739,7 +888,15 @@ export class Interval {
    * @returns `true` if the values share the same time exponent, prime exponents, residual and cents offset and the domains match.
    */
   strictEquals(other: Interval) {
-    return this.domain === other.domain && this.value.strictEquals(other.value);
+    return (
+      this.domain === other.domain &&
+      this.steps === other.steps &&
+      this.value.strictEquals(other.value)
+    );
+  }
+
+  isPureSteps() {
+    return this.value.isScalar() && this.value.isUnity();
   }
 
   /**
@@ -752,24 +909,25 @@ export class Interval {
       return this.node;
     }
     if (this.node.type === 'AspiringAbsoluteFJS') {
-      const C4 = context.C4;
-      const relativeToC4 = this.value.div(C4);
       let ups = 0;
       let lifts = 0;
       let steps = 0;
-      let residue = 0;
-      if (context.up.isRealCents() && context.lift.isRealCents()) {
-        ({ups, lifts, steps, residue} = countUpsAndLifts(
-          relativeToC4.cents,
-          context.up.cents,
-          context.lift.cents
+      if (context.up.isPureSteps() && context.lift.isPureSteps()) {
+        ({ups, lifts, steps} = countUpsAndLifts(
+          this.steps,
+          context.up.steps,
+          context.lift.steps
         ));
-        if (steps || residue) {
+        if (steps) {
           return undefined;
         }
-        relativeToC4.cents = 0;
       }
 
+      const C4 = context.C4;
+      const relativeToC4 = this.value.div(C4);
+      if (relativeToC4 instanceof TimeReal) {
+        return undefined;
+      }
       const node = asAbsoluteFJS(relativeToC4, this.node.flavor);
       if (!node) {
         return undefined;
@@ -779,26 +937,25 @@ export class Interval {
       return node;
     }
     if (this.node.type === 'AspiringFJS') {
-      const value = this.value.clone();
+      if (this.value instanceof TimeReal) {
+        return undefined;
+      }
       let ups = 0;
       let lifts = 0;
-      if (value.cents) {
-        let steps = 0;
-        let residue = 0;
-        if (context.up.isRealCents() && context.lift.isRealCents()) {
-          ({ups, lifts, steps, residue} = countUpsAndLifts(
-            value.cents,
-            context.up.cents,
-            context.lift.cents
-          ));
-          if (steps || residue) {
-            return undefined;
-          }
-          value.cents = 0;
+      let steps = 0;
+
+      if (context.up.isPureSteps() && context.lift.isPureSteps()) {
+        ({ups, lifts, steps} = countUpsAndLifts(
+          this.steps,
+          context.up.steps,
+          context.lift.steps
+        ));
+        if (steps) {
+          return undefined;
         }
       }
 
-      const node = asFJS(value, this.node.flavor);
+      const node = asFJS(this.value, this.node.flavor);
       if (!node) {
         return undefined;
       }
@@ -809,6 +966,36 @@ export class Interval {
     return this.node;
   }
 
+  asMonzoLiteral(): MonzoLiteral {
+    const node = this.value.asMonzoLiteral();
+    if (this.steps) {
+      if (!node.basis.length) {
+        node.basis.push({numerator: 2, denominator: null});
+        node.basis.push('');
+        node.basis.push('');
+      }
+      node.basis.unshift('1°');
+      node.components.unshift(integerToVectorComponent(this.steps));
+    }
+    return node;
+  }
+
+  private hardStr() {
+    if (this.steps) {
+      let result: string;
+      if (this.isPureSteps()) {
+        result = `${this.steps}°`;
+      } else {
+        result = literalToString(this.asMonzoLiteral());
+      }
+      if (this.domain === 'linear') {
+        return `linear(${result})`;
+      }
+      return result;
+    }
+    return this.value.toString(this.domain);
+  }
+
   /**
    * Convert this interval to a string that faithfully represents it ignoring colors and labels.
    * @param context Current root context with information about root pitch and size of ups and lifts.
@@ -817,52 +1004,33 @@ export class Interval {
   str(context?: RootContext) {
     if (this.node) {
       let node: IntervalLiteral | undefined = this.node;
-      let prefix = '';
-      let postfix = '';
       if (this.node.type === 'AspiringAbsoluteFJS') {
         if (!context) {
-          return this.value.toString(this.domain);
+          return this.hardStr();
         }
-        const C4 = context.C4;
-        const relativeToC4 = this.value.div(C4);
-        if (context.up.isRealCents() && context.lift.isRealCents()) {
-          ({prefix, postfix} = countUpsAndLifts(
-            relativeToC4.cents,
-            context.up.cents,
-            context.lift.cents
-          ));
-          relativeToC4.cents = 0;
-        }
-
-        node = asAbsoluteFJS(relativeToC4, this.node.flavor);
+        node = this.realizeNode(context);
         if (!node) {
-          return this.value.toString(this.domain);
+          return this.hardStr();
         }
       }
       if (this.node.type === 'AspiringFJS') {
-        const value = this.value.clone();
-        if (value.cents) {
-          if (!context) {
-            return this.value.toString(this.domain);
-          }
-          if (context.up.isRealCents() && context.lift.isRealCents()) {
-            ({prefix, postfix} = countUpsAndLifts(
-              value.cents,
-              context.up.cents,
-              context.lift.cents
-            ));
-            value.cents = 0;
-          }
+        if (context) {
+          node = this.realizeNode(context);
+        } else if (this.steps) {
+          return this.hardStr();
+        } else if (this.value instanceof TimeMonzo) {
+          node = asFJS(this.value, this.node.flavor);
+        } else {
+          return this.hardStr();
         }
 
-        node = asFJS(value, this.node.flavor);
         if (!node) {
-          return this.value.toString(this.domain);
+          return this.hardStr();
         }
       }
-      return prefix + literalToString(node) + postfix;
+      return literalToString(node);
     }
-    return this.value.toString(this.domain);
+    return this.hardStr();
   }
 
   // "JS" toString or "Python" repr.
@@ -894,7 +1062,7 @@ export class Interval {
    */
   valueOf() {
     if (this.value.isIntegral()) {
-      return Number(this.value.toBigInteger());
+      return Number((this.value as TimeMonzo).toBigInteger());
     }
     return this.value.valueOf();
   }
@@ -905,20 +1073,20 @@ export class Interval {
    * @returns A new interval with size increased by the current "up" value.
    */
   up(context: RootContext) {
-    const value = this.value.mul(context.up);
+    const value = this.value.mul(context.up.value);
+    const steps = this.steps + context.up.steps;
     if (
       this.node?.type === 'FJS' ||
       this.node?.type === 'AbsoluteFJS' ||
-      this.node?.type === 'MonzoLiteral' ||
-      this.node?.type === 'ValLiteral'
+      this.node?.type === 'MonzoLiteral'
     ) {
       const node = {...this.node};
       node.ups++;
-      const result = new Interval(value, this.domain, node, this);
+      const result = new Interval(value, this.domain, steps, node, this);
       context.fragiles.push(result);
       return result;
     }
-    return new Interval(value, this.domain, undefined, this);
+    return new Interval(value, this.domain, steps, undefined, this);
   }
 
   /**
@@ -927,20 +1095,20 @@ export class Interval {
    * @returns A new interval with size decreased by the current "up" value.
    */
   down(context: RootContext) {
-    const value = this.value.div(context.up);
+    const value = this.value.div(context.up.value);
+    const steps = this.steps - context.up.steps;
     if (
       this.node?.type === 'FJS' ||
       this.node?.type === 'AbsoluteFJS' ||
-      this.node?.type === 'MonzoLiteral' ||
-      this.node?.type === 'ValLiteral'
+      this.node?.type === 'MonzoLiteral'
     ) {
       const node = {...this.node};
       node.ups--;
-      const result = new Interval(value, this.domain, node, this);
+      const result = new Interval(value, this.domain, steps, node, this);
       context.fragiles.push(result);
       return result;
     }
-    return new Interval(value, this.domain, undefined, this);
+    return new Interval(value, this.domain, steps, undefined, this);
   }
 
   /**
@@ -949,58 +1117,58 @@ export class Interval {
    * @returns A new interval with size increased by the current "lift" value.
    */
   lift(context: RootContext) {
-    const value = this.value.mul(context.lift);
+    const value = this.value.mul(context.lift.value);
+    const steps = this.steps + context.lift.steps;
     if (
       this.node?.type === 'FJS' ||
       this.node?.type === 'AbsoluteFJS' ||
-      this.node?.type === 'MonzoLiteral' ||
-      this.node?.type === 'ValLiteral'
+      this.node?.type === 'MonzoLiteral'
     ) {
       const node = {...this.node};
       node.lifts++;
-      const result = new Interval(value, this.domain, node, this);
+      const result = new Interval(value, this.domain, steps, node, this);
       context.fragiles.push(result);
       return result;
     }
-    return new Interval(value, this.domain, undefined, this);
+    return new Interval(value, this.domain, steps, undefined, this);
   }
 
   /**
-   * Apply a drtop to this interval.
+   * Apply a drop to this interval.
    * @param context Current root context with the value of "drop" to apply.
    * @returns A new interval with size decreased by the current "lift" value.
    */
   drop(context: RootContext) {
-    const value = this.value.div(context.lift);
+    const value = this.value.div(context.lift.value);
+    const steps = this.steps - context.lift.steps;
     if (
       this.node?.type === 'FJS' ||
       this.node?.type === 'AbsoluteFJS' ||
-      this.node?.type === 'MonzoLiteral' ||
-      this.node?.type === 'ValLiteral'
+      this.node?.type === 'MonzoLiteral'
     ) {
       const node = {...this.node};
       node.lifts--;
-      const result = new Interval(value, this.domain, node, this);
+      const result = new Interval(value, this.domain, steps, node, this);
       context.fragiles.push(result);
       return result;
     }
-    return new Interval(value, this.domain, undefined, this);
+    return new Interval(value, this.domain, steps, undefined, this);
   }
 
   /**
    * Remove stored context-dependent formatting information. (Triggered by a context shift.)
    */
-  break() {
+  break(force = false) {
     if (this.node?.type === 'FJS') {
-      this.node = {type: 'AspiringFJS', flavor: ''};
+      this.node = {type: 'AspiringFJS', flavor: inferFJSFlavor(this.node)};
     }
     if (this.node?.type === 'AbsoluteFJS') {
-      this.node = {type: 'AspiringAbsoluteFJS', flavor: ''};
+      this.node = {
+        type: 'AspiringAbsoluteFJS',
+        flavor: inferFJSFlavor(this.node),
+      };
     }
-    if (
-      this.node?.type === 'MonzoLiteral' ||
-      this.node?.type === 'ValLiteral'
-    ) {
+    if (this.node?.type === 'MonzoLiteral' || force) {
       this.node = undefined;
     }
   }
@@ -1063,74 +1231,6 @@ export class Val {
   }
 
   /**
-   * Increase the "upness" of this val by one.
-   * @param context Current root context with the value of "up" to apply.
-   * @returns A val that maps up/down arrows on intervals more aggressively.
-   */
-  up(context: RootContext) {
-    const value = this.value.mul(context.up);
-    if (this.node?.type === 'ValLiteral') {
-      const node = {...this.node};
-      node.ups++;
-      const result = new Val(value, this.equave, node);
-      context.fragiles.push(result);
-      return result;
-    }
-    return new Val(value, this.equave);
-  }
-
-  /**
-   * Increase the "downness" of this val by one.
-   * @param context Current root context with the value of "down" to apply.
-   * @returns A val that maps up/down arrows on intervals more aggressively.
-   */
-  down(context: RootContext) {
-    const value = this.value.div(context.up);
-    if (this.node?.type === 'ValLiteral') {
-      const node = {...this.node};
-      node.ups--;
-      const result = new Val(value, this.equave, node);
-      context.fragiles.push(result);
-      return result;
-    }
-    return new Val(value, this.equave);
-  }
-
-  /**
-   * Increase the "liftness" of this val by one.
-   * @param context Current root context with the value of "lift" to apply.
-   * @returns A val that maps lifts/drops on intervals more aggressively.
-   */
-  lift(context: RootContext) {
-    const value = this.value.mul(context.lift);
-    if (this.node?.type === 'ValLiteral') {
-      const node = {...this.node};
-      node.lifts++;
-      const result = new Val(value, this.equave, node);
-      context.fragiles.push(result);
-      return result;
-    }
-    return new Val(value, this.equave);
-  }
-
-  /**
-   * Increase the "dropness" of this val by one.
-   * @param context Current root context with the value of "drop" to apply.
-   * @returns A val that maps lifts/drops on intervals more aggressively.
-   */
-  drop(context: RootContext) {
-    const value = this.value.div(context.lift);
-    if (this.node?.type === 'ValLiteral') {
-      const node = {...this.node};
-      node.lifts--;
-      const result = new Val(value, this.equave, node);
-      context.fragiles.push(result);
-      return result;
-    }
-    return new Val(value, this.equave);
-  }
-
-  /**
    * Check if this val has the same size and equave as another.
    * @param other Another val.
    * @returns `true` if the vals have the same size and their equaves have the same size.
@@ -1162,6 +1262,9 @@ export class Val {
     }
     const node = addNodes(this.node, other.node);
     const value = this.value.mul(other.value);
+    if (value instanceof TimeReal) {
+      throw new Error('Val addition failed.');
+    }
     return new Val(value, this.equave, node);
   }
 
@@ -1176,6 +1279,9 @@ export class Val {
     }
     const node = subNodes(this.node, other.node);
     const value = this.value.div(other.value);
+    if (value instanceof TimeReal) {
+      throw new Error('Val subtraction failed.');
+    }
     return new Val(value, this.equave, node);
   }
 
@@ -1185,17 +1291,17 @@ export class Val {
    * @returns A rescaled version of this val.
    */
   mul(other: Interval) {
-    if (other.domain !== 'linear' || other.value.timeExponent.n) {
+    if (other.domain !== 'linear' || other.value.timeExponent.valueOf()) {
       throw new Error('Only scalar multiplication implemented for vals.');
     }
-    if (other.node?.type === 'DecimalLiteral' && other.node.flavor === 'r') {
-      const size = this.value.totalCents() * 1200 ** -2;
-      return new Val(
-        TimeMonzo.fromCents(size * other.value.valueOf()),
-        this.equave
-      );
+    if (other.value instanceof TimeReal) {
+      throw new Error('Cannot multiply val by an irrational scalar.');
     }
-    return new Val(this.value.pow(other.value), this.equave);
+    const value = this.value.pow(other.value);
+    if (value instanceof TimeReal) {
+      throw new Error('Val scalar multiplication failed.');
+    }
+    return new Val(value, this.equave);
   }
 
   /**
@@ -1204,11 +1310,14 @@ export class Val {
    * @returns A rescaled version of this val.
    */
   div(other: Interval) {
-    if (other.domain !== 'linear' || other.value.timeExponent.n) {
+    if (other.domain !== 'linear' || other.value.timeExponent.valueOf()) {
       throw new Error('Only scalar multiplication implemented for vals.');
     }
-    const scalar = other.value.inverse();
-    return new Val(this.value.pow(scalar), this.equave);
+    const value = this.value.pow(other.value.inverse());
+    if (value instanceof TimeReal) {
+      throw new Error('Val scalar multiplication failed.');
+    }
+    return new Val(value, this.equave);
   }
 
   /**
@@ -1223,17 +1332,9 @@ export class Val {
 
     const product = this.value.dot(other.value);
     if (product.d === 1) {
-      const value = BigInt(product.s * product.n);
-      return new Interval(TimeMonzo.fromBigInt(value), 'linear', {
-        type: 'IntegerLiteral',
-        value,
-      });
+      return Interval.fromInteger(product.s * product.n);
     }
-    return new Interval(TimeMonzo.fromFraction(product), 'linear', {
-      type: 'FractionLiteral',
-      numerator: BigInt(product.s * product.n),
-      denominator: BigInt(product.d),
-    });
+    return Interval.fromFraction(product);
   }
 
   /**
@@ -1250,24 +1351,17 @@ export class Val {
     }
     return result;
   }
-
-  /**
-   * Remove formatting information. (Triggered on context shift.)
-   */
-  break() {
-    this.node = undefined;
-  }
 }
 
 /**
  * Format a {@link TimeMonzo} instance as a node in the abstract syntax tree if possible.
- * @param monzo Time monzo to convert.
+ * @param value Time monzo to convert.
  * @param node Reference node to infer type and formatting information from.
  * @param simplify Ignore formatting information from the reference AST node.
  * @returns AST node representing the time monzo.
  */
-export function timeMonzoAs(
-  monzo: TimeMonzo,
+export function intervalValueAs(
+  value: TimeMonzo | TimeReal,
   node: IntervalLiteral | undefined,
   simplify = false
 ): IntervalLiteral | undefined {
@@ -1276,21 +1370,21 @@ export function timeMonzoAs(
   }
   switch (node.type) {
     case 'IntegerLiteral':
-      return monzo.asIntegerLiteral();
+      return value.asIntegerLiteral();
     case 'FractionLiteral':
-      return monzo.asFractionLiteral(simplify ? undefined : node);
+      return value.asFractionLiteral(simplify ? undefined : node);
     case 'NedjiLiteral':
-      return monzo.asNedjiLiteral(simplify ? undefined : node);
+      return value.asNedjiLiteral(simplify ? undefined : node);
     case 'CentsLiteral':
-      return monzo.asCentsLiteral();
+      return value.asCentsLiteral();
     case 'MonzoLiteral':
-      return monzo.asMonzoLiteral();
+      return value.asMonzoLiteral();
     case 'FJS':
     case 'AspiringFJS':
-      return {type: 'AspiringFJS', flavor: ''};
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(node)};
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
-      return {type: 'AspiringAbsoluteFJS', flavor: ''};
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(node)};
     default:
       return undefined;
   }
