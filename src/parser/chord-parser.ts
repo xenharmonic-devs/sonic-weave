@@ -6,6 +6,12 @@ import {TimeMonzo, getNumberOfComponents} from '../monzo';
 import {PRIMES} from 'xen-dev-utils';
 import {ONE, ZERO} from '../utils';
 
+/**
+ * Parse a list of intervals separated by '|', '&', ':', ';', ',' or whitespace.
+ * @param input User input in a context that expects a chord.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @returns An array of parsed {@link Interval} instances.
+ */
 export function parseChord(input: string, includePrelude = true): Interval[] {
   const parts: string[] = parse(input) as any;
   const visitor = evaluateSource(`[${parts.join(', ')}]`, includePrelude);
@@ -13,6 +19,13 @@ export function parseChord(input: string, includePrelude = true): Interval[] {
   return result.filter(i => i instanceof Interval);
 }
 
+/**
+ * Parse a list of vals separated by '|', '&', ':', ';', ',' or whitespace.
+ * @param input User input in a context that expects a sequance of vals.
+ * @param subgroup Dot-separated subgroup basis or the prime limit.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @returns An array of number arrays representing vals in the subgroup basis.
+ */
 export function parseVals(
   input: string,
   subgroup: string,

@@ -149,6 +149,7 @@ whitesmoke #F5F5F5
 yellow #FFFF00
 yellowgreen #9ACD32`;
 
+/** @hidden */
 export const CSS_COLOR_CONTEXT = new Map<string, Color>(
   CSS_COLORS.split('\n')
     .map(l => l.split(' '))

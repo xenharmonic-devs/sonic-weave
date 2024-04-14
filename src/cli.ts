@@ -13,6 +13,11 @@ import type {Context} from 'node:vm';
 import {parse as parenCounter} from './parser/paren-counter';
 const {version} = require('../package.json');
 
+/**
+ * Convert a program in the SonicWeave DSL to the Scala .scl format.
+ * @param source Source code for a SonicWeave program.
+ * @returns A string convorming to the [Scala format](https://www.huygens-fokker.org/scala/scl_format.html).
+ */
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
   const keyColors = [];
@@ -52,6 +57,7 @@ export function toScalaScl(source: string) {
 
 const prompt = '𝄞 ';
 
+/** @hidden */
 export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   const globalVisitor = getSourceVisitor();
   const visitor = new StatementVisitor(

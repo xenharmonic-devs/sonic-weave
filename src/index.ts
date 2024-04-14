@@ -29,6 +29,5 @@ export {
   setUnion,
   hasOwn,
 } from './utils';
-export * from './warts';
 export * from './words';
 export * from './scale-workshop-2-parser';
