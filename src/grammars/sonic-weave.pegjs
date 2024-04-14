@@ -713,7 +713,7 @@ Secondary
   / AccessExpression
 
 ChainableUnaryOperator
-  = $(NotToken / '^' / '/' / LiftToken / '\\' / DropToken)
+  = $(NotToken / '^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: Secondary {

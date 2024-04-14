@@ -7,6 +7,8 @@ export type UnaryOperator =
   | '÷'
   | 'not'
   | '^'
+  | '∧'
+  | '\u2228' // ∨
   | '/'
   | 'lift'
   | '\\'

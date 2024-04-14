@@ -902,7 +902,10 @@ export class ExpressionVisitor {
       case '÷':
         return operand.inverse();
       case '^':
+      case '∧':
         return operand.up(this.rootContext);
+      case '\u2228':
+        return operand.down(this.rootContext);
       case '/':
       case 'lift':
         return operand.lift(this.rootContext);
