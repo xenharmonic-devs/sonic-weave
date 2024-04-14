@@ -1236,4 +1236,17 @@ describe('SonicWeave parser', () => {
       'Only arrays can be sorted.'
     );
   });
+
+  it('tempers in the 3-limit', () => {
+    const scale = parseSource(`
+      C4 = 263 Hz
+
+      A4
+      C5
+
+      12@.3
+      str
+    `);
+    expect(scale).toEqual(['9\\12', '12\\12']);
+  });
 });

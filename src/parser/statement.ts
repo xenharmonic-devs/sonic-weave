@@ -590,8 +590,9 @@ export class StatementVisitor {
       );
       const rel = relative.bind(subVisitor);
       const mapped = scale.map(i => {
+        i = rel(i);
         const t = i.value.tail(value.value.numberOfComponents);
-        const result = rel(i).dot(value).mul(step);
+        const result = i.dot(value).mul(step);
         if (t.totalCents(true)) {
           return new Interval(t, 'logarithmic').add(result);
         }
