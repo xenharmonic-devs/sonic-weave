@@ -534,7 +534,7 @@ CoalescingExpression
     return tail.reduce(operatorReducerLite, head);
   }
 
-RelationalOperator
+RelationalOperator 'relational operator'
   = '==='
   / '!=='
   / '=='
@@ -605,7 +605,7 @@ ExtremumExpression
     return tail.reduce(operatorReducer, head);
   }
 
-AdditiveOperator
+AdditiveOperator 'additive operator'
   = $('+' / '-' / '/+' / '⊕' / '/-' / '⊖')
 
 AdditiveExpression
@@ -621,7 +621,7 @@ Term
     return tail.reduce(operatorReducer, head); 
   }
 
-MultiplicativeOperator
+MultiplicativeOperator 'multiplicative operator'
   = $('*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken)
 
 MultiplicativeExpression
@@ -664,7 +664,7 @@ UniformUnaryExpression
     return operand;
   }
 
-ExponentiationOperator
+ExponentiationOperator 'exponentiation'
   = $('^/' / '^' / '/_' / '/^')
 
 ExponentiationExpression
@@ -1033,7 +1033,7 @@ VectorComponent
 VectorComponents
   = VectorComponent|.., _ ','? _|
 
-UpsAndDowns
+UpsAndDowns 'up-and-down'
   = ('^' / 'v' / '/' / '\\')* {
     const t = text();
     return {
@@ -1151,10 +1151,11 @@ ColorLiteral
     };
   }
 
-VulgarFraction
+VulgarFraction 'vulgar fraction'
   = $('¼' / 'q' / '½' / 's' / '¾' / 'Q' / [⅐-⅞] / '')
 
-AugmentedToken = $('dim' / 'aug' / 'Aug' / [daÂ])
+AugmentedToken 'augmented quality'
+  = $('dim' / 'aug' / 'Aug' / [daÂ])
 
 AugmentedQuality
   = fraction: VulgarFraction quality: AugmentedToken {
@@ -1320,7 +1321,7 @@ FJS
     };
   }
 
-Accidental
+Accidental 'accidental'
   = fraction: VulgarFraction accidental: $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£]) {
     return {
       fraction,
@@ -1328,11 +1329,11 @@ Accidental
     };
   }
 
-Nominal
+PitchNominal 'pitch nominal'
   = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G])
 
 AbsolutePitch
-  = nominal: Nominal accidentals: Accidental* octave: SignedBasicInteger {
+  = nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
     return {
       type: 'AbsolutePitch',
       nominal,
@@ -1384,7 +1385,7 @@ ArrowFunction
 // This rule is a faster version of the part of (FJS / AbsoluteFJS / SquareSuperparticular) which overlaps with identifiers.
 ReservedPattern
   = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ '_'? [0-9]*
-  / Nominal [sqQxdbrp]* [0-9]+ '_'? [0-9]*
+  / PitchNominal [sqQxdbrp]* [0-9]+ '_'? [0-9]*
   / 'S' [0-9]+
 
 Identifier

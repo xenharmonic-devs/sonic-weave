@@ -149,13 +149,13 @@ WhiteSpace
   / '\uFEFF'
   / Zs
 
-LineTerminator
+LineTerminator 'line break'
   = '\n'
   / '\r'
   / '\u2028'
   / '\u2029'
 
-LineTerminatorSequence
+LineTerminatorSequence 'line terminator'
   = '\n'
   / '\r' !'\n'
   / '\u2028'

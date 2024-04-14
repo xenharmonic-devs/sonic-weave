@@ -1016,4 +1016,25 @@ describe('Negative tests', () => {
   it('rejects dim5 as an identifier', () => {
     expect(() => parse('({dim5: "no good"})')).toThrow();
   });
+
+  it('rejects Pythonic matrix multiplication with a human readable error message', () => {
+    let rejected = false;
+    try {
+      parse('foo @ bar');
+    } catch (e) {
+      rejected = true;
+      const message: string = e.message;
+      expect(message).toContain('additive operator');
+      expect(message).toContain('augmented quality');
+      expect(message).toContain('exponentiation');
+      expect(message).toContain('whitespace');
+      expect(message).toContain('line terminator');
+      expect(message).toContain('multiplicative operator');
+      expect(message).toContain('pitch nominal');
+      expect(message).toContain('relational operator');
+      expect(message).toContain('up-and-down');
+    } finally {
+      expect(rejected).toBe(true);
+    }
+  });
 });
