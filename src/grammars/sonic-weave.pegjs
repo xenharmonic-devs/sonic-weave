@@ -672,8 +672,11 @@ ExponentiationExpression
       return tail.reduce(operatorReducer, head);
     }
 
+// Not comment or any of the the extended operators
+FractionOperator = @'/' !'/' !'-' !'+' !'_' !'^'
+
 FractionExpression
-  = head: LabeledExpression tail: (__ @'~'? @'/' !('+' / '-' / '^' / '_') @'~'? _ @LabeledExpression)* {
+  = head: LabeledExpression tail: (__ @'~'? @FractionOperator @'~'? _ @LabeledExpression)* {
     return tail.reduce(operatorReducer, head);
   }
 

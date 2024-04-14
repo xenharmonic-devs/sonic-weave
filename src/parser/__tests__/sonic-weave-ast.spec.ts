@@ -935,6 +935,27 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast.expression.operator).toBe('/');
     expect(ast.expression.right.id).toBe('_b');
   });
+
+  it('parses comments after dot product', () => {
+    const ast = parseSingle('3 dot 12@ // Are the comments fixed now?');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: 'dot',
+        left: {type: 'IntegerLiteral', value: 3n},
+        right: {
+          type: 'WartsLiteral',
+          equave: '',
+          divisions: 12,
+          warts: [],
+          basis: [''],
+        },
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
