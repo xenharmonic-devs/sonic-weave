@@ -1040,7 +1040,11 @@ export class TimeMonzo {
       );
     }
     if (this.timeExponent.n !== 0) {
-      throw new Error('Cannot raise time units to an irrational power.');
+      if (other instanceof Fraction) {
+        throw new Error('Time unit exponent too complex.');
+      } else {
+        throw new Error('Cannot raise time units to an irrational power.');
+      }
     }
     return TimeMonzo.fromCents(this.totalCents() * scalar.valueOf());
   }

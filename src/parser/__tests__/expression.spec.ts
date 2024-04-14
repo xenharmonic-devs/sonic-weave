@@ -1794,4 +1794,10 @@ describe('SonicWeave expression evaluator', () => {
     const zero = parseSingle('20000/19683 dot 4@3/2.10/9');
     expect(zero.valueOf()).toBe(0);
   });
+
+  it('has low-hanging sanity limits', () => {
+    expect(() => parseSingle('1 = 440Hz; relative([10000>@Hz)')).toThrow(
+      'Time unit exponent too complex.'
+    );
+  });
 });
