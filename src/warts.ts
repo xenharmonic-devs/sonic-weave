@@ -164,7 +164,7 @@ export function valToTimeMonzo(
     element.numberOfComponents = numberOfComponents;
   }
 
-  // Perform Gram–Schmidt process
+  // Perform Gram process
   const orthoBasis = [...subgroup];
   const dualBasis: TimeMonzo[] = [];
 
