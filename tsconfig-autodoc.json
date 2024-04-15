@@ -9,8 +9,10 @@
       "es2020"
     ],
     "target": "es2020",
+    "resolveJsonModule": true
   },
   "include": [
+    "./package.json",
     "scripts/builtin-docs.ts"
   ]
 }
