@@ -104,18 +104,18 @@ SonicWeave comes with some operators.
 | Inversion     | `÷3/2`  | `2/3`       | `-P5`       | `P-5`      |
 | Geom. inverse | _N/A_   |             | `%P8`       | `v<1]`     |
 | Logical NOT   | `not 2` | `false`     | `not P8`    | `false`    |
-| Up-shimmer*   | `^2`    | `2*1.0006r` | `^P8`       | `P8 + 1\`  |
-| Down-shimmer* | `v{2}`  | `2*0.9994r` | `vP8`       | `P8 - 1\`  |
-| Lift-shimmer* | `/2`    | `2*1.0029r` | `/P8`       | `P8 + 5\`  |
-| Drop-shimmer* | `\2`    | `2*0.9971r` | `\P8`       | `P8 - 5\`  |
+| Up            | `^2`    | *           | `^P8`       | `P8 + 1\`  |
+| Down          | `v{2}`  | *           | `vP8`       | `P8 - 1\`  |
+| Lift          | `/2`    | *           | `/P8`       | `P8 + 5\`  |
+| Drop          | `\2`    | *           | `\P8`       | `P8 - 5\`  |
 | Increment     | `++i`   | `3`         | _N/A_       |            |
 | Increment     | `i++`   | `2`         | _N/A_       |            |
 | Decrement     | `--i`   | `1`         | _N/A_       |            |
 | Decrement     | `i--`   | `2`         | _N/A_       |            |
 
-*) Shimmer is meant to be used with tempering and corresponds to edo-steps unless otherwise declared.
+*) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. These operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
 
-Down-shimmer sometimes requires curly brackets due to `v` colliding with the Latin alphabet.
+The down operator sometimes requires curly brackets due to `v` colliding with the Latin alphabet. Unicode `∨` is available but not recommended because it makes the source code harder to interprete for humans.
 
 Drop `\` can be spelled `drop` to avoid using the backslash inside template literals. Lift `/` may be spelled `lift` for minor grammatical reasons.
 

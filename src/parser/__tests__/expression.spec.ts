@@ -1827,4 +1827,28 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.steps).toBe(6);
     expect(interval.toString()).toBe('6°');
   });
+
+  it('has monzo representation for a step', () => {
+    const {interval} = parseSingle('monzo(1\\)');
+    expect(interval.steps).toBe(1);
+    expect(interval.toString()).toBe('[1>@1°');
+  });
+
+  it('has linear representation for a step', () => {
+    const {interval} = parseSingle('^1');
+    expect(interval.steps).toBe(1);
+    expect(interval.toString()).toBe('linear(1°)');
+  });
+
+  it('has linear representation for up two', () => {
+    const {interval} = parseSingle('^2');
+    expect(interval.steps).toBe(1);
+    expect(interval.toString()).toBe('linear([1 1>@1°.2)');
+  });
+
+  it('has linear representation for up three', () => {
+    const {interval} = parseSingle('^3');
+    expect(interval.steps).toBe(1);
+    expect(interval.toString()).toBe('linear([1 0 1>@1°.2..)');
+  });
 });

@@ -969,10 +969,12 @@ export class Interval {
   asMonzoLiteral(): MonzoLiteral {
     const node = this.value.asMonzoLiteral();
     if (this.steps) {
-      if (!node.basis.length) {
+      if (!node.basis.length && node.components.length) {
         node.basis.push({numerator: 2, denominator: null});
-        node.basis.push('');
-        node.basis.push('');
+        if (node.components.length > 1) {
+          node.basis.push('');
+          node.basis.push('');
+        }
       }
       node.basis.unshift('1°');
       node.components.unshift(integerToVectorComponent(this.steps));
@@ -980,7 +982,12 @@ export class Interval {
     return node;
   }
 
-  private hardStr() {
+  /**
+   * Convert this interval to a string that faithfully represents it ignoring formatting, colors and labels.
+   * Doesn't depend on the current root context.
+   * @returns String that has the same value and domain as this interval if evaluated as a SonicWeave expression.
+   */
+  simpleStr() {
     if (this.steps) {
       let result: string;
       if (this.isPureSteps()) {
@@ -1006,31 +1013,31 @@ export class Interval {
       let node: IntervalLiteral | undefined = this.node;
       if (this.node.type === 'AspiringAbsoluteFJS') {
         if (!context) {
-          return this.hardStr();
+          return this.simpleStr();
         }
         node = this.realizeNode(context);
         if (!node) {
-          return this.hardStr();
+          return this.simpleStr();
         }
       }
       if (this.node.type === 'AspiringFJS') {
         if (context) {
           node = this.realizeNode(context);
         } else if (this.steps) {
-          return this.hardStr();
+          return this.simpleStr();
         } else if (this.value instanceof TimeMonzo) {
           node = asFJS(this.value, this.node.flavor);
         } else {
-          return this.hardStr();
+          return this.simpleStr();
         }
 
         if (!node) {
-          return this.hardStr();
+          return this.simpleStr();
         }
       }
       return literalToString(node);
     }
-    return this.hardStr();
+    return this.simpleStr();
   }
 
   // "JS" toString or "Python" repr.
