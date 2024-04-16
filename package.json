@@ -1,6 +1,6 @@
 {
   "name": "sonic-weave",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "Lumi Pakkanen",
   "description": "The SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments",
   "license": "MIT",
