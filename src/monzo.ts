@@ -600,7 +600,7 @@ export class TimeReal {
   }
 
   /**
-   * Obtain an AST node representing the time monzo as a cents literal.
+   * Obtain an AST node representing the time real as a cents literal.
    * @returns Cents literal or a hacky real cents literal if necessary.
    */
   asCentsLiteral(): CentsLiteral {
@@ -711,6 +711,58 @@ export class TimeReal {
     return literalToString(this.asMonzoLiteral());
   }
 
+  /**
+   * Find the closest approximation of the time real in a harmonic series.
+   * @param denominator Denominator of the harmonic series.
+   * @returns The closest approximant in the series.
+   */
+  approximateHarmonic(denominator: number) {
+    const numerator = Math.round(this.valueOf() * denominator);
+    return TimeMonzo.fromFraction(new Fraction(numerator, denominator));
+  }
+
+  /**
+   * Find the closest approximation of the time real in a subharmonic series.
+   * @param numerator Numerator of the subharmonic series.
+   * @returns The closest approximant in the series.
+   */
+  approximateSubharmonic(numerator: number) {
+    const denominator = Math.round(numerator / this.valueOf());
+    return TimeMonzo.fromFraction(new Fraction(numerator, denominator));
+  }
+
+  /**
+   * Simplify the time real using the given threshold.
+   * @param eps Error threshold. Defaults to `0.001`.
+   * @returns Simple approximation of the time real.
+   */
+  approximateSimple(eps?: number) {
+    const fraction = new Fraction(this.valueOf()).simplify(eps);
+    return TimeMonzo.fromFraction(fraction);
+  }
+
+  /**
+   * Obtain an array of the time real representing a continued fraction. The first element always contains the whole part.
+   * @returns Array of continued fraction coefficients.
+   */
+  toContinued() {
+    return new Fraction(this.valueOf()).toContinued();
+  }
+
+  /**
+   * Obtain a convergent of this time real.
+   * @param depth How many continued fraction coefficients to use after the whole part.
+   * @returns Approximation of the time real.
+   */
+  getConvergent(depth: number) {
+    const continuedFraction = this.toContinued().slice(0, depth + 1);
+    let result = new Fraction(continuedFraction[continuedFraction.length - 1]);
+    for (let i = continuedFraction.length - 2; i >= 0; i--) {
+      result = result.inverse().add(continuedFraction[i]);
+    }
+    return TimeMonzo.fromFraction(result);
+  }
+
   // Dummy methods to conform to the API of TimeMonzo.
 
   /** @hidden */
@@ -734,6 +786,16 @@ export class TimeReal {
     return false;
   }
 
+  /** @hidden */
+  isDecimal() {
+    return false;
+  }
+
+  /** @hidden */
+  isPowerOfTwo() {
+    return false;
+  }
+
   // TypeScript be like
   /** @hidden */
   toBigInteger(): bigint {
@@ -742,6 +804,10 @@ export class TimeReal {
 
   /** @hidden */
   toFraction(): Fraction {
+    throw new Error('Cannot convert irrational value to a fraction.');
+  }
+
+  toBigNumeratorDenominator(): {numerator: bigint; denominator: bigint} {
     throw new Error('Cannot convert irrational value to a fraction.');
   }
 
