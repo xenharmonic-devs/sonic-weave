@@ -107,6 +107,9 @@ export class RootContext {
    * @throws An error if the context runs out of gas.
    */
   spendGas(amount = 1) {
+    if (isNaN(amount)) {
+      return;
+    }
     if (amount < 0) {
       throw new Error('Cannot refill gas.');
     }

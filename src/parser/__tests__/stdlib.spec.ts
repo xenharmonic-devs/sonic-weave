@@ -649,7 +649,7 @@ describe('SonicWeave standard library', () => {
       periostack // Didn't finish typing out the parenthesis
     `);
     const visitor = getSourceVisitor();
-    visitor.rootContext.gas = 1000;
+    visitor.rootContext!.gas = 1000;
     for (const statement of ast.body) {
       visitor.visit(statement);
     }
@@ -1307,5 +1307,13 @@ describe('SonicWeave standard library', () => {
   it('can access the application version', () => {
     const v = evaluateExpression('VERSION');
     expect(v).toContain('.');
+  });
+
+  it('supports guard rails against array manipulating stdlib', () => {
+    const ast = parseAST('mos(50, 51)');
+
+    const visitor = getSourceVisitor();
+    visitor.rootContext!.gas = 200;
+    expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 });

@@ -1,6 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {parseChord, parseVals} from '../chord-parser';
 import {MonzoLiteral} from '../../expression';
+import {TimeMonzo} from '../../monzo';
 
 describe('Chord input parser', () => {
   it.each(['1 2 3', '1|2|3', '1&2&3', '1;2;3', '1,2,3', '1:2:3'])(
@@ -42,17 +43,16 @@ describe('Chord input parser', () => {
 
   it('has the Konami code', () => {
     const start = parseChord('^^vv/\\/\\[2, 1>');
-    expect(start[0].value.primeExponents.map(pe => pe.toFraction())).toEqual([
-      '2',
-      '1',
-    ]);
+    const value = start[0].value as TimeMonzo;
+    expect(value.primeExponents.map(pe => pe.toFraction())).toEqual(['2', '1']);
   });
 
   it('has subgroup monzos', () => {
     const result = parseChord('[5, -1>@3/2.7');
-    expect(
-      result[0].value.primeExponents.slice(0, 4).map(pe => pe.toFraction())
-    ).toEqual(['-5', '5', '0', '-1']);
+    const value = result[0].value as TimeMonzo;
+    expect(value.primeExponents.slice(0, 4).map(pe => pe.toFraction())).toEqual(
+      ['-5', '5', '0', '-1']
+    );
   });
 
   it('has the monzo of logarithmic zero', () => {

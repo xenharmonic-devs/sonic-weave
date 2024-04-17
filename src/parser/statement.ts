@@ -81,10 +81,6 @@ export class Interrupt {
  */
 export class StatementVisitor {
   /**
-   * The root context with the current values of the root pitch, ups, lifts, etc.
-   */
-  rootContext: RootContext;
-  /**
    * Parent context of the surrounding code block.
    */
   parent?: StatementVisitor;
@@ -101,13 +97,13 @@ export class StatementVisitor {
    */
   expandable: boolean;
 
+  private rootContext_?: RootContext;
+
   /**
    * Construct a new visitor for a block of code inside the AST.
-   * @param rootContext The root context with the current values of the root pitch, ups, lifts, etc.
    * @param parent Parent context of the surrounding code block.
    */
-  constructor(rootContext: RootContext, parent?: StatementVisitor) {
-    this.rootContext = rootContext;
+  constructor(parent?: StatementVisitor) {
     this.parent = parent;
     this.mutables = new Map();
     this.mutables.set('$', []);
@@ -116,11 +112,36 @@ export class StatementVisitor {
   }
 
   /**
+   * The root context with the current values of the root pitch, ups, lifts, etc.
+   */
+  get rootContext(): RootContext | undefined {
+    if (this.parent) {
+      return this.parent.rootContext;
+    }
+    return this.rootContext_;
+  }
+
+  set rootContext(context: RootContext | undefined) {
+    if (this.parent) {
+      this.parent.rootContext = context;
+    }
+    this.rootContext_ = context;
+  }
+
+  spendGas(amount?: number) {
+    const context = this.rootContext;
+    if (context) {
+      context.spendGas(amount);
+    }
+  }
+
+  /**
    * Create an independent (shallow) clone of the visitor useable as a cache of runtime state.
    * @returns A {@link StatementVisitor} in the same state as this one.
    */
   clone() {
-    const result = new StatementVisitor(this.rootContext);
+    const result = new StatementVisitor();
+    result.rootContext = this.rootContext;
     result.mutables = new Map(this.mutables);
     result.immutables = new Map(this.immutables);
     const scale = this.currentScale;
@@ -149,6 +170,9 @@ export class StatementVisitor {
   expand(defaultRootContext: RootContext) {
     if (!this.expandable) {
       throw new Error('The global scope cannot be expanded.');
+    }
+    if (!this.rootContext) {
+      throw new Error('Root context must be present during expansion.');
     }
     let base = this.rootContext.expand(defaultRootContext);
     if (base) {
@@ -202,7 +226,7 @@ export class StatementVisitor {
    * @returns An interrupt if encountered. `undefined` otherwise.
    */
   visit(node: Statement): Interrupt | undefined {
-    this.rootContext.spendGas();
+    this.spendGas();
     switch (node.type) {
       case 'VariableDeclaration':
         return this.visitVariableDeclaration(node);
@@ -464,6 +488,9 @@ export class StatementVisitor {
   }
 
   protected visitPitchDeclaration(node: PitchDeclaration) {
+    if (!this.rootContext) {
+      throw new Error('Root context required for pitch declaration.');
+    }
     if (
       node.middle?.type === 'AbsoluteFJS' ||
       node.right.type === 'AbsoluteFJS'
@@ -539,6 +566,9 @@ export class StatementVisitor {
   }
 
   protected visitUpDeclaration(node: UpDeclaration) {
+    if (!this.rootContext) {
+      throw new Error('Root context required for up declaration.');
+    }
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
@@ -549,6 +579,9 @@ export class StatementVisitor {
   }
 
   protected visitLiftDeclaration(node: LiftDeclaration) {
+    if (!this.rootContext) {
+      throw new Error('Root context required for lift declaration.');
+    }
     const subVisitor = this.createExpressionVisitor();
     const value = subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
@@ -622,7 +655,7 @@ export class StatementVisitor {
       if (scale.length) {
         scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
         scale[scale.length - 1].label = value;
-      } else {
+      } else if (this.rootContext) {
         this.rootContext.title = value;
       }
     } else if (typeof value === 'boolean') {
@@ -638,7 +671,7 @@ export class StatementVisitor {
       sort.bind(subVisitor)(tail);
       scale.push(...tail);
     } else {
-      this.rootContext.spendGas(scale.length);
+      this.spendGas(scale.length);
       const bound = value.bind(subVisitor);
       const mapped = scale.map(i => bound(i));
       scale.length = 0;
@@ -667,7 +700,7 @@ export class StatementVisitor {
   }
 
   protected visitBlockStatement(node: BlockStatement) {
-    const subVisitor = new StatementVisitor(this.rootContext, this);
+    const subVisitor = new StatementVisitor(this);
     const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
     let interrupt: Interrupt | undefined = undefined;
@@ -759,7 +792,7 @@ export class StatementVisitor {
   protected visitIterationStatement(node: IterationStatement) {
     const subVisitor = this.createExpressionVisitor();
     const array = containerToArray(subVisitor.visit(node.container), node.kind);
-    const loopVisitor = new StatementVisitor(this.rootContext, this);
+    const loopVisitor = new StatementVisitor(this);
     loopVisitor.mutables.delete('$'); // Collapse scope
     const loopSubVisitor = loopVisitor.createExpressionVisitor();
     let executeTail = true;
@@ -799,7 +832,7 @@ export class StatementVisitor {
           // eslint-disable-next-line no-ex-assign
           e = e.message;
         }
-        const handlerVisitor = new StatementVisitor(this.rootContext, this);
+        const handlerVisitor = new StatementVisitor(this);
         handlerVisitor.mutables.delete('$'); // Collapse scope
         handlerVisitor.immutables.set(
           node.handler.parameter.id,
@@ -855,10 +888,7 @@ export class StatementVisitor {
     const scopeParent = this;
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {
-      const localVisitor = new StatementVisitor(
-        scopeParent.rootContext,
-        scopeParent
-      );
+      const localVisitor = new StatementVisitor(scopeParent);
       localVisitor.mutables.set('$$', this.parent.currentScale);
 
       // XXX: Poor type system gets abused again.

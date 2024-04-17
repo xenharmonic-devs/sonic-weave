@@ -158,17 +158,24 @@ function isPrime(n: Interval) {
 isPrime.__doc__ = 'Return `true` if `n` is a prime number, `false` otherwise.';
 isPrime.__node__ = builtinNode(isPrime);
 
-function primes(start: Interval, end?: Interval) {
+function primes(this: ExpressionVisitor, start: Interval, end?: Interval) {
   requireParameters({start});
-  return xduPrimes(start.valueOf(), end ? end.valueOf() : undefined).map(p =>
-    fromInteger(p)
-  );
+  const s = start.valueOf();
+  if (end) {
+    const e = end.valueOf();
+    // It only generates ~ N / log(N) primes, but it costs more computationally.
+    this.spendGas(Math.max(0, e - s));
+    return xduPrimes(s, e).map(p => fromInteger(p));
+  }
+  this.spendGas(Math.max(0, s));
+  return xduPrimes(s);
 }
 primes.__doc__ =
   'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.';
 primes.__node__ = builtinNode(primes);
 
 function mosSubset(
+  this: ExpressionVisitor,
   numberOfLargeSteps: Interval,
   numberOfSmallSteps: Interval,
   sizeOfLargeStep?: Interval,
@@ -177,6 +184,9 @@ function mosSubset(
   down?: Interval
 ) {
   requireParameters({numberOfLargeSteps, numberOfSmallSteps});
+  const numL = numberOfLargeSteps.toInteger();
+  const numS = numberOfSmallSteps.toInteger();
+  this.spendGas(Math.abs(numL) + Math.abs(numS));
   const options: MosOptions = {};
   if (sizeOfLargeStep !== undefined) {
     options.sizeOfLargeStep = sizeOfLargeStep.toInteger();
@@ -190,12 +200,7 @@ function mosSubset(
   if (down !== undefined) {
     options.down = down.toInteger();
   }
-  const result = mos(
-    numberOfLargeSteps.toInteger(),
-    numberOfSmallSteps.toInteger(),
-    options
-  );
-  return result.map(s => fromInteger(s));
+  return mos(numL, numS, options).map(s => fromInteger(s));
 }
 mosSubset.__doc__ =
   'Calculate a subset of equally tempered degrees with maximum variety two per scale degree.';
@@ -358,7 +363,7 @@ export function absolute(
       interval
     );
   }
-  if (this.rootContext.unisonFrequency === undefined) {
+  if (this.rootContext?.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz.'
     );
@@ -392,7 +397,7 @@ export function relative(
   if (interval.isRelative()) {
     return interval.shallowClone();
   }
-  if (this.rootContext.unisonFrequency === undefined) {
+  if (this.rootContext?.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
     );
@@ -679,6 +684,9 @@ function validateFlavor(flavor: string): FJSFlavor {
 
 // Coercion: None.
 function absoluteFJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+  if (!this.rootContext) {
+    throw new Error('Root context required for absolute FJS.');
+  }
   const C4 = this.rootContext.C4;
   let monzo: TimeMonzo | TimeReal;
   if (C4.timeExponent.n === 0) {
@@ -705,6 +713,9 @@ absoluteFJS.__node__ = builtinNode(absoluteFJS);
 
 // Coercion: None.
 function FJS(this: ExpressionVisitor, interval: Interval, flavor = '') {
+  if (!this.rootContext) {
+    throw new Error('Root context required for FJS.');
+  }
   const monzo = relative.bind(this)(interval).value;
   const result = new Interval(monzo, 'logarithmic', interval.steps, {
     type: 'AspiringFJS',
@@ -728,6 +739,9 @@ function labelAbsoluteFJS(
   interval: Interval,
   flavor = ''
 ) {
+  if (!this.rootContext) {
+    throw new Error('Root context required for absolute FJS.');
+  }
   if (
     !interval.node ||
     (interval.node.type !== 'AbsoluteFJS' &&
@@ -930,6 +944,9 @@ export function compare(
  * @returns A copy of the interval that can be tracked e.g. for changes in scale order.
  */
 export function track(this: ExpressionVisitor, interval: Interval) {
+  if (!this.rootContext) {
+    throw new Error('Root context required for tracking.');
+  }
   requireParameters({interval});
   const result = interval.shallowClone();
   result.trackingIds.add(this.rootContext.nextTrackingId());

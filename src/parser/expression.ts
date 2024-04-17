@@ -88,6 +88,7 @@ import {
   RecordLiteral,
   UnaryExpression,
   IterationKind,
+  TemplateArgument,
 } from '../ast';
 import {type StatementVisitor} from './statement';
 
@@ -246,7 +247,7 @@ export class ExpressionVisitor {
   /**
    * Get the root context with the current values of the root pitch, ups, lifts, etc.
    */
-  get rootContext(): RootContext {
+  get rootContext(): RootContext | undefined {
     return this.parent.rootContext;
   }
 
@@ -255,7 +256,7 @@ export class ExpressionVisitor {
    *
    * Warning: Modifies parent context!
    */
-  set rootContext(context: RootContext) {
+  set rootContext(context: RootContext | undefined) {
     this.parent.rootContext = context;
   }
 
@@ -274,13 +275,17 @@ export class ExpressionVisitor {
     this.parent.currentScale = scale;
   }
 
+  spendGas(amount?: number) {
+    this.parent.spendGas(amount);
+  }
+
   /**
    * Visit a node in the abstract syntax tree and evaluate to a value.
    * @param node The AST node of the expression to evaluate.
    * @returns The result of evaluation.
    */
   visit(node: Expression): SonicWeaveValue {
-    this.rootContext.spendGas();
+    this.spendGas();
     switch (node.type) {
       case 'LestExpression':
         return this.visitLestExpression(node);
@@ -371,9 +376,16 @@ export class ExpressionVisitor {
       case 'SquareSuperparticular':
         return this.visitSquareSuperparticular(node);
       case 'TemplateArgument':
-        return this.rootContext.templateArguments[node.index];
+        return this.visitTemplateArgument(node);
     }
     node satisfies never;
+  }
+
+  protected visitTemplateArgument(node: TemplateArgument) {
+    if (!this.rootContext) {
+      throw new Error('Root context required to access template arguments.');
+    }
+    return this.rootContext.templateArguments[node.index];
   }
 
   protected visitSquareSuperparticular(node: SquareSuperparticular) {
@@ -513,6 +525,9 @@ export class ExpressionVisitor {
   }
 
   protected down(operand: SonicWeaveValue): Interval | Interval[] {
+    if (!this.rootContext) {
+      throw new Error('Root context required for down.');
+    }
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
@@ -596,6 +611,9 @@ export class ExpressionVisitor {
     value: TimeMonzo | TimeReal,
     node: MonzoLiteral | FJS | AbsoluteFJS
   ) {
+    if (!this.rootContext) {
+      throw new Error('Root context required for uplift.');
+    }
     value = value
       .mul(this.rootContext.up.value.pow(node.ups))
       .mul(this.rootContext.lift.value.pow(node.lifts));
@@ -635,7 +653,8 @@ export class ExpressionVisitor {
     }
     result.steps += steps.valueOf();
     if (node.ups || node.lifts) {
-      this.rootContext.fragiles.push(result);
+      // Uplift already throws if context is missing.
+      this.rootContext!.fragiles.push(result);
     }
     return result;
   }
@@ -698,7 +717,7 @@ export class ExpressionVisitor {
       node.subscripts
     );
     const result = this.upLift(monzo, node);
-    this.rootContext.fragiles.push(result);
+    this.rootContext!.fragiles.push(result);
     return result;
   }
 
@@ -710,12 +729,12 @@ export class ExpressionVisitor {
     );
     const upLifted = this.upLift(relativeToC4, node);
     const result = new Interval(
-      this.rootContext.C4.mul(upLifted.value),
+      this.rootContext!.C4.mul(upLifted.value),
       'logarithmic',
       upLifted.steps,
       node
     );
-    this.rootContext.fragiles.push(result);
+    this.rootContext!.fragiles.push(result);
     return result;
   }
 
@@ -929,6 +948,9 @@ export class ExpressionVisitor {
     if (operand instanceof Val) {
       throw new Error(`Unary operation '${operator} not supported on vals.`);
     }
+    if (!this.rootContext) {
+      throw new Error('Root context required.');
+    }
     switch (operator) {
       case '^':
       case '∧':
@@ -992,7 +1014,7 @@ export class ExpressionVisitor {
         throw new Error('Can only tensor intervals or arrays.');
       }
       if (right instanceof Interval) {
-        this.rootContext.spendGas();
+        this.spendGas();
         if (node.preferLeft || node.preferRight) {
           const value = left.value.mul(right.value);
           return resolvePreference(value, left, right, node, false);
@@ -1633,7 +1655,7 @@ export class ExpressionVisitor {
       throw new Error('Irrational ranges disabled for now.');
     }
     if (step.value.residual.s !== 0) {
-      this.rootContext.spendGas(
+      this.spendGas(
         Math.abs(
           (end.value.valueOf() - start.value.valueOf()) / step.value.valueOf()
         )
@@ -1677,9 +1699,7 @@ export class ExpressionVisitor {
     if (!(root instanceof Interval && end instanceof Interval)) {
       throw new Error('Harmonic segments must be built from intervals.');
     }
-    this.rootContext.spendGas(
-      Math.abs(end.value.valueOf() - root.value.valueOf())
-    );
+    this.spendGas(Math.abs(end.value.valueOf() - root.value.valueOf()));
     const one = linearOne();
     const result: Interval[] = [];
     if (root.compare(end) <= 0) {

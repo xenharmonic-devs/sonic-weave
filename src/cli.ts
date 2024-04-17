@@ -23,7 +23,7 @@ export function toScalaScl(source: string) {
   const keyColors = [];
   let useColors = false;
   const lines = [`!Created using SonicWeave ${version}`, '!'];
-  lines.push(visitor.rootContext.title || 'Untitled tuning');
+  lines.push(visitor.rootContext!.title || 'Untitled tuning');
   const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');
@@ -60,10 +60,7 @@ const prompt = '𝄞 ';
 /** @hidden */
 export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   const globalVisitor = getSourceVisitor();
-  const visitor = new StatementVisitor(
-    globalVisitor.rootContext,
-    globalVisitor
-  );
+  const visitor = new StatementVisitor(globalVisitor);
 
   let currentCmd = '';
 

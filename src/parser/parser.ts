@@ -20,6 +20,7 @@ export function parseAST(source: string): Program {
 
 // Cached globally on first initialization.
 let SOURCE_VISITOR_WITH_PRELUDE: StatementVisitor | null = null;
+let PRELUDE_SCOPE: StatementVisitor | null = null;
 let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
 let VOLATILES: Program | null = null;
 
@@ -35,9 +36,19 @@ export function getSourceVisitor(
 ) {
   extraBuiltins ??= {};
   const rootContext = new RootContext();
-  if (includePrelude && SOURCE_VISITOR_WITH_PRELUDE && VOLATILES) {
+  if (
+    includePrelude &&
+    SOURCE_VISITOR_WITH_PRELUDE &&
+    PRELUDE_SCOPE &&
+    VOLATILES
+  ) {
+    // In order to set gas limits on non-volatiles the cached visitors have to be patched.
+    PRELUDE_SCOPE.rootContext = rootContext;
+    SOURCE_VISITOR_WITH_PRELUDE.rootContext = rootContext;
+
     const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
-    // Volatiles depend on the active root context.
+
+    // Volatiles are expected to interact with extra builins.
     for (const statement of VOLATILES.body) {
       visitor.visit(statement);
     }
@@ -48,11 +59,13 @@ export function getSourceVisitor(
     }
     return visitor;
   } else if (!includePrelude && SOURCE_VISITOR_NO_PRELUDE) {
+    SOURCE_VISITOR_NO_PRELUDE.rootContext = rootContext;
     const visitor = SOURCE_VISITOR_NO_PRELUDE.clone();
     visitor.rootContext = rootContext;
     return visitor;
   } else {
-    const visitor = new StatementVisitor(rootContext);
+    const visitor = new StatementVisitor();
+    visitor.rootContext = rootContext;
     visitor.expandable = false;
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.immutables.set(name, color);
@@ -67,6 +80,7 @@ export function getSourceVisitor(
       for (const statement of prelude.body) {
         visitor.visit(statement);
       }
+      PRELUDE_SCOPE = visitor;
       SOURCE_VISITOR_WITH_PRELUDE = visitor.clone();
       // Volatiles depend on the active root context.
       VOLATILES = parseAST(PRELUDE_VOLATILES);
@@ -97,10 +111,7 @@ export function evaluateSource(
   extraBuiltins?: Record<string, SonicWeaveValue>
 ) {
   const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-  const visitor = new StatementVisitor(
-    globalVisitor.rootContext,
-    globalVisitor
-  );
+  const visitor = new StatementVisitor(globalVisitor);
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -126,10 +137,7 @@ export function evaluateExpression(
   extraBuiltins?: Record<string, SonicWeaveValue>
 ): SonicWeaveValue {
   const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-  const visitor = new StatementVisitor(
-    globalVisitor.rootContext,
-    globalVisitor
-  );
+  const visitor = new StatementVisitor(globalVisitor);
   const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
@@ -196,10 +204,10 @@ export function createTag(
   function tag(strings: TemplateStringsArray, ...args: any[]) {
     const fragments = escapeStrings ? strings : strings.raw;
     const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-    const visitor = new StatementVisitor(
-      globalVisitor.rootContext,
-      globalVisitor
-    );
+    const visitor = new StatementVisitor(globalVisitor);
+    if (!visitor.rootContext) {
+      throw new Error('Root context required for storing template arguments.');
+    }
     let source = fragments[0];
     for (let i = 0; i < args.length; ++i) {
       visitor.rootContext.templateArguments[i] = convert(args[i]);

@@ -50,7 +50,8 @@ describe('SonicWeave parser', () => {
 
   it('can declare variables', () => {
     const ast = parseAST('const i = 676/675 /* The Island comma */;');
-    const visitor = new StatementVisitor(new RootContext());
+    const visitor = new StatementVisitor();
+    visitor.rootContext = new RootContext();
     visitor.visit(ast.body[0]);
     expect(visitor.get('i')?.toString()).toBe('676/675');
   });
@@ -92,7 +93,8 @@ describe('SonicWeave parser', () => {
 
   it('can declare functions', () => {
     const ast = parseAST('riff plusOne (x) { x ~+ 1; }');
-    const visitor = new StatementVisitor(new RootContext());
+    const visitor = new StatementVisitor();
+    visitor.rootContext = new RootContext();
     visitor.visit(ast.body[0]);
     expect(visitor.immutables.has('plusOne')).toBe(true);
     const two = new Interval(TimeMonzo.fromBigInt(2n), 'linear');
@@ -483,21 +485,29 @@ describe('SonicWeave parser', () => {
     const ast = parseAST('while (true) {}');
 
     const visitor = getSourceVisitor(false);
-    visitor.rootContext.gas = 100;
+    visitor.rootContext!.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
   it('supports guard rails against huge segments', () => {
     const ast = parseAST('1000::2000');
     const visitor = getSourceVisitor(false);
-    visitor.rootContext.gas = 100;
+    visitor.rootContext!.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
   it('supports guard rails against large tensors', () => {
     const ast = parseAST('[1..15] tns [1..15]');
     const visitor = getSourceVisitor(false);
-    visitor.rootContext.gas = 100;
+    visitor.rootContext!.gas = 100;
+    expect(() => visitor.visit(ast.body[0])).toThrow();
+  });
+
+  it('supports guard rails against array producing builtins', () => {
+    const ast = parseAST('mosSubset(50, 51)');
+
+    const visitor = getSourceVisitor(false);
+    visitor.rootContext!.gas = 100;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
 
@@ -514,14 +524,14 @@ describe('SonicWeave parser', () => {
 
   it('can expand basic scales', () => {
     const visitor = evaluateSource('5::10', false);
-    expect(visitor.expand(visitor.rootContext)).toBe(
+    expect(visitor.expand(visitor.rootContext!)).toBe(
       '6/5\n7/5\n8/5\n9/5\n10/5'
     );
   });
 
   it("can't expand the global scope", () => {
     const visitor = getSourceVisitor(false);
-    expect(() => visitor.expand(visitor.rootContext)).toThrow();
+    expect(() => visitor.expand(visitor.rootContext!)).toThrow();
   });
 
   it('can expand customized scales', () => {
@@ -529,7 +539,7 @@ describe('SonicWeave parser', () => {
       'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;',
       false
     );
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       [
         'C4 = 256 Hz',
         '1/1 = 432 Hz',
@@ -547,42 +557,42 @@ describe('SonicWeave parser', () => {
       '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"',
       false
     );
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       '5/4\n6/4 black\n7/4 "seventh"\n8/4'
     );
   });
 
   it('can expand riffs', () => {
     const visitor = evaluateSource('riff foo (bar) {bar + 3};foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       'riff foo (bar) {bar + 3}\n4'
     );
   });
 
   it('can expand fns', () => {
     const visitor = evaluateSource('fn foo(bar){bar + 3};foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       'fn foo(bar){bar + 3}\n4'
     );
   });
 
   it('can expand arrow functions', () => {
     const visitor = evaluateSource('const foo = bar => bar + 2;foo(1)', false);
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       'const foo = bar => bar + 2\n3'
     );
   });
 
   it('can expend variables that start with "riff"', () => {
     const visitor = evaluateSource('const riffy = 42', false);
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       'const riffy = 42\n'
     );
   });
 
   it('can expand renamed builtins', () => {
     const visitor = evaluateSource('let foo = gcd;foo(6, 8)', false);
-    expect(visitor.expand(getSourceVisitor(false).rootContext)).toBe(
+    expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       'let foo = gcd\n2'
     );
   });
@@ -593,12 +603,9 @@ describe('SonicWeave parser', () => {
     for (const statement of ast.body) {
       globalVisitor.visit(statement);
     }
-    const defaults = globalVisitor.rootContext.clone();
+    const defaults = globalVisitor.rootContext!.clone();
 
-    const visitor = new StatementVisitor(
-      globalVisitor.rootContext,
-      globalVisitor
-    );
+    const visitor = new StatementVisitor(globalVisitor);
 
     const userAst = parseAST('D4 = 270 Hz;let x = 7;D4;200 Hz;x;3;2');
     for (const statement of userAst.body) {
