@@ -1,4 +1,20 @@
 export const PRELUDE_VOLATILES = `
+// XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn().
+riff reduce(scale = $$) {
+  "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
+  for (const i of scale) {
+    if (i < 1 or i > scale[-1])
+      break;
+  } else {
+    warn("The scale was already reduced by its equave. Did you mean 'simplify'?");
+    return;
+  }
+  equaveReduce(scale);
+}
+`;
+
+export const PRELUDE_SOURCE = `
+// == Root context dependents ==
 riff ablin(interval) {
   "Convert interval to absolute linear representation.";
   return absolute(linear(interval));
@@ -39,21 +55,6 @@ riff absoluteHEJI(interval) {
   return absoluteFJS(interval, 'h');
 }
 
-// XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn().
-riff reduce(scale = $$) {
-  "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
-  for (const i of scale) {
-    if (i < 1 or i > scale[-1])
-      break;
-  } else {
-    warn("The scale was already reduced by its equave. Did you mean 'simplify'?");
-    return;
-  }
-  equaveReduce(scale);
-}
-`;
-
-export const PRELUDE_SOURCE = `
 // == Functions ==
 riff keys(record) {
   "Obtain an array of keys of the record.";
