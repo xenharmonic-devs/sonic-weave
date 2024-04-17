@@ -11,6 +11,9 @@ import {
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
 import {parse as parenCounter} from './parser/paren-counter';
+import {asAbsoluteFJS} from './fjs';
+import {TimeMonzo} from './monzo';
+import {literalToString} from './expression';
 const {version} = require('../package.json');
 
 /**
@@ -50,6 +53,37 @@ export function toScalaScl(source: string) {
     keyColors.unshift(keyColors.pop());
     lines.push('! A list of key colors, ascending from 1/1');
     lines.push('! ' + keyColors.join(' '));
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+export function toSonicWeaveInterchange(source: string) {
+  const visitor = evaluateSource(source);
+  const context = visitor.rootContext;
+  if (!context) {
+    throw new Error('Missing root context.');
+  }
+  const lines = [`// Created using SonicWeave ${version}`, ''];
+  if (context.title) {
+    lines.push(JSON.stringify(context.title));
+    lines.push('');
+  }
+  if (context.unisonFrequency) {
+    const unisonFrequency = literalToString(
+      context.unisonFrequency.asMonzoLiteral()
+    );
+    lines.push(`1 = ${unisonFrequency}`);
+    lines.push('');
+  }
+  for (const interval of visitor.currentScale) {
+    const universal = interval.shallowClone();
+    universal.node = universal.asMonzoLiteral();
+    let line = universal.toString(context);
+    if (line.startsWith('(') && line.endsWith(')')) {
+      line = line.slice(1, -1);
+    }
+    lines.push(line);
   }
   lines.push('');
   return lines.join('\n');

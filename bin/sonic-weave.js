@@ -6,7 +6,7 @@ const {readFileSync} = require('fs');
 const {start} = require('repl');
 const {program} = require('commander');
 const {version} = require('../package.json');
-const {toScalaScl, repl} = require('../dist');
+const {toScalaScl, toSonicWeaveInterchange, repl} = require('../dist');
 
 program
   .name('sonic-weave')
@@ -29,6 +29,8 @@ if (require.main === module) {
     const data = readFileSync(program.args[0]);
     if (options.format === 'scl') {
       process.stdout.write(toScalaScl(data.toString()));
+    } else if (options.format === 'swi') {
+      process.stdout.write(toSonicWeaveInterchange(data.toString()));
     } else {
       process.stderr.write(`Unrecognized output format ${options.format}\n`);
     }
