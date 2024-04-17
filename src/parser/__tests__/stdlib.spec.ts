@@ -1328,4 +1328,9 @@ describe('SonicWeave standard library', () => {
     );
     expect(scale).toEqual(['4096/4095', '3/2', '4095/2048', '2/1']);
   });
+
+  it('calculates Euler-Fokker genus 444', () => {
+    const scale = parseSource('eulerGenus(444);str');
+    expect(scale).toEqual(['37/32', '3/2', '111/64', '2']);
+  });
 });

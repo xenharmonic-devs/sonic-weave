@@ -507,7 +507,7 @@ riff eulerGenus(guide, root = 1, equave = 2) {
   const c = colorOf(guide);
   const l = labelOf(guide);
   for (const n of divisors(guide)) {
-    if (not (guide ~mod n)) n c l;
+    if (n ~mod equave) n c l;
   }
   i => i ~% root ~rdc equave;
   sort();
