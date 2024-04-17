@@ -942,8 +942,10 @@ riff randomVaried(amount, varyEquave = false, scale = $$) {
   randomVariance(amount, varyEquave);
 }
 
-riff coalesced(tolerance = 3.5, action = 'simplest', scale = $$) {
-  "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` are coalesced into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.";
+riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
+  "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` are coalesced into one.\\
+  \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.\\
+  If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   if (not scale) return [];
 
   let last;
@@ -969,17 +971,23 @@ riff coalesced(tolerance = 3.5, action = 'simplest', scale = $$) {
     last = interval;
     push(interval, group);
   }
+  if (not preserveBoundary) {
+    while ($$ and abs(logarithmic($$[0])) <= tolerance) void(shift($$));
+    while ($$ and abs(logarithmic($$[-1] %~ scale[-1])) <= tolerance) void(pop($$));
+  }
   scale[-1];
   if (length(scale) === 1) return;
   while ($[-1] == $[-2]) void(pop());
 }
 
-riff coalesce(tolerance = 3.5, action = 'simplest', scale = $$) {
-  "Coalesce intervals in the current/given scale separated by \`tolerance\` (default 3.5 cents) into one. \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.";
+riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
+  "Coalesce intervals in the current/given scale separated by \`tolerance\` (default 3.5 cents) into one. \\
+   \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.\\
+   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   $ = scale;
   scale = $[..];
   clear();
-  coalesced(tolerance, action, scale);
+  coalesced(tolerance, action, preserveBoundary, scale);
   return;
 }
 
@@ -1017,19 +1025,23 @@ riff stepReplaced(step, replacement, scale = $$) {
   return cumprod(replaced(step, replacement, geodiff(scale)));
 }
 
-riff organize(tolerance = niente, action = 'simplest', scale = $$) {
-  "Reduce the current/given scale by its last interval, sort the result and filter out duplicates. If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.";
+riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = $$) {
+  "Reduce the current/given scale by its last interval, sort the result and filter out duplicates.\\
+  If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.\\
+  If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   $ = scale;
   equaveReduce();
   if (tolerance === niente) keepUnique();
   sort();
-  if (tolerance !== niente) coalesce(tolerance, action);
+  if (tolerance !== niente) coalesce(tolerance, action, preserveBoundary);
   return;
 }
 
-riff organized(tolerance = niente, action = 'simplest', scale = $$) {
-  "Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out. If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.";
+riff organized(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = $$) {
+  "Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out.\\
+  If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.\\
+  If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   scale;
-  organize(tolerance, action);
+  organize(tolerance, action, preserveBoundary);
 }
 `;

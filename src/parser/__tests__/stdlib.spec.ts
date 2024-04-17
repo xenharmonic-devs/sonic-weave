@@ -1316,4 +1316,16 @@ describe('SonicWeave standard library', () => {
     visitor.rootContext!.gas = 200;
     expect(() => visitor.visit(ast.body[0])).toThrow();
   });
+
+  it('coalesces schisminas by default', () => {
+    const scale = parseSource('4096/4095;3/2;4095/2048;2/1;coalesce();str');
+    expect(scale).toEqual(['3/2', '2/1']);
+  });
+
+  it('preserves schisminas if asked to', () => {
+    const scale = parseSource(
+      "4096/4095;3/2;4095/2048;2/1;coalesce(3.5, 'simplest', true);str"
+    );
+    expect(scale).toEqual(['4096/4095', '3/2', '4095/2048', '2/1']);
+  });
 });

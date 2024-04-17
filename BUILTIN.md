@@ -395,11 +395,11 @@ Calculate the geometric difference of two intervals on a circle.
 ### circleDistance(*a*, *b*, *equave = 2*)
 Calculate the geometric distance of two intervals on a circle.
 
-### coalesce(*tolerance = 3.5*, *action = "simplest"*, *scale = $$*)
-Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.
+### coalesce(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
+Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one.    `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.   If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
-### coalesced(*tolerance = 3.5*, *action = "simplest"*, *scale = $$*)
-Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one. `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.
+### coalesced(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
+Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### colorsOf(*scale = $$*)
 Obtain an array of colors of the current/given scale.
@@ -542,11 +542,11 @@ Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive
 ### oddLimitOf(*x*, *equave = 2*)
 Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 
-### organize(*tolerance = niente*, *action = "simplest"*, *scale = $$*)
-Reduce the current/given scale by its last interval, sort the result and filter out duplicates. If `tolerance` is given near-duplicates are coalesced instead using the given `action`.
+### organize(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
+Reduce the current/given scale by its last interval, sort the result and filter out duplicates.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
-### organized(*tolerance = niente*, *action = "simplest"*, *scale = $$*)
-Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out. If `tolerance` is given near-duplicates are coalesced instead using the given `action`.
+### organized(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
+Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.
