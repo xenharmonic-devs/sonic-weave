@@ -523,6 +523,7 @@ AssigningOperator
   / MiscOperator
   / MultiplicativeOperator
   / ExponentiationOperator
+  / FractionOperator
 
 CoalescingOperator
   = '??'
