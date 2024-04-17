@@ -140,6 +140,15 @@ function stepSignature(word: string) {
 stepSignature.__doc__ = 'Calculate the step signature of an entire scale word.';
 stepSignature.__node__ = builtinNode(stepSignature);
 
+function divisors(this: ExpressionVisitor, interval: Interval) {
+  requireParameters({interval});
+  const result = interval.value.divisors();
+  this.spendGas(result.length);
+  return result.map(fromInteger);
+}
+divisors.__doc__ = 'Obtain an array of divisors of a natural number.';
+divisors.__node__ = builtinNode(divisors);
+
 // == Third-party wrappers ==
 function kCombinations(set: any[], k: Interval) {
   requireParameters({set, k});
@@ -1996,6 +2005,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // First-party wrappers
   numComponents,
   stepSignature,
+  divisors,
   // Third-party wrappers
   mosSubset,
   isPrime,

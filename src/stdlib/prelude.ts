@@ -504,14 +504,10 @@ riff eulerGenus(guide, root = 1, equave = 2) {
   if (guide ~mod root) {
     throw "Root must divide the guide tone.";
   }
-
-  let remainder = guide ~* 0;
-  while (++remainder < equave) {
-    let n = remainder;
-    while (n <= guide) {
-      if (not (guide ~mod n)) n;
-      n ~+= equave;
-    }
+  const c = colorOf(guide);
+  const l = labelOf(guide);
+  for (const n of divisors(guide)) {
+    if (not (guide ~mod n)) n c l;
   }
   i => i ~% root ~rdc equave;
   sort();

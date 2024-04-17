@@ -857,6 +857,11 @@ export class TimeReal {
   }
 
   /** @hidden */
+  divisors(): number[] {
+    throw new Error('Can only calculate the divisors of a natural number.');
+  }
+
+  /** @hidden */
   asIntegerLiteral() {
     return undefined;
   }
@@ -2122,6 +2127,62 @@ export class TimeMonzo {
       result.primeExponents[i] = ZERO;
     }
     return result;
+  }
+
+  /**
+   * Find all divisors of a natural number (ignoring units of time).
+   * @returns All divisors including 1 and the number itself.
+   * @throws An error if this time monzo doesn't represent a positive integer.
+   */
+  divisors(): number[] {
+    if (!this.isIntegral()) {
+      throw new Error('Can only calculate the divisors of an integer.');
+    }
+    if (this.residual.s !== 1) {
+      throw new Error('Can only calculate the divisors of a positive integer.');
+    }
+    const divisors: number[] = [1];
+    let r = this.residual.valueOf();
+    let i = this.primeExponents.length;
+    while (r !== 1 && i < PRIMES.length) {
+      const prime = PRIMES[i++];
+      let component = 0;
+      while (r % prime === 0) {
+        // XXX: This division can be eliminated for a minor speedup. See xen-dev-utils/toMonzo.
+        r /= prime;
+        component++;
+      }
+      const l = divisors.length;
+      let f = prime;
+      while (component--) {
+        for (let j = 0; j < l; ++j) {
+          divisors.push(divisors[j] * f);
+        }
+        f *= prime;
+      }
+    }
+    if (r !== 1) {
+      // Give up on finding *all* divisors.
+      divisors.push(r);
+    }
+
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      // These should all be non-negative based on prior checks.
+      if (this.primeExponents[i].n) {
+        const prime = PRIMES[i];
+        let component = this.primeExponents[i].valueOf();
+        const l = divisors.length;
+        let f = prime;
+        while (component--) {
+          for (let j = 0; j < l; ++j) {
+            divisors.push(divisors[j] * f);
+          }
+          f *= prime;
+        }
+      }
+    }
+    divisors.sort((a, b) => a - b);
+    return divisors;
   }
 
   /**

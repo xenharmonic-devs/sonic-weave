@@ -78,6 +78,9 @@ Remove and return the first element equal to the given one from the current/give
 ### distill(*tester*, *scale = $$*)
 Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.
 
+### divisors(*interval*)
+Obtain an array of divisors of a natural number.
+
 ### doc(*riff*)
 Obtain the docstring of the given riff.
 

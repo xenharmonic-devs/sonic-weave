@@ -416,4 +416,12 @@ describe('Extended monzo with time', () => {
     const twelve = TimeMonzo.fromBigInt(0n).gcd(TimeMonzo.fromBigInt(12n));
     expect(twelve.toBigInteger()).toBe(12n);
   });
+
+  it('can find all divisors of 360', () => {
+    const babylon = TimeMonzo.fromFraction(360).divisors();
+    expect(babylon).toEqual([
+      1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72,
+      90, 120, 180, 360,
+    ]);
+  });
 });
