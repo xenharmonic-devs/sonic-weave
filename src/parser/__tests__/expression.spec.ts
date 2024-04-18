@@ -1851,4 +1851,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.steps).toBe(1);
     expect(interval.toString()).toBe('linear([1 0 1>@1°.2..)');
   });
+
+  it('has universal formatting for negative real quantities', () => {
+    const interval = evaluate('monzo(-3.14r)') as Interval;
+    expect(interval.toString()).toBe('[1 1980.917470940283>@-1.rc');
+  });
+
+  it('parses negative real monzos', () => {
+    const interval = evaluate('[1 1980.917470940283>@-1.rc') as Interval;
+    expect(interval.valueOf()).toBeCloseTo(-3.14);
+  });
 });
