@@ -3,7 +3,19 @@ SonicWeave is a Domain Specific Language for manipulating musical frequencies, r
 
 Not to be confused with the Sweave flexible framework for mixing text and R code for automatic document generation.
 
+## Package overview
+The `sonic-weave` package is many things.
+
+- The [language](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md) of Scale Workshop 3
+- A [command-line interface](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/cli.md) for calculating musical quantities
+- A TypeScript compatible [npm package](https://xenharmonic-devs.github.io/sonic-weave/)
+- A [template language](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tag.md) for running SonicWeave programs inside JavaScript
+
+You may also be interested in the [technical overview](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md) of SonicWeave as a programming language.
+
 ## Type system
+TODO: Curate and move to documentation/dsl.md and documentation/technical.md
+
 SonicWeave comes with some basic types.
 
 | Type     | Example                  | Notes |
