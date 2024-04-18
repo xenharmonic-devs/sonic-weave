@@ -830,19 +830,18 @@ export class TimeReal {
 
   /** @hidden */
   gcd(other: TimeMonzo | TimeReal) {
-    // Not sure if what interpretation makes sense here. Let's just return the conventional identity.
+    // To satisfy the multiplicative identity we return 1 here and (this * other) in lcm.
     return new TimeReal(
       Math.min(this.timeExponent, other.timeExponent.valueOf()),
-      0
+      1
     );
   }
 
   /** @hidden */
   lcm(other: TimeMonzo | TimeReal) {
-    // Division by zero due to how gcd was interpreted.
     return new TimeReal(
       Math.max(this.timeExponent, other.timeExponent.valueOf()),
-      NaN
+      this.value * other.valueOf()
     );
   }
 
@@ -1037,6 +1036,26 @@ export class TimeMonzo {
       positiveVector.map((p, i) => new Fraction(p - negativeVector[i])),
       residual
     );
+  }
+
+  /**
+   * Create a scalar from a rational number of cents (1 cent = 1 centisemitone or 1200th of an octave).
+   * @param cents Width of a musical interval in cents i.e. logarithmic size.
+   * @returns Scalar in the relative echelon.
+   */
+  static fromFractionalCents(
+    cents: FractionValue,
+    numberOfComponents?: number
+  ) {
+    numberOfComponents ??= NUMBER_OF_COMPONENTS;
+    if (numberOfComponents < 1) {
+      throw new Error('Too few components to represent cents.');
+    }
+    const components: Fraction[] = [new Fraction(cents).div(1200)];
+    while (components.length < numberOfComponents) {
+      components.push(new Fraction(0));
+    }
+    return new TimeMonzo(ZERO, components);
   }
 
   /**

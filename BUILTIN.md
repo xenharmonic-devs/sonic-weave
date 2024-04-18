@@ -43,7 +43,7 @@ Convert value to a boolean.
 Round value up to the nearest integer.
 
 ### cents(*interval*, *fractionDigits*)
-Convert interval to cents. `fractionDigits` represents the number of decimal digits in the cents representation. May produce non-algebraic (real) results if number of digits is not given.
+Convert interval to cents. `fractionDigits` represents the number of decimal digits in the cents representation. May produce non-algebraic (real) results if number of digits is not given. String arguments are interpreted as denoting cent quantities, not linear fractions.
 
 ### centsColor(*interval*)
 Color based on the size of the interval. Hue wraps around every 1200 cents.
@@ -341,6 +341,9 @@ Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
+
+### vbool(*value*)
+Convert value to a boolean. Vectorizes over arrays.
 
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.

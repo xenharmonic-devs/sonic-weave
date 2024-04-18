@@ -1333,4 +1333,12 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('eulerGenus(444);str');
     expect(scale).toEqual(['37/32', '3/2', '111/64', '2']);
   });
+
+  it('has a vectorized sinh', () => {
+    const xs = evaluateExpression('sinh([0, 1, LN2])') as Interval[];
+    expect(xs).toHaveLength(3);
+    expect(xs[0].valueOf()).toBeCloseTo(0);
+    expect(xs[1].valueOf()).toBeCloseTo(1.175);
+    expect(xs[2].valueOf()).toBeCloseTo(0.75);
+  });
 });

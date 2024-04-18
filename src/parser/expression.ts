@@ -36,8 +36,6 @@ import {
   linearOne,
   SonicWeaveFunction,
   compare,
-  maximum,
-  minimum,
   upcastBool,
   SonicWeavePrimitive,
 } from '../stdlib';
@@ -528,15 +526,10 @@ export class ExpressionVisitor {
     if (!this.rootContext) {
       throw new Error('Root context required for down.');
     }
-    if (typeof operand === 'boolean') {
-      operand = upcastBool(operand);
-    }
-    if (operand instanceof Interval) {
-      return operand.down(this.rootContext);
-    }
     if (Array.isArray(operand)) {
       return operand.map(this.down.bind(this)) as Interval[];
     }
+    return upcastBool(operand).down(this.rootContext);
     throw new Error('Can only apply down arrows to intervals and vals');
   }
 
@@ -549,27 +542,21 @@ export class ExpressionVisitor {
     object: SonicWeaveValue,
     labels: (string | Color | undefined)[]
   ): Interval | Interval[] {
-    if (typeof object === 'boolean') {
-      object = upcastBool(object);
-    }
-    if (object instanceof Interval) {
-      object = object.shallowClone();
-      for (const label of labels) {
-        if (typeof label === 'string') {
-          object.label = label;
-        } else if (label instanceof Color) {
-          object.color = label;
-        } else {
-          object.color = undefined;
-        }
-      }
-      return object;
-    }
     if (Array.isArray(object)) {
       const l = this.label.bind(this);
       return object.map(o => l(o, labels)) as Interval[];
     }
-    throw new Error('Labels can only be applied to intervals.');
+    object = upcastBool(object).shallowClone();
+    for (const label of labels) {
+      if (typeof label === 'string') {
+        object.label = label;
+      } else if (label instanceof Color) {
+        object.color = label;
+      } else {
+        object.color = undefined;
+      }
+    }
+    return object;
   }
 
   protected visitLabeledExpression(node: LabeledExpression) {
@@ -1054,10 +1041,12 @@ export class ExpressionVisitor {
               value = left.value.sub(right.value);
               break;
             case 'max':
-              value = maximum.bind(this)(left, right).value;
+              value =
+                compare.bind(this)(left, right) >= 0 ? left.value : right.value;
               break;
             case 'min':
-              value = minimum.bind(this)(left, right).value;
+              value =
+                compare.bind(this)(left, right) <= 0 ? left.value : right.value;
               break;
             case 'to':
               value = left.value.roundTo(right.value);
@@ -1198,9 +1187,9 @@ export class ExpressionVisitor {
           case 'rdc':
             return left.reduce(right, true);
           case 'max':
-            return maximum.bind(this)(left, right);
+            return compare.bind(this)(left, right) >= 0 ? left : right;
           case 'min':
-            return minimum.bind(this)(left, right);
+            return compare.bind(this)(left, right) <= 0 ? left : right;
           case 'to':
             return left.roundTo(right);
           case 'by':
@@ -1358,9 +1347,7 @@ export class ExpressionVisitor {
         throw new Error(`Operator '${operator}' not implemented between vals.`);
       }
       if (right instanceof Interval || typeof right === 'boolean') {
-        if (typeof right === 'boolean') {
-          right = upcastBool(right);
-        }
+        right = upcastBool(right);
         switch (operator) {
           case '×':
           case '*':
