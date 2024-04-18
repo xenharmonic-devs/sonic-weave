@@ -277,6 +277,16 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('0.');
   });
 
+  it('bool converts empty array to false', () => {
+    const thereAreOddPerfectNumbers = evaluate('bool([])');
+    expect(thereAreOddPerfectNumbers).toBe(false);
+  });
+
+  it('has vectorizing vbool', () => {
+    const duckDuckGoose = evaluate('vbool(["", 0, 12])');
+    expect(duckDuckGoose).toEqual([false, false, true]);
+  });
+
   it('fails to converts pi to an integer', () => {
     expect(() => parseSingle('int(PI)')).toThrow();
   });
@@ -783,9 +793,21 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('9/6');
   });
 
+  it('can convert a string to a fraction', () => {
+    const {fraction} = parseSingle('fraction("6/4")');
+    expect(fraction).toBe('3/2');
+  });
+
   it('supports nedji formatting preference', () => {
     const {interval} = parseSingle('nedji(1\\3, 0, 12)');
     expect(interval.toString()).toBe('4\\12');
+  });
+
+  it('can convert a string to nedji', () => {
+    const {interval} = parseSingle('nedji("7°13<3>")');
+    const {fractionOfEquave, equave} = interval.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('7/13');
+    expect(equave.toFraction()).toBe('3');
   });
 
   it('can use "s" as a handy inflection', () => {
@@ -1138,10 +1160,20 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.domain).toBe('logarithmic');
   });
 
+  it('converts string to cents interpreted literally', () => {
+    const {interval} = parseSingle('cents("701.955")');
+    expect(interval.totalCents()).toBeCloseTo(701.955);
+  });
+
   it('switched domains while converting cents to decimals', () => {
     const {interval} = parseSingle('decimal(1200.)');
     expect(interval.value.valueOf()).toBeCloseTo(2);
     expect(interval.domain).toBe('linear');
+  });
+
+  it('converts a string to a decimal', () => {
+    const {fraction} = parseSingle('decimal("12.3")');
+    expect(fraction).toBe('123/10');
   });
 
   it('evaluates the difference in absolute FJS as relative FJS (default)', () => {
@@ -1194,6 +1226,15 @@ describe('SonicWeave expression evaluator', () => {
   it('has sine', () => {
     const sinRad = evaluate('sin(1)') as Interval;
     expect(sinRad.toString()).toBe('0.8414709848078965r');
+  });
+
+  it('has a vectorized cos', () => {
+    const xs = evaluate('cos([0, 1, PI/2, PI])') as Interval[];
+    expect(xs).toHaveLength(4);
+    expect(xs[0].valueOf()).toBeCloseTo(1);
+    expect(xs[1].valueOf()).toBeCloseTo(0.54);
+    expect(xs[2].valueOf()).toBeCloseTo(0);
+    expect(xs[3].valueOf()).toBeCloseTo(-1);
   });
 
   it('produces nan from asin', () => {
@@ -1450,13 +1491,21 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("throws if you don't pass arguments to sin", () => {
-    expect(() => parseSingle('sin()')).toThrow("Parameter 'x' is required.");
+    expect(() => parseSingle('sin()')).toThrow(
+      'An interval or boolean is required.'
+    );
   });
 
   it("throws if you don't pass arguments to int", () => {
     expect(() => parseSingle('int()')).toThrow(
-      "Parameter 'interval' is required."
+      'An interval or boolean is required.'
     );
+  });
+
+  it('converts a string to an integer', () => {
+    // parseSingle checks that it's converted to an interval.
+    const {fraction} = parseSingle('int("311")');
+    expect(fraction).toBe('311');
   });
 
   it('has the empty gcd', () => {
@@ -1860,5 +1909,15 @@ describe('SonicWeave expression evaluator', () => {
   it('parses negative real monzos', () => {
     const interval = evaluate('[1 1980.917470940283>@-1.rc') as Interval;
     expect(interval.valueOf()).toBeCloseTo(-3.14);
+  });
+
+  it('finds the lexicographically minimal string', () => {
+    const a = evaluate('minimum("c", "a", "b")');
+    expect(a).toBe('a');
+  });
+
+  it('finds the lexicographically maximal string', () => {
+    const c = evaluate('maximum("c", "a", "b")');
+    expect(c).toBe('c');
   });
 });

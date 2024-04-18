@@ -987,6 +987,7 @@ SonicWeave looks like Javascript with Python semantics, has Haskell ranges and o
 * ECMAScript - Brendan Eich et. al.
 * Python - Guido van Rossum et. al.
 * Haskell - Lennart Augustsson et. al.
+* NumPy - Travis Oliphant et. al.
 * Scala - Manuel Op de Coul
 * Scale Workshop 1 - Sean Archibald et. al.
 * FJS - "misotanni"
@@ -994,6 +995,7 @@ SonicWeave looks like Javascript with Python semantics, has Haskell ranges and o
 * Xen-calc - Matthew Yacavone
 * Xenpaper - Damien Clarke
 * Ups and downs notation - Kite Giedraitis
+* S-expressions - "Godtone"
 * Peg.js - David Majda et. al.
 * Peggy - Joe Hildebrand et. al.
 * Xenharmonic Wiki - (community project)

@@ -1222,10 +1222,9 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('throws an error if you try to call simplify with an array argument', () => {
-    expect(() => parseSource('6/4;6/3;simplify($)')).toThrow(
-      'An interval, val or boolean is required.'
-    );
+  it('has a vectorized simplify', () => {
+    const scale = parseSource('6/4;6/3;simplify($);str');
+    expect(scale).toEqual(['6/4', '6/3', '3/2', '2']);
   });
 
   it('throws an error if you use sort as a mapper', () => {

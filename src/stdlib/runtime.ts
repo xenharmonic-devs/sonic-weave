@@ -58,8 +58,15 @@ export function fromInteger(n: number) {
  * @param b `true` or `false` to convert.
  * @returns Interval literal representing either 1 or 0.
  */
-export function upcastBool(b: boolean) {
-  return b ? INT_CACHE[1].shallowClone() : INT_CACHE[0].shallowClone();
+export function upcastBool(b: SonicWeaveValue) {
+  if (b instanceof Interval) {
+    return b;
+  } else if (b === true) {
+    return INT_CACHE[1].shallowClone();
+  } else if (b === false) {
+    return INT_CACHE[0].shallowClone();
+  }
+  throw new Error('An interval or boolean is required.');
 }
 
 /**
