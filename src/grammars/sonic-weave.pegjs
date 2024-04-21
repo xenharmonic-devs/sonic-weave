@@ -1290,7 +1290,7 @@ Superscripts
   }
 
 Subscripts
-  = '_' inflections: Inflections {
+  = [_v] inflections: Inflections {
     return {
       type: 'Subscript',
       inflections,
@@ -1390,8 +1390,8 @@ ArrowFunction
 
 // This rule is a faster version of the part of (FJS / AbsoluteFJS / SquareSuperparticular) which overlaps with identifiers.
 ReservedPattern
-  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ '_'? [0-9]*
-  / PitchNominal [sqQxdbrp]* [0-9]+ '_'? [0-9]*
+  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ ([_v] [0-9])*
+  / PitchNominal [sqQxdbrp]* [0-9]+ ([_v] [0-9])*
   / 'S' [0-9]+
 
 Identifier

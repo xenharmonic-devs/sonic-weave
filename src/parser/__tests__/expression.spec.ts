@@ -1934,4 +1934,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(fractionOfEquave.toFraction()).toBe('23/31');
     expect(equave.toFraction()).toBe('2');
   });
+
+  it('lets you spell FJS using vees', () => {
+    const {fraction} = parseSingle('m3v5');
+    expect(fraction).toBe('6/5');
+  });
 });

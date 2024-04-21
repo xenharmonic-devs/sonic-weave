@@ -239,6 +239,8 @@ However in [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning
 
 By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplies the underlying frequency by `2187/2048` ≈ `1.06787e` or equivalently shifts the pitch up by about `113.685 ¢`. (Yes that fancy unicode cent is legal syntax in SonicWeave; A plain `c` also works, but only when attached to a numeric value.)
 
+[^1]: *By default* is too soft an expression here. The sharp sign widens an interval by an apotome, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
+
 Conversely a flat sign (`b` or `♭`) on an absolute pitch shifts its pitch down by around `113.685 c` corresponding to a multiplication by `2048/2187` ≈ `0.93644e` of the underlying frequency.
 
 Let's play around with these a bit to get a feel for them:
@@ -292,8 +294,6 @@ C5    // 524.000Hz | 1200.000 | 2.000
 
 I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
 
-[^1]: *By default* is too soft an expression here. That's what the sharp sign does, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
-
 ### Double accidentals
 
 Double accidentals are straightforward enough. `C##4` is twice as far from `C4` as `C#4` is. In Pythagorean tuning that's a pitch distance of about 227.370 cents. Another spelling for `##` is `x` standing in for `𝄪` which is also valid in SonicWeave.
@@ -311,3 +311,102 @@ The basic accidentals are summarized below:
 | `x`, `𝄪`   | `[-22 14>` | `+227.370`    |
 | `b`, `♭`   | `[11 -7>`  | `-113.685`    |
 | `bb`, `𝄫`  | `[22 -14>` | `-227.370`    |
+
+## Relative Pythagorean notation
+
+Pythagorean notation is build around the chain of fifths centered on the perfect unison. In SonicWeave we can use scalar multiplication to compress a sum like `P5 + P5 + P5` into `3 * P5` so the chain looks like this:
+
+..., `-3*P5`, `-2*P5`, `-P5`, `P1`, `P5`, `2*P5`, `3*P5`, ...
+
+An interval like `3 * P5` is already quite wide so we add or subtract octaves as needed to stay within a single octave:
+
+| Fifths + octaves | Literal  | Name             |
+| ---------------- | -------- | ---------------- |
+| `-6*P5 + 4*P8`   | `dim5`   | diminished fifth |
+| `-5*P5 + 3*P8`   | `m2`     | minor second     |
+| `-4*P5 + 3*P8`   | `m6`     | minor sixth      |
+| `-3*P5 + 2*P8`   | `m3`     | minor third      |
+| `-2*P5 + 2*P8`   | `m7`     | minor seventh    |
+| `-P5 + P8`       | `P4`     | perfect fourth   |
+| `0*P5`           | `P1`     | perfect unison   |
+| `P5`             | `P5`     | perfect fifth    |
+| `2*P5 - P8`      | `M2`     | major second     |
+| `3*P5 - P8`      | `M6`     | major sixth      |
+| `4*P5 - 2*P8`    | `M3`     | major third      |
+| `5*P5 - 2*P8`    | `M7`     | major seventh    |
+| `6*P5 - 3*P8`    | `Aug4`   | augmented fourth |
+
+Or in paired up based on interval class:
+
+| Literals     | Fractions         | Sizes in cents        |
+| -------------| ----------------- | --------------------- |
+| `P1`, `P8`   | `1/1`, `2/1`      | `0.000`, `1200.0`     |
+| `m2`, `M2`   | `256/243`, `9/8`  | `90.225`, `203.910`   |
+| `m3`, `M3`   | `32/27`, `81/64`  | `294.135`, `407.820`  |
+| `P4`, `Aug4` | `4/3`, `729/512`  | `498.045`, `611.730`  |
+| `dim5`, `P5` | `1024/729`, `3/2` | `588.27`, `701.955`   |
+| `m6`, `M6`   | `128/81`, `27/16` | `792.180`, `905.865`  |
+| `m7`, `M7`   | `16/9`, `243/128` | `996.090`, `1109.775` |
+
+The chain is infinite so after `Aug4` comes `Aug1` representing `2187/2048` which is the same as the sharp sign when attached to an absolute pitch nominal. You can't attach accidentals to relative intervals so the doubly augmented unison must be spelled `AugAug1`.
+
+Another spelling for `dim` is `d` and for `Aug` we have both `a` and `Â`, so `aa1` is the doubly augmented unison. During the development of SonicWeave there was some debate about if all pitch nominals should be upper-case or if `A4` was allowed to stand in for the augmented fourth. In the end consistency in absolute notation won and `Â4` got its circumflex to visually distinguish it[^2].
+
+[^2]: The Greek Alpha `Α` would've been a free machine-readable codepoint, but it's not visually distinguishable by humans.
+
+### Pythagorean absolute notation
+
+Under the hood SonicWeave computes a value for `C4` based on your pitch declaration and the rest of the nominals are defined in terms of it and perfect or major intervals:
+
+| Literal | Meaning   |
+| ------- | --------- |
+| `C4`    | `C4 + P1` |
+| `D4`    | `C4 + M2` |
+| `E4`    | `C4 + M3` |
+| `F4`    | `C4 + P4` |
+| `G4`    | `C4 + P5` |
+| `A4`    | `C4 + M6` |
+| `B4`    | `C4 + M7` |
+| `C5`    | `C4 + P8` |
+
+## FJS inflections
+
+The Pythagorean part of FJS notation is powerful enough to represent any multiple of powers of two and powers of three, be the powers negative or positive.
+
+Each higher prime number is associated with a comma which is chosen based on simplicity and the prime being in the numerator (i.e. otonality) rather than direction of the inflection. We already saw the `^5` inflection earlier when we re-spelled our just intonation fractions using absolute FJS. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. The (logarithmic) `M6^5` is the same as (linear) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`. You can also use a vee, which looks like a downwards-pointing caret, so `m3v5` is the same `logarithmic(6/5)`.
+
+The inflections stack so `m2v5v5` represents `256/243 * 81/80 * 81/80` or `27/25`. Other spellings understood by the parser are `m2_5,5` and `m2v25`.
+
+The inflections work the same on both relative and absolute notation e.g. `Db4_25` represents the frequency of middle C multiplied by `27/25`.
+
+The first few commas are:
+| Prime `p` | `P1^p`      | Monzo                  | Size in cents  |
+| --------- | ----------- | ---------------------- | -------------- |
+| `5`       | `80/81`     | `[4 -4 1>`             | `-21.506`      |
+| `7`       | `63/64`     | `[-6 2 0 1>`           | `-27.264`      |
+| `11`      | `33/32`     | `[-5 1 0 0 1>`         | `+53.273`      |
+| `13`      | `1053/1024` | `[-10 4 0 0 0 1>`      | `+48.348`      |
+| `17`      | `4131/4096` | `[-12 5 0 0 0 0 1>`    | `+14.73`       |
+| `19`      | `513/512`   | `[-9 3 0 0 0 0 0 1>`   | `+3.378`       |
+| `23`      | `736/729`   | `[5 -6 0 0 0 0 0 0 1>` | `+16.544`      |
+| `29`      | `261/256`   | `[-8 2 1>@2.3.29`      | `+33.487`      |
+
+The first few prime harmonics in FJS are:
+|  Reduced harmonic | FJS     | Absolute FJS |
+| ----------------- | ------- | ------------ |
+| `5/4`             | `M3^5`  | `E♮4^5`      |
+| `7/4`             | `m7^7`  | `B♭4^7`      |
+| `11/8`            | `P4^11` | `F♮4^11`     |
+| `13/8`            | `m6^13` | `A♭4^13`     |
+| `17/16`           | `m2^17` | `D♭4^17`     |
+| `19/16`           | `m3^19` | `E♭4^19`     |
+| `23/16`           | `a4^23` | `F♯4^23`     |
+| `27/16`           | `m7^29` | `B♭4^29`     |
+
+SonicWeave agrees with [FloraC's critique](https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System) and assigns `31/32` to `P1^31`. The classic inflection may be accessed using the `c` *flavor* i.e. `P1^31c` for `248/243`.
+
+There is a well-known tension between visual similarity with fractions and the direction of inflection. `m7^7` looks like it has a seven in the numerator which it indeed does, but it also looks like it should be wider than plain `m7` which it isn't. [HEJI](https://en.xen.wiki/w/Helmholtz-Ellis_notation) inflections focus on the latter aspect. They're indicated by the `h` flavor at the end of the inflection `m7_7h` (or `m7v7h` if you prefer) is the septimal minor seventh and narrower than its Pythagorean counterpart. You can learn more about various other [comma flavors](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md) by clicking the link.
+
+## Enumerated chords
+
+TODO
