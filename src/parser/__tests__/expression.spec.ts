@@ -1920,4 +1920,18 @@ describe('SonicWeave expression evaluator', () => {
     const c = evaluate('maximum("c", "a", "b")');
     expect(c).toBe('c');
   });
+
+  it('tempers a sixth in 31ed2 inline (val right)', () => {
+    const {interval} = parseSingle('5/3 tmpr 31@');
+    const {fractionOfEquave, equave} = interval.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('23/31');
+    expect(equave.toFraction()).toBe('2');
+  });
+
+  it('tempers a sixth in 31ed2 inline (val left)', () => {
+    const {interval} = parseSingle('31@ tmpr 5/3');
+    const {fractionOfEquave, equave} = interval.value.toEqualTemperament();
+    expect(fractionOfEquave.toFraction()).toBe('23/31');
+    expect(equave.toFraction()).toBe('2');
+  });
 });

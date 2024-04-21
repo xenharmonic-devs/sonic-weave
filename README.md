@@ -203,12 +203,13 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 | Round (to power of)    | `5 by 2`       | `4`      | `M17^5 to P8`    | `P15`      |
 | N of EDO               | `(5+2)\12`     | `7\12`   | _N/A_            |            |
 | N of EDO               | `(5+2)°12`     | `7\12`   | _N/A_            |            |
-| NEDJI Projection       | `sqrt(2) ed 3` | `1\2<3>` | `2\3 ed S3`      | `2\3<9/8>` |
+| NEDJI projection       | `sqrt(2) ed 3` | `1\2<3>` | `2\3 ed S3`      | `2\3<9/8>` |
 | Val product            | `12@ · 3/2`    | `7`      | `<12 19] dot P5` | `7`        |
+| Explicit tempering     | `12@ tmpr 3/2` | `7\12`   | `<12 19] tmpr P5` | `7\12`    |
 
 Fractions and their powers are used a lot in just intonation so `4/3 ^ 2/1` means `(4/3) ^ (2/1)` i.e. `16/9`. The other division symbols (`÷` and its ASCII counterpart `%`) have the usual precedence from mathematics: `4÷3^2÷1` means `4 ÷ (3^2) ÷ 1` i.e. `4/9`. In other words `/` binds stronger than `^` which binds stronger than `÷`.
 
-Of these NEDJI Projection is probably the most obtuse, so a few words are in order. In `octaves ed base` the `base` operand is raised to the two's exponent of `octaves`. Exponents of all other primes are discarded. The result is alway is in the logarithmic domain. e.g. `[7/13 1 1> ed 5` discards the `1` components and moves/projects the first component to the third slot (corresponding to prime five) resulting in `[0 0 7\13>`.
+Of these NEDJI projection is probably the most obtuse, so a few words are in order. In `octaves ed base` the `base` operand is raised to the two's exponent of `octaves`. Exponents of all other primes are discarded. The result is alway is in the logarithmic domain. e.g. `[7/13 1 1> ed 5` discards the `1` components and moves/projects the first component to the third slot (corresponding to prime five) resulting in `[0 0 7\13>`.
 
 #### Universal operators and preference
 
@@ -632,6 +633,8 @@ i => 12@ dot i \ 12
 The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
 
 The default action when encountering a val such as `12@` is to temper the current scale with it.
+
+The operation implied is `i => 12@ tmpr i` which takes the equave of the val into account and handles higher prime tails gracefully.
 
 The above reduces to
 ```javascript

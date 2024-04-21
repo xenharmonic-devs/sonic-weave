@@ -1245,4 +1245,9 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['9\\12', '12\\12']);
   });
+
+  it('tempers in the 3-limit inline', () => {
+    const scale = parseSource('C4 = 263Hz;[A4, C5] tmpr 12@.3;str');
+    expect(scale).toEqual(['9\\12', '12\\12']);
+  });
 });

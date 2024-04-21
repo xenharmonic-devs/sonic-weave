@@ -79,6 +79,7 @@ ReduceCeilingToken = 'rdc'      !IdentifierPart
 ReturnToken        = 'return'   !IdentifierPart
 FunctionToken      = 'riff'     !IdentifierPart
 FunctionAliasToken = 'fn'       !IdentifierPart
+TemperToken        = 'tmpr'     !IdentifierPart
 TensorToken        = 'tns'      !IdentifierPart
 ThrowToken         = 'throw'    !IdentifierPart
 ToToken            = 'to'       !IdentifierPart
@@ -117,6 +118,7 @@ ReservedWord
   / ReturnToken
   / FunctionToken
   / FunctionAliasToken
+  / TemperToken
   / TensorToken
   / ThrowToken
   / ToToken
@@ -623,7 +625,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = $('*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken)
+  = $('*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken / TemperToken)
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {

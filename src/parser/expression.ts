@@ -38,6 +38,7 @@ import {
   compare,
   upcastBool,
   SonicWeavePrimitive,
+  temper,
 } from '../stdlib';
 import {
   metricExponent,
@@ -1018,7 +1019,20 @@ export class ExpressionVisitor {
     left: SonicWeaveValue,
     right: SonicWeaveValue,
     node: BinaryExpression
-  ): boolean | Interval | Interval[] {
+  ): boolean | boolean[] | Interval | Interval[] | Val | Val[] {
+    if (Array.isArray(left)) {
+      const b = this.binaryOperate.bind(this);
+      if (Array.isArray(right)) {
+        return left.map((l, i) =>
+          b(l, (right as SonicWeavePrimitive[])[i], node)
+        ) as Interval[];
+      }
+      return left.map(l => b(l, right, node)) as Interval[];
+    }
+    if (Array.isArray(right)) {
+      const b = this.binaryOperate.bind(this);
+      return right.map(r => b(left, r, node)) as Interval[];
+    }
     if (typeof left === 'boolean') {
       left = upcastBool(left);
     }
@@ -1111,6 +1125,8 @@ export class ExpressionVisitor {
             case '\\':
             case '°':
               throw new Error('Preference not supported with backslahes');
+            case 'tmpr':
+              throw new Error('Tempering needs an interval and a val.');
             default:
               throw new Error(
                 `${node.preferLeft ? '~' : ''}${node.operator}${
@@ -1201,6 +1217,8 @@ export class ExpressionVisitor {
             return left.lensSub(right);
           case 'ed':
             return left.project(right);
+          case 'tmpr':
+            throw new Error('Tempering needs an interval and a val.');
           case '??':
           case 'or':
           case 'and':
@@ -1217,24 +1235,68 @@ export class ExpressionVisitor {
             throw new Error('Unexpected code flow.');
         }
         operator satisfies never;
+      } else if (right instanceof Val) {
+        switch (operator) {
+          case '×':
+          case '*':
+          case ' ':
+            return left.mul(right);
+          case '·':
+          case 'dot':
+            return left.dot(right);
+          case 'tmpr':
+            return temper.bind(this)(right, left);
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between intervals and vals.`
+        );
       }
-      if (!Array.isArray(right)) {
-        throw new Error('Heterogenous broadcasting not supported.');
+    } else if (left instanceof Val) {
+      if (right instanceof Val) {
+        switch (operator) {
+          case '===':
+            return left.strictEquals(right);
+          case '!==':
+            return !left.strictEquals(right);
+          case '==':
+            return left.equals(right);
+          case '!=':
+            return !left.equals(right);
+          case '+':
+            return left.add(right);
+          case '-':
+            return left.sub(right);
+          case '·':
+          case 'dot':
+            return left.dot(right);
+        }
+        throw new Error(`Operator '${operator}' not implemented between vals.`);
       }
-      const op = this.binaryOperate.bind(this);
-      return right.map(r => op(left, r, node)) as Interval[];
+      if (right instanceof Interval) {
+        right = upcastBool(right);
+        switch (operator) {
+          case '×':
+          case '*':
+          case ' ':
+            return left.mul(right);
+          case '÷':
+          case '%':
+          case '/':
+            return left.div(right);
+          case '·':
+          case 'dot':
+            return left.dot(right);
+          case 'tmpr':
+            return temper.bind(this)(left, right);
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between vals and intervals.`
+        );
+      }
     }
-    if (!Array.isArray(left)) {
-      throw new Error('Heterogenous broadcasting not supported.');
-    }
-    if (right instanceof Interval) {
-      const op = this.binaryOperate.bind(this);
-      return left.map(l => op(l, right, node)) as Interval[];
-    }
-    const op = this.binaryOperate.bind(this);
-    return left.map((l, i) =>
-      op(l, (right as Interval[])[i], node)
-    ) as Interval[];
+    throw new Error(
+      `Unsupported type encountered during vector binary operation broadcasting of '${operator}'.`
+    );
   }
 
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
@@ -1324,68 +1386,13 @@ export class ExpressionVisitor {
       }
       return !hasOwn(right, left);
     }
-    if (left instanceof Val) {
-      if (right instanceof Val) {
-        switch (operator) {
-          case '===':
-            return left.strictEquals(right);
-          case '!==':
-            return !left.strictEquals(right);
-          case '==':
-            return left.equals(right);
-          case '!=':
-            return !left.equals(right);
-          case '+':
-            return left.add(right);
-          case '-':
-            return left.sub(right);
-          case '·':
-          case 'dot':
-            return left.dot(right);
-        }
-        throw new Error(`Operator '${operator}' not implemented between vals.`);
-      }
-      if (right instanceof Interval || typeof right === 'boolean') {
-        right = upcastBool(right);
-        switch (operator) {
-          case '×':
-          case '*':
-          case ' ':
-            return left.mul(right);
-          case '÷':
-          case '%':
-          case '/':
-            return left.div(right);
-          case '·':
-          case 'dot':
-            return left.dot(right);
-        }
-        throw new Error(
-          `Operator '${operator}' not implemented between vals and intervals.`
-        );
-      }
-    }
-    if (right instanceof Val) {
-      if (left instanceof Interval) {
-        switch (operator) {
-          case '×':
-          case '*':
-          case ' ':
-            return left.mul(right);
-          case '·':
-          case 'dot':
-            return left.dot(right);
-        }
-        throw new Error(
-          `Operator '${operator}' not implemented between intervals and vals.`
-        );
-      }
-    }
     if (
       (left instanceof Interval ||
+        left instanceof Val ||
         typeof left === 'boolean' ||
         Array.isArray(left)) &&
       (right instanceof Interval ||
+        right instanceof Val ||
         typeof right === 'boolean' ||
         Array.isArray(right))
     ) {

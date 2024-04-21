@@ -3,14 +3,13 @@ import {TimeMonzo, TimeReal} from '../monzo';
 import {
   SonicWeaveValue,
   sonicTruth,
-  relative,
   SonicWeaveFunction,
   repr,
   upcastBool,
   SonicWeavePrimitive,
   sort,
+  temper,
 } from '../stdlib';
-import {TWO} from '../utils';
 import {RootContext} from '../context';
 import {
   AssignmentStatement,
@@ -613,38 +612,7 @@ export class StatementVisitor {
     } else if (value instanceof Interval) {
       scale.push(value);
     } else if (value instanceof Val) {
-      const divisions = value.divisions;
-      const equave = value.equave.toFraction();
-      let equaveNumerator: number | null = null;
-      let equaveDenominator: number | null = null;
-      if (equave.compare(TWO)) {
-        equaveNumerator = equave.n;
-        if (equave.d !== 1) {
-          equaveDenominator = equave.d;
-        }
-      }
-      const step = new Interval(
-        TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
-        'logarithmic',
-        0,
-        {
-          type: 'NedjiLiteral',
-          numerator: divisions.d,
-          denominator: divisions.n,
-          equaveNumerator,
-          equaveDenominator,
-        }
-      );
-      const rel = relative.bind(subVisitor);
-      const mapped = scale.map(i => {
-        i = rel(i);
-        const t = i.value.tail(value.value.numberOfComponents);
-        const result = i.dot(value).mul(step);
-        if (t.totalCents(true)) {
-          return new Interval(t, 'logarithmic').add(result);
-        }
-        return result;
-      });
+      const mapped = temper.bind(subVisitor)(value, scale) as Interval[];
       scale.length = 0;
       scale.push(...mapped);
     } else if (Array.isArray(value)) {

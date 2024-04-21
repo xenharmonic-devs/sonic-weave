@@ -4,7 +4,7 @@
 import {Fraction} from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {type ExpressionVisitor} from '../parser/expression';
-import {NEGATIVE_ONE} from '../utils';
+import {NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
 import {TimeMonzo} from '../monzo';
 
@@ -373,4 +373,59 @@ export function factorColor(this: ExpressionVisitor, interval: Interval) {
     }
   }
   return new Color(`rgb(${tanh255(r)}, ${tanh255(g)}, ${tanh255(b)})`);
+}
+
+/**
+ * Temper an interval using a val i.e. map exponents of prime factors to steps on an equal temperament.
+ * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param interval Interval to map to equal steps.
+ * @param val Val to map by.
+ * @returns The interval tempered to equal steps of the val's equave.
+ */
+export function temper(
+  this: ExpressionVisitor,
+  val: Val,
+  interval: Interval | Interval[]
+): typeof interval {
+  const divisions = val.divisions;
+  const equave = val.equave.toFraction();
+  let equaveNumerator: number | null = null;
+  let equaveDenominator: number | null = null;
+  if (equave.compare(TWO)) {
+    equaveNumerator = equave.n;
+    if (equave.d !== 1) {
+      equaveDenominator = equave.d;
+    }
+  }
+  const step = new Interval(
+    TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
+    'logarithmic',
+    0,
+    {
+      type: 'NedjiLiteral',
+      numerator: divisions.d,
+      denominator: divisions.n,
+      equaveNumerator,
+      equaveDenominator,
+    }
+  );
+  const rel = relative.bind(this);
+  if (Array.isArray(interval)) {
+    return interval.map(i => {
+      i = rel(i);
+      const t = i.value.tail(val.value.numberOfComponents);
+      const result = i.dot(val).mul(step);
+      if (t.totalCents(true)) {
+        return new Interval(t, 'logarithmic').add(result);
+      }
+      return result;
+    });
+  }
+  interval = rel(interval);
+  const t = interval.value.tail(val.value.numberOfComponents);
+  const result = interval.dot(val).mul(step);
+  if (t.totalCents(true)) {
+    return new Interval(t, 'logarithmic').add(result);
+  }
+  return result;
 }
