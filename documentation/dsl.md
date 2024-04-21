@@ -136,6 +136,22 @@ C5
 31@
 ```
 
+### Relative pitch notation
+
+[FJS](https://en.xen.wiki/w/Functional_Just_System) also has notation for relative intervals like the perfect fifth `P5` between C and G or the major second `M2` between G and A. The microtonal inflections that come after the ordinal number work the same as in absolute FJS. Going back to just intonation our little major scale becomes:
+
+```js
+P1 = 262 Hz
+M2
+M3^5
+P4
+P5
+M6^5
+M7^5
+P8
+```
+
+
 ## Domains
 
 So far we've only used one interval per line corresponding to a single note repeated every octave.
@@ -150,11 +166,11 @@ Let's see what happens when we add two whole tones together in just intonation `
 
 The difference of what the operator `+` means is indicated by the *domain* of the interval. Steps of equal temperaments and cents are *logarithmic* quantities so their underlying frequency ratios multiply together: `200. + 200.` actually means around `1.122e * 1.122e` ≈ `1.26e` under the hood.
 
-On the other hand fractions like `9/8` are in the *linear* domain. The musically correct way of combining them is multiplication so `9/8 * 9/8` equal to `81/64` is the major third we expect from stacking two whole tones.
+On the other hand fractions like `9/8` are in the *linear* domain. The musically correct way of combining them is multiplication so `9/8 * 9/8` equal to `81/64` is the (Pythagorean) major third we expect from stacking two whole tones.
 
 Relative FJS intervals can be especially confusing because they represent fractions but add like cents do. Our whole tone stack becomes `M2 + M2` equal to `M3`. This is notationally expected even if obscured by the ordinal nature of traditional Western music notation. Remember that the perfect unison `P1` represents no change and `P1 + P1` is equal to `P1` i.e. 1st + 1st = 1st. Therefore 2nd + 2nd must be (2+2-1)rd = 3rd.
 
-For the most part you cannot combine intervals across domains so `9/8 * M2` is not a valid operation. Use tildes (`~`) to always operate as if in the linear domain. E.g. `9/8 ~* M2` is a valid expression and evaluates to `81/64` while `9/8 *~ M2` evaluates to `M3`. The direction of the "wing" tells which domain and formatting to prefer.
+For the most part you cannot combine intervals across domains so `9/8 + M2` is not a valid operation. Use tildes (`~`) to always operate as if in the linear domain. E.g. `9/8 ~* M2` is a valid expression and evaluates to `81/64` while `9/8 *~ M2` evaluates to `M3`. The direction of the "wing" determines which domain and formatting to prefer.
 
 Conversely the minus operator `-` represent divisions of the underlying values in the logarithmic domain and the usual kind of subraction in the linear domain e.g. `1.2e - 0.1e` equals `1.1e` owing to decimal ratios inhabiting the linear domain.
 
@@ -164,6 +180,134 @@ Scale Workshop 2 didn't have domains, everything was logarithmic, so `81/64 - 81
 
 Another breaking change is that *comma decimals* are no longer allowed in complex expressions `1,2 + 1,2` equal to `1,44` in Scale Workshop 2 must be spelled `1.2e * 1.2e` in SonicWeave. Users are strongly advised **not** to use comma decimals anymore even if a single `1,2` is still legal syntax for backwards compatibility. The decimal comma is deprecated and will be removed in SonicWeave 2.0.
 
-## To be continued...
+## Adding colors to notes
 
-TODO: More DSL docs.
+Microtonal scales can get complicated pretty fast so in addition to string labels we saw before SonicWeave has built-in support for CSS colors.
+
+Let's spell out all the notes of 12-tone equal temperament with labels and the usual colors you would find on a piano keyboard, and let's also introduce a handy helper function (`mtof`) from the standard library for converting MIDI note number to a frequency in the A440 pitch standard:
+```js
+0\12 = mtof(60)
+
+1\12  "C# / Db" black
+2\12  "D"       white
+3\12  "D# / Eb" black
+4\12  "E"       white
+5\12  "F"       white
+6\12  "F# / Gb" black
+7\12  "G"       white
+8\12  "G# / Ab" black
+9\12  "A"       white
+10\12 "A# / Bb" black
+11\12 "B"       white
+12\12 "C"       white
+```
+
+Now a tool like Scale Workshop can show you the colors so that you can differentiatiate notes with accidentals from notes without.
+
+Colors may be specified using
+- [Keywords](https://www.w3.org/wiki/CSS/Properties/color/keywords) like `red`, `white` or `black`
+- Short hexadecimal colors like `#d13` for crimson red
+- Long hexadecimal colors like `#e6e6fa` for lavender
+- RGB values like `rgb(160, 82, 45)` for sienna brown
+- HSL values like `hsl(120, 60, 70)` for pastel green
+
+SonicWeave doesn't have percentages so the CSS color `hsl(120, 60%, 70%)` is spelled without the percent signs.
+
+## Code comments
+
+Anything after two slashes (`//`) is ignored until the end of the line. Everything after a slash and an asterisk (`/*`) is ignored until a corresponding pair (`*/`) is encountered.
+
+```js
+1 = 432 Hz  // Good vibes only... Wait what are you doing?!
+11/8
+/**
+ * The undecimal superfourth 11/8 of about 551.3¢ is the simplest superfourth in just intonation,
+ * and as it falls about halfway between 12edo's perfect fourth and tritone, it is very xenharmonic.
+ *
+ * The YouTuber mannfishh has made a video revealing the terrifying truths of the 11th harmonic.
+ */
+
+// Did you know you can repeat scales at the fifth too?
+3/2
+```
+
+## Accidentals
+
+Above we gave `1\12` the name "C# / Db" because it doesn't really matter if it's a C sharp or a D flat, they sound the same anyway.
+
+However in [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning), which is the default in SonicWeave, C sharp and D flat correspond to distinct frequencies.
+
+By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplies the underlying frequency by `2187/2048` ≈ `1.06787e` or equivalently shifts the pitch up by about `113.685 ¢`. (Yes that fancy unicode cent is legal syntax in SonicWeave; A plain `c` also works, but only when attached to a numeric value.)
+
+Conversely a flat sign (`b` or `♭`) on an absolute pitch shifts its pitch down by around `113.685 c` corresponding to a multiplication by `2048/2187` ≈ `0.93644e` of the underlying frequency.
+
+Let's play around with these a bit to get a feel for them:
+```js
+C4 = 262 Hz
+
+/*
+Pitch // Frequency |    Cents | Ratio
+*/
+Db4   // 276.016Hz |   90.225 | 1.053
+C#4   // 279.782Hz |  113.685 | 1.068
+D4    // 294.750Hz |  203.910 | 1.125
+G4    // 393.000Hz |  701.955 | 1.500
+C5    // 524.000Hz | 1200.000 | 2.000
+```
+
+Looking at the frequencies or the width of the interval against the root note we can see that D flat is lower in pitch than C sharp. They differ by a [Pythagorean comma](https://en.xen.wiki/w/Pythagorean_comma) of around `23.460 c`. The art and science of musical tuning often deals with small intervals like this. One approach is to make it go away i.e. temper it out which leads to the 12-tone equal temperament a.k.a. 12ed2.
+
+```js
+C4 = 262 Hz
+
+/*
+Pitch // Frequency |    Cents | Ratio
+*/
+Db4   // 277.579Hz |  100.000 | 1.059
+C#4   // 277.579Hz |  100.000 | 1.059
+D4    // 294.085Hz |  200.000 | 1.122
+G4    // 392.556Hz |  700.000 | 1.498
+C5    // 524.000Hz | 1200.000 | 2.000
+
+12@   // Merge sharps together with the flat of the note above.
+```
+
+Another thing we might notice is that the fifth at `700.0` is only about two cents flat of the frequency ratio `1.5e` of the justly intoned fifth. The major third at `200.0` on the other hand is almost four cents flat of `1.125e`. Small tuning error like these tend to compound the further you go along the chain of fifths.
+
+Let's do one final comparison in 19-tone equal temperament:
+```js
+C4 = 262 Hz
+
+/*
+Pitch // Frequency |    Cents | Ratio
+*/
+C#4   // 271.735Hz |   63.158 | 1.037
+Db4   // 281.831Hz |  126.316 | 1.076
+D4    // 292.302Hz |  189.474 | 1.116
+G4    // 391.365Hz |  694.737 | 1.494
+C5    // 524.000Hz | 1200.000 | 2.000
+
+19@   // Temper to 19ed2
+```
+
+I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
+
+[^1] *By default* is too soft an expression here. That's what the sharp sign does, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
+
+### Double accidentals
+
+Double accidentals are straightforward enough. `C##4` is twice as far from `C4` as `C#4` is. In Pythagorean tuning that's a pitch distance of about 227.370 cents. Another spelling for `##` is `x` standing in for `𝄪` which is also valid in SonicWeave.
+
+Correspondingly `Cbb4` is twice as flat as `Cb4`. There's no single ASCII character standing in for `𝄫` in this case.
+
+The formal definition of the sharp is seven steps along the chain of fifths reduced by octaves. Mathematically this corresponds to a factor of three to the power of seven divided by two to the power of eleven. There's a handy [monzo](https://en.xen.wiki/w/Monzo) notation for this quantity 2⁻¹¹ ⋅ 3⁷ in `[-11 7>`. The double sharp is just two of these `[-11 7> + [-11 7>` = `[-22 14>`.
+
+The basic accidentals are summarized below:
+
+| Accidental | Monzo      | Size in cents |
+| ---------- | ---------- | ------------- |
+| `=`, `♮`   | `[0 0>`    | `0.000`       |
+| `#`, `♯`   | `[-11 7>`  | `+113.685`    |
+| `x`, `𝄪`   | `[-22 14>` | `+227.370`    |
+| `b`, `♭`   | `[11 -7>`  | `-113.685`    |
+| `bb`, `𝄫`  | `[22 -14>` | `-227.370`    |
