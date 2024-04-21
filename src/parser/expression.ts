@@ -1,4 +1,4 @@
-import {Fraction} from 'xen-dev-utils';
+import {Fraction, gcd} from 'xen-dev-utils';
 import {
   NedjiLiteral,
   IntegerLiteral,
@@ -40,7 +40,6 @@ import {
   SonicWeavePrimitive,
 } from '../stdlib';
 import {
-  bigGcd,
   metricExponent,
   ZERO,
   ONE,
@@ -1504,7 +1503,7 @@ export class ExpressionVisitor {
       numerator = 10n * numerator + BigInt(c);
       denominator *= 10n;
     }
-    const factor = bigGcd(numerator, denominator);
+    const factor = gcd(numerator, denominator);
     numerator = Number(numerator / factor);
     denominator = Number(denominator / factor);
     let value: TimeMonzo | TimeReal;

@@ -19,7 +19,7 @@ import {
   getNumberOfComponents,
   setNumberOfComponents,
 } from '../monzo';
-import {ExpressionVisitor} from '../parser';
+import {type ExpressionVisitor} from '../parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {expressionToString} from '../ast';
 import {

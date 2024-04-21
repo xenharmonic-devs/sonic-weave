@@ -4,11 +4,10 @@ import {
   ABSURD_EXPONENT,
   BinaryPrefix,
   MetricPrefix,
-  bigAbs,
   validateBigInt,
 } from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
-import {Fraction, lcm} from 'xen-dev-utils';
+import {Fraction, bigAbs, lcm} from 'xen-dev-utils';
 
 /**
  * Comma sets for Functional Just System.

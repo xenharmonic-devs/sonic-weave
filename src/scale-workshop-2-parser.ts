@@ -1,4 +1,11 @@
-import {Fraction, PRIMES, PRIME_CENTS, dot, valueToCents} from 'xen-dev-utils';
+import {
+  Fraction,
+  PRIMES,
+  PRIME_CENTS,
+  dot,
+  gcd,
+  valueToCents,
+} from 'xen-dev-utils';
 import {Domain, TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
 import {parse} from './scale-workshop-2-ast';
 import {Interval} from './interval';
@@ -8,7 +15,6 @@ import {
   NedjiLiteral,
   uniformInvertNode,
 } from './expression';
-import {bigGcd} from './utils';
 
 const ZERO = new Fraction(0);
 
@@ -111,7 +117,7 @@ function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
     numerator = 10n * numerator + BigInt(c);
     denominator *= 10n;
   }
-  const factor = bigGcd(numerator, denominator);
+  const factor = gcd(numerator, denominator);
   numerator = Number(numerator / factor);
   denominator = Number(denominator / factor);
   let value: TimeMonzo | TimeReal;

@@ -19,9 +19,6 @@ export {
 } from './pythagorean';
 export * from './tools';
 export {
-  bigGcd,
-  bigLcm,
-  bigAbs,
   MetricPrefix,
   metricExponent,
   BinaryPrefix,

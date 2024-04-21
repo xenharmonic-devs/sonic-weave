@@ -20,7 +20,6 @@ import {
   ONE,
   TWO,
   ZERO,
-  bigGcd,
   validateBigInt,
 } from './utils';
 import {
@@ -1026,7 +1025,7 @@ export class TimeMonzo {
       denominator,
       numberOfComponents
     );
-    const commonFactor = bigGcd(numeratorResidual, denominatorResidual);
+    const commonFactor = gcd(numeratorResidual, denominatorResidual);
     const residual = new Fraction(
       Number(numeratorResidual / commonFactor),
       Number(denominatorResidual / commonFactor)
@@ -2289,8 +2288,6 @@ export class TimeMonzo {
           denominator,
         };
       }
-      // XXX: Using the gcd might be reasonable in some special cases but not in general.
-      // let factor = bigGcd(node.numerator, node.denominator);
       if (node.denominator % denominator === 0n) {
         const factor = node.denominator / denominator;
         return {
