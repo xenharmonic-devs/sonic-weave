@@ -6,7 +6,7 @@ This document describes the SonicWeave domain-specific language for manipulating
 SonicWeave is a relative of [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor to Scale Workshop 2 syntax. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
 
 Let's start with a basic major scale in just intonation:
-```js
+```c
 9/8
 5/4
 4/3
@@ -19,7 +19,7 @@ Let's start with a basic major scale in just intonation:
 Note that there's no `1/1` to mark the root. The octave `2/1` does double duty as the root note and the interval of repetition.
 
 Let's give labels to the notes with the root on "C".
-```js
+```c
 9/8  "D"
 5/4  "E"
 4/3  "F"
@@ -33,7 +33,7 @@ Notice again how the root and its label comes last in the list.
 
 Our scale is still pretty abstract in the sense that the notes do not correspond to any specific frequencies. A tool like Scale Workshop 3 sets the reference frequency automatically but let's set it manually here:
 
-```js
+```c
 1/1 = 262 Hz
 9/8  "D"
 5/4  "E"
@@ -50,7 +50,7 @@ Now the first note has the frequency of 262 oscillations per second and the note
 
 SonicWeave is a major upgrade compared to Scale Workshop 2. One of the new features is support for an extended version of the [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) which allows us to spell our scale as follows:
 
-```js
+```c
 C4 = 262 Hz
 D4
 E4^5
@@ -66,7 +66,7 @@ C5
 Another common way to notate pitch is using [cents](https://en.wikipedia.org/wiki/Cent_(music)). The octave is worth 1200 cents and following Scala's convention SonicWeave dedicates the decimal dot (`.`) for representing relative musical intervals measured in cents.
 
 Using cents up to one decimal of precision our major scale becomes:
-```js
+```c
 1/1 = 262 Hz
 203.9  "D"
 386.3  "E"
@@ -88,7 +88,7 @@ In addition to just intonation and cents SonicWeave has notation for equal divis
 The notation `n \ m` denotes n steps of m equal logarithmic divisions of the octave.
 
 Let's update our example and use the common A440 pitch standard:
-```js
+```c
 A4 = 440 Hz = 9\12
 
 2\12  "D"
@@ -104,7 +104,7 @@ The expression `440 Hz = 9\12` implicitly sets the reference frequency for 1/1 a
 
 To get a taste of the powerful tempering features in SonicWeave we'll spell our scale using (absolute) FJS but add `12@` at the end to tell the runtime to interprete everything in 12-TET.
 
-```js
+```c
 A4 = 440 Hz = 9\12
 
 D4
@@ -122,7 +122,7 @@ We could drop the FJS inflection `^5` from `E4` because in 12-tone equal `E4` an
 
 To highlight the power of tempering we can convert our major scale to 31-tone equal temperament simply by switching out the reference interval and the final `12@` with `31@`.
 
-```js
+```c
 A4 = 440 Hz = 23\31
 
 D4
@@ -140,7 +140,7 @@ C5
 
 [FJS](https://en.xen.wiki/w/Functional_Just_System) also has notation for relative intervals like the perfect fifth `P5` between C and G or the major second `M2` between G and A. The microtonal inflections that come after the ordinal number work the same as in absolute FJS. Going back to just intonation our little major scale becomes:
 
-```js
+```c
 P1 = 262 Hz
 M2
 M3^5
@@ -185,7 +185,7 @@ Another breaking change is that *comma decimals* are no longer allowed in comple
 Microtonal scales can get complicated pretty fast so in addition to string labels we saw before SonicWeave has built-in support for CSS colors.
 
 Let's spell out all the notes of 12-tone equal temperament with labels and the usual colors you would find on a piano keyboard, and let's also introduce a handy helper function (`mtof`) from the standard library for converting MIDI note number to a frequency in the A440 pitch standard:
-```js
+```c
 0\12 = mtof(60)
 
 1\12  "C# / Db" black
@@ -217,7 +217,7 @@ SonicWeave doesn't have percentages so the CSS color `hsl(120, 60%, 70%)` is spe
 
 Anything after two slashes (`//`) is ignored until the end of the line. Everything after a slash and an asterisk (`/*`) is ignored until a corresponding pair (`*/`) is encountered.
 
-```js
+```c
 1 = 432 Hz  // Good vibes only... Wait what are you doing?!
 11/8
 /**
@@ -242,7 +242,7 @@ By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplie
 Conversely a flat sign (`b` or `♭`) on an absolute pitch shifts its pitch down by around `113.685 c` corresponding to a multiplication by `2048/2187` ≈ `0.93644e` of the underlying frequency.
 
 Let's play around with these a bit to get a feel for them:
-```js
+```c
 C4 = 262 Hz
 
 /*
@@ -257,7 +257,7 @@ C5    // 524.000Hz | 1200.000 | 2.000
 
 Looking at the frequencies or the width of the interval against the root note we can see that D flat is lower in pitch than C sharp. They differ by a [Pythagorean comma](https://en.xen.wiki/w/Pythagorean_comma) of around `23.460 c`. The art and science of musical tuning often deals with small intervals like this. One approach is to make it go away i.e. temper it out which leads to the 12-tone equal temperament a.k.a. 12ed2.
 
-```js
+```c
 C4 = 262 Hz
 
 /*
@@ -275,7 +275,7 @@ C5    // 524.000Hz | 1200.000 | 2.000
 Another thing we might notice is that the fifth at `700.0` is only about two cents flat of the frequency ratio `1.5e` of the justly intoned fifth. The major third at `200.0` on the other hand is almost four cents flat of `1.125e`. Small tuning error like these tend to compound the further you go along the chain of fifths.
 
 Let's do one final comparison in 19-tone equal temperament:
-```js
+```c
 C4 = 262 Hz
 
 /*
@@ -292,7 +292,7 @@ C5    // 524.000Hz | 1200.000 | 2.000
 
 I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
 
-[^1] *By default* is too soft an expression here. That's what the sharp sign does, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
+[^1]: *By default* is too soft an expression here. That's what the sharp sign does, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
 
 ### Double accidentals
 
