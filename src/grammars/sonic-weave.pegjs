@@ -492,7 +492,7 @@ Expression
   = LestExpression
 
 LestExpression
-  = fallback: ConditionalExpression tail: (LestToken @ConditionalExpression)? {
+  = fallback: ConditionalExpression tail: (__ LestToken _ @ConditionalExpression)? {
     if (tail) {
       return {
         type: 'LestExpression',
@@ -504,7 +504,7 @@ LestExpression
   }
 
 ConditionalExpression
-  = consequent: CoalescingExpression tail: (IfToken @CoalescingExpression ElseToken @CoalescingExpression)? {
+  = consequent: CoalescingExpression tail: (__ IfToken _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)? {
     if (tail) {
       const [test, alternate] = tail;
       return {
@@ -564,39 +564,44 @@ RoundingOperator
   = $(ToToken / ByToken)
 
 RoundingExpression
-  = head: Segment tail: (__ @'~'? @RoundingOperator @'~'? _ @Segment)* {
+  = head: EnumeratedChord tail: (__ @'~'? @RoundingOperator @'~'? _ @EnumeratedChord)* {
     return tail.reduce(operatorReducer, head);
   }
 
-Segment
-  = __ @(HarmonicSegment / EnumeratedChord) __
-
 HarmonicSegment
-  = mirror: '/'? __ root: ExtremumExpression _ '::' _ end: ExtremumExpression {
+  = root: ExtremumExpression _ '::' _ end: ExtremumExpression {
     return {
       type: 'HarmonicSegment',
-      mirror: !!mirror,
       root,
       end,
     };
   }
 
+Enumeral = HarmonicSegment / ExtremumExpression
+
 EnumeratedChord
-  = '/' __ intervals: ExtremumExpression|2.., _ ':' _| {
+  = '/' __ enumerals: Enumeral|2.., _ ':' _| {
     return {
       type: 'EnumeratedChord',
       mirror: true,
-      intervals,
+      enumerals,
     };
   }
-  / intervals: ExtremumExpression|1.., _ ':' _| {
-    if (intervals.length === 1) {
-      return intervals[0];
+  / '/' __ segment: HarmonicSegment {
+    return  {
+      type: 'EnumeratedChord',
+      mirror: true,
+      enumerals: [segment],
+    };
+  }
+  / enumerals: Enumeral|1.., _ ':' _| {
+    if (enumerals.length === 1) {
+      return enumerals[0];
     }
     return {
       type: 'EnumeratedChord',
       mirror: false,
-      intervals,
+      enumerals,
     };
   }
 
@@ -905,7 +910,7 @@ Comprehension
   }
 
 ArrayComprehension
-  = '[' _ expression: Expression comprehensions: Comprehension+ _ test: (IfToken @Expression)? _ ']' {
+  = '[' _ expression: Expression comprehensions: Comprehension+ _ test: (IfToken _ @Expression)? _ ']' {
     return  {
       type: 'ArrayComprehension',
       expression,

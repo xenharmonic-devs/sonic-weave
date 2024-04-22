@@ -1250,4 +1250,32 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('C4 = 263Hz;[A4, C5] tmpr 12@.3;str');
     expect(scale).toEqual(['9\\12', '12\\12']);
   });
+
+  it('supports harmonic segments as parts of enumerated chords', () => {
+    const scale = parseSource('2:4::7:11:14::17;str');
+    expect(scale).toEqual([
+      '4/2',
+      '5/2',
+      '6/2',
+      '7/2',
+      '11/2',
+      '14/2',
+      '15/2',
+      '16/2',
+      '17/2',
+    ]);
+  });
+
+  it('supports subharmonic segments as parts of reflected enumerated chords', () => {
+    const scale = parseSource('/16:14::9:5;str');
+    expect(scale).toEqual([
+      '16/14',
+      '16/13',
+      '16/12',
+      '16/11',
+      '16/10',
+      '16/9',
+      '16/5',
+    ]);
+  });
 });

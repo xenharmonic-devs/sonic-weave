@@ -1594,17 +1594,26 @@ export class ExpressionVisitor {
     const intervals: Interval[] = [];
     const domains: IntervalDomain[] = [];
     const monzos: (TimeMonzo | TimeReal)[] = [];
-    for (const expression of node.intervals) {
-      let interval = this.visit(expression);
-      if (typeof interval === 'boolean') {
-        interval = upcastBool(interval);
-      }
-      if (interval instanceof Interval) {
-        intervals.push(interval);
-        monzos.push(interval.value);
-        domains.push(interval.domain);
+    for (const expression of node.enumerals) {
+      if (expression.type === 'HarmonicSegment') {
+        const segment = this.visitHarmonicSegment(expression, true);
+        for (const interval of segment) {
+          intervals.push(interval);
+          monzos.push(interval.value);
+          domains.push(interval.domain);
+        }
       } else {
-        throw new Error('Type error: Can only stack intervals in a chord.');
+        let interval = this.visit(expression);
+        if (typeof interval === 'boolean') {
+          interval = upcastBool(interval);
+        }
+        if (interval instanceof Interval) {
+          intervals.push(interval);
+          monzos.push(interval.value);
+          domains.push(interval.domain);
+        } else {
+          throw new Error('Type error: Can only stack intervals in a chord.');
+        }
       }
     }
     const rootInterval = intervals.shift()!;
@@ -1692,7 +1701,10 @@ export class ExpressionVisitor {
     throw new Error('Range step must not be zero.');
   }
 
-  protected visitHarmonicSegment(node: HarmonicSegment): Interval[] {
+  protected visitHarmonicSegment(
+    node: HarmonicSegment,
+    enumeral = false
+  ): Interval[] {
     let root = this.visit(node.root);
     let end = this.visit(node.end);
     if (typeof root === 'boolean') {
@@ -1707,20 +1719,22 @@ export class ExpressionVisitor {
     this.spendGas(Math.abs(end.value.valueOf() - root.value.valueOf()));
     const one = linearOne();
     const result: Interval[] = [];
+    let next = root;
     if (root.compare(end) <= 0) {
-      let next = root.add(one);
       while (next.compare(end) <= 0) {
-        result.push(node.mirror ? root.div(next) : next.div(root));
+        result.push(next);
         next = next.add(one);
       }
     } else {
-      let next = root.sub(one);
       while (next.compare(end) >= 0) {
-        result.push(node.mirror ? root.div(next) : next.div(root));
+        result.push(next);
         next = next.sub(one);
       }
     }
-    return result;
+    if (enumeral) {
+      return result;
+    }
+    return result.slice(1).map(i => i.div(root as Interval));
   }
 
   /**
