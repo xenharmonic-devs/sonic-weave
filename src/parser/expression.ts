@@ -1004,7 +1004,13 @@ export class ExpressionVisitor {
         this.spendGas();
         if (node.preferLeft || node.preferRight) {
           const value = left.value.mul(right.value);
-          return resolvePreference(value, left, right, node, false);
+          return resolvePreference(
+            value,
+            left,
+            right,
+            node,
+            left.domain === 'linear' && right.domain === 'linear'
+          );
         }
         return left.mul(right) as Interval;
       }
@@ -1072,12 +1078,14 @@ export class ExpressionVisitor {
             case ' ':
               value = left.value.mul(right.value);
               steps = left.steps + right.steps;
+              simplify = left.domain === 'linear' && right.domain === 'linear';
               break;
             case '÷':
             case '%':
             case '/':
               value = left.value.div(right.value);
               steps = left.steps - right.steps;
+              simplify = left.domain === 'linear' && right.domain === 'linear';
               break;
             case 'rd':
               value = left.value.reduce(right.value);

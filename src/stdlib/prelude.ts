@@ -759,8 +759,9 @@ riff repeated(times = 2, scale = $$) {
   if (not times) {
     return [];
   }
+  scale;
   const equave = scale[-1];
-  let i = -1;
+  let i = 0;
   while (++i < times) {
     scale;
     interval => interval ~* equave ~^ i;

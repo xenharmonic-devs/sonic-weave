@@ -69,7 +69,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('rank2(707.048, 4, 4, 600.0, 2);');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '107.048;214.096;385.904;492.952;600.;707.048;814.096;985.904;1092.952;1200.'
+      '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
     );
   });
 
@@ -497,7 +497,9 @@ describe('SonicWeave standard library', () => {
 
   it('has a copying repeater', () => {
     const bigScale = parseSource('repeated(2, 3::6);str');
-    expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '12/3']);
+    // XXX: Would be cool if that last 4/1 was 12/3, but can't come up
+    // with formatting rules that wouldn't mess up everything else.
+    expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '4/1']);
   });
 
   it('can label intervals after generating', () => {
@@ -1340,5 +1342,43 @@ describe('SonicWeave standard library', () => {
     expect(xs[0].valueOf()).toBeCloseTo(0);
     expect(xs[1].valueOf()).toBeCloseTo(1.175);
     expect(xs[2].valueOf()).toBeCloseTo(0.75);
+  });
+
+  it('formats rotated smitonic somewhat reasonably', () => {
+    const sothic = parseSource(`
+      128/121
+      324.341029
+      421.705144
+      16/11
+      2048/1331
+      973.023086
+      2
+      rotate()
+      str
+    `);
+    expect(sothic).toEqual([
+      '226.9769137295143rc',
+      '324.3410287295137rc',
+      '11/8',
+      '16/11',
+      '875.6589707295143rc',
+      '121/64',
+      '2',
+    ]);
+  });
+
+  it('formats stacked 5-limit major reasonably', () => {
+    const major = parseSource(`
+      9/8
+      10/9
+      16/15
+      9/8
+      10/9
+      9/8
+      16/15
+      stack()
+      str
+    `);
+    expect(major).toEqual(['9/8', '5/4', '4/3', '3/2', '5/3', '15/8', '2/1']);
   });
 });
