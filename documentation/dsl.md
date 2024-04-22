@@ -409,4 +409,142 @@ There is a well-known tension between visual similarity with fractions and the d
 
 ## Enumerated chords
 
-TODO
+List out all of the fractions in a scale can get tedious so there's a shorthand for harmonic (a.k.a. overtonal or otonal) chords where the intervals have simple relationships with each other.
+
+Let's take a look at a subset of our major scale:
+```c
+1/1 = 262 Hz
+
+9/8
+5/4
+3/2
+15/8
+2/1
+```
+
+Expanding the factors for a common denominator gives:
+```c
+8/8 = 262 Hz
+
+9/8
+10/8
+12/8
+15/8
+16/8
+```
+
+So it's clear that they're in a 8:9:10:12:15:16 relationship. This makes our scale fragment a two liner.
+
+```c
+1 = 262 Hz
+8:9:10:12:15:16
+```
+
+The missing 4/3 and 5/3 are in a 3:4:5 relationship with the root. With a final call to `sort()` our full major scale becomes.
+
+```c
+1 = 262 Hz
+8:9:10:12:15:16
+3:4:5
+sort()
+```
+
+Just as in scales, the unison is implicit in enumerated chords.
+
+Enumerations can span multiple lines so something like this is valid syntax:
+
+```c
+1 = 262 Hz
+
+8  "C" : // Implicit
+9  "D" :
+10 "E" :
+12 "G" :
+15 "B"
+
+3 "C"  : // Implicit
+4 "F"  :
+5 "A"  :
+6 "C"    // Octave, interval of repetition
+
+sort()
+```
+
+### Harmonic segments
+
+Simple consecutive harmonics often sound consonant or at least fuse together so there's syntax for segments of the harmonic series.
+
+```c
+1 = 262 Hz
+
+// Same as 8:9:10:11:12:13:14:15:16
+8::16
+```
+
+Harmonic segments can be mixed in with chord enumerations `7:11::14` is the same as `7:11:12:13:14`.
+
+### Reflected enumerations
+
+A simple major triad is given by `4:5:6` in terms of frequency ratios. However from a luthier's perspective the lengths of the strings of an instrument should be in a 15:12:10 relationship to produce a major chord.
+
+The difference between the perspectives is that of inversion i.e. reflection about the unison: `4:5:6` = `(1/15):(1/12):(1/10)`. This is a bit tedious to write so a simple slash at the beginning of the enumeration suffices `4:5:6` = `/15:12:10`.
+
+## Scale title
+
+A string that is not attached to an interval becomes the title of the scale visible on export.
+
+```c
+"Subharmonics 10 through 5"
+
+1 = 262 Hz
+/10::5
+```
+
+## Ups and downs notation
+
+The primes span a vast musical universe to explore so just intonation can get very complex very fast which is reflected in the notation.
+
+Equal temperaments simplify this complexity to a finite collection of distinct pitches within an octave and many of them offer passable approximations to most of the consonances we care about as musicians.
+
+[https://en.xen.wiki/w/Ups_and_downs_notation](https://en.xen.wiki/w/Ups_and_downs_notation) is designed for working with equal temperaments a.k.a. edos. By default the up inflection (`^`) indicates a positive pitch shift by one edostep while the down inflection (`v`) indicates a negative pitch shift. The conversion from abstract steps to concrete pitch happens during tempering.
+
+Let's demonstrate with an approximation of the 5-limit major scale in 22edo:
+
+```c
+C4 = 262 Hz
+
+D4
+vE4
+F4
+G4
+vA4
+vB4
+C5
+
+22@
+```
+
+Normally `E4` would temper to `8\22` but using the down inflection we made it a more mellow `7\22`.
+
+### Lifts and drops
+
+Larger edos are more accurate while still being simpler to work with than pure just intonation. One downside is that a single edosteps becomes almost unnoticeably small so we need a new symbol for groups of them. By default the lift inflection (`/`) is worth 5 positive edosteps while the corresponding drop inflection (`\`) is worth 5 negative edosteps.
+
+We can change this using a *lift declaration* `/ = (newLiftAmount)`. The syntax for an edosteps is `1\` or `1°` whichever you prefer.
+
+Declaring a lift to be worth 6 degrees of 311edo we arrive at this version of our major scale:
+
+```c
+/ = 6°
+C4 = 262 Hz
+
+D4
+\E4
+F4
+G4
+\A4
+\B4
+C5
+
+311@
+```
