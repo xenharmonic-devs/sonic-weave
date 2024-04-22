@@ -1030,6 +1030,68 @@ function isRadical(interval: SonicWeaveValue) {
 isRadical.__doc__ = 'Return `true` if the interval is an nth root.';
 isRadical.__node__ = builtinNode(isRadical);
 
+// == String methods ==
+
+function charCodeAt(str: string, index: SonicWeaveValue) {
+  if (typeof str !== 'string') {
+    throw new Error('A string is required.');
+  }
+  if (index === undefined) {
+    if (str) {
+      return fromInteger(str.charCodeAt(0));
+    }
+    throw new Error('A non-empty string is required.');
+  }
+  let idx = upcastBool(index).toInteger();
+  if (idx < 0) {
+    idx += str.length;
+  }
+  if (idx < 0 || idx >= str.length) {
+    throw new Error('Index out of range.');
+  }
+  return fromInteger(str.charCodeAt(idx));
+}
+charCodeAt.__doc__ =
+  'Obtain an integer between 0 and 65535 representing the UTF-16 code unit at the given index.';
+charCodeAt.__node__ = builtinNode(charCodeAt);
+
+function codePointAt(str: string, index: SonicWeaveValue) {
+  if (typeof str !== 'string') {
+    throw new Error('A string is required.');
+  }
+  if (index === undefined) {
+    if (str) {
+      return fromInteger(str.codePointAt(0)!);
+    }
+    throw new Error('A non-empty string is required.');
+  }
+  let idx = upcastBool(index).toInteger();
+  if (idx < 0) {
+    idx += str.length;
+  }
+  if (idx < 0 || idx >= str.length) {
+    throw new Error('Index out of range.');
+  }
+  return fromInteger(str.codePointAt(idx)!);
+}
+codePointAt.__doc__ =
+  'Obtain a non-negative integer that is the Unicode code point value of the character starting at the given index. Note that the index is still based on UTF-16 code units, not Unicode code points.';
+codePointAt.__node__ = builtinNode(codePointAt);
+
+function fromCharCode(...indices: SonicWeaveValue[]) {
+  return String.fromCharCode(...indices.map(i => upcastBool(i).toInteger()));
+}
+fromCharCode.__doc__ =
+  'Obtain a string created from the specified sequence of UTF-16 code units.';
+fromCharCode.__node__ = builtinNode(fromCharCode);
+
+function fromCodePoint(...indices: SonicWeaveValue[]) {
+  return String.fromCodePoint(...indices.map(i => upcastBool(i).toInteger()));
+}
+fromCodePoint.__doc__ =
+  'Obtain a string created from the specified sequence of code points.';
+fromCodePoint.__node__ = builtinNode(fromCodePoint);
+
 // == Other ==
 
 function track(this: ExpressionVisitor, interval: SonicWeaveValue) {
@@ -2106,6 +2168,11 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   round,
   trunc,
   ceil,
+  // String methods
+  charCodeAt,
+  codePointAt,
+  fromCharCode,
+  fromCodePoint,
   // Other
   track,
   trackingIds,

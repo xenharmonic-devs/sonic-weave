@@ -1939,4 +1939,24 @@ describe('SonicWeave expression evaluator', () => {
     const {fraction} = parseSingle('m3v5');
     expect(fraction).toBe('6/5');
   });
+
+  it('can compute string char codes', () => {
+    const {fraction} = parseSingle('charCodeAt("asdf", 1)');
+    expect(fraction).toBe('115');
+  });
+
+  it('can count string code-points from the end', () => {
+    const {fraction} = parseSingle('codePointAt("asdf", -2)');
+    expect(fraction).toBe('100');
+  });
+
+  it('can construct strings from char codes', () => {
+    const str = evaluate('fromCharCode(65, 66, 67)');
+    expect(str).toBe('ABC');
+  });
+
+  it('can construct strings from code-points', () => {
+    const str = evaluate('fromCodePoint(9731, 9733, 9842)');
+    expect(str).toBe('☃★♲');
+  });
 });

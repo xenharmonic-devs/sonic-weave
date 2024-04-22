@@ -48,11 +48,17 @@ Convert interval to cents. `fractionDigits` represents the number of decimal dig
 ### centsColor(*interval*)
 Color based on the size of the interval. Hue wraps around every 1200 cents.
 
+### charCodeAt(*str*, *index*)
+Obtain an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
+
 ### clear(*scale = $$*)
 Remove the contents of the current/given scale.
 
 ### clz32(*x*)
 Calculate clz32 x.
+
+### codePointAt(*str*, *index*)
+Obtain a non-negative integer that is the Unicode code point value of the character starting at the given index. Note that the index is still based on UTF-16 code units, not Unicode code points.
 
 ### colorOf(*interval*)
 Return the color of the interval.
@@ -119,6 +125,12 @@ Round value down to the nearest integer.
 
 ### fraction(*interval*, *tolerance*, *preferredNumerator*, *preferredDenominator*)
 Convert interval to a fraction. Throws an error if conversion is impossible and no tolerance (in cents) for approximation is given.
+
+### fromCharCode(*...indices*)
+Obtain a string created from the specified sequence of UTF-16 code units.
+
+### fromCodePoint(*...indices*)
+Obtain a string created from the specified sequence of code points.
 
 ### fround(*x*)
 Calculate fround x.
