@@ -643,7 +643,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'EnumeratedChord',
         mirror: false,
-        intervals: [
+        enumerals: [
           {
             type: 'CallExpression',
             callee: {type: 'Identifier', id: 'root'},
@@ -697,6 +697,25 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           },
         ],
         test: null,
+      },
+    });
+  });
+
+  it('accepts conditional array comprehensions', () => {
+    const ast = parseSingle('[foo for foo of bar if baz]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArrayComprehension',
+        expression: {type: 'Identifier', id: 'foo'},
+        comprehensions: [
+          {
+            element: {type: 'Parameter', id: 'foo', defaultValue: null},
+            kind: 'of',
+            container: {type: 'Identifier', id: 'bar'},
+          },
+        ],
+        test: {type: 'Identifier', id: 'baz'},
       },
     });
   });
@@ -1036,5 +1055,9 @@ describe('Negative tests', () => {
     } finally {
       expect(rejected).toBe(true);
     }
+  });
+
+  it('rejects potentially ambiguous harmonic segment concatenations', () => {
+    expect(() => parse('4::7::16')).toThrow();
   });
 });
