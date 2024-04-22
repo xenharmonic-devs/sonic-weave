@@ -27,12 +27,12 @@ DotJoinedRationals = Rational|.., '.'|
 Prefix = (!WhiteSpace ![<|&:;,] !'[' SourceCharacter)*
 
 MonzoLiteral
-  = prefix: Prefix '[' _ components: VectorComponents _ '>' basis: ('@' @DotJoinedRationals)? {
+  = prefix: Prefix '[' _ components: VectorComponents _ [>⟩] basis: ('@' @DotJoinedRationals)? {
     return text();
   }
 
 ValLiteral
-  = prefix: Prefix '<' _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
+  = prefix: Prefix [<⟨] _ components: VectorComponents _ ']' basis: ('@' @DotJoinedRationals)? {
     return text();
   }
 

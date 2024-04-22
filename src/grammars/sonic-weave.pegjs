@@ -1051,7 +1051,7 @@ UpsAndDowns 'up-and-down'
   }
 
 MonzoLiteral
-  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ '>' basis: ('@' @SubgroupBasis)? {
+  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ [>⟩] basis: ('@' @SubgroupBasis)? {
     return {
       ...upsAndDowns,
       type: 'MonzoLiteral',
@@ -1061,7 +1061,7 @@ MonzoLiteral
   }
 
 ValLiteral
-  = '<' _ components: VectorComponents _ ']' basis: ('@' @ValBasis)? {
+  = [<⟨] _ components: VectorComponents _ ']' basis: ('@' @ValBasis)? {
     return {
       type: 'ValLiteral',
       components,

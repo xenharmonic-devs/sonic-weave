@@ -1965,4 +1965,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.totalCents()).toBe(0);
     expect(interval.steps).toBe(-3);
   });
+
+  it('supports fancy angle brackets', () => {
+    const {fraction} = parseSingle('⟨1 2 3] · [4 5 6⟩');
+    expect(fraction).toBe((1 * 4 + 2 * 5 + 3 * 6).toString());
+  });
 });

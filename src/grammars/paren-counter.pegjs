@@ -37,12 +37,12 @@ VectorComponents
 Rational = $(PositiveInteger ('/' PositiveInteger)?)
 
 MonzoLiteral
-  = '[' _ VectorComponents _ '>' {
+  = '[' _ VectorComponents _ [>⟩] {
     return empty;
   }
 
 ValLiteral
-  = '<' _ VectorComponents _ ']' {
+  = [<⟨] _ VectorComponents _ ']' {
     return empty;
   }
 
