@@ -522,20 +522,24 @@ export class ExpressionVisitor {
     return new Interval(value, 'logarithmic', node.count, node);
   }
 
-  protected down(operand: SonicWeaveValue): Interval | Interval[] {
+  protected down(
+    operand: SonicWeaveValue,
+    count: number
+  ): Interval | Interval[] {
     if (!this.rootContext) {
       throw new Error('Root context required for down.');
     }
     if (Array.isArray(operand)) {
-      return operand.map(this.down.bind(this)) as Interval[];
+      const d = this.down.bind(this);
+      return operand.map(x => d(x, count)) as Interval[];
     }
-    return upcastBool(operand).down(this.rootContext);
+    return upcastBool(operand).down(this.rootContext, count);
     throw new Error('Can only apply down arrows to intervals and vals');
   }
 
   protected visitDownExpression(node: DownExpression) {
     const operand = this.visit(node.operand);
-    return this.down(operand);
+    return this.down(operand, node.count);
   }
 
   protected label(

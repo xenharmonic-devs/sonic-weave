@@ -1099,18 +1099,19 @@ export class Interval {
   /**
    * Apply a down arrow to this interval.
    * @param context Current root context with the value of "down" to apply.
+   * @param count How many down arrows to apply.
    * @returns A new interval with size decreased by the current "up" value.
    */
-  down(context: RootContext) {
-    const value = this.value.div(context.up.value);
-    const steps = this.steps - context.up.steps;
+  down(context: RootContext, count = 1) {
+    const value = this.value.div(context.up.value.pow(count));
+    const steps = this.steps - context.up.steps * count;
     if (
       this.node?.type === 'FJS' ||
       this.node?.type === 'AbsoluteFJS' ||
       this.node?.type === 'MonzoLiteral'
     ) {
       const node = {...this.node};
-      node.ups--;
+      node.ups -= count;
       const result = new Interval(value, this.domain, steps, node, this);
       context.fragiles.push(result);
       return result;

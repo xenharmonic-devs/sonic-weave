@@ -1959,4 +1959,10 @@ describe('SonicWeave expression evaluator', () => {
     const str = evaluate('fromCodePoint(9731, 9733, 9842)');
     expect(str).toBe('☃★♲');
   });
+
+  it('applies the full count from a down expression', () => {
+    const {interval} = parseSingle('vvv{1}');
+    expect(interval.totalCents()).toBe(0);
+    expect(interval.steps).toBe(-3);
+  });
 });
