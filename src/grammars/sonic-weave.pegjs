@@ -492,29 +492,22 @@ Expression
   = LestExpression
 
 LestExpression
-  = fallback: ConditionalExpression tail: (__ LestToken _ @ConditionalExpression)? {
-    if (tail) {
-      return {
-        type: 'LestExpression',
-        primary: tail,
-        fallback,
-      };
-    }
-    return fallback;
+  = head: ConditionalExpression tail: (__ @$LestToken _ @LestExpression)* {
+    return tail.reduce(operatorReducerLite, head);
   }
 
 ConditionalExpression
-  = consequent: CoalescingExpression tail: (__ IfToken _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)? {
-    if (tail) {
-      const [test, alternate] = tail;
-      return {
-        type: 'ConditionalExpression',
-        test,
-        consequent,
-        alternate,
-      };
-    }
-    return consequent;
+  = consequent: CoalescingExpression tail: (__ IfToken _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)* {
+    return tail.reduce(
+      (result, [test, alternate]) => (
+        {
+          type: 'ConditionalExpression',
+          test,
+          alternate,
+          consequent: result,
+        }
+      ), consequent
+    );
   }
 
 AssigningOperator

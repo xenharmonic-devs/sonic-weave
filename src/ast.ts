@@ -17,6 +17,7 @@ export type UnaryOperator =
   | '--';
 
 export type BinaryOperator =
+  | 'lest'
   | '??'
   | 'or'
   | 'and'
@@ -220,12 +221,6 @@ export type Statement =
   | ContinueStatement
   | ReturnStatement;
 
-export type LestExpression = {
-  type: 'LestExpression';
-  primary: Expression;
-  fallback: Expression;
-};
-
 export type ConditionalExpression = {
   type: 'ConditionalExpression';
   test: Expression;
@@ -371,7 +366,6 @@ export type FalseLiteral = {
 };
 
 export type Expression =
-  | LestExpression
   | ConditionalExpression
   | AccessExpression
   | ArraySlice

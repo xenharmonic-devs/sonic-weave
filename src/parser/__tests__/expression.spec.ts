@@ -1463,8 +1463,21 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('3/2');
   });
 
+  it('has inline analogue of try..catch (right success)', () => {
+    const {interval} = parseSingle(
+      '[-1 1> lest fraction([-1 1>) lest fraction([1>)'
+    );
+    expect(interval.toString()).toBe('2/1');
+  });
+
   it('has an inline analogue of try..catch (failure)', () => {
     const pi = evaluate('PI lest fraction(PI)') as Interval;
+    expect(pi.value.isFractional()).toBe(false);
+    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+  });
+
+  it('has an inline analogue of try..catch (left failure)', () => {
+    const pi = evaluate('PI lest fraction(PI) lest fraction(E)') as Interval;
     expect(pi.value.isFractional()).toBe(false);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });

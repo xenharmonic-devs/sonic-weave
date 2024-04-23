@@ -79,7 +79,6 @@ import {
   HarmonicSegment,
   Identifier,
   LabeledExpression,
-  LestExpression,
   Parameter,
   Parameters_,
   Range,
@@ -285,8 +284,6 @@ export class ExpressionVisitor {
   visit(node: Expression): SonicWeaveValue {
     this.spendGas();
     switch (node.type) {
-      case 'LestExpression':
-        return this.visitLestExpression(node);
       case 'ConditionalExpression':
         return this.visitConditionalExpression(node);
       case 'AccessExpression':
@@ -583,14 +580,6 @@ export class ExpressionVisitor {
       return this.visit(node.consequent);
     }
     return this.visit(node.alternate);
-  }
-
-  protected visitLestExpression(node: LestExpression) {
-    try {
-      return this.visit(node.primary);
-    } catch {
-      return this.visit(node.fallback);
-    }
   }
 
   protected visitComponent(component: VectorComponent) {
@@ -1231,6 +1220,7 @@ export class ExpressionVisitor {
             return left.project(right);
           case 'tmpr':
             throw new Error('Tempering needs an interval and a val.');
+          case 'lest':
           case '??':
           case 'or':
           case 'and':
@@ -1313,6 +1303,13 @@ export class ExpressionVisitor {
 
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
+    if (operator === 'lest') {
+      try {
+        return this.visit(node.right);
+      } catch {
+        return this.visit(node.left);
+      }
+    }
     const left = this.visit(node.left);
     if (operator === '??') {
       if (left !== undefined) {

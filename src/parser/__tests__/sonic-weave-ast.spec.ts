@@ -975,6 +975,46 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('has a right-associative lest', () => {
+    const ast = parseSingle('foo lest bar lest baz');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: 'lest',
+        left: {type: 'Identifier', id: 'foo'},
+        right: {
+          type: 'BinaryExpression',
+          operator: 'lest',
+          left: {type: 'Identifier', id: 'bar'},
+          right: {type: 'Identifier', id: 'baz'},
+          preferLeft: false,
+          preferRight: false,
+        },
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('has a left-associative ternary operator complex', () => {
+    const ast = parseSingle('foo if bar else baz if qux else quux');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ConditionalExpression',
+        test: {type: 'Identifier', id: 'qux'},
+        alternate: {type: 'Identifier', id: 'quux'},
+        consequent: {
+          type: 'ConditionalExpression',
+          test: {type: 'Identifier', id: 'bar'},
+          alternate: {type: 'Identifier', id: 'baz'},
+          consequent: {type: 'Identifier', id: 'foo'},
+        },
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
@@ -1059,5 +1099,9 @@ describe('Negative tests', () => {
 
   it('rejects potentially ambiguous harmonic segment concatenations', () => {
     expect(() => parse('4::7::16')).toThrow();
+  });
+
+  it('rejects inner ternary operator association', () => {
+    expect(() => parse('foo if bar if baz else qux else quux')).toThrow();
   });
 });
