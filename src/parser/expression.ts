@@ -86,6 +86,8 @@ import {
   UnaryExpression,
   IterationKind,
   TemplateArgument,
+  UpdateExpression,
+  UpdateOperator,
 } from '../ast';
 import {type StatementVisitor} from './statement';
 
@@ -292,6 +294,8 @@ export class ExpressionVisitor {
         return this.visitArraySlice(node);
       case 'UnaryExpression':
         return this.visitUnaryExpression(node);
+      case 'UpdateExpression':
+        return this.visitUpdateExpression(node);
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
       case 'LabeledExpression':
@@ -944,27 +948,8 @@ export class ExpressionVisitor {
       case 'drop':
         return operand.drop(this.rootContext);
     }
-    if (operator === 'not') {
-      // The runtime shouldn't let you get here.
-      throw new Error('Unexpected unary operation.');
-    }
-    operator satisfies '++' | '--';
-
-    let newValue: Interval;
-    if (operator === '++') {
-      newValue = operand.add(linearOne());
-    } else {
-      newValue = operand.sub(linearOne());
-    }
-    if (node.operand.type !== 'Identifier') {
-      throw new Error('Cannot increment/decrement a value.');
-    }
-    const name = node.operand.id;
-    this.set(name, newValue);
-    if (node.prefix) {
-      return newValue;
-    }
-    return operand;
+    // The runtime shouldn't let you get here.
+    throw new Error('Unexpected unary operation.');
   }
 
   protected visitUnaryExpression(node: UnaryExpression) {
@@ -973,6 +958,62 @@ export class ExpressionVisitor {
       return !sonicTruth(operand);
     }
     return this.unaryOperate(operand, node);
+  }
+
+  protected updateArgument(
+    argument: SonicWeaveValue,
+    operator: UpdateOperator
+  ): Interval | Interval[] {
+    if (Array.isArray(argument)) {
+      const u = this.updateArgument.bind(this);
+      return argument.map(x => u(x, operator)) as Interval[];
+    }
+    if (typeof argument === 'boolean' || argument instanceof Interval) {
+      if (operator === '++') {
+        return upcastBool(argument).add(linearOne());
+      }
+      return upcastBool(argument).sub(linearOne());
+    }
+    throw new Error('Only intervals may be incremented or decremented.');
+  }
+
+  protected visitUpdateExpression(node: UpdateExpression) {
+    const argument = this.visit(node.argument);
+    const newValue = this.updateArgument(argument, node.operator);
+    if (node.argument.type === 'Identifier') {
+      this.set(node.argument.id, newValue);
+    } else if (node.argument.type === 'AccessExpression') {
+      const key = this.visit(node.argument.key);
+      const object = arrayRecordOrString(
+        this.visit(node.argument.object),
+        'Only array elements or record values may be incremented or decremented.'
+      );
+      if (typeof object === 'string') {
+        throw new Error('Strings are immutable.');
+      }
+      if (Array.isArray(object)) {
+        if (typeof key === 'boolean' || key instanceof Interval) {
+          const index = upcastBool(key).toInteger();
+          object[index] = newValue as SonicWeavePrimitive;
+        } else {
+          throw new Error('Array indices must be intervals.');
+        }
+      } else {
+        if (typeof key === 'string') {
+          object[key] = newValue as SonicWeavePrimitive;
+        } else {
+          throw new Error('Record keys must be strings.');
+        }
+      }
+    } else {
+      throw new Error(
+        'Only identifiers, array elements or record values may be incremented or decremented.'
+      );
+    }
+    if (node.prefix) {
+      return newValue;
+    }
+    return argument;
   }
 
   protected tensor(

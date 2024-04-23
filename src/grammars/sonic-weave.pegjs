@@ -7,6 +7,24 @@
     ArraySlice: "object",
   };
 
+  function UpdateExpression(operator, argument, prefix) {
+    return {
+      type: 'UpdateExpression',
+      operator,
+      argument,
+      prefix,
+    };
+  }
+
+  function UnaryExpression(operator, operand, uniform) {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      uniform,
+    };
+  }
+
   function BinaryExpression(operator, left, right, preferLeft, preferRight) {
     return {
       type: 'BinaryExpression',
@@ -530,19 +548,19 @@ CoalescingExpression
 Conjunct = NotExpression / RelationalExpression
 
 ConjunctionExpression
-  = head: Conjunct tail: (__ @$AndToken _ @Conjunct)* {
+  = head: NotExpression tail: (__ @$AndToken _ @NotExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
 NotExpression
-  = operator: $NotToken __ operand: (RelationalExpression / NotExpression) {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
+  = operators: NotToken|.., __| __ operand: RelationalExpression {
+    if (!operators.length) {
+      return operand;
+    }
+    if (operators.length & 1) {
+      return UnaryExpression('not', operand, false);
+    }
+    return UnaryExpression('not', UnaryExpression('not', operand, false), false);
   }
 
 RelationalOperator 'relational operator'
@@ -649,33 +667,15 @@ UniformUnaryOperator
   = '-' / '%' / '÷'
 
 UniformUnaryExpression
-  = operator: '--' operand: ExponentiationExpression {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
+  = operator: '--' argument: ExponentiationExpression {
+    return UpdateExpression(operator, argument, true);
   }
   / operator: UniformUnaryOperator '~' operand: ExponentiationExpression {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: true,
-    };
+    return UnaryExpression(operator, operand, true);
   }
   / operator: UniformUnaryOperator? operand: ExponentiationExpression {
     if (operator) {
-      return {
-        type: 'UnaryExpression',
-        operator,
-        operand,
-        prefix: true,
-        uniform: false,
-      };
+      return UnaryExpression(operator, operand, false);
     }
     return operand;
   }
@@ -699,43 +699,24 @@ FractionExpression
 ChainableUnaryOperator
   = $('^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
 
+// The precedence between exponentiation and fractions is a bit uneasy.
+// Uniform unary operators make a seccond appearance here to be valid right operands for exponentiation and fractions.
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: LabeledExpression {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: !!uniform,
-    };
+    return UnaryExpression(operator, operand, !!uniform);
   }
   / operator: ChainableUnaryOperator __ operand: (LabeledExpression / UnaryExpression) {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
+    return UnaryExpression(operator, operand, false);
   }
   / operator: ('--' / '++' / '+') operand: LabeledExpression {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
+    if (operator === '+') {
+      return UnaryExpression(operator, operand, false);
+    }
+    return UpdateExpression(operator, operand, true);
   }
   / operand: LabeledExpression operator: ('--' / '++')? {
     if (operator) {
-      return {
-        type: 'UnaryExpression',
-        operator,
-        operand,
-        prefix: false,
-        uniform: false,
-      }
+      return UpdateExpression(operator, operand, false);
     }
     return operand;
   }

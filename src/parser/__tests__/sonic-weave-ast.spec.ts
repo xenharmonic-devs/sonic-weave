@@ -574,7 +574,6 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           callee: {type: 'Identifier', id: 'foo'},
           args: [],
         },
-        prefix: true,
         uniform: false,
       },
     });
@@ -585,11 +584,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'UnaryExpression',
+        type: 'UpdateExpression',
         operator: '--',
-        operand: {type: 'Identifier', id: 'i'},
+        argument: {type: 'Identifier', id: 'i'},
         prefix: false,
-        uniform: false,
       },
     });
   });
@@ -653,7 +651,6 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             type: 'UnaryExpression',
             operator: '-',
             operand: {type: 'IntegerLiteral', value: 2n},
-            prefix: true,
             uniform: false,
           },
         ],

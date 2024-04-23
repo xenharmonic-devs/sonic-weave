@@ -12,9 +12,9 @@ export type UnaryOperator =
   | '/'
   | 'lift'
   | '\\'
-  | 'drop'
-  | '++'
-  | '--';
+  | 'drop';
+
+export type UpdateOperator = '++' | '--';
 
 export type BinaryOperator =
   | 'lest'
@@ -247,8 +247,14 @@ export type UnaryExpression = {
   type: 'UnaryExpression';
   operator: UnaryOperator;
   operand: Expression;
-  prefix: boolean;
   uniform: boolean;
+};
+
+export type UpdateExpression = {
+  type: 'UpdateExpression';
+  operator: UpdateOperator;
+  argument: Expression;
+  prefix: boolean;
 };
 
 export type DownExpression = {
@@ -370,6 +376,7 @@ export type Expression =
   | AccessExpression
   | ArraySlice
   | UnaryExpression
+  | UpdateExpression
   | DownExpression
   | BinaryExpression
   | LabeledExpression
