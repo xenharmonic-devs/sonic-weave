@@ -2000,4 +2000,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(pe[2].toFraction()).toBe('0');
     expect(pe[3].toFraction()).toBe('1');
   });
+
+  it('has a chainable not', () => {
+    const yep = evaluate('not not hotpink');
+    expect(yep).toBe(true);
+  });
 });

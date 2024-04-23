@@ -1015,6 +1015,34 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('has a pythonic precedence between logical and relational', () => {
+    const ast = parseSingle('not a < b and c > d or not e === f');
+    const e = ast.expression;
+    expect(e.operator).toBe('or');
+    {
+      expect(e.left.operator).toBe('and');
+      {
+        expect(e.left.left.operator).toBe('not');
+        expect(e.left.left.operand.operator).toBe('<');
+        {
+          expect(e.left.left.operand.left.id).toBe('a');
+          expect(e.left.left.operand.right.id).toBe('b');
+        }
+        expect(e.left.right.operator).toBe('>');
+        {
+          expect(e.left.right.left.id).toBe('c');
+          expect(e.left.right.right.id).toBe('d');
+        }
+      }
+      expect(e.right.operator).toBe('not');
+      expect(e.right.operand.operator).toBe('===');
+      {
+        expect(e.right.operand.left.id).toBe('e');
+        expect(e.right.operand.right.id).toBe('f');
+      }
+    }
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

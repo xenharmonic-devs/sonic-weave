@@ -520,14 +520,29 @@ AssigningOperator
   / ExponentiationOperator
   / FractionOperator
 
-CoalescingOperator
-  = '??'
-  / $(OrToken)
-  / $(AndToken)
+CoalescingOperator = '??' / $(OrToken)
 
 CoalescingExpression
-  = head: RelationalExpression tail: (__ @CoalescingOperator _ @RelationalExpression)* {
+  = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {
     return tail.reduce(operatorReducerLite, head);
+  }
+
+Conjunct = NotExpression / RelationalExpression
+
+ConjunctionExpression
+  = head: Conjunct tail: (__ @$AndToken _ @Conjunct)* {
+    return tail.reduce(operatorReducerLite, head);
+  }
+
+NotExpression
+  = operator: $NotToken __ operand: (RelationalExpression / NotExpression) {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
+    };
   }
 
 RelationalOperator 'relational operator'
@@ -684,9 +699,8 @@ FractionExpression
 Labels
   = (CallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
-// XXX: Don't know why that trailing __ has to be there.
 LabeledExpression
-  = object: UnaryExpression labels: (' ' __ @Labels)? __ {
+  = object: UnaryExpression labels: (' ' __ @Labels)? {
     if (labels) {
       return {
         type: 'LabeledExpression',
@@ -698,7 +712,7 @@ LabeledExpression
   }
 
 LabeledCommaDecimal
-  = __ object: CommaDecimal labels: (' ' __ @Labels)? __ {
+  = __ object: CommaDecimal labels: (' ' __ @Labels)? {
     if (labels) {
       return {
         type: 'LabeledExpression',
@@ -714,7 +728,7 @@ Secondary
   / AccessExpression
 
 ChainableUnaryOperator
-  = $(NotToken / '^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
+  = $('^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
 
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: Secondary {
