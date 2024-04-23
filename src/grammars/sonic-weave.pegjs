@@ -692,15 +692,61 @@ ExponentiationExpression
 FractionOperator = @'/' !'/' !'-' !'+' !'_' !'^'
 
 FractionExpression
-  = head: LabeledExpression tail: (__ @'~'? @FractionOperator @'~'? _ @LabeledExpression)* {
+  = head: UnaryExpression tail: (__ @'~'? @FractionOperator @'~'? _ @UnaryExpression)* {
     return tail.reduce(operatorReducer, head);
   }
+
+ChainableUnaryOperator
+  = $('^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
+
+UnaryExpression
+  = operator: UniformUnaryOperator uniform: '~'? operand: LabeledExpression {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: !!uniform,
+    };
+  }
+  / operator: ChainableUnaryOperator __ operand: (LabeledExpression / UnaryExpression) {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
+    };
+  }
+  / operator: ('--' / '++' / '+') operand: LabeledExpression {
+    return {
+      type: 'UnaryExpression',
+      operator,
+      operand,
+      prefix: true,
+      uniform: false,
+    };
+  }
+  / operand: LabeledExpression operator: ('--' / '++')? {
+    if (operator) {
+      return {
+        type: 'UnaryExpression',
+        operator,
+        operand,
+        prefix: false,
+        uniform: false,
+      }
+    }
+    return operand;
+  }
+
+LabelObject = CallExpression / AccessExpression
 
 Labels
   = (CallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
 LabeledExpression
-  = object: UnaryExpression labels: (' ' __ @Labels)? {
+  = object: LabelObject labels: (' ' __ @Labels)? {
     if (labels) {
       return {
         type: 'LabeledExpression',
@@ -721,54 +767,6 @@ LabeledCommaDecimal
       };
     }
     return object;
-  }
-
-Secondary
-  = CallExpression
-  / AccessExpression
-
-ChainableUnaryOperator
-  = $('^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
-
-UnaryExpression
-  = operator: UniformUnaryOperator uniform: '~'? operand: Secondary {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: !!uniform,
-    };
-  }
-  / operator: ChainableUnaryOperator __ operand: (Secondary / UnaryExpression) {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
-  }
-  / operator: ('--' / '++' / '+') operand: Secondary {
-    return {
-      type: 'UnaryExpression',
-      operator,
-      operand,
-      prefix: true,
-      uniform: false,
-    };
-  }
-  / operand: Secondary operator: ('--' / '++')? {
-    if (operator) {
-      return {
-        type: 'UnaryExpression',
-        operator,
-        operand,
-        prefix: false,
-        uniform: false,
-      }
-    }
-    return operand;
   }
 
 CallExpression
