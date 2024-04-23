@@ -643,3 +643,7 @@ reduce
 These helpers can be freely combined. A common task is to reduce the scale and sort it only keeping unique intervals. The handy `organize()` helper does just that.
 
 There are plenty more helpers in SonicWeave: See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/BUILTIN.md).
+
+## Next steps
+
+I hope these examples gave you a feeling for this language. Check out [intermediate DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/intermediate-dsl.md) documentation for a deeper understanding of what each line of code does, and to learn about variables and basic programming.

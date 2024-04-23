@@ -1970,4 +1970,21 @@ describe('SonicWeave expression evaluator', () => {
     const {fraction} = parseSingle('⟨1 2 3] · [4 5 6⟩');
     expect(fraction).toBe((1 * 4 + 2 * 5 + 3 * 6).toString());
   });
+
+  it('evaluates the explicit tmpr operator from the docs', () => {
+    const {value} = parseSingle(`
+      const v = <12 19 28]
+      const m = 7/5
+      ((v dot relative(m)) \\ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))
+    `);
+    const pe = [...value.primeExponents];
+    while (!pe[pe.length - 1].n) {
+      pe.pop();
+    }
+    expect(pe).toHaveLength(4);
+    expect(pe[0].toFraction()).toBe('-7/3');
+    expect(pe[1].toFraction()).toBe('0');
+    expect(pe[2].toFraction()).toBe('0');
+    expect(pe[3].toFraction()).toBe('1');
+  });
 });

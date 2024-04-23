@@ -63,6 +63,9 @@ Obtain a non-negative integer that is the Unicode code point value of the charac
 ### colorOf(*interval*)
 Return the color of the interval.
 
+### complexityOf(*interval*, *countZeros = false*)
+Compute the prime limit ordinal of an interval or val. 1/1 has a complexity of 0, 2/1 has complexity 1, 3/1 has complexity 2, 5/1 has complexity 3, etc.. If `countZeros` is true, measure the complexity of the internal representation instead.
+
 ### concat(*first*, *...rest*)
 Combine two or more arrays/strings.
 

@@ -11,6 +11,7 @@ import {
   fareySequence as xduFareySequence,
   fareyInterior as xduFareyInterior,
   hasMarginConstantStructure,
+  primeLimit,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
@@ -1191,6 +1192,53 @@ function labelOf(
 labelOf.__doc__ = 'Return the label of the interval.';
 labelOf.__node__ = builtinNode(labelOf);
 
+function complexityOf(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue,
+  countZeros = false
+): Interval | Interval[] {
+  if (Array.isArray(interval)) {
+    this.spendGas(interval.length);
+    const c = complexityOf.bind(this);
+    return interval.map(i => c(i, countZeros)) as Interval[];
+  }
+  let pe: Fraction[];
+  if (interval instanceof Val) {
+    if (countZeros) {
+      return fromInteger(interval.value.numberOfComponents);
+    }
+    if (!interval.value.residual.isUnity()) {
+      throw new Error('Non-standard val encountered.');
+    }
+    pe = interval.value.primeExponents;
+  } else {
+    const monzo = upcastBool(interval).value;
+    if (monzo instanceof TimeReal) {
+      return new Interval(new TimeReal(0, Infinity), 'linear');
+    }
+    if (!monzo.residual.isUnity()) {
+      const result = primeLimit(monzo.residual, true);
+      if (Number.isInteger(result)) {
+        return fromInteger(result);
+      }
+      return new Interval(new TimeReal(0, result), 'linear');
+    }
+    if (countZeros) {
+      return fromInteger(monzo.numberOfComponents);
+    }
+    pe = monzo.primeExponents;
+  }
+  for (let i = pe.length - 1; i >= 0; --i) {
+    if (pe[i].n) {
+      return fromInteger(i + 1);
+    }
+  }
+  return fromInteger(0);
+}
+complexityOf.__doc__ =
+  'Compute the prime limit ordinal of an interval or val. 1/1 has a complexity of 0, 2/1 has complexity 1, 3/1 has complexity 2, 5/1 has complexity 3, etc.. If `countZeros` is true, measure the complexity of the internal representation instead.';
+complexityOf.__node__ = builtinNode(complexityOf);
+
 function equaveOf(
   this: ExpressionVisitor,
   val: SonicWeaveValue
@@ -2181,6 +2229,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   tail,
   colorOf,
   labelOf,
+  complexityOf,
   equaveOf,
   withEquave,
   cosJIP,
