@@ -548,3 +548,98 @@ C5
 
 311@
 ```
+
+## Helper functions
+
+We already saw `mtof(60)` and `sort()` above. There are plenty more, but here's a table of commonly used ones.
+
+| Helper         | Description                                       |
+| -------------- | ------------------------------------------------- |
+| clear()        | Replace the scale with an empty one               |
+| keepUnique()   | Remove duplicate intervals from the scale         |
+| mtof(midiNote) | Get the frequency corresponding to the MIDI note  |
+| FJS            | Convert fractions to Functional Just Systems      |
+| absoluteFJS    | Convert fractions to absolute pitch notation with FJS inflections                    |
+| reduce         | Reduce pitches in the scale to lie between unison and the octave (or generic equave) |
+| relin          | Convert FJS to fractions. Converts anything to relative linear format                |
+| rotate(degree) | Rotate the scale to start on the given degree     |
+| simplify       | Simplify fractions by reducing common factors     |
+| sort()         | Sort the scale in ascending order                 |
+| stack()        | Stack intervals in the scale on top of each other |
+| tet(N)         | Generate one octave of N-tone equal temperament   |
+
+Some helpers need to be called like `sort()` while other's like `simplify` are implicitly mapped over the current scale. Let's demonstrate with our major that has been code-golfed to obscurity:
+
+```c
+1=262z
+24:27:30:32:36:40:45:48
+```
+
+The intervals will format as `27/24`, `30/24`, etc. but those are just `9/8` and `5/4` with a complicated denominator. Tagging a `simplify` at the end reduces the fractions:
+
+```c
+1 = 262 Hz
+24:27:30:32:36:40:45:48
+simplify
+```
+
+The result will format as `9/8`, `5/4`, `4/3`, etc. .
+
+With `FJS` tagged at the end
+
+```c
+1 = 262 Hz
+24:27:30:32:36:40:45:48
+FJS
+```
+
+we obtain `M2`, `M3^5`, `P4`, etc. .
+
+To go from (absolute) FJS to fractions we can use `relin`:
+
+```c
+A4 = 440 Hz
+
+B4
+C5_5
+D5
+E5
+F5_5
+G5_5
+A5
+
+relin
+```
+
+The result is the same as if we had entered:
+```c
+1/1 = 440 Hz
+
+9/8
+6/5
+4/3
+3/2
+8/5
+9/5
+2/1
+```
+
+The `reduce` helper allows us to be imprecise with octaves. The above spelled sloppily is:
+
+```c
+1 = 440 Hz
+
+9
+3/5
+1/3
+3
+1/5
+9/5
+2
+
+reduce
+```
+
+These helpers can be freely combined. A common task is to reduce the scale and sort it only keeping unique intervals. The handy `organize()` helper does just that.
+
+There are plenty more helpers in SonicWeave: See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/BUILTIN.md).

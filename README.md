@@ -728,10 +728,10 @@ SonicWeave comes with batteries included.
 | `TAU` | `6.283185307179586r` | The [superior circle constant](https://tauday.com/tau-manifesto) |
 
 ### Built-in functions
-See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/BUILTIN.md#built-in-functions).
+See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/BUILTIN.md#built-in-functions).
 
 ### Prelude functions
-See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/BUILTIN.md#prelude-functions).
+See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/BUILTIN.md#prelude-functions).
 
 ## Odds and ends
 Most of these features were implemented for their own sake.

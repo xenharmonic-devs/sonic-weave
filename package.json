@@ -52,7 +52,7 @@
     "bench": "vitest bench",
     "doc": "typedoc src/index.ts . --name sonic-weave",
     "preautodoc": "npm run precompile && tsc -p tsconfig-autodoc.json",
-    "autodoc": "node .temp/scripts/builtin-docs.js > BUILTIN.md",
+    "autodoc": "node .temp/scripts/builtin-docs.js > documentation/BUILTIN.md",
     "preinspect-grammar": "npm run compile-sonic-weave-parser",
     "inspect-grammar": "node scripts/inspect-printable-ascii.js",
     "preinspect-random": "npm run compile-sonic-weave-parser",
