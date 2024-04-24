@@ -508,8 +508,22 @@ ExpressionStatement
 Expression
   = LestExpression
 
+AssigningOperator
+  = LestOperator
+  / CoalescingOperator
+  / ConjunctOperator
+  / RoundingOperator
+  / ExtremumOperator
+  / AdditiveOperator
+  / MiscOperator
+  / MultiplicativeOperator
+  / ExponentiationOperator
+  / FractionOperator
+
+LestOperator = $LestToken
+
 LestExpression
-  = head: ConditionalExpression tail: (__ @$LestToken _ @LestExpression)* {
+  = head: ConditionalExpression tail: (__ @LestOperator _ @LestExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
@@ -527,16 +541,6 @@ ConditionalExpression
     );
   }
 
-AssigningOperator
-  = CoalescingOperator
-  / RoundingOperator
-  / ExtremumOperator
-  / AdditiveOperator
-  / MiscOperator
-  / MultiplicativeOperator
-  / ExponentiationOperator
-  / FractionOperator
-
 CoalescingOperator = '??' / $(OrToken)
 
 CoalescingExpression
@@ -544,10 +548,12 @@ CoalescingExpression
     return tail.reduce(operatorReducerLite, head);
   }
 
+ConjunctOperator = $AndToken
+
 Conjunct = NotExpression / RelationalExpression
 
 ConjunctionExpression
-  = head: NotExpression tail: (__ @$AndToken _ @NotExpression)* {
+  = head: NotExpression tail: (__ @ConjunctOperator _ @NotExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 

@@ -1482,6 +1482,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 
+  it('has inline analogue of assignment inside try..catch', () => {
+    const pi = evaluate(
+      'let halfTau = PI;halfTau lest= fraction(halfTau);halfTau'
+    ) as Interval;
+    expect(pi.value.isFractional()).toBe(false);
+    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+  });
+
   it('has atan2 with swapped arguments', () => {
     const interval = evaluate('atanXY(S5, -E)') as Interval;
     expect(interval.domain).toBe('linear');
@@ -2035,5 +2043,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(() => evaluate('++1')).toThrow(
       'Only identifiers, array elements or record values may be incremented or decremented.'
     );
+  });
+
+  it('supports assigning boolean and', () => {
+    const {fraction} = parseSingle('let foo = 1;foo and= 0;foo');
+    expect(fraction).toBe('0');
   });
 });
