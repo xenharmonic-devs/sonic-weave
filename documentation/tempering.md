@@ -13,6 +13,8 @@ The dot product between two monzos multiplies each component pair-wise and adds 
 
 You can also use the `·` operator in place of ASCII `dot`.
 
+The dot product is always linear scalar valued and works regardless of the the domain of the operands. `3/2 dot 15/8` also evaluates to `4`.
+
 ## Co-vectors for mapping primes
 In some sense the dot product measures how well two vectors are aligned with each other. To be more precise we measure the prime content using geometric inverses of the prime vectors that inhabit a new *co-logarithmic* domain.
 
