@@ -110,6 +110,8 @@ function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
     sign: '',
     whole: sw2Node.whole ?? 0n,
     fractional: sw2Node.fractional ?? '',
+    exponent: null,
+    real: false,
   };
   let numerator: bigint | number = node.whole;
   let denominator: bigint | number = 1200n;

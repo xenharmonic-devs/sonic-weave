@@ -53,7 +53,7 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
     } else if (element === 'Hz' || element === 'hz') {
       subgroup.push(HERTZ_MONZO);
       checkSpan();
-    } else if (element === 'rc') {
+    } else if (element === 'rc' || element === 'r¢') {
       subgroup.push(REAL_CENT_MONZO);
       checkSpan();
     } else if (element === '1\\' || element === '1°') {

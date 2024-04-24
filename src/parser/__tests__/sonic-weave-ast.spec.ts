@@ -173,6 +173,8 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         sign: '',
         whole: 1n,
         fractional: '955',
+        exponent: null,
+        real: false,
       },
     });
   });

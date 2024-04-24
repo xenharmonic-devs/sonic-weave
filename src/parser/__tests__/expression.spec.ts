@@ -431,7 +431,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a just intonation point', () => {
     const marvelCents = evaluate('JIP(225/224)') as Interval;
-    expect(marvelCents.toString()).toBe('7.711522991319323rc');
+    expect(marvelCents.toString()).toBe('7.711522991319323r¢');
   });
 
   it('parses negative intervals correctly', () => {
@@ -1394,7 +1394,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('converts a mixture of rational and irrational to real in cents conversion', () => {
     const c = evaluate('cents(3/2 % 1.00123r)') as Interval;
-    expect(c.toString()).toBe('699.8268915041559rc');
+    expect(c.toString()).toBe('699.8268915041559r¢');
     expect(c.value.totalCents()).toBeCloseTo(699.82689);
   });
 
@@ -1878,7 +1878,7 @@ describe('SonicWeave expression evaluator', () => {
     const miksiTeitSen = evaluate(
       '1 = 440Hz; relative([10000>@Hz)'
     ) as Interval;
-    expect(miksiTeitSen.toString()).toBe('-10537.63165622959rc');
+    expect(miksiTeitSen.toString()).toBe('-10537.63165622959r¢');
   });
 
   it('it formats one quebihertz', () => {
@@ -2048,5 +2048,27 @@ describe('SonicWeave expression evaluator', () => {
   it('supports assigning boolean and', () => {
     const {fraction} = parseSingle('let foo = 1;foo and= 0;foo');
     expect(fraction).toBe('0');
+  });
+
+  it('converts the neutrino to cents as fractions of the octave', () => {
+    // XXX: Precision is off by a factor of 2.84, but at least the order of magnitude is correct.
+    const neutrino = evaluate('cents([1889 -2145 138 424⟩, 12)') as Interval;
+    expect(neutrino.toString()).toBe('0.000000000466');
+  });
+
+  it('converts the neutrino to real cents', () => {
+    // XXX: Precision is off by a factor of 2.84, but at least the order of magnitude is correct.
+    const neutrino = evaluate('cents([1889 -2145 138 424⟩)') as Interval;
+    expect(neutrino.toString()).toBe('4.6552193953432127e-10r¢');
+  });
+
+  it('parses cents with exponents', () => {
+    const {interval} = parseSingle('4.65e-2¢');
+    expect(interval.totalCents()).toBeCloseTo(4.65e-2, 6);
+  });
+
+  it('parses real cents with exponents', () => {
+    const smol = evaluate('4.6552193953432127e-10r¢') as Interval;
+    expect(smol.totalCents()).toBeCloseTo(4.6552193953432127e-10, 12);
   });
 });

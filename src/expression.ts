@@ -72,7 +72,7 @@ export type WartBasisElement = BasisFraction | '';
 
 export type ValBasisElement = WartBasisElement | 's' | 'Hz' | 'hz';
 
-export type BasisElement = ValBasisElement | 'rc' | '1\\' | '1°';
+export type BasisElement = ValBasisElement | 'rc' | 'r¢' | '1\\' | '1°';
 
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
@@ -121,10 +121,13 @@ export type CentsLiteral = {
   sign: Sign;
   whole: bigint;
   fractional: string;
+  exponent: number | null;
+  real: boolean;
 };
 
 export type CentLiteral = {
   type: 'CentLiteral';
+  real: boolean;
 };
 
 export type ReciprocalCentLiteral = {
@@ -642,6 +645,8 @@ export function mulNodes(
         sign: a.value < 0n ? '-' : '',
         whole: bigAbs(a.value),
         fractional: '',
+        exponent: null,
+        real: b.real,
       };
     } else if (b.type === 'StepLiteral') {
       return {
@@ -652,7 +657,7 @@ export function mulNodes(
     return undefined;
   }
   if (a.type === 'DecimalLiteral') {
-    if (a.exponent || a.flavor) {
+    if (a.flavor === 'z') {
       return undefined;
     }
     if (b.type === 'CentLiteral') {
@@ -661,6 +666,8 @@ export function mulNodes(
         sign: a.sign,
         whole: a.whole,
         fractional: a.fractional,
+        exponent: a.exponent,
+        real: b.real || a.flavor === 'r',
       };
     }
     return undefined;
@@ -835,6 +842,18 @@ function formatDecimal(literal: DecimalLiteral) {
   return `${result}${exponent}${literal.flavor}`;
 }
 
+function formatCents(literal: CentsLiteral) {
+  const result =
+    literal.sign + literal.whole.toString() + '.' + literal.fractional;
+  const exponent = literal.exponent ? 'e' + literal.exponent.toString() : '';
+  if (literal.real) {
+    return `${result}${exponent}r¢`;
+  } else if (exponent) {
+    return `${result}${exponent}¢`;
+  }
+  return result;
+}
+
 /** @hidden */
 export function formatComponent(component: VectorComponent) {
   const {sign, left, separator, right, exponent} = component;
@@ -932,9 +951,9 @@ export function literalToString(literal: IntervalLiteral) {
     case 'DecimalLiteral':
       return formatDecimal(literal);
     case 'CentsLiteral':
-      return `${literal.sign}${literal.whole}.${literal.fractional}`;
+      return formatCents(literal);
     case 'CentLiteral':
-      return 'c';
+      return `${literal.real ? 'r' : ''}¢`;
     case 'ReciprocalCentLiteral':
       return '€';
     case 'FJS':

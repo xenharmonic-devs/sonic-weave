@@ -167,6 +167,7 @@ const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const TEN_MONZO = new TimeMonzo(ZERO, [ONE, ZERO, ONE]);
 const KIBI_MONZO = new TimeMonzo(ZERO, [F(10)]);
 const CENT_MONZO = new TimeMonzo(ZERO, [F(1, 1200)]);
+const CENT_REAL = new TimeReal(0, 1.0005777895065548);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [F(1200)]);
 
 function typesCompatible(
@@ -315,9 +316,10 @@ export class ExpressionVisitor {
       case 'CentsLiteral':
         return this.visitCentsLiteral(node);
       case 'CentLiteral':
-        return new Interval(CENT_MONZO, 'logarithmic', 0, {
-          type: 'CentLiteral',
-        });
+        if (node.real) {
+          return new Interval(CENT_REAL, 'logarithmic', 0, node);
+        }
+        return new Interval(CENT_MONZO, 'logarithmic', 0, node);
       case 'ReciprocalCentLiteral':
         return new Val(RECIPROCAL_CENT_MONZO, TWO_MONZO, {
           type: 'ReciprocalCentLiteral',
@@ -1551,11 +1553,20 @@ export class ExpressionVisitor {
   }
 
   protected visitCentsLiteral(node: CentsLiteral): Interval {
+    if (node.real) {
+      throw new Error('Unexpected real cents.');
+    }
     let numerator: bigint | number = node.whole;
     let denominator: bigint | number = 1200n;
     for (const c of node.fractional) {
       numerator = 10n * numerator + BigInt(c);
       denominator *= 10n;
+    }
+    const exponent = BigInt(node.exponent || 0);
+    if (exponent > 0) {
+      numerator *= 10n ** exponent;
+    } else if (exponent < 0) {
+      denominator *= 10n ** -exponent;
     }
     const factor = gcd(numerator, denominator);
     numerator = Number(numerator / factor);
@@ -1565,6 +1576,8 @@ export class ExpressionVisitor {
       value = new TimeMonzo(ZERO, [new Fraction(numerator, denominator)]);
     } catch {
       value = TimeReal.fromCents((1200 * numerator) / denominator);
+      node = {...node};
+      node.real = true;
     }
     return new Interval(value, 'logarithmic', 0, node);
   }

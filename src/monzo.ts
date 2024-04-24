@@ -602,18 +602,29 @@ export class TimeReal {
    * Obtain an AST node representing the time real as a cents literal.
    * @returns Cents literal or a hacky real cents literal if necessary.
    */
-  asCentsLiteral(): CentsLiteral {
+  asCentsLiteral(): CentsLiteral | undefined {
+    if (this.timeExponent) {
+      return undefined;
+    }
     const cents = this.totalCents();
     if (isNaN(cents)) {
-      throw new Error('Cannot represent NaN in cents.');
+      return undefined;
     }
     if (!isFinite(cents)) {
-      throw new Error('Cannot represent Infinity in cents.');
+      return undefined;
     }
-    let {sign, whole, fractional} = numberToDecimalLiteral(cents, 'r');
-    // Note: This abuses the grammar
-    fractional += 'rc';
-    return {type: 'CentsLiteral', sign, whole, fractional};
+    const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+      cents,
+      'r'
+    );
+    return {
+      type: 'CentsLiteral',
+      sign,
+      whole,
+      fractional,
+      exponent,
+      real: true,
+    };
   }
 
   /**
@@ -705,7 +716,10 @@ export class TimeReal {
       return value;
     }
     if (!this.timeExponent) {
-      return literalToString(this.asCentsLiteral());
+      const node = this.asCentsLiteral();
+      if (node) {
+        return literalToString(node);
+      }
     }
     return literalToString(this.asMonzoLiteral());
   }
@@ -2241,25 +2255,28 @@ export class TimeMonzo {
    * Obtain an AST node representing the time monzo as a cents literal.
    * @returns Cents literal or a hacky real cents literal if necessary.
    */
-  asCentsLiteral(): CentsLiteral {
+  asCentsLiteral(): CentsLiteral | undefined {
+    if (!this.isScalar()) {
+      return undefined;
+    }
     if (this.isPowerOfTwo()) {
       const cents = this.octaves.mul(1200);
       if (isDecimal(cents)) {
-        const {sign, whole, fractional} = numberToDecimalLiteral(cents, 'e');
-        return {type: 'CentsLiteral', sign, whole, fractional};
+        const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+          cents,
+          'e'
+        );
+        return {
+          type: 'CentsLiteral',
+          sign,
+          whole,
+          fractional,
+          exponent,
+          real: false,
+        };
       }
     }
-    const cents = this.totalCents();
-    if (isNaN(cents)) {
-      throw new Error('Cannot represent NaN in cents.');
-    }
-    if (!isFinite(cents)) {
-      throw new Error('Cannot represent Infinity in cents.');
-    }
-    let {sign, whole, fractional} = numberToDecimalLiteral(cents, 'r');
-    // Note: This abuses the grammar
-    fractional += 'rc';
-    return {type: 'CentsLiteral', sign, whole, fractional};
+    return undefined;
   }
 
   /**

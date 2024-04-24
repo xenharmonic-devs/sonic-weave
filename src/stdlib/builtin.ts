@@ -718,13 +718,15 @@ function cents(
       new Fraction(numerator, denominator * 1200),
     ]);
   }
-  converted.node = converted.value.asCentsLiteral();
-  // XXX: Detect and follow grammar abuse.
-  if (converted.node.fractional.endsWith('rc')) {
-    converted.value = TimeReal.fromCents(converted.totalCents());
+  const node = converted.value.asCentsLiteral();
+  if (node) {
+    converted.node = node;
+    converted.domain = 'logarithmic';
+    return converted;
   }
-  converted.domain = 'logarithmic';
-  return converted;
+  // Convert to real cents
+  const value = TimeReal.fromCents(converted.totalCents());
+  return new Interval(value, 'logarithmic', 0, value.asCentsLiteral());
 }
 cents.__doc__ =
   'Convert interval to cents. `fractionDigits` represents the number of decimal digits in the cents representation. May produce non-algebraic (real) results if number of digits is not given. String arguments are interpreted as denoting cent quantities, not linear fractions.';
@@ -1372,13 +1374,12 @@ function PrimeMapping(
     for (let i = 0; i < np.length; ++i) {
       mapped = mapped.mul(np[i].pow(monzo.primeExponents[i]));
     }
-    return new Interval(
-      mapped,
-      'logarithmic',
-      0,
-      mapped.asCentsLiteral(),
-      interval
-    );
+    let node = mapped.asCentsLiteral();
+    if (!node) {
+      mapped = TimeReal.fromCents(mapped.totalCents());
+      node = mapped.asCentsLiteral();
+    }
+    return new Interval(mapped, 'logarithmic', 0, node, interval);
   }
   const r = repr.bind(this);
   Object.defineProperty(mapper, 'name', {

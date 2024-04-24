@@ -822,6 +822,8 @@ ScalarMultiple
         sign: scalar.sign,
         whole: scalar.whole,
         fractional: scalar.fractional,
+        exponent: null,
+        real: false,
       };
     }
     return scalar;
@@ -1096,7 +1098,7 @@ SparseOffsetVal
 
 ValBasisElement = Fraction / $SecondToken / $HertzToken / $LowHertzToken
 
-BasisElement = ValBasisElement / $RealCentToken / '1\\' / '1°' / ''
+BasisElement = ValBasisElement / $RealCentToken / 'r¢' / '1\\' / '1°' / ''
 
 ValBasis = (ValBasisElement / '')|.., '.'|
 
@@ -1105,7 +1107,7 @@ SubgroupBasis = BasisElement|.., '.'|
 WartBasis = (Fraction / '')|.., '.'|
 
 CentLiteral
-  = (CentToken / '¢') { return { type: 'CentLiteral' }; }
+  = real: 'r'? (CentToken / '¢') { return { type: 'CentLiteral', real: !!real }; }
 
 HertzLiteral
   = LowHertzToken {
