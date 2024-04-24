@@ -424,4 +424,14 @@ describe('Extended monzo with time', () => {
       90, 120, 180, 360,
     ]);
   });
+
+  it('measures the size of the neutrino', () => {
+    const neutrino = new TimeMonzo(new Fraction(0), [
+      new Fraction(1889),
+      new Fraction(-2145),
+      new Fraction(138),
+      new Fraction(424),
+    ]);
+    expect(neutrino.totalCents()).toBeCloseTo(1.6361187484440885e-10, 11);
+  });
 });

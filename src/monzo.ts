@@ -37,6 +37,7 @@ import {
   literalToString,
   ValLiteral,
 } from './expression';
+import {sum} from './polyfils/sum-precise';
 
 /**
  * Fractional prime exponents of rational numbers for exact representation of square roots etc.
@@ -2009,11 +2010,28 @@ export class TimeMonzo {
     if (ignoreSign) {
       residualValue = Math.abs(residualValue);
     }
-    let total = valueToCents(residualValue);
-    for (let i = 0; i < this.primeExponents.length; ++i) {
-      total += this.primeExponents[i].valueOf() * PRIME_CENTS[i];
+    const terms = [valueToCents(residualValue)];
+    const pe = this.primeExponents.map(e => e.valueOf());
+    let minSize = Infinity;
+    for (const component of pe) {
+      const size = Math.abs(component);
+      if (size && size < minSize) {
+        minSize = size;
+      }
     }
-    return total;
+    if (isFinite(minSize)) {
+      let grandFactor = 1;
+      for (let i = 0; i < pe.length; ++i) {
+        const exponent = Math.round(pe[i] / minSize);
+        grandFactor *= PRIMES[i] ** exponent;
+        pe[i] -= exponent * minSize;
+      }
+      terms.push(valueToCents(grandFactor) * minSize);
+    }
+    for (let i = 0; i < pe.length; ++i) {
+      terms.push(pe[i] * PRIME_CENTS[i]);
+    }
+    return sum(terms);
   }
 
   /**
