@@ -579,19 +579,6 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('prioritizes unary expression over plain', () => {
-    const ast = parseSingle('i--');
-    expect(ast).toEqual({
-      type: 'ExpressionStatement',
-      expression: {
-        type: 'UpdateExpression',
-        operator: '--',
-        argument: {type: 'Identifier', id: 'i'},
-        prefix: false,
-      },
-    });
-  });
-
   it('parses a lone comma-decimal', () => {
     const ast = parseSingle('3,14');
     expect(ast).toEqual({

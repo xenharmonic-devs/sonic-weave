@@ -7,12 +7,11 @@
     ArraySlice: "object",
   };
 
-  function UpdateExpression(operator, argument, prefix) {
+  function UpdateExpression(operator, argument) {
     return {
       type: 'UpdateExpression',
       operator,
       argument,
-      prefix,
     };
   }
 
@@ -708,15 +707,11 @@ UnaryExpression
   / operator: ChainableUnaryOperator __ operand: (LabeledExpression / UnaryExpression) {
     return UnaryExpression(operator, operand, false);
   }
-  / operator: ('--' / '++' / '+') operand: LabeledExpression {
+  / operator: ('--' / '++' / '+')? operand: LabeledExpression {
     if (operator === '+') {
       return UnaryExpression(operator, operand, false);
-    }
-    return UpdateExpression(operator, operand, true);
-  }
-  / operand: LabeledExpression operator: ('--' / '++')? {
-    if (operator) {
-      return UpdateExpression(operator, operand, false);
+    } else if (operator) {
+      return UpdateExpression(operator, operand);
     }
     return operand;
   }

@@ -2012,12 +2012,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('increments an array element', () => {
-    const arr = evaluate('const arr = [1, 2];arr[1]++;map(str, arr)');
+    const arr = evaluate('const arr = [1, 2];++arr[1];map(str, arr)');
     expect(arr).toEqual(['1', '3']);
   });
 
   it('increments a record value', () => {
-    const rec = evaluate('const rec = {a: 1, b: 2};rec["a"]++;rec') as Record<
+    const rec = evaluate('const rec = {a: 1, b: 2};++rec["a"];rec') as Record<
       string,
       Interval
     >;
@@ -2025,26 +2025,14 @@ describe('SonicWeave expression evaluator', () => {
     expect(rec.b.toInteger()).toBe(2);
   });
 
-  it('increments an array (prefix)', () => {
+  it('increments an array', () => {
     const arr = evaluate('let arr = [1, 2];++arr') as Interval[];
     expect(arr[0].toInteger()).toBe(2);
     expect(arr[1].toInteger()).toBe(3);
   });
 
-  it('increments (?) an array (postfix)', () => {
-    const arr = evaluate('let arr = [1, 2];arr++') as Interval[];
-    expect(arr[0].toInteger()).toBe(1);
-    expect(arr[1].toInteger()).toBe(2);
-  });
-
-  it('increments an array (postfix)', () => {
-    const arr = evaluate('let arr = [1, 2];arr++;arr') as Interval[];
-    expect(arr[0].toInteger()).toBe(2);
-    expect(arr[1].toInteger()).toBe(3);
-  });
-
   it('reject literal increment', () => {
-    expect(() => evaluate('1++')).toThrow(
+    expect(() => evaluate('++1')).toThrow(
       'Only identifiers, array elements or record values may be incremented or decremented.'
     );
   });

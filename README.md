@@ -121,9 +121,7 @@ SonicWeave comes with some operators.
 | Lift          | `/2`    | *           | `/P8`       | `P8 + 5\`  |
 | Drop          | `\2`    | *           | `\P8`       | `P8 - 5\`  |
 | Increment     | `++i`   | `3`         | _N/A_       |            |
-| Increment     | `i++`   | `2`         | _N/A_       |            |
 | Decrement     | `--i`   | `1`         | _N/A_       |            |
-| Decrement     | `i--`   | `2`         | _N/A_       |            |
 
 *) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. These operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
 
@@ -469,7 +467,7 @@ results in `$ = [1\6, 2\6, 3\6, 4\6, 5\6, 6\6]`.
 The `continue` keyword terminates the execution of the current iteration of a "while" or "for" loop and continues with the next iteration.
 ```javascript
 let i = 8;
-while (i++ < 16) {
+while (++i <= 16) {
   if (i > 12 and i mod 2) {
     continue
   }

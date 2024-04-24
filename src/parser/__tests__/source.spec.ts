@@ -142,11 +142,11 @@ describe('SonicWeave parser', () => {
   it('can affect the outer context from inside a block statement', () => {
     let i = 5;
     while (i) {
-      i--;
+      --i;
     }
-    const scale = parseSource('let i = 5; while (i) { i--; }');
+    const scale = parseSource('let i = 5; while (i) { --i; }');
     expect(scale).toHaveLength(5);
-    expect(scale.map(i => i.toString()).join(';')).toBe('5;4;3;2;1');
+    expect(scale.map(i => i.toString()).join(';')).toBe('4;3;2;1;0');
   });
 
   it('supports explicit arguments to builtin functions', () => {

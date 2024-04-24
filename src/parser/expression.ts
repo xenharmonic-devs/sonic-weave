@@ -1010,10 +1010,7 @@ export class ExpressionVisitor {
         'Only identifiers, array elements or record values may be incremented or decremented.'
       );
     }
-    if (node.prefix) {
-      return newValue;
-    }
-    return argument;
+    return newValue;
   }
 
   protected tensor(

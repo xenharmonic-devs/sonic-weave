@@ -254,7 +254,6 @@ export type UpdateExpression = {
   type: 'UpdateExpression';
   operator: UpdateOperator;
   argument: Expression;
-  prefix: boolean;
 };
 
 export type DownExpression = {

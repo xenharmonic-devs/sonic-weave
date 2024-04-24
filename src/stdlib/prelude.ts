@@ -190,7 +190,7 @@ riff ftom(freq) {
 }
 
 riff void() {
-  "Get rid of expression results. \`void(i++)\` increments the value but doesn't push anything onto the scale.";
+  "Get rid of expression results. \`void(++i)\` increments the value but doesn't push anything onto the scale.";
   return;
 }
 
@@ -253,17 +253,17 @@ riff stacked(array) {
 riff diff(array) {
   "Calculate the (linear) differences between the terms.";
   array;
-  let i = length($) - 1;
-  while (i--)
-    $[i + 1] ~-= $[i];
+  let i = length($);
+  while (--i)
+    $[i] ~-= $[i - 1];
 }
 
 riff unstack(array = $$) {
   "Unstack the current/given scale into steps.";
   $ = array;
-  let i = length($) - 1;
-  while (i--)
-    $[i + 1] ~%= $[i];
+  let i = length($);
+  while (--i)
+    $[i] ~%= $[i - 1];
   return;
 }
 
@@ -283,9 +283,9 @@ riff unperiostack(array = $$) {
   "Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.";
   $ = array;
   const first = $[0] ~% $[-1];
-  let i = length($) - 1;
-  while (i--)
-    $[i + 1] ~%= $[i];
+  let i = length($);
+  while (--i)
+    $[i] ~%= $[i - 1];
   $[0] = first;
   return;
 }
@@ -340,13 +340,14 @@ riff labeled(labels, scale = $$) {
 
 riff enumerate(array = $$) {
   "Produce an array of [index, element] pairs from the given current/given array.";
-  let i = 0;
-  return [[i++, element] for element of array];
+  let i = -1;
+  return [[++i, element] for element of array];
 }
 
 riff tune(a, b, numIter = 1, weighting = 'tenney') {
   "Find a combination of two vals that is closer to just intonation.";
-  while (numIter--) {
+  ++numIter;
+  while (--numIter) {
     const x = 2 * a - b;
     const y = a + b;
     const z = 2 * b - a;
@@ -358,7 +359,8 @@ riff tune(a, b, numIter = 1, weighting = 'tenney') {
 
 riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
   "Find a combination of three vals that is closer to just intonation.";
-  while (numIter--) {
+  ++numIter;
+  while (--numIter) {
     const combos = [
       a,
       b,
@@ -459,16 +461,16 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
   const up = length(commaFractions) - down;
 
   let accumulator = 1;
-  let i = 0;
-  while (i < up) {
-    accumulator *~= generator ~* comma ~^ commaFractions[down + i++];
+  let i = -1;
+  while (++i < up) {
+    accumulator *~= generator ~* comma ~^ commaFractions[down + i];
     accumulator;
   }
 
   accumulator = 1;
-  i = 0;
-  while (i < down) {
-    accumulator %~= generator ~* comma ~^ commaFractions[down - 1 - i++];
+  i = -1;
+  while (++i < down) {
+    accumulator %~= generator ~* comma ~^ commaFractions[down - 1 - i];
     accumulator;
   }
   period;
@@ -534,9 +536,9 @@ riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
 riff gs(generators, size, period = 2, numPeriods = 1) {
   "Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.";
   size = round(size % numPeriods);
-  let i = 0;
+  let i = -1;
   while (--size > 0) {
-    generators[i++ mod length(generators)];
+    generators[++i mod length(generators)];
   }
   simplify;
   stack();
@@ -553,16 +555,16 @@ riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
   period;
   equaveReduce();
   sort();
-  let i = 0;
+  let i = -1;
   while (ordinal) {
-    accumulator *~= generators[i++ mod length(generators)];
+    accumulator *~= generators[++i mod length(generators)];
     push(accumulator ~rd period, $$);
     if (length($$) > maxSize) {
       throw "No constant structure found before reaching maximum size.";
     }
     sort($$);
     if (hasConstantStructure($$)) {
-      void(ordinal--);
+      void(--ordinal);
     }
   }
   repeat(numPeriods);

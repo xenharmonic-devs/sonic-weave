@@ -352,7 +352,7 @@ describe('SonicWeave standard library', () => {
   it('can access docstrings', () => {
     const doc = evaluateExpression('doc(void)');
     expect(doc).toBe(
-      "Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale."
+      "Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale."
     );
   });
 
