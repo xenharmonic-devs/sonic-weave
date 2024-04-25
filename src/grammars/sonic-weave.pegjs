@@ -145,13 +145,6 @@ TryToken           = @'try'      !IdentifierPart
 TrueToken          = @'true'     !IdentifierPart
 WhileToken         = @'while'    !IdentifierPart
 
-// Tokens representing units can only appear along scalars so they're not reserved.
-CentToken     = @'c'  !IdentifierPart
-HertzToken    = @'Hz' !IdentifierPart
-LowHertzToken = @'hz' !IdentifierPart
-RealCentToken = @'rc' !IdentifierPart
-SecondToken   = @'s'  !IdentifierPart
-
 Statements
   = head: Statement tail: (_ @Statement)* {
     return prepend(head, tail);
@@ -1010,28 +1003,6 @@ FractionLiteral
     };
   }
 
-Fraction
-  = numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
-    return {
-      numerator,
-      denominator,
-    };
-  }
-
-VectorComponent
-  = sign: SignPart left: BasicInteger separator: '/' right: $(PositiveBasicInteger) {
-    return {sign, left, separator, right, exponent: null};
-  }
-  / sign: SignPart left: BasicInteger separator: '.' right: UnderscoreDigits exponent: ExponentPart? {
-    return {sign, left, separator, right, exponent};
-  }
-  / sign: SignPart left: BasicInteger exponent: ExponentPart? {
-    return {sign, left, separator: '', right: '', exponent};
-  }
-
-VectorComponents
-  = VectorComponent|.., _ ','? _|
-
 UpsAndDowns 'up-and-down'
   = ('^' / 'v' / '/' / '\\')* {
     const t = text();
@@ -1097,14 +1068,6 @@ SparseOffsetVal
       basis,
     }
   }
-
-ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
-
-BasisElement = ValBasisElement / RealCentToken / 'r¢' / '1\\' / '1°' / ''
-
-ValBasis = (ValBasisElement / '')|.., '.'|
-
-SubgroupBasis = BasisElement|.., '.'|
 
 WartBasis = (Fraction / '')|.., '.'|
 

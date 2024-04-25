@@ -20,22 +20,6 @@ StringLiteral
   = '"' chars: DoubleStringCharacter* '"' { return empty; }
   / "'" chars: SingleStringCharacter* "'" { return empty; }
 
-VectorComponent
-  = sign: SignPart left: BasicInteger separator: '/' right: $(PositiveBasicInteger) {
-    return {sign, left, separator, right, exponent: null};
-  }
-  / sign: SignPart left: BasicInteger separator: '.' right: UnderscoreDigits exponent: ExponentPart? {
-    return {sign, left, separator, right, exponent};
-  }
-  / sign: SignPart left: BasicInteger exponent: ExponentPart? {
-    return {sign, left, separator: '', right: '', exponent};
-  }
-
-VectorComponents
-  = VectorComponent|.., _ ','? _|
-
-Rational = $(PositiveInteger ('/' PositiveInteger)?)
-
 MonzoLiteral
   = '[' _ VectorComponents _ [>⟩] {
     return empty;

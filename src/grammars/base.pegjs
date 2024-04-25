@@ -39,6 +39,9 @@ BasicInteger
 PositiveBasicInteger
   = num: $([1-9] DecimalDigit*) { return parseInt(num, 10) }
 
+DenominatorPart
+  = $([1-9] DecimalDigit*)
+
 SignedBasicInteger
   = num: $([+-]? ('0' / ([1-9] DecimalDigit*))) { return parseInt(num, 10) }
 
@@ -199,3 +202,41 @@ SingleLineComment
 
 SingleLineCommentChar
   = !LineTerminator SourceCharacter
+
+// Chord parser needs to know what monzo components look like
+VectorComponent
+  = sign: SignPart left: BasicInteger separator: '/' right: DenominatorPart {
+    return {sign, left, separator, right, exponent: null};
+  }
+  / sign: SignPart left: BasicInteger separator: '.' right: UnderscoreDigits exponent: ExponentPart? {
+    return {sign, left, separator, right, exponent};
+  }
+  / sign: SignPart left: BasicInteger exponent: ExponentPart? {
+    return {sign, left, separator: '', right: '', exponent};
+  }
+
+VectorComponents
+  = VectorComponent|.., _ ','? _|
+
+Fraction
+  = numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
+    return {
+      numerator,
+      denominator,
+    };
+  }
+
+// Tokens representing units can only appear along scalars so they're not reserved.
+CentToken     = @'c'  !IdentifierPart
+HertzToken    = @'Hz' !IdentifierPart
+LowHertzToken = @'hz' !IdentifierPart
+RealCentToken = @'rc' !IdentifierPart
+SecondToken   = @'s'  !IdentifierPart
+
+ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
+
+BasisElement = ValBasisElement / RealCentToken / 'r¢' / '1\\' / '1°' / ''
+
+ValBasis = (ValBasisElement / '')|.., '.'|
+
+SubgroupBasis = BasisElement|.., '.'|
