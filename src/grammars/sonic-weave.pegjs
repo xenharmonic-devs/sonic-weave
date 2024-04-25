@@ -184,14 +184,14 @@ ReassignmentTail
   }
 
 VariableManipulationStatement
-  = name: IdentifierArray _ '=' _ value: Expression EOS {
+  = &SourceCharacter name: IdentifierArray _ '=' _ value: Expression EOS {
     return {
       type: 'AssignmentStatement',
       name,
       value,
     };
   }
-  / name: AccessExpression tail: ReassignmentTail? EOS {
+  / &SourceCharacter name: AccessExpression tail: ReassignmentTail? EOS {
     if (!tail) {
       return {
         type: 'ExpressionStatement',
@@ -250,7 +250,7 @@ FunctionDeclaration
   }
 
 PitchDeclaration
-  = left: AbsoluteFJS middle: (_ '=' _ @Expression)? right: (_ '=' _ @Expression)? EOS {
+  = &SourceCharacter left: AbsoluteFJS middle: (_ '=' _ @Expression)? right: (_ '=' _ @Expression)? EOS {
     if (right) {
       return {
         type: 'PitchDeclaration',
@@ -497,7 +497,7 @@ EmptyStatement
   }
 
 ExpressionStatement
-  = !("{" / FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
+  = &SourceCharacter !("{" / FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
     return {
       type: 'ExpressionStatement',
       expression,
