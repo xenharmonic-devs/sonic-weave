@@ -355,7 +355,7 @@ export class StatementVisitor {
         this.assign(name.identifiers[i], value[i]);
       }
       if (name.rest) {
-        this.assign(name, value.slice(name.identifiers.length));
+        this.assign(name.rest, value.slice(name.identifiers.length));
       }
     } else {
       const id = name.id;

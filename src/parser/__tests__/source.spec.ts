@@ -1278,4 +1278,14 @@ describe('SonicWeave parser', () => {
       '16/5',
     ]);
   });
+
+  it('has rest assignment', () => {
+    const scale = parseSource(`
+      let x, r
+      [x, ...r] = [1, 2, 3, 4]
+      r
+      str;
+    `);
+    expect(scale).toEqual(['2', '3', '4']);
+  });
 });

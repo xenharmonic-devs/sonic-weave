@@ -20,7 +20,7 @@ Array and record types are recursive i.e. arrays may contain other arrays or rec
 
 SonicWeave does not have classes and there's no `value.property` syntax.
 
-The language is weakly typed. Logdivision is particularly leaky: `16 /_ 8` is rational `4/3` but `16 /_ 3` evaluates to a real (floating point) number. However most expressions that can be expressed as a radical (nth root) are exact.
+The language is weakly typed and weakly valued. Logdivision is particularly leaky: `16 /_ 8` is rational `4/3` but `16 /_ 3` evaluates to a real (floating point) number. However most expressions that can be expressed as a radical (nth root) are exact.
 
 ## Operator precedence
 
