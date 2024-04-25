@@ -925,7 +925,7 @@ export class Interval {
 
       const C4 = context.C4;
       const relativeToC4 = this.value.div(C4);
-      if (relativeToC4 instanceof TimeReal) {
+      if (relativeToC4 instanceof TimeReal || !relativeToC4.isScalar()) {
         return undefined;
       }
       const node = asAbsoluteFJS(relativeToC4, this.node.flavor);

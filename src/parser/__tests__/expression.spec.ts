@@ -2071,4 +2071,9 @@ describe('SonicWeave expression evaluator', () => {
     const smol = evaluate('4.6552193953432127e-10r¢') as Interval;
     expect(smol.totalCents()).toBeCloseTo(4.6552193953432127e-10, 12);
   });
+
+  it("doesn't render non-standard pitches as absolute FJS", () => {
+    const suchE = evaluate('C4 = 256 Hz; str(E4 + E4)');
+    expect(suchE).toBe('[-2 4 8>@s.2..');
+  });
 });

@@ -1288,4 +1288,26 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['2', '3', '4']);
   });
+
+  it('freezes existing content on unison frequency re-declaration', () => {
+    const scale = parseSource(`
+      1 = 256 Hz
+      // Every scalar is henceforth interpreted as multiples of 256 hertz.
+      5/4 // 320 Hz
+      3/2 // 384 Hz
+      2   // 512 Hz
+
+      // Upon re-declaration of the unison frequency the existing content is converted to frequencies.
+      1 = 440 Hz
+      // From now on scalars are multiples of 440 hertz instead.
+      16/11 // 640 Hz
+      9/5   // 792 Hz
+      2     // 880 Hz
+
+      // Manual conversion
+      absolute
+    `);
+    const freqs = scale.map(i => i.valueOf());
+    expect(freqs).toEqual([320, 384, 512, 640, 792, 880]);
+  });
 });

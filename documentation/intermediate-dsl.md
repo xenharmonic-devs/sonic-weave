@@ -191,7 +191,7 @@ Values in SonicWeave fall into these categories
 
 ## Interval domains
 
-As explained in [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md#domains) documentation. We need two distinct domains if we wish to capture the informal notion where `1 + 1/8` is `9/8` but also where `500. + 500.` is `1000.`.
+As explained in [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md#domains) documentation. We need two distinct domains, *linear* and *logarithmic*, if we wish to capture the informal notion where `1 + 1/8` is `9/8` but also where `500. + 500.` is `1000.`.
 
 Especially scalar multiplication and division can be hard to wrap your head around. An expression like `3 * x` is always equal to `x + x + x` no matter the domain of `x`. Similarly `const y = x / 3` results in an `y` such that `y + y + y` is equal to `x`.
 
@@ -199,4 +199,50 @@ This means that multiplication between linear and logarithmic quantities is the 
 
 Similarly a logarithmic quantity divided by a linear quantity is equivalent to taking an nth root. `P5 / 2` is doing `FJS( (3/2) ^ (1/2) )` or taking advantage of the exotic *recipropower* operator and operator precedence of fractions in SonicWeave `FJS( 3/2 /^ 2)`
 
-Division of logarithmic quantities is a true mind-bender: `m7` is `2 * P4` so correspondingly `m7 / P4` evaluates to `2`, a linear scalar!
+Division of logarithmic quantities is a true mind-bender: `m7` is `2 * P4` so correspondingly `m7 / P4` evaluates to `2`, a linear scalar! The underlying operation is that of *logdivision* or log-in-the-base-of in conventional mathematical notation. You may verify for yourself that the logarithm of 16/9 in the base of 4/3 is indeed 2, written as `16/9 /_ 4/3` in SonicWeave. Looking at cents may offer a more natural perspective. It's hopefully less surprising that `1000. / 500.` is `2`.
+
+## Interval echelons
+
+There are two *echelons* in SonicWeave: *absolute* and *relative*. Relative intervals are also called scalars and absolute intervals non-scalars.
+
+Frequencies are the most common non-scalars. They're required for declaring the reference frequency and we can use them as is:
+```c
+1 = 256 Hz
+320 Hz
+384 Hz
+512 Hz
+```
+
+Re-declaring the reference is not recommended as it involves an implicit relative-to-absolute conversion.
+
+```c
+1 = 256 Hz
+// Every scalar is henceforth interpreted as multiples of 256 hertz.
+5/4 // 320 Hz
+3/2 // 384 Hz
+2   // 512 Hz
+
+// Upon unison frequency re-declaration the existing content is converted to frequencies.
+1 = 440 Hz
+// From now on scalars are multiples of 440 hertz instead.
+16/11 // 640 Hz
+9/5   // 792 Hz
+2     // 880 Hz
+```
+
+Durations like seconds or milliseconds are also supported. They're interpreted as periods of oscillation i.e. inverse frequencies.
+
+```c
+"Upwards sounding minor chord /6:5:4:3"
+1 = 6 ms
+5 ms
+4 ms
+3 ms
+```
+
+Addition of frequencies and scalar multiplication works as you'd expect:
+```c
+1 = 100 Hz
+100 Hz + 50 Hz // 150 Hz
+2 * 100 Hz     // 200 Hz
+```

@@ -9,6 +9,7 @@ import {
   SonicWeavePrimitive,
   sort,
   temper,
+  absolute,
 } from '../stdlib';
 import {RootContext} from '../context';
 import {
@@ -486,6 +487,14 @@ export class StatementVisitor {
     return undefined;
   }
 
+  protected freezeScale() {
+    const a = absolute.bind(this.createExpressionVisitor());
+    const scale = this.currentScale;
+    const frozen = scale.map(i => a(i));
+    scale.length = 0;
+    scale.push(...frozen);
+  }
+
   protected visitPitchDeclaration(node: PitchDeclaration) {
     if (!this.rootContext) {
       throw new Error('Root context required for pitch declaration.');
@@ -527,6 +536,7 @@ export class StatementVisitor {
         }
         // Implicit 1/1
         if (value.value.timeExponent.n) {
+          this.freezeScale();
           const absolute = value.value;
           this.rootContext.unisonFrequency = absolute.pow(
             absolute.timeExponent.inverse().neg()
@@ -558,6 +568,7 @@ export class StatementVisitor {
       absolute = right.value;
       relative = left.value;
     }
+    this.freezeScale();
     this.rootContext.unisonFrequency = absolute
       .pow(absolute.timeExponent.inverse().neg())
       .div(relative) as TimeMonzo;

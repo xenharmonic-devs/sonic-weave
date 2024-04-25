@@ -729,7 +729,7 @@ Obtain an array of values of the record.
 Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default `12`) within the given tolerance (default `5c`). Harmonics equated by the `equave` (default `2/1`) are only included once. The returned segment begins at unison.
 
 ### void()
-Get rid of expression results. `void(i++)` increments the value but doesn't push anything onto the scale.
+Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale.
 
 ### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = 2*)
 Generate a well-temperament by cumulatively modifying the pure fifth `3/2` (or a given generator) by fractions of the syntonic/given comma.
