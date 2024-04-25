@@ -113,10 +113,20 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
       let [id, defaultValue] = parameter.id.split('=');
       parameter.id = id.trim();
       defaultValue = defaultValue.trim().replace(/'/g, '"');
-      parameter.defaultValue = {
-        type: 'StringLiteral',
-        value: JSON.parse(defaultValue),
-      };
+      if (defaultValue.includes('"')) {
+        parameter.defaultValue = {
+          type: 'StringLiteral',
+          value: JSON.parse(defaultValue),
+        };
+      } else if (defaultValue === 'true') {
+        parameter.defaultValue = {
+          type: 'TrueLiteral',
+        };
+      } else if (defaultValue === 'false') {
+        parameter.defaultValue = {
+          type: 'FalseLiteral',
+        };
+      }
     } else if (parameter.id === 'scale') {
       parameter.defaultValue = {
         type: 'Identifier',
