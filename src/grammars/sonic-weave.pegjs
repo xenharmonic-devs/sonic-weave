@@ -48,6 +48,10 @@
     'while',
   ]);
 
+  const PERFECT_DEGREES = new Set([1, 4, 5]);
+  const MID_DEGREES = new Set([4, 5]);
+  const IMPERFECT_DEGREES = new Set([2, 3, 6, 7]);
+
   function UpdateExpression(operator, argument) {
     return {
       type: 'UpdateExpression',
@@ -1168,46 +1172,40 @@ Degree
       negative: !!sign,
       base: (num % 7) + 1,
       octaves: Math.floor(num / 7),
+      imperfect: false,
     };
   }
 
 PerfectDegree
-  = degree: Degree &{ return degree.base === 1; } {
-    return degree;
-  }
+  = @degree:Degree &{ return PERFECT_DEGREES.has(degree.base); }
 
 MidDegree
-  = degree: Degree &{ return [4, 5].includes(degree.base); } {
-    return degree;
-  }
+  = @degree:Degree &{ return MID_DEGREES.has(degree.base); }
 
 ImperfectDegree
-  = degree: Degree &{ return [2, 3, 6, 7].includes(degree.base); } {
-    return degree;
+  = degree: Degree &{ return IMPERFECT_DEGREES.has(degree.base); } {
+    return {
+      ...degree,
+      imperfect: true,
+    };
   }
 
 HalfDegree
   = degree: Degree ('½' / '.5') {
-    return {...degree, base: degree.base + 0.5};
-  }
-
-SplitPythagorean
-  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (HalfDegree / ImperfectDegree) {
     return {
-      type: 'Pythagorean',
-      quality,
-      augmentations,
-      degree,
+      ...degree,
+      base: degree.base + 0.5,
       imperfect: true,
     };
   }
-  / quality: AugmentedQuality augmentations: AugmentedToken* degree: (MidDegree / PerfectDegree) {
+
+SplitPythagorean
+  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (HalfDegree / ImperfectDegree / PerfectDegree) {
     return {
       type: 'Pythagorean',
       quality,
       augmentations,
       degree,
-      imperfect: false,
     };
   }
   / quality: ImperfectQuality degree: (HalfDegree / ImperfectDegree) {
@@ -1215,7 +1213,6 @@ SplitPythagorean
       type: 'Pythagorean',
       quality,
       degree,
-      imperfect: true,
     };
   }
   / quality: MidQuality degree: MidDegree {
@@ -1223,7 +1220,6 @@ SplitPythagorean
       type: 'Pythagorean',
       quality,
       degree,
-      imperfect: false,
     };
   }
   / quality: PerfectQuality degree: PerfectDegree {
@@ -1231,7 +1227,6 @@ SplitPythagorean
       type: 'Pythagorean',
       quality,
       degree,
-      imperfect: false,
     };
   }
 

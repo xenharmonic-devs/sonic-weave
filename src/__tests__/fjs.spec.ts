@@ -236,8 +236,7 @@ describe('FJS interval inflector', () => {
         type: 'Pythagorean',
         quality: {fraction: vulgar, quality: quality as any},
         augmentations,
-        degree: {base, octaves, negative: false},
-        imperfect,
+        degree: {base, octaves, negative: false, imperfect},
       };
       const monzo = pythagoreanMonzo(node);
       const interval = inflect(

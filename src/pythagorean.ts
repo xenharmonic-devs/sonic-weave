@@ -31,6 +31,10 @@ export type Degree = {
    * Number of octaves added to the base interval class.
    */
   octaves: number;
+  /**
+   * Flag to indicate if the degree has minor and major variants.
+   */
+  imperfect: boolean;
 };
 
 /**
@@ -80,7 +84,6 @@ export type Pythagorean = {
   type: 'Pythagorean';
   quality: IntervalQuality;
   augmentations?: AugmentedQuality[];
-  imperfect: boolean;
   degree: Degree;
 };
 
@@ -338,7 +341,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   const quality = node.quality.quality;
 
   // Non-perfect intervals need an extra half-augmented widening
-  if (node.imperfect) {
+  if (node.degree.imperfect) {
     if (
       quality === 'a' ||
       quality === 'Â' ||
@@ -521,11 +524,11 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
     type: 'Pythagorean',
     quality,
     augmentations,
-    imperfect,
     degree: {
       base,
       negative,
       octaves,
+      imperfect,
     },
   };
 }

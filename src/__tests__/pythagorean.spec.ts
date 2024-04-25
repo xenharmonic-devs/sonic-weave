@@ -121,8 +121,7 @@ describe('Pythagorean interval construction from parts', () => {
       type: 'Pythagorean',
       quality: {fraction, quality: quality as any},
       augmentations,
-      imperfect,
-      degree: {negative: degree < 0, base, octaves},
+      degree: {negative: degree < 0, base, octaves, imperfect},
     };
     const monzo = pythagoreanMonzo(node);
     expect(
@@ -176,8 +175,7 @@ describe('Monzo -> node converter', () => {
         quality: 'P',
       },
       augmentations: [],
-      imperfect: false,
-      degree: {base: 5, negative: false, octaves: 0},
+      degree: {base: 5, negative: false, octaves: 0, imperfect: false},
     });
   });
 
@@ -190,8 +188,7 @@ describe('Monzo -> node converter', () => {
         quality: 'M',
       },
       augmentations: [],
-      imperfect: true,
-      degree: {base: 3, negative: false, octaves: 0},
+      degree: {base: 3, negative: false, octaves: 0, imperfect: true},
     });
   });
 
@@ -204,8 +201,7 @@ describe('Monzo -> node converter', () => {
         quality: 'a',
       },
       augmentations: ['a'],
-      imperfect: false,
-      degree: {base: 1, negative: false, octaves: 1},
+      degree: {base: 1, negative: false, octaves: 1, imperfect: false},
     });
   });
 
@@ -218,8 +214,7 @@ describe('Monzo -> node converter', () => {
         quality: 'd',
       },
       augmentations: ['d'],
-      imperfect: true,
-      degree: {base: 7, negative: false, octaves: 0},
+      degree: {base: 7, negative: false, octaves: 0, imperfect: true},
     });
   });
 
@@ -232,8 +227,7 @@ describe('Monzo -> node converter', () => {
         quality: 'n',
       },
       augmentations: [],
-      imperfect: true,
-      degree: {base: 3, negative: false, octaves: 0},
+      degree: {base: 3, negative: false, octaves: 0, imperfect: true},
     });
   });
 
@@ -246,8 +240,7 @@ describe('Monzo -> node converter', () => {
         quality: 'n',
       },
       augmentations: [],
-      imperfect: true,
-      degree: {base: 4.5, negative: false, octaves: 0},
+      degree: {base: 4.5, negative: false, octaves: 0, imperfect: true},
     });
   });
 
@@ -260,8 +253,7 @@ describe('Monzo -> node converter', () => {
         quality: 'd',
       },
       augmentations: ['d'],
-      imperfect: true,
-      degree: {base: 3, negative: true, octaves: 0},
+      degree: {base: 3, negative: true, octaves: 0, imperfect: true},
     });
   });
 });
