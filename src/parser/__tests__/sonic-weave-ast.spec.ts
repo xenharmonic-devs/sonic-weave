@@ -1029,6 +1029,27 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       }
     }
   });
+
+  it('parses boolean not without mutilating a variable name', () => {
+    const ast = parseSingle('not nothing');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'UnaryExpression',
+        operator: 'not',
+        operand: {type: 'Identifier', id: 'nothing'},
+        uniform: false,
+      },
+    });
+  });
+
+  it('parses an identifier that starts with a reserved word', () => {
+    const ast = parseSingle('nientes');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'Identifier', id: 'nientes'},
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

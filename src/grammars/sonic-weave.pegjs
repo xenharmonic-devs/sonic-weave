@@ -7,6 +7,47 @@
     ArraySlice: "object",
   };
 
+  const RESERVED_WORDS = new Set([
+    'and',
+    'break',
+    'by',
+    'catch',
+    'const',
+    'continue',
+    'dot',
+    'drop',
+    'ed',
+    'else',
+    'false',
+    'finally',
+    'for',
+    'if',
+    'in',
+    'lest',
+    'let',
+    'lift',
+    'max',
+    'min',
+    'mod',
+    'modc',
+    'niente',
+    'not',
+    'of',
+    'or',
+    'rd',
+    'rdc',
+    'return',
+    'riff',
+    'fn',
+    'tmpr',
+    'tns',
+    'throw',
+    'to',
+    'try',
+    'true',
+    'while',
+  ]);
+
   function UpdateExpression(operator, argument) {
     return {
       type: 'UpdateExpression',
@@ -65,90 +106,51 @@ Program
     };
   }
 
-AndToken           = 'and'      !IdentifierPart
-BreakToken         = 'break'    !IdentifierPart
-ByToken            = 'by'       !IdentifierPart
-CatchToken         = 'catch'    !IdentifierPart
-ConstToken         = 'const'    !IdentifierPart
-ContinueToken      = 'continue' !IdentifierPart
-DotToken           = 'dot'      !IdentifierPart
-DropToken          = 'drop'     !IdentifierPart
-EdToken            = 'ed'       !IdentifierPart
-ElseToken          = 'else'     !IdentifierPart
-FalseToken         = 'false'    !IdentifierPart
-FinallyToken       = 'finally'  !IdentifierPart
-ForToken           = 'for'      !IdentifierPart
-IfToken            = 'if'       !IdentifierPart
-InToken            = 'in'       !IdentifierPart
-LestToken          = 'lest'     !IdentifierPart
-LetToken           = 'let'      !IdentifierPart
-LiftToken          = 'lift'     !IdentifierPart
-MaxToken           = 'max'      !IdentifierPart
-MinToken           = 'min'      !IdentifierPart
-ModToken           = 'mod'      !IdentifierPart
-ModCeilingToken    = 'modc'     !IdentifierPart
-NoneToken          = 'niente'   !IdentifierPart
-NotToken           = 'not'      !IdentifierPart
-OfToken            = 'of'       !IdentifierPart
-OrToken            = 'or'       !IdentifierPart
-ReduceToken        = 'rd'       !IdentifierPart
-ReduceCeilingToken = 'rdc'      !IdentifierPart
-ReturnToken        = 'return'   !IdentifierPart
-FunctionToken      = 'riff'     !IdentifierPart
-FunctionAliasToken = 'fn'       !IdentifierPart
-TemperToken        = 'tmpr'     !IdentifierPart
-TensorToken        = 'tns'      !IdentifierPart
-ThrowToken         = 'throw'    !IdentifierPart
-ToToken            = 'to'       !IdentifierPart
-TryToken           = 'try'      !IdentifierPart
-TrueToken          = 'true'     !IdentifierPart
-WhileToken         = 'while'    !IdentifierPart
-
-ReservedWord
-  = AndToken
-  / BreakToken
-  / ByToken
-  / CatchToken
-  / ConstToken
-  / ContinueToken
-  / DotToken
-  / DropToken
-  / EdToken
-  / ElseToken
-  / FalseToken
-  / ForToken
-  / IfToken
-  / InToken
-  / LestToken
-  / LetToken
-  / LiftToken
-  / MaxToken
-  / MinToken
-  / ModToken
-  / ModCeilingToken
-  / NoneToken
-  / NotToken
-  / OfToken
-  / OrToken
-  / ReduceToken
-  / ReduceCeilingToken
-  / ReturnToken
-  / FunctionToken
-  / FunctionAliasToken
-  / TemperToken
-  / TensorToken
-  / ThrowToken
-  / ToToken
-  / TryToken
-  / TrueToken
-  / WhileToken
+AndToken           = @'and'      !IdentifierPart
+BreakToken         = @'break'    !IdentifierPart
+ByToken            = @'by'       !IdentifierPart
+CatchToken         = @'catch'    !IdentifierPart
+ConstToken         = @'const'    !IdentifierPart
+ContinueToken      = @'continue' !IdentifierPart
+DotToken           = @'dot'      !IdentifierPart
+DropToken          = @'drop'     !IdentifierPart
+EdToken            = @'ed'       !IdentifierPart
+ElseToken          = @'else'     !IdentifierPart
+FalseToken         = @'false'    !IdentifierPart
+FinallyToken       = @'finally'  !IdentifierPart
+ForToken           = @'for'      !IdentifierPart
+IfToken            = @'if'       !IdentifierPart
+InToken            = @'in'       !IdentifierPart
+LestToken          = @'lest'     !IdentifierPart
+LetToken           = @'let'      !IdentifierPart
+LiftToken          = @'lift'     !IdentifierPart
+MaxToken           = @'max'      !IdentifierPart
+MinToken           = @'min'      !IdentifierPart
+ModToken           = @'mod'      !IdentifierPart
+ModCeilingToken    = @'modc'     !IdentifierPart
+NoneToken          = @'niente'   !IdentifierPart
+NotToken           = @'not'      !IdentifierPart
+OfToken            = @'of'       !IdentifierPart
+OrToken            = @'or'       !IdentifierPart
+ReduceToken        = @'rd'       !IdentifierPart
+ReduceCeilingToken = @'rdc'      !IdentifierPart
+ReturnToken        = @'return'   !IdentifierPart
+FunctionToken      = @'riff'     !IdentifierPart
+FunctionAliasToken = @'fn'       !IdentifierPart
+TemperToken        = @'tmpr'     !IdentifierPart
+TensorToken        = @'tns'      !IdentifierPart
+ThrowToken         = @'throw'    !IdentifierPart
+ToToken            = @'to'       !IdentifierPart
+TryToken           = @'try'      !IdentifierPart
+TrueToken          = @'true'     !IdentifierPart
+WhileToken         = @'while'    !IdentifierPart
 
 // Tokens representing units can only appear along scalars so they're not reserved.
-CentToken     = 'c'  !IdentifierPart
-HertzToken    = 'Hz' !IdentifierPart
-LowHertzToken = 'hz' !IdentifierPart
-RealCentToken = 'rc' !IdentifierPart
-SecondToken   = 's'  !IdentifierPart
+CentToken     = @'c'  !IdentifierPart
+HertzToken    = @'Hz' !IdentifierPart
+LowHertzToken = @'hz' !IdentifierPart
+RealCentToken = @'rc' !IdentifierPart
+SecondToken   = @'s'  !IdentifierPart
 
 Statements
   = head: Statement tail: (_ @Statement)* {
@@ -423,7 +425,7 @@ IfStatement
     }
   }
 
-IterationKind = $(OfToken / InToken)
+IterationKind = OfToken / InToken
 
 IterationStatement
   = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
@@ -520,7 +522,7 @@ AssigningOperator
   / ExponentiationOperator
   / FractionOperator
 
-LestOperator = $LestToken
+LestOperator = LestToken
 
 LestExpression
   = head: ConditionalExpression tail: (__ @LestOperator _ @LestExpression)* {
@@ -541,14 +543,14 @@ ConditionalExpression
     );
   }
 
-CoalescingOperator = '??' / $(OrToken)
+CoalescingOperator = '??' / OrToken
 
 CoalescingExpression
   = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
-ConjunctOperator = $AndToken
+ConjunctOperator = AndToken
 
 Conjunct = NotExpression / RelationalExpression
 
@@ -577,11 +579,11 @@ RelationalOperator 'relational operator'
   / '>='
   / '<'
   / '>'
-  / $(OfToken)
+  / OfToken
   / (NotToken __ OfToken) { return 'not of'; }
   / $('~' OfToken)
   / (NotToken __ '~' OfToken) { return 'not ~of'; }
-  / $(InToken)
+  / InToken
   / (NotToken __ InToken) { return 'not in'; }
   / $('~' InToken)
   / (NotToken __ '~' InToken) { return 'not ~in'; }
@@ -592,7 +594,7 @@ RelationalExpression
   }
 
 RoundingOperator
-  = $(ToToken / ByToken)
+  = ToToken / ByToken
 
 RoundingExpression
   = head: EnumeratedChord tail: (__ @'~'? @RoundingOperator @'~'? _ @EnumeratedChord)* {
@@ -637,7 +639,7 @@ EnumeratedChord
   }
 
 ExtremumOperator
-  = $(MaxToken / MinToken)
+  = MaxToken / MinToken
 
 ExtremumExpression
   = head: AdditiveExpression tail: (__ @'~'? @ExtremumOperator @'~'? _ @AdditiveExpression)* {
@@ -653,7 +655,7 @@ AdditiveExpression
   }
 
 MiscOperator
-  = $(ModToken / ModCeilingToken / ReduceToken / ReduceCeilingToken / EdToken)
+  = ModCeilingToken / ModToken / ReduceCeilingToken / ReduceToken / EdToken
 
 Term
   = head: MultiplicativeExpression tail: (__ @'~'? @MiscOperator @'~'? _ @MultiplicativeExpression)* {
@@ -661,7 +663,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = $('*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken / TemperToken)
+  = '*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken / TemperToken
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
@@ -702,7 +704,7 @@ FractionExpression
   }
 
 ChainableUnaryOperator
-  = $('^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken)
+  = '^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken
 
 // The precedence between exponentiation and fractions is a bit uneasy.
 // Uniform unary operators make a seccond appearance here to be valid right operands for exponentiation and fractions.
@@ -1096,7 +1098,7 @@ SparseOffsetVal
     }
   }
 
-ValBasisElement = Fraction / $SecondToken / $HertzToken / $LowHertzToken
+ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
 
 BasisElement = ValBasisElement / $RealCentToken / 'r¢' / '1\\' / '1°' / ''
 
@@ -1388,8 +1390,13 @@ ReservedPattern
   / PitchNominal [sqQxdbrp]* [0-9]+ ([_v] [0-9])*
   / 'S' [0-9]+
 
+ValidIdentifierName
+  = @word:IdentifierName &{
+    return !RESERVED_WORDS.has(word)
+  }
+
 Identifier
-  = !(ReservedWord / ReservedPattern)  id: IdentifierName {
+  = !ReservedPattern id: ValidIdentifierName {
     return {
       type: 'Identifier',
       id,

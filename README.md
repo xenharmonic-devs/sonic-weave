@@ -982,6 +982,14 @@ The syntax could be extended to cover movement in time i.e. to become a full tex
 * [Xenharmonic Wiki](https://en.xen.wiki/)
 * [Rationale](https://forum.sagittal.org/viewtopic.php?t=575) behind the two flavors of anti-exponentiation `/^` and `/_`.
 
+## Special thanks
+* Arseniiv A. - Co-developer / Language feedback
+* Inthar - Co-developer / Language feedback
+* Akselai - Quality assurance
+* Godtone - Language feedback
+* Joe Hildebrand - Grammar review
+* Marc Sabat - Notation adviser
+
 ## Acknowledgments / inspiration
 SonicWeave looks like Javascript with Python semantics, has Haskell ranges and operates similar to xen-calc.
 
