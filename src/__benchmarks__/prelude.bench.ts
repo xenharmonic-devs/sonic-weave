@@ -1,6 +1,6 @@
 import {describe, bench, beforeAll} from 'vitest';
 import {StatementVisitor, getSourceVisitor, parseAST, sw} from '../parser';
-import {BUILTIN_CONTEXT} from '../stdlib';
+import {BUILTIN_CONTEXT} from '../stdlib/builtin';
 import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
 import {RootContext} from '../context';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
@@ -14,6 +14,24 @@ beforeAll(() => {
 describe('Prelude AST parsing', () => {
   bench('parse prelude source', () => {
     parseAST(PRELUDE_SOURCE);
+  });
+});
+
+describe('Parenthesis AST parsing', () => {
+  bench('parse none', () => {
+    parseAST('niente');
+  });
+
+  bench('parse one pair', () => {
+    parseAST('(niente)');
+  });
+
+  bench('parse two pairs', () => {
+    parseAST('((niente))');
+  });
+
+  bench('parse three pairs', () => {
+    parseAST('(((niente)))');
   });
 });
 
