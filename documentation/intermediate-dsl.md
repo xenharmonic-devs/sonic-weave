@@ -240,9 +240,63 @@ Durations like seconds or milliseconds are also supported. They're interpreted a
 3 ms
 ```
 
+Beware that the unison reference is always a frequency even if declared as a duration.
+```c
+1 = 1 ms // 1 = 1000 Hz
+3/2      // 1500 Hz
+2        // 2000 Hz
+```
+
+### Operations on absolute intervals
+
 Addition of frequencies and scalar multiplication works as you'd expect:
 ```c
 1 = 100 Hz
 100 Hz + 50 Hz // 150 Hz
 2 * 100 Hz     // 200 Hz
 ```
+
+Division of frequencies produces scalars:
+```c
+1 = 100 Hz
+4000 Hz / 2000 Hz // Same as plain 2
+```
+
+The produced scalars are in turn interpreted against the reference. In the end `4000 Hz / 2000 Hz` results in 200 Hz above.
+
+Squaring a frequency does seemingly nothing:
+```c
+1 = 200 Hz
+(300 Hz)^2 // Sounds just like 300 Hz
+400 Hz
+```
+
+This is because absolute intervals are by their nature *projective* i.e. they're normalized to frequencies by tools like Scale Workshop.
+
+This causes an absolute pitch reference to behave in two distinct ways:
+
+```c
+"Relative reference for absolute FJS"
+C4 = 1 = 200 Hz
+E4^5 + Eb4_5 // Same as 5/4 * 6/5 i.e. 3/2
+C5           // Same as 2/1
+```
+
+...or with an absolute reference:
+
+```c
+"Absolute reference for absolute FJS"
+C4 = 200 Hz = 1
+E4^5 + Eb4_5 // Same as 250 Hz * 240 Hz
+C5           // Same as 400 Hz
+```
+That 250 Hz * 240 Hz is normalized to `sqrt(60000) Hz` i.e. a neutral third above 200 Hz. Addition means averaging with projective quantities. Scalar multiplication merely biases the weights.
+
+```c
+"Absolute reference for absolute FJS"
+C4 = 200 Hz = 1
+2 * E4^5 + Eb4_5 // Same as (250 Hz)^2 * 240 Hz
+C5               // Same as 400 Hz
+```
+
+The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something between neutral and major thirds above 200 Hz.
