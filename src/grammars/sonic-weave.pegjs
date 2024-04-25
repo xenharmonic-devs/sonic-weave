@@ -647,7 +647,7 @@ ExtremumExpression
   }
 
 AdditiveOperator 'additive operator'
-  = $('+' / '-' / '/+' / '⊕' / '/-' / '⊖')
+  = '+' / '-' / '/+' / '⊕' / '/-' / '⊖'
 
 AdditiveExpression
   = head: Term tail: (__ @'~'? @AdditiveOperator @'~'? _ @Term)* {
@@ -688,7 +688,7 @@ UniformUnaryExpression
   }
 
 ExponentiationOperator 'exponentiation'
-  = $('^/' / '^' / '/_' / '/^')
+  = '^/' / '^' / '/_' / '/^'
 
 ExponentiationExpression
   = head: FractionExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
@@ -974,7 +974,7 @@ CommaDecimal
   }
 
 NumericLiteral
-  = sign: SignPart whole: Integer separator: $(!'..' '.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+  = sign: SignPart whole: Integer separator: (!'..' @'.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
     if (separator === '.' || exponent || flavor) {
       return {
         type: 'DecimalLiteral',
@@ -1100,7 +1100,7 @@ SparseOffsetVal
 
 ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
 
-BasisElement = ValBasisElement / $RealCentToken / 'r¢' / '1\\' / '1°' / ''
+BasisElement = ValBasisElement / RealCentToken / 'r¢' / '1\\' / '1°' / ''
 
 ValBasis = (ValBasisElement / '')|.., '.'|
 
@@ -1154,10 +1154,10 @@ ColorLiteral
   }
 
 VulgarFraction 'vulgar fraction'
-  = $('¼' / 'q' / '½' / 's' / '¾' / 'Q' / [⅐-⅞] / '')
+  = '¼' / 'q' / '½' / 's' / '¾' / 'Q' / [⅐-⅞] / ''
 
 AugmentedToken 'augmented quality'
-  = $('dim' / 'aug' / 'Aug' / [daÂ])
+  = 'dim' / 'aug' / 'Aug' / [daÂ]
 
 AugmentedQuality
   = fraction: VulgarFraction quality: AugmentedToken {
@@ -1323,8 +1323,11 @@ FJS
     };
   }
 
+AccidentalSign
+  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£]
+
 Accidental 'accidental'
-  = fraction: VulgarFraction accidental: $('𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£]) {
+  = fraction: VulgarFraction accidental: AccidentalSign  {
     return {
       fraction,
       accidental,
@@ -1332,7 +1335,7 @@ Accidental 'accidental'
   }
 
 PitchNominal 'pitch nominal'
-  = $('alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G])
+  = 'alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G]
 
 AbsolutePitch
   = nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
@@ -1396,7 +1399,7 @@ ValidIdentifierName
   }
 
 Identifier
-  = !ReservedPattern id: ValidIdentifierName {
+  = &IdentifierStart !ReservedPattern id: ValidIdentifierName {
     return {
       type: 'Identifier',
       id,
@@ -1461,7 +1464,7 @@ ParenthesizedExpression
   = '(' _ @Expression _ ')'
 
 MetricPrefix
-  = $([QRYZEPTGMkhdcmµnpfazyrq] / 'da' / '')
+  = [QRYZEPTGMkhdcmµnpfazyrq] / 'da' / ''
 
 // Note: According to Wikipedia Ri and Qi are still under review.
 BinaryPrefix
