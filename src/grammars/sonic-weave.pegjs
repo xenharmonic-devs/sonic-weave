@@ -805,10 +805,7 @@ ArraySlice
   }
 
 ScalarMultiple
-  = scalar: ScalarLike operator: ' ' __ quantity: (Unit / Quantity) {
-    return BinaryExpression(operator, scalar, quantity, false, false);
-  }
-  / scalar: ScalarLike quantity: (Unit / Quantity)? {
+  = scalar: ScalarLike quantity: (' '? __ @(Unit / Quantity))? {
     if (quantity) {
       return BinaryExpression(' ', scalar, quantity, false, false);
     }
