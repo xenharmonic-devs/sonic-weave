@@ -56,8 +56,6 @@ export type EqualTemperament = {
   equave: Fraction;
 };
 
-const MAX_POW_DENOMINATOR = 10000;
-
 let NUMBER_OF_COMPONENTS = 9; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
 
 /**
@@ -1707,36 +1705,43 @@ export class TimeMonzo {
       if (other.timeExponent.n !== 0) {
         throw new Error('Can only raise to a scalar power.');
       }
-      if (other.isFractional()) {
+      try {
         other = other.toFraction();
-      } else {
-        const exponent = other.valueOf();
+      } catch {
+        const exponent = (other as TimeMonzo & Fraction).valueOf();
         return new TimeReal(
           this.timeExponent.valueOf() * exponent,
           this.valueOf() ** exponent
         );
       }
     }
-    const scalar = new Fraction(other);
-    if (scalar.d < MAX_POW_DENOMINATOR) {
-      const vector = this.primeExponents.map(component =>
-        component.mul(scalar)
+    try {
+      const scalar = new Fraction(other);
+      try {
+        const vector = this.primeExponents.map(component =>
+          component.mul(scalar)
+        );
+        const residual: Fraction | null | undefined = this.residual.pow(scalar);
+        if (residual !== null) {
+          return new TimeMonzo(this.timeExponent.mul(scalar), vector, residual);
+        }
+      } catch {
+        /** Fall through */
+      }
+      const exponent = scalar.valueOf();
+      return new TimeReal(
+        this.timeExponent.valueOf() * exponent,
+        this.valueOf() ** exponent
       );
-      const residual: Fraction | null | undefined = this.residual.pow(scalar);
-      if (residual === null) {
-        const exponent = scalar.valueOf();
+    } catch (e) {
+      if (typeof other === 'number') {
         return new TimeReal(
-          this.timeExponent.valueOf() * exponent,
-          this.valueOf() ** exponent
+          this.timeExponent.valueOf() * other,
+          this.valueOf() ** other
         );
       }
-      return new TimeMonzo(this.timeExponent.mul(scalar), vector, residual);
+      throw e;
     }
-    const exponent = scalar.valueOf();
-    return new TimeReal(
-      this.timeExponent.valueOf() * exponent,
-      this.valueOf() ** exponent
-    );
   }
 
   /**

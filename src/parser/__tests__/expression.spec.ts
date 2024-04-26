@@ -1879,7 +1879,7 @@ describe('SonicWeave expression evaluator', () => {
     const miksiTeitSen = evaluate(
       '1 = 440Hz; relative([10000>@Hz)'
     ) as Interval;
-    expect(miksiTeitSen.toString()).toBe('-10537.631656229592r¢');
+    expect(miksiTeitSen.toString()).toBe('-1\\1<440>');
   });
 
   it('it formats one quebihertz', () => {
@@ -2085,5 +2085,12 @@ describe('SonicWeave expression evaluator', () => {
   it('can order intervals accurately', () => {
     const smidgeWider = evaluate('[162 -84 -12⟩ > 2');
     expect(smidgeWider).toBe(true);
+  });
+
+  it('supports complex exponents', () => {
+    const {interval} = parseSingle(
+      '2^(19019/12000) \'Guybrush "3L 3s" Threewood\''
+    );
+    expect(interval.totalCents()).toBe(1901.9);
   });
 });

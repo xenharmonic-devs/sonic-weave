@@ -207,10 +207,11 @@ describe('Extended monzo with time', () => {
     expect(fourthDown.mmod(octave).strictEquals(fifth));
     expect(tritave.mmod(octave).strictEquals(fifth));
   });
-  it('throws an error when trying to reduce by unison', () => {
+  it('produces NaN from reduction by unison', () => {
     const unison = new TimeMonzo(new Fraction(0), [new Fraction(0)]);
     const octave = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
-    expect(() => octave.reduce(unison)).toThrow();
+    const uhOh = octave.reduce(unison);
+    expect(uhOh.valueOf()).toBe(NaN);
   });
   it('can be stretched', () => {
     const octave = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
