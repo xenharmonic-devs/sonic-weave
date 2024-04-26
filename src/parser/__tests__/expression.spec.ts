@@ -2076,4 +2076,9 @@ describe('SonicWeave expression evaluator', () => {
     const suchE = evaluate('C4 = 256 Hz; str(E4 + E4)');
     expect(suchE).toBe('[-2 4 8>@s.2..');
   });
+
+  it('parses zero exponents as linear decimals', () => {
+    const {fraction} = parseSingle('1.5e0');
+    expect(fraction).toBe('3/2');
+  });
 });

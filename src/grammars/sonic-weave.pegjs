@@ -810,7 +810,7 @@ ScalarMultiple
       return BinaryExpression(' ', scalar, quantity, false, false);
     }
     if (scalar.type === 'DecimalLiteral') {
-      if (scalar.exponent || scalar.flavor) {
+      if (scalar.exponent !== null || scalar.flavor) {
         return scalar;
       }
       return {
@@ -969,7 +969,7 @@ CommaDecimal
 
 NumericLiteral
   = sign: SignPart whole: Integer separator: (!'..' @'.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
-    if (separator === '.' || exponent || flavor) {
+    if (separator === '.' || exponent !== null || flavor) {
       return {
         type: 'DecimalLiteral',
         sign,
