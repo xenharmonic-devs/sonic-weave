@@ -58,12 +58,12 @@ riff absoluteHEJI(interval) {
 // == Functions ==
 riff keys(record) {
   "Obtain an array of keys of the record.";
-  return map([key] => key, entries(record));
+  return map([key] => key, entries record);
 }
 
 riff values(record) {
   "Obtain an array of values of the record.";
-  return map([_, value] => value, entries(record));
+  return map([_, value] => value, entries record);
 }
 
 riff sanitize(interval) {
@@ -201,7 +201,7 @@ riff sum(terms = $$) {
 
 riff add(...terms) {
   "Calculate the (linear) sum of the arguments.";
-  return sum(terms);
+  return sum terms;
 }
 
 riff prod(factors = $$) {
@@ -211,7 +211,7 @@ riff prod(factors = $$) {
 
 riff mul(...factors) {
   "Calculate the (linear) product of the arguments i.e. the logarithmic sum.";
-  return prod(factors);
+  return prod factors;
 }
 
 riff stackLinear(array = $$) {
@@ -660,7 +660,6 @@ riff realizeWord(word, sizes, equave = niente) {
     sizes[letter];
   }
   stack();
-  i => simplify(i) if isLinear(i) else i;
 }
 
 // == Scale modification ==

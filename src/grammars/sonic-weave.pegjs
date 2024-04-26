@@ -377,10 +377,10 @@ Argument
   }
 
 ArgumentList
-  = (@(Argument|.., _ ',' _|) _ ','? _)
+  = (@(Argument|.., _ ',' _|) _ ','?)
 
 BlockStatement
-  = '{' _ body: Statements? _ '}' _ {
+  = '{' _ body: Statements? _ '}' {
     return {
       type: 'BlockStatement',
       body: body ?? [],
@@ -628,7 +628,7 @@ HarmonicSegment
 Enumeral = HarmonicSegment / ExtremumExpression
 
 EnumeratedChord
-  = '/' __ enumerals: Enumeral|2.., _ ':' _| {
+  = '/' __ enumerals: Enumeral|2.., _ ':'| {
     return {
       type: 'EnumeratedChord',
       mirror: true,
@@ -642,7 +642,7 @@ EnumeratedChord
       enumerals: [segment],
     };
   }
-  / enumerals: Enumeral|1.., _ ':' _| {
+  / enumerals: Enumeral|1.., _ ':'| {
     if (enumerals.length === 1) {
       return enumerals[0];
     }
@@ -724,13 +724,13 @@ ChainableUnaryOperator
 // The precedence between exponentiation and fractions is a bit uneasy.
 // Uniform unary operators make a seccond appearance here to be valid right operands for exponentiation and fractions.
 UnaryExpression
-  = operator: UniformUnaryOperator uniform: '~'? operand: LabeledExpression {
+  = operator: UniformUnaryOperator uniform: '~'? operand: ImplicitCallExpression {
     return UnaryExpression(operator, operand, !!uniform);
   }
-  / operator: ChainableUnaryOperator __ operand: (LabeledExpression / UnaryExpression) {
+  / operator: ChainableUnaryOperator __ operand: (ImplicitCallExpression / UnaryExpression) {
     return UnaryExpression(operator, operand, false);
   }
-  / operator: ('--' / '++' / '+')? operand: LabeledExpression {
+  / operator: ('--' / '++' / '+')? operand: ImplicitCallExpression {
     if (operator === '+') {
       return UnaryExpression(operator, operand, false);
     } else if (operator) {
@@ -739,31 +739,19 @@ UnaryExpression
     return operand;
   }
 
-Labels
-  = (TrueCallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
-
-LabeledExpression
-  = object: CallExpression labels: (' ' __ @Labels)? {
-    if (labels) {
-      return {
-        type: 'LabeledExpression',
-        object,
-        labels,
-      };
-    }
-    return object;
+// Val literals must be excluded to keep comparisons working
+ImplicitCallExpression
+  = head: CallExpression tail: (@' ' __ !'<' @CallExpression)* {
+    return tail.reduce(operatorReducerLite, head);
   }
 
+// Comma decimal labeling uses implicit calling, but with a limited selection
+Label
+  = TrueCallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral
+
 LabeledCommaDecimal
-  = __ object: CommaDecimal labels: (' ' __ @Labels)? {
-    if (labels) {
-      return {
-        type: 'LabeledExpression',
-        object,
-        labels,
-      };
-    }
-    return object;
+  = __ object: CommaDecimal labels: (@' ' __ @Label)* {
+    return labels.reduce(operatorReducerLite, object);
   }
 
 CallTail
@@ -828,9 +816,9 @@ ArraySlice
   }
 
 ScalarMultiple
-  = scalar: ScalarLike quantity: (' '? __ @(Unit / Quantity))? {
-    if (quantity) {
-      return BinaryExpression(' ', scalar, quantity, false, false);
+  = scalar: Scalar unit: (__ @Unit)? {
+    if (unit) {
+      return BinaryExpression('×', scalar, unit, false, false);
     }
     if (scalar.type === 'DecimalLiteral') {
       if (scalar.exponent !== null || scalar.flavor) {
@@ -848,10 +836,14 @@ ScalarMultiple
     return scalar;
   }
 
-ScalarLike
-  = ParenthesizedExpression
-  / FractionLiteral
+Scalar
+  = FractionLiteral
   / NumericLiteral
+
+Unit
+  = HertzLiteral
+  / SecondLiteral
+  / CentLiteral
 
 Quantity
   = WartsLiteral
@@ -861,14 +853,10 @@ Quantity
   / ValLiteral
   / DownExpression
 
-Unit
-  = HertzLiteral
-  / SecondLiteral
-  / CentLiteral
-
 Primary
-  = Quantity
-  / ArrowFunction
+  = ArrowFunction
+  / ParenthesizedExpression
+  / Quantity
   / Range
   / ArrayComprehension
   / NoneLiteral
@@ -909,7 +897,7 @@ StepRange
 Range = StepRange / UnitStepRange
 
 Comprehension
-  = _ ForToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ {
+  = _ ForToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression {
     return {
       element,
       kind,
@@ -979,11 +967,11 @@ CommaDecimal
   }
 
 NumericLiteral
-  = sign: SignPart whole: Integer separator: (!'..' @'.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+  = whole: Integer separator: (!'..' @'.')? fractional: UnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
     if (separator === '.' || exponent !== null || flavor) {
       return {
         type: 'DecimalLiteral',
-        sign,
+        sign: '',
         whole,
         fractional,
         exponent,
@@ -992,13 +980,13 @@ NumericLiteral
     }
     return {
       type: 'IntegerLiteral',
-      value: sign === '-' ? -whole : whole,
+      value: whole,
     };
   }
-  / !'..' sign: SignPart '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
+  / !'..' '.' fractional: NonEmptyUnderscoreDigits exponent: ExponentPart? flavor: NumericFlavor {
     return {
       type: 'DecimalLiteral',
-      sign,
+      sign: '',
       whole: 0n,
       fractional,
       exponent,
@@ -1068,7 +1056,7 @@ PatentTweak
     };
   }
 
-PatentTweaks = PatentTweak|.., _ ',' _|
+PatentTweaks = PatentTweak|.., _ ','|
 
 SparseOffsetVal
   = equave: ('[' @Fraction ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
