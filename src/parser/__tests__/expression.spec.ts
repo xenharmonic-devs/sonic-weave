@@ -2077,7 +2077,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('parses zero exponents as linear decimals', () => {
-    const {fraction} = parseSingle('1.5e0');
+    const {interval, fraction} = parseSingle('1.5e0');
+    expect(interval.toString()).toBe('1.5e0');
     expect(fraction).toBe('3/2');
   });
 

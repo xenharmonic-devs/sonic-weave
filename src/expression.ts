@@ -834,18 +834,20 @@ function formatDecimal(literal: DecimalLiteral) {
   if (literal.fractional) {
     result += '.' + literal.fractional;
   }
-  const exponent = literal.exponent
-    ? 'e' + literal.exponent.toString()
-    : literal.flavor
-      ? ''
-      : 'e';
+  const exponent =
+    literal.exponent !== null
+      ? 'e' + literal.exponent.toString()
+      : literal.flavor
+        ? ''
+        : 'e';
   return `${result}${exponent}${literal.flavor}`;
 }
 
 function formatCents(literal: CentsLiteral) {
   const result =
     literal.sign + literal.whole.toString() + '.' + literal.fractional;
-  const exponent = literal.exponent ? 'e' + literal.exponent.toString() : '';
+  const exponent =
+    literal.exponent !== null ? 'e' + literal.exponent.toString() : '';
   if (literal.real) {
     return `${result}${exponent}r¢`;
   } else if (exponent) {
