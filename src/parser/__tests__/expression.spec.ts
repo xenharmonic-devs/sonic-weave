@@ -2093,4 +2093,101 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(interval.totalCents()).toBe(1901.9);
   });
+
+  it('has implicit record tensoring string concatenation', () => {
+    // TODO: Find out why the parenthesis are required here
+    const thisLanguageNeedsToBeStopped = evaluate(
+      '({a: "a", b: "b"}) {c: "c", d: "d"}'
+    );
+    expect(thisLanguageNeedsToBeStopped).toEqual({
+      a: {c: 'ac', d: 'ad'},
+      b: {c: 'bc', d: 'bd'},
+    });
+  });
+
+  it('has implicit array outer product', () => {
+    const numpyIndexingTears = evaluate(
+      '[2, 3] [5, 7]'
+    ) as unknown as Interval[][];
+    expect(numpyIndexingTears.map(row => row.map(i => i.toInteger()))).toEqual([
+      [10, 14],
+      [15, 21],
+    ]);
+  });
+
+  it('has implicit function calls', () => {
+    const {interval} = parseSingle('simplify 6/4');
+    expect(interval.toString()).toBe('3/2');
+  });
+
+  it('has implicit multiplication', () => {
+    const {fraction} = parseSingle('(3) 5');
+    expect(fraction).toBe('15');
+  });
+
+  it('has explicit intrinsic multiplication', () => {
+    const {fraction} = parseSingle('3(5)');
+    expect(fraction).toBe('15');
+  });
+
+  it("doesn't have negative literals for a good reason", () => {
+    const {fraction} = parseSingle('2 -1');
+    expect(fraction).toBe('1');
+  });
+});
+
+describe('Poor grammar / Fun with "<"', () => {
+  it('rejects nedji with trailing garbage', () => {
+    expect(() => evaluate('1\\2<3>4')).toThrow();
+  });
+
+  it('knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4', () => {
+    const no = evaluate('1 \\2<3>4');
+    expect(no).toBe(false);
+  });
+
+  it('knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4', () => {
+    const no = evaluate('1\\ 2<3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the return of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2 <3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the persistence of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2< 3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the obstinence of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2<3 >4');
+    expect(no).toBe(false);
+  });
+
+  it('has quadruple semitwelfth', () => {
+    const {fraction} = parseSingle('1\\2<3> 4');
+    expect(fraction).toBe('9');
+  });
+
+  it('multiplies a monzo from the left', () => {
+    const {fraction} = parseSingle('2 [2 -1>');
+    expect(fraction).toBe('16/9');
+  });
+
+  it('compares two to two minus one', () => {
+    const no = evaluate('2 < 2 - 1');
+    expect(no).toBe(false);
+  });
+
+  it('rejects val multiplication from the left due to grammatical issues', () => {
+    expect(() => evaluate('2 <2 -1]')).toThrow();
+  });
+
+  it('accepts val multiplication from the left if you speak softly enough', () => {
+    const val = evaluate('2 ⟨2 -1]') as Val;
+    expect(val.value.primeExponents[0].toFraction()).toBe('4');
+    expect(val.value.primeExponents[1].toFraction()).toBe('-2');
+  });
 });

@@ -1310,4 +1310,18 @@ describe('SonicWeave parser', () => {
     const freqs = scale.map(i => i.valueOf());
     expect(freqs).toEqual([320, 384, 512, 640, 792, 880]);
   });
+
+  it('technically supports partial application', () => {
+    const scale = parseSource(`
+      fn add(x) {
+        return y => y + x;
+      }
+      const plusTwo = add 2;
+      plusTwo 1;
+      plusTwo 5;
+      add 11 300;
+      str;
+    `);
+    expect(scale).toEqual(['3', '7', '311']);
+  });
 });

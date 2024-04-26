@@ -66,7 +66,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: ' ',
+        operator: '×',
         left: {type: 'IntegerLiteral', value: 1n},
         right: {type: 'HertzLiteral', prefix: 'k'},
         preferLeft: false,
@@ -81,7 +81,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: ' ',
+        operator: '×',
         left: {
           type: 'DecimalLiteral',
           sign: '',
@@ -103,7 +103,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: ' ',
+        operator: '×',
         left: {type: 'IntegerLiteral', value: 420n},
         right: {type: 'SecondLiteral', prefix: 'E'},
         preferLeft: false,
@@ -118,7 +118,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       type: 'ExpressionStatement',
       expression: {
         type: 'BinaryExpression',
-        operator: ' ',
+        operator: '×',
         left: {
           type: 'DecimalLiteral',
           sign: '',
@@ -184,12 +184,17 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'DecimalLiteral',
-        sign: '-',
-        whole: 1n,
-        fractional: '955',
-        exponent: null,
-        flavor: 'r',
+        type: 'UnaryExpression',
+        operator: '-',
+        operand: {
+          type: 'DecimalLiteral',
+          sign: '',
+          whole: 1n,
+          fractional: '955',
+          exponent: null,
+          flavor: 'r',
+        },
+        uniform: false,
       },
     });
   });
@@ -606,19 +611,26 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
-        type: 'LabeledExpression',
-        object: {
-          type: 'DecimalLiteral',
-          sign: '',
-          whole: 1n,
-          fractional: '234',
-          exponent: null,
-          flavor: '',
+        type: 'BinaryExpression',
+        operator: ' ',
+        left: {
+          type: 'BinaryExpression',
+          operator: ' ',
+          left: {
+            type: 'DecimalLiteral',
+            sign: '',
+            whole: 1n,
+            fractional: '234',
+            exponent: null,
+            flavor: '',
+          },
+          right: {type: 'StringLiteral', value: 'my third'},
+          preferLeft: false,
+          preferRight: false,
         },
-        labels: [
-          {type: 'StringLiteral', value: 'my third'},
-          {type: 'ColorLiteral', value: '#0dead0'},
-        ],
+        right: {type: 'ColorLiteral', value: '#0dead0'},
+        preferLeft: false,
+        preferRight: false,
       },
     });
   });
@@ -647,8 +659,19 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('rejects numeric labels', () => {
-    expect(() => parseSingle('1 2')).toThrow();
+  it('accepts implicit multiplication', () => {
+    const ast = parseSingle('1 2');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: ' ',
+        left: {type: 'IntegerLiteral', value: 1n},
+        right: {type: 'IntegerLiteral', value: 2n},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
   });
 
   it('accepts array comprehensions spanning multiple rows', () => {
@@ -666,9 +689,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'ArrayComprehension',
         expression: {
-          type: 'LabeledExpression',
-          object: {type: 'Identifier', id: 'foo'},
-          labels: [{type: 'Identifier', id: 'bar'}],
+          type: 'BinaryExpression',
+          operator: ' ',
+          left: {type: 'Identifier', id: 'foo'},
+          right: {type: 'Identifier', id: 'bar'},
+          preferLeft: false,
+          preferRight: false,
         },
         comprehensions: [
           {
@@ -1048,6 +1074,39 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {type: 'Identifier', id: 'nientes'},
+    });
+  });
+
+  it('admits trailing space after blocks', () => {
+    const ast = parse(`
+      {
+        1;
+        2;
+      }
+
+      3;
+    `);
+    expect(ast).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'BlockStatement',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'IntegerLiteral', value: 1n},
+            },
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'IntegerLiteral', value: 2n},
+            },
+          ],
+        },
+        {
+          type: 'ExpressionStatement',
+          expression: {type: 'IntegerLiteral', value: 3n},
+        },
+      ],
     });
   });
 });

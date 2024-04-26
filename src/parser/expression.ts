@@ -39,6 +39,7 @@ import {
   upcastBool,
   SonicWeavePrimitive,
   temper,
+  fromInteger,
 } from '../stdlib';
 import {
   metricExponent,
@@ -78,7 +79,6 @@ import {
   Expression,
   HarmonicSegment,
   Identifier,
-  LabeledExpression,
   Parameter,
   Parameters_,
   Range,
@@ -222,6 +222,32 @@ function resolvePreference(
   );
 }
 
+function mapValues(
+  this: ExpressionVisitor,
+  container: SonicWeaveValue,
+  fn: (x: SonicWeavePrimitive) => SonicWeaveValue
+) {
+  if (Array.isArray(container)) {
+    this.spendGas(container.length);
+    return container.map(fn) as SonicWeavePrimitive[];
+  }
+  if (typeof container !== 'object') {
+    throw new Error('Invalid container to map over.');
+  }
+  if (
+    container instanceof Color ||
+    container instanceof Val ||
+    container instanceof Interval
+  ) {
+    throw new Error('Invalid container to map over.');
+  }
+  const entries = Object.entries(container);
+  this.spendGas(entries.length);
+  return Object.fromEntries(
+    entries.map(([key, value]) => [key, fn(value)])
+  ) as Record<string, SonicWeavePrimitive>;
+}
+
 /**
  * Abstract syntax tree visitor for SonicWeave expressions.
  */
@@ -299,8 +325,6 @@ export class ExpressionVisitor {
         return this.visitUpdateExpression(node);
       case 'BinaryExpression':
         return this.visitBinaryExpression(node);
-      case 'LabeledExpression':
-        return this.visitLabeledExpression(node);
       case 'CallExpression':
         return this.visitCallExpression(node);
       case 'ArrowFunction':
@@ -543,41 +567,6 @@ export class ExpressionVisitor {
   protected visitDownExpression(node: DownExpression) {
     const operand = this.visit(node.operand);
     return this.down(operand, node.count);
-  }
-
-  protected label(
-    object: SonicWeaveValue,
-    labels: (string | Color | undefined)[]
-  ): Interval | Interval[] {
-    if (Array.isArray(object)) {
-      const l = this.label.bind(this);
-      return object.map(o => l(o, labels)) as Interval[];
-    }
-    object = upcastBool(object).shallowClone();
-    for (const label of labels) {
-      if (typeof label === 'string') {
-        object.label = label;
-      } else if (label instanceof Color) {
-        object.color = label;
-      } else {
-        object.color = undefined;
-      }
-    }
-    return object;
-  }
-
-  protected visitLabeledExpression(node: LabeledExpression) {
-    const object = this.visit(node.object);
-    const labels: (string | Color | undefined)[] = [];
-    for (const label of node.labels) {
-      const l = this.visit(label);
-      if (l instanceof Color || typeof l === 'string' || l === undefined) {
-        labels.push(l);
-      } else {
-        throw new Error('Labels must be strings, colors or niente.');
-      }
-    }
-    return this.label(object, labels);
   }
 
   protected visitConditionalExpression(node: ConditionalExpression) {
@@ -1108,7 +1097,6 @@ export class ExpressionVisitor {
               break;
             case '×':
             case '*':
-            case ' ':
               value = left.value.mul(right.value);
               steps = left.steps + right.steps;
               simplify = left.domain === 'linear' && right.domain === 'linear';
@@ -1215,7 +1203,6 @@ export class ExpressionVisitor {
             return left.sub(right);
           case '×':
           case '*':
-          case ' ':
             return left.mul(right);
           case '÷':
           case '%':
@@ -1274,6 +1261,7 @@ export class ExpressionVisitor {
           case 'not ~in':
           case '⊗':
           case 'tns':
+          case ' ':
             throw new Error('Unexpected code flow.');
         }
         operator satisfies never;
@@ -1281,7 +1269,6 @@ export class ExpressionVisitor {
         switch (operator) {
           case '×':
           case '*':
-          case ' ':
             return left.mul(right);
           case '·':
           case 'dot':
@@ -1319,7 +1306,6 @@ export class ExpressionVisitor {
         switch (operator) {
           case '×':
           case '*':
-          case ' ':
             return left.mul(right);
           case '÷':
           case '%':
@@ -1339,6 +1325,112 @@ export class ExpressionVisitor {
     throw new Error(
       `Unsupported type encountered during vector binary operation broadcasting of '${operator}'.`
     );
+  }
+
+  // This is the 'whitespace' operator responsible for labeling
+  protected implicitCall(
+    left: SonicWeaveValue,
+    right: SonicWeaveValue
+  ): SonicWeaveValue {
+    switch (typeof left) {
+      case 'string':
+        return this.intrinsicStringCall(left, right);
+      case 'undefined':
+        return this.intrinsicNoneCall(right);
+      case 'boolean':
+        return this.intrinsicIntervalCall(upcastBool(left), right);
+      case 'function':
+        return left.bind(this)(right);
+    }
+    if (left instanceof Interval) {
+      return this.intrinsicIntervalCall(left, right);
+    } else if (left instanceof Val) {
+      return this.intrinsicValCall(left, right);
+    } else if (left instanceof Color) {
+      return this.intrinsicColorCall(left, right);
+    }
+    const ic = this.implicitCall.bind(this);
+    return mapValues.bind(this)(left, l => ic(l, right));
+  }
+
+  protected intrinsicStringCall(
+    callee: string,
+    caller: SonicWeaveValue
+  ): SonicWeaveValue {
+    if (typeof caller === 'string') {
+      return callee + caller;
+    }
+    if (typeof caller === 'boolean' || caller instanceof Interval) {
+      caller = upcastBool(caller).shallowClone();
+      caller.label = callee;
+      return caller;
+    }
+    const ic = this.intrinsicStringCall.bind(this);
+    return mapValues.bind(this)(caller, c => ic(callee, c));
+  }
+
+  protected intrinsicColorCall(
+    callee: Color,
+    caller: SonicWeaveValue
+  ): SonicWeaveValue {
+    if (typeof caller === 'boolean' || caller instanceof Interval) {
+      caller = upcastBool(caller).shallowClone();
+      caller.color = callee;
+      return caller;
+    }
+    const ic = this.intrinsicColorCall.bind(this);
+    return mapValues.bind(this)(caller, c => ic(callee, c));
+  }
+
+  protected intrinsicNoneCall(caller: SonicWeaveValue): SonicWeaveValue {
+    if (typeof caller === 'boolean' || caller instanceof Interval) {
+      caller = upcastBool(caller).shallowClone();
+      caller.color = undefined;
+      return caller;
+    }
+    const n = this.intrinsicNoneCall.bind(this);
+    return mapValues.bind(this)(caller, n);
+  }
+
+  protected intrinsicIntervalCall(
+    callee: Interval,
+    caller: SonicWeaveValue
+  ): SonicWeaveValue {
+    switch (typeof caller) {
+      case 'string':
+        callee = callee.shallowClone();
+        callee.label = caller;
+        return callee;
+      case 'boolean':
+        if (caller) {
+          return callee.shallowClone();
+        }
+        return fromInteger(0);
+      case 'undefined':
+        callee = callee.shallowClone();
+        callee.color = undefined;
+        return callee;
+    }
+    if (caller instanceof Interval || caller instanceof Val) {
+      return caller.mul(callee);
+    } else if (caller instanceof Color) {
+      callee = callee.shallowClone();
+      callee.color = caller;
+      return callee;
+    }
+    const ic = this.intrinsicIntervalCall.bind(this);
+    return mapValues.bind(this)(caller, c => ic(callee, c));
+  }
+
+  protected intrinsicValCall(
+    callee: Val,
+    caller: SonicWeaveValue
+  ): SonicWeaveValue {
+    if (typeof caller === 'boolean' || caller instanceof Interval) {
+      return upcastBool(caller).mul(callee);
+    }
+    const ic = this.intrinsicValCall.bind(this);
+    return mapValues.bind(this)(caller, c => ic(callee, c));
   }
 
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
@@ -1370,6 +1462,9 @@ export class ExpressionVisitor {
       return this.visit(node.right);
     }
     let right = this.visit(node.right);
+    if (operator === ' ') {
+      return this.implicitCall(left, right);
+    }
     if (operator === 'tns' || operator === '⊗') {
       return this.tensor(left, right, node);
     }
@@ -1491,12 +1586,15 @@ export class ExpressionVisitor {
     if (node.callee.type === 'Identifier') {
       const callee = this.get(node.callee.id) as SonicWeaveFunction;
       return callee.bind(this)(...args);
-    } else if (node.callee.type === 'AccessExpression') {
-      const callee = this.visitAccessExpression(node.callee);
-      return (callee as SonicWeaveFunction).bind(this)(...args);
-    } else {
-      throw new Error('Invalid callee.');
     }
+    const callee = this.visit(node.callee);
+    if (typeof callee === 'function') {
+      return (callee as SonicWeaveFunction).bind(this)(...args);
+    }
+    if (args.length !== 1) {
+      throw new Error('Intrinsic calls require exactly one argument.');
+    }
+    return this.implicitCall(callee, args[0]);
   }
 
   protected visitArrowFunction(node: ArrowFunction) {

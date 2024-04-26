@@ -271,12 +271,6 @@ export type BinaryExpression = {
   preferRight: boolean;
 };
 
-export type LabeledExpression = {
-  type: 'LabeledExpression';
-  object: Expression;
-  labels: (Identifier | ColorLiteral | StringLiteral | NoneLiteral)[];
-};
-
 export type NoneLiteral = {
   type: 'NoneLiteral';
 };
@@ -378,7 +372,6 @@ export type Expression =
   | UpdateExpression
   | DownExpression
   | BinaryExpression
-  | LabeledExpression
   | CallExpression
   | ArrowFunction
   | IntervalLiteral

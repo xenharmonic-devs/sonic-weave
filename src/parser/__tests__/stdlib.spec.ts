@@ -173,7 +173,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('rotates scales two steps', () => {
-    const scale = parseSource('1\\6;2\\6;6\\6;rotate(2);');
+    const scale = parseSource('1\\6;2\\6;6\\6;rotate 2;');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe('4\\6;5\\6;6\\6');
   });
@@ -1245,7 +1245,7 @@ describe('SonicWeave standard library', () => {
       '3/2',
       '27/16',
       '243/128',
-      '2',
+      '2/1',
     ]);
   });
 
@@ -1273,7 +1273,7 @@ describe('SonicWeave standard library', () => {
       '3/2',
       '27/16',
       '243/128',
-      '2',
+      '2/1',
     ]);
   });
 
