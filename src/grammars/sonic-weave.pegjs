@@ -721,13 +721,11 @@ UnaryExpression
     return operand;
   }
 
-LabelObject = CallExpression / AccessExpression
-
 Labels
-  = (CallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
+  = (TrueCallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral)|1.., __|
 
 LabeledExpression
-  = object: LabelObject labels: (' ' __ @Labels)? {
+  = object: CallExpression labels: (' ' __ @Labels)? {
     if (labels) {
       return {
         type: 'LabeledExpression',
@@ -750,27 +748,36 @@ LabeledCommaDecimal
     return object;
   }
 
-CallExpression
-  = head: (
-    callee: AccessExpression __ '(' _ args: ArgumentList _ ')' {
-      return { type: 'CallExpression', callee, args };
+CallTail
+  = head: (__ '(' _ @ArgumentList _ ')')
+    tail: (
+      __ '(' _ args: ArgumentList _ ')' {
+        return { type: 'CallExpression', args };
+      }
+      / __ '[' _ key: Expression _ ']' {
+        return { type: 'AccessExpression', key };
+      }
+      / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ '..' _ end: Expression? _ ']' {
+        return { type: 'ArraySlice', start, second, end };
+      }
+    )* {
+      tail.unshift({ type: 'CallExpression', args: head});
+      return tail;
     }
-  ) tail: (
-    __ '(' _ args: ArgumentList _ ')' {
-      return { type: 'CallExpression', args };
-    }
-    / __ '[' _ key: Expression _ ']' {
-      return { type: 'AccessExpression', key };
-    }
-    / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ '..' _ end: Expression? _ ']' {
-      return { type: 'ArraySlice', start, second, end };
-    }
-  )* {
-    return tail.reduce((result, element) => {
-      element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
 
-      return element;
-    }, head);
+CallExpression
+  = head: AccessExpression tail: CallTail? {
+    if (tail) {
+      tail[0].callee = head;
+      let result = tail[0];
+      result.callee = head;
+      for (const element of tail.slice(1)) {
+        element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
+        result = element;
+      }
+      return result;
+    }
+    return head;
   }
 
 AccessExpression
@@ -783,6 +790,18 @@ AccessExpression
         key,
       };
     }, head);
+  }
+
+TrueCallExpression
+  = head: AccessExpression tail: CallTail {
+      tail[0].callee = head;
+      let result = tail[0];
+      result.callee = head;
+      for (const element of tail.slice(1)) {
+        element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
+        result = element;
+      }
+      return result;
   }
 
 TrueAccessExpression
@@ -914,7 +933,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger ('\\' / '°') __ denominator: (ParenthesizedExpression / CallExpression / TrueAccessExpression / Identifier / TemplateArgument)? {
+  = count: BasicInteger ('\\' / '°') __ denominator: (ParenthesizedExpression / CallExpression)? {
     if (denominator) {
       return BinaryExpression(
         '\\',
