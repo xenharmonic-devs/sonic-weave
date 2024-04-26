@@ -97,6 +97,24 @@
 
     return BinaryExpression(op, left, right, false, false);
   }
+
+  function processCallTail(head, tail) {
+    if (head.type === 'StepLiteral' && tail.length === 1 && tail[0].args.length === 1) {
+      return BinaryExpression(
+        '\\',
+        {type: 'IntegerLiteral', value: BigInt(head.count)},
+        tail[0].args[0].expression,
+        false,
+        false
+      );
+    }
+    let result = head;
+    for (const element of tail) {
+      element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
+      result = element;
+    }
+    return result;
+  }
 }}
 
 Start
@@ -768,14 +786,7 @@ CallTail
 CallExpression
   = head: AccessExpression tail: CallTail? {
     if (tail) {
-      tail[0].callee = head;
-      let result = tail[0];
-      result.callee = head;
-      for (const element of tail.slice(1)) {
-        element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
-        result = element;
-      }
-      return result;
+      return processCallTail(head, tail);
     }
     return head;
   }
@@ -794,14 +805,7 @@ AccessExpression
 
 TrueCallExpression
   = head: AccessExpression tail: CallTail {
-      tail[0].callee = head;
-      let result = tail[0];
-      result.callee = head;
-      for (const element of tail.slice(1)) {
-        element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
-        result = element;
-      }
-      return result;
+    return processCallTail(head, tail);
   }
 
 TrueAccessExpression
@@ -933,19 +937,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger ('\\' / '°') __ denominator: (ParenthesizedExpression / CallExpression)? {
-    if (denominator) {
-      return BinaryExpression(
-        '\\',
-        {
-          type: 'IntegerLiteral',
-          value: BigInt(count),
-        },
-        denominator,
-        false,
-        false
-      );
-    }
+  = count: BasicInteger ('\\' / '°') !'(' !IdentifierStart {
     return {
       type: 'StepLiteral',
       count,
