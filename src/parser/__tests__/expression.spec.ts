@@ -431,7 +431,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a just intonation point', () => {
     const marvelCents = evaluate('JIP(225/224)') as Interval;
-    expect(marvelCents.toString()).toBe('7.711522991319323r¢');
+    expect(marvelCents.toString()).toBe('7.711522991319705r¢');
   });
 
   it('parses negative intervals correctly', () => {
@@ -1879,7 +1879,7 @@ describe('SonicWeave expression evaluator', () => {
     const miksiTeitSen = evaluate(
       '1 = 440Hz; relative([10000>@Hz)'
     ) as Interval;
-    expect(miksiTeitSen.toString()).toBe('-10537.63165622959r¢');
+    expect(miksiTeitSen.toString()).toBe('-10537.631656229592r¢');
   });
 
   it('it formats one quebihertz', () => {
@@ -2052,15 +2052,13 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('converts the neutrino to cents as fractions of the octave', () => {
-    // XXX: Precision is off by a factor of 2.84, but at least the order of magnitude is correct.
     const neutrino = evaluate('cents([1889 -2145 138 424⟩, 12)') as Interval;
-    expect(neutrino.toString()).toBe('0.000000000466');
+    expect(neutrino.toString()).toBe('0.000000000164');
   });
 
   it('converts the neutrino to real cents', () => {
-    // XXX: Precision is off by a factor of 2.84, but at least the order of magnitude is correct.
     const neutrino = evaluate('cents([1889 -2145 138 424⟩)') as Interval;
-    expect(neutrino.toString()).toBe('4.6552193953432127e-10r¢');
+    expect(neutrino.toString()).toBe('1.6375916287501086e-10r¢');
   });
 
   it('parses cents with exponents', () => {
@@ -2081,5 +2079,10 @@ describe('SonicWeave expression evaluator', () => {
   it('parses zero exponents as linear decimals', () => {
     const {fraction} = parseSingle('1.5e0');
     expect(fraction).toBe('3/2');
+  });
+
+  it('can order intervals accurately', () => {
+    const smidgeWider = evaluate('[162 -84 -12⟩ > 2');
+    expect(smidgeWider).toBe(true);
   });
 });

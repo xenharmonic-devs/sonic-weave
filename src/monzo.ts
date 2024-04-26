@@ -11,6 +11,8 @@ import {
   valueToCents,
   mmod,
   BIG_INT_PRIMES,
+  monzoToCents,
+  sum,
 } from 'xen-dev-utils';
 
 import {
@@ -2023,11 +2025,16 @@ export class TimeMonzo {
     if (ignoreSign) {
       residualValue = Math.abs(residualValue);
     }
-    let total = valueToCents(residualValue);
-    for (let i = 0; i < this.primeExponents.length; ++i) {
-      total += this.primeExponents[i].valueOf() * PRIME_CENTS[i];
+    if (residualValue === 1) {
+      // Uses an accurate measure for rationals extremely close to unity
+      return monzoToCents(this.primeExponents.map(e => e.valueOf()));
     }
-    return total;
+    const terms: number[] = [];
+    terms.push(valueToCents(residualValue));
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      terms.push(this.primeExponents[i].valueOf() * PRIME_CENTS[i]);
+    }
+    return sum(terms);
   }
 
   /**
@@ -2071,10 +2078,12 @@ export class TimeMonzo {
    * @returns Result < 0 if other is larger than this. Result > 0 if other is smaller than this. Result == 0 if other is equal to this in size.
    */
   compare(other: TimeMonzo | TimeReal) {
-    if (this.strictEquals(other)) {
-      return 0;
+    if (other instanceof TimeReal || this.residual.s * other.residual.s !== 1) {
+      return this.valueOf() - other.valueOf();
     }
-    return this.valueOf() - other.valueOf();
+    // Exploit increased accuracy near unison:
+    // Division eliminates sign from the difference, but also swaps comparison semantics
+    return this.div(other).totalCents() * other.residual.s;
   }
 
   /**

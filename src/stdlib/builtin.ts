@@ -4,7 +4,6 @@ import {
   isPrime as xduIsPrime,
   primes as xduPrimes,
   approximateRadical,
-  dot,
   LOG_PRIMES,
   norm,
   BIG_INT_PRIMES,
@@ -12,6 +11,7 @@ import {
   fareyInterior as xduFareyInterior,
   hasMarginConstantStructure,
   primeLimit,
+  dotPrecise,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
@@ -1308,7 +1308,7 @@ function cosJIP(
   } else {
     const peNorm = norm(pe);
     const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
-    value = dot(LOG_PRIMES, pe) / peNorm / jipNorm;
+    value = dotPrecise(LOG_PRIMES, pe) / peNorm / jipNorm;
   }
   return new Interval(TimeReal.fromValue(value), 'linear');
 }
