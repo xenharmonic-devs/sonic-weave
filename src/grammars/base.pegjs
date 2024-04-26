@@ -1,3 +1,9 @@
+{{
+  const ZS_RE = /\p{Zs}/u;
+  const ID_START_RE = /\p{ID_Start}/u;
+  const ID_CONTINUE_RE = /\p{ID_Continue}/u;
+}}
+
 UnderscoreDigits
   = num: $([_0-9]*) {
   if (num.endsWith('_')) {
@@ -166,7 +172,7 @@ LineTerminatorSequence 'line terminator'
   / '\r\n'
 
 // Separator, Space
-Zs = c:SourceCharacter &{ return /\p{Zs}/u.test(c); }
+Zs = c:SourceCharacter &{ return ZS_RE.test(c); }
 
 SourceCharacter 'any character'
   = SourceCharacterLow
@@ -183,10 +189,10 @@ SourceCharacterHigh
   / [\uDC00-\uDFFF] // Lone second surrogate
 
 ID_Start
-  = c:SourceCharacter &{ return /\p{ID_Start}/u.test(c); }
+  = c:SourceCharacter &{ return ID_START_RE.test(c); }
 
 ID_Continue
-  = c:SourceCharacter &{ return /\p{ID_Continue}/u.test(c); }
+  = c:SourceCharacter &{ return ID_CONTINUE_RE.test(c); }
 
 Comment
   = MultiLineComment
