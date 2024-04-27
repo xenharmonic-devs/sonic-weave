@@ -1356,4 +1356,20 @@ describe('SonicWeave standard library', () => {
     `);
     expect(major).toEqual(['9/8', '5/4', '4/3', '3/2', '5/3', '15/8', '2/1']);
   });
+
+  it('parses Rage Todi (golfed)', () => {
+    const scale = expand(`
+      rank2(3/2 white, 1, 5, 2/1 white)
+      $[[2, 5]] *~= 135/128 black
+    `);
+    expect(scale).toEqual([
+      '256/243 white',
+      '32/27 white',
+      '45/32 black',
+      '3/2 white',
+      '128/81 white',
+      '15/8 black',
+      '2/1 white',
+    ]);
+  });
 });

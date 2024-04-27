@@ -465,6 +465,32 @@ export class StatementVisitor {
       }
       if (Array.isArray(object)) {
         const index = subVisitor.visit(node.name.key);
+        if (Array.isArray(index)) {
+          if (!Array.isArray(value)) {
+            throw new Error('Unrecoverable error in array assignment.');
+          }
+          let j = 0;
+          for (let i = 0; i < index.length; ++i) {
+            const idx = index[i];
+            if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
+              throw new Error(
+                'Only booleans and intervals can be used as indices.'
+              );
+            }
+            if (idx === true) {
+              object[i] = value[j++];
+              continue;
+            } else if (idx === false) {
+              continue;
+            }
+            let k = idx.toInteger();
+            if (k < 0) {
+              k += object.length;
+            }
+            object[k] = value[j++];
+          }
+          return undefined;
+        }
         if (!(index instanceof Interval)) {
           throw new Error('Array access with a non-integer.');
         }
