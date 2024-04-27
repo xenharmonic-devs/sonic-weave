@@ -1327,11 +1327,13 @@ export class ExpressionVisitor {
     );
   }
 
-  // This is the 'whitespace' operator responsible for labeling
-  protected implicitCall(
-    left: SonicWeaveValue,
-    right: SonicWeaveValue
-  ): SonicWeaveValue {
+  /**
+   * Invoke intrinsic behavior associated with SonicWeave values.
+   * @param left The callee.
+   * @param right The caller.
+   * @returns The return value of the intrinsic call.
+   */
+  implicitCall(left: SonicWeaveValue, right: SonicWeaveValue): SonicWeaveValue {
     switch (typeof left) {
       case 'string':
         return this.intrinsicStringCall(left, right);

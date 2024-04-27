@@ -93,9 +93,9 @@ export class StatementVisitor {
    */
   immutables: VisitorContext;
   /**
-   * Whether or not the state of the visitor can be represented as text. The global context doesn't have a representation because the builtins are not written in the SonicWeave DSL.
+   * Whether or not the state of the visitor can be represented as text and that state represents the runtime from a user's perspective. The global context doesn't have a representation because the builtins are not written in the SonicWeave DSL.
    */
-  expandable: boolean;
+  isUserRoot: boolean;
 
   private rootContext_?: RootContext;
 
@@ -108,7 +108,7 @@ export class StatementVisitor {
     this.mutables = new Map();
     this.mutables.set('$', []);
     this.immutables = new Map();
-    this.expandable = true;
+    this.isUserRoot = false;
   }
 
   /**
@@ -146,7 +146,7 @@ export class StatementVisitor {
     result.immutables = new Map(this.immutables);
     const scale = this.currentScale;
     result.mutables.set('$', [...scale]);
-    result.expandable = this.expandable;
+    result.isUserRoot = this.isUserRoot;
     return result;
   }
 
@@ -168,8 +168,8 @@ export class StatementVisitor {
    * @returns A string that when evaluated should recreate the same runtime state.
    */
   expand(defaultRootContext: RootContext) {
-    if (!this.expandable) {
-      throw new Error('The global scope cannot be expanded.');
+    if (!this.isUserRoot) {
+      throw new Error('Only the user root scope may be expanded.');
     }
     if (!this.rootContext) {
       throw new Error('Root context must be present during expansion.');
@@ -616,9 +616,11 @@ export class StatementVisitor {
   handleValue(value: SonicWeaveValue, subVisitor: ExpressionVisitor) {
     const scale = this.currentScale;
     if (value instanceof Color) {
-      if (scale.length) {
-        scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
-        scale[scale.length - 1].color = value;
+      for (let i = 0; i < scale.length; ++i) {
+        if (scale[i].color === undefined) {
+          scale[i] = scale[i].shallowClone();
+          scale[i].color = value;
+        }
       }
     } else if (value instanceof Interval) {
       scale.push(value);
@@ -627,23 +629,23 @@ export class StatementVisitor {
       scale.length = 0;
       scale.push(...mapped);
     } else if (Array.isArray(value)) {
-      scale.push(...this.flattenArray(value));
+      this.handleArray(value);
     } else if (value === undefined) {
       /* Do nothing */
     } else if (typeof value === 'string') {
-      if (scale.length) {
-        scale[scale.length - 1] = scale[scale.length - 1].shallowClone();
-        scale[scale.length - 1].label = value;
-      } else if (this.rootContext) {
-        this.rootContext.title = value;
+      if (!this.rootContext) {
+        throw new Error('No root context found for storing scale title.');
       }
+      if (!this.isUserRoot) {
+        throw new Error('Scale title must be given at root level.');
+      }
+      this.rootContext.title = value;
     } else if (typeof value === 'boolean') {
       scale.push(upcastBool(value));
     } else if (typeof value === 'object') {
       const entries = Object.entries(value);
       for (const [key, subValue] of entries) {
-        this.handleValue(subValue, subVisitor);
-        this.handleValue(key, subVisitor);
+        this.handleValue(subVisitor.implicitCall(key, subValue), subVisitor);
       }
       const tail = scale.slice(-entries.length);
       scale.length = scale.length - tail.length;
@@ -654,28 +656,48 @@ export class StatementVisitor {
       const bound = value.bind(subVisitor);
       const mapped = scale.map(i => bound(i));
       scale.length = 0;
-      scale.push(...mapped);
+      this.handleArray(mapped);
     }
   }
 
-  protected flattenArray(value: any): Interval[] {
-    const result: any[] = [];
-    for (const subvalue of value) {
-      if (Array.isArray(subvalue)) {
-        result.push(...this.flattenArray(subvalue));
-      } else if (subvalue instanceof Interval) {
-        result.push(subvalue);
-      } else if (result.length) {
-        if (subvalue instanceof Color) {
-          result[result.length - 1] = result[result.length - 1].shallowClone();
-          result[result.length - 1].color = subvalue;
-        } else if (typeof subvalue === 'string') {
-          result[result.length - 1] = result[result.length - 1].shallowClone();
-          result[result.length - 1].label = subvalue;
+  protected handleArray(array: SonicWeavePrimitive[]) {
+    const scale = this.currentScale;
+    const result = [...this.currentScale];
+    for (let i = 0; i < array.length; ++i) {
+      const value = array[i];
+      if (value instanceof Interval || typeof value === 'boolean') {
+        result.push(upcastBool(value));
+        continue;
+      } else if (Array.isArray(value)) {
+        for (const subValue of value.flat(Infinity)) {
+          if (subValue instanceof Interval || typeof subValue === 'boolean') {
+            result.push(upcastBool(subValue));
+          } else {
+            throw new Error('Nested pushed array elements must be intervals.');
+          }
         }
+        continue;
+      }
+      if (i >= scale.length) {
+        continue;
+      }
+      if (value instanceof Color) {
+        result[i] = result[i].shallowClone();
+        result[i].color = value;
+      } else if (value === undefined) {
+        result[i] = result[i].shallowClone();
+        result[i].color = undefined;
+      } else if (typeof value === 'string') {
+        result[i] = result[i].shallowClone();
+        result[i].label = value;
+      } else {
+        throw new Error(
+          'A pushed array element must be color, string, niente or interval.'
+        );
       }
     }
-    return result;
+    scale.length = 0;
+    scale.push(...result);
   }
 
   protected visitBlockStatement(node: BlockStatement) {
