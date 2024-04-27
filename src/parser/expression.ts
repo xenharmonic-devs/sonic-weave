@@ -222,7 +222,7 @@ function resolvePreference(
   );
 }
 
-function mapValues(
+function unaryMapContainer(
   this: ExpressionVisitor,
   container: SonicWeaveValue,
   fn: (x: SonicWeavePrimitive) => SonicWeaveValue
@@ -246,6 +246,100 @@ function mapValues(
   return Object.fromEntries(
     entries.map(([key, value]) => [key, fn(value)])
   ) as Record<string, SonicWeavePrimitive>;
+}
+
+/**
+ * Boardcast containers together and map a binary function over them.
+ */
+function binaryMapContainers(
+  this: ExpressionVisitor,
+  left: SonicWeaveValue,
+  right: SonicWeaveValue,
+  fn: (x: SonicWeavePrimitive, y: SonicWeavePrimitive) => SonicWeaveValue
+): SonicWeaveValue {
+  if (Array.isArray(left)) {
+    if (Array.isArray(right)) {
+      if (left.length !== right.length) {
+        throw new Error(
+          `Unable to broadcast arrays together with lengths ${left.length} and ${right.length}.`
+        );
+      }
+      this.spendGas(left.length);
+      return left.map((l, i) => fn(l, right[i])) as SonicWeaveValue;
+    }
+    if (
+      typeof right === 'object' &&
+      !(
+        right instanceof Color ||
+        right instanceof Interval ||
+        right instanceof Val
+      )
+    ) {
+      right satisfies Record<string, SonicWeavePrimitive>;
+      throw new Error('Unable to broadcast an array and record together.');
+    }
+    this.spendGas(left.length);
+    return left.map(l => fn(l, right)) as SonicWeaveValue;
+  }
+  if (
+    typeof left === 'object' &&
+    !(left instanceof Color || left instanceof Interval || left instanceof Val)
+  ) {
+    left satisfies Record<string, SonicWeavePrimitive>;
+    if (Array.isArray(right)) {
+      throw new Error('Unable to broadcast an array and record together.');
+    }
+    const entries = Object.entries(left);
+    if (
+      typeof right === 'object' &&
+      !(
+        right instanceof Color ||
+        right instanceof Interval ||
+        right instanceof Val
+      )
+    ) {
+      right satisfies Record<string, SonicWeavePrimitive>;
+      for (const key in right) {
+        if (!(key in left)) {
+          throw new Error(`Unable broadcast records together on key ${key}.`);
+        }
+      }
+      const resultEntries: [string, SonicWeavePrimitive][] = [];
+      for (const [key, value] of entries) {
+        if (!(key in right)) {
+          throw new Error(`Unable broadcast records together on key ${key}.`);
+        }
+        this.spendGas();
+        resultEntries.push([key, fn(value, right[key]) as SonicWeavePrimitive]);
+      }
+      return Object.fromEntries(resultEntries);
+    }
+    this.spendGas(entries.length);
+    return Object.fromEntries(
+      entries.map(([key, value]) => [
+        key,
+        fn(value, right) as SonicWeavePrimitive,
+      ])
+    );
+  }
+  if (Array.isArray(right)) {
+    this.spendGas(right.length);
+    return right.map(r => fn(left, r)) as SonicWeaveValue;
+  }
+  if (
+    typeof right !== 'object' ||
+    right instanceof Color ||
+    right instanceof Interval ||
+    right instanceof Val
+  ) {
+    throw new Error('Invalid container broadcast.');
+  }
+  right satisfies Record<string, SonicWeavePrimitive>;
+  const entries = Object.entries(right);
+  this.spendGas(entries.length);
+  return Object.fromEntries(
+    entries.map(([key, value]) => [key, fn(left, value) as SonicWeavePrimitive])
+  );
 }
 
 /**
@@ -1334,10 +1428,6 @@ export class ExpressionVisitor {
    * @returns The return value of the intrinsic call.
    */
   implicitCall(left: SonicWeaveValue, right: SonicWeaveValue): SonicWeaveValue {
-    const ic = this.implicitCall.bind(this);
-    if (Array.isArray(left) && Array.isArray(right)) {
-      return left.map((l, i) => ic(l, right[i])) as SonicWeaveValue;
-    }
     switch (typeof left) {
       case 'string':
         return this.intrinsicStringCall(left, right);
@@ -1355,7 +1445,8 @@ export class ExpressionVisitor {
     } else if (left instanceof Color) {
       return this.intrinsicColorCall(left, right);
     }
-    return mapValues.bind(this)(left, l => ic(l, right));
+    const ic = this.implicitCall.bind(this);
+    return binaryMapContainers.bind(this)(left, right, ic);
   }
 
   protected intrinsicStringCall(
@@ -1371,7 +1462,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const ic = this.intrinsicStringCall.bind(this);
-    return mapValues.bind(this)(caller, c => ic(callee, c));
+    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicColorCall(
@@ -1384,7 +1475,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const ic = this.intrinsicColorCall.bind(this);
-    return mapValues.bind(this)(caller, c => ic(callee, c));
+    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicNoneCall(caller: SonicWeaveValue): SonicWeaveValue {
@@ -1394,7 +1485,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const n = this.intrinsicNoneCall.bind(this);
-    return mapValues.bind(this)(caller, n);
+    return unaryMapContainer.bind(this)(caller, n);
   }
 
   protected intrinsicIntervalCall(
@@ -1424,7 +1515,7 @@ export class ExpressionVisitor {
       return callee;
     }
     const ic = this.intrinsicIntervalCall.bind(this);
-    return mapValues.bind(this)(caller, c => ic(callee, c));
+    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicValCall(
@@ -1435,7 +1526,7 @@ export class ExpressionVisitor {
       return upcastBool(caller).mul(callee);
     }
     const ic = this.intrinsicValCall.bind(this);
-    return mapValues.bind(this)(caller, c => ic(callee, c));
+    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
   }
 
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
