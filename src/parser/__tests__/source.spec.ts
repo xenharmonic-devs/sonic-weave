@@ -1319,4 +1319,28 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['5/4 green', '3/2 green', '2/1 red']);
   });
+
+  it('parses Raga Bageshri (otonal)', () => {
+    const scale = expand(`
+      54 white:
+      60 black:
+      64 white:
+      72 white:
+      81 white:
+      90 black:
+      96 white:
+      108 '2/1'
+
+      simplify
+    `);
+    expect(scale).toEqual([
+      '10/9 black',
+      '32/27 white',
+      '4/3 white',
+      '3/2 white',
+      '5/3 black',
+      '16/9 white',
+      '2 white "2/1"',
+    ]);
+  });
 });

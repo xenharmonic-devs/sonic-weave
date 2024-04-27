@@ -646,7 +646,7 @@ HarmonicSegment
 Enumeral = HarmonicSegment / ExtremumExpression
 
 EnumeratedChord
-  = '/' __ enumerals: Enumeral|2.., _ ':'| {
+  = '/' __ enumerals: Enumeral|2.., _ ':' _| {
     return {
       type: 'EnumeratedChord',
       mirror: true,
@@ -660,7 +660,7 @@ EnumeratedChord
       enumerals: [segment],
     };
   }
-  / enumerals: Enumeral|1.., _ ':'| {
+  / enumerals: Enumeral|1.., _ ':' _| {
     if (enumerals.length === 1) {
       return enumerals[0];
     }
@@ -1074,7 +1074,7 @@ PatentTweak
     };
   }
 
-PatentTweaks = PatentTweak|.., _ ','|
+PatentTweaks = PatentTweak|.., _ ',' _|
 
 SparseOffsetVal
   = equave: ('[' @Fraction ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
