@@ -1198,4 +1198,16 @@ describe('Negative tests', () => {
   it('rejects inner ternary operator association', () => {
     expect(() => parse('foo if bar if baz else qux else quux')).toThrow();
   });
+
+  it('rejects empty variable declaration (const)', () => {
+    expect(() => parse('const')).toThrow();
+  });
+
+  it('rejects empty variable declaration (let)', () => {
+    expect(() => parse('let')).toThrow();
+  });
+
+  it('rejects empty arrow function parameters', () => {
+    expect(() => parse('=> 0')).toThrow();
+  });
 });

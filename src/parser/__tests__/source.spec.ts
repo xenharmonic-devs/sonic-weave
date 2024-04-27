@@ -770,7 +770,7 @@ describe('SonicWeave parser', () => {
     }
     const scale = expand(`
       const a = 1
-      const foo = => a
+      const foo = () => a
       {
         const a = 2
         const bar = () => a
@@ -778,7 +778,7 @@ describe('SonicWeave parser', () => {
         bar()
       }
     `);
-    expect(scale).toEqual(['const a = 1', 'const foo = => a', '1', '2']);
+    expect(scale).toEqual(['const a = 1', 'const foo = () => a', '1', '2']);
   });
 
   it('iterates over ranges', () => {

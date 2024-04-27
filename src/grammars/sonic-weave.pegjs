@@ -241,7 +241,7 @@ VariableManipulationStatement
   }
 
 VariableDeclaration
-  = LetToken _ parameters: Parameters EOS {
+  = LetToken _ parameters: NonEmptyParameters EOS {
     return {
       type: 'VariableDeclaration',
       parameters,
@@ -322,6 +322,24 @@ Parameters
     };
   }
 
+NonEmptyParameters
+  = parameters: (Parameter / ParameterArray)|1.., _ ',' _| rest: (_ ','? _ '...' _ @Parameter)? {
+    return {
+      type: 'Parameters',
+      parameters,
+      rest,
+      defaultValue: null,
+    };
+  }
+  / '...' _ rest: Parameter {
+    return {
+      type: 'Parameters',
+      parameters: [],
+      rest,
+      defaultValue: null,
+    }
+  }
+
 ParameterArray
   = '[' _ parameters: Parameters _ ']' defaultValue: (_ '=' _ @Expression)? {
     return {
@@ -340,7 +358,7 @@ ParameterWithDefault
   }
 
 ParametersWithDefaults
-  = parameters: (ParameterWithDefault / ParameterArrayWithDefault)|.., _ ',' _| {
+  = parameters: (ParameterWithDefault / ParameterArrayWithDefault)|1.., _ ',' _| {
     return {
       type: 'Parameters',
       parameters,
@@ -1332,7 +1350,7 @@ ArrowFunction
       text: text(),
     };
   }
-  / parameters: Parameters _ '=>' _ expression: Expression {
+  / parameters: NonEmptyParameters _ '=>' _ expression: Expression {
     return {
       type: 'ArrowFunction',
       parameters,
