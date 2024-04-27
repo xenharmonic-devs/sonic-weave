@@ -1334,6 +1334,10 @@ export class ExpressionVisitor {
    * @returns The return value of the intrinsic call.
    */
   implicitCall(left: SonicWeaveValue, right: SonicWeaveValue): SonicWeaveValue {
+    const ic = this.implicitCall.bind(this);
+    if (Array.isArray(left) && Array.isArray(right)) {
+      return left.map((l, i) => ic(l, right[i])) as SonicWeaveValue;
+    }
     switch (typeof left) {
       case 'string':
         return this.intrinsicStringCall(left, right);
@@ -1351,7 +1355,6 @@ export class ExpressionVisitor {
     } else if (left instanceof Color) {
       return this.intrinsicColorCall(left, right);
     }
-    const ic = this.implicitCall.bind(this);
     return mapValues.bind(this)(left, l => ic(l, right));
   }
 

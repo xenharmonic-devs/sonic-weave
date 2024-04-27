@@ -1343,4 +1343,26 @@ describe('SonicWeave parser', () => {
       '2 white "2/1"',
     ]);
   });
+
+  it('parses Pythagoras[12] (golfed)', () => {
+    const scale = expand(`
+      [3^i rdc 2 white for i of [-2..4]] ['F', 'C', 'G', 'D', 'A', 'E', 'B']
+      [3^i rdc 2 black for i of [-7..-3]] ['G♭', 'D♭', 'A♭', 'E♭', 'B♭']
+      sort()
+    `);
+    expect(scale).toEqual([
+      '256/243 black "A♭"',
+      '9/8 white "A"',
+      '32/27 black "B♭"',
+      '81/64 white "B"',
+      '4/3 white "C"',
+      '1024/729 black "D♭"',
+      '3/2 white "D"',
+      '128/81 black "E♭"',
+      '27/16 white "E"',
+      '16/9 white "F"',
+      '4096/2187 black "G♭"',
+      '2 white "G"',
+    ]);
+  });
 });

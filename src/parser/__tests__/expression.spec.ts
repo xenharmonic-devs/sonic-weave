@@ -2105,14 +2105,9 @@ describe('SonicWeave expression evaluator', () => {
     });
   });
 
-  it('has implicit array outer product', () => {
-    const numpyIndexingTears = evaluate(
-      '[2, 3] [5, 7]'
-    ) as unknown as Interval[][];
-    expect(numpyIndexingTears.map(row => row.map(i => i.toInteger()))).toEqual([
-      [10, 14],
-      [15, 21],
-    ]);
+  it('has implicit elementwise product', () => {
+    const numpyIndexingTears = evaluate('[2, 3] [5, 7]') as Interval[];
+    expect(numpyIndexingTears.map(i => i.toInteger())).toEqual([10, 21]);
   });
 
   it('has implicit function calls', () => {
