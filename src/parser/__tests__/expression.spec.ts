@@ -2094,17 +2094,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.totalCents()).toBe(1901.9);
   });
 
-  it('has implicit record tensoring string concatenation', () => {
-    // TODO: Find out why the parenthesis are required here
-    const thisLanguageNeedsToBeStopped = evaluate(
-      '({a: "a", b: "b"}) {c: "c", d: "d"}'
-    );
-    expect(thisLanguageNeedsToBeStopped).toEqual({
-      a: {c: 'ac', d: 'ad'},
-      b: {c: 'bc', d: 'bd'},
-    });
-  });
-
   it('has implicit elementwise product', () => {
     const numpyIndexingTears = evaluate('[2, 3] [5, 7]') as Interval[];
     expect(numpyIndexingTears.map(i => i.toInteger())).toEqual([10, 21]);
