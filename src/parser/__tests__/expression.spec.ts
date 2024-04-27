@@ -703,7 +703,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("doesn't let you color pi (scale)", () => {
-    const purePi = evaluate('PI;chocolate;PI') as Interval;
+    const purePi = evaluate('PI;[chocolate];PI') as Interval;
     expect(purePi.color?.value).toBe(undefined);
   });
 

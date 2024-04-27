@@ -20,6 +20,11 @@ function parseSingle(source: string) {
   return value as Interval;
 }
 
+function expand(source: string) {
+  const visitor = evaluateSource(source);
+  return visitor.expand(visitor.rootContext!).split('\n');
+}
+
 describe('SonicWeave standard library', () => {
   it('converts MIDI note number to frequency', () => {
     const scale = parseSource('mtof(60);');
@@ -112,13 +117,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('generates Euler-Fokker genera with colors', () => {
-    const scale = parseSource('eulerGenus(15 white, 1, 2 gray);repr');
-    expect(scale).toEqual([
-      '(5/4 white)',
-      '(3/2 white)',
-      '(15/8 white)',
-      '(2 gray)',
-    ]);
+    const scale = expand('eulerGenus(15 white, 1, 2 gray)');
+    expect(scale).toEqual(['5/4 white', '3/2 white', '15/8 white', '2 gray']);
   });
 
   it('generates the Easter egg', () => {
@@ -141,9 +141,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can take out the unison rotating the result', () => {
-    const scale = parseSource(
-      '3\\100;10\\100;75\\100;100\\100;subset([1, 2]);str'
-    );
+    const scale = expand('3\\100;10\\100;75\\100;100\\100;subset([1, 2])');
     expect(scale).toEqual(['7\\100', '100\\100']);
   });
 
@@ -321,15 +319,15 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can generate generator sequences (zil[5])', () => {
-    const scale = parseSource(
-      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5);str'
+    const scale = expand(
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5)'
     );
     expect(scale).toEqual(['8/7', '4/3', '32/21', '16/9', '2']);
   });
 
   it('can generate generator sequences (zil[14])', () => {
-    const scale = parseSource(
-      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 14);str'
+    const scale = expand(
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 14)'
     );
     expect(scale).toEqual([
       '64/63',
@@ -444,31 +442,27 @@ describe('SonicWeave standard library', () => {
   });
 
   it('has the means to convert JI scales to enumerations', () => {
-    const scale = parseSource('12/11;6/5;4/3;3/2;elevate();simplify;str');
+    const scale = expand('12/11;6/5;4/3;3/2;elevate();simplify');
     expect(scale.join(':')).toBe('330:360:396:440:495');
   });
 
   it('has the means to convert JI scales to retroverted enumerations', () => {
-    const scale = parseSource(
-      '12/11;6/5;4/3;3/2;retrovert();elevate();simplify;str'
-    );
+    const scale = expand('12/11;6/5;4/3;3/2;retrovert();elevate();simplify');
     expect(`retroverted(${scale.join(':')})`).toBe('retroverted(8:9:10:11:12)');
   });
 
   it('has the means to convert JI scales to reflected enumerations', () => {
-    const scale = parseSource(
-      '12/11;6/5;4/3;3/2;reflect();elevate();simplify;str'
-    );
+    const scale = expand('12/11;6/5;4/3;3/2;reflect();elevate();simplify');
     expect(`reflected(${scale.join(':')})`).toBe('reflected(12:11:10:9:8)');
   });
 
   it('has the means to keep already enumerated scales enumerated', () => {
-    const scale = parseSource('4:12:14:16;elevate();simplify;str');
+    const scale = expand('4:12:14:16;elevate();simplify');
     expect(scale.join(':')).toBe('2:6:7:8');
   });
 
   it("doesn't introduce extra denominators when elevating", () => {
-    const scale = parseSource('5/3;10/3;elevate();simplify;str');
+    const scale = expand('5/3;10/3;elevate();simplify');
     expect(scale.join(':')).toBe('3:5:10');
   });
 
@@ -486,17 +480,17 @@ describe('SonicWeave standard library', () => {
   });
 
   it('has a linear differentiator', () => {
-    const steps = parseSource('diff([2, 3, 5, 8]);str');
+    const steps = expand('diff([2, 3, 5, 8])');
     expect(steps).toEqual(['2', '1', '2', '3']);
   });
 
   it('has a geometric differentiator', () => {
-    const steps = parseSource('geodiff(4::8);simplify;str');
+    const steps = expand('geodiff(4::8);simplify');
     expect(steps).toEqual(['5/4', '6/5', '7/6', '8/7']);
   });
 
   it('has a copying repeater', () => {
-    const bigScale = parseSource('repeated(2, 3::6);str');
+    const bigScale = expand('repeated(2, 3::6)');
     // XXX: Would be cool if that last 4/1 was 12/3, but can't come up
     // with formatting rules that wouldn't mess up everything else.
     expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '4/1']);
@@ -524,8 +518,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can reduce Raga Bhairavi to a comma recipe (inline)', () => {
-    const scale = parseSource(
-      'periodiff(geodiff([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]));str'
+    const scale = expand(
+      'periodiff(geodiff([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]))'
     );
     expect(scale).toEqual([
       '24/25',
@@ -540,8 +534,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can reduce Raga Bhairavi to a comma recipe (verbs)', () => {
-    const scale = parseSource(
-      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unperiostack();str'
+    const scale = expand(
+      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unperiostack()'
     );
     expect(scale).toEqual([
       '24/25',
@@ -556,7 +550,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can recover Raga Bhairavi from its comma recipe (inline)', () => {
-    const scale = parseSource(`
+    const scale = expand(`
       cumprod(
         antiperiodiff(
           10/9,
@@ -573,7 +567,6 @@ describe('SonicWeave standard library', () => {
         )
       )
       simplify
-      str
     `);
     expect(scale).toEqual([
       '16/15',
@@ -588,7 +581,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can recover Raga Bhairavi from its comma recipe (verbs)', () => {
-    const scale = parseSource(`
+    const scale = expand(`
       24/25
       2025/2048
       2048/2025
@@ -600,7 +593,6 @@ describe('SonicWeave standard library', () => {
       periostack(10/9)
       stack()
       simplify
-      str
     `);
     expect(scale).toEqual([
       '16/15',
@@ -620,7 +612,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can build a scale from self-referencing copies', () => {
-    const scale = parseSource('3;2;2;[$, $];i => i \\ sum();stack();str');
+    const scale = expand('3;2;2;[$, $];i => i \\ sum();stack()');
     expect(scale).toEqual([
       '3\\21',
       '5\\21',
@@ -658,8 +650,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('spans a lattice in cents', () => {
-    const scale = parseSource(
-      'parallelotope([123.4, 567.9], [2, 1], [1, 0], 1200.);str'
+    const scale = expand(
+      'parallelotope([123.4, 567.9], [2, 1], [1, 0], 1200.)'
     );
     expect(scale).toEqual([
       '123.4',
@@ -694,17 +686,17 @@ describe('SonicWeave standard library', () => {
   });
 
   it('coalesces intervals that are close to each other', () => {
-    const scale = parseSource('50/49;49/48;3/2;2/1;coalesce();str');
+    const scale = expand('50/49;49/48;3/2;2/1;coalesce()');
     expect(scale).toEqual(['49/48', '3/2', '2/1']);
   });
 
   it('coalesces with zero tolerance', () => {
-    const scale = parseSource('5/4;3/2;7/4;7/4;7/4;2/1;coalesce(0.);str');
+    const scale = expand('5/4;3/2;7/4;7/4;7/4;2/1;coalesce(0.)');
     expect(scale).toEqual(['5/4', '3/2', '7/4', '2/1']);
   });
 
   it('pops a specific index', () => {
-    const scale = parseSource('6::12;void(pop($, 4));str');
+    const scale = expand('6::12;void(pop($, 4))');
     expect(scale).toEqual(['7/6', '8/6', '9/6', '10/6', '12/6']);
   });
 
@@ -727,36 +719,29 @@ describe('SonicWeave standard library', () => {
   });
 
   it("doesn't eat colors across lines", () => {
-    const scale = parseSource(`
+    const scale = expand(`
       4/3 red
       3/2 "fifth"
       7/4
       2/1 "root" blue
       rotate(0)
-      repr
     `);
-    expect(scale).toEqual([
-      '(4/3 red)',
-      '(3/2 "fifth")',
-      '7/4',
-      '(2/1 blue "root")',
-    ]);
+    expect(scale).toEqual(['4/3 red', '3/2 "fifth"', '7/4', '2/1 blue "root"']);
   });
 
   it('coalesces cents geometrically', () => {
-    const scale = parseSource(`
+    const scale = expand(`
       100.
       200.
       202.
       1200.
       coalesce(3.5, 'geoavg')
-      str
     `);
     expect(scale).toEqual(['100.', '201.', '1200.']);
   });
 
   it('can store colors and labels for later', () => {
-    const scale = parseSource(`
+    const scale = expand(`{
       1 red "one"
       2 "two"
       3
@@ -766,111 +751,105 @@ describe('SonicWeave standard library', () => {
       3::6
       label(cs)
       label(ls)
-      repr
-    `);
-    expect(scale).toEqual(['(4/3 red "one")', '(5/3 "two")', '6/3']);
+    }`);
+    expect(scale).toEqual(['4/3 red "one"', '5/3 "two"', '6/3']);
   });
 
   it('generates Raga Kafi with everything simplified', () => {
-    const scale = parseSource(
-      'rank2(3/2 white, 2, 3)\ninsert(5/3 black)\nrepr'
-    );
+    const scale = expand('rank2(3/2 white, 2, 3)\ninsert(5/3 black)');
     expect(scale).toEqual([
-      '(9/8 white)',
-      '(32/27 white)',
-      '(4/3 white)',
-      '(3/2 white)',
-      '(5/3 black)',
-      '(16/9 white)',
+      '9/8 white',
+      '32/27 white',
+      '4/3 white',
+      '3/2 white',
+      '5/3 black',
+      '16/9 white',
       '2',
     ]);
   });
 
   it('generates 22 Shruti with the intended colors', () => {
-    const scale = parseSource(
-      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify\nrepr"
+    const scale = expand(
+      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify"
     );
     expect(scale).toEqual([
-      '(256/243 white)',
-      '(16/15 green)',
-      '(10/9 yellow)',
-      '(9/8 white)',
-      '(32/27 white)',
-      '(6/5 green)',
-      '(5/4 yellow)',
-      '(81/64 white)',
-      '(4/3 white)',
-      '(27/20 green)',
-      '(45/32 yellow)',
-      '(729/512 white)',
-      '(3/2 white)',
-      '(128/81 white)',
-      '(8/5 green)',
-      '(5/3 yellow)',
-      '(27/16 white)',
-      '(16/9 white)',
-      '(9/5 green)',
-      '(15/8 yellow)',
-      '(243/128 white)',
-      '(2 gray)',
+      '256/243 white',
+      '16/15 green',
+      '10/9 yellow',
+      '9/8 white',
+      '32/27 white',
+      '6/5 green',
+      '5/4 yellow',
+      '81/64 white',
+      '4/3 white',
+      '27/20 green',
+      '45/32 yellow',
+      '729/512 white',
+      '3/2 white',
+      '128/81 white',
+      '8/5 green',
+      '5/3 yellow',
+      '27/16 white',
+      '16/9 white',
+      '9/5 green',
+      '15/8 yellow',
+      '243/128 white',
+      '2 gray',
     ]);
   });
 
   it('has inline labeling', () => {
-    const pythagoras = parseSource(`
+    const pythagoras = expand(`
       labeled(['F', 'C', 'G', 'D', 'A', 'E', 'B'], [3^i rdc 2 white for i of [-2..4]])
       labeled(['Gb', 'Db', 'Ab', 'Eb', 'Bb'], [3^i rdc 2 black for i of [-7..-3]])
       sort()
-      repr
     `);
     expect(pythagoras).toEqual([
-      '(256/243 black "Ab")',
-      '(9/8 white "A")',
-      '(32/27 black "Bb")',
-      '(81/64 white "B")',
-      '(4/3 white "C")',
-      '(1024/729 black "Db")',
-      '(3/2 white "D")',
-      '(128/81 black "Eb")',
-      '(27/16 white "E")',
-      '(16/9 white "F")',
-      '(4096/2187 black "Gb")',
-      '(2 white "G")',
+      '256/243 black "Ab"',
+      '9/8 white "A"',
+      '32/27 black "Bb"',
+      '81/64 white "B"',
+      '4/3 white "C"',
+      '1024/729 black "Db"',
+      '3/2 white "D"',
+      '128/81 black "Eb"',
+      '27/16 white "E"',
+      '16/9 white "F"',
+      '4096/2187 black "Gb"',
+      '2 white "G"',
     ]);
   });
 
   it('merges offsets without duplicating', () => {
-    const scale = parseSource(
-      '4/3;3/2;2/1;mergeOffset(3/2, "wrap");simplify;str'
-    );
+    const scale = expand('4/3;3/2;2/1;mergeOffset(3/2, "wrap");simplify');
     expect(scale).toEqual(['9/8', '4/3', '3/2', '2']);
   });
 
   it('can generate vertically aligned objects', () => {
-    const vao = parseSource('vao(16, 64);str');
+    const vao = expand('vao(16, 64)');
     expect(vao).toEqual(['16/16', '17/16', '18/16', '19/16', '24/16', '57/16']);
   });
 
   it('can generate concordance shells', () => {
-    const shell = parseSource('concordanceShell(37, 255, 12, 5.0, 2/1);repr');
+    const shell = expand('concordanceShell(37, 255, 12, 5.0, 2/1)');
     expect(shell).toEqual([
-      '(1\\12 "157")',
-      '(2\\12 "83")',
-      '(3\\12 "44")',
-      '(4\\12 "93 & 187")',
-      '(5\\12 "99 & 197")',
-      '(6\\12 "209")',
-      '(7\\12 "111")',
-      '(8\\12 "235")',
-      '(9\\12 "249")',
-      '(10\\12 "66")',
-      '(11\\12 "70")',
-      '(12\\12 "37")',
+      '1\\12 "157"',
+      '2\\12 "83"',
+      '3\\12 "44"',
+      '4\\12 "93 & 187"',
+      '5\\12 "99 & 197"',
+      '6\\12 "209"',
+      '7\\12 "111"',
+      '8\\12 "235"',
+      '9\\12 "249"',
+      '10\\12 "66"',
+      '11\\12 "70"',
+      '12\\12 "37"',
     ]);
   });
 
   it('equalizes a wide harmonic segment', () => {
-    const scale = parseSource('4::16;equalize(23);str');
+    const scale = expand('4::16;equalize(23)');
     expect(scale).toEqual([
       '8\\23',
       '14\\23',
@@ -888,7 +867,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('has reasonable formatting for geometric differences', () => {
-    const scale = parseSource('geodiff(4:5:6:7);str');
+    const scale = expand('geodiff(4:5:6:7)');
     expect(scale).toEqual(['5/4', '6/5', '7/6']);
   });
 
@@ -918,8 +897,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can replace all occurences of a relative step with others', () => {
-    const splitCPS = parseSource(
-      'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33]);str'
+    const splitCPS = expand(
+      'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33])'
     );
     expect(splitCPS).toEqual([
       '11/10',
@@ -934,24 +913,24 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can paint the whole scale', () => {
-    const scale = parseSource('3::6;label(white);label("bob");repr');
+    const scale = expand('3::6;white;label("bob")');
     expect(scale).toEqual([
-      '(4/3 white "bob")',
-      '(5/3 white "bob")',
-      '(6/3 white "bob")',
+      '4/3 white "bob"',
+      '5/3 white "bob"',
+      '6/3 white "bob"',
     ]);
   });
 
   it('can detect domains (linear)', () => {
-    const scale = parseSource(
-      '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i;str'
+    const scale = expand(
+      '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i'
     );
     expect(scale).toEqual(['5/4', '3/2', '7/4']);
   });
 
   it('can detect domains (logarithmic)', () => {
-    const scale = parseSource(
-      '1\\12;3\\12;5\\12;stack();i => i if isLogarithmic(i) else simplify(i);str'
+    const scale = expand(
+      '1\\12;3\\12;5\\12;stack();i => i if isLogarithmic(i) else simplify(i)'
     );
     expect(scale).toEqual(['1\\12', '4\\12', '9\\12']);
   });
@@ -972,16 +951,18 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can shadow immutable stdlib', () => {
-    const scale = parseSource(
-      'const repeat = "Lost it!";rank2(3, 2, 0, 2 /^ 2, 2);str'
-    );
-    expect(scale).toEqual(['9/8^1/2', '2^1/2', '3/2', '2']);
+    const scale = expand('const repeat = "Lost it!";rank2(3, 2, 0, 2 /^ 2, 2)');
+    expect(scale).toEqual([
+      'const repeat = "Lost it!"',
+      '9/8^1/2',
+      '2^1/2',
+      '3/2',
+      '2',
+    ]);
   });
 
   it('can repeat unstacked steps', () => {
-    const zarlino7 = parseSource(
-      '5;3/5;flatRepeat(3);stack();2;reduce();sort();str'
-    );
+    const zarlino7 = expand('5;3/5;flatRepeat(3);stack();2;reduce();sort()');
     expect(zarlino7).toEqual([
       '9/8',
       '5/4',
@@ -1019,12 +1000,12 @@ describe('SonicWeave standard library', () => {
   });
 
   it('is stacked', () => {
-    const scale = parseSource('stacked([5/4, 6/5]);str');
+    const scale = expand('stacked([5/4, 6/5])');
     expect(scale).toEqual(['5/4', '3/2']);
   });
 
   it("isn't that stacked actually", () => {
-    const scale = parseSource('unstacked([5/4, 3/2]);str');
+    const scale = expand('unstacked([5/4, 3/2])');
     expect(scale).toEqual(['5/4', '6/5']);
   });
 
@@ -1054,7 +1035,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can generate the full 9-odd limit as a scale', () => {
-    const nineOdd = parseSource('oddLimit(9);str');
+    const nineOdd = expand('oddLimit(9)');
     expect(nineOdd).toEqual([
       '10/9',
       '9/8',
@@ -1079,7 +1060,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can generate the full 8-throdd limit as a scale', () => {
-    const eightThrodd = parseSource('oddLimit(8, 3);str');
+    const eightThrodd = expand('oddLimit(8, 3)');
     expect(eightThrodd).toEqual([
       '9/8',
       '8/7',
@@ -1110,19 +1091,17 @@ describe('SonicWeave standard library', () => {
   });
 
   it('colors intervals based on deviation from 12ed2', () => {
-    const scale = parseSource('5/4;3/2;7/4;2;edColors();repr');
+    const scale = expand('5/4;3/2;7/4;2;edColors()');
     expect(scale).toEqual([
-      '(5/4 hsl(310.729, 100.000, 50.000))',
-      '(3/2 hsl(7.038, 100.000, 50.000))',
-      '(7/4 hsl(247.773, 100.000, 50.000))',
-      '(2 hsl(0.000, 100.000, 50.000))',
+      '5/4 hsl(310.729, 100.000, 50.000)',
+      '3/2 hsl(7.038, 100.000, 50.000)',
+      '7/4 hsl(247.773, 100.000, 50.000)',
+      '2 hsl(0.000, 100.000, 50.000)',
     ]);
   });
 
   it('stacks steps as plain numbers', () => {
-    const scale = parseSource(
-      '2;2;1;2;2;2;1;stackLinear();i => i \\ $[-1];str'
-    );
+    const scale = expand('2;2;1;2;2;2;1;stackLinear();i => i \\ $[-1]');
     expect(scale).toEqual([
       '2\\12',
       '4\\12',
@@ -1184,7 +1163,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can organize a scale with a single command', () => {
-    const scale = parseSource('13;17;[1..12];13;2;organize();str;');
+    const scale = expand('13;17;[1..12];13;2;organize()');
     expect(scale).toEqual([
       '17/16',
       '9/8',
@@ -1198,8 +1177,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can organize a scale by coalescing near-duplicates', () => {
-    const scale = parseSource(
-      '4;[1, 3, 9] tns [1, 5, 25] tns [1, 7];2;organize(8.0);str;'
+    const scale = expand(
+      '4;[1, 3, 9] tns [1, 5, 25] tns [1, 7];2;organize(8.0)'
     );
     expect(scale).toEqual([
       '525/512',
@@ -1235,9 +1214,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes a scale word', () => {
-    const scale = parseSource(
-      'realizeWord("LLsLLLs", {L: 9/8, s: 256/243});str'
-    );
+    const scale = expand('realizeWord("LLsLLLs", {L: 9/8, s: 256/243})');
     expect(scale).toEqual([
       '9/8',
       '81/64',
@@ -1250,7 +1227,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes a scale word with a missing step', () => {
-    const scale = parseSource('realizeWord("sLsLsLs", {L: 2\\10});str');
+    const scale = expand('realizeWord("sLsLsLs", {L: 2\\10})');
     expect(scale).toEqual([
       '1\\10',
       '3\\10',
@@ -1263,8 +1240,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('gracefully handles extra step sizes in the record', () => {
-    const scale = parseSource(
-      'realizeWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80});str'
+    const scale = expand(
+      'realizeWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80})'
     );
     expect(scale).toEqual([
       '9/8',
@@ -1278,11 +1255,11 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes edge cases of `realizeWord`', () => {
-    const emptiness = parseSource('realizeWord("", {L: 2});str');
+    const emptiness = parseSource('realizeWord("", {L: 2})');
     expect(emptiness).toEqual([]);
-    const octave = parseSource('realizeWord("L", {});str');
+    const octave = expand('realizeWord("L", {})');
     expect(octave).toEqual(['2']);
-    const threeWholeTones = parseSource('realizeWord("LLL", {L: 9/8});str');
+    const threeWholeTones = expand('realizeWord("LLL", {L: 9/8})');
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
   });
 
@@ -1320,19 +1297,19 @@ describe('SonicWeave standard library', () => {
   });
 
   it('coalesces schisminas by default', () => {
-    const scale = parseSource('4096/4095;3/2;4095/2048;2/1;coalesce();str');
+    const scale = expand('4096/4095;3/2;4095/2048;2/1;coalesce()');
     expect(scale).toEqual(['3/2', '2/1']);
   });
 
   it('preserves schisminas if asked to', () => {
-    const scale = parseSource(
-      "4096/4095;3/2;4095/2048;2/1;coalesce(3.5, 'simplest', true);str"
+    const scale = expand(
+      "4096/4095;3/2;4095/2048;2/1;coalesce(3.5, 'simplest', true)"
     );
     expect(scale).toEqual(['4096/4095', '3/2', '4095/2048', '2/1']);
   });
 
   it('calculates Euler-Fokker genus 444', () => {
-    const scale = parseSource('eulerGenus(444);str');
+    const scale = expand('eulerGenus(444)');
     expect(scale).toEqual(['37/32', '3/2', '111/64', '2']);
   });
 
@@ -1345,7 +1322,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('formats rotated smitonic somewhat reasonably', () => {
-    const sothic = parseSource(`
+    const sothic = expand(`
       128/121
       324.341029rc
       421.705144rc
@@ -1354,7 +1331,6 @@ describe('SonicWeave standard library', () => {
       973.023086rc
       2
       rotate()
-      str
     `);
     expect(sothic).toEqual([
       '226.97691372951408r¢',
@@ -1368,7 +1344,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('formats stacked 5-limit major reasonably', () => {
-    const major = parseSource(`
+    const major = expand(`
       9/8
       10/9
       16/15
@@ -1377,7 +1353,6 @@ describe('SonicWeave standard library', () => {
       9/8
       16/15
       stack()
-      str
     `);
     expect(major).toEqual(['9/8', '5/4', '4/3', '3/2', '5/3', '15/8', '2/1']);
   });

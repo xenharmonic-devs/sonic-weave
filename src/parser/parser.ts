@@ -67,7 +67,7 @@ export function getSourceVisitor(
   } else {
     const visitor = new StatementVisitor();
     visitor.rootContext = rootContext;
-    visitor.expandable = false;
+    visitor.isUserRoot = false;
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.immutables.set(name, color);
     }
@@ -113,6 +113,7 @@ export function evaluateSource(
 ) {
   const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
   const visitor = new StatementVisitor(globalVisitor);
+  visitor.isUserRoot = true;
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -139,6 +140,7 @@ export function evaluateExpression(
 ): SonicWeaveValue {
   const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
   const visitor = new StatementVisitor(globalVisitor);
+  visitor.isUserRoot = true;
   const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
@@ -206,6 +208,7 @@ export function createTag(
     const fragments = escapeStrings ? strings : strings.raw;
     const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
     const visitor = new StatementVisitor(globalVisitor);
+    visitor.isUserRoot = true;
     if (!visitor.rootContext) {
       throw new Error('Root context required for storing template arguments.');
     }

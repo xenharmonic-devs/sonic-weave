@@ -77,28 +77,43 @@ Sub-scales are automatically unrolled onto the current scale.
 Results in the scale `$ = [4\12, 7\12, 12\12]`.
 
 ### Coloring
-If an expression evaluates to a color it is attached to the last interval in the scale.
+If an expression evaluates to a color it is applied to all the intervals in the scale that don't have a color yet.
 ```javascript
+5/4
 3/2
 green
 2/1
 red
 ```
-Results in a scale equivalent to `$ = [3/2 #008000, 2/1 #FF0000]`.
+Results in a scale equivalent to `$ = [5/4 #008000, 3/2 #008000, 2/1 #FF0000]`.
+
+#### Inline colors
+```javascript
+5/4
+3/2 green
+2/1 red
+```
+Results in `$ = [5/4 green, 2/1 red]`.
 
 It is up to a user interface to interprete colors. The original intent is to color notes in an on-screen keyboard.
 
-### Labeling
-If an expression evaluates to a string it is attached to the last interval in the scale.
+### Scale title
+If an expression evaluates to a string it is used as the scale title.
 ```javascript
+"My fourth and octave"
 4/3
-"My P4"
 2/1
-'Unison / octave'
 ```
-Results in the scale `$ = [(4/3 "My P4"), (2/1 "Unison / octave")]`.
+Results in the scale `$ = [4/3, 2/1]`.
 
-Labels are included in the `.scl` export.
+The title is included in the `.scl` export.
+
+#### Inline labels
+```javascript
+4/3 "My perfect fourth"
+2/1 'octave'
+```
+Results in the scale `$ = [4/3 'My perfect fourth', 2/1 'octave']`.
 
 It is up to a user interface to interprete labels. The original intent is to label notes in an on-screen keyboard.
 
