@@ -1372,4 +1372,9 @@ describe('SonicWeave standard library', () => {
       '2/1 white',
     ]);
   });
+
+  it('has vectorizing vbool', () => {
+    const duckDuckGooseDuck = evaluateExpression('vbool(["", 0, 12, niente])');
+    expect(duckDuckGooseDuck).toEqual([false, false, true, false]);
+  });
 });

@@ -282,11 +282,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(thereAreOddPerfectNumbers).toBe(false);
   });
 
-  it('has vectorizing vbool', () => {
-    const duckDuckGoose = evaluate('vbool(["", 0, 12])');
-    expect(duckDuckGoose).toEqual([false, false, true]);
-  });
-
   it('fails to converts pi to an integer', () => {
     expect(() => parseSingle('int(PI)')).toThrow();
   });
@@ -1513,14 +1508,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("throws if you don't pass arguments to sin", () => {
-    expect(() => parseSingle('sin()')).toThrow(
-      'An interval or boolean is required.'
-    );
+    expect(() => parseSingle('sin()')).toThrow("Parameter 'x' is required.");
   });
 
   it("throws if you don't pass arguments to int", () => {
     expect(() => parseSingle('int()')).toThrow(
-      'An interval or boolean is required.'
+      "Parameter 'interval' is required."
     );
   });
 

@@ -36,26 +36,31 @@ riff relog(interval) {
 }
 
 riff NFJS(interval) {
-  "Convert interval to (relative) FJS using neutral comma flavors."
+  "Convert interval to (relative) FJS using neutral comma flavors.";
   return FJS(interval, 'n');
 }
 
 riff absoluteNFJS(interval) {
-  "Convert interval to absolute FJS using neutral comma flavors."
+  "Convert interval to absolute FJS using neutral comma flavors.";
   return absoluteFJS(interval, 'n');
 }
 
 riff HEJI(interval) {
-  "Convert interval to (relative) FJS using HEJI comma flavors."
+  "Convert interval to (relative) FJS using HEJI comma flavors.";
   return FJS(interval, 'h');
 }
 
 riff absoluteHEJI(interval) {
-  "Convert interval to absolute FJS using HEJI comma flavors."
+  "Convert interval to absolute FJS using HEJI comma flavors.";
   return absoluteFJS(interval, 'h');
 }
 
 // == Functions ==
+riff vbool(value) {
+  "Convert value to a boolean. Vectorizes over arrays.";
+  return vnot vnot value;
+}
+
 riff keys(record) {
   "Obtain an array of keys of the record.";
   return map([key] => key, entries record);

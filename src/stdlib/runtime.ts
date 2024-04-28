@@ -5,6 +5,7 @@ import {
 } from '../ast';
 import {Color, Interval, Val} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
+import {type ExpressionVisitor} from '../parser/expression';
 import {ZERO} from '../utils';
 
 /**
@@ -153,4 +154,56 @@ export function requireParameters(parameters: Record<string, any>) {
       throw new Error(`Parameter '${name}' is required.`);
     }
   }
+}
+
+/**
+ * Check if the value is an array or a SonicWeave record.
+ * @param container Value to check.
+ * @returns `true` if the value is a container that supports broadcasting.
+ */
+export function isArrayOrRecord(container: SonicWeaveValue) {
+  if (Array.isArray(container)) {
+    return true;
+  }
+  if (typeof container !== 'object') {
+    return false;
+  }
+  return !(
+    container instanceof Interval ||
+    container instanceof Color ||
+    container instanceof Val
+  );
+}
+
+/**
+ * Apply broadcasting rules to arrays and records.
+ * @param this Current evaluation context.
+ * @param container Array or record.
+ * @param fn Unary function for evaluating subvalues.
+ * @returns The function mapped over the values of the container.
+ */
+export function unaryBroadcast(
+  this: ExpressionVisitor,
+  container: SonicWeaveValue,
+  fn: (x: SonicWeavePrimitive) => SonicWeaveValue
+) {
+  if (Array.isArray(container)) {
+    this.spendGas(container.length);
+    return container.map(fn) as SonicWeavePrimitive[];
+  }
+  if (typeof container !== 'object') {
+    throw new Error('Invalid container to map over.');
+  }
+  if (
+    container instanceof Color ||
+    container instanceof Val ||
+    container instanceof Interval
+  ) {
+    throw new Error('Invalid container to map over.');
+  }
+  const entries = Object.entries(container);
+  this.spendGas(entries.length);
+  return Object.fromEntries(
+    entries.map(([key, value]) => [key, fn(value)])
+  ) as Record<string, SonicWeavePrimitive>;
 }
