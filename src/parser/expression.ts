@@ -40,6 +40,8 @@ import {
   SonicWeavePrimitive,
   temper,
   fromInteger,
+  unaryBroadcast,
+  isArrayOrRecord,
 } from '../stdlib';
 import {
   metricExponent,
@@ -139,20 +141,6 @@ export function containerToArray(
   return container;
 }
 
-export function isArrayOrRecord(container: SonicWeaveValue) {
-  if (Array.isArray(container)) {
-    return true;
-  }
-  if (typeof container !== 'object') {
-    return false;
-  }
-  return !(
-    container instanceof Interval ||
-    container instanceof Color ||
-    container instanceof Val
-  );
-}
-
 function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
   if (element instanceof Interval) {
     for (const existing of scale) {
@@ -234,32 +222,6 @@ function resolvePreference(
     intervalValueAs(value, right.node, simplify),
     right
   );
-}
-
-function unaryMapContainer(
-  this: ExpressionVisitor,
-  container: SonicWeaveValue,
-  fn: (x: SonicWeavePrimitive) => SonicWeaveValue
-) {
-  if (Array.isArray(container)) {
-    this.spendGas(container.length);
-    return container.map(fn) as SonicWeavePrimitive[];
-  }
-  if (typeof container !== 'object') {
-    throw new Error('Invalid container to map over.');
-  }
-  if (
-    container instanceof Color ||
-    container instanceof Val ||
-    container instanceof Interval
-  ) {
-    throw new Error('Invalid container to map over.');
-  }
-  const entries = Object.entries(container);
-  this.spendGas(entries.length);
-  return Object.fromEntries(
-    entries.map(([key, value]) => [key, fn(value)])
-  ) as Record<string, SonicWeavePrimitive>;
 }
 
 /**
@@ -1047,9 +1009,22 @@ export class ExpressionVisitor {
       operator satisfies 'not';
       // The runtime shouldn't let you get here.
       throw new Error(`Unexpected unary operation '${operator}'.`);
+    } else if (
+      operand instanceof Color ||
+      typeof operand === 'string' ||
+      typeof operand === 'function' ||
+      operand === undefined
+    ) {
+      if (operator === 'vnot') {
+        return !sonicTruth(operand);
+      }
+      throw new Error(`Unsupported unary operation '${operator}'.`);
     }
+    operand satisfies
+      | SonicWeavePrimitive[]
+      | Record<string, SonicWeavePrimitive>;
     const op = this.unaryOperate.bind(this);
-    return unaryMapContainer.bind(this)(operand, c => op(c, node));
+    return unaryBroadcast.bind(this)(operand, c => op(c, node));
   }
 
   protected visitUnaryExpression(node: UnaryExpression) {
@@ -1509,7 +1484,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const ic = this.intrinsicStringCall.bind(this);
-    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
+    return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicColorCall(
@@ -1522,7 +1497,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const ic = this.intrinsicColorCall.bind(this);
-    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
+    return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicNoneCall(caller: SonicWeaveValue): SonicWeaveValue {
@@ -1532,7 +1507,7 @@ export class ExpressionVisitor {
       return caller;
     }
     const n = this.intrinsicNoneCall.bind(this);
-    return unaryMapContainer.bind(this)(caller, n);
+    return unaryBroadcast.bind(this)(caller, n);
   }
 
   protected intrinsicIntervalCall(
@@ -1562,7 +1537,7 @@ export class ExpressionVisitor {
       return callee;
     }
     const ic = this.intrinsicIntervalCall.bind(this);
-    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
+    return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicValCall(
@@ -1573,7 +1548,7 @@ export class ExpressionVisitor {
       return upcastBool(caller).mul(callee);
     }
     const ic = this.intrinsicValCall.bind(this);
-    return unaryMapContainer.bind(this)(caller, c => ic(callee, c));
+    return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {

@@ -1,12 +1,12 @@
 /**
  * Exported builtins without vectorization complications.
  */
-import {Fraction} from 'xen-dev-utils';
+import {Fraction, LOG_PRIMES} from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {type ExpressionVisitor} from '../parser/expression';
 import {NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 
 /**
  * Compare two primitive values.
@@ -66,13 +66,16 @@ export function simplify(interval: Val | Interval | boolean): typeof interval {
   if (typeof interval === 'boolean') {
     return upcastBool(interval);
   }
-  return new Interval(
-    interval.value.clone(),
-    interval.domain,
-    interval.steps,
-    undefined,
-    interval
-  );
+  if (interval instanceof Interval) {
+    return new Interval(
+      interval.value.clone(),
+      interval.domain,
+      interval.steps,
+      undefined,
+      interval
+    );
+  }
+  throw new Error('An interval, val or boolean is required.');
 }
 
 /**
@@ -193,6 +196,29 @@ export function relative(
     undefined,
     interval
   );
+}
+
+/**
+ * Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
+ * @param this {@link ExpressionVisitor} instance providing context for the height of absolute intervals.
+ * @param interval Interval to measure.
+ * @returns Relative linear interval representing the Tenney height.
+ */
+export function tenneyHeight(
+  this: ExpressionVisitor,
+  interval: Interval | boolean
+): Interval {
+  const monzo = relative.bind(this)(upcastBool(interval)).value;
+  if (monzo instanceof TimeReal) {
+    return new Interval(TimeReal.fromValue(Infinity), 'linear');
+  }
+  const height =
+    Math.log(monzo.residual.n * monzo.residual.d) +
+    monzo.primeExponents.reduce(
+      (total, pe, i) => total + Math.abs(pe.valueOf()) * LOG_PRIMES[i],
+      0
+    );
+  return new Interval(TimeReal.fromValue(height), 'linear');
 }
 
 /**

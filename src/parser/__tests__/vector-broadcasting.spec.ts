@@ -280,4 +280,85 @@ describe('SonicWeave vector broadcasting', () => {
       throw new Error('Failed to evaluate to a boolean or an interval.');
     }
   });
+
+  // TODO:
+  // 'int',
+  // 'radical',
+  // 'nedji',
+  // 'absoluteFJS',
+  // 'FJS',
+  // 'labelAbsoluteFJS',
+
+  // 'tail',
+  // 'colorOf',
+  // 'labelOf',
+  // 'equaveOf',
+  // 'withEquave',
+
+  it.each([
+    'acos',
+    'asin',
+    'atan',
+    'clz32',
+    'cos',
+    'expm1',
+    'fround',
+    'imul',
+    'log1p',
+    'sin',
+    'tan',
+    'isPrime',
+    'simplify',
+    'bleach',
+    'linear',
+    'logarithmic',
+    'absolute',
+    'relative',
+    'decimal',
+    'fraction',
+    'monzo',
+    'complexityOf',
+    'JIP',
+    'PrimeMapping(1200., 1902.)',
+    'tenneyHeight',
+    'floor',
+    'round',
+    'trunc',
+    'ceil',
+    'abs',
+  ])('broadcasts unary function "%s"', fn => {
+    // Implicit call
+    const three = evaluateExpression(`1=440z;${fn} 3`) as Interval;
+    // Explicit call
+    const negThird = evaluateExpression(`1=440z;${fn}(-1/3)`) as Interval;
+
+    const vec = evaluateExpression(`1=440z;${fn} [3, -1/3]`) as Interval[];
+    expect(vec).toHaveLength(2);
+    if (fn === 'isPrime') {
+      expect(vec[0]).toBe(three);
+      expect(vec[1]).toBe(negThird);
+    } else {
+      if (isNaN(three.valueOf())) {
+        expect(vec[0].valueOf()).toBeNaN();
+      } else {
+        expect(vec[0].strictEquals(three)).toBe(true);
+      }
+      if (isNaN(negThird.valueOf())) {
+        expect(vec[1].valueOf()).toBeNaN();
+      } else {
+        expect(vec[1].strictEquals(negThird)).toBe(true);
+      }
+    }
+
+    const mat = evaluateExpression(
+      `1=440z;${fn}([[3, -1/3], [1, 1]])`
+    ) as unknown as Interval[][];
+    expect(mat).toHaveLength(2);
+    expect(mat[0]).toHaveLength(2);
+
+    const rec = evaluateExpression(
+      `1=440z;${fn} {a: 3, "negative third": -1/3}`
+    ) as Record<string, Interval>;
+    expect(Object.keys(rec)).toHaveLength(2);
+  });
 });
