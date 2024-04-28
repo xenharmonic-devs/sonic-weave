@@ -967,74 +967,69 @@ export class ExpressionVisitor {
   protected unaryOperate(
     operand: SonicWeaveValue,
     node: UnaryExpression
-  ): Interval | Interval[] | Val {
-    if (Array.isArray(operand)) {
-      const op = this.unaryOperate.bind(this);
-      return operand.map(o => op(o, node)) as Interval[];
-    }
+  ): SonicWeaveValue {
     if (typeof operand === 'boolean') {
       operand = upcastBool(operand);
     }
-    if (!(operand instanceof Interval || operand instanceof Val)) {
-      throw new Error(
-        `${node.operator} can only operate on intervals and vals.`
-      );
-    }
-    const operator = node.operator;
-    if (node.uniform) {
-      let value: TimeMonzo | TimeReal;
-      let newNode = operand.node;
+    if (operand instanceof Interval || operand instanceof Val) {
+      const operator = node.operator;
+      if (node.uniform) {
+        let value: TimeMonzo | TimeReal;
+        let newNode = operand.node;
+        switch (operator) {
+          case '-':
+            value = operand.value.neg();
+            break;
+          case '%':
+          case '÷':
+            value = operand.value.inverse();
+            newNode = uniformInvertNode(newNode);
+            break;
+          default:
+            // The grammar shouldn't let you get here.
+            throw new Error(`Uniform operation '${operator}' not supported.`);
+        }
+        if (operand.domain === 'cologarithmic') {
+          if (value instanceof TimeMonzo) {
+            return new Val(value, operand.equave, newNode);
+          }
+          throw new Error('Val unary operation failed.');
+        }
+        return new Interval(value, operand.domain, 0, newNode, operand);
+      }
       switch (operator) {
+        case '+':
+          return operand;
         case '-':
-          value = operand.value.neg();
-          break;
+          return operand.neg();
         case '%':
         case '÷':
-          value = operand.value.inverse();
-          newNode = uniformInvertNode(newNode);
-          break;
-        default:
-          // The grammar shouldn't let you get here.
-          throw new Error('Uniform operation not supported.');
+          return operand.inverse();
       }
-      if (operand.domain === 'cologarithmic') {
-        if (value instanceof TimeMonzo) {
-          return new Val(value, operand.equave, newNode);
-        }
-        throw new Error('Val unary operation failed.');
+      if (operand instanceof Val) {
+        throw new Error(`Unary operation '${operator}' not supported on vals.`);
       }
-      return new Interval(value, operand.domain, 0, newNode, operand);
+      if (!this.rootContext) {
+        throw new Error('Root context required.');
+      }
+      switch (operator) {
+        case '^':
+        case '∧':
+          return operand.up(this.rootContext);
+        case '\u2228':
+          return operand.down(this.rootContext);
+        case '/':
+        case 'lift':
+          return operand.lift(this.rootContext);
+        case '\\':
+        case 'drop':
+          return operand.drop(this.rootContext);
+      }
+      // The runtime shouldn't let you get here.
+      throw new Error(`Unexpected unary operation '${operator}'.`);
     }
-    switch (operator) {
-      case '+':
-        return operand;
-      case '-':
-        return operand.neg();
-      case '%':
-      case '÷':
-        return operand.inverse();
-    }
-    if (operand instanceof Val) {
-      throw new Error(`Unary operation '${operator} not supported on vals.`);
-    }
-    if (!this.rootContext) {
-      throw new Error('Root context required.');
-    }
-    switch (operator) {
-      case '^':
-      case '∧':
-        return operand.up(this.rootContext);
-      case '\u2228':
-        return operand.down(this.rootContext);
-      case '/':
-      case 'lift':
-        return operand.lift(this.rootContext);
-      case '\\':
-      case 'drop':
-        return operand.drop(this.rootContext);
-    }
-    // The runtime shouldn't let you get here.
-    throw new Error('Unexpected unary operation.');
+    const op = this.unaryOperate.bind(this);
+    return unaryMapContainer.bind(this)(operand, c => op(c, node));
   }
 
   protected visitUnaryExpression(node: UnaryExpression) {

@@ -1,6 +1,14 @@
 import {describe, it, expect} from 'vitest';
-import {sw} from '../parser';
+import {evaluateExpression, sw} from '../parser';
 import {Interval} from '../../interval';
+
+function sw0D(strings: TemplateStringsArray, ...args: any[]): number {
+  const result = sw(strings, ...args);
+  if (result instanceof Interval) {
+    return result.valueOf();
+  }
+  throw new Error('Failed to evaluate to an interval.');
+}
 
 function sw1D(strings: TemplateStringsArray, ...args: any[]): number[] {
   const result: any = sw(strings, ...args);
@@ -82,6 +90,11 @@ describe('SonicWeave vector broadcasting', () => {
     ]);
   });
 
+  it('implicitly multiplies a scalar with a scalar', () => {
+    const x = sw0D`3 5`;
+    expect(x).toEqual(15);
+  });
+
   it('implicitly multiplies a 1D array with a scalar', () => {
     const vec = sw1D`[3, 5] 7`;
     expect(vec).toEqual([21, 35]);
@@ -128,4 +141,39 @@ describe('SonicWeave vector broadcasting', () => {
     const rec = swRec`({a: 3, b: 5}) {a: 7, b: 11}`;
     expect(rec).toEqual({a: 21, b: 55});
   });
+
+  it("doesn't broadcast unary not", () => {
+    expect(evaluateExpression('not 0')).toBe(true);
+    expect(evaluateExpression('not []')).toBe(true);
+    expect(evaluateExpression('not 2')).toBe(false);
+    expect(evaluateExpression('not [0, 0]')).toBe(false);
+  });
+
+  it.each(['-', '+', '%', '÷', '^', '∧', '∨', '/', 'lift ', '\\', 'drop '])(
+    'broadcasts unary operator "%s"',
+    op => {
+      const four = evaluateExpression(`${op}4`) as Interval;
+      const negHalf = evaluateExpression(`${op}(-1/2)`) as Interval;
+
+      const vec = evaluateExpression(`${op}[4, -1/2]`) as Interval[];
+      expect(vec).toHaveLength(2);
+      expect(vec[0].strictEquals(four)).toBe(true);
+      expect(vec[1].strictEquals(negHalf)).toBe(true);
+
+      const mat = evaluateExpression(
+        `${op}[[4, -1/2], [1, 1]]`
+      ) as unknown as Interval[][];
+      expect(mat).toHaveLength(2);
+      expect(mat[0]).toHaveLength(2);
+      expect(mat[0][0].strictEquals(four)).toBe(true);
+      expect(mat[0][1].strictEquals(negHalf)).toBe(true);
+
+      const rec = evaluateExpression(
+        `${op}{four: 4, "negative half": -1/2}`
+      ) as Record<string, Interval>;
+      expect(Object.keys(rec)).toHaveLength(2);
+      expect(rec.four.strictEquals(four)).toBe(true);
+      expect(rec['negative half'].strictEquals(negHalf)).toBe(true);
+    }
+  );
 });
