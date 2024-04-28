@@ -139,6 +139,20 @@ export function containerToArray(
   return container;
 }
 
+export function isArrayOrRecord(container: SonicWeaveValue) {
+  if (Array.isArray(container)) {
+    return true;
+  }
+  if (typeof container !== 'object') {
+    return false;
+  }
+  return !(
+    container instanceof Interval ||
+    container instanceof Color ||
+    container instanceof Val
+  );
+}
+
 function strictIncludes(element: SonicWeaveValue, scale: SonicWeaveValue[]) {
   if (element instanceof Interval) {
     for (const existing of scale) {
@@ -1143,18 +1157,11 @@ export class ExpressionVisitor {
     right: SonicWeaveValue,
     node: BinaryExpression
   ): SonicWeaveValue {
-    if (Array.isArray(left)) {
-      const b = this.binaryOperate.bind(this);
-      if (Array.isArray(right)) {
-        return left.map((l, i) =>
-          b(l, (right as SonicWeavePrimitive[])[i], node)
-        ) as Interval[];
-      }
-      return left.map(l => b(l, right, node)) as Interval[];
-    }
-    if (Array.isArray(right)) {
-      const b = this.binaryOperate.bind(this);
-      return right.map(r => b(left, r, node)) as Interval[];
+    if (isArrayOrRecord(left) || isArrayOrRecord(right)) {
+      const binOp = this.binaryOperate.bind(this);
+      return binaryMapContainers.bind(this)(left, right, (l, r) =>
+        binOp(l, r, node)
+      );
     }
     const operator = node.operator;
     if (operator === 'vor') {
@@ -1379,6 +1386,13 @@ export class ExpressionVisitor {
         throw new Error(
           `Operator '${operator}' not implemented between intervals and vals.`
         );
+      } else if (typeof right === 'string') {
+        if (operator === '*' || operator === '×') {
+          return right.repeat(left.toInteger());
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between intervals and strings.`
+        );
       }
     } else if (left instanceof Val) {
       if (right instanceof Val) {
@@ -1421,10 +1435,37 @@ export class ExpressionVisitor {
           `Operator '${operator}' not implemented between vals and intervals.`
         );
       }
+    } else if (typeof left === 'string') {
+      if (right instanceof Interval) {
+        if (operator === '*' || operator === '×') {
+          return left.repeat(right.toInteger());
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between strings and intervals.`
+        );
+      }
     }
-    throw new Error(
-      `Unsupported type encountered during vector binary operation broadcasting of '${operator}'.`
-    );
+    switch (operator) {
+      case '===':
+        return left === right;
+      case '!==':
+        return left !== right;
+      case '==':
+        // eslint-disable-next-line eqeqeq
+        return left == right;
+      case '!=':
+        // eslint-disable-next-line eqeqeq
+        return left != right;
+      case '<=':
+        return (left as any) <= (right as any);
+      case '<':
+        return (left as any) < (right as any);
+      case '>=':
+        return (left as any) >= (right as any);
+      case '>':
+        return (left as any) > (right as any);
+    }
+    throw new Error(`Unsupported binary operation '${operator}'.`);
   }
 
   /**
@@ -1632,55 +1673,9 @@ export class ExpressionVisitor {
       }
       return !hasOwn(right, left);
     }
-    if (
-      (left instanceof Interval ||
-        left instanceof Val ||
-        typeof left === 'boolean' ||
-        Array.isArray(left)) &&
-      (right instanceof Interval ||
-        right instanceof Val ||
-        typeof right === 'boolean' ||
-        Array.isArray(right))
-    ) {
-      return this.binaryOperate(left, right, node);
-    }
-    switch (node.operator) {
-      case '===':
-        return left === right;
-      case '!==':
-        return left !== right;
-      case '==':
-        // eslint-disable-next-line eqeqeq
-        return left == right;
-      case '!=':
-        // eslint-disable-next-line eqeqeq
-        return left != right;
-      case '<=':
-        return (left as any) <= (right as any);
-      case '<':
-        return (left as any) < (right as any);
-      case '>=':
-        return (left as any) >= (right as any);
-      case '>':
-        return (left as any) > (right as any);
-    }
 
-    if (left instanceof Color || right instanceof Color) {
-      throw new Error('Cannot operate on colors');
-    }
-    if (typeof left === 'function' || typeof right === 'function') {
-      throw new Error('Cannot operate on functions');
-    }
-    if (Array.isArray(left) || Array.isArray(right)) {
-      throw new Error('Cannot operate on arrays');
-    }
-    if (typeof left === 'string' || typeof right === 'string') {
-      throw new Error('Cannot operate on strings');
-    }
-    if (left === undefined || right === undefined) {
-      throw new Error('Cannot operate on nothing');
-    }
-    throw new Error(`Unhandled binary operation '${node.operator}'.`);
+    // Broadcasting rules apply on all other binary operators
+    return this.binaryOperate(left, right, node);
   }
 
   protected visitCallExpression(node: CallExpression) {

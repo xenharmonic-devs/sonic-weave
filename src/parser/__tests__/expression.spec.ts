@@ -2174,4 +2174,14 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(val.value.primeExponents[0].toFraction()).toBe('4');
     expect(val.value.primeExponents[1].toFraction()).toBe('-2');
   });
+
+  it('has pythonic string multiplication (right)', () => {
+    const batman = evaluate('"na" * 5');
+    expect(batman).toBe('nanananana');
+  });
+
+  it('has pythonic string multiplication (left)', () => {
+    const batman = evaluate('5 * "na"');
+    expect(batman).toBe('nanananana');
+  });
 });

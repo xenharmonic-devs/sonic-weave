@@ -1,6 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {evaluateExpression, sw} from '../parser';
 import {Interval} from '../../interval';
+import {SonicWeavePrimitive} from '../../stdlib';
 
 function sw0D(strings: TemplateStringsArray, ...args: any[]): number {
   const result = sw(strings, ...args);
@@ -199,6 +200,84 @@ describe('SonicWeave vector broadcasting', () => {
     } else {
       expect(rec.four.strictEquals(four)).toBe(true);
       expect(rec['negative half'].strictEquals(negHalf)).toBe(true);
+    }
+  });
+
+  it.each([
+    'vor',
+    'vand',
+    '===',
+    '!==',
+    '==',
+    '!=',
+    '<=',
+    '>=',
+    '<',
+    '>',
+    '+',
+    '-',
+    'max',
+    'min',
+    'to',
+    'by',
+    '/+',
+    '⊕',
+    '/-',
+    '⊖',
+    '*',
+    '×',
+    '%',
+    '÷',
+    '\\',
+    '°',
+    'mod',
+    'modc',
+    'rd',
+    'rdc',
+    'ed',
+    '/_',
+    '·',
+    'dot',
+    '^',
+    '/^',
+    '^/',
+    '/',
+  ])('broadcasts binary operator "%s"', op => {
+    const fiveOpTwo = evaluateExpression(`5 ${op} 2`);
+    const negHalfOpPi = evaluateExpression(`(-1/2) ${op} PI`);
+
+    const mat = evaluateExpression(
+      `[[5, 1], [1, -1/2]] ${op} [2, PI]`
+    ) as unknown as SonicWeavePrimitive[][];
+    expect(mat).toHaveLength(2);
+    expect(mat[0]).toHaveLength(2);
+
+    const rec = evaluateExpression(
+      `({a: 5, b: -1/2}) ${op} {a: 2, b: PI}`
+    ) as Record<string, SonicWeavePrimitive>;
+    expect(Object.keys(rec)).toHaveLength(2);
+
+    if (typeof fiveOpTwo === 'boolean') {
+      expect(mat[0][0]).toBe(fiveOpTwo);
+      expect(mat[1][1]).toBe(negHalfOpPi);
+
+      expect(rec.a).toBe(fiveOpTwo);
+      expect(rec.b).toBe(negHalfOpPi);
+    } else if (
+      fiveOpTwo instanceof Interval &&
+      negHalfOpPi instanceof Interval
+    ) {
+      expect(fiveOpTwo.strictEquals(mat[0][0] as Interval)).toBe(true);
+      expect(fiveOpTwo.strictEquals(rec.a as Interval)).toBe(true);
+      if (isNaN(negHalfOpPi.valueOf())) {
+        expect(mat[1][1]?.valueOf()).toBeNaN();
+        expect(rec.b?.valueOf()).toBeNaN();
+      } else {
+        expect(negHalfOpPi.strictEquals(mat[1][1] as Interval)).toBe(true);
+        expect(negHalfOpPi.strictEquals(rec.b as Interval)).toBe(true);
+      }
+    } else {
+      throw new Error('Failed to evaluate to a boolean or an interval.');
     }
   });
 });
