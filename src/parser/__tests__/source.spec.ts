@@ -1365,4 +1365,12 @@ describe('SonicWeave parser', () => {
       '2 white "G"',
     ]);
   });
+
+  it('can build complex indexing conditionals using vectorized boolean ops', () => {
+    const scale = expand(`{
+      const xs = [0..9];
+      xs[vnot xs vor xs > 3 vand xs <= 7];
+    }`);
+    expect(scale).toEqual(['0', '4', '5', '6', '7']);
+  });
 });

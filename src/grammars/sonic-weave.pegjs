@@ -45,6 +45,9 @@
     'to',
     'try',
     'true',
+    'vand',
+    'vnot',
+    'vor',
     'while',
   ]);
 
@@ -165,6 +168,9 @@ ThrowToken         = @'throw'    !IdentifierPart
 ToToken            = @'to'       !IdentifierPart
 TryToken           = @'try'      !IdentifierPart
 TrueToken          = @'true'     !IdentifierPart
+VectorAndToken     = @'vand'     !IdentifierPart
+VectorNotToken     = @'vnot'     !IdentifierPart
+VectorOrToken      = @'vor'      !IdentifierPart
 WhileToken         = @'while'    !IdentifierPart
 
 Statements
@@ -576,14 +582,14 @@ ConditionalExpression
     );
   }
 
-CoalescingOperator = '??' / OrToken
+CoalescingOperator = '??' / OrToken / VectorOrToken
 
 CoalescingExpression
   = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
-ConjunctOperator = AndToken
+ConjunctOperator = AndToken / VectorAndToken
 
 Conjunct = NotExpression / RelationalExpression
 
@@ -593,14 +599,8 @@ ConjunctionExpression
   }
 
 NotExpression
-  = operators: NotToken|.., __| __ operand: RelationalExpression {
-    if (!operators.length) {
-      return operand;
-    }
-    if (operators.length & 1) {
-      return UnaryExpression('not', operand, false);
-    }
-    return UnaryExpression('not', UnaryExpression('not', operand, false), false);
+  = operators: (NotToken / VectorNotToken)|.., __| __ operand: RelationalExpression {
+    return operators.reduce((result, operator) => UnaryExpression(operator, result, false), operand);
   }
 
 RelationalOperator 'relational operator'

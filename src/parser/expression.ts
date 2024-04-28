@@ -968,11 +968,14 @@ export class ExpressionVisitor {
     operand: SonicWeaveValue,
     node: UnaryExpression
   ): SonicWeaveValue {
+    const operator = node.operator;
     if (typeof operand === 'boolean') {
+      if (operator === 'vnot') {
+        return !operand;
+      }
       operand = upcastBool(operand);
     }
     if (operand instanceof Interval || operand instanceof Val) {
-      const operator = node.operator;
       if (node.uniform) {
         let value: TimeMonzo | TimeReal;
         let newNode = operand.node;
@@ -998,6 +1001,8 @@ export class ExpressionVisitor {
         return new Interval(value, operand.domain, 0, newNode, operand);
       }
       switch (operator) {
+        case 'vnot':
+          return !sonicTruth(operand);
         case '+':
           return operand;
         case '-':
@@ -1025,6 +1030,7 @@ export class ExpressionVisitor {
         case 'drop':
           return operand.drop(this.rootContext);
       }
+      operator satisfies 'not';
       // The runtime shouldn't let you get here.
       throw new Error(`Unexpected unary operation '${operator}'.`);
     }
@@ -1136,7 +1142,7 @@ export class ExpressionVisitor {
     left: SonicWeaveValue,
     right: SonicWeaveValue,
     node: BinaryExpression
-  ): boolean | boolean[] | Interval | Interval[] | Val | Val[] {
+  ): SonicWeaveValue {
     if (Array.isArray(left)) {
       const b = this.binaryOperate.bind(this);
       if (Array.isArray(right)) {
@@ -1150,13 +1156,18 @@ export class ExpressionVisitor {
       const b = this.binaryOperate.bind(this);
       return right.map(r => b(left, r, node)) as Interval[];
     }
+    const operator = node.operator;
+    if (operator === 'vor') {
+      return sonicTruth(left) ? left : right;
+    } else if (operator === 'vand') {
+      return !sonicTruth(left) ? left : right;
+    }
     if (typeof left === 'boolean') {
       left = upcastBool(left);
     }
     if (typeof right === 'boolean') {
       right = upcastBool(right);
     }
-    const operator = node.operator;
     if (left instanceof Interval) {
       if (right instanceof Interval) {
         if (node.preferLeft || node.preferRight) {

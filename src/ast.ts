@@ -6,6 +6,7 @@ export type UnaryOperator =
   | '%'
   | '÷'
   | 'not'
+  | 'vnot'
   | '^'
   | '∧'
   | '\u2228' // ∨
@@ -20,7 +21,9 @@ export type BinaryOperator =
   | 'lest'
   | '??'
   | 'or'
+  | 'vor'
   | 'and'
+  | 'vand'
   | '==='
   | '!=='
   | '=='

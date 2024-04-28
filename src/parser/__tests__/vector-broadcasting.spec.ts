@@ -149,31 +149,56 @@ describe('SonicWeave vector broadcasting', () => {
     expect(evaluateExpression('not [0, 0]')).toBe(false);
   });
 
-  it.each(['-', '+', '%', '÷', '^', '∧', '∨', '/', 'lift ', '\\', 'drop '])(
-    'broadcasts unary operator "%s"',
-    op => {
-      const four = evaluateExpression(`${op}4`) as Interval;
-      const negHalf = evaluateExpression(`${op}(-1/2)`) as Interval;
+  it.each([
+    'vnot ',
+    '-',
+    '+',
+    '%',
+    '÷',
+    '^',
+    '∧',
+    '∨',
+    '/',
+    'lift ',
+    '\\',
+    'drop ',
+  ])('broadcasts unary operator "%s"', op => {
+    const four = evaluateExpression(`${op}4`) as Interval;
+    const negHalf = evaluateExpression(`${op}(-1/2)`) as Interval;
 
-      const vec = evaluateExpression(`${op}[4, -1/2]`) as Interval[];
-      expect(vec).toHaveLength(2);
+    const vec = evaluateExpression(`${op}[4, -1/2]`) as Interval[];
+    expect(vec).toHaveLength(2);
+    if (op === 'vnot ') {
+      expect(vec[0]).toBe(four);
+      expect(vec[1]).toBe(negHalf);
+    } else {
       expect(vec[0].strictEquals(four)).toBe(true);
       expect(vec[1].strictEquals(negHalf)).toBe(true);
+    }
 
-      const mat = evaluateExpression(
-        `${op}[[4, -1/2], [1, 1]]`
-      ) as unknown as Interval[][];
-      expect(mat).toHaveLength(2);
-      expect(mat[0]).toHaveLength(2);
+    const mat = evaluateExpression(
+      `${op}[[4, -1/2], [1, 1]]`
+    ) as unknown as Interval[][];
+    expect(mat).toHaveLength(2);
+    expect(mat[0]).toHaveLength(2);
+    if (op === 'vnot ') {
+      expect(mat[0][0]).toBe(four);
+      expect(mat[0][1]).toBe(negHalf);
+    } else {
       expect(mat[0][0].strictEquals(four)).toBe(true);
       expect(mat[0][1].strictEquals(negHalf)).toBe(true);
+    }
 
-      const rec = evaluateExpression(
-        `${op}{four: 4, "negative half": -1/2}`
-      ) as Record<string, Interval>;
-      expect(Object.keys(rec)).toHaveLength(2);
+    const rec = evaluateExpression(
+      `${op}{four: 4, "negative half": -1/2}`
+    ) as Record<string, Interval>;
+    expect(Object.keys(rec)).toHaveLength(2);
+    if (op === 'vnot ') {
+      expect(rec.four).toBe(four);
+      expect(rec['negative half']).toBe(negHalf);
+    } else {
       expect(rec.four.strictEquals(four)).toBe(true);
       expect(rec['negative half'].strictEquals(negHalf)).toBe(true);
     }
-  );
+  });
 });

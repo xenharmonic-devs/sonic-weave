@@ -131,6 +131,7 @@ SonicWeave comes with some operators.
 | Inversion     | `÷3/2`  | `2/3`       | `-P5`       | `P-5`      |
 | Geom. inverse | _N/A_   |             | `%P8`       | `v<1]`     |
 | Logical NOT   | `not 2` | `false`     | `not P8`    | `false`    |
+| Vector NOT    | `vnot [0, 2]` | `[true, false]` | ... | ...      |
 | Up            | `^2`    | *           | `^P8`       | `P8 + 1\`  |
 | Down          | `v{2}`  | *           | `vP8`       | `P8 - 1\`  |
 | Lift          | `/2`    | *           | `/P8`       | `P8 + 5\`  |
@@ -151,6 +152,8 @@ Increment/decrement assumes that you've declared `let i = 2` originally.
 | Logical AND        | `2 and 0`     | `0`    |
 | Logical OR         | `0 or 2`      | `2`    |
 | Nullish coalescing | `niente ?? 2` | `2`    |
+| Vector AND         | `[0, 1] vand [2, 3]` | `[0, 3]` |
+| Vector OR          | `[0, 1] vor  [2, 3]` | `[2, 1]` |
 
 ### Boolean
 | Name                  | Operator |
