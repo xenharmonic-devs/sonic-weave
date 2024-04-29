@@ -1141,7 +1141,6 @@ export class ExpressionVisitor {
               value = left.value.project(right.value);
               break;
             case '\\':
-            case '°':
               throw new Error('Preference not supported with backslahes');
             case 'tmpr':
               throw new Error('Tempering needs an interval and a val.');
@@ -1205,7 +1204,6 @@ export class ExpressionVisitor {
           case '/_':
             return left.log(right);
           case '\\':
-          case '°':
             return left.backslash(right);
           case 'mod':
             return left.mmod(right);

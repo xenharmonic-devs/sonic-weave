@@ -40,7 +40,7 @@ All operations are left-associative except exponentiation, recipropower, logdivi
 | `/`                                              | Fraction                                                                |
 | `^`, `^/`, `/^`, `/_`                            | Exponentiation, recipropower, logdivision*                              |
 | `-x`, `%x`, `÷x`                                 | Negation, inversion                                                     |
-| `*`, `×`, `%`, `÷`, `\`, `°`, `dot`, `·`, `tns`, `⊗`, `tmpr` | Multiplication, division, N-of-EDO, monzo/val dot product, array tensoring, tempering |
+| `*`, `×`, `%`, `÷`, `\`, `dot`, `·`, `tns`, `⊗`, `tmpr` | Multiplication, division, N-of-EDO, monzo/val dot product, array tensoring, tempering |
 | `mod`, `modc`, `rd`, `rdc`, `ed`                 | Modulo, ceiling modulo, reduction, ceiling reduction, octave projection |
 | `+`, `-`, `/+`, `⊕`, `/-`, `⊖`                   | Addition, subtraction, lens addition, lens subtraction                  |
 | `max`, `min`                                     | Maximum, minimum                                                        |

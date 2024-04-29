@@ -322,7 +322,7 @@ describe('SonicWeave parser', () => {
       P8
 
       // Break fragiles
-      ^ = 1\\
+      ^ = 1°
 
       FJS
     `);
@@ -542,7 +542,7 @@ describe('SonicWeave parser', () => {
 
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
-      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2\\;const syn=81/80;vD4~*syn;3;$[-1]=5;',
+      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2°;const syn=81/80;vD4~*syn;3;$[-1]=5;',
       false
     );
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(

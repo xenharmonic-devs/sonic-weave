@@ -229,7 +229,6 @@ describe('SonicWeave vector broadcasting', () => {
     '%',
     '÷',
     '\\',
-    '°',
     'mod',
     'modc',
     'rd',

@@ -56,7 +56,7 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
     } else if (element === 'rc' || element === 'r¢') {
       subgroup.push(REAL_CENT_MONZO);
       checkSpan();
-    } else if (element === '1\\' || element === '1°') {
+    } else if (element === '1°') {
       subgroup.push(STEP_ELEMENT);
       checkSpan();
     } else if (element === '') {

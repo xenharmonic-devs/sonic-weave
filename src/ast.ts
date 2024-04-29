@@ -56,7 +56,6 @@ export type BinaryOperator =
   | '%'
   | '÷'
   | '\\'
-  | '°'
   | 'mod'
   | 'modc'
   | 'rd'

@@ -1377,4 +1377,16 @@ describe('SonicWeave standard library', () => {
     const duckDuckGooseDuck = evaluateExpression('vbool(["", 0, 12, niente])');
     expect(duckDuckGooseDuck).toEqual([false, false, true, false]);
   });
+
+  it('has soft ASCII for step literals (singular)', () => {
+    const oneStep = parseSingle('1 edostep');
+    expect(oneStep.steps).toBe(1);
+    expect(oneStep.totalCents()).toBe(0);
+  });
+
+  it('has soft ASCII for step literals (plural)', () => {
+    const oneStep = parseSingle('-3 edosteps');
+    expect(oneStep.steps).toBe(-3);
+    expect(oneStep.totalCents()).toBe(0);
+  });
 });

@@ -696,7 +696,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = '*' / '×' / '%' / '÷' / '\\' / '°' / '·' / DotToken / '⊗' / TensorToken / TemperToken
+  = '*' / '×' / '%' / '÷' / '\\' / '·' / DotToken / '⊗' / TensorToken / TemperToken
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
@@ -943,7 +943,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger ('\\' / '°') !'(' !IdentifierStart {
+  = count: BasicInteger '°' {
     return {
       type: 'StepLiteral',
       count,
@@ -951,7 +951,7 @@ StepLiteral
   }
 
 NedjiLiteral
-  = numerator: BasicInteger ('\\' / '°') denominator: PositiveBasicInteger '<' equaveNumerator: PositiveBasicInteger equaveDenominator: ('/' @PositiveBasicInteger)? '>' {
+  = numerator: BasicInteger '\\' denominator: PositiveBasicInteger '<' equaveNumerator: PositiveBasicInteger equaveDenominator: ('/' @PositiveBasicInteger)? '>' {
     return {
       type: 'NedjiLiteral',
       numerator,
@@ -960,7 +960,7 @@ NedjiLiteral
       equaveDenominator,
     };
   }
-  / numerator: BasicInteger ('\\' / '°') denominator: PositiveBasicInteger {
+  / numerator: BasicInteger '\\' denominator: PositiveBasicInteger {
     return {
       type: 'NedjiLiteral',
       numerator,

@@ -409,7 +409,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has steps', () => {
-    const {interval} = parseSingle('7\\');
+    const {interval} = parseSingle('7°');
     expect(interval.steps).toBe(7);
     expect(interval.totalCents()).toBe(0);
   });
@@ -799,7 +799,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can convert a string to nedji', () => {
-    const {interval} = parseSingle('nedji("7°13<3>")');
+    const {interval} = parseSingle('nedji("7\\\\13<3>")');
     const {fractionOfEquave, equave} = interval.value.toEqualTemperament();
     expect(fractionOfEquave.toFraction()).toBe('7/13');
     expect(equave.toFraction()).toBe('3');
@@ -1362,7 +1362,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('labels up-E-semiflat-super-11-neutral', () => {
     const {interval} = parseSingle(
-      'C4 = 1;labelAbsoluteFJS(11/9 * linear(1\\), "n")'
+      'C4 = 1;labelAbsoluteFJS(11/9 * linear(1°), "n")'
     );
     expect(interval.label).toBe('^Ed^11n');
     expect(interval.color?.value).toBe('black');
@@ -1893,7 +1893,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has monzo representation for a step', () => {
-    const {interval} = parseSingle('monzo(1\\)');
+    const {interval} = parseSingle('monzo(1°)');
     expect(interval.steps).toBe(1);
     expect(interval.toString()).toBe('[1>@1°');
   });
@@ -2176,5 +2176,20 @@ describe('Poor grammar / Fun with "<"', () => {
   it('has pythonic string multiplication (left)', () => {
     const batman = evaluate('5 * "na"');
     expect(batman).toBe('nanananana');
+  });
+
+  it('allows for spaces in NEDO (right)', () => {
+    const {interval} = parseSingle('1\\ 2');
+    expect(interval.totalCents()).toBe(600);
+  });
+
+  it('allows for spaces in NEDO (left)', () => {
+    const {interval} = parseSingle('1 \\2');
+    expect(interval.totalCents()).toBe(600);
+  });
+
+  it('allows for spaces in NEDO (both)', () => {
+    const {interval} = parseSingle('1 \\ 2');
+    expect(interval.totalCents()).toBe(600);
   });
 });

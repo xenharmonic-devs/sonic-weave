@@ -602,7 +602,7 @@ function nedji(
       equave = equave.slice(0, -1);
     }
     const monzo = TimeMonzo.fromEqualTemperament(
-      fraction.replace('\\', '/').replace('°', '/'),
+      fraction.replace('\\', '/'),
       equave
     );
     interval = new Interval(monzo, 'logarithmic');

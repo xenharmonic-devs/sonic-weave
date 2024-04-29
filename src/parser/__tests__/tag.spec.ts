@@ -97,7 +97,7 @@ describe('SonicWeave raw template tag', () => {
     // JS template grammar is broken:
     // swr`${12}\${12}` escapes the dollar sign (Not even String.raw survives this corner case.)
     // swr`${12}\\${12}` is equivalent to 12 \ (\12)
-    const value = swr`${12}°${12}` as Interval;
+    const value = swr`${12}\ ${12}` as Interval;
     expect(value.valueOf()).toBe(2);
   });
 
