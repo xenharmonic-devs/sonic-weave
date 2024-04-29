@@ -99,6 +99,9 @@ Obtain an array of `[key, value]` pairs of the record.
 ### equaveOf(*val*)
 Return the equave of the val.
 
+### every(*array*, *test*)
+Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
+
 ### expm1(*x*)
 Calculate expm1 x.
 
@@ -318,6 +321,9 @@ Calculate sin x.
 ### slice(*array*, *indexStart*, *indexEnd*)
 Obtain a slice of a string or scale between the given indices.
 
+### some(*array*, *test*)
+Test whether at least one element in the array passes the test implemented by the provided function. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
+
 ### sort(*scale = $$*, *compareFn*)
 Sort the current/given scale in ascending order.
 
@@ -520,6 +526,9 @@ Apply labels (or colors) from the first array to a copy of the current/given sca
 
 ### labelsOf(*scale = $$*)
 Obtain an array of labels of the current/given scale.
+
+### labs(*x*)
+Calculate the logarithmic absolute value. Inputs below unison are inverted.
 
 ### log(*x*, *y = E*)
 Calculate the logarithm of x base y. Base defaults to E.
