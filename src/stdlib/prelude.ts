@@ -84,6 +84,11 @@ riff sanitize(interval) {
   return bleach(simplify interval);
 }
 
+riff labs(x) {
+  "Calculate the logarithmic absolute value. Inputs below unison are inverted.";
+  return x logarithmic abs;
+}
+
 riff sqrt(x) {
   "Calculate the square root of the input.";
   return x ~/^ 2;
@@ -192,11 +197,11 @@ riff circleDistance(a, b, equave = 2) {
 
 riff mtof(index) {
   "Convert MIDI note number to absolute frequency.";
-  return 440 Hz * 2^((index - 69) % 12);
+  return 440 Hz * 2 ^ (index - 69)/12;
 }
 riff ftom(freq) {
   "Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).";
-  return (freq % 440 Hz) /_ 2 * 12 + 69;
+  return freq/440Hz /_ 2 * 12 + 69;
 }
 
 riff void() {
@@ -343,8 +348,7 @@ riff labeled(labels, scale = $$) {
     }
     scale[length(labels)..];
   } else {
-    scale;
-    i => i labels;
+    scale labels;
   }
 }
 
@@ -419,9 +423,10 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 // == Scale generation ==
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
-  [1..divisions];
-  if (equave === 2) step => step \\ divisions;
-  else step => step \\ divisions ed equave;
+  if (equave === 2)
+    [1..divisions] \\ divisions;
+  else
+    [1..divisions] \\ divisions ed equave;
 }
 
 riff subharmonics(start, end) {
@@ -436,8 +441,10 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   The default \`equave\` is the octave \`2/1\`.";
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = $[-1];
-  if (equave === 2) step => step \\ divisions;
-  else step => step \\ divisions ed equave;
+  if (equave === 2)
+    step => step \\ divisions;
+  else
+    step => step \\ divisions ed equave;
 }
 
 riff rank2(generator, up, down = 0, period = 2, numPeriods = 1) {
@@ -448,8 +455,8 @@ riff rank2(generator, up, down = 0, period = 2, numPeriods = 1) {
     throw "Down must be a multiple of the number of periods.";
   up ~%= numPeriods
   down ~%= numPeriods
-  [generator ~^ i ~rd period for i of [-down..-1]];
-  [generator ~^ i ~rd period for i of [1..up]];
+  generator ~^ [-down..-1] ~rd period;
+  generator ~^ [1..up] ~rd period;
   period;
   sort();
   repeat(numPeriods);
@@ -460,7 +467,8 @@ riff cps(factors, count, equave = 2, withUnity = false) {
   for (const combination of kCombinations(factors, count))
     prod(combination);
   sort();
-  if (not withUnity) ground();
+  if (not withUnity)
+    ground();
   equave;
   equaveReduce();
   sort();
@@ -503,7 +511,7 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2) {
     const up = pop(ups);
     const down = pop(downs);
 
-    popAll($$) tns~ [generator ~^ i for i of [-down..up]];
+    popAll($$) tns~ generator ~^ [-down..up];
   }
 
   i => i ~rdc equave;
@@ -521,21 +529,21 @@ riff eulerGenus(guide, root = 1, equave = 2) {
 
   (divisors(guide) ~% root ~rdc equave) colorOf(guide) labelOf(guide);
   sort();
-  pop() colorOf(equave) labelOf(equave);
+  equave vor pop();
 }
 
 riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
   "Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.";
-  for (const s1 of [-1, 1]) {
-    for (const s2 of [-1, 1]) {
-      b0 ~^ s1 ~* b1 ~^ s2;
-      b0 ~^ s1 ~* b2 ~^ s2;
-      b0 ~^ s1 ~* b3 ~^ s2;
-      b1 ~^ s1 ~* b3 ~^ s2;
-      b2 ~^ s1 ~* b3 ~^ s2;
-      b1 ~^ s1 ~* b2 ~^ s2;
-    }
-  }
+  const s1 = [-1, -1, 1, 1];
+  const s2 = [-1, 1, -1, 1];
+
+  b0 ~^ s1 ~* b1 ~^ s2;
+  b0 ~^ s1 ~* b2 ~^ s2;
+  b0 ~^ s1 ~* b3 ~^ s2;
+  b1 ~^ s1 ~* b3 ~^ s2;
+  b2 ~^ s1 ~* b3 ~^ s2;
+  b1 ~^ s1 ~* b2 ~^ s2;
+
   sort();
   if (not withUnity) ground();
   equave;
@@ -550,7 +558,6 @@ riff gs(generators, size, period = 2, numPeriods = 1) {
   while (--size > 0) {
     generators[++i mod length(generators)];
   }
-  simplify;
   stack();
   period;
   equaveReduce();
@@ -586,7 +593,7 @@ riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2)
   const witnesses = [];
   for (const numerator of [denominator .. maxNumerator]) {
     const candidate = numerator % denominator;
-    if (abs(logarithmic((candidate ~by step) %~ candidate)) < tolerance) {
+    if (labs((candidate ~by step) %~ candidate) < tolerance) {
       const witness = candidate ~rd equave;
       if (witness not of witnesses) {
         candidate;
@@ -605,10 +612,10 @@ riff concordanceShell(denominator, maxNumerator, divisions = 12, tolerance = 5.0
   const result = [];
   for (const harmonic of vao(denominator, maxNumerator, divisions, tolerance, equave)) {
     const candidate = (harmonic by~ step) ~rdc equave;
-    const label = str(simplify(harmonic ~* denominator))
+    const label = (harmonic ~* denominator) simplify str;
     if (candidate of result) {
       const existing = dislodge(candidate, result);
-      push(existing concat(labelOf(existing), ' & ', label), result);
+      push(existing concat(labelOf existing, ' & ', label), result);
     } else {
       push(candidate label, result);
     }
@@ -617,8 +624,7 @@ riff concordanceShell(denominator, maxNumerator, divisions = 12, tolerance = 5.0
   if (equave not of result) {
     equave;
   }
-  result;
-  sort();
+  sorted(result);
 }
 
 riff oddLimit(limit, equave = 2) {
@@ -675,9 +681,7 @@ riff realizeWord(word, sizes, equave = niente) {
 // == Scale modification ==
 riff equaveReduce(scale = $$) {
   "Reduce the current/given scale by its equave.";
-  $ = scale;
-  i => i ~rdc $[-1];
-  return;
+  remap(i => i ~rdc scale[-1], scale);
 }
 
 riff equaveReduced(scale = $$) {
@@ -726,9 +730,7 @@ riff retroverted(scale = $$) {
 
 riff reflect(scale = $$) {
   "Reflect the current/given scale about unison.";
-  $ = scale;
-  i => %~i;
-  return;
+  remap(i => %~i, scale);
 }
 
 riff reflected(scale = $$) {
@@ -774,8 +776,7 @@ riff repeated(times = 2, scale = $$) {
   const equave = scale[-1];
   let i = 0;
   while (++i < times) {
-    scale;
-    interval => interval ~* equave ~^ i;
+    scale ~* equave ~^ i;
   }
 }
 
@@ -831,7 +832,7 @@ riff subsetOf(degrees, scale = $$) {
   scale = scale[..];
   const equave = pop(scale);
   unshift(equave ~^ 0, scale);
-  filter((_, i) => i of degrees, scale);
+  scale[degrees];
   ground();
   equave;
 }
@@ -898,9 +899,9 @@ riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
   void(shift());
 
   if (overflow === 'drop') {
-    remap(copy => filter(i => i > 1 and i < equave, copy), copies);
+    remap(copy => copy[copy > 1 vand copy < equave], copies);
   } else if (overflow === 'wrap') {
-    remap(copy => map(i => i ~rdc equave, copy), copies);
+    remap(copy => copy ~rdc equave, copies);
   } else {
     equave;
   }
@@ -929,7 +930,7 @@ riff stretch(amount, scale = $$) {
 
 riff stretched(amount, scale = $$) {
   "Obtain a copy of the current/given scale streched by the given amount. A value of \`1\` corresponds to no change.";
-  map(i => i ~^ amount, scale);
+  scale ~^ amount;
 }
 
 riff randomVariance(amount, varyEquave = false, scale = $$) {
@@ -957,7 +958,7 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
   let last;
   let group = [];
   for (const [i, interval] of enumerate(scale)) {
-    if (group and (abs(logarithmic(last %~ interval)) > tolerance or i === length(scale)-1)) {
+    if (group and (labs(last %~ interval) > tolerance or i === length(scale)-1)) {
       if (action === 'lowest') {
         group[0];
       } else if (action === 'highest') {
@@ -978,12 +979,15 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
     push(interval, group);
   }
   if (not preserveBoundary) {
-    while ($$ and abs(logarithmic($$[0])) <= tolerance) void(shift($$));
-    while ($$ and abs(logarithmic($$[-1] %~ scale[-1])) <= tolerance) void(pop($$));
+    while ($$ and labs $$[0] <= tolerance)
+      void(shift($$));
+    while ($$ and labs($$[-1] %~ scale[-1]) <= tolerance)
+      void(pop($$));
   }
   scale[-1];
   if (length(scale) === 1) return;
-  while ($[-1] == $[-2]) void(pop());
+  while ($[-1] == $[-2])
+    void(pop());
 }
 
 riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
