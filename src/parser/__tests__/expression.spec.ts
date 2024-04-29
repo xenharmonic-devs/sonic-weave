@@ -2097,6 +2097,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('3/2');
   });
 
+  it('has implicit fallback call semantics for chaining unary functions', () => {
+    const {interval} = parseSingle('(-6/4) simplify abs logarithmic');
+    expect(interval.toString()).toBe('1\\1<3/2>');
+  });
+
   it('has implicit multiplication', () => {
     const {fraction} = parseSingle('(3) 5');
     expect(fraction).toBe('15');

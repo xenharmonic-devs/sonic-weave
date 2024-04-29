@@ -1436,6 +1436,9 @@ export class ExpressionVisitor {
       case 'function':
         return left.bind(this)(right);
     }
+    if (typeof right === 'function') {
+      return right.bind(this)(left);
+    }
     if (left instanceof Interval) {
       return this.intrinsicIntervalCall(left, right);
     } else if (left instanceof Val) {
