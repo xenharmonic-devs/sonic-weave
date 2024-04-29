@@ -1534,9 +1534,9 @@ export class ExpressionVisitor {
     const operator = node.operator;
     if (operator === 'lest') {
       try {
-        return this.visit(node.right);
-      } catch {
         return this.visit(node.left);
+      } catch {
+        return this.visit(node.right);
       }
     }
     const left = this.visit(node.left);
