@@ -72,6 +72,8 @@ export type BinaryOperator =
   | '^/'
   | '/';
 
+export type ConditionalKind = 'if' | 'where';
+
 export type IterationKind = 'in' | 'of';
 
 export type Program = {
@@ -225,6 +227,7 @@ export type Statement =
 
 export type ConditionalExpression = {
   type: 'ConditionalExpression';
+  kind: ConditionalKind;
   test: Expression;
   consequent: Expression;
   alternate: Expression;

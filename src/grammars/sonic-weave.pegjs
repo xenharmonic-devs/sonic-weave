@@ -48,6 +48,7 @@
     'vand',
     'vnot',
     'vor',
+    'where',
     'while',
   ]);
 
@@ -171,6 +172,7 @@ TrueToken          = @'true'     !IdentifierPart
 VectorAndToken     = @'vand'     !IdentifierPart
 VectorNotToken     = @'vnot'     !IdentifierPart
 VectorOrToken      = @'vor'      !IdentifierPart
+WhereToken         = @'where'    !IdentifierPart
 WhileToken         = @'while'    !IdentifierPart
 
 Statements
@@ -569,11 +571,12 @@ LestExpression
   }
 
 ConditionalExpression
-  = consequent: CoalescingExpression tail: (__ IfToken _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)* {
+  = consequent: CoalescingExpression tail: (__ @(IfToken / WhereToken) _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)* {
     return tail.reduce(
-      (result, [test, alternate]) => (
+      (result, [kind, test, alternate]) => (
         {
           type: 'ConditionalExpression',
+          kind,
           test,
           alternate,
           consequent: result,

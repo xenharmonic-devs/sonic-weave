@@ -2220,4 +2220,28 @@ describe('Poor grammar / Fun with "<"', () => {
     // I'm pretty sure node's Math.random is bad enough for this to be guaranteed.
     expect(x).not.toBe(y);
   });
+
+  it('has a broadcasting ternary operator', () => {
+    const vec = evaluate('[2, 3] where [true, false] else 4') as Interval[];
+    expect(vec.map(i => i.toInteger())).toEqual([2, 4]);
+  });
+
+  it('has a broadcasting ternary operator (broadcasting failure)', () => {
+    expect(() => evaluate('[2] where [true, false] else [4, 5, 6]')).toThrow(
+      'Unable to broadcast arrays together with lengths 1, 2 and 3.'
+    );
+  });
+
+  it('has a broadcasting ternary operator (broadcasting failure *)', () => {
+    expect(() => evaluate('2 where [true, false] else [4, 5, 6]')).toThrow(
+      'Unable to broadcast arrays together with lengths *, 2 and 3.'
+    );
+  });
+
+  it('ignores ternary broadcasting of records', () => {
+    const oof = evaluate('1 where [true, false] else {a: 2}') as any;
+    expect(oof).toHaveLength(2);
+    expect(oof[0].valueOf()).toBe(1);
+    expect(oof[1].a.valueOf()).toBe(2);
+  });
 });

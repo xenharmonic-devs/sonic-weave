@@ -546,12 +546,83 @@ export class ExpressionVisitor {
     return this.down(operand, node.count);
   }
 
-  protected visitConditionalExpression(node: ConditionalExpression) {
-    const test = this.visit(node.test);
-    if (sonicTruth(test)) {
-      return this.visit(node.consequent);
+  protected where(
+    test: SonicWeaveValue,
+    consequent: SonicWeaveValue,
+    alternate: SonicWeaveValue
+  ): SonicWeaveValue {
+    const w = this.where.bind(this);
+    if (Array.isArray(test)) {
+      this.spendGas(test.length);
+      if (Array.isArray(consequent)) {
+        if (Array.isArray(alternate)) {
+          if (
+            test.length !== consequent.length ||
+            consequent.length !== alternate.length
+          ) {
+            throw new Error(
+              `Unable to broadcast arrays together with lengths ${consequent.length}, ${test.length} and ${alternate.length}.`
+            );
+          }
+          return test.map((t, i) =>
+            w(t, consequent[i], alternate[i])
+          ) as SonicWeaveValue;
+        }
+        if (test.length !== consequent.length) {
+          throw new Error(
+            `Unable to broadcast arrays together with lengths ${consequent.length}, ${test.length} and *.`
+          );
+        }
+        return test.map((t, i) =>
+          w(t, consequent[i], alternate)
+        ) as SonicWeaveValue;
+      }
+      if (Array.isArray(alternate)) {
+        if (test.length !== alternate.length) {
+          throw new Error(
+            `Unable to broadcast arrays together with lengths *, ${test.length} and ${alternate.length}.`
+          );
+        }
+        return test.map((t, i) =>
+          w(t, consequent, alternate[i])
+        ) as SonicWeaveValue;
+      }
+      return test.map(t => w(t, consequent, alternate)) as SonicWeaveValue;
     }
-    return this.visit(node.alternate);
+    if (Array.isArray(consequent)) {
+      this.spendGas(consequent.length);
+      if (Array.isArray(alternate)) {
+        if (consequent.length !== alternate.length) {
+          throw new Error(
+            `Unable to broadcast arrays together with lengths ${consequent.length}, * and ${alternate.length}.`
+          );
+        }
+        return consequent.map((c, i) =>
+          w(test, c, alternate[i])
+        ) as SonicWeaveValue;
+      }
+      return consequent.map(c => w(test, c, alternate)) as SonicWeaveValue;
+    }
+    if (Array.isArray(alternate)) {
+      this.spendGas(alternate.length);
+      return alternate.map(a => w(test, consequent, a)) as SonicWeaveValue;
+    }
+    return sonicTruth(test) ? consequent : alternate;
+  }
+
+  protected visitConditionalExpression(node: ConditionalExpression) {
+    if (node.kind === 'if') {
+      const test = this.visit(node.test);
+      if (sonicTruth(test)) {
+        return this.visit(node.consequent);
+      }
+      return this.visit(node.alternate);
+    }
+    return this.where(
+      this.visit(node.test),
+      this.visit(node.consequent),
+      this.visit(node.alternate)
+    );
   }
 
   protected visitComponent(component: VectorComponent) {
