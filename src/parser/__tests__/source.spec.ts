@@ -1373,4 +1373,11 @@ describe('SonicWeave parser', () => {
     }`);
     expect(scale).toEqual(['0', '4', '5', '6', '7']);
   });
+
+  it('could golf ablin', () => {
+    const scale = expand(
+      '1=6z;{const ablin = i => i linear absolute;3::6;ablin}'
+    );
+    expect(scale).toEqual(['8 Hz', '10 Hz', '12 Hz']);
+  });
 });

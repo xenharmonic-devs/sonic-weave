@@ -2,10 +2,10 @@ export const PRELUDE_VOLATILES = `
 // XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn().
 riff reduce(scale = $$) {
   "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
-  for (const i of scale) {
-    if (i < 1 or i > scale[-1])
-      break;
-  } else {
+  if (not scale) {
+    return;
+  }
+  if (every(scale >= 1 vand scale <= scale[-1])) {
     warn("The scale was already reduced by its equave. Did you mean 'simplify'?");
     return;
   }
@@ -15,24 +15,28 @@ riff reduce(scale = $$) {
 
 export const PRELUDE_SOURCE = `
 // == Root context dependents ==
+
+// Note that this could be golfed to:
+// const ablin = i => i linear absolute,
+// but it would lead to weird behavior if i is a function.
 riff ablin(interval) {
   "Convert interval to absolute linear representation.";
-  return absolute(linear(interval));
+  return absolute(linear interval);
 }
 
 riff ablog(interval) {
   "Convert interval to absolute logarithmic representation.";
-  return absolute(logarithmic(interval));
+  return absolute(logarithmic interval);
 }
 
 riff relin(interval) {
   "Convert interval to relative linear representation.";
-  return relative(linear(interval));
+  return relative(linear interval);
 }
 
 riff relog(interval) {
   "Convert interval to relative logarithmic representation.";
-  return relative(logarithmic(interval));
+  return relative(logarithmic interval);
 }
 
 riff NFJS(interval) {
@@ -77,7 +81,7 @@ riff values(record) {
 
 riff sanitize(interval) {
   "Get rid of interval formatting, color and label.";
-  return bleach(simplify(interval));
+  return bleach(simplify interval);
 }
 
 riff sqrt(x) {
@@ -143,10 +147,7 @@ riff denominator(x) {
 }
 riff sign(x) {
   "Calculate the sign of x.";
-  if (x > 0) return 1;
-  if (x < 0) return -1;
-  if (x === 0) return 0;
-  return NaN;
+  return 1 where x > 0 else -1 where x < 0 else 0 where x === 0 else NaN;
 }
 riff oddLimitOf(x, equave = 2) {
   "Calculate the odd limit of x. Here 'odd' means not divisible by the equave.";

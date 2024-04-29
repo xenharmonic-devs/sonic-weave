@@ -572,17 +572,28 @@ LestExpression
 
 ConditionalExpression
   = consequent: CoalescingExpression tail: (__ @(IfToken / WhereToken) _ @CoalescingExpression _ ElseToken _ @CoalescingExpression)* {
-    return tail.reduce(
-      (result, [kind, test, alternate]) => (
-        {
-          type: 'ConditionalExpression',
-          kind,
-          test,
-          alternate,
-          consequent: result,
-        }
-      ), consequent
-    );
+    if (!tail.length) {
+      return consequent;
+    }
+    const [kind, test, alternate] = tail.pop();
+    let result = {
+      type: 'ConditionalExpression',
+      kind,
+      test,
+      alternate,
+    };
+    while (tail.length) {
+      const [kind, test, alternate] = tail.pop();
+      result.consequent = alternate;
+      result = {
+        type: 'ConditionalExpression',
+        kind,
+        test,
+        alternate: result,
+      };
+    }
+    result.consequent = consequent;
+    return result;
   }
 
 CoalescingOperator = '??' / OrToken / VectorOrToken

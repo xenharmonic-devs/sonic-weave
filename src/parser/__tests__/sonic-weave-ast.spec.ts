@@ -1010,22 +1010,22 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('has a left-associative ternary operator complex', () => {
+  it('has a ternary operator complex with pythonic associativity', () => {
     const ast = parseSingle('foo if bar else baz where qux else quux');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
         type: 'ConditionalExpression',
-        kind: 'where',
-        test: {type: 'Identifier', id: 'qux'},
-        alternate: {type: 'Identifier', id: 'quux'},
-        consequent: {
+        kind: 'if',
+        test: {type: 'Identifier', id: 'bar'},
+        alternate: {
           type: 'ConditionalExpression',
-          kind: 'if',
-          test: {type: 'Identifier', id: 'bar'},
-          alternate: {type: 'Identifier', id: 'baz'},
-          consequent: {type: 'Identifier', id: 'foo'},
+          kind: 'where',
+          test: {type: 'Identifier', id: 'qux'},
+          alternate: {type: 'Identifier', id: 'quux'},
+          consequent: {type: 'Identifier', id: 'baz'},
         },
+        consequent: {type: 'Identifier', id: 'foo'},
       },
     });
   });

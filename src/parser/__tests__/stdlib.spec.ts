@@ -1279,7 +1279,7 @@ describe('SonicWeave standard library', () => {
 
   it('throws an error if you use reduce as a mapper', () => {
     expect(() => parseSource('3/2;4/2;reduce')).toThrow(
-      'Can only iterate over arrays, records or strings.'
+      'Can only access arrays, records or strings.'
     );
   });
 

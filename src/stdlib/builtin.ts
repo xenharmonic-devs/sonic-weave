@@ -1989,6 +1989,42 @@ function arrayRepeat(
 arrayRepeat.__doc__ = 'Repeat the given/current array or string `count` times.';
 arrayRepeat.__node__ = builtinNode(arrayRepeat);
 
+function some(
+  this: ExpressionVisitor,
+  array?: any[],
+  test?: (value: any, index: Interval, array: any[]) => unknown
+) {
+  if (!array) {
+    array = this.currentScale;
+  }
+  this.spendGas(array.length);
+  if (!test) {
+    return array.some(sonicTruth);
+  }
+  return array.some((v, i, arr) => test(v, fromInteger(i), arr));
+}
+some.__doc__ =
+  "Test whether at least one element in the array passes the test implemented by the provided function. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.";
+some.__node__ = builtinNode(some);
+
+function every(
+  this: ExpressionVisitor,
+  array?: any[],
+  test?: (value: any, index: Interval, array: any[]) => unknown
+) {
+  if (!array) {
+    array = this.currentScale;
+  }
+  this.spendGas(array.length);
+  if (!test) {
+    return array.every(sonicTruth);
+  }
+  return array.every((v, i, arr) => test(v, fromInteger(i), arr));
+}
+every.__doc__ =
+  "Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.";
+every.__node__ = builtinNode(every);
+
 /**
  * Obtain an array of `[key, value]` pairs of the record.
  * @param record SonicWeave record.
@@ -2282,6 +2318,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   distill,
   arrayReduce,
   arrayRepeat,
+  some,
+  every,
   kCombinations,
   entries,
   // CSS color generation

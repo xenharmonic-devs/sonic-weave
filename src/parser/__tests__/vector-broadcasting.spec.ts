@@ -376,4 +376,18 @@ describe('SonicWeave vector broadcasting', () => {
       expect(vecLR[0].strictEquals(z)).toBe(true);
     }
   );
+
+  it('has a broadcasting sign', () => {
+    const zero = sw0D`0 sign`;
+    expect(zero).toBe(0);
+
+    const polarity = sw1D`[-1/2, PI] sign`;
+    expect(polarity).toEqual([-1, 1]);
+
+    const circleOfNaN = sw2D`sign([[0, LN2], [-1, NaN]])`;
+    expect(circleOfNaN).toEqual([
+      [0, 1],
+      [-1, NaN],
+    ]);
+  });
 });
