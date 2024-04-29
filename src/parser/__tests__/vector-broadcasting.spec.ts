@@ -361,4 +361,20 @@ describe('SonicWeave vector broadcasting', () => {
     ) as Record<string, Interval>;
     expect(Object.keys(rec)).toHaveLength(2);
   });
+
+  it.each(['atan2', 'atanXY', 'gcd', 'lcm'])(
+    'broadcasts binary function %s',
+    fn => {
+      const z = evaluateExpression(`${fn}(4, 6)`) as Interval;
+      const vecL = evaluateExpression(`${fn}([4], 6)`) as Interval[];
+      const vecR = evaluateExpression(`${fn}(4, [6])`) as Interval[];
+      const vecLR = evaluateExpression(`${fn}([4], [6])`) as Interval[];
+      expect(vecL).toHaveLength(1);
+      expect(vecR).toHaveLength(1);
+      expect(vecLR).toHaveLength(1);
+      expect(vecL[0].strictEquals(z)).toBe(true);
+      expect(vecR[0].strictEquals(z)).toBe(true);
+      expect(vecLR[0].strictEquals(z)).toBe(true);
+    }
+  );
 });

@@ -36,6 +36,7 @@ import {
   SonicWeaveFunction,
   SonicWeavePrimitive,
   SonicWeaveValue,
+  binaryBroadcast,
   builtinNode,
   fromInteger,
   isArrayOrRecord,
@@ -127,20 +128,9 @@ function atan2(
   this: ExpressionVisitor,
   y: SonicWeaveValue,
   x: SonicWeaveValue
-): Interval | Interval[] {
-  if (Array.isArray(y)) {
-    this.spendGas(y.length);
-    const a = atan2.bind(this);
-    if (Array.isArray(x)) {
-      return y.map((z, i) =>
-        a(z, (x as SonicWeavePrimitive[])[i])
-      ) as Interval[];
-    } else {
-      return y.map(z => a(z, x)) as Interval[];
-    }
-  } else if (Array.isArray(x)) {
-    const a = atan2.bind(this);
-    return x.map(z => a(y, z)) as Interval[];
+): SonicWeaveValue {
+  if (isArrayOrRecord(y) || isArrayOrRecord(x)) {
+    return binaryBroadcast.bind(this)(y, x, atan2.bind(this));
   }
   y = upcastBool(y);
   x = upcastBool(x);
@@ -1382,36 +1372,51 @@ tenneyHeight.__doc__ =
   'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
 tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
-function gcd(this: ExpressionVisitor, ...intervals: SonicWeaveValue[]) {
-  if (!intervals.length) {
-    intervals = this.currentScale;
+function gcd(
+  this: ExpressionVisitor,
+  x: SonicWeaveValue,
+  y: SonicWeaveValue
+): SonicWeaveValue {
+  if (x === undefined && y === undefined) {
+    let result: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], ZERO);
+    for (const interval of this.currentScale) {
+      result = result.gcd(interval.value);
+    }
+    return new Interval(result, 'linear');
   }
-  let result: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], ZERO);
-  for (const interval of intervals) {
-    result = result.gcd(upcastBool(interval).value);
+  if (isArrayOrRecord(x) || isArrayOrRecord(y)) {
+    return binaryBroadcast.bind(this)(x, y, gcd.bind(this));
   }
-  return new Interval(result, 'linear');
+  return new Interval(upcastBool(x).value.gcd(upcastBool(y).value), 'linear');
 }
 gcd.__doc__ =
-  'Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.';
+  'Obtain the largest (linear) multiplicative factor shared the two arguments or by all intervals or the current scale if no arguments are given.';
 gcd.__node__ = builtinNode(gcd);
 
-function lcm(this: ExpressionVisitor, ...intervals: SonicWeaveValue[]) {
-  if (!intervals.length) {
-    intervals = this.currentScale;
+function lcm(
+  this: ExpressionVisitor,
+  x: SonicWeaveValue,
+  y: SonicWeaveValue
+): SonicWeaveValue {
+  if (x === undefined && y === undefined) {
+    const intervals = this.currentScale;
     if (!intervals.length) {
       // Conventional empty LCM as there's no identity element.
       return fromInteger(0);
     }
+    let result = intervals[0].value.clone();
+    for (const interval of intervals.slice(1)) {
+      result = result.lcm(interval.value);
+    }
+    return new Interval(result, 'linear');
   }
-  let result = upcastBool(intervals[0]).value.clone();
-  for (const interval of intervals.slice(1)) {
-    result = result.lcm(upcastBool(interval).value);
+  if (isArrayOrRecord(x) || isArrayOrRecord(y)) {
+    return binaryBroadcast.bind(this)(x, y, lcm.bind(this));
   }
-  return new Interval(result, 'linear');
+  return new Interval(upcastBool(x).value.lcm(upcastBool(y).value), 'linear');
 }
 lcm.__doc__ =
-  'Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.';
+  'Obtain the smallest (linear) interval that shares both arguments as multiplicative factors. Applies to the current scale if not arguments are given.';
 lcm.__node__ = builtinNode(lcm);
 
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {

@@ -207,3 +207,102 @@ export function unaryBroadcast(
     entries.map(([key, value]) => [key, fn(value)])
   ) as Record<string, SonicWeavePrimitive>;
 }
+
+/**
+ * Apply broadcasting rules to arrays and records.
+ * @param this Current evaluation context.
+ * @param left Array or record. The left operand.
+ * @param right Array or record. The right operand.
+ * @param fn Binary function for evaluating subvalues.
+ * @returns The function mapped over the values of the containers.
+ */
+export function binaryBroadcast(
+  this: ExpressionVisitor,
+  left: SonicWeaveValue,
+  right: SonicWeaveValue,
+  fn: (x: SonicWeavePrimitive, y: SonicWeavePrimitive) => SonicWeaveValue
+): SonicWeaveValue {
+  if (Array.isArray(left)) {
+    if (Array.isArray(right)) {
+      if (left.length !== right.length) {
+        throw new Error(
+          `Unable to broadcast arrays together with lengths ${left.length} and ${right.length}.`
+        );
+      }
+      this.spendGas(left.length);
+      return left.map((l, i) => fn(l, right[i])) as SonicWeaveValue;
+    }
+    if (
+      typeof right === 'object' &&
+      !(
+        right instanceof Color ||
+        right instanceof Interval ||
+        right instanceof Val
+      )
+    ) {
+      right satisfies Record<string, SonicWeavePrimitive>;
+      throw new Error('Unable to broadcast an array and record together.');
+    }
+    this.spendGas(left.length);
+    return left.map(l => fn(l, right)) as SonicWeaveValue;
+  }
+  if (
+    typeof left === 'object' &&
+    !(left instanceof Color || left instanceof Interval || left instanceof Val)
+  ) {
+    left satisfies Record<string, SonicWeavePrimitive>;
+    if (Array.isArray(right)) {
+      throw new Error('Unable to broadcast an array and record together.');
+    }
+    const entries = Object.entries(left);
+    if (
+      typeof right === 'object' &&
+      !(
+        right instanceof Color ||
+        right instanceof Interval ||
+        right instanceof Val
+      )
+    ) {
+      right satisfies Record<string, SonicWeavePrimitive>;
+      for (const key in right) {
+        if (!(key in left)) {
+          throw new Error(`Unable broadcast records together on key ${key}.`);
+        }
+      }
+      const resultEntries: [string, SonicWeavePrimitive][] = [];
+      for (const [key, value] of entries) {
+        if (!(key in right)) {
+          throw new Error(`Unable broadcast records together on key ${key}.`);
+        }
+        this.spendGas();
+        resultEntries.push([key, fn(value, right[key]) as SonicWeavePrimitive]);
+      }
+      return Object.fromEntries(resultEntries);
+    }
+    this.spendGas(entries.length);
+    return Object.fromEntries(
+      entries.map(([key, value]) => [
+        key,
+        fn(value, right) as SonicWeavePrimitive,
+      ])
+    );
+  }
+  if (Array.isArray(right)) {
+    this.spendGas(right.length);
+    return right.map(r => fn(left, r)) as SonicWeaveValue;
+  }
+  if (
+    typeof right !== 'object' ||
+    right instanceof Color ||
+    right instanceof Interval ||
+    right instanceof Val
+  ) {
+    throw new Error('Invalid container broadcast.');
+  }
+  right satisfies Record<string, SonicWeavePrimitive>;
+  const entries = Object.entries(right);
+  this.spendGas(entries.length);
+  return Object.fromEntries(
+    entries.map(([key, value]) => [key, fn(left, value) as SonicWeavePrimitive])
+  );
+}

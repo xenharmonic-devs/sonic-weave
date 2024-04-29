@@ -138,8 +138,8 @@ Obtain a string created from the specified sequence of code points.
 ### fround(*x*)
 Calculate fround x.
 
-### gcd(*...intervals*)
-Obtain the largest (linear) multiplicative factor shared by all intervals or the current scale.
+### gcd(*x*, *y*)
+Obtain the largest (linear) multiplicative factor shared the two arguments or by all intervals or the current scale if no arguments are given.
 
 ### hasConstantStructure(*scale = $$*)
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
@@ -219,8 +219,8 @@ Convert interval to absolute FJS and label without octaves. Color black if there
 ### labelOf(*interval*)
 Return the label of the interval.
 
-### lcm(*...intervals*)
-Obtain the smallest (linear) interval that shares all intervals or the current scale as multiplicative factors.
+### lcm(*x*, *y*)
+Obtain the smallest (linear) interval that shares both arguments as multiplicative factors. Applies to the current scale if not arguments are given.
 
 ### length(*scale = $$*)
 Return the number of intervals in the scale.
@@ -356,9 +356,6 @@ Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
-
-### vbool(*value*)
-Convert value to a boolean. Vectorizes over arrays.
 
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.
@@ -727,6 +724,9 @@ Obtain an array of values of the record.
 
 ### vao(*denominator*, *maxNumerator*, *divisions = 12*, *tolerance = 5.0*, *equave = 2*)
 Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default `12`) within the given tolerance (default `5c`). Harmonics equated by the `equave` (default `2/1`) are only included once. The returned segment begins at unison.
+
+### vbool(*value*)
+Convert value to a boolean. Vectorizes over arrays.
 
 ### void()
 Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale.
