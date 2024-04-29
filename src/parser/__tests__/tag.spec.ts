@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {sw, swr} from '../../parser';
-import {Interval} from '../../interval';
+import {Color, Interval, Val} from '../../interval';
 import {Fraction} from 'xen-dev-utils';
 
 describe('SonicWeave template tag', () => {
@@ -59,6 +59,31 @@ describe('SonicWeave template tag', () => {
   it('evaluates the TypeDoc example', () => {
     const interval = sw`7\\12` as Interval;
     expect(interval.totalCents()).toBe(700);
+  });
+
+  it('supports injecting custom CSS color spaces', () => {
+    const oklab = new Color('oklab(59% 0.1 0.1)');
+    const interval = sw`[-4 4 -1> ${oklab}` as Interval;
+    expect(interval.color?.value).toBe('oklab(59% 0.1 0.1)');
+    expect(interval.totalCents()).toBeCloseTo(21.51);
+  });
+
+  it('supports injecting custom equal temperament mappings', () => {
+    const c17 = Val.fromArray([17, 27, 40]);
+    const intervals = sw`[5/4, 5/3] tmpr ${c17}` as Interval[];
+    expect(intervals).toHaveLength(2);
+    {
+      const {fractionOfEquave, equave} =
+        intervals[0].value.toEqualTemperament();
+      expect(equave.valueOf()).toBe(2);
+      expect(fractionOfEquave.toFraction()).toBe('6/17');
+    }
+    {
+      const {fractionOfEquave, equave} =
+        intervals[1].value.toEqualTemperament();
+      expect(equave.valueOf()).toBe(2);
+      expect(fractionOfEquave.toFraction()).toBe('13/17');
+    }
   });
 });
 

@@ -1207,6 +1207,22 @@ export class Val {
   }
 
   /**
+   * Construct a val from an array of mapping entries representing equal divisions of an equave.
+   * @param primeExponentMap Val components.
+   * @param equave Equave of the equal temperament. Defaults to the octave.
+   * @returns A cologarithmic mapping vector.
+   */
+  static fromArray(
+    primeExponentMap: FractionValue[],
+    equave?: TimeMonzo | FractionValue
+  ) {
+    if (!(equave instanceof TimeMonzo)) {
+      equave = TimeMonzo.fromFraction(equave ?? 2);
+    }
+    return new Val(TimeMonzo.fromArray(primeExponentMap), equave);
+  }
+
+  /**
    * The number of divisions in the equal temperament associated with this val.
    */
   get divisions() {

@@ -1072,6 +1072,18 @@ export class TimeMonzo {
   }
 
   /**
+   * Create a scalar from an array of prime exponents.
+   * @param monzo Exponents of prime numbers starting from prime 2. Possibly fractional.
+   * @returns Scalar in the relative echelon.
+   */
+  static fromArray(monzo: FractionValue[]) {
+    return new TimeMonzo(
+      new Fraction(0),
+      monzo.map(component => new Fraction(component))
+    );
+  }
+
+  /**
    * Number of components in the monzo vector part.
    */
   get numberOfComponents() {

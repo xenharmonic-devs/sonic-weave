@@ -4,6 +4,7 @@ import {
   evaluateSource,
   StatementVisitor,
   getSourceVisitor,
+  getGlobalVisitor,
 } from '../../parser';
 import {TimeMonzo} from '../../monzo';
 import {Interval} from '../../interval';
@@ -536,7 +537,7 @@ describe('SonicWeave parser', () => {
   });
 
   it("can't expand the global scope", () => {
-    const visitor = getSourceVisitor(false);
+    const visitor = getGlobalVisitor(false);
     expect(() => visitor.expand(visitor.rootContext!)).toThrow();
   });
 
@@ -604,7 +605,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can sort scales after the fact', () => {
-    const globalVisitor = getSourceVisitor(false);
+    const globalVisitor = getGlobalVisitor(false);
     const ast = parseAST('C5 = 256 Hz;const baseMidiNote = 72;');
     for (const statement of ast.body) {
       globalVisitor.visit(statement);

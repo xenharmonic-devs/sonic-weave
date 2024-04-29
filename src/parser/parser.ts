@@ -1,5 +1,5 @@
 import {Fraction} from 'xen-dev-utils';
-import {Interval} from '../interval';
+import {Color, Interval, Val} from '../interval';
 import {TimeMonzo} from '../monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
@@ -26,12 +26,13 @@ let SOURCE_VISITOR_NO_PRELUDE: StatementVisitor | null = null;
 let VOLATILES: Program | null = null;
 
 /**
- * Obtain a runtime visitor for the body of a program produced by {@link parseAST}.
+ * Note: Use {@link getSourceVisitor} instead unless you need hack the built-ins for some reason.
+ * Obtain a runtime visitor usable as the parent scope of a visitor for the body of a program produced by {@link parseAST}.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
- * @returns A SonicWeave statement evaluator.
+ * @returns A SonicWeave statement evaluator containing the built-in global scope.
  */
-export function getSourceVisitor(
+export function getGlobalVisitor(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
 ) {
@@ -67,7 +68,6 @@ export function getSourceVisitor(
   } else {
     const visitor = new StatementVisitor();
     visitor.rootContext = rootContext;
-    visitor.isUserRoot = false;
     for (const [name, color] of CSS_COLOR_CONTEXT) {
       visitor.immutables.set(name, color);
     }
@@ -100,6 +100,22 @@ export function getSourceVisitor(
 }
 
 /**
+ * Obtain a runtime visitor for the body of a program produced by {@link parseAST}.
+ * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
+ * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
+ * @returns A SonicWeave statement evaluator.
+ */
+export function getSourceVisitor(
+  includePrelude = true,
+  extraBuiltins?: Record<string, SonicWeaveValue>
+) {
+  const globalVisitor = getGlobalVisitor(includePrelude, extraBuiltins);
+  const visitor = new StatementVisitor(globalVisitor);
+  visitor.isUserRoot = true;
+  return visitor;
+}
+
+/**
  * Evaluate a SonicWeave program and return a {@link StatementVisitor} representing the final runtime state.
  * @param source Source code for a SonicWeave program.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
@@ -111,9 +127,7 @@ export function evaluateSource(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
 ) {
-  const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-  const visitor = new StatementVisitor(globalVisitor);
-  visitor.isUserRoot = true;
+  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
 
   const program = parseAST(source);
   for (const statement of program.body) {
@@ -138,9 +152,7 @@ export function evaluateExpression(
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>
 ): SonicWeaveValue {
-  const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-  const visitor = new StatementVisitor(globalVisitor);
-  visitor.isUserRoot = true;
+  const visitor = getSourceVisitor(includePrelude, extraBuiltins);
   const program = parseAST(source);
   for (const statement of program.body.slice(0, -1)) {
     const interrupt = visitor.visit(statement);
@@ -173,7 +185,11 @@ function convert(value: any): SonicWeaveValue {
     case 'symbol':
       throw new Error('Symbols cannot be converted.');
     case 'object':
-      if (value instanceof Interval) {
+      if (
+        value instanceof Interval ||
+        value instanceof Val ||
+        value instanceof Color
+      ) {
         return value;
       } else if (value instanceof Fraction) {
         return Interval.fromFraction(value);
@@ -206,9 +222,7 @@ export function createTag(
 ) {
   function tag(strings: TemplateStringsArray, ...args: any[]) {
     const fragments = escapeStrings ? strings : strings.raw;
-    const globalVisitor = getSourceVisitor(includePrelude, extraBuiltins);
-    const visitor = new StatementVisitor(globalVisitor);
-    visitor.isUserRoot = true;
+    const visitor = getSourceVisitor(includePrelude, extraBuiltins);
     if (!visitor.rootContext) {
       throw new Error('Root context required for storing template arguments.');
     }
