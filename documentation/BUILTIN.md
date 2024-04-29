@@ -276,10 +276,10 @@ Append an interval onto the current/given scale. Optionally an index to push aft
 ### radical(*interval*, *maxIndex*, *maxHeight*)
 Convert interval to a radical expression. Throws an error if conversion is impossible and no maximum index (2 means square root, 3 means cube root, etc.) for approximation is given.
 
-### random()
+### random(*...shape*)
 Obtain a random value between (linear) 0 and 1.
 
-### randomCents()
+### randomCents(*...shape*)
 Obtain random cents between (logarithmic) 0.0c and 1.0c.
 
 ### relative(*interval*)

@@ -2192,4 +2192,32 @@ describe('Poor grammar / Fun with "<"', () => {
     const {interval} = parseSingle('1 \\ 2');
     expect(interval.totalCents()).toBe(600);
   });
+
+  it('generates shaped arrays of random values', () => {
+    const rands = evaluate('random(4, 3, 2)') as unknown as Interval[][][];
+    expect(rands).toHaveLength(4);
+    expect(rands[0]).toHaveLength(3);
+    expect(rands[0][0]).toHaveLength(2);
+    const [x, y] = rands[0][0].map(i => i.valueOf());
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(x).toBeLessThanOrEqual(1);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(y).toBeLessThanOrEqual(1);
+    // I'm pretty sure node's Math.random is bad enough for this to be guaranteed.
+    expect(x).not.toBe(y);
+  });
+
+  it('generates shaped arrays of random cents', () => {
+    const rands = evaluate('randomCents(3, 4, 2)') as unknown as Interval[][][];
+    expect(rands).toHaveLength(3);
+    expect(rands[0]).toHaveLength(4);
+    expect(rands[0][0]).toHaveLength(2);
+    const [x, y] = rands[0][0].map(i => i.totalCents());
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(x).toBeLessThanOrEqual(1);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(y).toBeLessThanOrEqual(1);
+    // I'm pretty sure node's Math.random is bad enough for this to be guaranteed.
+    expect(x).not.toBe(y);
+  });
 });

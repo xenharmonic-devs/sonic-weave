@@ -1496,16 +1496,32 @@ zipLongest.__doc__ =
   'Combine elements of each array into tuples until all of them are exhausted. Pads missing values with `niente`.';
 zipLongest.__node__ = builtinNode(zipLongest);
 
-function random() {
-  const value = TimeReal.fromValue(Math.random());
-  return new Interval(value, 'linear');
+function random(...shape: Interval[]): Interval | Interval[] {
+  if (shape.length === 0) {
+    const value = TimeReal.fromValue(Math.random());
+    return new Interval(value, 'linear');
+  }
+  const result: Interval[] = [];
+  const dimension = shape.shift()!.toInteger();
+  for (let i = 0; i < dimension; ++i) {
+    result.push(random(...shape) as Interval);
+  }
+  return result;
 }
 random.__doc__ = 'Obtain a random value between (linear) 0 and 1.';
 random.__node__ = builtinNode(random);
 
-function randomCents() {
-  const value = TimeReal.fromCents(Math.random());
-  return new Interval(value, 'logarithmic');
+function randomCents(...shape: Interval[]): Interval | Interval[] {
+  if (shape.length === 0) {
+    const value = TimeReal.fromCents(Math.random());
+    return new Interval(value, 'logarithmic');
+  }
+  const result: Interval[] = [];
+  const dimension = shape.shift()!.toInteger();
+  for (let i = 0; i < dimension; ++i) {
+    result.push(randomCents(...shape) as Interval);
+  }
+  return result;
 }
 randomCents.__doc__ =
   'Obtain random cents between (logarithmic) 0.0c and 1.0c.';
