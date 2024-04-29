@@ -476,24 +476,12 @@ riff cps(factors, count, equave = 2, withUnity = false) {
 
 riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, period = 2) {
   "Generate a well-temperament by cumulatively modifying the pure fifth \`3/2\` (or a given generator) by fractions of the syntonic/given comma.";
-  const up = length(commaFractions) - down;
-
-  let accumulator = 1;
-  let i = -1;
-  while (++i < up) {
-    accumulator *~= generator ~* comma ~^ commaFractions[down + i];
-    accumulator;
-  }
-
-  accumulator = 1;
-  i = -1;
-  while (++i < down) {
-    accumulator %~= generator ~* comma ~^ commaFractions[down - 1 - i];
-    accumulator;
-  }
-  period;
-  equaveReduce();
+  1;
+  generator ~* comma ~^ commaFractions;
+  stack();
+  i => i ~/ $[down] rdc period;
   sort();
+  period vor pop();
 }
 
 riff parallelotope(basis, ups = niente, downs = niente, equave = 2) {
