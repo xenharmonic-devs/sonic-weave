@@ -26,7 +26,7 @@ The language is weakly typed and weakly valued. Logdivision is particularly leak
 
 The following table summarizes the operator precedence in SonicWeave, from highest precedence (most binding) to lowest precedence (least binding). Operators in the same box have the same precedence.
 
-All operations are left-associative except exponentiation, recipropower, logdivision and fallback (marked with an asterisk *).
+All operations are left-associative except exponentiation, recipropower, and logdivision (marked with an asterisk *).
 
 | Operator                                         | Description                                                             |
 | ------------------------------------------------ | ----------------------------------------------------------------------- |
@@ -51,7 +51,7 @@ All operations are left-associative except exponentiation, recipropower, logdivi
 | `and`, `vand`                                    | Boolean and, vector and                                                 |
 | `or`, `vor`, `??`                                | Boolean or, vector or, niente coalescing                                |
 | `x if y else z`                                  | Ternary conditional                                                     |
-| `lest`                                           | Fallback*                                                               |
+| `lest`                                           | Fallback                                                                |
 
 Parenthesis, `^`, `×`, `÷`, `+`, `-` follow [PEMDAS](https://en.wikipedia.org/wiki/Order_of_operations). The fraction slash `/` represents vertically aligned fractions similar to `$\frac{3}{2}^\frac{1}{2}$` in LaTeX e.g. `3/2 ^ 1/2` evaluates to `sqrt(3 ÷ 2)`.
 

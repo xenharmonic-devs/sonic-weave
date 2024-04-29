@@ -597,10 +597,10 @@ try {
 ```
 
 ## Lest expressions
-The inline version of `try..catch` is called `lest`. The latter expression is tried and replaced by the former on failure.
+The inline version of `try..catch` is called `lest`. The former expression is tried and replaced by the latter on failure.
 ```javascript
-P5 lest fraction(P5) // Successfully evaluates to 3/2
-PI lest fraction(PI) // Falls back to 3.141592653589793r
+fraction(P5) lest P5 // Successfully evaluates to 3/2
+fraction(PI) lest PI // Falls back to 3.141592653589793r
 ```
 
 ## Implicit mapping

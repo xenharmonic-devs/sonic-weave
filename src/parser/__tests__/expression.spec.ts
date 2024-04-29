@@ -1455,25 +1455,25 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has inline analogue of try..catch (success)', () => {
-    const {interval} = parseSingle('[-1 1> lest fraction([-1 1>)');
+    const {interval} = parseSingle('fraction([-1 1>) lest [-1 1>');
     expect(interval.toString()).toBe('3/2');
   });
 
-  it('has inline analogue of try..catch (right success)', () => {
+  it('has inline analogue of try..catch (left success)', () => {
     const {interval} = parseSingle(
-      '[-1 1> lest fraction([-1 1>) lest fraction([1>)'
+      'fraction([1>) lest fraction([-1 1>) lest [-1 1>'
     );
     expect(interval.toString()).toBe('2/1');
   });
 
   it('has an inline analogue of try..catch (failure)', () => {
-    const pi = evaluate('PI lest fraction(PI)') as Interval;
+    const pi = evaluate('fraction(PI) lest PI') as Interval;
     expect(pi.value.isFractional()).toBe(false);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 
-  it('has an inline analogue of try..catch (left failure)', () => {
-    const pi = evaluate('PI lest fraction(PI) lest fraction(E)') as Interval;
+  it('has an inline analogue of try..catch (right failure)', () => {
+    const pi = evaluate('fraction(E) lest fraction(PI) lest PI') as Interval;
     expect(pi.value.isFractional()).toBe(false);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
@@ -1483,6 +1483,8 @@ describe('SonicWeave expression evaluator', () => {
       'let halfTau = PI;halfTau lest= fraction(halfTau);halfTau'
     ) as Interval;
     expect(pi.value.isFractional()).toBe(false);
+    expect(pi.value.isFractional()).toBe(false);
+    expect(pi.valueOf()).toBeCloseTo(Math.PI);
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 

@@ -963,7 +963,7 @@ describe('SonicWeave parser', () => {
       9/8
       E % 2r
       G4
-      i => i lest FJS(i)
+      i => FJS(i) lest i
     `);
     expect(scale).toEqual(['M2', '1.3591409142295225r', 'P5']);
   });

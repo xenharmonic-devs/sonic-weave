@@ -988,28 +988,6 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
-  it('has a right-associative lest', () => {
-    const ast = parseSingle('foo lest bar lest baz');
-    expect(ast).toEqual({
-      type: 'ExpressionStatement',
-      expression: {
-        type: 'BinaryExpression',
-        operator: 'lest',
-        left: {type: 'Identifier', id: 'foo'},
-        right: {
-          type: 'BinaryExpression',
-          operator: 'lest',
-          left: {type: 'Identifier', id: 'bar'},
-          right: {type: 'Identifier', id: 'baz'},
-          preferLeft: false,
-          preferRight: false,
-        },
-        preferLeft: false,
-        preferRight: false,
-      },
-    });
-  });
-
   it('has a ternary operator complex with pythonic associativity', () => {
     const ast = parseSingle('foo if bar else baz where qux else quux');
     expect(ast).toEqual({
