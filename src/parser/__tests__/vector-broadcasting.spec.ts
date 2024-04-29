@@ -73,7 +73,7 @@ describe('SonicWeave vector broadcasting', () => {
   });
 
   it('refuses to mix disparate records together', () => {
-    expect(() => sw`({a: 1}) {b: 2}`).toThrow(
+    expect(() => sw`{a: 1} {b: 2}`).toThrow(
       'Unable broadcast records together on key b.'
     );
   });
@@ -139,7 +139,7 @@ describe('SonicWeave vector broadcasting', () => {
   });
 
   it('implicitly multiplies records', () => {
-    const rec = swRec`({a: 3, b: 5}) {a: 7, b: 11}`;
+    const rec = swRec`{a: 3, b: 5} {a: 7, b: 11}`;
     expect(rec).toEqual({a: 21, b: 55});
   });
 
@@ -252,7 +252,7 @@ describe('SonicWeave vector broadcasting', () => {
     expect(mat[0]).toHaveLength(2);
 
     const rec = evaluateExpression(
-      `({a: 5, b: -1/2}) ${op} {a: 2, b: PI}`
+      `{a: 5, b: -1/2} ${op} {a: 2, b: PI}`
     ) as Record<string, SonicWeavePrimitive>;
     expect(Object.keys(rec)).toHaveLength(2);
 

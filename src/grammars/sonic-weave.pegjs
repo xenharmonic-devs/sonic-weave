@@ -541,7 +541,7 @@ EmptyStatement
   }
 
 ExpressionStatement
-  = &SourceCharacter !("{" / FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
+  = &SourceCharacter !(FunctionToken / FunctionAliasToken) expression: (LabeledCommaDecimal / Expression) EOS {
     return {
       type: 'ExpressionStatement',
       expression,
