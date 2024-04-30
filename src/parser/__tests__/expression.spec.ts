@@ -2272,4 +2272,15 @@ describe('Poor grammar / Fun with "<"', () => {
     const {fraction} = parseSingle('wilsonHeight(1073741820)');
     expect(fraction).toBe((2 + 2 + 3 + 5 + 29 + 43 + 113 + 127).toString());
   });
+
+  it('can convert 1073741821/1073741820 to a prime monzo', () => {
+    const {interval, fraction} = parseSingle(
+      'primeMonzo(1073741821/1073741820)'
+    );
+    expect(fraction).toBe('1073741821/1073741820');
+    expect(interval.toString()).toBe(
+      '[-2 -1 -1 1 -1 -1 -1 -1 1>@2.3.5.23.29.43.113.127.46684427'
+    );
+    expect(interval.domain).toBe('logarithmic');
+  });
 });

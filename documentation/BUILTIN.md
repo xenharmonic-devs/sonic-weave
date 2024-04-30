@@ -112,10 +112,10 @@ Extend the first array with the contents of the rest.
 Color an interval based on its prime factors.
 
 ### fareyInterior(*maxDenominator*)
-Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominater below or at the given limit.
+Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominator below or at the given limit.
 
 ### fareySequence(*maxDenominator*)
-Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominater below or at the given limit.
+Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominator below or at the given limit.
 
 ### filter(*tester*, *scale = $$*)
 Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.
@@ -266,6 +266,9 @@ Remove and return all intervals in the current/given scale.
 
 ### PrimeMapping(*...newPrimes*)
 Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.
+
+### primeMonzo(*interval*)
+Convert interval to a prime count vector a.k.a. monzo with all primes listed in the subgroup part.
 
 ### primes(*start*, *end*)
 Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.

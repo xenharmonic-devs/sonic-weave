@@ -287,6 +287,7 @@ describe('SonicWeave vector broadcasting', () => {
   // 'absoluteFJS',
   // 'FJS',
   // 'labelAbsoluteFJS',
+  // 'primeMonzo',
 
   // 'tail',
   // 'colorOf',

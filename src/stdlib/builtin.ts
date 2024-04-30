@@ -12,6 +12,8 @@ import {
   hasMarginConstantStructure,
   primeLimit,
   dotPrecise,
+  PRIMES,
+  primeFactorize,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
@@ -24,10 +26,15 @@ import {type ExpressionVisitor} from '../parser';
 import {MosOptions, mos} from 'moment-of-symmetry';
 import {expressionToString} from '../ast';
 import {
+  BasisElement,
   FJSFlavor,
+  MonzoLiteral,
   NedjiLiteral,
   RadicalLiteral,
+  VectorComponent,
   formatAbsoluteFJS,
+  fractionToVectorComponent,
+  integerToVectorComponent,
 } from '../expression';
 import {TWO, ZERO} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
@@ -276,7 +283,7 @@ function fareySequence(
   return result;
 }
 fareySequence.__doc__ =
-  "Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominater below or at the given limit.";
+  "Generate the n'th Farey sequence i.e. all fractions between 0 and 1 inclusive with denominator below or at the given limit.";
 fareySequence.__node__ = builtinNode(fareySequence);
 
 function fareyInterior(
@@ -293,7 +300,7 @@ function fareyInterior(
   return result;
 }
 fareyInterior.__doc__ =
-  "Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominater below or at the given limit.";
+  "Generate the interior of the n'th Farey sequence i.e. all fractions between 0 and 1 exclusive with denominator below or at the given limit.";
 fareyInterior.__node__ = builtinNode(fareyInterior);
 
 // == Domain conversion ==
@@ -872,6 +879,59 @@ Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});
 toMonzo.__doc__ = 'Convert interval to a prime count vector a.k.a. monzo.';
 toMonzo.__node__ = builtinNode(toMonzo);
 
+// Coercion: None.
+function primeMonzo(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
+  if (typeof interval === 'boolean' || interval instanceof Interval) {
+    interval = upcastBool(interval);
+    if (interval.steps) {
+      throw new Error('Edosteps cannot be converted to prime monzos.');
+    }
+    const monzo = interval.value;
+    if (monzo instanceof TimeReal) {
+      throw new Error(
+        'Irrational intervals cannot be converted to prime monzos.'
+      );
+    }
+    if (!monzo.isScalar()) {
+      throw new Error('A relative interval is required.');
+    }
+    if (monzo.residual.s !== 1) {
+      throw new Error('A positive interval is required.');
+    }
+    const components: VectorComponent[] = [];
+    const basis: BasisElement[] = [];
+    const pe = monzo.primeExponents;
+    const denominator = null;
+    for (let i = 0; i < pe.length; ++i) {
+      if (pe[i].n) {
+        components.push(fractionToVectorComponent(pe[i]));
+        basis.push({numerator: PRIMES[i], denominator});
+      }
+    }
+    const factors = primeFactorize(monzo.residual);
+    const primes = Array.from(factors.keys()).sort((a, b) => a - b);
+    for (const numerator of primes) {
+      components.push(integerToVectorComponent(factors.get(numerator)!));
+      basis.push({numerator, denominator});
+    }
+    const node: MonzoLiteral = {
+      type: 'MonzoLiteral',
+      components,
+      basis,
+      ups: 0,
+      lifts: 0,
+    };
+    return new Interval(monzo, 'logarithmic', 0, node, interval);
+  }
+  return unaryBroadcast.bind(this)(interval, primeMonzo.bind(this));
+}
+primeMonzo.__doc__ =
+  'Convert interval to a prime count vector a.k.a. monzo with all primes listed in the subgroup part.';
+primeMonzo.__node__ = builtinNode(primeMonzo);
+
 // == Type detection ==
 function isInterval(value: SonicWeaveValue) {
   requireParameters({value});
@@ -1373,7 +1433,7 @@ tenneyHeight.__doc__ =
   'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
 tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
-// TODO: Wilson in cosJIP, nthPrime, primeRange, primeMonzo
+// TODO: Wilson in cosJIP, nthPrime, primeRange
 function wilsonHeight(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -2253,6 +2313,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   FJS,
   labelAbsoluteFJS,
   monzo: toMonzo,
+  primeMonzo,
   // Type detection
   isInterval,
   isColor,
