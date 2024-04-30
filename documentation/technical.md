@@ -51,9 +51,11 @@ All operations are left-associative except exponentiation, recipropower, and log
 | `and`, `vand`                                    | Boolean and, vector and                                                 |
 | `or`, `vor`, `??`                                | Boolean or, vector or, niente coalescing                                |
 | `x if y else z`                                  | Ternary conditional                                                     |
-| `lest`                                           | Fallback                                                                |
+| `lest`                                           | Fallback[^1]                                                                |
 
 Parenthesis, `^`, `×`, `÷`, `+`, `-` follow [PEMDAS](https://en.wikipedia.org/wiki/Order_of_operations). The fraction slash `/` represents vertically aligned fractions similar to `$\frac{3}{2}^\frac{1}{2}$` in LaTeX e.g. `3/2 ^ 1/2` evaluates to `sqrt(3 ÷ 2)`.
+
+[^1]: `lest` is a fully associative operation, thus `a() lest b() lest c()` = `(a() lest b()) lest c()` = `a() lest (b() lest c())`. This means that one can always treat a sequence `a() lest b() lest ... lest c()` as if the evaluations occurred from left to right. Any possible parenthesis may be ignored in such a sequence.
 
 ## Interval subtypes
 
