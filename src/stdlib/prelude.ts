@@ -159,6 +159,10 @@ riff oddLimitOf(x, equave = 2) {
   const noEquaves = x ~% equave^(x dot %logarithmic(equave));
   return numerator(noEquaves) max denominator(noEquaves);
 }
+riff weilHeight(x) {
+  "Calculate the Weil height of the interval. Natural logarithm of the maximum of numerator or denominator.";
+  return (tenneyHeight x ~+ log(labs x)) ~/ 2;
+}
 riff hypot(...args) {
   "Calculate the square root of the sum of squares of the arguments.";
   return sum(map(a => a ~^ 2, args)) ~/^ 2;

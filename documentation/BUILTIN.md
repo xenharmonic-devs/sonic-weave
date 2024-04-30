@@ -752,6 +752,9 @@ Convert value to a boolean. Vectorizes over arrays.
 ### void()
 Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale.
 
+### weilHeight(*x*)
+Calculate the Weil height of the interval. Natural logarithm of the maximum of numerator or denominator.
+
 ### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = 2*)
 Generate a well-temperament by cumulatively modifying the pure fifth `3/2` (or a given generator) by fractions of the syntonic/given comma.
 
