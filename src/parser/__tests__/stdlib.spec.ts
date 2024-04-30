@@ -1308,6 +1308,11 @@ describe('SonicWeave standard library', () => {
     expect(scale).toEqual(['4096/4095', '3/2', '4095/2048', '2/1']);
   });
 
+  it('coalesces based on wilson height', () => {
+    const scale = expand('70/69;37/36;P5;2;coalesce(23., "wilson")');
+    expect(scale).toEqual(['70/69', 'P5', '2']);
+  });
+
   it('calculates Euler-Fokker genus 444', () => {
     const scale = expand('eulerGenus(444)');
     expect(scale).toEqual(['37/32', '3/2', '111/64', '2']);

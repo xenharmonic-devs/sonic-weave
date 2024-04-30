@@ -2262,4 +2262,14 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(oof[0].valueOf()).toBe(1);
     expect(oof[1].a.valueOf()).toBe(2);
   });
+
+  it('can measure the Wilson complexity of 11/8', () => {
+    const {fraction} = parseSingle('wilsonHeight(11/8)');
+    expect(fraction).toBe('17');
+  });
+
+  it('can measure the Wilson complexity of 1073741820', () => {
+    const {fraction} = parseSingle('wilsonHeight(1073741820)');
+    expect(fraction).toBe((2 + 2 + 3 + 5 + 29 + 43 + 113 + 127).toString());
+  });
 });

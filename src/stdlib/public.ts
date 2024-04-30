@@ -1,10 +1,14 @@
 /**
  * Exported builtins without vectorization complications.
  */
-import {Fraction, LOG_PRIMES} from 'xen-dev-utils';
+import {
+  Fraction,
+  tenneyHeight as xduTenney,
+  wilsonHeight as xduWilson,
+} from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {type ExpressionVisitor} from '../parser/expression';
-import {NEGATIVE_ONE, TWO} from '../utils';
+import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
 import {TimeMonzo, TimeReal} from '../monzo';
 
@@ -213,12 +217,36 @@ export function tenneyHeight(
     return new Interval(TimeReal.fromValue(Infinity), 'linear');
   }
   const height =
-    Math.log(monzo.residual.n * monzo.residual.d) +
-    monzo.primeExponents.reduce(
-      (total, pe, i) => total + Math.abs(pe.valueOf()) * LOG_PRIMES[i],
-      0
-    );
+    xduTenney(monzo.residual) +
+    xduTenney(monzo.primeExponents.map(pe => pe.valueOf()));
   return new Interval(TimeReal.fromValue(height), 'linear');
+}
+
+/**
+ * Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition.
+ * @param this {@link ExpressionVisitor} instance providing context for the height of absolute intervals.
+ * @param interval Interval to measure.
+ * @returns Relative linear interval representing the Wilson height.
+ */
+export function wilsonHeight(
+  this: ExpressionVisitor,
+  interval: Interval | boolean
+): Interval {
+  const monzo = relative.bind(this)(upcastBool(interval)).value;
+  if (monzo instanceof TimeReal) {
+    return new Interval(TimeReal.fromValue(Infinity), 'linear');
+  }
+  const resHeight = xduWilson(monzo.residual);
+  if (resHeight === Infinity) {
+    return new Interval(TimeReal.fromValue(Infinity), 'linear');
+  }
+  let result = new Fraction(resHeight);
+  const pe = monzo.primeExponents;
+  for (let i = 0; i < pe.length; ++i) {
+    result = result.add(pe[i].abs().mul(FRACTION_PRIMES[i]));
+  }
+
+  return new Interval(TimeMonzo.fromFraction(result), 'linear');
 }
 
 /**

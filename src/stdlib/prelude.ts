@@ -939,7 +939,7 @@ riff randomVaried(amount, varyEquave = false, scale = $$) {
 
 riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
   "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` are coalesced into one.\\
-  \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.\\
+  \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.\\
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   if (not scale) return [];
 
@@ -957,6 +957,9 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
         havg(...group);
       } else if (action === 'geoavg') {
         geoavg(...group);
+      } else if (action === 'wilson') {
+        sort(group, (a, b) => wilsonHeight(a) - wilsonHeight(b));
+        group[0];
       } else {
         sort(group, (a, b) => tenneyHeight(a) - tenneyHeight(b));
         group[0];
@@ -980,7 +983,7 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
 
 riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
   "Coalesce intervals in the current/given scale separated by \`tolerance\` (default 3.5 cents) into one. \\
-   \`action\` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.\\
+   \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.\\
    If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   $ = scale;
   scale = $[..];

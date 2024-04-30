@@ -366,6 +366,9 @@ Prepend an interval at the beginning of the current/given scale.
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.
 
+### wilsonHeight(*interval*)
+Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition..
+
 ### withEquave(*val*, *equave*)
 Change the equave of the val.
 
@@ -420,10 +423,10 @@ Calculate the geometric difference of two intervals on a circle.
 Calculate the geometric distance of two intervals on a circle.
 
 ### coalesce(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one.    `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.   If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one.    `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.   If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### coalesced(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### colorsOf(*scale = $$*)
 Obtain an array of colors of the current/given scale.

@@ -53,6 +53,7 @@ import {
   absolute as pubAbsolute,
   relative as pubRelative,
   tenneyHeight as pubTenney,
+  wilsonHeight as pubWilson,
   track as pubTrack,
   sort as pubSort,
   repr as pubRepr,
@@ -1372,6 +1373,21 @@ tenneyHeight.__doc__ =
   'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
 tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
+// TODO: Wilson in cosJIP, nthPrime, primeRange, primeMonzo
+function wilsonHeight(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
+  requireParameters({interval});
+  if (typeof interval === 'boolean' || interval instanceof Interval) {
+    return pubWilson.bind(this)(interval);
+  }
+  return unaryBroadcast.bind(this)(interval, wilsonHeight.bind(this));
+}
+wilsonHeight.__doc__ =
+  'Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition..';
+wilsonHeight.__node__ = builtinNode(wilsonHeight);
+
 function gcd(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
@@ -2277,6 +2293,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   JIP,
   PrimeMapping,
   tenneyHeight,
+  wilsonHeight,
   gcd,
   lcm,
   hasConstantStructure: hasConstantStructure_,

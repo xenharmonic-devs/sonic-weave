@@ -320,6 +320,7 @@ describe('SonicWeave vector broadcasting', () => {
     'JIP',
     'PrimeMapping(1200., 1902.)',
     'tenneyHeight',
+    'wilsonHeight',
     'floor',
     'round',
     'trunc',

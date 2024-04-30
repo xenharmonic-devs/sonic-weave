@@ -1,9 +1,9 @@
 import {stdout} from 'process';
-import {getSourceVisitor} from '../src/parser';
+import {getGlobalVisitor} from '../src/parser';
 import {SonicWeaveFunction} from '../src/stdlib';
 import {expressionToString} from '../src/ast';
 
-const visitor = getSourceVisitor();
+const visitor = getGlobalVisitor();
 
 stdout.write('# SonicWeave standard library\n');
 stdout.write(
