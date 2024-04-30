@@ -354,14 +354,12 @@ riff labeled(labels, scale = $$) {
 
 riff enumerate(array = $$) {
   "Produce an array of [index, element] pairs from the given current/given array.";
-  let i = -1;
-  return [[++i, element] for element of array];
+  return [[i, array[i]] for i in array];
 }
 
 riff tune(a, b, numIter = 1, weighting = 'tenney') {
   "Find a combination of two vals that is closer to just intonation.";
-  ++numIter;
-  while (--numIter) {
+  while (0 <= --numIter) {
     const x = 2 * a - b;
     const y = a + b;
     const z = 2 * b - a;
@@ -373,8 +371,7 @@ riff tune(a, b, numIter = 1, weighting = 'tenney') {
 
 riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
   "Find a combination of three vals that is closer to just intonation.";
-  ++numIter;
-  while (--numIter) {
+  while (0 <= --numIter) {
     const combos = [
       a,
       b,
@@ -542,10 +539,7 @@ riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
 riff gs(generators, size, period = 2, numPeriods = 1) {
   "Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.";
   size = round(size % numPeriods);
-  let i = -1;
-  while (--size > 0) {
-    generators[++i mod length(generators)];
-  }
+  generators[[0..size-2] mod length(generators)];
   stack();
   period;
   equaveReduce();
@@ -762,10 +756,8 @@ riff repeated(times = 2, scale = $$) {
   }
   scale;
   const equave = scale[-1];
-  let i = 0;
-  while (++i < times) {
-    scale ~* equave ~^ i;
-  }
+  for (const level of equave ~^ [1..times-1])
+    scale ~* level;
 }
 
 riff repeat(times = 2, scale = $$) {
