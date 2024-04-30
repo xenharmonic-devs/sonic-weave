@@ -392,4 +392,13 @@ describe('SonicWeave vector broadcasting', () => {
       [-1, NaN],
     ]);
   });
+
+  it('has a broadcasting Weil height', () => {
+    const ln5 = sw0D`weilHeight 3/5`;
+    expect(ln5.valueOf()).toBeCloseTo(Math.log(5));
+
+    const [ln2, ln3] = sw1D`[2, 3/2] weilHeight`;
+    expect(ln2.valueOf()).toBeCloseTo(Math.LN2);
+    expect(ln3.valueOf()).toBeCloseTo(Math.log(3));
+  });
 });
