@@ -14,6 +14,8 @@ import {
   dotPrecise,
   PRIMES,
   primeFactorize,
+  nthPrime as xduNthPrime,
+  primeRange as xduPrimeRange,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
@@ -219,6 +221,24 @@ function isPrime(this: ExpressionVisitor, n: SonicWeaveValue): SonicWeaveValue {
 isPrime.__doc__ = 'Return `true` if `n` is a prime number, `false` otherwise.';
 isPrime.__node__ = builtinNode(isPrime);
 
+function nthPrime(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
+  requireParameters({interval});
+  if (typeof interval === 'boolean' || interval instanceof Interval) {
+    const n = upcastBool(interval).toInteger();
+    if (n < 0) {
+      throw new Error('A non-negative integer is required.');
+    }
+    this.spendGas(n / 3);
+    return fromInteger(xduNthPrime(n));
+  }
+  return unaryBroadcast.bind(this)(interval, nthPrime.bind(this));
+}
+nthPrime.__doc__ = 'Obtain the nth odd prime or prime 2 if n = 0.';
+nthPrime.__node__ = builtinNode(nthPrime);
+
 function primes(
   this: ExpressionVisitor,
   start: SonicWeaveValue,
@@ -232,11 +252,29 @@ function primes(
     return xduPrimes(s, e).map(p => fromInteger(p));
   }
   this.spendGas(Math.max(0, s));
-  return xduPrimes(s);
+  return xduPrimes(s).map(p => fromInteger(p));
 }
 primes.__doc__ =
   'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.';
 primes.__node__ = builtinNode(primes);
+
+function primeRange(
+  this: ExpressionVisitor,
+  start: SonicWeaveValue,
+  end?: Interval
+) {
+  const s = upcastBool(start).toInteger();
+  if (end) {
+    const e = upcastBool(end).toInteger();
+    this.spendGas(Math.max(0, (e - s) / 3));
+    return xduPrimeRange(s, e).map(p => fromInteger(p));
+  }
+  this.spendGas(Math.max(0, s / 3));
+  return xduPrimeRange(s).map(p => fromInteger(p));
+}
+primeRange.__doc__ =
+  'Obtain a range of primes starting at the given ordinal. Prime 2 has ordinal 0. (End - start) elements are returned.';
+primeRange.__node__ = builtinNode(primeRange);
 
 function mosSubset(
   this: ExpressionVisitor,
@@ -1438,7 +1476,6 @@ tenneyHeight.__doc__ =
   'Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.';
 tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
-// TODO: Wilson in cosJIP, nthPrime, primeRange
 function wilsonHeight(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -2296,7 +2333,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   // Third-party wrappers
   mosSubset,
   isPrime,
+  nthPrime,
   primes,
+  primeRange,
   fareySequence,
   fareyInterior,
   // Domain conversion

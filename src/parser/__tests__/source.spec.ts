@@ -438,12 +438,23 @@ describe('SonicWeave parser', () => {
     );
   });
 
-  it('can list primes', () => {
+  it('can get (odd) primes at given ordinals', () => {
+    const scale = expand('nthPrime([1, 10, 100, 1000])');
+    expect(scale).toEqual(['3', '31', '547', '7927']);
+  });
+
+  it('can list primes (within bounds)', () => {
     const scale = parseSource('primes(3, 22)');
     expect(scale).toHaveLength(7);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
       '3;5;7;11;13;17;19'
     );
+  });
+
+  it('can list primes (between ordinals)', () => {
+    const scale = parseSource('primeRange(2, 7)') as Interval[];
+    expect(scale).toHaveLength(7 - 2);
+    expect(scale.map(i => i.toString()).join(';')).toBe('5;7;11;13;17');
   });
 
   it('supports expressions inside ranges', () => {

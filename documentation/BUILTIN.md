@@ -255,6 +255,9 @@ Calculate a subset of equally tempered degrees with maximum variety two per scal
 ### nedji(*interval*, *preferredNumerator*, *preferredDenominator*, *preferredEquaveNumerator*, *preferredEquaveDenominator*)
 Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.
 
+### nthPrime(*interval*)
+Obtain the nth odd prime or prime 2 if n = 0.
+
 ### numComponents(*value*)
 Get/set the number of prime exponents to support in monzos. Also sets the length of vals.
 
@@ -269,6 +272,9 @@ Construct a prime mapping for tempering intervals to specified cents. Remaining 
 
 ### primeMonzo(*interval*)
 Convert interval to a prime count vector a.k.a. monzo with all primes listed in the subgroup part.
+
+### primeRange(*start*, *end*)
+Obtain a range of primes starting at the given ordinal. Prime 2 has ordinal 0. (End - start) elements are returned.
 
 ### primes(*start*, *end*)
 Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.
