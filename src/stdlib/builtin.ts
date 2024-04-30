@@ -1308,7 +1308,7 @@ withEquave.__node__ = builtinNode(withEquave);
 function cosJIP(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
-  weighting: 'none' | 'tenney' = 'tenney'
+  weighting: 'none' | 'tenney' | 'wilson' = 'tenney'
 ): SonicWeaveValue {
   requireParameters({val});
   if (isArrayOrRecord(val)) {
@@ -1322,7 +1322,8 @@ function cosJIP(
   }
   const pe = val.value.primeExponents.map(e => e.valueOf());
   let value = 0;
-  if (weighting.toLowerCase() === 'tenney') {
+  weighting = weighting.toLowerCase() as typeof weighting;
+  if (weighting === 'tenney') {
     let n2 = 0;
     for (let i = 0; i < pe.length; ++i) {
       const e = pe[i] / LOG_PRIMES[i];
@@ -1330,6 +1331,10 @@ function cosJIP(
       n2 += e * e;
     }
     value /= Math.sqrt(n2 * pe.length);
+  } else if (weighting === 'wilson') {
+    pe.map((e, i) => e / PRIMES[i]);
+    const jip = LOG_PRIMES.slice(0, pe.length).map((e, i) => e / PRIMES[i]);
+    value = dotPrecise(jip, pe) / norm(pe) / norm(jip);
   } else {
     const peNorm = norm(pe);
     const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
@@ -1338,7 +1343,7 @@ function cosJIP(
   return new Interval(TimeReal.fromValue(value), 'linear');
 }
 cosJIP.__doc__ =
-  'Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".';
+  'Cosine of the angle between the val and the just intonation point. Weighting is either "none", "tenney" or "wilson".';
 cosJIP.__node__ = builtinNode(cosJIP);
 
 function JIP(

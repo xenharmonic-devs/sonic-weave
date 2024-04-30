@@ -370,6 +370,14 @@ describe('SonicWeave standard library', () => {
     expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
   });
 
+  it('can combine two vals to approach the JIP (Wilson metric)', () => {
+    const fiftyTwo = evaluateExpression(
+      'tune(12@.5, 22@.5, 3, "wilson")'
+    ) as Val;
+    // Pretty bad TBH
+    expect(fiftyTwo.value.toIntegerMonzo()).toEqual([52, 83, 120]);
+  });
+
   it('can combine three vals to approach the JIP', () => {
     const fourtyOne = evaluateExpression('tune3(5@.7, 17@.7, 19@.7)') as Val;
     expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);

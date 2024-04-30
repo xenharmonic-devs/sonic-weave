@@ -73,7 +73,7 @@ Combine two or more arrays/strings.
 Calculate cos x.
 
 ### cosJIP(*val*, *weighting = "tenney"*)
-Cosine of the angle between the val and the just intonation point. Weighting is either "none" or "tenney".
+Cosine of the angle between the val and the just intonation point. Weighting is either "none", "tenney" or "wilson".
 
 ### decimal(*interval*, *fractionDigits*)
 Convert interval to a decimal number.
