@@ -552,8 +552,7 @@ Expression
   = LestExpression
 
 AssigningOperator
-  = LestOperator
-  / CoalescingOperator
+  = CoalescingOperator
   / ConjunctOperator
   / RoundingOperator
   / ExtremumOperator

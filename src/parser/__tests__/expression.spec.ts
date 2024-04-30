@@ -1472,20 +1472,31 @@ describe('SonicWeave expression evaluator', () => {
     expect(pi.valueOf()).toBeCloseTo(Math.PI);
   });
 
-  it('has an inline analogue of try..catch (right failure)', () => {
-    const pi = evaluate('fraction(E) lest fraction(PI) lest PI') as Interval;
-    expect(pi.value.isFractional()).toBe(false);
-    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+  it('has an inline analogue of try..catch (ternary fail.fail.fail)', () => {
+    expect(() =>
+      evaluate('fraction(E) lest fraction(PI) lest fraction(LN2)')
+    ).toThrow('Input is irrational and no tolerance given.');
   });
 
-  it('has inline analogue of assignment inside try..catch', () => {
-    const pi = evaluate(
-      'let halfTau = PI;halfTau lest= fraction(halfTau);halfTau'
-    ) as Interval;
-    expect(pi.value.isFractional()).toBe(false);
-    expect(pi.value.isFractional()).toBe(false);
-    expect(pi.valueOf()).toBeCloseTo(Math.PI);
-    expect(pi.valueOf()).toBeCloseTo(Math.PI);
+  it('has an inline analogue of try..catch (ternary fail.fail.success)', () => {
+    const {fraction} = parseSingle(
+      'fraction(E) lest fraction(PI) lest fraction(LN2, 10.)'
+    );
+    expect(fraction).toBe('9/13');
+  });
+
+  it('has an inline analogue of try..catch (ternary fail.success.no-eval)', () => {
+    const {fraction} = parseSingle(
+      'fraction(E) lest fraction(PI, 10.) lest fraction(LN2)'
+    );
+    expect(fraction).toBe('22/7');
+  });
+
+  it('has an inline analogue of try..catch (ternary success.no-eval.no-eval)', () => {
+    const {fraction} = parseSingle(
+      'fraction(E, 10.) lest fraction(PI, 10.) lest fraction(LN2)'
+    );
+    expect(fraction).toBe('19/7');
   });
 
   it('has atan2 with swapped arguments', () => {
