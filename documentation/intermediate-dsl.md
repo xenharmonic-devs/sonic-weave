@@ -410,6 +410,11 @@ j    // Still [1, 2]
 ### Binary operators
 There are many operators that take two operands.
 
+#### Fallback
+The expression `foo() lest bar()` executes `foo()` and returns the result if it succeeds. If `foo()` throws an error `bar()` is tried instead.
+
+In `foo() lest bar() lest baz()` execution proceeds from left to right until an operand evaluates successfully. If all fail, the exception from `baz()` is thrown.
+
 #### Coalescing
 | Name               | Example       | Result |
 | ------------------ | ------------- | ------ |
@@ -496,6 +501,8 @@ Vectorized versions of logical operators work on plain values too and do not sho
 
 All boolean operators vectorize over arrays. `[1, 2] === [1, 3]` evaluates to `[true, false]`.
 
+Absolute quantities are converted to relative before comparison so `440 Hz > 1` evaluates to `true` if `1 = 432Hz` was declared as the unison frequency. This conversion has no impact on the relative ordering between absolute quantities `1 ms > 440 Hz` always evaluates to `true` because `1 ms` represents `1000 Hz` as a frequency.
+
 #### Arithmetic
 | Name                   | Linear         | Result   | Logarithmic      | Result     |
 | ---------------------- | -------------- | -------- | ---------------- | ---------- |
@@ -542,19 +549,89 @@ P8
 The broadcasting of `[-1..3] * P5` into `[-P5, 0 * P5, P5, 2 * P5, 3 * P5]` will be explained [below](#vector-broadcasting).
 
 #### Extrema
-TODO
+| Name                   | Linear         | Result   | Logarithmic      | Result     |
+| ---------------------- | -------------- | -------- | ---------------- | ---------- |
+| Minimum                | `2 min 1`      | `1`      | `P8 min P1`      | `P1`       |
+| Maximum                | `2 max 1`      | `2`      | `P8 max P1`      | `P8`       |
+
+`x min y` picks the smaller operand when both are interpreted as a relative intervals against the reference frequency while `x max y` picks the larger.
 
 #### Extended arithmetic
-TODO
+| Name                   | Linear         | Result   | Logarithmic      | Result     |
+| ---------------------- | -------------- | -------- | ---------------- | ---------- |
+| Recipropower           | `9 /^ 2`       | `3`      | `M23 % 2`        | `P12`      |
+| Root taking            | `9 ^/ 2`       | `3`      | `M23 ÷ 2`        | `P12`      |
+| Logarithm (in base of) | `9 /_ 3`       | `2`      | `M23 % P12`      | `2`        |
+
+The rationale behind the two flavors of anti-exponentiation `/^` and `/_` is explained in Douglas Blumeyer's [forum post](https://forum.sagittal.org/viewtopic.php?t=575).
+
+They have the same precedence and associativity as exponentiation does:
+- `x ^ y ^ z` = `x ^ (y ^ z)`
+- `x /^ y /^ z` = `x /^ (y /^ z)`
+- `x /_ y /_ z` = `x /_ (y /_ z)`
+
+Again, fractions bind stronger so the neutral third `sqrt(3/2)` may be expressed as `3/2 /^ 2`.
+
+A natural way to think about logdivision is to compare the sizes of intervals measured in cents. `M3` is always twice as wide as `M2` regardless of temperament so `M3 ÷ M2` always evaluates to `2`. The result of logdivisions is always a linear scalar so `M3 ~/_ 9/8` is still `2` despite appearing to prefer logarithmic formatting.
 
 #### N of EDO
-TODO
+| Name                   | Linear         | Result   | Logarithmic      | Result     |
+| ---------------------- | -------------- | -------- | ---------------- | ---------- |
+| N of EDO               | `7 \ 12`       | `7\12`   | _N/A_            |            |
+| N steps of M-TET       | `7 sof 12`     | `7\12`   | _N/A_            |            |
+| Octave projection      | `sqrt(2) ed 3` | `1\2<3>` | `2\3 ed S3`      | `2\3<9/8>` |
+
+Octave projection takes the exponent of two of the left operand and raises the right operand to it. It mainly exists to work around grammar issues related to the `<` comparison operator. Using variables the expression `foo\bar<baz>` is illegal but `foo\bar ed baz` works.
+
+The steps-of (`sof`) operator mainly exists to work around backslash escapes inside `sw` [tagged template literals](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tag.md). The expression `foo sof bar` may be read aloud as "*foo* steps of *bar*-tone equal temperament" while `foo sof bar ed baz` reads "*foo* steps of *bar* equal divisions of *baz*".
 
 #### Dot product and tempering
-TODO
+
+| Name                   | Linear         | Result   | Logarithmic       | Result     |
+| ---------------------- | -------------- | -------- | ----------------- | ---------- |
+| Interval dot product   | `4 dot 8`      | `6`      | `[2> · [3>`       | `6`        |
+| Val-interval product   | `12@ · 3/2`    | `7`      | `<12 19] dot P5`  | `7`        |
+| Explicit tempering     | `12@ tmpr 3/2` | `7\12`   | `<12 19] tmpr P5` | `7\12`     |
+
+The dot product ignores domain and the result is always a linear scalar. It is suggestive of the bra-ket between covectors and vectors <12 19 28 | -4 4 -1> gets rendered `<12 19 28] · [-4 4 -1>` in legal syntax (evaluating to `0`).
+
+Beware that the dot product between cologarithmic quantities is unweighted. The value of `5@ dot 7@` depends on the default number of components in the runtime. When restricted to a prime limit like 5 here the result is well-defined `5@.5 dot 7@.5` is the same as `<5 8 12] · <7 11 16]` and evaluates to `5*7 + 8*11 + 12*16` or `315`.
+
+Explicit tempering is basically the dot product multipled with one step of the equal temperament associated with the val if we ignore the [technicalities](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md).
 
 #### Vector broadcasting
-TODO
+All binary operators vectorize over arrays starting from vectorized logical operators above. They also broadcast their operands together to the largest shape involved in the operation.
+
+E.g. `2 * [3, 4, 5]` broadcasts to `[2, 2, 2] * [3, 4, 5]` evaluating to `[2*3, 2*4, 2*5]` or `[6, 8, 10]`.
+
+Broadcasting descends one level at a time so the meaning is reversed from that of NumPy where shapes are matched from tail to head instead. E.g.
+```c
+[
+  [1, 2],
+  [3, 4],
+  [5, 6],
+] + [10, 100, 1000]
+```
+proceeds to
+```c
+[
+  [1, 2] + 10,
+  [3, 4] + 100,
+  [5, 6] + 1000,
+]
+```
+resulting in
+```c
+[
+  [11, 12],
+  [103, 104],
+  [1005, 1006],
+]
+```
+
+However this allows us to use non-uniform shapes. `[[1, 2], [3, [4, 5]]] + [10, [100, 1000]]` is legal and equal to `[[11, 12], [103, [1004, 1005]]]`.
 
 #### Universal operation and preference
+Domain-aware operators can be instructed to ignore domain using tildes.
+
 TODO
