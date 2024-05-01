@@ -89,6 +89,23 @@ riff labs(x) {
   return x logarithmic abs;
 }
 
+riff fail(message) {
+  "Throw the given message as an error.";
+  throw message;
+}
+
+riff trap(message) {
+  "Produce a function that fails with the given message when called.";
+  return () => fail(message);
+}
+
+riff domainOf(interval) {
+  "Return the domain of the given interval as a callable converter.";
+  return linear where isLinear(interval)
+    else logarithmic where isLogarithmic(interval)
+      else trap("An interval is required.");
+}
+
 riff sqrt(x) {
   "Calculate the square root of the input.";
   return x ~/^ 2;

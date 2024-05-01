@@ -1402,4 +1402,19 @@ describe('SonicWeave standard library', () => {
     expect(oneStep.steps).toBe(-3);
     expect(oneStep.totalCents()).toBe(0);
   });
+
+  it('has a broadcasting domain extractor', () => {
+    const scale = expand(`{
+      const x = [2, P5]
+      const y = [3, 6]
+      domainOf(x)(linear(y) * linear(x))
+    }`);
+    expect(scale).toEqual(['6', '2\\1<3>']);
+  });
+
+  it('has a broadcasting domain extractor (trap)', () => {
+    expect(() => evaluateExpression('domainOf([2, "fif"]) 1')).toThrow(
+      'An interval is required.'
+    );
+  });
 });

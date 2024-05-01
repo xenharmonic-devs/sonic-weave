@@ -1014,8 +1014,14 @@ function isArray(value: SonicWeaveValue) {
 isArray.__doc__ = 'Return `true` if the value is an array.';
 isArray.__node__ = builtinNode(isArray);
 
-function isAbsolute(interval: SonicWeaveValue) {
+function isAbsolute(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
   requireParameters({interval});
+  if (isArrayOrRecord(interval)) {
+    return unaryBroadcast.bind(this)(interval, isAbsolute.bind(this));
+  }
   if (interval instanceof Interval) {
     return interval.isAbsolute();
   }
@@ -1025,8 +1031,14 @@ isAbsolute.__doc__ =
   'Return `true` if the interval belongs to the absolute echelon.';
 isAbsolute.__node__ = builtinNode(isAbsolute);
 
-function isRelative(interval: SonicWeaveValue) {
+function isRelative(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
   requireParameters({interval});
+  if (isArrayOrRecord(interval)) {
+    return unaryBroadcast.bind(this)(interval, isRelative.bind(this));
+  }
   if (typeof interval === 'boolean') {
     return true;
   }
@@ -1039,8 +1051,14 @@ isRelative.__doc__ =
   'Return `true` if the interval belongs to the relative echelon.';
 isRelative.__node__ = builtinNode(isRelative);
 
-function isLinear(interval: SonicWeaveValue) {
+function isLinear(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
   requireParameters({interval});
+  if (isArrayOrRecord(interval)) {
+    return unaryBroadcast.bind(this)(interval, isLinear.bind(this));
+  }
   if (typeof interval === 'boolean') {
     return true;
   }
@@ -1053,8 +1071,14 @@ isLinear.__doc__ =
   'Return `true` if the interval belongs to the linear domain.';
 isLinear.__node__ = builtinNode(isLinear);
 
-function isLogarithmic(interval: SonicWeaveValue) {
+function isLogarithmic(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
   requireParameters({interval});
+  if (isArrayOrRecord(interval)) {
+    return unaryBroadcast.bind(this)(interval, isLogarithmic.bind(this));
+  }
   if (interval instanceof Interval) {
     return interval.domain === 'logarithmic';
   }

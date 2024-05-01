@@ -288,12 +288,17 @@ describe('SonicWeave vector broadcasting', () => {
   // 'FJS',
   // 'labelAbsoluteFJS',
   // 'primeMonzo',
-
   // 'tail',
+
   // 'colorOf',
   // 'labelOf',
   // 'equaveOf',
   // 'withEquave',
+
+  // 'isAbsolute',
+  // 'isRelative',
+  // 'isLinear',
+  // 'isLogarithmic',
 
   it.each([
     'acos',

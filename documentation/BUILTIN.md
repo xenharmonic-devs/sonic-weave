@@ -467,6 +467,9 @@ Calculate the denominator of x in reduced form.
 ### diff(*array*)
 Calculate the (linear) differences between the terms.
 
+### domainOf(*interval*)
+Return the domain of the given interval as a callable converter.
+
 ### edColors(*divisions = 12*, *offset = 0*, *equave = 2*)
 Color every interval in the scale with hue repeating every step of an equal division of `equave`. `offset` rotates the hue wheel.
 
@@ -496,6 +499,9 @@ Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 ### exp(*x*)
 Calculate e raised to the power of x.
+
+### fail(*message*)
+Throw the given message as an error.
 
 ### flatRepeat(*times = 2*, *scale = $$*)
 Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.
@@ -724,6 +730,9 @@ Quantize the current/given scale to harmonics of the given fundamental.
 
 ### toSubharmonics(*overtone*, *scale = $$*)
 Quantize the current/given scale to subharmonics of the given overtone.
+
+### trap(*message*)
+Produce a function that fails with the given message when called.
 
 ### tune(*a*, *b*, *numIter = 1*, *weighting = "tenney"*)
 Find a combination of two vals that is closer to just intonation.
