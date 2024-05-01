@@ -336,7 +336,7 @@ An interval like `3 * P5` is already quite wide so we add or subtract octaves as
 | `5*P5 - 2*P8`    | `M7`     | major seventh    |
 | `6*P5 - 3*P8`    | `Aug4`   | augmented fourth |
 
-Or in paired up based on interval class:
+Or paired up based on interval class:
 
 | Literals     | Fractions         | Sizes in cents        |
 | -------------| ----------------- | --------------------- |

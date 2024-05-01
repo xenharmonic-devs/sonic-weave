@@ -317,3 +317,60 @@ C5               // Same as 400 Hz
 ```
 
 The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something between neutral and major thirds above 200 Hz.
+
+## Interval types
+
+| Type         | Examples                | Domain        | Echelon   | Notes |
+| ------------ | ----------------------- | ------------- | --------- | ----- |
+| Integer      | `2`, `5`                | Linear        | Relative  | Same as `2/1` or `5/1`. |
+| Decimal      | `1,2`, `1.4e0`          | Linear        | Relative  | Decimal commas only work in isolation. |
+| Fraction     | `4/3`, `10/7`           | Linear        | Relative  | The fraction slash binds stronger than exponentiation |
+| N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative  | `n\m` means `n` steps of `m` equal divisions of the octave `2/1`. |
+| N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative  | `n\m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
+| Step         | `7°`, `13 edosteps`     | Logarithmic   | Relative  | Correspond to edo-steps after tempering is applied. |
+| Cents        | `701.955`, `100c`       | Logarithmic   | Relative  | One centisemitone `1.0` is equal to `1\1200`. |
+| Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative  | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
+| FJS          | `P5`, `M3^5`            | Logarithmic   | Relative  | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
+| Frequency    | `440 Hz`, `2.2 kHz`     | Linear        | Absolute  | Absolute frequency of oscillation. |
+| Duration     | `1 ms`                  | Linear        | Absolute  | Absolute period of oscillation. |
+| Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute* | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System). |
+| S-expression | `S8`, `S5..8`           | Logarithmic   | Relative  | Additive spelling of [square superparticulars](https://en.xen.wiki/w/Square_superparticular). |
+| Val          | `<12, 19, 28]`          | Cologarithmic | Relative  | Used to temper scales. |
+| Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
+| SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |
+
+*) The echelon of absolute FJS depends on whether or not the reference pitch declaration was relative or absolute.
+
+### Numeric separators
+It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
+
+## Operators
+
+Operations can be applied to intervals to create new intervals.
+
+### Unary operators
+
+| Name          | Linear  | Result      | Logarithmic | Result        |
+| ------------- | ------- | ----------- | ----------- | ------------- |
+| Identity      | `+2`    | `2`         | `+P8`       | `P8`          |
+| Negation      | `-2`    | `-2`        | _N/A_       |               |
+| Inversion     | `%2`    | `1/2`       | `-P8`       | `P-8`         |
+| Inversion     | `÷3/2`  | `2/3`       | `-P5`       | `P-5`         |
+| Geom. inverse | _N/A_   |             | `%P8`       | `<1 0 0 ...]` |
+| Logical NOT   | `not 2` | `false`     | `not P8`    | `false`       |
+| Up            | `^2`    | *           | `^P8`       | `P8 + 1°`     |
+| Down          | `v{2}`  | *           | `vP8`       | `P8 - 1°`     |
+| Lift          | `/2`    | *           | `/P8`       | `P8 + 5°`     |
+| Drop          | `\2`    | *           | `\P8`       | `P8 - 5°`     |
+| Increment     | `++i`   | `3`         | _N/A_       |               |
+| Decrement     | `--i`   | `1`         | _N/A_       |               |
+
+*) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. These operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
+
+The down operator sometimes requires curly brackets due to `v` colliding with the Latin alphabet. Unicode `∨` is available but not recommended because it makes the source code harder to interprete for humans.
+
+Drop `\` can be spelled `drop` to avoid using the backslash inside template literals. Lift `/` may be spelled `lift` for minor grammatical reasons.
+
+#### Unary broadcasting
+
+TODO: `vnot`

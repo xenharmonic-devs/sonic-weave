@@ -127,13 +127,13 @@ SonicWeave comes with some operators.
 | Negation      | `-2`    | `-2`        | _N/A_       |            |
 | Inversion     | `%2`    | `1/2`       | `-P8`       | `P-8`      |
 | Inversion     | `÷3/2`  | `2/3`       | `-P5`       | `P-5`      |
-| Geom. inverse | _N/A_   |             | `%P8`       | `v<1]`     |
+| Geom. inverse | _N/A_   |             | `%P8`       | `<1]`      |
 | Logical NOT   | `not 2` | `false`     | `not P8`    | `false`    |
 | Vector NOT    | `vnot [0, 2]` | `[true, false]` | ... | ...      |
-| Up            | `^2`    | *           | `^P8`       | `P8 + 1\`  |
-| Down          | `v{2}`  | *           | `vP8`       | `P8 - 1\`  |
-| Lift          | `/2`    | *           | `/P8`       | `P8 + 5\`  |
-| Drop          | `\2`    | *           | `\P8`       | `P8 - 5\`  |
+| Up            | `^2`    | *           | `^P8`       | `P8 + 1°`  |
+| Down          | `v{2}`  | *           | `vP8`       | `P8 - 1°`  |
+| Lift          | `/2`    | *           | `/P8`       | `P8 + 5°`  |
+| Drop          | `\2`    | *           | `\P8`       | `P8 - 5°`  |
 | Increment     | `++i`   | `3`         | _N/A_       |            |
 | Decrement     | `--i`   | `1`         | _N/A_       |            |
 
