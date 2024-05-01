@@ -406,4 +406,79 @@ describe('SonicWeave vector broadcasting', () => {
     expect(ln2.valueOf()).toBeCloseTo(Math.LN2);
     expect(ln3.valueOf()).toBeCloseTo(Math.log(3));
   });
+
+  it('has vector dot product (reduction to scalar)', () => {
+    // Missing elements interpreted as 0.
+    const fourteen = sw0D`[-1, 2, 3] vdot [4, 5]`;
+    expect(fourteen).toBe(6);
+    const x = sw0D`[P8, 3] ~vdot [4, 5, 6]`;
+    expect(x).toBe(23);
+  });
+
+  it('has vector dot product (reduction of 1 level)', () => {
+    const vec = sw1D`[[1, 2], [3, 4]] vdot [5, 6]`;
+    expect(vec).toEqual([17, 39]);
+
+    const vec2 = sw1D`[[1, 2], [3, 4]] vdot [[5, 6], [7, 8]]`;
+    expect(vec2).toEqual([17, 53]);
+  });
+
+  it('has matrix multiplication', () => {
+    const mat = sw2D`
+      [
+        [1, 2, 3],
+        [4, 5, 6],
+      ] mdot [
+        [7, 8],
+        [9, 10],
+        [11, 12],
+      ]
+    `;
+    expect(mat).toEqual([
+      [58, 64],
+      [139, 154],
+    ]);
+  });
+
+  it.skip('has some kind of vectorized matrix multiplication', () => {
+    const mats = sw`
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [
+          [5, 6],
+          [7, 8]
+        ],
+        [
+          [9, 10],
+          [11, 12],
+        ],
+      ] mdot [
+        [
+          [13, 14],
+          [15, 16],
+        ],
+        [
+          [17, 18],
+          [19, 20],
+        ],
+      ]
+    ` as unknown as Interval[][][];
+    expect(mats.map(mat => mat.map(row => row.map(i => i.valueOf())))).toEqual([
+      [
+        [41, 123],
+        [47, 137],
+      ],
+      [
+        [149, 263],
+        [171, 293],
+      ],
+      [
+        [257, 403],
+        [295, 449],
+      ],
+    ]);
+  });
 });

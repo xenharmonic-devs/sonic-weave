@@ -65,6 +65,8 @@ export type BinaryOperator =
   | '/_'
   | '·'
   | 'dot'
+  | 'vdot'
+  | 'mdot'
   | '⊗'
   | 'tns'
   | 'tmpr'

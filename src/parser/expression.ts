@@ -1239,6 +1239,8 @@ export class ExpressionVisitor {
             case ' ':
             case '\u2297':
             case 'tns':
+            case 'vdot':
+            case 'mdot':
               throw new Error(
                 `${node.preferLeft ? '~' : ''}${node.operator}${
                   node.preferRight ? '~' : ''
@@ -1349,6 +1351,8 @@ export class ExpressionVisitor {
           case '⊗':
           case 'tns':
           case ' ':
+          case 'vdot':
+          case 'mdot':
             throw new Error('Unexpected code flow.');
         }
         operator satisfies never;
@@ -1559,6 +1563,76 @@ export class ExpressionVisitor {
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
+  protected vectorDot(
+    left: SonicWeaveValue,
+    right: SonicWeaveValue,
+    node: BinaryExpression
+  ): SonicWeaveValue {
+    if (!Array.isArray(left) || !Array.isArray(right)) {
+      throw new Error('Operands must be arrays in vdot.');
+    }
+    if (left.length > right.length) {
+      return this.vectorDot(right, left, node);
+    }
+    this.spendGas(left.length);
+    if (Array.isArray(left[0])) {
+      const vd = this.vectorDot.bind(this);
+      if (Array.isArray(right[0])) {
+        return left.map((l, i) => vd(l, right[i], node)) as SonicWeaveValue;
+      }
+      return left.map(l => vd(l, right, node)) as SonicWeaveValue;
+    }
+    if (Array.isArray(right[0])) {
+      const vd = this.vectorDot.bind(this);
+      return right.map(r => vd(left, r, node)) as SonicWeaveValue;
+    }
+    if (node.preferLeft || node.preferRight) {
+      if (!left.length) {
+        return fromInteger(0);
+      }
+      const value = left
+        .map((l, i) => upcastBool(l).value.mul(upcastBool(right[i]).value))
+        .reduce((result, x) => result.add(x));
+      return new Interval(value, 'linear');
+    }
+    if (!left.length) {
+      throw new Error(
+        'The domain of the empty vdot without preference is ambiguous.'
+      );
+    }
+    return left
+      .map((l, i) => upcastBool(l).mul(upcastBool(right[i])))
+      .reduce((result, x) => result.add(x));
+  }
+
+  protected matrixDot(
+    left: SonicWeaveValue,
+    right: SonicWeaveValue,
+    node: BinaryExpression
+  ) {
+    if (!Array.isArray(left) || !Array.isArray(right)) {
+      throw new Error('Operands must be arrays of arrays in mdot.');
+    }
+    if (!Array.isArray(left[0]) || !Array.isArray(right[0])) {
+      throw new Error('Operands must be arrays of arrays in mdot.');
+    }
+    const A = left as unknown as SonicWeavePrimitive[][];
+    const B = right as unknown as SonicWeavePrimitive[][];
+
+    const vd = this.vectorDot.bind(this);
+    const result: SonicWeaveValue[][] = [];
+
+    const xMax = B.reduce((l, b) => Math.max(l, b.length), 0);
+    for (let y = 0; y < A.length; ++y) {
+      const row: SonicWeaveValue[] = [];
+      for (let x = 0; x < xMax; ++x) {
+        row.push(vd(A[y], B.map(b => b[x]) ?? fromInteger(0), node));
+      }
+      result.push(row);
+    }
+    return result as unknown as SonicWeaveValue;
+  }
+
   protected visitBinaryExpression(node: BinaryExpression): SonicWeaveValue {
     const operator = node.operator;
     if (operator === 'lest') {
@@ -1590,9 +1664,12 @@ export class ExpressionVisitor {
     let right = this.visit(node.right);
     if (operator === ' ') {
       return this.implicitCall(left, right);
-    }
-    if (operator === 'tns' || operator === '⊗') {
+    } else if (operator === 'tns' || operator === '⊗') {
       return this.tensor(left, right, node);
+    } else if (operator === 'vdot') {
+      return this.vectorDot(left, right, node);
+    } else if (operator === 'mdot') {
+      return this.matrixDot(left, right, node);
     }
     if (
       operator === 'of' ||

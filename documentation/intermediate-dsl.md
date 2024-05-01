@@ -475,6 +475,16 @@ Beware that the product is domain-aware! Most of the time you want all possible 
 ]
 ```
 
+#### Matrix
+| Name                  | Operator |
+| --------------------- | -------- |
+| Vector dot product    | `vdot`   |
+| Matrix multiplication | `mdot`   |
+
+Vector dot product reduces two arrays into a single interval. The domain ignoring `u ~vdot v` always evaluates to a linear scalar.
+
+Matrix multiplication performs `vdot` between rows and columns of two arrays of arrays according to the usual mathematical definition.
+
 #### Vectorized logical
 | Name                   | Operator |
 | ---------------------- | -------- |

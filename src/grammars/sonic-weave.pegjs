@@ -20,6 +20,7 @@
     'else',
     'false',
     'finally',
+    'fn',
     'for',
     'if',
     'in',
@@ -27,6 +28,7 @@
     'let',
     'lift',
     'max',
+    'mdot',
     'min',
     'mod',
     'modc',
@@ -39,7 +41,6 @@
     'return',
     'riff',
     'sof',
-    'fn',
     'tmpr',
     'tns',
     'throw',
@@ -47,6 +48,7 @@
     'try',
     'true',
     'vand',
+    'vdot',
     'vnot',
     'vor',
     'where',
@@ -143,6 +145,7 @@ LestToken          = @'lest'     !IdentifierPart
 LetToken           = @'let'      !IdentifierPart
 LiftToken          = @'lift'     !IdentifierPart
 MaxToken           = @'max'      !IdentifierPart
+MatrixDotToken     = @'mdot'     !IdentifierPart
 MinToken           = @'min'      !IdentifierPart
 ModToken           = @'mod'      !IdentifierPart
 ModCeilingToken    = @'modc'     !IdentifierPart
@@ -163,6 +166,7 @@ ToToken            = @'to'       !IdentifierPart
 TryToken           = @'try'      !IdentifierPart
 TrueToken          = @'true'     !IdentifierPart
 VectorAndToken     = @'vand'     !IdentifierPart
+VectorDotToken     = @'vdot'     !IdentifierPart
 VectorNotToken     = @'vnot'     !IdentifierPart
 VectorOrToken      = @'vor'      !IdentifierPart
 WhereToken         = @'where'    !IdentifierPart
@@ -702,7 +706,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = '*' / '×' / '%' / '÷' / '\\' / StepsOfToken / '·' / DotToken / '⊗' / TensorToken / TemperToken
+  = '*' / '×' / '%' / '÷' / '\\' / StepsOfToken / '·' / DotToken / MatrixDotToken / VectorDotToken / '⊗' / TensorToken / TemperToken
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
