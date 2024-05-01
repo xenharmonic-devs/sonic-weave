@@ -1212,14 +1212,42 @@ export class ExpressionVisitor {
               value = left.value.project(right.value);
               break;
             case '\\':
+            case 'sof':
               throw new Error('Preference not supported with backslahes');
             case 'tmpr':
               throw new Error('Tempering needs an interval and a val.');
-            default:
+            case 'lest':
+            case '??':
+            case 'or':
+            case 'and':
+            case '===':
+            case '!==':
+            case '==':
+            case '!=':
+            case '<=':
+            case '>=':
+            case '<':
+            case '>':
+            case 'of':
+            case 'not of':
+            case '~of':
+            case 'not ~of':
+            case 'in':
+            case 'not in':
+            case '~in':
+            case 'not ~in':
+            case ' ':
+            case '\u2297':
+            case 'tns':
               throw new Error(
                 `${node.preferLeft ? '~' : ''}${node.operator}${
                   node.preferRight ? '~' : ''
                 } unimplemented.`
+              );
+            default:
+              operator satisfies never;
+              throw new Error(
+                `Unexpected code flow with operator ${operator}.`
               );
           }
           const result = resolvePreference(value, left, right, node, simplify);
@@ -1275,6 +1303,7 @@ export class ExpressionVisitor {
           case '/_':
             return left.log(right);
           case '\\':
+          case 'sof':
             return left.backslash(right);
           case 'mod':
             return left.mmod(right);

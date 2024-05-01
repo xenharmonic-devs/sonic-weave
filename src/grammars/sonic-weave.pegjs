@@ -38,6 +38,7 @@
     'rdc',
     'return',
     'riff',
+    'sof',
     'fn',
     'tmpr',
     'tns',
@@ -103,15 +104,6 @@
   }
 
   function processCallTail(head, tail) {
-    if (head.type === 'StepLiteral' && tail.length === 1 && tail[0].args.length === 1) {
-      return BinaryExpression(
-        '\\',
-        {type: 'IntegerLiteral', value: BigInt(head.count)},
-        tail[0].args[0].expression,
-        false,
-        false
-      );
-    }
     let result = head;
     for (const element of tail) {
       element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
@@ -163,6 +155,7 @@ ReduceCeilingToken = @'rdc'      !IdentifierPart
 ReturnToken        = @'return'   !IdentifierPart
 FunctionToken      = @'riff'     !IdentifierPart
 FunctionAliasToken = @'fn'       !IdentifierPart
+StepsOfToken       = @'sof'      !IdentifierPart
 TemperToken        = @'tmpr'     !IdentifierPart
 TensorToken        = @'tns'      !IdentifierPart
 ThrowToken         = @'throw'    !IdentifierPart
@@ -709,7 +702,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = '*' / '×' / '%' / '÷' / '\\' / '·' / DotToken / '⊗' / TensorToken / TemperToken
+  = '*' / '×' / '%' / '÷' / '\\' / StepsOfToken / '·' / DotToken / '⊗' / TensorToken / TemperToken
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {

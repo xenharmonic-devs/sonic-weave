@@ -126,6 +126,11 @@ describe('SonicWeave raw template tag', () => {
     expect(value.valueOf()).toBe(2);
   });
 
+  it('evaluates the backslash alternative of two number passed in', () => {
+    const value = swr`${12}sof${12}` as Interval;
+    expect(value.valueOf()).toBe(2);
+  });
+
   it('evaluates drop of a fraction passed in', () => {
     const fraction = new Fraction('3/2');
     // See above why swr`\${fraction}` just won't do...
