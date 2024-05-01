@@ -2165,6 +2165,16 @@ function entries(record: SonicWeaveValue) {
 entries.__doc__ = 'Obtain an array of `[key, value]` pairs of the record.';
 entries.__node__ = builtinNode(entries);
 
+function templateArg(this: ExpressionVisitor, index: Interval) {
+  if (!this.rootContext) {
+    throw new Error('Root context required to access template arguments.');
+  }
+  return this.rootContext.templateArguments[upcastBool(index).toInteger()];
+}
+templateArg.__doc__ =
+  'Access the nth template argument when using the `sw` tag inside JavaScript.';
+templateArg.__node__ = builtinNode(templateArg);
+
 function repr(this: ExpressionVisitor, value: SonicWeaveValue) {
   return pubRepr.bind(this)(value);
 }
@@ -2444,6 +2454,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   every,
   kCombinations,
   entries,
+  templateArg,
   // CSS color generation
   rgb,
   rgba,

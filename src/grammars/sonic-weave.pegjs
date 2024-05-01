@@ -1385,7 +1385,7 @@ Identifier
   }
 
 TemplateArgument
-  = '£' index: BasicInteger {
+  = '¥' index: BasicInteger {
     return {
       type: 'TemplateArgument',
       index,

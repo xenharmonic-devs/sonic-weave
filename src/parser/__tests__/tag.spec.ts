@@ -85,6 +85,15 @@ describe('SonicWeave template tag', () => {
       expect(fractionOfEquave.toFraction()).toBe('13/17');
     }
   });
+
+  it("doesn't pun accidentals", () => {
+    expect(() => sw`C${"please don't look like £0"}`).toThrow();
+  });
+
+  it('has an API for re-accessing template arguments', () => {
+    const first = sw`${'first'};${'second'};templateArg(0)`;
+    expect(first).toBe('first');
+  });
 });
 
 describe('SonicWeave raw template tag', () => {

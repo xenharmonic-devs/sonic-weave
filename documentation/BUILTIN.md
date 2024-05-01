@@ -354,6 +354,9 @@ Return the higher prime tail of an interval starting from the given index. Prime
 ### tan(*x*)
 Calculate tan x.
 
+### templateArg(*index*)
+Access the nth template argument when using the `sw` tag inside JavaScript.
+
 ### tenneyHeight(*interval*)
 Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
 

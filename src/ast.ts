@@ -432,7 +432,7 @@ export function expressionToString(node: Expression) {
     case 'Identifier':
       return node.id;
     case 'TemplateArgument':
-      return `£${node.index}`;
+      return `¥${node.index}`;
     case 'StringLiteral':
       return JSON.stringify(node.value);
   }

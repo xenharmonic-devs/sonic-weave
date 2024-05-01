@@ -229,7 +229,7 @@ export function createTag(
     let source = fragments[0];
     for (let i = 0; i < args.length; ++i) {
       visitor.rootContext.templateArguments[i] = convert(args[i]);
-      source += `£${i}` + fragments[i + 1];
+      source += `¥${i}` + fragments[i + 1];
     }
     const program = parseAST(source);
     for (const statement of program.body.slice(0, -1)) {
