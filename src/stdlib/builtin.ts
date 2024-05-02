@@ -1631,6 +1631,27 @@ valFromPrimeArray.__doc__ =
   'Convert an array of prime mapping entries to a val.';
 valFromPrimeArray.__node__ = builtinNode(valFromPrimeArray);
 
+function transpose(matrix: SonicWeaveValue[][]) {
+  if (!Array.isArray(matrix)) {
+    return matrix;
+  }
+  if (!Array.isArray(matrix[0])) {
+    return [...matrix];
+  }
+  const width = matrix.reduce((w, row) => Math.max(w, row.length), 0);
+  const result: SonicWeaveValue[][] = [];
+  for (let i = 0; i < width; ++i) {
+    const row: SonicWeaveValue[] = [];
+    for (let j = 0; j < matrix.length; ++j) {
+      row.push(matrix[j][i] ?? fromInteger(0));
+    }
+    result.push(row);
+  }
+  return result;
+}
+transpose.__doc__ = 'Transpose a matrix. For modal transposition see rotate().';
+transpose.__node__ = builtinNode(transpose);
+
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
   this.spendGas(scale.length * scale.length);
@@ -2508,6 +2529,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   toPrimeArray,
   monzoFromPrimeArray,
   valFromPrimeArray,
+  transpose,
   hasConstantStructure: hasConstantStructure_,
   stepString: stepString_,
   str,

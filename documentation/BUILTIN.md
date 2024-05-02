@@ -372,6 +372,9 @@ Attach a tracking ID to the interval.
 ### trackingIds(*interval*)
 Obtain an array of the tracking IDs attached to the interval.
 
+### transpose(*matrix*)
+Transpose a matrix. For modal transposition see rotate().
+
 ### trunc(*interval*)
 Truncate value towards zero to the nearest integer.
 

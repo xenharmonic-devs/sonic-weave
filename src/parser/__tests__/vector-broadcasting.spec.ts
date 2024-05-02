@@ -481,4 +481,12 @@ describe('SonicWeave vector broadcasting', () => {
       ],
     ]);
   });
+
+  it('can transpose a matrix', () => {
+    const mat = sw2D`transpose([[1, 2], [3, 4], [5, 6]])`;
+    expect(mat).toEqual([
+      [1, 3, 5],
+      [2, 4, 6],
+    ]);
+  });
 });
