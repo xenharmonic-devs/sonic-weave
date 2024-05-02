@@ -38,7 +38,7 @@ import {
   fractionToVectorComponent,
   integerToVectorComponent,
 } from '../expression';
-import {TWO, ZERO} from '../utils';
+import {ONE, TWO, ZERO} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
 import {hasConstantStructure} from '../tools';
 import {
@@ -1561,6 +1561,76 @@ lcm.__doc__ =
   'Obtain the smallest (linear) interval that shares both arguments as multiplicative factors. Applies to the current scale if not arguments are given.';
 lcm.__node__ = builtinNode(lcm);
 
+function toPrimeArray(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
+  requireParameters({interval});
+  if (typeof interval === 'boolean' || interval instanceof Interval) {
+    const monzo = upcastBool(interval).value;
+    if (monzo instanceof TimeReal) {
+      throw new Error('Unable to convert irrational value to vector.');
+    }
+    if (!monzo.residual.isUnity()) {
+      throw new Error('Interval too complex to convert to vector.');
+    }
+    const pe = [...monzo.primeExponents];
+    while (pe.length && !pe[pe.length - 1].n) {
+      pe.pop();
+    }
+    return pe.map(e => Interval.fromFraction(e));
+  } else if (interval instanceof Val) {
+    return interval.value.primeExponents.map(pe => Interval.fromFraction(pe));
+  }
+  return unaryBroadcast.bind(this)(interval, toPrimeArray.bind(this));
+}
+toPrimeArray.__doc__ = 'Convert interval to an array of its prime counts.';
+toPrimeArray.__node__ = builtinNode(toPrimeArray);
+
+function monzoFromPrimeArray(
+  this: ExpressionVisitor,
+  primeExponents: Interval[]
+) {
+  if (!Array.isArray(primeExponents)) {
+    throw new Error('An array is required.');
+  }
+  const value = new TimeMonzo(
+    ZERO,
+    primeExponents.map(i => upcastBool(i).toFraction())
+  );
+  return new Interval(value, 'logarithmic', 0, value.asMonzoLiteral());
+}
+monzoFromPrimeArray.__doc__ = 'Convert an array of prime counts to a monzo.';
+monzoFromPrimeArray.__node__ = builtinNode(monzoFromPrimeArray);
+
+function valFromPrimeArray(
+  this: ExpressionVisitor,
+  primeExponents: Interval[],
+  equave?: Interval
+) {
+  if (!Array.isArray(primeExponents)) {
+    throw new Error('An array is required.');
+  }
+  const value = new TimeMonzo(
+    ZERO,
+    primeExponents.map(i => upcastBool(i).toFraction())
+  );
+  let equaveMonzo: TimeMonzo;
+  if (equave === undefined) {
+    equaveMonzo = new TimeMonzo(ZERO, [ONE]);
+  } else {
+    equave = upcastBool(equave);
+    if (equave.value instanceof TimeReal) {
+      throw new Error('Irrational equaves not supported');
+    }
+    equaveMonzo = equave.value.clone();
+  }
+  return new Val(value, equaveMonzo);
+}
+valFromPrimeArray.__doc__ =
+  'Convert an array of prime mapping entries to a val.';
+valFromPrimeArray.__node__ = builtinNode(valFromPrimeArray);
+
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
   this.spendGas(scale.length * scale.length);
@@ -2435,6 +2505,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   wilsonHeight,
   gcd,
   lcm,
+  toPrimeArray,
+  monzoFromPrimeArray,
+  valFromPrimeArray,
   hasConstantStructure: hasConstantStructure_,
   stepString: stepString_,
   str,

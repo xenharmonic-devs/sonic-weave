@@ -249,6 +249,9 @@ Obtain the argument with the minimum value.
 ### monzo(*interval*)
 Convert interval to a prime count vector a.k.a. monzo.
 
+### monzoFromPrimeArray(*primeExponents*)
+Convert an array of prime counts to a monzo.
+
 ### mosSubset(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep*, *sizeOfSmallStep*, *up*, *down*)
 Calculate a subset of equally tempered degrees with maximum variety two per scale degree.
 
@@ -360,6 +363,9 @@ Access the nth template argument when using the `sw` tag inside JavaScript.
 ### tenneyHeight(*interval*)
 Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
 
+### toPrimeArray(*interval*)
+Convert interval to an array of its prime counts.
+
 ### track(*interval*)
 Attach a tracking ID to the interval.
 
@@ -374,6 +380,9 @@ Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
+
+### valFromPrimeArray(*primeExponents*, *equave*)
+Convert an array of prime mapping entries to a val.
 
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.

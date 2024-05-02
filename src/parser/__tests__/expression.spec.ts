@@ -2283,4 +2283,27 @@ describe('Poor grammar / Fun with "<"', () => {
     );
     expect(interval.domain).toBe('logarithmic');
   });
+
+  it('can convert 81/80 to a prime count array', () => {
+    const counts = evaluate('toPrimeArray(81/80)') as Interval[];
+    expect(counts.map(i => i.toInteger())).toEqual([-4, 4, -1]);
+  });
+
+  it('can convert [-4, 4, -1] to a monzo', () => {
+    const {interval, fraction} = parseSingle(
+      'monzoFromPrimeArray([-4, 4, -1])'
+    );
+    expect(fraction).toBe('81/80');
+    expect(interval.toString()).toBe('[-4 4 -1>');
+  });
+
+  it('can convert 12@.5 to a prime mapping array', () => {
+    const map = evaluate('toPrimeArray(12@.5)') as Interval[];
+    expect(map.map(i => i.toInteger())).toEqual([12, 19, 28]);
+  });
+
+  it('can convert [12, 19, 28] to a val', () => {
+    const val = evaluate('valFromPrimeArray([12, 19, 28])') as Val;
+    expect(val.toString()).toBe('<12 19 28]');
+  });
 });
