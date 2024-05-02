@@ -755,3 +755,77 @@ First few of these square superparticulars are:
 | `S7` | `49/48`  | `35.697`      |
 | `S8` | `64/63`  | `27.264`      |
 | `S9` | `81/80`  | `21.506`      |
+
+## Pythagorean notation revisited
+In addition to the various intervals between the unison and the octave there are negative intervals like this major negative second `M-2` representing the frequency ratio `8/9`, and intervals above the octave like this major ninth `M9` representing the frequency ratio `9/4`.
+
+## Neutral Pythagorean
+You may have noticed that the gap between an augmented third and a diminished third is wider than between an augmented fourth and a diminished fourth: `cents(a3 - d3, 3)` is `341.055` while `cents(a4 - d4, 3)` is mere `227.370`.
+
+The central interval between the fourths `(dim4 + Aug4) / 2` is just `P4` but the central third lands between minor and major:
+```c
+(dim3 + Aug3) / 2 // n3, the neutral third
+```
+
+Another way to think about the neutral third is as the split fifth `n3` = `P5 / 2`. (The ordinal notation obscures the fact that the *stepspan* of `P5` is four which evenly divides into two.)
+
+| Name            | Logarithmic      | Linear       | Size in cents |
+| --------------- | ---------------- | ------------ | ------------- |
+| Neutral third   | `n3`, `P5 ÷ 2`   | `sqrt(3/2)`  | `350.978`     |
+| Neutral sixth   | `n6`, `P11 % 2`  | `sqrt(8/3)`  | `849.022`     |
+| Neutral seventh | `n7`, `P5 * 3/2` | `sqrt(27/8)` | `1052.933`    |
+
+We need a new interval quality to describe the difference between major and neutral. If there's an augmented unison between minor and major then the midpoint must be a semiaugmented unison: `m3 + sa1` = `n3` or spelling "semi" as "½" `n3 + ½Aug1` = `M3`. The width is `cents(sa1, 3)` or `56.843`. The opposite of semiaugmented is naturally semidiminished.
+
+A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sa6` is `M6 + sa1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
+
+Perfectable intervals are more straightforwarde.g. `sa4` is simply `P4 + sa1` or `32/27^3/2` if expressed linearly.
+
+### Semisharps and semiflats
+The accidental associated with `sa1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
+
+For example the neutral third above `C4` is `Ed4`.
+
+| Accidental                            | Monzo         | Size in cents |
+| ------------------------------------- | ------------- | ------------- |
+| `s#`, `½#`, `s♯`, `½♯`, `𝄲`, `‡`, `t` | `[-11/2 7/2>` | `+56.843`     |
+| `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `[11/2 -7/2>` | `-56.843`     |
+
+### Mids
+Another way to conceptualize *neutralness* is to investigate the diatonic scale. Not counting the octave, it has exactly two sizes per interval class. The midpoint between the narrower and wider sixths `n6` agrees with the concept of centralness w.r.t. diminished and augmented, but the midpoint between the narrow and wide fourths `(P4 + a4) / 2` is lopsided at `sa4`. SonicWeave still accepts it as the neutral fourth `n4` or *mid fourth* from [ups-and-downs](https://en.xen.wiki/w/Ups_and_downs_notation). The midpoint between the narrow and wide fifths `(d5 + P5)/2` or `sd5` has the alias `n5`.
+
+#### Neutral FJS
+[NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation originally applied to neutral sounding primes such as 11, 13, 29, 31 etc. In SonicWeave you must be explicit about the comma set you wish to use in order to spell `11/9` as `n3^11n` or `27/22` as `n3_11n`.
+
+The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
+| Prime  | Comma                   | Monzo                             | Size in cents |
+| ------ | ----------------------- | --------------------------------- | ------------- |
+| `11n`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`                | `-3.570`      |
+| `13n`  | `sqrt(507/512)`         | `[-9/2 1/2 0 0 0 1>`              | `-8.495`      |
+| `29n`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
+| `31n`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
+| `37n`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
+
+In addition to NFJS commas SonicWeave has a neutral bridging comma associated with every prime.
+| Prime  | Comma                   | Monzo                             | Size in cents |
+| ------ | ----------------------- | --------------------------------- | ------------- |
+| `5n`   | `sqrt(25/24)`           | `[-3/2 -1/2 1>`                   | `+35.336`     |
+| `7n`   | `sqrt(54/49)`           | `[-1/2 -3/2 0 1>`                 | `-84.107`     |
+| `17n`  | `sqrt(8192/7803)`       | `[-13/2 3/2 0 0 0 0 1>`           | `-42.112`     |
+| `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`         | `-53.464`     |
+| `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>`       | `73.387`      |
+
+Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`. See [commas.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md#lumis-irrational-bridges) to learn more.
+
+## Up/lift declaration
+While commonly you would declare ups and lifts in terms of edosteps, but nothing's preventing you from co-opting the system for notating just intonation and skipping the tempering step altogether.
+
+```c
+^ = 81/80  // Ups are syntonic now
+
+C4 = 263z = 1/1
+vE4      // 5/4
+G4       // 3/2
+^Bb4     // 9/5
+C5       // 2/1
+```

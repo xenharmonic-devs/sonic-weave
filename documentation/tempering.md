@@ -50,3 +50,45 @@ is the same as `$ = map(i => 12@ tmpr i, [5/4, 3/2, 2/1])`. Aren't you glad that
 All of this "co-logarithmic" machinery seems overengineered compared to a simple `i => i by~ 1\17` mapping. However such a naïve approach fails to preserve consistent relationships between the intervals. In the 5-limit major scale from our basic example there's a perfect fourth between 5/4 and 5/3 but if we do `24:27:30:32:36:40:45:48 by~ 1\17` we get a `8\17` between them while the other fourths are more reasonable at `7\17`.
 
 Choosing between `<17 27 39]` and `<17 27 40]` lets us decide if *all* major thirds should be `5\17` or *all* major sixths should be `13\17` and avoid confusing situations where relative intervals jump all over the place even if they happen to be more accurate individually when measured against the root note.
+
+## Old docs
+TODO: Review and update
+
+In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
+
+Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
+
+First we'll measure out the primes:
+```javascript
+2^-2 * 3^0 * 5^1
+2^-1 * 3^1 * 5^0
+2^+1 * 3^0 * 5^0
+```
+
+Then we replace each prime with their closest approximation:
+```javascript
+const st = 2^1/12 // One semitone
+
+(2 by st)^-2 * (3 by st)^0 * (5 by st)^1
+(2 by st)^-1 * (3 by st)^1 * (5 by st)^0
+(2 by st)^+1 * (3 by st)^0 * (5 by st)^0
+```
+Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
+
+### Implicit tempering
+The above could've been achieved by
+```javascript
+[5/4, 3/2, 2]
+i => 12@ dot i \ 12
+```
+The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
+
+The default action when encountering a val such as `12@` is to temper the current scale with it.
+
+The operation implied is `i => 12@ tmpr i` which takes the equave of the val into account and handles higher prime tails gracefully.
+
+The above reduces to
+```javascript
+[5/4, 3/2, 2]
+12@
+```
