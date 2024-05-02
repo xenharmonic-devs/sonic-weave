@@ -196,6 +196,9 @@ let x, r
 // r has value [2, 3, 4]
 ```
 
+### Re-assignment
+Variables can be reassigned after declaration e.g. with `let i = 2` the statement `i += 3` sets `i` to `5`.
+
 ## Statements / line endings
 Statements in SonicWeave end in a semicolon. Newlines use automatic semicolon insertion where applicable.
 
@@ -717,3 +720,38 @@ results in `$ = [5, 7, 11]`
 Range syntax inside array access gets a copy of a subset of the array e.g. `[1, 2, 3, 4, 5][2..4]` evaluates to `[3, 4, 5]`.
 
 In slice syntax the end points are optional e.g. `[1, 2, 3][..]` evaluates to `[1, 2, 3]` (a new copy).
+
+## Records
+Record literals are constructed using `key: value` pairs inside curly brackets e.g. `{fif: 3/2, "my octave": 2/1}`.
+
+### Record access
+Records are accessed with the same syntax as arrays but using string indices e.g. `{fif: 3/2}["fif"]` evaluates to `3/2`.
+
+Nullish access is supported e.g. `{}~["nothing here"]` evaluates to `niente`.
+
+## Metric prefixes
+Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`. [Binary prefixes](https://en.wikipedia.org/wiki/Binary_prefix) are also supported for no particular reason.
+
+## Numeric frequency flavor
+The Hertz unit may be spelled with a lowercase 'h' and without spaces `123hz` but there is also a numeric *flavor* 'z' for even quicker input i.e. `123z`.
+
+## S-expressions
+SonicWeave uses the logarithmic domain for [S-expressions](https://en.xen.wiki/w/Square_superparticular) in order to make them compatible with FJS.
+
+So a linear fact like S9 = S6/S8 is expressed as `S9 === S6-S8` in SonicWeave.
+
+Sums of consecutive S-expressions use the range syntax. E.g. `logarithmic(10/9)` is equivalent to `S5..8` i.e. `logarithmic(25/24 * 36/35 * 49/48 * 64/63)`
+
+In combination with FJS we can now spell `10/7` as `linear(a4+S8-S9)` or `12/11` as `linear(M2-S9..11)`.
+
+First few of these square superparticulars are:
+| Sn   | Fraction | Size in cents |
+| ---- | -------- | ------------- |
+| `S2` | `4/3`    | `498.045`     |
+| `S3` | `9/8`    | `203.910`     |
+| `S4` | `16/15`  | `111.731`     |
+| `S5` | `25/24`  | `70.672`      |
+| `S6` | `36/35`  | `48.770`      |
+| `S7` | `49/48`  | `35.697`      |
+| `S8` | `64/63`  | `27.264`      |
+| `S9` | `81/80`  | `21.506`      |

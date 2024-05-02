@@ -332,8 +332,6 @@ The Pythagorean nominals from unison to the first octave are.
 | `B4`    | `C4 + M7` |
 | `C5`    | `C4 + P8` |
 
-The `a` nominal must be in lowercase or combined with a neutral sign (`=` or  `♮`) to distinguish it from the *augmented* inflection.
-
 The sharp signs (`#` and `♯`) correspond to the augmented unison e.g. `F#4` is `F4 + a1` or `729/512` relative to `C4`.
 
 The flat signs (`b` and `♭`) correspond to the diminished unison e.g. `Eb4` is `E4 + d1` or `32/27` relative to `C4`.
