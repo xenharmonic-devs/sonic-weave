@@ -425,4 +425,29 @@ describe('Extended monzo with time', () => {
       90, 120, 180, 360,
     ]);
   });
+
+  it('can calculate the dot product between syntonic and porcupine commas (prime exponents)', () => {
+    const neg27 = TimeMonzo.fromFraction('81/80').dot(
+      TimeMonzo.fromFraction('250/243')
+    );
+    expect(neg27.toFraction()).toBe('-27');
+  });
+
+  it('can calculate the dot product between syntonic and porcupine commas (residuals)', () => {
+    const neg27 = new TimeMonzo(new Fraction(0), [], new Fraction('81/80')).dot(
+      new TimeMonzo(new Fraction(0), [], new Fraction('250/243'))
+    );
+    expect(neg27.toFraction()).toBe('-27');
+  });
+
+  it('can calculate the dot product between syntonic and porcupine commas (mixed)', () => {
+    const neg27 = new TimeMonzo(
+      new Fraction(0),
+      [new Fraction(-4)],
+      new Fraction('81/5')
+    ).dot(
+      new TimeMonzo(new Fraction(0), [new Fraction(1)], new Fraction('125/243'))
+    );
+    expect(neg27.toFraction()).toBe('-27');
+  });
 });

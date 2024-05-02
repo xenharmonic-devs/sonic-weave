@@ -13,6 +13,7 @@ import {
   BIG_INT_PRIMES,
   monzoToCents,
   sum,
+  primeFactorize,
 } from 'xen-dev-utils';
 
 import {
@@ -135,6 +136,30 @@ function min(a: Fraction, b: Fraction) {
     return b;
   }
   return a;
+}
+
+function intDot(a: number, b: number) {
+  const factor = gcd(a, b);
+  if (factor === 1) {
+    return 0;
+  }
+  a /= factor;
+  b /= factor;
+  let total = 0;
+  for (const [prime, exponent] of primeFactorize(factor)) {
+    let aCount = exponent;
+    while (!(a % prime)) {
+      ++aCount;
+      a /= prime;
+    }
+    let bCount = exponent;
+    while (!(b % prime)) {
+      ++bCount;
+      b /= prime;
+    }
+    total += aCount * bCount;
+  }
+  return total;
 }
 
 /**
@@ -1887,7 +1912,20 @@ export class TimeMonzo {
       }
       return result;
     }
-    throw new Error('Residuals prevent calculating the dot product.');
+    if (!this.residual.s && !other.residual.s) {
+      throw new Error('Dot product of 0 is ambiguous.');
+    }
+    if (this.residual.s < 0 && other.residual.s < 0) {
+      throw new Error('Dot product of -1 is ambiguous.');
+    }
+    const {n, d} = this.residual;
+    const {n: p, d: q} = other.residual;
+    const resDot = intDot(n, p) - intDot(n, q) - intDot(d, p) + intDot(d, q);
+    let result = this.timeExponent.mul(other.timeExponent).add(resDot);
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      result = result.add(this.primeExponents[i].mul(other.primeExponents[i]));
+    }
+    return result;
   }
 
   /**
