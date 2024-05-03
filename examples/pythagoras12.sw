@@ -27,7 +27,7 @@ P5 white
 // This is Ab4
 m6 black
 
-// This is 'a4' or 'A♮4' ('A4' is interpreted as an augmented fourth instead)
+// This is 'A4' or 'A♮4' ('a4' is interpreted as an augmented fourth instead)
 M6 white
 
 // You can also use unicode ♭

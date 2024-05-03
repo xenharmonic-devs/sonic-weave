@@ -10,4 +10,4 @@ rank2(generator, up, down);
 
 // https://en.xen.wiki/w/4L_3s#Note_names
 // Diamond-MOS labels based on the symmetric mode
-label(["K", "L", "M", "N", "O", "P", "J"])
+["K", "L", "M", "N", "O", "P", "J"]

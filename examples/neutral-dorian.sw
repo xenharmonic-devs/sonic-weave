@@ -7,3 +7,6 @@ P5
 n6
 n7
 P8
+
+// Extract labels from FJS literals.
+map(str, $)

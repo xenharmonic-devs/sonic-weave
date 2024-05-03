@@ -5,7 +5,10 @@
 const factors = [1, 3, 5, 7]
 
 // These two 'for' loops could be replaced with map(prod, kCombinations(factors, 2))
-for (const i of [0 .. length(factors)-1]) {
+
+// for..in iterates over array indices
+for (const i in factors) {
+  // for..of iterates over array values
   for (const j of [i+1 .. length(factors)-1]) {
     // Push a combination product onto this scale
     factors[i] * factors[j]
@@ -23,7 +26,7 @@ combo => combo % 3
 combo => combo rd 2
 
 // Sort in ascending order
-sort();
+sort()
 
 // Shift out the 3/3 because the unison should be implicit
 // Voiding is required to avoid pushing the first element on top instead
