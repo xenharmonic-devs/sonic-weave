@@ -1064,7 +1064,7 @@ describe('SonicWeave parser', () => {
       for (const i of [2..12]) {
         let j = 1;
         while (++j < i) {
-          if (i mod j === 0) break;
+          if (i mod j == 0) break;
         } else {
           i;
         }
@@ -1077,7 +1077,7 @@ describe('SonicWeave parser', () => {
     const scale = expand(`
       for (const i of [2..12]) {
         for (const j of [2..i-1]) {
-          if (i mod j === 0) break;
+          if (i mod j == 0) break;
         } else {
           i;
         }
@@ -1404,41 +1404,50 @@ describe('SonicWeave parser', () => {
   });
 
   it('has defer similar to Zig (single)', () => {
-    evaluateSource(`
+    evaluateSource(
+      `
       let x = 5;
       {
           defer x += 2;
-          if (x !== 5) {
+          if (x <> 5) {
             throw 'Defer executed early!';
           }
       }
-      if (x !== 7) {
+      if (x <> 7) {
         throw 'Defer did not execute!';
       }
-    `);
+    `,
+      false
+    );
   });
 
   it('has defer similar to Zig (multi)', () => {
-    evaluateSource(`
+    evaluateSource(
+      `
       let x = 5;
       {
           defer x += 2;
           defer x /= 2;
       }
-      if (x !== 4.5e) {
+      if (x <> 4.5e) {
         throw 'Deferred statements executed in the wrong order!';
       }
-    `);
+    `,
+      false
+    );
   });
 
   it('rejects confusing defer', () => {
     expect(() =>
-      evaluateSource(`
-      for (const i of [3, 5]) {
-        defer break;
-        i / (i - 1);
-      }
-    `)
+      evaluateSource(
+        `
+          for (const i of [3, 5]) {
+            defer break;
+            i / (i - 1);
+          }
+        `,
+        false
+      )
     ).toThrow('Illegal BreakStatement inside a deferred block.');
   });
 });

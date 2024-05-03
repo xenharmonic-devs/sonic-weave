@@ -67,6 +67,7 @@ SonicWeave looks like Javascript with Python semantics, has Haskell ranges and o
 * NumPy - Travis Oliphant et. al.
 * Scala - Manuel Op de Coul
 * Scale Workshop 1 - Sean Archibald et. al.
+* SQL - Donald D. Chamberlin et. al.
 * FJS - "misotanni"
 * NFJS - Matthew Yacavone
 * Xen-calc - Matthew Yacavone

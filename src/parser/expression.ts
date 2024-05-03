@@ -1220,10 +1220,9 @@ export class ExpressionVisitor {
             case '??':
             case 'or':
             case 'and':
-            case '===':
-            case '!==':
             case '==':
-            case '!=':
+            case '<>':
+            case '~=':
             case '<=':
             case '>=':
             case '<':
@@ -1270,14 +1269,12 @@ export class ExpressionVisitor {
           return result;
         }
         switch (operator) {
-          case '===':
-            return left.strictEquals(right);
-          case '!==':
-            return !left.strictEquals(right);
           case '==':
+            return left.strictEquals(right);
+          case '<>':
+            return !left.strictEquals(right);
+          case '~=':
             return left.equals(right);
-          case '!=':
-            return !left.equals(right);
           case '<=':
             return compare.bind(this)(left, right) <= 0;
           case '>=':
@@ -1381,14 +1378,12 @@ export class ExpressionVisitor {
     } else if (left instanceof Val) {
       if (right instanceof Val) {
         switch (operator) {
-          case '===':
-            return left.strictEquals(right);
-          case '!==':
-            return !left.strictEquals(right);
           case '==':
+            return left.strictEquals(right);
+          case '<>':
+            return !left.strictEquals(right);
+          case '~=':
             return left.equals(right);
-          case '!=':
-            return !left.equals(right);
           case '+':
             return left.add(right);
           case '-':
@@ -1430,16 +1425,13 @@ export class ExpressionVisitor {
       }
     }
     switch (operator) {
-      case '===':
-        return left === right;
-      case '!==':
-        return left !== right;
       case '==':
+        return left === right;
+      case '<>':
+        return left !== right;
+      case '~=':
         // eslint-disable-next-line eqeqeq
         return left == right;
-      case '!=':
-        // eslint-disable-next-line eqeqeq
-        return left != right;
       case '<=':
         return (left as any) <= (right as any);
       case '<':

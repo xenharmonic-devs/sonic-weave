@@ -503,16 +503,15 @@ Binary operation is vectorized elementwise:
 Vectorized versions of logical operators work on plain values too and do not short-circuit. `P8 white vor pop()` is a handy expression to swap out the last interval for a white-colored octave because the `pop()` command executes without further effects.
 
 #### Boolean
-| Strict equality        | `===`    |
-| Strict inequality      | `!==`    |
-| Equality               | `==`     |
-| Inequality             | `!=`     |
-| Greater than           | `>`      |
-| Greater than or equal  | `>=`     |
-| Less than              | `<`      |
-| Less than or equal     | `<=`     |
+| Strict equality        | `==` |
+| Strict inequality      | `<>` |
+| Size equality          | `~=` |
+| Greater than           | `>`  |
+| Greater than or equal  | `>=` |
+| Less than              | `<`  |
+| Less than or equal     | `<=` |
 
-All boolean operators vectorize over arrays. `[1, 2] === [1, 3]` evaluates to `[true, false]`.
+All boolean operators vectorize over arrays. `[1, 2] == [1, 3]` evaluates to `[true, false]`.
 
 Absolute quantities are converted to relative before comparison so `440 Hz > 1` evaluates to `true` if `1 = 432Hz` was declared as the unison frequency. This conversion has no impact on the relative ordering between absolute quantities `1 ms > 440 Hz` always evaluates to `true` because `1 ms` represents `1000 Hz` as a frequency.
 
@@ -738,7 +737,7 @@ The Hertz unit may be spelled with a lowercase 'h' and without spaces `123hz` bu
 ## S-expressions
 SonicWeave uses the logarithmic domain for [S-expressions](https://en.xen.wiki/w/Square_superparticular) in order to make them compatible with FJS.
 
-So a linear fact like S9 = S6/S8 is expressed as `S9 === S6-S8` in SonicWeave.
+So a linear fact like S9 = S6/S8 is expressed as `S9 == S6-S8` in SonicWeave.
 
 Sums of consecutive S-expressions use the range syntax. E.g. `logarithmic(10/9)` is equivalent to `S5..8` i.e. `logarithmic(25/24 * 36/35 * 49/48 * 64/63)`
 

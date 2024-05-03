@@ -1448,16 +1448,14 @@ describe('SonicWeave standard library', () => {
       let x = 5;
       {
           defer x += 2;
-          assert(x === 5);
+          assert(x == 5);
       }
-      assert(x === 7);
+      assert(x == 7);
     `);
   });
 
   it('has assert (failure)', () => {
-    expect(() => evaluateSource('assert(1 === 2)')).toThrow(
-      'Assertion failed.'
-    );
+    expect(() => evaluateSource('assert(1 == 2)')).toThrow('Assertion failed.');
   });
 
   it('executes deferred actions before interrupting', () => {
@@ -1469,7 +1467,7 @@ describe('SonicWeave standard library', () => {
         x = "Unreachable code executed!";
         throw "Execution shouldn't reach here!";
       }
-      assert(doStuff() === 311);
+      assert(doStuff() == 311);
       x;
     `);
     expect(result).toBe('Deferred action triggered.');

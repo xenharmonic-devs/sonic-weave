@@ -175,7 +175,7 @@ riff denominator(x) {
 }
 riff sign(x) {
   "Calculate the sign of x.";
-  return 1 where x > 0 else -1 where x < 0 else 0 where x === 0 else NaN;
+  return 1 where x > 0 else -1 where x < 0 else 0 where x == 0 else NaN;
 }
 riff oddLimitOf(x, equave = 2) {
   "Calculate the odd limit of x. Here 'odd' means not divisible by the equave.";
@@ -447,7 +447,7 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 // == Scale generation ==
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
-  if (equave === 2)
+  if (equave == 2)
     [1..divisions] \\ divisions;
   else
     [1..divisions] \\ divisions ed equave;
@@ -465,7 +465,7 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   The default \`equave\` is the octave \`2/1\`.";
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = $[-1];
-  if (equave === 2)
+  if (equave == 2)
     step => step \\ divisions;
   else
     step => step \\ divisions ed equave;
@@ -615,7 +615,7 @@ riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2)
 riff concordanceShell(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2) {
   "Generate a concordance shell i.e. a vertically aligned object reduced to an equal temperament. Intervals are labeled by their harmonics.";
   let step = 1 \\ divisions ed equave;
-  if (equave === 2) {
+  if (equave == 2) {
     step = 1 \\ divisions;
   }
   const result = [];
@@ -643,7 +643,7 @@ riff oddLimit(limit, equave = 2) {
     [remainder, remainder ~+ equave .. limit];
   }
   const odds = popAll();
-  [n % d for n of odds for d of odds if gcd(n, d) === 1];
+  [n % d for n of odds for d of odds if gcd(n, d) == 1];
   i => i rdc equave;
   sort();
 }
@@ -662,22 +662,22 @@ riff realizeWord(word, sizes, equave = niente) {
   if (numMissing > 1) {
     throw "Only a single step size may be omitted.";
   }
-  if (numMissing === 1) {
+  if (numMissing == 1) {
     equave ??= 2;
     let total = 1;
     for (const [letter, count] of entries(signature)) {
-      if (letter === missingLetter)
+      if (letter == missingLetter)
         continue;
       total = total *~ sizes[letter] ~^ count;
     }
     sizes = {...sizes};
     sizes[missingLetter] = (equave %~ total) ~/^ signature[missingLetter];
-  } else if (equave !== niente) {
+  } else if (equave <> niente) {
     let total = 1;
     for (const [letter, count] of entries(signature)) {
       total = total *~ sizes[letter] ~^ count;
     }
-    if (total !== equave) {
+    if (total <> equave) {
       throw "Given sizes must be compatible with an explicit equave.";
     }
   }
@@ -901,7 +901,7 @@ riff equalize(divisions, scale = $$) {
   "Quantize the current/given scale to given equal divisions of its equave.";
   $ = scale;
   let step = 1 \\ divisions;
-  if ($[-1] != 2)
+  if ($[-1] <> 2)
     step ed= $[-1];
   i => i by~ step colorOf(i) labelOf(i);
   return;
@@ -923,9 +923,9 @@ riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
   const copies = $ tns~ offsets;
   void(shift());
 
-  if (overflow === 'drop') {
+  if (overflow == 'drop') {
     remap(copy => copy[copy > 1 vand copy < equave], copies);
-  } else if (overflow === 'wrap') {
+  } else if (overflow == 'wrap') {
     remap(copy => copy ~rdc equave, copies);
   } else {
     equave;
@@ -933,7 +933,7 @@ riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
 
   copies;
   sort();
-  if (overflow !== 'keep') {
+  if (overflow <> 'keep') {
     equave;
   }
   keepUnique();
@@ -983,18 +983,18 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
   let last;
   let group = [];
   for (const [i, interval] of enumerate(scale)) {
-    if (group and (labs(last %~ interval) > tolerance or i === length(scale)-1)) {
-      if (action === 'lowest') {
+    if (group and (labs(last %~ interval) > tolerance or i == length(scale)-1)) {
+      if (action == 'lowest') {
         group[0];
-      } else if (action === 'highest') {
+      } else if (action == 'highest') {
         group[-1];
-      } else if (action === 'avg') {
+      } else if (action == 'avg') {
         avg(...group);
-      } else if (action === 'havg') {
+      } else if (action == 'havg') {
         havg(...group);
-      } else if (action === 'geoavg') {
+      } else if (action == 'geoavg') {
         geoavg(...group);
-      } else if (action === 'wilson') {
+      } else if (action == 'wilson') {
         sort(group, (a, b) => wilsonHeight(a) - wilsonHeight(b));
         group[0];
       } else {
@@ -1013,8 +1013,8 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
       void(pop($$));
   }
   scale[-1];
-  if (length(scale) === 1) return;
-  while ($[-1] == $[-2])
+  if (length(scale) == 1) return;
+  while ($[-1] ~= $[-2])
     void(pop());
 }
 
@@ -1032,7 +1032,7 @@ riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, sc
 riff replaced(interval, replacement, scale = $$) {
   "Obtain a copy of the current/given scale with occurences of \`interval\` replaced by \`replacement\`.";
   for (const existing of scale) {
-    if (existing === interval) {
+    if (existing == interval) {
       replacement;
     } else {
       existing;
@@ -1069,9 +1069,9 @@ riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false,
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   $ = scale;
   equaveReduce();
-  if (tolerance === niente) keepUnique();
+  if (tolerance == niente) keepUnique();
   sort();
-  if (tolerance !== niente) coalesce(tolerance, action, preserveBoundary);
+  if (tolerance <> niente) coalesce(tolerance, action, preserveBoundary);
   return;
 }
 

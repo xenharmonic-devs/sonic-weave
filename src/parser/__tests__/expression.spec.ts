@@ -713,7 +713,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can add vals', () => {
-    const yes = evaluate('24@.7 + 5@.7 === 29c@.7');
+    const yes = evaluate('24@.7 + 5@.7 == 29c@.7');
     expect(yes).toBe(true);
   });
 

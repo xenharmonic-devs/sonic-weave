@@ -34,9 +34,9 @@ Defer is used to execute a statement while exiting the current block.
 let x = 5;
 {
     defer x += 2;
-    assert(x === 5);
+    assert(x == 5);
 }
-assert(x === 7);
+assert(x == 7);
 ```
 
 When there are multiple defers in a single block, they are executed in reverse order.
@@ -47,7 +47,7 @@ let x = 5;
     defer x += 2;
     defer x /= 2;
 }
-assert(x === 4.5e);
+assert(x == 4.5e);
 ```
 
 Defer is useful for pushing implicit tempering and general housekeeping to the top of the source instead of having to dangle everything at the end while editing the scale.
@@ -109,7 +109,7 @@ The `else` branch of a "while" or "for" loop is executed if no `break` statement
 ```c
 for (const i of [2..12]) {
   for (const j of [2..i-1]) {
-    if (i mod j === 0) break
+    if (i mod j == 0) break
   } else {
     i
   }
@@ -127,11 +127,11 @@ results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
 #### If clause
 To conditionally include elements use an `if` clause e.g.
 ```c
-[i for i of [1..9] if i mod 3 !== 0]
+[i for i of [1..9] if i mod 3 <> 0]
 ```
 results in `$ = [1, 2, 4, 5, 7, 8]` i.e. all [throdd](https://en.xen.wiki/w/Threeven) numbers below 10.
 
-Above the `!== 0` part is unnecessary. `[i for i of [1..9] if i mod 3]` works the same because `0` is falsy while `1` and `2` are truthy.
+Above the `<> 0` part is unnecessary. `[i for i of [1..9] if i mod 3]` works the same because `0` is falsy while `1` and `2` are truthy.
 
 ## If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.

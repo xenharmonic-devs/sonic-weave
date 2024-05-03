@@ -240,6 +240,11 @@ VariableManipulationStatement
       };
     } else if (operator) {
       throw new Error('Left-hand-side expression expected.');
+    } else if (preferLeft) {
+      return {
+        type: 'ExpressionStatement',
+        expression: BinaryExpression('~=', name, value, false, false)
+      };
     }
     return {
       type: 'PitchDeclaration',
@@ -625,10 +630,9 @@ NotExpression
   }
 
 RelationalOperator 'relational operator'
-  = '==='
-  / '!=='
-  / '=='
-  / '!='
+  = '=='
+  / '<>'
+  / '~='
   / '<='
   / '>='
   / '<'

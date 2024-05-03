@@ -1009,7 +1009,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('has a pythonic precedence between logical and relational', () => {
-    const ast = parseSingle('not a < b and c > d or not e === f');
+    const ast = parseSingle('not a < b and c > d or not e == f');
     const e = ast.expression;
     expect(e.operator).toBe('or');
     {
@@ -1028,7 +1028,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         }
       }
       expect(e.right.operator).toBe('not');
-      expect(e.right.operand.operator).toBe('===');
+      expect(e.right.operand.operator).toBe('==');
       {
         expect(e.right.operand.left.id).toBe('e');
         expect(e.right.operand.right.id).toBe('f');
