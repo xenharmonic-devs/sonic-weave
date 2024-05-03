@@ -49,7 +49,7 @@ All operations are left-associative except exponentiation, recipropower, and log
 | `==`, `<>`, `~=`, `<=`, `>=`, `<`, `>`, `of`, `not of`, `~of`, `not ~of`, `in`, `not in`, `~in`, `not ~in` | Strict equality, size equality, comparisons, strict/non-strict value inclusion, strict/non-strict index/key inclusion |
 | `not x`, `vnot x`                                | Boolean not, vector not                                                 |
 | `and`, `vand`                                    | Boolean and, vector and                                                 |
-| `or`, `vor`, `??`                                | Boolean or, vector or, niente coalescing                                |
+| `or`, `vor`, `al`                                | Boolean or, vector or, niente coalescing                                |
 | `x if y else z`                                  | Ternary conditional                                                     |
 | `lest`                                           | Fallback[^1]                                                                |
 

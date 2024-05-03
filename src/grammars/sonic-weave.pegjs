@@ -8,6 +8,7 @@
   };
 
   const RESERVED_WORDS = new Set([
+    'al',
     'and',
     'break',
     'by',
@@ -127,6 +128,7 @@ Program
     };
   }
 
+AlToken            = @'al'       !IdentifierPart
 AndToken           = @'and'      !IdentifierPart
 BreakToken         = @'break'    !IdentifierPart
 ByToken            = @'by'       !IdentifierPart
@@ -608,7 +610,7 @@ ConditionalExpression
     return result;
   }
 
-CoalescingOperator = '??' / OrToken / VectorOrToken
+CoalescingOperator = AlToken / OrToken / VectorOrToken
 
 CoalescingExpression
   = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {

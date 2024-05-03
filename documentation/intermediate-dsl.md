@@ -423,7 +423,7 @@ In `foo() lest bar() lest baz()` execution proceeds from left to right until an 
 | ------------------ | ------------- | ------ |
 | Logical AND        | `2 and 0`     | `0`    |
 | Logical OR         | `0 or 2`      | `2`    |
-| Nullish coalescing | `niente ?? 2` | `2`    |
+| Niente coalescing  | `niente al 2` | `2`    |
 
 Logical operators check for *truthiness*. The falsy values are `false`, `niente`, `0`, `""` and `[]` while everything else is truthy. Note that this means that `0.0` representing zero cents or `1/1` as a linear frequency ratio is truthy.
 
@@ -436,8 +436,8 @@ Coalescing operators short-circuit. Execution stops once the value of the expres
 false or print('This executes too')
 true  or print("This won't execute")
 
-niente ?? print('This executes as well')
-0      ?? print("This won't execute")
+niente al print('This executes as well')
+0      al print("This won't execute")
 ```
 
 #### Array

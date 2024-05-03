@@ -1217,7 +1217,7 @@ export class ExpressionVisitor {
             case 'tmpr':
               throw new Error('Tempering needs an interval and a val.');
             case 'lest':
-            case '??':
+            case 'al':
             case 'or':
             case 'and':
             case '==':
@@ -1334,7 +1334,7 @@ export class ExpressionVisitor {
           case 'tmpr':
             throw new Error('Tempering needs an interval and a val.');
           case 'lest':
-          case '??':
+          case 'al':
           case 'or':
           case 'and':
           case 'of':
@@ -1635,7 +1635,7 @@ export class ExpressionVisitor {
       }
     }
     const left = this.visit(node.left);
-    if (operator === '??') {
+    if (operator === 'al') {
       if (left !== undefined) {
         return left;
       }

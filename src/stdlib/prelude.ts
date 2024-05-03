@@ -663,7 +663,7 @@ riff realizeWord(word, sizes, equave = niente) {
     throw "Only a single step size may be omitted.";
   }
   if (numMissing == 1) {
-    equave ??= 2;
+    equave al= 2;
     let total = 1;
     for (const [letter, count] of entries(signature)) {
       if (letter == missingLetter)

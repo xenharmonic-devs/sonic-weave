@@ -301,13 +301,13 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses coalescing reassignment', () => {
-    const ast = parseSingle('x ??= 42');
+    const ast = parseSingle('x al= 42');
     expect(ast).toEqual({
       type: 'AssignmentStatement',
       name: {type: 'Identifier', id: 'x'},
       value: {
         type: 'BinaryExpression',
-        operator: '??',
+        operator: 'al',
         left: {type: 'Identifier', id: 'x'},
         right: {type: 'IntegerLiteral', value: 42n},
         preferLeft: false,
