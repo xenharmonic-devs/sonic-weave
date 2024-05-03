@@ -17,6 +17,8 @@ The `sonic-weave` package is many things.
 
 You may also be interested in the [technical overview](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md) of SonicWeave as a programming language.
 
+Appendix: [tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md), [commas](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md)
+
 ## Highlights
 Harmonic segment from the 8th harmonic to the 16th (repeating at the octave).
 ```c

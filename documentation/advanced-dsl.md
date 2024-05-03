@@ -207,7 +207,7 @@ See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/docum
 
 ### Highlights
 
-Many helper functions have an arithmetic and geometric variants.
+Many helper functions have arithmetic and geometric variants.
 
 | Action           | Linear           | Logarithmic    | Logarithmic (accumulative)    |
 | ---------------- | ---------------- | -------------- | ----------------------------- |
@@ -216,6 +216,8 @@ Many helper functions have an arithmetic and geometric variants.
 | Cumulative sum   | `cumsum(arr)`    | `cumprod(arr)` | `antiperiodif(guideGen, arr)` |
 | Stacking         | `stackLinear()`  | `stack()`      | *N/A*                         |
 | Repeating        | `flatRepeat()`   | `flatRepeat()` | `repeat()`                    |
+
+There's also the linearly accumulating `repeatLinear()` for repeating harmonic segments arithmetically.
 
 ## Issues with the decimal separator
 To be backwards compatible with Scale Workshop versions 1 and 2, SonicWeave preserves the syntax for "dot cents" and "comma decimals".

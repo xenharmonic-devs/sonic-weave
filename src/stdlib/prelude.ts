@@ -772,9 +772,8 @@ riff rotated(onto = 1, scale = $$) {
 
 riff repeated(times = 2, scale = $$) {
   "Stack the current/given scale on top of itself.";
-  if (not times) {
+  if (not times)
     return [];
-  }
   scale;
   const equave = scale[-1];
   for (const level of equave ~^ [1..times-1])
@@ -787,6 +786,25 @@ riff repeat(times = 2, scale = $$) {
   const segment = $[..];
   clear();
   repeated(times, segment);
+  return;
+}
+
+riff repeatedLinear(times = 2, scale = $$) {
+  "Repeat the current/given scale shifted linearly each time.";
+  if (not times)
+    return [];
+  scale;
+  const total = (scale[-1] ~- 1);
+  for (const level of total ~* [1..times-1])
+    (scale ~- 1) ~+ level ~+ 1;
+}
+
+riff repeatLinear(times = 2, scale = $$) {
+  "Repeat the current/given scale shifted linearly each time. Clears the scale if the number of repeats is zero.";
+  $ = scale;
+  const segment = $[..];
+  clear();
+  repeatedLinear(times, segment);
   return;
 }
 

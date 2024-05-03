@@ -1417,4 +1417,29 @@ describe('SonicWeave standard library', () => {
       'An interval is required.'
     );
   });
+
+  it('can repeat harmonics linearly (fifth to octave)', () => {
+    const scale = expand('6:7:9;repeatLinear()');
+    expect(scale).toEqual(['7/6', '9/6', '10/6', '12/6']);
+  });
+
+  it('can repeat harmonics linearly (octave to double octave)', () => {
+    const scale = expand('3:5:6;repeatLinear(3)');
+    expect(scale).toEqual(['5/3', '6/3', '8/3', '9/3', '11/3', '12/3']);
+  });
+
+  it('can repeat JI linearly (fourth to octave)', () => {
+    const scale = expand('10/9;7/6;4/3;repeatLinear(3)');
+    expect(scale).toEqual([
+      '10/9',
+      '7/6',
+      '4/3',
+      '13/9',
+      '9/6',
+      '5/3',
+      '16/9',
+      '11/6',
+      '6/3',
+    ]);
+  });
 });

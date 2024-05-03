@@ -659,6 +659,12 @@ Stack the current scale on top of itself. Clears the scale if the number of repe
 ### repeated(*times = 2*, *scale = $$*)
 Stack the current/given scale on top of itself.
 
+### repeatedLinear(*times = 2*, *scale = $$*)
+Repeat the current/given scale shifted linearly each time.
+
+### repeatLinear(*times = 2*, *scale = $$*)
+Repeat the current/given scale shifted linearly each time. Clears the scale if the number of repeats is zero.
+
 ### replace(*interval*, *replacement*, *scale = $$*)
 Replace occurences of `interval` in the current/given scale by `replacement`.
 
