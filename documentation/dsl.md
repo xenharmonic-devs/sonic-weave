@@ -3,7 +3,7 @@ This document describes the SonicWeave domain-specific language for manipulating
 
 ## Basic example
 
-SonicWeave is a relative of [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor to Scale Workshop 2 syntax. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
+SonicWeave is related to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor of Scale Workshop 2. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
 
 Let's start with a basic major scale in just intonation:
 ```c
@@ -29,7 +29,7 @@ Let's give labels to the notes with the root on "C".
 2/1  "C"
 ```
 
-Notice again how the root and its label comes last in the list.
+Notice again how the root and its label come last in the list.
 
 Our scale is still pretty abstract in the sense that the notes do not correspond to any specific frequencies. A tool like Scale Workshop 3 sets the reference frequency automatically but let's set it manually here:
 
@@ -79,13 +79,13 @@ Using cents up to one decimal of precision our major scale becomes:
 
 Note how the last dot in `1200.` is required. Without it `1200` denotes the frequency ratio between 1 Hz and 1200 Hz, a huge interval!
 
-Decimal ratios are less commonly used in music, but can be as useful as cents for comparing the sizes of intervals. E.g. the frequency ratio of `11/9` is around `1.2222e` while `27/22` is a smidge wider around `1.227272e`. The final `e` differentiates `1.2e` (just minor third) from `1.2` (an unnoticeably small interval, basically a chorus tone near 1/1). The `e` may be followed with a ten's exponent. E.g. `14e-1` is unnecessarily obfuscated notation for `7/5`.
+Decimal ratios are less commonly used in music, but can be as useful as cents for comparing the sizes of intervals. E.g. the frequency ratio of `11/9` is around `1.2222e` while `27/22` is a smidge wider around `1.227272e`. The final `e` differentiates `1.2e` (just minor third) from `1.2` (an unnoticeably small interval, basically a chorus tone near 1/1). The `e` may be followed with a ten's exponent. E.g. `14e-1` is unnecessarily obfuscated notation for `14/10` i.e. `7/5`.
 
 ### Equal temperaments
 
 In addition to just intonation and cents SonicWeave has notation for equal divisions of the octave like 12-tone equal temperament commonly used around the world.
 
-The notation `n \ m` denotes n steps of m equal logarithmic divisions of the octave.
+The notation `n \ m` denotes n steps of m-tone equal temperament.
 
 Let's update our example and use the common A440 pitch standard:
 ```c
@@ -151,7 +151,6 @@ M7^5
 P8
 ```
 
-
 ## Domains
 
 So far we've only used one interval per line corresponding to a single note repeated every octave.
@@ -162,13 +161,13 @@ On the equally tempered piano it is natural that two steps combined with two ste
 
 The same goes for cents: `200. + 200.` equals `400.` as expected.
 
-Let's see what happens when we add two whole tones together in just intonation `9/8 + 9/8` is `(9 + 9)/8` is `18/8` is `9/4`, an interval larger than the octave `8/4`! How unexpected! On the other hand it would be weirder if addition of fractions didn't follow the usual rules of mathematics.
+Let's see what happens when we add two whole-tones together in just intonation `9/8 + 9/8` equals `(9 + 9)/8` or `18/8` i.e. `9/4`, an interval larger than the octave `8/4`! How unexpected! On the other hand it would be weirder if addition of fractions didn't follow the usual rules of mathematics.
 
 The difference of what the operator `+` means is indicated by the *domain* of the interval. Steps of equal temperaments and cents are *logarithmic* quantities so their underlying frequency ratios multiply together: `200. + 200.` actually means around `1.122e * 1.122e` ≈ `1.26e` under the hood.
 
-On the other hand fractions like `9/8` are in the *linear* domain. The musically correct way of combining them is multiplication so `9/8 * 9/8` equal to `81/64` is the (Pythagorean) major third we expect from stacking two whole tones.
+On the other hand fractions like `9/8` are in the *linear* domain. The musically correct way of combining them is multiplication so `9/8 * 9/8` equal to `81/64` is the (Pythagorean) major third we expect from stacking two whole-tones.
 
-Relative FJS intervals can be especially confusing because they represent fractions but add like cents do. Our whole tone stack becomes `M2 + M2` equal to `M3`. This is notationally expected even if obscured by the ordinal nature of traditional Western music notation. Remember that the perfect unison `P1` represents no change and `P1 + P1` is equal to `P1` i.e. 1st + 1st = 1st. Therefore 2nd + 2nd must be (2+2-1)rd = 3rd.
+Relative FJS intervals can be especially confusing because they represent fractions but add like cents do. Our whole-tone stack becomes `M2 + M2` equal to `M3`. This is notationally expected even if obscured by the ordinal nature of traditional Western music notation. Remember that the perfect unison `P1` represents no change and `P1 + P1` is equal to `P1` i.e. 1st + 1st = 1st. Therefore 2nd + 2nd must be a (2+2-1)rd = 3rd.
 
 For the most part you cannot combine intervals across domains so `9/8 + M2` is not a valid operation. Use tildes (`~`) to always operate as if in the linear domain. E.g. `9/8 ~* M2` is a valid expression and evaluates to `81/64` while `9/8 *~ M2` evaluates to `M3`. The direction of the "wing" determines which domain and formatting to prefer.
 
@@ -178,7 +177,7 @@ Conversely the minus operator `-` represent divisions of the underlying values i
 
 Scale Workshop 2 didn't have domains, everything was logarithmic, so `81/64 - 81/80` was valid notation for `5/4`. In SonicWeave this expression must be spelled `(81/64) / (81/80)` or `81/64 ÷ 81/80` using the handy division operator that binds more loosely than the fractional slash (`/`).
 
-Another breaking change is that *comma decimals* are no longer allowed in complex expressions `1,2 + 1,2` equal to `1,44` in Scale Workshop 2 must be spelled `1.2e * 1.2e` in SonicWeave. Users are strongly advised **not** to use comma decimals anymore even if a single `1,2` is still legal syntax for backwards compatibility. The decimal comma is deprecated and will be removed in SonicWeave 2.0.
+Another breaking change is that *comma decimals* are no longer allowed in complex expressions `1,2 + 1,2` equal to `1,44` in Scale Workshop 2 must be spelled `1.2e * 1.2e` in SonicWeave. Users are strongly advised **not** to use comma decimals anymore even if a single `1,2` is still legal syntax for backwards compatibility. The decimal comma is deprecated and will be removed in SonicWeave v2.0.
 
 ## Adding colors to notes
 
@@ -237,7 +236,7 @@ Above we gave `1\12` the name "C# / Db" because it doesn't really matter if it's
 
 However in [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning), which is the default in SonicWeave, C sharp and D flat correspond to distinct frequencies.
 
-By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplies the underlying frequency by `2187/2048` ≈ `1.06787e` or equivalently shifts the pitch up by about `113.685 ¢`. (Yes that fancy unicode cent is legal syntax in SonicWeave; A plain `c` also works, but only when attached to a numeric value.)
+By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplies the underlying frequency by `2187/2048` ≈ `1.06787e` or equivalently shifts the pitch up by about `113.685 ¢`. (Yes that fancy unicode cent is legal syntax in SonicWeave when attached to a numeric literal; A plain `c` also works.)
 
 [^1]: *By default* is too soft an expression here. The sharp sign widens an interval by an apotome, *period*. Tempering applies to values as they are specified and only makes it seem that `#` narrows from `113.685 c` down to `100.0 c` when a scale is tempered to 12-tone equal using `12@` at the bottom.
 
@@ -257,10 +256,13 @@ G4    // 393.000Hz |  701.955 | 1.500
 C5    // 524.000Hz | 1200.000 | 2.000
 ```
 
-Looking at the frequencies or the width of the interval against the root note we can see that D flat is lower in pitch than C sharp. They differ by a [Pythagorean comma](https://en.xen.wiki/w/Pythagorean_comma) of around `23.460 c`. The art and science of musical tuning often deals with small intervals like this. One approach is to make it go away i.e. temper it out which leads to the 12-tone equal temperament a.k.a. 12ed2.
+Looking at the frequencies or the width of the interval against the root note we can see that D flat is lower in pitch than C sharp. They differ by a [Pythagorean comma](https://en.xen.wiki/w/Pythagorean_comma) of around `23.460 c`. The art and science of musical tuning often deals with small intervals like this. One approach is to make it go away i.e. temper it out which leads to 12-tone equal temperament a.k.a. 12ed2.
 
 ```c
 C4 = 262 Hz
+
+// Merge sharps together with the flat of the note above.
+defer 12@
 
 /*
 Pitch // Frequency |    Cents | Ratio
@@ -271,7 +273,7 @@ D4    // 294.085Hz |  200.000 | 1.122
 G4    // 392.556Hz |  700.000 | 1.498
 C5    // 524.000Hz | 1200.000 | 2.000
 
-12@   // Merge sharps together with the flat of the note above.
+// Tempering using 12@ was deferred here.
 ```
 
 Another thing we might notice is that the fifth at `700.0` is only about two cents flat of the frequency ratio `1.5e` of the justly intoned fifth. The major third at `200.0` on the other hand is almost four cents flat of `1.125e`. Small tuning error like these tend to compound the further you go along the chain of fifths.
@@ -279,6 +281,9 @@ Another thing we might notice is that the fifth at `700.0` is only about two cen
 Let's do one final comparison in 19-tone equal temperament:
 ```c
 C4 = 262 Hz
+
+// Temper to 19ed2
+defer 19@
 
 /*
 Pitch // Frequency |    Cents | Ratio
@@ -288,8 +293,6 @@ Db4   // 281.831Hz |  126.316 | 1.076
 D4    // 292.302Hz |  189.474 | 1.116
 G4    // 391.365Hz |  694.737 | 1.494
 C5    // 524.000Hz | 1200.000 | 2.000
-
-19@   // Temper to 19ed2
 ```
 
 I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
@@ -401,7 +404,7 @@ The first few prime harmonics in FJS are:
 | `17/16`           | `m2^17` | `D♭4^17`     |
 | `19/16`           | `m3^19` | `E♭4^19`     |
 | `23/16`           | `a4^23` | `F♯4^23`     |
-| `27/16`           | `m7^29` | `B♭4^29`     |
+| `29/16`           | `m7^29` | `B♭4^29`     |
 
 SonicWeave agrees with [FloraC's critique](https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System) and assigns `31/32` to `P1^31`. The classic inflection may be accessed using the `c` *flavor* i.e. `P1^31c` for `248/243`.
 
@@ -409,7 +412,7 @@ There is a well-known tension between visual similarity with fractions and the d
 
 ## Enumerated chords
 
-List out all of the fractions in a scale can get tedious so there's a shorthand for harmonic (a.k.a. overtonal or otonal) chords where the intervals have simple relationships with each other.
+Listing out all of the fractions in a scale can get tedious so there's a shorthand for harmonic (a.k.a. overtonal or otonal) chords where the intervals have simple relationships with each other.
 
 Let's take a look at a subset of our major scale:
 ```c
@@ -491,7 +494,7 @@ The difference between the perspectives is that of inversion i.e. reflection abo
 
 ## Scale title
 
-A string that is not attached to an interval becomes the title of the scale visible on export.
+A string of characters that is not attached to an interval becomes the title of the scale visible on export.
 
 ```c
 "Subharmonics 10 through 5"
@@ -535,6 +538,7 @@ We can change this using a *lift declaration* `/ = (newLiftAmount)`. The syntax 
 Declaring a lift to be worth 6 degrees of 311edo we arrive at this version of our major scale:
 
 ```c
+defer 311@
 / = 6°
 C4 = 262 Hz
 
@@ -545,28 +549,26 @@ G4
 \A4
 \B4
 C5
-
-311@
 ```
 
 ## Helper functions
 
 We already saw `mtof(60)` and `sort()` above. There are plenty more, but here's a table of commonly used ones.
 
-| Helper         | Description                                       |
-| -------------- | ------------------------------------------------- |
-| clear()        | Replace the scale with an empty one               |
-| keepUnique()   | Remove duplicate intervals from the scale         |
-| mtof(midiNote) | Get the frequency corresponding to the MIDI note  |
-| FJS            | Convert fractions to Functional Just Systems      |
-| absoluteFJS    | Convert fractions to absolute pitch notation with FJS inflections                    |
-| reduce         | Reduce pitches in the scale to lie between unison and the octave (or generic equave) |
-| relin          | Convert FJS to fractions. Converts anything to relative linear format                |
-| rotate(degree) | Rotate the scale to start on the given degree     |
-| simplify       | Simplify fractions by reducing common factors     |
-| sort()         | Sort the scale in ascending order                 |
-| stack()        | Stack intervals in the scale on top of each other |
-| tet(N)         | Generate one octave of N-tone equal temperament   |
+| Helper         | Description                                        |
+| -------------- | -------------------------------------------------- |
+| clear()        | Replace the scale with an empty one.               |
+| keepUnique()   | Remove duplicate intervals from the scale.         |
+| mtof(midiNote) | Get the frequency corresponding to the MIDI note.  |
+| FJS            | Convert fractions to Functional Just Systems.      |
+| absoluteFJS    | Convert fractions to absolute pitch notation with FJS inflections.                    |
+| reduce         | Reduce pitches in the scale to lie between unison and the octave (or generic equave). |
+| relin          | Convert FJS to fractions. Converts anything to relative linear format.                |
+| rotate(degree) | Rotate the scale to start on the given degree.     |
+| simplify       | Simplify fractions by reducing common factors.     |
+| sort()         | Sort the scale in ascending order.                 |
+| stack()        | Stack intervals in the scale on top of each other. |
+| tet(N)         | Generate one octave of N-tone equal temperament.   |
 
 Some helpers need to be called like `sort()` while other's like `simplify` are implicitly mapped over the current scale. Let's demonstrate with our major that has been code-golfed to obscurity:
 
@@ -627,6 +629,7 @@ The result is the same as if we had entered:
 The `reduce` helper allows us to be imprecise with octaves. The above spelled sloppily is:
 
 ```c
+defer reduce
 1 = 440 Hz
 
 9
@@ -636,11 +639,11 @@ The `reduce` helper allows us to be imprecise with octaves. The above spelled sl
 1/5
 9/5
 2
-
-reduce
 ```
 
 These helpers can be freely combined. A common task is to reduce the scale and sort it only keeping unique intervals. The handy `organize()` helper does just that.
+
+It is often convenient to defer all such *"housekeeping"* actions so that they don't dangle at the end of the scale as you edit it.
 
 There are plenty more helpers in SonicWeave: See [BUILTIN.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/BUILTIN.md).
 
