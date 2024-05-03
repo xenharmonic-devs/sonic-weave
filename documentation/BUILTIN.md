@@ -428,6 +428,9 @@ Calculate the cumulative geometric sums of a periodic difference pattern. Undoes
 ### asinh(*x*)
 Calculate the inverse hyperbolic sine of x.
 
+### assert(*test*, *message = "Assertion failed."*)
+Assert that the test expression is true or fail with the given message.
+
 ### atanh(*x*)
 Calculate the inverse hyperbolic tangent of x.
 

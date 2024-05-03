@@ -27,6 +27,31 @@ Blocks start with a curly bracket `{`, have their own instance of a current scal
 ### Parent scale
 The current scale of the parent block can be accessed using `$$`.
 
+## Defer
+Defer is used to execute a statement while exiting the current block.
+
+```c
+let x = 5;
+{
+    defer x += 2;
+    assert(x === 5);
+}
+assert(x === 7);
+```
+
+When there are multiple defers in a single block, they are executed in reverse order.
+
+```c
+let x = 5;
+{
+    defer x += 2;
+    defer x /= 2;
+}
+assert(x === 4.5e);
+```
+
+Defer is useful for pushing implicit tempering and general housekeeping to the top of the source instead of having to dangle everything at the end while editing the scale.
+
 ## While
 "While" loops repeat a statement until the test becames *falsy* e.g.
 ```c

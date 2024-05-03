@@ -204,6 +204,11 @@ export type TryStatement = {
   finalizer?: Statement;
 };
 
+export type DeferStatement = {
+  type: 'DeferStatement';
+  body: Statement;
+};
+
 export type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -223,6 +228,7 @@ export type Statement =
   | IfStatement
   | IterationStatement
   | TryStatement
+  | DeferStatement
   | ThrowStatement
   | BreakStatement
   | ContinueStatement

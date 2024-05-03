@@ -2306,4 +2306,15 @@ describe('Poor grammar / Fun with "<"', () => {
     const val = evaluate('valFromPrimeArray([12, 19, 28])') as Val;
     expect(val.toString()).toBe('<12 19 28]');
   });
+
+  it('rejects defer at root scope', () => {
+    expect(() => evaluate('defer 2;3')).toThrow(
+      'Deferred actions not allowed when evaluating expressions.'
+    );
+  });
+
+  it('accepts defer in sub-blocks', () => {
+    const {fraction} = parseSingle('{defer 2; 3};$[-1]');
+    expect(fraction).toBe('2');
+  });
 });

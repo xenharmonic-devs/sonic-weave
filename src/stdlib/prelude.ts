@@ -99,6 +99,12 @@ riff trap(message) {
   return () => fail(message);
 }
 
+riff assert(test, message = "Assertion failed.") {
+  "Assert that the test expression is true or fail with the given message.";
+  if (not test)
+    fail(message);
+}
+
 riff domainOf(interval) {
   "Return the domain of the given interval as a callable converter.";
   return linear where isLinear(interval)

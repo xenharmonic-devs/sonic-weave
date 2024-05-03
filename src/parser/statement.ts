@@ -34,6 +34,8 @@ import {
   UpDeclaration,
   VariableDeclaration,
   WhileStatement,
+  DeferStatement,
+  Program,
 } from '../ast';
 import {
   ExpressionVisitor,
@@ -96,6 +98,10 @@ export class StatementVisitor {
    * Whether or not the state of the visitor can be represented as text and that state represents the runtime from a user's perspective. The global context doesn't have a representation because the builtins are not written in the SonicWeave DSL.
    */
   isUserRoot: boolean;
+  /**
+   * Deferred statement to be executed at the end of the current block.
+   */
+  deferred: Statement[];
 
   private rootContext_?: RootContext;
 
@@ -109,6 +115,7 @@ export class StatementVisitor {
     this.mutables.set('$', []);
     this.immutables = new Map();
     this.isUserRoot = false;
+    this.deferred = [];
   }
 
   /**
@@ -260,10 +267,17 @@ export class StatementVisitor {
         return this.visitContinueStatement(node);
       case 'ThrowStatement':
         throw this.visitThrowStatement(node);
+      case 'DeferStatement':
+        return this.visitDeferStatement(node);
       case 'EmptyStatement':
         return;
     }
     node satisfies never;
+  }
+
+  protected visitDeferStatement(node: DeferStatement) {
+    this.deferred.push(node.body);
+    return undefined;
   }
 
   protected visitReturnStatement(node: ReturnStatement) {
@@ -726,18 +740,40 @@ export class StatementVisitor {
     scale.push(...result);
   }
 
+  /**
+   * Execute the abstract syntax tree of a SonicWeave program or an array of statements.
+   * @param body Program containing the AST to be executed.
+   * @returns An interrupt or undefined if none encountered.
+   */
+  executeProgram(body: Program | Statement[]): Interrupt | undefined {
+    if (!Array.isArray(body)) {
+      body = body.body;
+    }
+    let interrupt: Interrupt | undefined = undefined;
+    for (const statement of body) {
+      interrupt = this.visit(statement);
+      if (interrupt) {
+        break;
+      }
+    }
+    while (this.deferred.length) {
+      const badInterrupt = this.visit(this.deferred.pop()!);
+      if (badInterrupt) {
+        throw new Error(
+          `Illegal ${badInterrupt.type} inside a deferred block.`
+        );
+      }
+    }
+    return interrupt;
+  }
+
   protected visitBlockStatement(node: BlockStatement) {
     const subVisitor = new StatementVisitor(this);
     const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
-    let interrupt: Interrupt | undefined = undefined;
-    for (const statement of node.body) {
-      interrupt = subVisitor.visit(statement);
-      if (interrupt?.type === 'ReturnStatement') {
-        return interrupt;
-      } else if (interrupt) {
-        break;
-      }
+    const interrupt = subVisitor.executeProgram(node.body);
+    if (interrupt?.type === 'ReturnStatement') {
+      return interrupt;
     }
     const subScale = subVisitor.currentScale;
     scale.push(...subScale);
@@ -923,13 +959,11 @@ export class StatementVisitor {
       const localSubvisitor = localVisitor.createExpressionVisitor(true);
       localSubvisitor.localAssign(node.parameters, args as Interval[]);
 
-      for (const statement of node.body) {
-        const interrupt = localVisitor.visit(statement);
-        if (interrupt?.type === 'ReturnStatement') {
-          return interrupt.value;
-        } else if (interrupt) {
-          throw new Error(`Illegal ${interrupt.type}.`);
-        }
+      const interrupt = localVisitor.executeProgram(node.body);
+      if (interrupt?.type === 'ReturnStatement') {
+        return interrupt.value;
+      } else if (interrupt) {
+        throw new Error(`Illegal ${interrupt.type}.`);
       }
       return localVisitor.currentScale;
     }

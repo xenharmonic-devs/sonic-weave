@@ -14,6 +14,7 @@
     'catch',
     'const',
     'continue',
+    'defer',
     'dot',
     'drop',
     'ed',
@@ -132,6 +133,7 @@ ByToken            = @'by'       !IdentifierPart
 CatchToken         = @'catch'    !IdentifierPart
 ConstToken         = @'const'    !IdentifierPart
 ContinueToken      = @'continue' !IdentifierPart
+DeferToken         = @'defer'    !IdentifierPart
 DotToken           = @'dot'      !IdentifierPart
 DropToken          = @'drop'     !IdentifierPart
 EdToken            = @'ed'       !IdentifierPart
@@ -194,6 +196,7 @@ Statement
   / IfStatement
   / IterationStatement
   / TryStatement
+  / DeferStatement
   / EmptyStatement
 
 ReassignmentTail
@@ -529,6 +532,14 @@ CatchClause
   }
 
 TryFinalizer = FinallyToken _ @Statement
+
+DeferStatement
+  = DeferToken _ body: Statement {
+    return {
+      type: 'DeferStatement',
+      body,
+    };
+  }
 
 EmptyStatement
   = (_ ';' / __ SingleLineComment LineTerminatorSequence) {

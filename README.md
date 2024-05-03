@@ -58,11 +58,12 @@ Scale title, colors and labels.
 * Marc Sabat - Notation adviser
 
 ## Acknowledgments / inspiration
-SonicWeave looks like Javascript with Python semantics, has Haskell ranges and operates similar to xen-calc.
+SonicWeave looks like Javascript with Python semantics, has Haskell ranges and operates similar to xen-calc with some Zig sprinkled on top.
 
 * ECMAScript - Brendan Eich et. al.
 * Python - Guido van Rossum et. al.
 * Haskell - Lennart Augustsson et. al.
+* Zig - Andrew Kelley et. al.
 * NumPy - Travis Oliphant et. al.
 * Scala - Manuel Op de Coul
 * Scale Workshop 1 - Sean Archibald et. al.

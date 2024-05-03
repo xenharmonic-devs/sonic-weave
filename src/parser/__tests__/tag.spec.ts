@@ -94,6 +94,17 @@ describe('SonicWeave template tag', () => {
     const first = sw`${'first'};${'second'};templateArg(0)`;
     expect(first).toBe('first');
   });
+
+  it('rejects defer at root scope', () => {
+    expect(() => sw`defer 2;3`).toThrow(
+      'Deferred actions not allowed when evaluating tagged templates.'
+    );
+  });
+
+  it('accepts defer in sub-blocks', () => {
+    const two = sw`{defer 2; 3};$[-1]` as Interval;
+    expect(two.toString()).toBe('2');
+  });
 });
 
 describe('SonicWeave raw template tag', () => {

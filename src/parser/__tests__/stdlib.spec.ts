@@ -1442,4 +1442,36 @@ describe('SonicWeave standard library', () => {
       '6/3',
     ]);
   });
+
+  it('has assert (success)', () => {
+    evaluateSource(`
+      let x = 5;
+      {
+          defer x += 2;
+          assert(x === 5);
+      }
+      assert(x === 7);
+    `);
+  });
+
+  it('has assert (failure)', () => {
+    expect(() => evaluateSource('assert(1 === 2)')).toThrow(
+      'Assertion failed.'
+    );
+  });
+
+  it('executes deferred actions before interrupting', () => {
+    const result = evaluateExpression(`
+      let x = "Nothing happened...";
+      riff doStuff() {
+        defer x = "Deferred action triggered.";
+        return 311;
+        x = "Unreachable code executed!";
+        throw "Execution shouldn't reach here!";
+      }
+      assert(doStuff() === 311);
+      x;
+    `);
+    expect(result).toBe('Deferred action triggered.');
+  });
 });

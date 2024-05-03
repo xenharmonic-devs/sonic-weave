@@ -1392,4 +1392,53 @@ describe('SonicWeave parser', () => {
     );
     expect(scale).toEqual(['8 Hz', '10 Hz', '12 Hz']);
   });
+
+  it('can defer tempering', () => {
+    const scale = expand(`
+      defer 12@
+      M3
+      P5
+      P8
+    `);
+    expect(scale).toEqual(['4\\12', '7\\12', '12\\12']);
+  });
+
+  it('has defer similar to Zig (single)', () => {
+    evaluateSource(`
+      let x = 5;
+      {
+          defer x += 2;
+          if (x !== 5) {
+            throw 'Defer executed early!';
+          }
+      }
+      if (x !== 7) {
+        throw 'Defer did not execute!';
+      }
+    `);
+  });
+
+  it('has defer similar to Zig (multi)', () => {
+    evaluateSource(`
+      let x = 5;
+      {
+          defer x += 2;
+          defer x /= 2;
+      }
+      if (x !== 4.5e) {
+        throw 'Deferred statements executed in the wrong order!';
+      }
+    `);
+  });
+
+  it('rejects confusing defer', () => {
+    expect(() =>
+      evaluateSource(`
+      for (const i of [3, 5]) {
+        defer break;
+        i / (i - 1);
+      }
+    `)
+    ).toThrow('Illegal BreakStatement inside a deferred block.');
+  });
 });

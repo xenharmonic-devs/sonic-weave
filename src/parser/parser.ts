@@ -130,11 +130,9 @@ export function evaluateSource(
   const visitor = getSourceVisitor(includePrelude, extraBuiltins);
 
   const program = parseAST(source);
-  for (const statement of program.body) {
-    const interrupt = visitor.visit(statement);
-    if (interrupt) {
-      throw new Error(`Illegal ${interrupt.type}.`);
-    }
+  const interrupt = visitor.executeProgram(program);
+  if (interrupt) {
+    throw new Error(`Illegal ${interrupt.type}.`);
   }
   return visitor;
 }
@@ -159,6 +157,11 @@ export function evaluateExpression(
     if (interrupt) {
       throw new Error(`Illegal ${interrupt.type}.`);
     }
+  }
+  if (visitor.deferred.length) {
+    throw new Error(
+      'Deferred actions not allowed when evaluating expressions.'
+    );
   }
   const finalStatement = program.body[program.body.length - 1];
   if (finalStatement.type !== 'ExpressionStatement') {
@@ -237,6 +240,11 @@ export function createTag(
       if (interrupt) {
         throw new Error(`Illegal ${interrupt.type}.`);
       }
+    }
+    if (visitor.deferred.length) {
+      throw new Error(
+        'Deferred actions not allowed when evaluating tagged templates.'
+      );
     }
     const finalStatement = program.body[program.body.length - 1];
     if (finalStatement.type !== 'ExpressionStatement') {
