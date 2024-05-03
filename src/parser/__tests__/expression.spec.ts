@@ -2317,4 +2317,11 @@ describe('Poor grammar / Fun with "<"', () => {
     const {fraction} = parseSingle('{defer 2; 3};$[-1]');
     expect(fraction).toBe('2');
   });
+
+  it('has irrational ranges', () => {
+    const soReal = evaluate('[E,PI..4] str');
+    expect(soReal).toEqual(
+      '[2.718281828459045r, 3.141592653589793r, 3.564903478720541r, 3.988214303851289r]'
+    );
+  });
 });

@@ -854,7 +854,7 @@ export class ExpressionVisitor {
       if (!(interval instanceof Interval)) {
         throw new Error('Slice indices must consist of intervals.');
       }
-      start = Number(interval.value.toBigInteger());
+      start = interval.toInteger();
     }
 
     if (node.end) {
@@ -862,7 +862,7 @@ export class ExpressionVisitor {
       if (!(interval instanceof Interval)) {
         throw new Error('Slice indices must consist of intervals.');
       }
-      end = Number(interval.value.toBigInteger());
+      end = interval.toInteger();
     }
 
     if (node.second) {
@@ -870,7 +870,7 @@ export class ExpressionVisitor {
       if (!(second instanceof Interval)) {
         throw new Error('Slice indices must consist of intervals.');
       }
-      step = Number(second.value.toBigInteger()) - start;
+      step = second.toInteger() - start;
     }
 
     if (start < 0) {
@@ -1969,18 +1969,11 @@ export class ExpressionVisitor {
       }
       step = second.sub(start);
     }
-    if (step.value instanceof TimeReal) {
-      // TODO: Re-enable.
-      throw new Error('Irrational ranges disabled for now.');
+    const stepValue = step.valueOf();
+    if (stepValue) {
+      this.spendGas(Math.abs((end.valueOf() - start.valueOf()) / stepValue));
     }
-    if (step.value.residual.s !== 0) {
-      this.spendGas(
-        Math.abs(
-          (end.value.valueOf() - start.value.valueOf()) / step.value.valueOf()
-        )
-      );
-    }
-    if (step.value.residual.s > 0) {
+    if (stepValue > 0) {
       if (start.compare(end) > 0) {
         return [];
       }
@@ -1991,7 +1984,7 @@ export class ExpressionVisitor {
         next = next.add(step);
       }
       return result;
-    } else if (step.value.residual.s < 0) {
+    } else if (stepValue < 0) {
       if (start.compare(end) < 0) {
         return [];
       }
@@ -2021,7 +2014,7 @@ export class ExpressionVisitor {
     if (!(root instanceof Interval && end instanceof Interval)) {
       throw new Error('Harmonic segments must be built from intervals.');
     }
-    this.spendGas(Math.abs(end.value.valueOf() - root.value.valueOf()));
+    this.spendGas(Math.abs(end.valueOf() - root.valueOf()));
     const one = linearOne();
     const result: Interval[] = [];
     let next = root;
