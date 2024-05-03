@@ -130,10 +130,7 @@ export function evaluateSource(
   const visitor = getSourceVisitor(includePrelude, extraBuiltins);
 
   const program = parseAST(source);
-  const interrupt = visitor.executeProgram(program);
-  if (interrupt) {
-    throw new Error(`Illegal ${interrupt.type}.`);
-  }
+  visitor.executeProgram(program);
   return visitor;
 }
 

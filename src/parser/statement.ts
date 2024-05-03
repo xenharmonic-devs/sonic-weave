@@ -741,14 +741,22 @@ export class StatementVisitor {
   }
 
   /**
-   * Execute the abstract syntax tree of a SonicWeave program or an array of statements.
+   * Execute the abstract syntax tree of a SonicWeave program.
    * @param body Program containing the AST to be executed.
+   */
+  executeProgram(program: Program) {
+    const interrupt = this.executeStatements(program.body);
+    if (interrupt) {
+      throw new Error(`Illegal ${interrupt.type}.`);
+    }
+  }
+
+  /**
+   * Execute an array of SonicWeave statements from an abstract syntax tree.
+   * @param body The AST nodes to be executed.
    * @returns An interrupt or undefined if none encountered.
    */
-  executeProgram(body: Program | Statement[]): Interrupt | undefined {
-    if (!Array.isArray(body)) {
-      body = body.body;
-    }
+  executeStatements(body: Statement[]): Interrupt | undefined {
     let interrupt: Interrupt | undefined = undefined;
     for (const statement of body) {
       interrupt = this.visit(statement);
@@ -771,7 +779,7 @@ export class StatementVisitor {
     const subVisitor = new StatementVisitor(this);
     const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
-    const interrupt = subVisitor.executeProgram(node.body);
+    const interrupt = subVisitor.executeStatements(node.body);
     if (interrupt?.type === 'ReturnStatement') {
       return interrupt;
     }
@@ -959,7 +967,7 @@ export class StatementVisitor {
       const localSubvisitor = localVisitor.createExpressionVisitor(true);
       localSubvisitor.localAssign(node.parameters, args as Interval[]);
 
-      const interrupt = localVisitor.executeProgram(node.body);
+      const interrupt = localVisitor.executeStatements(node.body);
       if (interrupt?.type === 'ReturnStatement') {
         return interrupt.value;
       } else if (interrupt) {
