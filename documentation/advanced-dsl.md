@@ -263,7 +263,7 @@ To avoid ambiguity use explicit cents i.e. `100.0c` or explicit scientific notat
 ### Fractional Just Intonation Subgroups
 By default monzos are vectors of prime exponents and vals are maps of primes, but sometimes you may wish to use other rational numbers as the basis.
 
-Let's take a look at [Barbados temperament](https://en.xen.wiki/w/The_Archipelago#Barbados). We can treat `13/5` like a prime alongside `2` and `3` and map it to `7\5`. The syntax is `5@2.3.13/5` or `<5 8 7]@2.3.13/5`. Now `15/13 dot <5 8 7]@2.3.13/5` evaluates to 1 step, exactly half of the 2 steps that an approximate `4/3` spans, as desired.
+Let's take a look at [Barbados temperament](https://en.xen.wiki/w/The_Archipelago#Barbados). We can treat `13/5` like a prime alongside `2` and `3` and map it to `7\5`. The syntax is `5@2.3.13/5` or `<5 8 7]@2.3.13/5`. Now `<5 8 7]@2.3.13/5 dot 15/13` evaluates to 1 step, exactly half of the 2 steps that an approximate `4/3` spans, as desired.
 
 An explicit subgroup may be given with monzos as well e.g. `[0 1 -1>@2.3.13/5` for `logarithmic(15/13)`.
 

@@ -349,7 +349,7 @@ describe('SonicWeave parser', () => {
   it('can rig ups-and-downs (manual)', () => {
     const scale = parseSource(`
       riff rig (i) {
-        const ups = round(1° dot i);
+        const ups = round(1° ~dot i);
         return i ~% (1° * ups) ~* 81/80 ^ ups;
       }
       vM3;P5;P8;

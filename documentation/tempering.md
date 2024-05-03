@@ -9,11 +9,11 @@ Factored into prime numbers the comma is `(3^4)/(2^4 * 5^1)`or 2⁻⁴·3⁴·5�
 Monzos are *logarithmic* quantities so a stack of two syntonic commas is `[-4 4 -1> + [-4 4 -1>` equal to `[-8 8 -2>` or simply `2 * [-4 4 -1>`.
 
 ### Dot product
-The dot product between two monzos multiplies each component pair-wise and adds them up producing a linear scalar as a result. E.g. `[-1 1> dot [-3 1 1>` evaluates to `(-1)*(-3) + 1*1 + 0*1` (missing components are implicitly zero) or `4` in total.
+The dot product between two monzos multiplies each component pair-wise and adds them up producing a linear scalar as a result. E.g. `[-1 1> ~dot [-3 1 1>` evaluates to `(-1)*(-3) + 1*1 + 0*1` (missing components are implicitly zero) or `4` in total.
 
 You can also use the `·` operator in place of ASCII `dot`.
 
-The dot product is always linear scalar valued and works regardless of the the domain of the operands. `3/2 dot 15/8` also evaluates to `4`.
+The dot product is always linear scalar valued and works regardless of the the domain of the operands. `3/2 ~dot 15/8` also evaluates to `4`.
 
 ## Co-vectors for mapping primes
 In some sense the dot product measures how well two vectors are aligned with each other. To be more precise we measure the prime content using geometric inverses of the prime vectors that inhabit a new *co-logarithmic* domain.

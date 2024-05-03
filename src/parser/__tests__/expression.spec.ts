@@ -150,7 +150,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a reciprocal cent', () => {
-    const {interval} = parseSingle('1c dot €');
+    const {interval} = parseSingle('€ dot 1c');
     expect(interval.toString()).toBe('1');
   });
 
@@ -1124,7 +1124,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has unicode dot product between vals and intervals', () => {
-    const plenty = evaluate('str(P8·€)');
+    const plenty = evaluate('str(€ · P8)');
     expect(plenty).toBe('1200');
   });
 
@@ -1877,7 +1877,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('knows the tetracot comma is tempered out in 4@3/2.10/9', () => {
-    const {interval} = parseSingle('20000/19683 dot 4@3/2.10/9');
+    const {interval} = parseSingle('4@3/2.10/9 dot 20000/19683');
     expect(interval.valueOf()).toBe(0);
   });
 

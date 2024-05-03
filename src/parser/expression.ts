@@ -1310,7 +1310,7 @@ export class ExpressionVisitor {
             return left.mmod(right, true);
           case '·':
           case 'dot':
-            return left.dot(right);
+            throw new Error('Dot product between intervals requires a tilde.');
           case 'rd':
             return left.reduce(right);
           case 'rdc':
@@ -1360,7 +1360,13 @@ export class ExpressionVisitor {
             return left.mul(right);
           case '·':
           case 'dot':
-            return left.dot(right);
+            if (node.preferLeft || node.preferRight) {
+              return left.dot(right);
+            } else {
+              throw new Error(
+                'Dot product between a val and an interval must be in the correct order.'
+              );
+            }
           case 'tmpr':
             return temper.bind(this)(right, left);
         }
@@ -1390,7 +1396,11 @@ export class ExpressionVisitor {
             return left.sub(right);
           case '·':
           case 'dot':
-            return left.dot(right);
+            if (node.preferLeft || node.preferRight) {
+              return left.dot(right);
+            } else {
+              throw new Error('Dot product between vals requires a tilde.');
+            }
         }
         throw new Error(`Operator '${operator}' not implemented between vals.`);
       }

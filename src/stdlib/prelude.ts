@@ -179,7 +179,7 @@ riff sign(x) {
 }
 riff oddLimitOf(x, equave = 2) {
   "Calculate the odd limit of x. Here 'odd' means not divisible by the equave.";
-  const noEquaves = x ~% equave^(x dot %logarithmic(equave));
+  const noEquaves = x ~% equave^(%logarithmic(equave) dot x);
   return numerator(noEquaves) max denominator(noEquaves);
 }
 riff weilHeight(x) {

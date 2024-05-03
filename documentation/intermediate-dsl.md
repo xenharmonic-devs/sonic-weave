@@ -601,13 +601,15 @@ The steps-of (`sof`) operator mainly exists to work around backslash escapes ins
 
 | Name                   | Linear         | Result   | Logarithmic       | Result     |
 | ---------------------- | -------------- | -------- | ----------------- | ---------- |
-| Interval dot product   | `4 dot 8`      | `6`      | `[2> · [3>`       | `6`        |
 | Val-interval product   | `12@ · 3/2`    | `7`      | `<12 19] dot P5`  | `7`        |
+| Interval dot product   | `4 ~dot 8`     | `6`      | `[2> ~· [3>`      | `6`        |
 | Explicit tempering     | `12@ tmpr 3/2` | `7\12`   | `<12 19] tmpr P5` | `7\12`     |
 
 The dot product ignores domain and the result is always a linear scalar. It is suggestive of the bra-ket between covectors and vectors <12 19 28 | -4 4 -1> gets rendered `<12 19 28] · [-4 4 -1>` in legal syntax (evaluating to `0`).
 
-Beware that the dot product between cologarithmic quantities is unweighted. The value of `5@ dot 7@` depends on the default number of components in the runtime. When restricted to a prime limit like 5 here the result is well-defined `5@.5 dot 7@.5` is the same as `<5 8 12] · <7 11 16]` and evaluates to `5*7 + 8*11 + 12*16` or `315`.
+The dot product is meaningful only between a val and an interval and the operands must be given in the correct order. Use `~dot~` for hacking and monzo/val component extraction.
+
+Beware that the dot product between cologarithmic quantities is unweighted. The value of `5@ ~dot 7@` depends on the default number of components in the runtime. When restricted to a prime limit like 5 here the result is well-defined `5@.5 ~dot 7@.5` is the same as `<5 8 12] ~· <7 11 16]` and evaluates to `5*7 + 8*11 + 12*16` or `315`.
 
 Explicit tempering is basically the dot product multipled with one step of the equal temperament associated with the val if we ignore the [technicalities](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md).
 
