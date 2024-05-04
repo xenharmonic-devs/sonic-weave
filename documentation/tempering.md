@@ -22,7 +22,11 @@ The linear unary inverse operator has no logarithmic analogue so `%logarithmic(2
 
 By default a geometric inverse is only associated with the monzo it's the inverse of. To change the association use the `withEquave(...)` built-in function. To obtain the associated equave (as a linear quantity) use the `equaveOf(...)` function.
 
-By default co-vectors are associated with the octave so the basis of the co-logarithmic domain consists of `%logarithmic(2)`, `withEquave(%logarithmic(3), 2)`, `withEquave(%logarithmic(5), 2)`, etc. so a val literal such as `<12 19 28]` means `12 * %logarithmic(2) + 19 * withEquave(%logarithmic(3), 2) + 28 * withEquave(%logarithmic(5), 2)` if spelled out in full.
+By default co-vectors are associated with the octave so the basis of the co-logarithmic domain consists of `%logarithmic(2)`, `withEquave(%logarithmic(3), 2)`, `withEquave(%logarithmic(5), 2)`, etc. so a val literal such as `<12 19 28]` means
+```c
+12 * %logarithmic(2) + 19 * withEquave(%logarithmic(3), 2) + 28 * withEquave(%logarithmic(5), 2)
+```
+if spelled out in full.
 
 ### Dot product
 The dot product between a val and a monzo is straighforward enough: `<12 19 28] dot [-3 1 1>` evaluates to `12*(-3) + 19*1 + 28*1` or `11` in total.
@@ -30,7 +34,11 @@ The dot product between a val and a monzo is straighforward enough: `<12 19 28] 
 ### Tempering operator
 The association with an equave is important in tempering to know which equal temperament we're targetting. The `tmpr` operator infers the number of divisions from `val dot equaveOf(val)`. It's also more graceful with a higher prime tail and leaves it alone.
 
-The operation `v tmpr m` is equivalent to `((v dot relative(m)) \ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))`. E.g. `<12 19 28] tmpr 7/5` evaluates to `[-28/12 0 0 1>`.
+The operation `v tmpr m` is equivalent to:
+```c
+((v dot relative(m)) \ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))
+```
+E.g. `<12 19 28] tmpr 7/5` evaluates to `[-28/12 0 0 1>`.
 
 In practice the higher prime tail is usually irrelevant and the vals have enough components to map everything. `12@ tmpr 7/5` is simply `6\12`. The equave association does come into play though: `withEquave(12@, 3) tmpr 7/5` evaluates to `6\19<3>` owing to the three's component being 19 here.
 
@@ -51,10 +59,8 @@ All of this "co-logarithmic" machinery seems overengineered compared to a simple
 
 Choosing between `<17 27 39]` and `<17 27 40]` lets us decide if *all* major thirds should be `5\17` or *all* major sixths should be `13\17` and avoid confusing situations where relative intervals jump all over the place even if they happen to be more accurate individually when measured against the root note.
 
-## Old docs
-TODO: Review and update
-
-In SonicWeave tempering refers to measuring the prime counts of intervals and replacing the primes with close (or at least consistent) approximations.
+### Round only once
+While a simple `i => i by~ step` doesn't work consistently we can still think of tempering as rounding each prime `2 by~ step`, `3 by~ step`, `5 by~ step` etc. and using those in place of the original primes.
 
 Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
 
@@ -75,20 +81,7 @@ const st = 2^1/12 // One semitone
 ```
 Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
 
-### Implicit tempering
-The above could've been achieved by
-```javascript
-[5/4, 3/2, 2]
-i => 12@ dot i \ 12
-```
-The only difference is the logarithmic format `$ = [4\12, 7\12, 12\12]`.
-
-The default action when encountering a val such as `12@` is to temper the current scale with it.
-
-The operation implied is `i => 12@ tmpr i` which takes the equave of the val into account and handles higher prime tails gracefully.
-
-The above reduces to
-```javascript
-[5/4, 3/2, 2]
-12@
+The the 5-limit val `12@2.3.5` = `<12 19 28]` can be obtained using this method as well:
+```c
+valFromPrimeArray(([2, 3, 5] by st) /_ st)
 ```
