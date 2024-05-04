@@ -14,6 +14,7 @@ import {
   monzoToCents,
   sum,
   primeFactorize,
+  UnsignedFraction,
 } from 'xen-dev-utils';
 
 import {
@@ -206,6 +207,37 @@ export class TimeReal {
    */
   static fromFrequency(frequency: number) {
     return new TimeReal(-1, frequency);
+  }
+
+  /**
+   * Revive a {@link TimeReal} instance produced by `TimeReal.toJSON()`. Return everything else as is.
+   *
+   * Intended usage:
+   * ```ts
+   * const data = JSON.parse(serializedData, TimeReal.reviver);
+   * ```
+   *
+   * @param key Property name.
+   * @param value Property value.
+   * @returns Deserialized {@link TimeReal} instance or other data without modifications.
+   */
+  static reviver(key: string, value: any) {
+    if (typeof value === 'object' && value.type === 'TimeReal') {
+      return new TimeReal(value.timeExponent, value.value);
+    }
+    return value;
+  }
+
+  /**
+   * Serialize the time real to a JSON compatible object.
+   * @returns The serialized object with property `type` set to `'TimeReal'`.
+   */
+  toJSON() {
+    return {
+      type: 'TimeReal',
+      timeExponent: this.timeExponent,
+      value: this.value,
+    };
   }
 
   /**
@@ -1106,6 +1138,43 @@ export class TimeMonzo {
       new Fraction(0),
       monzo.map(component => new Fraction(component))
     );
+  }
+
+  /**
+   * Revive a {@link TimeMonzo} instance produced by `TimeMonzo.toJSON()`. Return everything else as is.
+   *
+   * Intended usage:
+   * ```ts
+   * const data = JSON.parse(serializedData, TimeMonzo.reviver);
+   * ```
+   *
+   * @param key Property name.
+   * @param value Property value.
+   * @returns Deserialized {@link TimeMonzo} instance or other data without modifications.
+   */
+  static reviver(key: string, value: any) {
+    if (typeof value === 'object' && value.type === 'TimeMonzo') {
+      const timeExponent = Fraction.reviver('timeExponent', value.timeExponent);
+      const primeExponents = (value.primeExponents as UnsignedFraction[]).map(
+        (component, i) => Fraction.reviver(i.toString(), component)
+      );
+      const residual = Fraction.reviver('residual', value.residual);
+      return new TimeMonzo(timeExponent, primeExponents, residual);
+    }
+    return value;
+  }
+
+  /**
+   * Serialize the time monzo to a JSON compatible object.
+   * @returns The serialized object with property `type` set to `'TimeMonzo'`.
+   */
+  toJSON() {
+    return {
+      type: 'TimeMonzo',
+      timeExponent: this.timeExponent.toJSON(),
+      primeExponents: this.primeExponents.map(component => component.toJSON()),
+      residual: this.residual.toJSON(),
+    };
   }
 
   /**

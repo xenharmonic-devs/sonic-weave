@@ -451,3 +451,46 @@ describe('Extended monzo with time', () => {
     expect(neg27.toFraction()).toBe('-27');
   });
 });
+
+describe('JSON serialization', () => {
+  it('can serialize an array of primitives, fractions and monzos', () => {
+    const data = [
+      'Hello, world!',
+      new Fraction(10, 7),
+      new TimeReal(-1, 777),
+      3.5,
+      TimeMonzo.fromFraction('81/80'),
+    ];
+    const serialized = JSON.stringify(data);
+    expect(serialized).toBe(
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}}]'
+    );
+  });
+
+  it('can deserialize an array of primitives, fractions and monzos', () => {
+    const serialized =
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}}]';
+    function reviver(key: string, value: any) {
+      return TimeMonzo.reviver(
+        key,
+        TimeReal.reviver(key, Fraction.reviver(key, value))
+      );
+    }
+    const data = JSON.parse(serialized, reviver);
+    expect(data).toHaveLength(5);
+
+    expect(data[0]).toBe('Hello, world!');
+
+    expect(data[1]).toBeInstanceOf(Fraction);
+    expect(data[1].equals('10/7')).toBe(true);
+
+    expect(data[2]).toBeInstanceOf(TimeReal);
+    expect(data[2].timeExponent).toBe(-1);
+    expect(data[2].value).toBe(777);
+
+    expect(data[3]).toBe(3.5);
+
+    expect(data[4]).toBeInstanceOf(TimeMonzo);
+    expect(data[4].toFraction().toFraction()).toBe('81/80');
+  });
+});
