@@ -23,6 +23,8 @@ import {
   inferFJSFlavor,
   integerToVectorComponent,
   MonzoLiteral,
+  literalToJSON,
+  literalFromJSON,
 } from './expression';
 import {TimeMonzo, TimeReal} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -215,6 +217,61 @@ export class Interval {
   static fromValue(value: number, convert?: Interval) {
     const real = TimeReal.fromValue(value);
     return new Interval(real, 'linear', 0, real.asDecimalLiteral(), convert);
+  }
+
+  /**
+   * Revive an {@link Interval} instance produced by `Interval.toJSON()`. Return everything else as is.
+   *
+   * Intended usage:
+   * ```ts
+   * const data = JSON.parse(serializedData, Interval.reviver);
+   * ```
+   *
+   * @param key Property name.
+   * @param value Property value.
+   * @returns Deserialized {@link Interval} instance or other data without modifications.
+   */
+  static reviver(key: string, value: any) {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      value.type === 'Interval'
+    ) {
+      let monzo: TimeMonzo | TimeReal;
+      if (value.value.type === 'TimeMonzo') {
+        monzo = TimeMonzo.reviver('value', value.value);
+      } else {
+        monzo = TimeReal.reviver('value', value.value);
+      }
+      const result = new Interval(
+        monzo,
+        value.domain,
+        value.steps,
+        literalFromJSON(value.node)
+      );
+      result.label = value.label;
+      result.color = value.color && new Color(value.color);
+      result.trackingIds = new Set(value.trackingIds);
+      return result;
+    }
+    return value;
+  }
+
+  /**
+   * Serialize the time monzo to a JSON compatible object.
+   * @returns The serialized object with property `type` set to `'TimeMonzo'`.
+   */
+  toJSON() {
+    return {
+      type: 'Interval',
+      value: this.value.toJSON(),
+      domain: this.domain,
+      steps: this.steps,
+      label: this.label,
+      color: this.color && this.color.value,
+      node: literalToJSON(this.node),
+      trackingIds: Array.from(this.trackingIds),
+    };
   }
 
   /**

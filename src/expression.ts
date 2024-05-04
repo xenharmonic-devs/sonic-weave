@@ -1046,3 +1046,104 @@ export function integerToVectorComponent(num: number): VectorComponent {
     exponent: null,
   };
 }
+
+export function literalToJSON(literal?: IntervalLiteral) {
+  if (!literal) {
+    return undefined;
+  }
+  const type = literal.type;
+  switch (literal.type) {
+    case 'IntegerLiteral':
+      return {type, value: literal.value.toString()};
+    case 'DecimalLiteral':
+      return {...literal, whole: literal.whole.toString()};
+    case 'FractionLiteral':
+      return {
+        type,
+        numerator: literal.numerator.toString(),
+        denominator: literal.denominator.toString(),
+      };
+    case 'RadicalLiteral':
+      return {
+        type,
+        argument: literal.argument.toJSON(),
+        exponent: literal.exponent.toJSON(),
+      };
+    case 'CentsLiteral':
+      return {
+        ...literal,
+        whole: literal.whole.toString(),
+      };
+    case 'SquareSuperparticular':
+      return {
+        type,
+        start: literal.start.toString(),
+        end: literal.end && literal.end.toString(),
+      };
+    case 'StepLiteral':
+    case 'NedjiLiteral':
+    case 'CentLiteral':
+    case 'ReciprocalCentLiteral':
+    case 'FJS':
+    case 'AspiringFJS':
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+    case 'HertzLiteral':
+    case 'SecondLiteral':
+    case 'ReciprocalLogarithmicHertzLiteral':
+    case 'MonzoLiteral':
+    case 'ValLiteral':
+    case 'SparseOffsetVal':
+    case 'WartsLiteral':
+      return literal;
+  }
+}
+
+export function literalFromJSON(object: any): IntervalLiteral | undefined {
+  if (object === undefined) {
+    return undefined;
+  }
+  const type: IntervalLiteral['type'] = object.type;
+  switch (type) {
+    case 'IntegerLiteral':
+      return {type, value: BigInt(object.value)};
+    case 'DecimalLiteral':
+      return {...object, whole: BigInt(object.whole)};
+    case 'FractionLiteral':
+      return {
+        type,
+        numerator: BigInt(object.numerator),
+        denominator: BigInt(object.denominator),
+      };
+    case 'RadicalLiteral':
+      return {
+        type,
+        argument: Fraction.reviver('argument', object.argument),
+        exponent: Fraction.reviver('exponent', object.exponent),
+      };
+    case 'CentsLiteral':
+      return {...object, whole: BigInt(object.whole)};
+    case 'SquareSuperparticular':
+      return {
+        type,
+        start: BigInt(object.start),
+        end: object.end && BigInt(object.end),
+      };
+    case 'StepLiteral':
+    case 'NedjiLiteral':
+    case 'CentLiteral':
+    case 'ReciprocalCentLiteral':
+    case 'FJS':
+    case 'AspiringFJS':
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+    case 'HertzLiteral':
+    case 'SecondLiteral':
+    case 'ReciprocalLogarithmicHertzLiteral':
+    case 'MonzoLiteral':
+    case 'ValLiteral':
+    case 'SparseOffsetVal':
+    case 'WartsLiteral':
+      return object;
+  }
+}

@@ -222,7 +222,11 @@ export class TimeReal {
    * @returns Deserialized {@link TimeReal} instance or other data without modifications.
    */
   static reviver(key: string, value: any) {
-    if (typeof value === 'object' && value.type === 'TimeReal') {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      value.type === 'TimeReal'
+    ) {
       return new TimeReal(value.timeExponent, value.value);
     }
     return value;
@@ -1153,7 +1157,11 @@ export class TimeMonzo {
    * @returns Deserialized {@link TimeMonzo} instance or other data without modifications.
    */
   static reviver(key: string, value: any) {
-    if (typeof value === 'object' && value.type === 'TimeMonzo') {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      value.type === 'TimeMonzo'
+    ) {
       const timeExponent = Fraction.reviver('timeExponent', value.timeExponent);
       const primeExponents = (value.primeExponents as UnsignedFraction[]).map(
         (component, i) => Fraction.reviver(i.toString(), component)
