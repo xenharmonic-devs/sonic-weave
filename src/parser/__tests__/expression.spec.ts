@@ -1779,23 +1779,28 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has "Aug" as an alternative spelling for "a"', () => {
-    const {interval} = parseSingle('Aug4');
-    expect(interval.toFraction().toFraction()).toBe('729/512');
+    const {fraction} = parseSingle('Aug4');
+    expect(fraction).toBe('729/512');
   });
 
   it('has "dim" as an alternative spelling for "d"', () => {
-    const {interval} = parseSingle('dim5');
-    expect(interval.toFraction().toFraction()).toBe('1024/729');
+    const {fraction} = parseSingle('dim5');
+    expect(fraction).toBe('1024/729');
   });
 
   it('has a porkupine inflection', () => {
-    const {interval} = parseSingle('⅓m3_6l');
-    expect(interval.toFraction().toFraction()).toBe('6/5');
+    const {fraction} = parseSingle('⅓m3_6l');
+    expect(fraction).toBe('6/5');
   });
 
   it('is a wizard, Harry!', () => {
-    const {interval} = parseSingle('⅓M2_7l');
-    expect(interval.toFraction().toFraction()).toBe('11/10');
+    const {fraction} = parseSingle('⅓M2_7l');
+    expect(fraction).toBe('11/10');
+  });
+
+  it('has amity', () => {
+    const {fraction} = parseSingle('⅗M2^9l');
+    expect(fraction).toBe('10/9');
   });
 
   it('has binary prefixes for mild amusement', () => {
