@@ -418,6 +418,7 @@ export function expressionToString(node: Expression) {
     case 'CentsLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
+    case 'ReciprocalLogarithmicHertzLiteral':
     case 'FJS':
     case 'AspiringFJS':
     case 'AbsoluteFJS':

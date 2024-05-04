@@ -172,6 +172,7 @@ const KIBI_MONZO = new TimeMonzo(ZERO, [F(10)]);
 const CENT_MONZO = new TimeMonzo(ZERO, [F(1, 1200)]);
 const CENT_REAL = new TimeReal(0, 1.0005777895065548);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [F(1200)]);
+const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
 
 function typesCompatible(
   a: IntervalLiteral | undefined,
@@ -324,6 +325,10 @@ export class ExpressionVisitor {
       case 'ReciprocalCentLiteral':
         return new Val(RECIPROCAL_CENT_MONZO, TWO_MONZO, {
           type: 'ReciprocalCentLiteral',
+        });
+      case 'ReciprocalLogarithmicHertzLiteral':
+        return new Val(HERTZ_MONZO, HERTZ_MONZO, {
+          type: 'ReciprocalLogarithmicHertzLiteral',
         });
       case 'TrueLiteral':
         return true;

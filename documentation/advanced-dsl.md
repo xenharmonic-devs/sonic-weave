@@ -416,10 +416,11 @@ Pitch can be declared as a period of oscillation, but it's coearced to Hz to pre
 E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 
 ### Obscure types
-| Type   | Literal | Meaning                                                |
-| ------ | ------- | ------------------------------------------------------ |
-| Second | `1s`    | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1`      |
-| Jorp   | `€`     | Geometric inverse of `c` i.e. `€` is equal to `<1200]` |
+| Type         | Literal | Meaning                                                |
+| ------------ | ------- | ------------------------------------------------------ |
+| Second       | `1s`    | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1`      |
+| Jorp         | `€`     | Geometric inverse of `c` i.e. `€` is equal to `<1200]` |
+| Pilcrowspoob | `¶`     | Geometric inverse of `logarithmic(1Hz)`                |
 
 ### Obscure operations
 | Name                      | Linear       | Result   | Logarithmic      | Result     |

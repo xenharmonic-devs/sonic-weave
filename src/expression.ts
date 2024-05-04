@@ -144,6 +144,10 @@ export type SecondLiteral = {
   prefix: MetricPrefix | BinaryPrefix;
 };
 
+export type ReciprocalLogarithmicHertzLiteral = {
+  type: 'ReciprocalLogarithmicHertzLiteral';
+};
+
 export type FJS = {
   type: 'FJS';
   ups: number;
@@ -245,6 +249,7 @@ export type IntervalLiteral =
   | AspiringAbsoluteFJS
   | HertzLiteral
   | SecondLiteral
+  | ReciprocalLogarithmicHertzLiteral
   | MonzoLiteral
   | ValLiteral
   | SparseOffsetVal
@@ -958,6 +963,8 @@ export function literalToString(literal: IntervalLiteral) {
       return `${literal.real ? 'r' : ''}¢`;
     case 'ReciprocalCentLiteral':
       return '€';
+    case 'ReciprocalLogarithmicHertzLiteral':
+      return '¶';
     case 'FJS':
       return formatFJS(literal);
     case 'AbsoluteFJS':

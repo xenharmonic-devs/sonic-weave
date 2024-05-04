@@ -894,6 +894,7 @@ Quantity
   = WartsLiteral
   / SparseOffsetVal
   / ReciprocalCentLiteral
+  / ReciprocalLogarithmicHertzLiteral
   / MonzoLiteral
   / ValLiteral
   / DownExpression
@@ -1143,6 +1144,9 @@ SecondLiteral
 
 ReciprocalCentLiteral
   = '€' { return { type: 'ReciprocalCentLiteral' }; }
+
+ReciprocalLogarithmicHertzLiteral
+  = '¶' { return { type: 'ReciprocalLogarithmicHertzLiteral' }; }
 
 NoneLiteral
   = NoneToken { return { type: 'NoneLiteral' }; }
