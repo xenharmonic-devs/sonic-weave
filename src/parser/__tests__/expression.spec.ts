@@ -2324,4 +2324,10 @@ describe('Poor grammar / Fun with "<"', () => {
       '[2.718281828459045r, 3.141592653589793r, 3.564903478720541r, 3.988214303851289r]'
     );
   });
+
+  it('can convert the semioctave to a linear real value', () => {
+    const sqrt2 = evaluate('real(1\\2)') as Interval;
+    expect(sqrt2.domain).toBe('linear');
+    expect(sqrt2.valueOf()).toBeCloseTo(Math.SQRT2);
+  });
 });

@@ -259,9 +259,10 @@ riff mul(...factors) {
 riff stackLinear(array = $$) {
   "Cumulatively sum the numbers of the current/given array.";
   $ = array;
-  let i = 0;
-  while (++i < length($))
-    $[i] ~+= $[i-1];
+  let i = 0r;
+  const len = real(length($));
+  while (++i < len)
+    $[i] ~+= $[i-1r];
   return;
 }
 
@@ -274,9 +275,10 @@ riff cumsum(array) {
 riff stack(array = $$) {
   "Cumulatively stack the current/given intervals on top of each other.";
   $ = array;
-  let i = 0;
-  while (++i < length($))
-    $[i] ~*= $[i-1];
+  let i = 0r;
+  const len = real(length($));
+  while (++i < len)
+    $[i] ~*= $[i-1r];
   return;
 }
 
@@ -295,17 +297,17 @@ riff stacked(array) {
 riff diff(array) {
   "Calculate the (linear) differences between the terms.";
   array;
-  let i = length($);
+  let i = real(length($));
   while (--i)
-    $[i] ~-= $[i - 1];
+    $[i] ~-= $[i - 1r];
 }
 
 riff unstack(array = $$) {
   "Unstack the current/given scale into steps.";
   $ = array;
-  let i = length($);
+  let i = real(length($));
   while (--i)
-    $[i] ~%= $[i - 1];
+    $[i] ~%= $[i - 1r];
   return;
 }
 
@@ -325,9 +327,9 @@ riff unperiostack(array = $$) {
   "Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.";
   $ = array;
   const first = $[0] ~% $[-1];
-  let i = length($);
+  let i = real(length($));
   while (--i)
-    $[i] ~%= $[i - 1];
+    $[i] ~%= $[i - 1r];
   $[0] = first;
   return;
 }
@@ -344,9 +346,10 @@ riff periostack(guideGenerator, array = $$) {
     throw "Guide generator must be an interval.";
   $ = array;
   $[0] ~*= guideGenerator;
-  let i = 0;
-  while (++i < length($))
-    $[i] ~*= $[i-1];
+  let i = 0r;
+  const len = real(length($));
+  while (++i < len)
+    $[i] ~*= $[i-1r];
   return;
 }
 
@@ -359,8 +362,9 @@ riff antiperiodiff(constantOfIntegration, array) {
 riff label(labels, scale = $$) {
   "Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.";
   if (isArray(labels)) {
-    let i = -1;
-    while (++i < length(labels) min length(scale))
+    let i = -1r;
+    const len = real(length(labels) min length(scale));
+    while (++i < len)
       scale[i] = scale[i] labels[i];
   } else {
     remap(i => i labels, scale);
@@ -386,7 +390,8 @@ riff enumerate(array = $$) {
 
 riff tune(a, b, numIter = 1, weighting = 'tenney') {
   "Find a combination of two vals that is closer to just intonation.";
-  while (0 <= --numIter) {
+  numIter = real(numIter) + 1r;
+  while (--numIter) {
     const x = 2 * a - b;
     const y = a + b;
     const z = 2 * b - a;
@@ -398,7 +403,8 @@ riff tune(a, b, numIter = 1, weighting = 'tenney') {
 
 riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
   "Find a combination of three vals that is closer to just intonation.";
-  while (0 <= --numIter) {
+  numIter = real(numIter) + 1r;
+  while (--numIter) {
     const combos = [
       a,
       b,
@@ -581,9 +587,11 @@ riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
   period;
   equaveReduce();
   sort();
-  let i = -1;
+  let i = -1r;
+  const len = real(length(generators));
+  ordinal = real(ordinal);
   while (ordinal) {
-    accumulator *~= generators[++i mod length(generators)];
+    accumulator *~= generators[++i mod len];
     push(accumulator ~rd period, $$);
     if (length($$) > maxSize) {
       throw "No constant structure found before reaching maximum size.";
@@ -760,7 +768,7 @@ riff o(scale = $$) {
 riff rotate(onto = 1, scale = $$) {
   "Rotate the current/given scale onto the given degree.";
   $ = scale;
-  onto = onto mod length($);
+  onto = real(onto mod length($));
   if (not onto) return;
   const equave = $[-1];
   while (--onto) equave *~ shift();

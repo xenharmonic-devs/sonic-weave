@@ -1022,10 +1022,28 @@ export class ExpressionVisitor {
       return argument.map(x => u(x, operator)) as Interval[];
     }
     if (typeof argument === 'boolean' || argument instanceof Interval) {
-      if (operator === '++') {
-        return upcastBool(argument).add(linearOne());
+      argument = upcastBool(argument);
+      if (argument.domain !== 'linear') {
+        throw new Error(
+          'Only linear quantities may be incremented or decremented.'
+        );
       }
-      return upcastBool(argument).sub(linearOne());
+      if (argument.value instanceof TimeReal && !argument.value.timeExponent) {
+        if (operator === '++') {
+          return new Interval(
+            TimeReal.fromValue(argument.value.value + 1),
+            'linear'
+          );
+        }
+        return new Interval(
+          TimeReal.fromValue(argument.value.value - 1),
+          'linear'
+        );
+      }
+      if (operator === '++') {
+        return argument.add(linearOne());
+      }
+      return argument.sub(linearOne());
     }
     throw new Error('Only intervals may be incremented or decremented.');
   }

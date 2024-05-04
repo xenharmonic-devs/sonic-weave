@@ -1413,8 +1413,7 @@ function JIP(
   interval: SonicWeaveValue
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
-    const j = JIP.bind(this);
-    return unaryBroadcast.bind(this)(interval, j);
+    return unaryBroadcast.bind(this)(interval, JIP.bind(this));
   }
   interval = upcastBool(interval);
   const monzo = pubRelative.bind(this)(interval).value;
@@ -1429,6 +1428,24 @@ function JIP(
 }
 JIP.__doc__ = 'The Just Intonation Point. Converts intervals to real cents.';
 JIP.__node__ = builtinNode(JIP);
+
+function real(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue
+): SonicWeaveValue {
+  requireParameters({interval});
+  if (interval === true) {
+    return new Interval(TimeReal.fromValue(1), 'linear');
+  } else if (interval === false) {
+    return new Interval(TimeReal.fromValue(0), 'linear');
+  } else if (interval instanceof Interval) {
+    interval = pubRelative.bind(this)(interval);
+    return new Interval(TimeReal.fromValue(interval.valueOf()), 'linear');
+  }
+  return unaryBroadcast.bind(this)(interval, real.bind(this));
+}
+real.__doc__ = 'Convert interval to a linear real value.';
+real.__node__ = builtinNode(real);
 
 function PrimeMapping(
   this: ExpressionVisitor,
@@ -2521,6 +2538,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   withEquave,
   cosJIP,
   JIP,
+  real,
   PrimeMapping,
   tenneyHeight,
   wilsonHeight,

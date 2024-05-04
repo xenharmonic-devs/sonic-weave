@@ -297,6 +297,9 @@ Obtain a random value between (linear) 0 and 1.
 ### randomCents(*...shape*)
 Obtain random cents between (logarithmic) 0.0c and 1.0c.
 
+### real(*interval*)
+Convert interval to a linear real value.
+
 ### relative(*interval*)
 Convert interval to relative representation.
 

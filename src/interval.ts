@@ -241,6 +241,9 @@ export class Interval {
 
   /** Convert the interval to an integer. */
   toInteger(): number {
+    if (this.value instanceof TimeReal && Number.isInteger(this.value.value)) {
+      return this.value.value;
+    }
     return Number(this.value.toBigInteger());
   }
 
