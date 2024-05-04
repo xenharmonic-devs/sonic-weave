@@ -68,7 +68,7 @@ Labels are included in the `.scl` export of the [CLI](https://github.com/xenharm
 
 It is up to a user interface to interprete labels. Scale Workshop displays labels in a tuning table next to the scale data and in an on-screen keyboard.
 
-Scales are intended to repeat from the last interval in the scale (a.k.a. *equave*), so a user interface would use the label of `2/1` for `1/1` or `4/1` too.
+Scales are intended to repeat from the last interval in the scale (a.k.a. *equave*), so a user interface would use the label of `2/1` for `1/1`, `1/2` or `4/1` too.
 
 ### Function calls
 Functions have access to the current scale and may modify it. E.g. a call to `sort()` puts everything in ascending order.
@@ -196,7 +196,7 @@ let x, r
 // r has value [2, 3, 4]
 ```
 
-### Re-assignment
+### Operator re-assignment
 Variables can be reassigned after declaration e.g. with `let i = 2` the statement `i += 3` sets `i` to `5`.
 
 ## Statements / line endings
@@ -218,12 +218,12 @@ Values in SonicWeave fall into these categories
 | None     | `niente`                 | _Niente_ is used in music notation and means _nothing_ in Italian.   |
 | String   | `'hello'`                | Both single and double quoted strings are supported. Used for note labels.                  |
 | Color    | `#ff00ff`                | CSS colors, short hexadecimal, and long hexadecimal colors supported. Used for note colors. |
-| Boolean  | `true` or `false`        | Converted to `1` or `0` inside scales.                               |
+| Boolean  | `true` or `false`        | Converted to `1` or `0` inside scales. Used in boolean indexing.     |
 | Interval | `7/5`                    | There are many kinds of intervals with their own operator semantics. |
 | Val      | `12@`                    | Used to convert scales in just intonation to equal temperaments.     |
 | Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals.            |
 | Record   | `{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings.                                 |
-| Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase.                  |
+| Function | `riff f(x){ x+1 }`       | _Riff_ is a music term for a short repeated phrase.                  |
 
 ## Interval domains
 
@@ -335,18 +335,18 @@ C4 = 200 Hz = 1
 C5               // Same as 400 Hz
 ```
 
-The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something between neutral and major thirds above 200 Hz.
+The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something between a neutral and a major third above 200 Hz.
 
 ## Interval types
 
 | Type         | Examples                | Domain        | Echelon   | Notes |
 | ------------ | ----------------------- | ------------- | --------- | ----- |
 | Integer      | `2`, `5`                | Linear        | Relative  | Same as `2/1` or `5/1`. |
-| Decimal      | `1,2`, `1.4e0`          | Linear        | Relative  | Decimal commas only work in isolation. |
+| Decimal      | `1.2e`, `1.4e0`         | Linear        | Relative  | Decimal commas (`1,2`) only work on isolated lines. |
 | Fraction     | `4/3`, `10/7`           | Linear        | Relative  | The fraction slash binds stronger than exponentiation |
 | N-of-EDO     | `1\5`, `7\12`           | Logarithmic   | Relative  | `n\m` means `n` steps of `m` equal divisions of the octave `2/1`. |
 | N-of-EDJI    | `9\13<3>`, `2\5<3/2>`   | Logarithmic   | Relative  | `n\m<p/q>` means `n` steps of `m` equal divisions of the ratio `p/q`. |
-| Step         | `7°`, `13 edosteps`     | Logarithmic   | Relative  | Correspond to edo-steps after tempering is applied. |
+| Step         | `7°`, `13 edosteps`     | Logarithmic   | Relative  | Correspond to edo-steps when tempering is applied. |
 | Cents        | `701.955`, `100c`       | Logarithmic   | Relative  | One centisemitone `1.0` is equal to `1\1200`. |
 | Monzo        | `[-4 4 -1>`, `[1,-1/2>` | Logarithmic   | Relative  | Also known as prime count vectors. Each component is an exponent of a prime number factor. |
 | FJS          | `P5`, `M3^5`            | Logarithmic   | Relative  | [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) |
@@ -358,7 +358,7 @@ The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 | SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |
 
-*) The echelon of absolute FJS depends on whether or not the reference pitch declaration was relative or absolute.
+*) The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
 
 ### Numeric separators
 It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
@@ -440,6 +440,8 @@ niente al print('This executes as well')
 0      al print("This won't execute")
 ```
 
+The `al` operator is the same as `??` in JavaScript. It's main use is to provide default values for uninitialized variables. The musical inspiration is to read `foo al bar` as *"foo in the style of bar"*.
+
 #### Array
 | Name             | Operator  |
 | ---------------- | --------- |
@@ -503,13 +505,15 @@ Binary operation is vectorized elementwise:
 Vectorized versions of logical operators work on plain values too and do not short-circuit. `P8 white vor pop()` is a handy expression to swap out the last interval for a white-colored octave because the `pop()` command executes without further effects.
 
 #### Boolean
-| Strict equality        | `==` |
-| Strict inequality      | `<>` |
-| Size equality          | `~=` |
-| Greater than           | `>`  |
-| Greater than or equal  | `>=` |
-| Less than              | `<`  |
-| Less than or equal     | `<=` |
+| Name                   | Operator |
+| ---------------------- | -------- |
+| Strict equality        | `==`     |
+| Strict inequality      | `<>`     |
+| Size equality          | `~=`     |
+| Greater than           | `>`      |
+| Greater than or equal  | `>=`     |
+| Less than              | `<`      |
+| Less than or equal     | `<=`     |
 
 All boolean operators vectorize over arrays. `[1, 2] == [1, 3]` evaluates to `[true, false]`.
 
@@ -707,7 +711,7 @@ Use square brackets to access array elements. Indexing starts from zero. Negativ
 Accessing an array out of bounds raises an exception. Javascript-like behavior is available using `~[]` e.g. `arr~[777]` evaluates to `niente` if the array doesn't have at least 778 elements.
 
 #### Using an array of indices
-To obtain a subset of an array use an array of indices e.g. `[1, 2, 3, 4][0, 2]` evaluates to `[1, 3]`.
+To obtain a subset of an array use an array of indices e.g. `[1, 2, 3, 4][[0, 2]]` evaluates to `[1, 3]`.
 
 #### Using an array of booleans
 Another way to obtain a subset is to use an array of booleans. This works especially well with vectorized operators like `>` here:
@@ -780,7 +784,7 @@ We need a new interval quality to describe the difference between major and neut
 
 A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `sa6` is `M6 + sa1` while semidiminished starts from minor e.g. `sd7` is `m7 + sd1`.
 
-Perfectable intervals are more straightforwarde.g. `sa4` is simply `P4 + sa1` or `32/27^3/2` if expressed linearly.
+Perfectable intervals are more straightforward e.g. `sa4` is simply `P4 + sa1` or `32/27 ^ 3/2` if expressed linearly.
 
 ### Semisharps and semiflats
 The accidental associated with `sa1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
@@ -793,7 +797,7 @@ For example the neutral third above `C4` is `Ed4`.
 | `sb`, `½b` `s♭`, `½♭`, `𝄳`, `d`       | `[11/2 -7/2>` | `-56.843`     |
 
 ### Mids
-Another way to conceptualize *neutralness* is to investigate the diatonic scale. Not counting the octave, it has exactly two sizes per interval class. The midpoint between the narrower and wider sixths `n6` agrees with the concept of centralness w.r.t. diminished and augmented, but the midpoint between the narrow and wide fourths `(P4 + a4) / 2` is lopsided at `sa4`. SonicWeave still accepts it as the neutral fourth `n4` or *mid fourth* from [ups-and-downs](https://en.xen.wiki/w/Ups_and_downs_notation). The midpoint between the narrow and wide fifths `(d5 + P5)/2` or `sd5` has the alias `n5`.
+Another way to conceptualize *neutralness* is to investigate the diatonic scale. Not counting the octave, it has exactly two sizes per interval class. The midpoint between the narrower and wider sixths `n6` agrees with the concept of centralness w.r.t. diminished and augmented, but the midpoint between the narrow and wide fourths `(P4 + a4) / 2` is lopsided at `sa4`. SonicWeave still accepts it as the neutral fourth `n4` or *mid fourth* from [ups-and-downs](https://en.xen.wiki/w/Ups_and_downs_notation). The midpoint between the narrow and wide fifths `(d5 + P5)/2` or `sd5` has the alias `n5`. The mids are octave complements of each other `n5 == P8 - n4`. There is no mid unison or mid octave.
 
 #### Neutral FJS
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation originally applied to neutral sounding primes such as 11, 13, 29, 31 etc. In SonicWeave you must be explicit about the comma set you wish to use in order to spell `11/9` as `n3^11n` or `27/22` as `n3_11n`.
@@ -816,10 +820,10 @@ In addition to NFJS commas SonicWeave has a neutral bridging comma associated wi
 | `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`         | `-53.464`     |
 | `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>`       | `73.387`      |
 
-Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`. See [commas.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md#lumis-irrational-bridges) to learn more.
+Some of these can be handy for using neutral intervals as the center of just major and minor intervals e.g. `n3^5n` corresponds to `5/4` while `n3_5n` corresponds to `6/5`. See [commas.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md#lumis-irrational-bridges) to learn more about irrational bridging.
 
 ## Up/lift declaration
-While commonly you would declare ups and lifts in terms of edosteps, but nothing's preventing you from co-opting the system for notating just intonation and skipping the tempering step altogether.
+Usually you would declare ups and lifts in terms of edosteps, but nothing is preventing you from co-opting the system for notating just intonation and skipping the tempering step altogether.
 
 ```c
 ^ = 81/80  // Ups are syntonic now
@@ -830,3 +834,7 @@ G4       // 3/2
 ^Bb4     // 9/5
 C5       // 2/1
 ```
+
+## Next steps
+
+[Advanced DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/advanced-dsl.md)
