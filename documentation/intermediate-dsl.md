@@ -418,6 +418,12 @@ The expression `foo() lest bar()` executes `foo()` and returns the result if it 
 
 In `foo() lest bar() lest baz()` execution proceeds from left to right until an operand evaluates successfully. If all fail, the exception from `baz()` is thrown.
 
+It's the inline version of `try..catch`.
+```javascript
+fraction(P5) lest P5 // Successfully evaluates to 3/2
+fraction(PI) lest PI // Falls back to 3.141592653589793r
+```
+
 #### Coalescing
 | Name               | Example       | Result |
 | ------------------ | ------------- | ------ |

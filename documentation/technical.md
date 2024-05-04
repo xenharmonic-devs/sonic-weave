@@ -80,3 +80,7 @@ TODO: For and while loops
 ## TODO
 
 TODO: Other technical notes
+
+## Next steps
+
+The standard library of SonicWeave is written in SonicWeave. Check out the [prelude](https://github.com/xenharmonic-devs/sonic-weave/blob/main/src/stdlib/prelude.ts).
