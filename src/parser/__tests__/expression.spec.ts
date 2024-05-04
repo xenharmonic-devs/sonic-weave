@@ -2335,4 +2335,9 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(sqrt2.domain).toBe('linear');
     expect(sqrt2.valueOf()).toBeCloseTo(Math.SQRT2);
   });
+
+  it('has string representation for the geometric inverse of the Hertz', () => {
+    const whatIsThis = evaluate('str(%logarithmic(1z))');
+    expect(whatIsThis).toBe('withEquave(<1]@Hz, 1 Hz)');
+  });
 });

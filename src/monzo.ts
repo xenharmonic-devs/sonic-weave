@@ -2480,11 +2480,13 @@ export class TimeMonzo {
     }
     if (pe.length && basis.length) {
       let index = 0;
-      while (!pe[0].n) {
+      while (pe.length && !pe[0].n) {
         pe.shift();
         index++;
       }
-      basis.push({numerator: PRIMES[index], denominator: null});
+      if (pe.length) {
+        basis.push({numerator: PRIMES[index], denominator: null});
+      }
       if (pe.length > 1) {
         // Two dots looks better IMO...
         basis.push('');
