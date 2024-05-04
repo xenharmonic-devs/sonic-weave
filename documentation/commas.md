@@ -82,7 +82,7 @@ A [variant](http://www.tonalsoft.com/enc/h/hewm.aspx) of Helmholtz-Ellis by Jose
 
 ## Semifourth bridges
 
-The neutral FJS master algorithm can be generalized to semiquartals. Semifourths fill the spectrum unevenly and the primes align poorly with them so the inflections end up large in terms of size in cents. (A smaller radius of tolerance would make everything much more complex.)
+The neutral FJS master algorithm can be generalized to semiquartals. Semifourths fill the spectrum unevenly and align poorly with primes so the inflections end up large in terms of size in cents. (A smaller radius of tolerance would make everything much more complex.)
 
 | Prime  | Comma                 | Monzo                          | Size in cents |
 | ------ | --------------------- | ------------------------------ | ------------- |
@@ -115,20 +115,20 @@ A random collection of inflections to bridge from irrationals to just intonation
 
 Reasons for existence assume `C4 = 1/1`.
 
-| Identifier | Size in cents | Raison d'être      |
-| ---------- | ------------- | ------------------ |
-| `0l`       | `+0.797`      | `15/14` ~ `sm2^0l` |
-| `1l`       | `+10.485`     | `11/10` ~ `sM2_1l` |
-| `2l`       | `+56.843`     | `9/8`   ~ `n2^2l`  |
-| `3l`       | `+1.281`      | `15/13` ~ `φ4_3l`  |
-| `4l`       | `+4.018`      | `25/14` ~ `α4^4l`  |
-| `5l`       | `+17.488`     |   `7/5` ~ `ζ4_5l`  |
-| `6l`       | `+16.389`     |   `6/5` ~ `⅓m3_6l` |
-| `7l`       | `+1.011`      | `11/10` ~ `⅓M2_7l` |
-| `8l`       | `+26.343`     | `13/7`  ~ `β4_8l`  |
-| `9l`       | `+2.221`      | `21/19` ~ `sM2_9l` |
+| Identifier | Name                                                        | Comma             | Size in cents | Raison d'être      |
+| ---------- | ------------------------------------------------------------| ----------------- | ------------- | -------------------|
+| `0l`       | ?                                                           | *                 | `+0.797`      | `15/14` ~ `sm2^0l` |
+| `1l`       | ?                                                           | *                 | `+10.485`     | `11/10` ~ `sM2_1l` |
+| `2l`       | [apotomic](https://en.xen.wiki/w/2187/2048)                 | `sqrt(2187/2048)` | `+56.843`     |   `9/8` ~ `n2^2l`  |
+| `3l`       | [island](https://en.xen.wiki/w/676/675)                     | `sqrt(676/675)`   | `+1.281`      | `15/13` ~ `φ4_3l`  |
+| `4l`       | [varunismic](https://en.xen.wiki/w/Varunismic_temperaments) | `[-9/2 4 -2 1>`   | `+4.018`      | `25/14` ~ `α4^4l`  |
+| `5l`       | [jubilismic](https://en.xen.wiki/w/50/49)                   | `sqrt(50/49)`     | `+17.488`     |   `7/5` ~ `ζ4_5l`  |
+| `6l`       | [porcupine](https://en.xen.wiki/w/250/243)                  | `cbrt(250/243)`   | `+16.389`     |   `6/5` ~ `⅓m3_6l` |
+| `7l`       | [wizardharry](https://en.xen.wiki/w/4000/3993)              | `cbrt(4000/3993)` | `+1.011`      | `11/10` ~ `⅓M2_7l` |
+| `8l`       | ?                                                           | *                 | `+26.343`     |  `13/7` ~ `β4_8l`  |
+| `9l`       | [amity](https://en.xen.wiki/w/Amity_comma)                  | `[9/5 -13/5 1>`   | `1.231`       |  `10/9` ~ `⅗M2^9l` |
 
-Only the [apotomic](https://en.xen.wiki/w/2187/2048) inflection `2l` ~ `sqrt(2187/2048)`, the [island](https://en.xen.wiki/w/676/675) inflection `3l` ~ `sqrt(676/675)`, the [jubilismic](https://en.xen.wiki/w/50/49) inflection `5l` ~ `sqrt(50/49)`, the [porcupine](https://en.xen.wiki/w/250/243) inflection `6l` ~ `cbrt(250/243)` and the [wizardharry](https://en.xen.wiki/w/4000/3993) inflection `7l` ~ `cbrt(4000/3993)` have reasonable expressions. The rest are filler curiosities which should be revised by someone who's willing to do more research into irrational bridging.
+The unnamed inflections are filler curiosities which should be revised by someone who is willing to do more research into irrational bridging.
 
 The semiapotome `2l` is a handy companion of the neutral inflections. It's equivalent to a half-sharp, but allows for spellings that bring prime 3 more in line with the higher primes. For comparison with prime 5 we get these pairs of small and large intervals centered on the neutrals.
 
@@ -136,14 +136,19 @@ The semiapotome `2l` is a handy companion of the neutral inflections. It's equiv
 | ------- | ---------- | ------- | --------- |
 | `n2_2l` | `256/243`  | `n2^2l` | `9/8`     |
 | `n2_5n` | `16/15`    | `n2^5n` | `10/9`    |
+|         |            |         |           |
 | `n3_2l` | `32/27`    | `n3^2l` | `81/64`   |
 | `n3_5n` | `6/5`      | `n3^5n` | `5/4`     |
+|         |            |         |           |
 | `n4_2l` | `4/3`      | `n4^2l` | `729/512` |
 | `n4_5n` | `27/20`    | `n4^5n` | `45/32`   |
+|         |            |         |           |
 | `n5_2l` | `1024/729` | `n5^2l` | `3/2`     |
 | `n5_5n` | `64/45`    | `n5^5n` | `40/27`   |
+|         |            |         |           |
 | `n6_2l` | `128/81`   | `n6^2l` | `27/16`   |
 | `n6_5n` | `8/5`      | `n6^5n` | `5/3`     |
+|         |            |         |           |
 | `n7_2l` | `16/9`     | `n7^2l` | `243/128` |
 | `n7_5n` | `9/5`      | `n7^5n` | `15/8`    |
 
