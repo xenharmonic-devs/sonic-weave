@@ -1472,4 +1472,19 @@ describe('SonicWeave standard library', () => {
     `);
     expect(result).toBe('Deferred action triggered.');
   });
+
+  it('has Python 2 ranges (all params)', () => {
+    const range = expand('range(3, 8, 2)');
+    expect(range).toEqual(['3', '5', '7']);
+  });
+
+  it('has Python 2 ranges (start + end)', () => {
+    const range = expand('range(-1, 3)');
+    expect(range).toEqual(['-1', '0', '1', '2']);
+  });
+
+  it('has Python 2 ranges (end)', () => {
+    const range = expand('range(3)');
+    expect(range).toEqual(['0', '1', '2']);
+  });
 });

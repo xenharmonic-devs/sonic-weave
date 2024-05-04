@@ -79,6 +79,18 @@ riff values(record) {
   return map([_, value] => value, entries record);
 }
 
+riff range(start, stop = niente, step = 1) {
+  "Obtain an array of integers from \`start\` to \`stop - 1\`. When only a single parameter is given \`range(0, n)\` is returned.";
+  if (stop == niente) {
+    stop = start;
+    start = 0;
+  }
+  const result = [start, start+step .. stop];
+  if (result and result[-1] ~= stop)
+    void(pop(result));
+  return result;
+}
+
 riff sanitize(interval) {
   "Get rid of interval formatting, color and label.";
   return bleach(simplify interval);
