@@ -1,7 +1,8 @@
 import {describe, it, expect} from 'vitest';
 import {TimeMonzo} from '../monzo';
-import {intervalValueAs} from '../interval';
+import {Interval, intervalValueAs} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
+import {sw} from '../parser';
 
 describe('Idempontent formatting', () => {
   it('has stable ratios (common factor)', () => {
@@ -40,5 +41,74 @@ describe('Idempontent formatting', () => {
     }) as NedjiLiteral;
     expect(node.numerator).toBe(4);
     expect(node.denominator).toBe(12);
+  });
+});
+
+const SERIALIZED =
+  '["hello",{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":2,"d":1},{"n":1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"linear","steps":0,"label":"","node":{"type":"IntegerLiteral","value":"12"},"trackingIds":[]},12,{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":1,"d":1},{"n":1,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"linear","steps":0,"label":"","node":{"type":"DecimalLiteral","sign":"","whole":"1","fractional":"2","exponent":null,"flavor":"e"},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":0,"d":1},{"n":-1,"d":1},{"n":1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"linear","steps":0,"label":"","node":{"type":"FractionLiteral","numerator":"5","denominator":"3"},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":1,"d":3},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"linear","steps":0,"label":"","node":{"type":"RadicalLiteral","argument":{"n":2,"d":1},"exponent":{"n":1,"d":3}},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":46797,"d":80000}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"type":"CentsLiteral","sign":"","whole":"701","fractional":"955","exponent":null,"real":false},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"type":"SquareSuperparticular","start":"9","end":null},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":3,"label":"","node":{"type":"StepLiteral","count":3},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":0,"d":1},{"n":6,"d":13},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"type":"NedjiLiteral","numerator":6,"denominator":13,"equaveNumerator":3,"equaveDenominator":null},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-2,"d":1},{"n":0,"d":1},{"n":1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"ups":0,"lifts":0,"type":"FJS","pythagorean":{"type":"Pythagorean","quality":{"fraction":"","quality":"M"},"degree":{"negative":false,"base":3,"octaves":0,"imperfect":true}},"superscripts":[[5,""]],"subscripts":[]},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":1,"d":1},{"n":-2,"d":1},{"n":0,"d":1},{"n":1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"ups":0,"lifts":0,"type":"AbsoluteFJS","pitch":{"type":"AbsolutePitch","nominal":"A","accidentals":[{"fraction":"","accidental":"b"}],"octave":4},"superscripts":[[7,""]],"subscripts":[]},"trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":-1,"d":1},"primeExponents":[{"n":0,"d":1},{"n":1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":37,"d":1}},"domain":"linear","steps":0,"label":"","trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":1,"d":1},"primeExponents":[{"n":-3,"d":1},{"n":1,"d":1},{"n":-3,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},"domain":"linear","steps":0,"label":"","trackingIds":[]},{"type":"Interval","value":{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-3,"d":1},{"n":1,"d":1},{"n":1,"d":1}],"residual":{"n":1,"d":1}},"domain":"logarithmic","steps":0,"label":"","node":{"ups":0,"lifts":0,"type":"MonzoLiteral","components":[{"sign":"-","left":3,"separator":"","right":"","exponent":null},{"sign":"","left":1,"separator":"","right":"","exponent":null},{"sign":"","left":1,"separator":"","right":"","exponent":null}],"basis":[]},"trackingIds":[]}]';
+
+describe('Interval JSON serialization', () => {
+  it('can be serialized alongside other data', () => {
+    const data: any = [
+      'hello',
+      sw`12`,
+      12,
+      sw`1.2e`,
+      sw`5/3`,
+      sw`radical(2 /^ 3)`,
+      sw`701.955`,
+      sw`S9`,
+      sw`3°`,
+      sw`6\\13<3>`,
+      sw`M3^5`,
+      sw`Ab4^7`,
+      sw`111 Hz`,
+      sw`3ms`,
+      sw`[-3 1 1>`,
+    ];
+    const serialized = JSON.stringify(data);
+    expect(serialized).toBe(SERIALIZED);
+  });
+
+  it('can be deserialized alongside other data', () => {
+    const data = JSON.parse(SERIALIZED, Interval.reviver);
+    expect(data).toHaveLength(15);
+    expect(data[0]).toBe('hello');
+    expect(data[2]).toBe(12);
+    expect(data.map(datum => datum.toString())).toEqual([
+      'hello',
+      '12',
+      '12',
+      '1.2e',
+      '5/3',
+      '2^1/3',
+      '701.955',
+      'S9',
+      '3°',
+      '6\\13<3>',
+      'M3^5',
+      'Ab4^7',
+      '111 Hz',
+      '2^-3*3*5^-3*(1s)^1',
+      '[-3 1 1>',
+    ]);
+
+    expect(data.map(datum => datum.valueOf())).toEqual([
+      'hello',
+      12,
+      12,
+      1.2,
+      1.666666666666667,
+      1.2599210498948732,
+      1.499999999250199,
+      1.0124999999999997,
+      1,
+      1.6603888560010867,
+      1.25,
+      1.5555555555555558,
+      111,
+      0.003,
+      1.875,
+    ]);
   });
 });
