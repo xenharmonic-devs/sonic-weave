@@ -1,4 +1,5 @@
 import {
+  type ExportFunctionStatement,
   type ArrowFunction,
   type FunctionDeclaration,
   type Parameter,
@@ -13,7 +14,7 @@ import {ZERO} from '../utils';
  */
 export interface SonicWeaveFunction extends Function {
   __doc__: string | undefined;
-  __node__: FunctionDeclaration | ArrowFunction;
+  __node__: FunctionDeclaration | ArrowFunction | ExportFunctionStatement;
 }
 
 /**

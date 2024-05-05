@@ -1093,6 +1093,27 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       ],
     });
   });
+
+  it('has module syntax', () => {
+    const ast = parse(`
+      module foo {
+        export const bar = 1;
+        export riff baz(qux) {
+          return qux + bar;
+        }
+      }
+      import bar, baz as quux from foo;
+    `);
+    expect(ast.body[0].type).toBe('ModuleDeclaration');
+    expect(ast.body[1]).toEqual({
+      type: 'ImportStatement',
+      elements: [
+        {type: 'ImportElement', id: 'bar', alias: null},
+        {type: 'ImportElement', id: 'baz', alias: 'quux'},
+      ],
+      module: 'foo',
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
