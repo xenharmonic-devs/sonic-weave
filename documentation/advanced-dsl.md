@@ -364,25 +364,27 @@ You can also declare ups to transport notes between the two periods if you wish 
 The labels indicate the equivalent Greek nominal.
 
 ```c
-"Semioctave heptanominal alternative"
-^ = 1\2 - P4
+"Semioctave heptanominal alternative I"
+^ = Aug4 - 1\2
 
 C4 = 1/1
-^C4  "gamma"
+vC#4 "gamma"
 D4
-^D4  "delta"
+vD#4 "delta"
 E4
 F4
-^F4  "zeta"
+vF#4 "zeta"
 G4
-^G4  "eta"
+vG#4 "eta"
 A4
-^A4  "alpha"
-^Bb4 "beta"
+vA#4 "alpha"
+vB4  "beta"
 C5
 ```
 
-The unfortunate mixed spelling ^B♭ is the result of demanding beta to be a perfect fourth above zeta. It is to be tolerated if we wish the two periods to be the same one semioctave apart.
+Note how it's vB instead of vB♯ like everything else in order to have beta to be a perfect fourth above zeta. This way we get two identical periods one semioctave apart.
+
+Here the up inflection is mere 11.730 cents. You can also check out the [other alternative](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/semioctave-alternative-2.sw) where zeta = ^F instead resulting in more compact notation.
 
 ### The interordinal semifourth
 When combined with a semiaugmented unison the true tone-splitters induce the notation `m2.5` for the semifourth `P4 / 2` basically for free.
