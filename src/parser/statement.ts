@@ -36,6 +36,12 @@ import {
   WhileStatement,
   DeferStatement,
   Program,
+  ModuleDeclaration,
+  ExportConstantStatement,
+  ExportFunctionStatement,
+  ExportAllStatement,
+  ImportStatement,
+  ImportAllStatement,
 } from '../ast';
 import {
   ExpressionVisitor,
@@ -78,6 +84,13 @@ export class Interrupt {
   }
 }
 
+export const MODULE_DOCSTRING = Symbol();
+
+export type SonicWeaveModule = Map<
+  string | typeof MODULE_DOCSTRING,
+  SonicWeaveValue
+>;
+
 /**
  * Abstract syntax tree visitor for statements in a SonicWeave program.
  */
@@ -102,6 +115,18 @@ export class StatementVisitor {
    * Deferred statement to be executed at the end of the current block.
    */
   deferred: Statement[];
+  /**
+   * Exported constants and functions usually from a module declaration.
+   */
+  exports: SonicWeaveModule;
+  /**
+   * Declared modules.
+   */
+  modules: Map<string, SonicWeaveModule>;
+  /**
+   * Imported names.
+   */
+  imported: Set<string>;
 
   private rootContext_?: RootContext;
 
@@ -116,6 +141,9 @@ export class StatementVisitor {
     this.immutables = new Map();
     this.isUserRoot = false;
     this.deferred = [];
+    this.exports = new Map();
+    this.modules = new Map();
+    this.imported = new Set();
   }
 
   /**
@@ -200,6 +228,9 @@ export class StatementVisitor {
       }
     }
     for (const key of this.immutables.keys()) {
+      if (this.imported.has(key)) {
+        continue;
+      }
       const value = r(this.immutables.get(key));
       if (value.startsWith('riff') || value.startsWith('fn')) {
         if (value.includes('[native riff]')) {
@@ -269,10 +300,135 @@ export class StatementVisitor {
         throw this.visitThrowStatement(node);
       case 'DeferStatement':
         return this.visitDeferStatement(node);
+      case 'ModuleDeclaration':
+        return this.visitModuleDeclaration(node);
+      case 'ExportConstantStatement':
+        return this.visitExportConstantStatement(node);
+      case 'ExportFunctionStatement':
+        return this.visitExportFunctionStatement(node);
+      case 'ExportAllStatement':
+        return this.visitExportAllStatement(node);
+      case 'ImportStatement':
+        return this.visitImportStatement(node);
+      case 'ImportAllStatement':
+        return this.visitImportAllStatement(node);
       case 'EmptyStatement':
         return;
     }
     node satisfies never;
+  }
+
+  protected visitModuleDeclaration(node: ModuleDeclaration) {
+    const sisterVisitor = new StatementVisitor(this.parent);
+    const body = [...node.body];
+    // Extract docstring
+    let docstring = '';
+    if (
+      body.length &&
+      body[0].type === 'ExpressionStatement' &&
+      body[0].expression.type === 'StringLiteral'
+    ) {
+      docstring = body[0].expression.value;
+      body.shift();
+    }
+
+    const interrupt = sisterVisitor.executeStatements(body);
+    if (interrupt) {
+      throw new Error(`Illegal ${interrupt.type}.`);
+    }
+    const exports = sisterVisitor.exports;
+    exports.set(MODULE_DOCSTRING, docstring);
+    this.modules.set(node.name, exports);
+    return undefined;
+  }
+
+  protected visitExportConstantStatement(node: ExportConstantStatement) {
+    const name = node.parameter.id;
+    if (this.immutables.has(name) || this.mutables.has(name)) {
+      throw new Error(`Name ${name} already exists in current scope.`);
+    }
+    if (this.exports.has(name)) {
+      throw new Error(`Cannot re-export ${name}.`);
+    }
+    if (!node.parameter.defaultValue) {
+      throw new Error('An exported value is required.');
+    }
+    const subVisitor = this.createExpressionVisitor();
+    const value = subVisitor.visit(node.parameter.defaultValue);
+    this.exports.set(name, value);
+    this.immutables.set(name, value);
+    return undefined;
+  }
+
+  protected visitExportFunctionStatement(node: ExportFunctionStatement) {
+    const name = node.name.id;
+    if (this.immutables.has(name) || this.mutables.has(name)) {
+      throw new Error(`Name ${name} already exists in current scope.`);
+    }
+    if (this.exports.has(name)) {
+      throw new Error(`Cannot re-export ${name}.`);
+    }
+
+    const value = this.realizeFunction(node);
+    this.exports.set(node.name.id, value);
+    this.immutables.set(name, value);
+    return undefined;
+  }
+
+  protected getModule(name: string): SonicWeaveModule {
+    if (this.modules.has(name)) {
+      return this.modules.get(name)!;
+    }
+    if (this.parent) {
+      return this.parent.getModule(name);
+    }
+    throw new Error(`Module ${name} not found.`);
+  }
+
+  protected visitExportAllStatement(node: ExportAllStatement) {
+    const exports = this.getModule(node.module);
+    for (const [name, value] of exports) {
+      if (name === MODULE_DOCSTRING) {
+        continue;
+      }
+      if (this.exports.has(name)) {
+        throw new Error(`Export * would overwrite ${name}.`);
+      }
+      this.exports.set(name, value);
+    }
+    return undefined;
+  }
+
+  protected visitImportStatement(node: ImportStatement) {
+    const exports = this.getModule(node.module);
+    for (const element of node.elements) {
+      const alias = element.alias ?? element.id;
+      if (this.immutables.has(alias)) {
+        throw new Error(`Name ${alias} is already in use.`);
+      }
+      if (!exports.has(element.id)) {
+        throw new Error(`Module does not export name ${element.id}.`);
+      }
+      const value = exports.get(element.id);
+      this.immutables.set(alias, value);
+      this.imported.add(alias);
+    }
+    return undefined;
+  }
+
+  protected visitImportAllStatement(node: ImportAllStatement) {
+    const exports = this.getModule(node.module);
+    for (const [name, value] of exports) {
+      if (name === MODULE_DOCSTRING) {
+        continue;
+      }
+      if (this.immutables.has(name)) {
+        throw new Error(`Import * would overwrite ${name}.`);
+      }
+      this.immutables.set(name, value);
+      this.imported.add(name);
+    }
+    return undefined;
   }
 
   protected visitDeferStatement(node: DeferStatement) {
@@ -942,7 +1098,9 @@ export class StatementVisitor {
     return undefined;
   }
 
-  protected visitFunctionDeclaration(node: FunctionDeclaration) {
+  protected realizeFunction(
+    node: FunctionDeclaration | ExportFunctionStatement
+  ) {
     // Extract docstring
     node = {...node};
     node.body = [...node.body];
@@ -981,7 +1139,17 @@ export class StatementVisitor {
     });
     realization.__doc__ = docstring;
     realization.__node__ = node;
-    this.immutables.set(node.name.id, realization);
+
+    return realization;
+  }
+
+  protected visitFunctionDeclaration(node: FunctionDeclaration) {
+    const name = node.name.id;
+    if (this.immutables.has(name) || this.mutables.has(name)) {
+      throw new Error(`The name ${name} is already in use.`);
+    }
+
+    this.immutables.set(name, this.realizeFunction(node));
     return undefined;
   }
 

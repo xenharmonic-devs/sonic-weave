@@ -10,6 +10,7 @@
   const RESERVED_WORDS = new Set([
     'al',
     'and',
+    'as',
     'break',
     'by',
     'catch',
@@ -20,11 +21,14 @@
     'drop',
     'ed',
     'else',
+    'export',
     'false',
     'finally',
     'fn',
     'for',
+    'from',
     'if',
+    'import',
     'in',
     'lest',
     'let',
@@ -34,6 +38,7 @@
     'min',
     'mod',
     'modc',
+    'module',
     'niente',
     'not',
     'of',
@@ -130,6 +135,7 @@ Program
 
 AlToken            = @'al'       !IdentifierPart
 AndToken           = @'and'      !IdentifierPart
+AsToken            = @'as'       !IdentifierPart
 BreakToken         = @'break'    !IdentifierPart
 ByToken            = @'by'       !IdentifierPart
 CatchToken         = @'catch'    !IdentifierPart
@@ -140,10 +146,13 @@ DotToken           = @'dot'      !IdentifierPart
 DropToken          = @'drop'     !IdentifierPart
 EdToken            = @'ed'       !IdentifierPart
 ElseToken          = @'else'     !IdentifierPart
+ExportToken        = @'export'   !IdentifierPart
 FalseToken         = @'false'    !IdentifierPart
 FinallyToken       = @'finally'  !IdentifierPart
 ForToken           = @'for'      !IdentifierPart
+FromToken          = @'from'     !IdentifierPart
 IfToken            = @'if'       !IdentifierPart
+ImportToken        = @'import'   !IdentifierPart
 InToken            = @'in'       !IdentifierPart
 LestToken          = @'lest'     !IdentifierPart
 LetToken           = @'let'      !IdentifierPart
@@ -153,6 +162,7 @@ MatrixDotToken     = @'mdot'     !IdentifierPart
 MinToken           = @'min'      !IdentifierPart
 ModToken           = @'mod'      !IdentifierPart
 ModCeilingToken    = @'modc'     !IdentifierPart
+ModuleToken        = @'module'   !IdentifierPart
 NoneToken          = @'niente'   !IdentifierPart
 NotToken           = @'not'      !IdentifierPart
 OfToken            = @'of'       !IdentifierPart
@@ -199,6 +209,12 @@ Statement
   / IterationStatement
   / TryStatement
   / DeferStatement
+  / ModuleDeclaration
+  / ExportConstantStatement
+  / ExportFunctionStatement
+  / ExportAllStatement
+  / ImportAllStatement
+  / ImportStatement
   / EmptyStatement
 
 ReassignmentTail
@@ -545,6 +561,65 @@ DeferStatement
     return {
       type: 'DeferStatement',
       body,
+    };
+  }
+
+ModuleDeclaration
+  = ModuleToken _ name: Identifier _ body: BlockStatement {
+    return {
+      type: 'ModuleDeclaration',
+      name: name.id,
+      body: body.body,
+    }
+  }
+
+ExportConstantStatement
+  = ExportToken _ ConstToken _ parameter: ParameterWithDefault EOS {
+    return {
+      type: 'ExportConstantStatement',
+      parameter,
+    };
+  }
+
+ExportFunctionStatement
+  = ExportToken _ riff: FunctionDeclaration {
+    return {
+      ...riff,
+      type: 'ExportFunctionStatement',
+    };
+  }
+
+ExportAllStatement
+  = ExportToken _ '*' _ FromToken _ name: Identifier EOS {
+    return {
+      type: 'ExportAllStatement',
+      module: name.id,
+    };
+  }
+
+ImportElement
+  = name: Identifier alias: (_ AsToken _ @Identifier)? {
+    return {
+      type: 'ImportElement',
+      id: name.id,
+      alias: alias && alias.id,
+    };
+  }
+
+ImportStatement
+  = ImportToken _ elements: ImportElement|1.., _ ',' _| _ FromToken _ name: Identifier EOS {
+  return {
+    type: 'ImportStatement',
+    elements,
+    module: name.id,
+  };
+}
+
+ImportAllStatement
+  = ImportToken _ '*' _ FromToken _ name: Identifier EOS {
+    return {
+      type: 'ImportAllStatement',
+      module: name.id,
     };
   }
 

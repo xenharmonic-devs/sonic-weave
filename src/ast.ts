@@ -208,6 +208,44 @@ export type DeferStatement = {
   body: Statement;
 };
 
+export type ModuleDeclaration = {
+  type: 'ModuleDeclaration';
+  name: string;
+  body: Statement[];
+};
+
+export type ExportConstantStatement = {
+  type: 'ExportConstantStatement';
+  parameter: Parameter;
+};
+
+export interface ExportFunctionStatement
+  extends Omit<FunctionDeclaration, 'type'> {
+  type: 'ExportFunctionStatement';
+}
+
+export type ExportAllStatement = {
+  type: 'ExportAllStatement';
+  module: string;
+};
+
+export type ImportElement = {
+  type: 'ImportElement';
+  id: string;
+  alias: null | string;
+};
+
+export type ImportStatement = {
+  type: 'ImportStatement';
+  elements: ImportElement[];
+  module: string;
+};
+
+export type ImportAllStatement = {
+  type: 'ImportAllStatement';
+  module: string;
+};
+
 export type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -228,6 +266,12 @@ export type Statement =
   | IterationStatement
   | TryStatement
   | DeferStatement
+  | ModuleDeclaration
+  | ExportConstantStatement
+  | ExportFunctionStatement
+  | ExportAllStatement
+  | ImportStatement
+  | ImportAllStatement
   | ThrowStatement
   | BreakStatement
   | ContinueStatement
