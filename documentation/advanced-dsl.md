@@ -320,6 +320,70 @@ The accidentals associated with this bihexatonic scale are `r` and `p`.
 
 Tone-splitter and decanominals are associated with the `t` flavor of commas e.g. `17/12` may be spelled `ζ4^17t` (assuming `C4 = 1/1`).
 
+#### Examples
+Using these nominals C major chord is still spelled:
+```c
+"Major chord on C4"
+C4
+E4
+G4
+```
+However the lack of B necessitates that the perfect fifth in E minor becomes `βr4`:
+```c
+"Minor chord on E4"
+E4
+G4
+betar4
+```
+
+The table below samples more translations between heptatonic and dodecatonic thinking.
+
+| Heptanominal | Dodecanominal | Fraction against C4 |
+| ------------ | ------------- | ------------------- |
+| Cb4          | βp3           | 2048/2187           |
+| Gb4          | ζp4           | 1024/72             |
+| Db4          | γp4           | 256/243             |
+| Ab4          | ηp4           | 128/81              |
+| Eb4          | δp4           | 32/27               |
+| Bb4          | αp4           | 16/9                |
+| B4           | βr4           | 243/128             |
+| F#4          | ζr4           | 729/512             |
+| C#4          | γr4           | 2187/2048           |
+
+Similarly when you build a minor chord on α, you would spell it α, γ, Fr to remain dodecanominal.
+```c
+"Minor chord on α4"
+alpha4
+gamma5
+Fr5
+```
+
+#### Alternative semioctave notation
+You can also declare ups to transport notes between the two periods if you wish to avoid using more than 7 nominals while still retaining notational compatibility with most even edos.
+
+The labels indicate the equivalent Greek nominal.
+
+```c
+"Semioctave heptanominal alternative"
+^ = 1\2 - P4
+
+C4 = 1/1
+^C4  "gamma"
+D4
+^D4  "delta"
+E4
+F4
+^F4  "zeta"
+G4
+^G4  "eta"
+A4
+^A4  "alpha"
+^Bb4 "beta"
+C5
+```
+
+The unfortunate mixed spelling ^B♭ is the result of demanding beta to be a perfect fourth above zeta. It is to be tolerated if we wish the two periods to be the same one semioctave apart.
+
 ### The interordinal semifourth
 When combined with a semiaugmented unison the true tone-splitters induce the notation `m2.5` for the semifourth `P4 / 2` basically for free.
 
