@@ -85,10 +85,7 @@ riff range(start, stop = niente, step = 1) {
     stop = start;
     start = 0;
   }
-  const result = [start, start+step .. stop];
-  if (result and result[-1] ~= stop)
-    void(pop(result));
-  return result;
+  return [start, start+step .. < stop];
 }
 
 riff sanitize(interval) {
@@ -802,7 +799,7 @@ riff repeated(times = 2, scale = $$) {
     return [];
   scale;
   const equave = scale[-1];
-  for (const level of equave ~^ [1..times-1])
+  for (const level of equave ~^ [1.. < times])
     scale ~* level;
 }
 
@@ -821,7 +818,7 @@ riff repeatedLinear(times = 2, scale = $$) {
     return [];
   scale;
   const total = (scale[-1] ~- 1);
-  for (const level of total ~* [1..times-1])
+  for (const level of total ~* [1.. < times])
     (scale ~- 1) ~+ level ~+ 1;
 }
 

@@ -53,4 +53,29 @@ describe('Parenthesis counter', () => {
     const counts = parse('if(1){\n[-1 1>\n');
     expect(counts).toEqual({parens: 0, squares: 0, curlies: 1});
   });
+
+  it('works with penultimate ranges', () => {
+    const counts = parse('[1 .. < 5]');
+    expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
+  });
+
+  it('works with penultimate ranges (unclosed)', () => {
+    const counts = parse('[1 .. < 5');
+    expect(counts).toEqual({parens: 0, squares: 1, curlies: 0});
+  });
+
+  it('works with arrays', () => {
+    const counts = parse('[1, 2, "hello"]');
+    expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
+  });
+
+  it('works with arrays (unclosed)', () => {
+    const counts = parse('[1, 2, "hello"');
+    expect(counts).toEqual({parens: 0, squares: 1, curlies: 0});
+  });
+
+  it('works with subgroup tails', () => {
+    const counts = parse('[1 2>@2..');
+    expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
+  });
 });

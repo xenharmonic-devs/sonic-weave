@@ -253,6 +253,7 @@ export type ArraySlice = {
   object: Expression;
   start: Expression | null;
   second: Expression | null;
+  penultimate: boolean;
   end: Expression | null;
 };
 
@@ -338,6 +339,7 @@ export type Range = {
   type: 'Range';
   start: Expression;
   second?: Expression;
+  penultimate: boolean;
   end: Expression;
 };
 

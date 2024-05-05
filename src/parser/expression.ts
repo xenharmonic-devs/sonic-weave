@@ -852,6 +852,7 @@ export class ExpressionVisitor {
 
     let start = 0;
     let step = 1;
+    const pu = node.penultimate;
     let end = -1;
 
     if (node.start) {
@@ -887,14 +888,14 @@ export class ExpressionVisitor {
 
     if (step > 0) {
       start = Math.max(0, start);
-      if (start > end || start >= object.length) {
+      if ((pu ? start >= end : start > end) || start >= object.length) {
         return empty;
       }
       end = Math.min(object.length - 1, end);
 
       const result = [object[start]];
       let next = start + step;
-      while (next <= end) {
+      while (pu ? next < end : next <= end) {
         result.push(object[next]);
         next += step;
       }
@@ -904,14 +905,14 @@ export class ExpressionVisitor {
       return result as Interval[];
     } else if (step < 0) {
       start = Math.min(object.length - 1, start);
-      if (start < end || start < 0) {
+      if ((pu ? start <= end : start < end) || start < 0) {
         return empty;
       }
       end = Math.max(0, end);
 
       const result = [object[start]];
       let next = start + step;
-      while (next >= end) {
+      while (pu ? next > end : next >= end) {
         result.push(object[next]);
         next += step;
       }
@@ -1980,6 +1981,7 @@ export class ExpressionVisitor {
   protected visitRange(node: Range): Interval[] {
     const start = this.visit(node.start);
     const end = this.visit(node.end);
+    const pu = node.penultimate;
     if (!(start instanceof Interval && end instanceof Interval)) {
       throw new Error('Ranges must consist of intervals.');
     }
@@ -1997,23 +1999,23 @@ export class ExpressionVisitor {
       this.spendGas(Math.abs((end.valueOf() - start.valueOf()) / stepValue));
     }
     if (stepValue > 0) {
-      if (start.compare(end) > 0) {
+      if (pu ? start.compare(end) >= 0 : start.compare(end) > 0) {
         return [];
       }
       const result = [start];
       let next = start.add(step);
-      while (next.compare(end) <= 0) {
+      while (pu ? next.compare(end) < 0 : next.compare(end) <= 0) {
         result.push(next);
         next = next.add(step);
       }
       return result;
     } else if (stepValue < 0) {
-      if (start.compare(end) < 0) {
+      if (pu ? start.compare(end) <= 0 : start.compare(end) < 0) {
         return [];
       }
       const result = [start];
       let next = start.add(step);
-      while (next.compare(end) >= 0) {
+      while (pu ? next.compare(end) > 0 : next.compare(end) >= 0) {
         result.push(next);
         next = next.add(step);
       }

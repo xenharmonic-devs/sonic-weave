@@ -799,6 +799,10 @@ LabeledCommaDecimal
     return labels.reduce(operatorReducerLite, object);
   }
 
+RangeDotsPenultimate = '..' _ penultimate: '<'? {
+  return !!penultimate;
+}
+
 CallTail
   = head: (__ '(' _ @ArgumentList _ ')')
     tail: (
@@ -808,8 +812,8 @@ CallTail
       / __ '[' _ key: Expression _ ']' {
         return { type: 'AccessExpression', key };
       }
-      / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ '..' _ end: Expression? _ ']' {
-        return { type: 'ArraySlice', start, second, end };
+      / __ '[' _ start: Expression? _ second: (',' _ @Expression)? _ penultimate: RangeDotsPenultimate _ end: Expression? _ ']' {
+        return { type: 'ArraySlice', start, second, penultimate, end };
       }
     )* {
       tail.unshift({ type: 'CallExpression', args: head});
@@ -854,9 +858,9 @@ TrueAccessExpression
   }
 
 ArraySlice
-  = head: Primary tail: (_ '[' _ @Expression? @(_ ',' _ @Expression)? _ '..' _ @Expression? _ ']')* {
-    return tail.reduce( (object, [start, second, end]) => {
-      return { type: 'ArraySlice', object, start, second, end };
+  = head: Primary tail: (_ '[' _ @Expression? @(_ ',' _ @Expression)? _ @RangeDotsPenultimate _ @Expression? _ ']')* {
+    return tail.reduce( (object, [start, second, penultimate, end]) => {
+      return { type: 'ArraySlice', object, start, second, penultimate, end };
     }, head);
   }
 
@@ -922,20 +926,22 @@ Primary
   / StringLiteral
 
 UnitStepRange
-  = '[' _ start: Expression _ '..' _ end: Expression _ ']' {
+  = '[' _ start: Expression _ penultimate: RangeDotsPenultimate _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,
+      penultimate,
       end,
     };
   }
 
 StepRange
-  = '[' _ start: Expression _ ',' _ second: Expression _ '..' _ end: Expression _ ']' {
+  = '[' _ start: Expression _ ',' _ second: Expression _ penultimate: RangeDotsPenultimate _ end: Expression _ ']' {
     return {
       type: 'Range',
       start,
       second,
+      penultimate,
       end,
     };
   }

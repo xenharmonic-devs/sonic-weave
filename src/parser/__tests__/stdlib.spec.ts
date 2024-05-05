@@ -1478,7 +1478,7 @@ describe('SonicWeave standard library', () => {
     expect(range).toEqual(['3', '5', '7']);
   });
 
-  it('has Python 2 ranges (start + end)', () => {
+  it('has Python 2 ranges (start with end)', () => {
     const range = expand('range(-1, 3)');
     expect(range).toEqual(['-1', '0', '1', '2']);
   });
@@ -1486,5 +1486,10 @@ describe('SonicWeave standard library', () => {
   it('has Python 2 ranges (end)', () => {
     const range = expand('range(3)');
     expect(range).toEqual(['0', '1', '2']);
+  });
+
+  it('has Python 2 ranges (negative step)', () => {
+    const range = expand('range(3, 0, -1)');
+    expect(range).toEqual(['3', '2', '1']);
   });
 });

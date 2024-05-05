@@ -540,6 +540,16 @@ describe('SonicWeave expression evaluator', () => {
     expect(ba).toBe('ba');
   });
 
+  it('supports penultimation tag in slices', () => {
+    const oba = evaluate('"foobar"[2..<5]');
+    expect(oba).toBe('oba');
+  });
+
+  it('supports penultimation tag in slices (first two)', () => {
+    const fo = evaluate('"foobar"[..<2]');
+    expect(fo).toBe('fo');
+  });
+
   it('supports indexing on str calls', () => {
     const C = evaluate('str(C4)[0]');
     expect(C).toBe('C');
@@ -616,10 +626,15 @@ describe('SonicWeave expression evaluator', () => {
     expect(stuff).toEqual(['1', ...['2', '3'], '4']);
   });
 
-  it('cannot produce empty ranges', () => {
+  it('cannot produce empty ranges without the penultimation flag', () => {
     const zero = evaluate('[0..0]') as Interval[];
     expect(zero).toHaveLength(1);
     expect(zero[0].toInteger()).toBe(0);
+  });
+
+  it('can produce empty ranges with the penultimation flag', () => {
+    const zero = evaluate('[0..<0]') as Interval[];
+    expect(zero).toHaveLength(0);
   });
 
   it('can produce empty segments', () => {

@@ -221,6 +221,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {
         type: 'Range',
         start: {type: 'IntegerLiteral', value: 1n},
+        penultimate: false,
         end: {type: 'IntegerLiteral', value: 10n},
       },
     });
@@ -348,10 +349,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             object: {type: 'Identifier', id: 'x'},
             start: {type: 'IntegerLiteral', value: 0n},
             second: {type: 'IntegerLiteral', value: 2n},
+            penultimate: false,
             end: {type: 'IntegerLiteral', value: 10n},
           },
           start: {type: 'IntegerLiteral', value: 1n},
           second: null,
+          penultimate: false,
           end: {type: 'IntegerLiteral', value: 2n},
         },
         key: {type: 'IntegerLiteral', value: 0n},
@@ -470,6 +473,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
             object: {type: 'Identifier', id: 'arr'},
             start: null,
             second: null,
+            penultimate: false,
             end: null,
           },
           key: {type: 'IntegerLiteral', value: 1n},

@@ -6,7 +6,7 @@
   const empty = {parens: 0, squares: 0, curlies: 0};
 }}
 
-Start = _ content: (StringLiteral / MonzoLiteral / ValLiteral / Other)|.., _| _ EOF {
+Start = _ content: Expression|.., _| _ EOF {
   const result = {parens: 0, squares: 0, curlies: 0};
   for (const counts of content) {
     result.parens += counts.parens;
@@ -15,6 +15,30 @@ Start = _ content: (StringLiteral / MonzoLiteral / ValLiteral / Other)|.., _| _ 
   }
   return result;
 }
+
+Expression
+  = RangeOrSlice
+  / StringLiteral
+  / MonzoLiteral
+  / Array
+  / ValLiteral
+  / Other
+
+RangeOrSlice
+  = '[' _ Expression _ '..' _ '<'? _ Expression _ closed: ']'? {
+    if (closed) {
+      return empty;
+    }
+    return {parens: 0, squares: 1, curlies: 0};
+  }
+
+Array
+  = '[' _ Expression|.., _| _ closed: ']'? {
+    if (closed) {
+      return empty;
+    }
+    return {parens: 0, squares: 1, curlies: 0};
+  }
 
 StringLiteral
   = '"' chars: DoubleStringCharacter* '"' { return empty; }
@@ -30,7 +54,7 @@ ValLiteral
     return empty;
   }
 
-Other = (!WhiteSpace !LineTerminatorSequence !Comment SourceCharacter)+ {
+Other = (!WhiteSpace !LineTerminatorSequence !Comment !']' SourceCharacter)+ {
   const t = text();
   const parens = (t.match(/\(/g) ?? []).length - (t.match(/\)/g) ?? []).length;
   const squares = (t.match(/\[/g) ?? []).length - (t.match(/\]/g) ?? []).length;
