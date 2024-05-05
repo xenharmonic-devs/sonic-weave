@@ -97,3 +97,52 @@ The properties of `Val` are as follows:
 - `.value: TimeMonzo` the mapping entries as `.value.primeExponents`
 - `.equave: TimeMonzo` the equave of the equal temperament
 - `.node: IntervalLiteral | undefined` as virtual AST node used for string representation
+
+## Embedding SonicWeave
+Scale Workshop 3 embeds the `sonic-weave` package in order to execute source code written in SonicWeave. Here's how to do it in your application.
+
+### Parsing
+The first step is to parse text into an abstract syntax tree.
+```ts
+import {parseAST} from 'sonic-weave';
+
+// In practice the source code would come from the user of your application.
+const source = '5/4;P4 + P4;2';
+
+const program = parseAST(source);
+/*
+{
+  type: "Program",
+  body: [
+    {
+      type: "ExpressionStatement",
+      expression: [Object ...],
+    }, {
+      type: "ExpressionStatement",
+      expression: [Object ...],
+    }, {
+      type: "ExpressionStatement",
+      expression: [Object ...],
+    }
+  ],
+}
+*/
+```
+
+### Execution
+The next steps are to execute the program, collect the resulting scale consisting of `Interval` instances and convert the result to something usable by your application.
+```ts
+import {parseAST, getSourceVisitor} from 'sonic-weave';
+
+const source = '5/4;P4 + P4;2';
+
+const program = parseAST(source);
+
+const visitor = getSourceVisitor();
+visitor.executeProgram(program);
+
+const scale = visitor.currentScale;
+
+const scaleCents = scale.map(interval => interval.totalCents());
+// [ 386.3137138648349, 996.0899982692249, 1200 ]
+```
