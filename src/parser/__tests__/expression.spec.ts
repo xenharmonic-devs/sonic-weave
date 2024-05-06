@@ -100,13 +100,13 @@ describe('SonicWeave expression evaluator', () => {
     expect(fourthFifth.value.valueOf()).toBeCloseTo(1.5 ** 0.25);
   });
 
-  it('supports tone-splitter interordinal', () => {
-    const splitTone = parseSingle('n1.5');
+  it('supports tone-splitter interordinals', () => {
+    const splitTone = parseSingle('P1.5');
     expect(splitTone.value.valueOf()).toBeCloseTo(Math.sqrt(9 / 8));
   });
 
   it('supports semiquartal interordinals', () => {
-    const semifourth = parseSingle('m2.5');
+    const semifourth = parseSingle('n2.5');
     expect(semifourth.value.valueOf()).toBeCloseTo(Math.sqrt(4 / 3));
   });
 
@@ -213,7 +213,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can format the half twelfth', () => {
     const {interval} = parseSingle('P12 % 2');
-    expect(interval.toString()).toBe('m6.5');
+    expect(interval.toString()).toBe('n6.5');
   });
 
   it("bails out when there's no Pythagorean to match", () => {
@@ -516,8 +516,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('preserves absolute FJS formatting', () => {
-    const phiAt = evaluate('str(phi@4)');
-    expect(phiAt).toBe('phi@4');
+    const phiAt = evaluate('str(alpd4)');
+    expect(phiAt).toBe('alpd4');
   });
 
   it('preserves lifts on monzos', () => {
@@ -1056,7 +1056,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("has Lumi's bridging commas (island)", () => {
-    const semifourth = parseSingle('C4 = 1/1;φ4_3l');
+    const semifourth = parseSingle('C4 = 1/1;alpd4_3l');
     expect(semifourth.value.toFraction().toFraction()).toBe('15/13');
   });
 
@@ -1420,23 +1420,23 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has a semiquartal spelling for 7/6 (relative parsing)', () => {
-    const {interval} = parseSingle('m2.5^7q');
+    const {interval} = parseSingle('n2.5^7q');
     expect(interval.value.toFraction().toFraction()).toBe('7/6');
   });
 
   it('has a semiquartal spelling for 7/6 (absolute parsing)', () => {
-    const q = parseSingle('C4 = 1;phi4^7q');
+    const q = parseSingle('C4 = 1;alpd4^7q');
     expect(q.value.toFraction().toFraction()).toBe('7/6');
   });
 
   it('has a semiquartal spelling for 7/6 (relative)', () => {
     const q = evaluate('str(FJS(7/6, "q"))');
-    expect(q).toBe('m2.5^7q');
+    expect(q).toBe('n2.5^7q');
   });
 
   it('has a semiquartal spelling for 7/6 (absolute)', () => {
     const q = evaluate('str(absoluteFJS(7/6, "q"))');
-    expect(q).toBe('φ♮4^7q');
+    expect(q).toBe('αd4^7q');
   });
 
   it('has a simple semiquartal (canceling) spelling for 15/13', () => {
@@ -1449,23 +1449,13 @@ describe('SonicWeave expression evaluator', () => {
     expect(q).toBe('m2^17q_5q');
   });
 
-  it('has true semiquartal accidentals (scarab)', () => {
-    const phiScarab = parseSingle('C4 = 1;φ¤4');
-    expect(phiScarab.value.toFraction().toFraction()).toBe('81/64');
-  });
-
-  it('has true semiquartal accidentals (pound)', () => {
-    const chiPound = parseSingle('C4 = 1;χ£4');
-    expect(chiPound.value.toFraction().toFraction()).toBe('32/27');
-  });
-
   it('has a tone-splitter spelling for 24/23', () => {
-    const lesserVicesimotertial = parseSingle('n1.5_23t');
+    const lesserVicesimotertial = parseSingle('P1.5_23t');
     expect(lesserVicesimotertial.value.toFraction().toFraction()).toBe('24/23');
   });
 
   it('has semioctave spelling for 17/12', () => {
-    const zeta = parseSingle('C4 = 1; ζ4^17t');
+    const zeta = parseSingle('C4 = 1; γ4^17t');
     expect(zeta.value.toFraction().toFraction()).toBe('17/12');
   });
 
@@ -1612,11 +1602,11 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a string representation for the eighth fifth (relative)', () => {
     const {interval} = parseSingle('P5 % 8');
-    expect(interval.toString()).toBe('¼m1.5');
+    expect(interval.toString()).toBe('⅛d1.5');
   });
 
   it('parses the eighth fifth', () => {
-    const quarterMinorSesquith = parseSingle('qm1.5');
+    const quarterMinorSesquith = parseSingle('⅛d1.5');
     expect(quarterMinorSesquith.value.primeExponents[0].toFraction()).toBe(
       '-1/8'
     );
@@ -1627,23 +1617,23 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a string representation for the eighth fifth (absolute)', () => {
     const {interval} = parseSingle('absoluteFJS(P5 % 8)');
-    expect(interval.toString()).toBe('γ⅛♭4');
+    expect(interval.toString()).toBe('η⅛♭4');
   });
 
   it('parses the absolute eighth fifth (eighth flat)', () => {
-    const gamma = parseSingle('γ⅛♭4');
+    const gamma = parseSingle('η⅛♭4');
     expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
     expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');
   });
 
   it('parses the absolute eighth fifth (quarter semiflat)', () => {
-    const gamma = parseSingle('gammaqd4');
+    const gamma = parseSingle('etaqd4');
     expect(gamma.value.primeExponents[0].toFraction()).toBe('-1/8');
     expect(gamma.value.primeExponents[1].toFraction()).toBe('1/8');
   });
 
   it("is kind of weird how 4/8 - 11/8 is -7/8 and how it pairs up with 7/8 of the three's exponent", () => {
-    const {interval} = parseSingle('8 * relative(zeta⅛#4) - 7 * P5');
+    const {interval} = parseSingle('8 * relative(gam⅛#4) - 7 * P5');
     expect(interval.totalCents()).toBe(0);
   });
 
@@ -1785,12 +1775,6 @@ describe('SonicWeave expression evaluator', () => {
     const {fractionOfEquave, equave} = deeFifthFlat.value.toEqualTemperament();
     expect(fractionOfEquave.toFraction()).toBe('1/5');
     expect(equave.toFraction()).toBe('27/16');
-  });
-
-  it('can split the scarab for no particular reason', () => {
-    const whatever = parseSingle('C4 = 1;ψ⅒¤3');
-    expect(whatever.value.primeExponents[0].toFraction()).toBe('-17/10');
-    expect(whatever.value.primeExponents[1].toFraction()).toBe('19/20');
   });
 
   it('has "Aug" as an alternative spelling for "a"', () => {

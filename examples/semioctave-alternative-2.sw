@@ -2,15 +2,15 @@
 ^ = 1\2 - P4
 
 C4 = 1/1
-^C4  "gamma"
+^C4  "eta"
 D4
-^D4  "delta"
+^D4  "alpha"
 E4
 F4
-^F4  "zeta"
+^F4  "gamma"
 G4
-^G4  "eta"
+^G4  "delta"
 A4
-^A4  "alpha"
-^Bb4 "beta"
+^A4  "epsilon"
+^Bb4 "zeta"
 C5

@@ -120,12 +120,12 @@ Reasons for existence assume `C4 = 1/1`.
 | `0l`       | ?                                                           | *                 | `+0.797`      | `15/14` ~ `sm2^0l` |
 | `1l`       | ?                                                           | *                 | `+10.485`     | `11/10` ~ `sM2_1l` |
 | `2l`       | [apotomic](https://en.xen.wiki/w/2187/2048)                 | `sqrt(2187/2048)` | `+56.843`     |   `9/8` ~ `n2^2l`  |
-| `3l`       | [island](https://en.xen.wiki/w/676/675)                     | `sqrt(676/675)`   | `+1.281`      | `15/13` ~ `φ4_3l`  |
-| `4l`       | [varunismic](https://en.xen.wiki/w/Varunismic_temperaments) | `[-9/2 4 -2 1>`   | `+4.018`      | `25/14` ~ `α4^4l`  |
-| `5l`       | [jubilismic](https://en.xen.wiki/w/50/49)                   | `sqrt(50/49)`     | `+17.488`     |   `7/5` ~ `ζ4_5l`  |
+| `3l`       | [island](https://en.xen.wiki/w/676/675)                     | `sqrt(676/675)`   | `+1.281`      | `15/13` ~ `αd4_3l` |
+| `4l`       | [varunismic](https://en.xen.wiki/w/Varunismic_temperaments) | `[-9/2 4 -2 1>`   | `+4.018`      | `25/14` ~ `ε4_4l`  |
+| `5l`       | [jubilismic](https://en.xen.wiki/w/50/49)                   | `sqrt(50/49)`     | `+17.488`     |   `7/5` ~ `γ4_5l`  |
 | `6l`       | [porcupine](https://en.xen.wiki/w/250/243)                  | `cbrt(250/243)`   | `+16.389`     |   `6/5` ~ `⅓m3_6l` |
 | `7l`       | [wizardharry](https://en.xen.wiki/w/4000/3993)              | `cbrt(4000/3993)` | `+1.011`      | `11/10` ~ `⅓M2_7l` |
-| `8l`       | ?                                                           | *                 | `+26.343`     |  `13/7` ~ `β4_8l`  |
+| `8l`       | ?                                                           | *                 | `+26.343`     |  `13/7` ~ `ζ4_8l`  |
 | `9l`       | [amity](https://en.xen.wiki/w/Amity_comma)                  | `[9/5 -13/5 1>`   | `1.231`       |  `10/9` ~ `⅗M2^9l` |
 
 The unnamed inflections are filler curiosities which should be revised by someone who is willing to do more research into irrational bridging.

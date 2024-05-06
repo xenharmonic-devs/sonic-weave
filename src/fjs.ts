@@ -8,11 +8,7 @@ import {
 } from 'xen-dev-utils';
 import {TimeMonzo, TimeReal} from './monzo';
 import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression';
-import {
-  absoluteToNode,
-  absoluteToSemiquartal,
-  monzoToNode,
-} from './pythagorean';
+import {absoluteToNode, monzoToNode} from './pythagorean';
 import {
   HEJI_SWAPS,
   HEWM53_SWAPS,
@@ -430,10 +426,7 @@ export function asAbsoluteFJS(
     }
   }
   const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
-  const pitch =
-    flavor === 'q'
-      ? absoluteToSemiquartal(pythagoreanMonzo)
-      : absoluteToNode(pythagoreanMonzo);
+  const pitch = absoluteToNode(pythagoreanMonzo);
   if (!pitch) {
     return undefined;
   }

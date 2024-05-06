@@ -4,7 +4,7 @@ sM2
 sm3
 n3
 P4
-qA4
+qa4
 qd5
 P5
 n6

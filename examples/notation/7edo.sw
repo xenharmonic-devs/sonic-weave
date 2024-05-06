@@ -1,11 +1,11 @@
 "Recommended notation for 7 divisions of the octave"
-C=4 = mtof(60)
-D=4
-E=4
-F=4
-G=4
-A=4
-B=4
-C=5
+C4 = mtof(60)
+D4
+E4
+F4
+G4
+A4
+B4
+C5
 
 7@

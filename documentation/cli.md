@@ -99,40 +99,38 @@ The program prints the result to standard output so if you're on Linux use stand
 ```bash
 $ npx sonic-weave examples/barbados9.sw > /tmp/desert-island-rain.scl
 $ cat /tmp/desert-island-rain.scl 
-!Created using SonicWeave 0.0.20
+!Created using SonicWeave 0.0.33
 !
-Pentanominal enneatonic 5L 4s subset of 313edo used in Sevish's track Desert Island Rain
+Enneatonic 5L 4s subset of 313edo used in Sevish's track Desert Island Rain
  9
 !
- 203.194888 φ@
- 249.201278 φ
- 452.396166 F@
- 498.402556 F
- 701.597444 G
- 747.603834 G&
- 950.798722 ψ
- 996.805112 ψ&
- 2 C
-! A list of key colors, ascending from 1/1
-! white black white black white white black white black
+ 203.194888 Octave-reduced doubled 5th
+ 249.201278 Split 4th
+ 452.396166
+ 498.402556 Perfect 4th
+ 701.597444 Perfect 5th
+ 747.603834
+ 950.798722 Otave-complemented split 4th
+ 996.805112 Doubled 4th
+ 2 Octave
 ```
 
 ### SonicWeave Interchange format
 The .swi format is suitable for data interchange between programs. It preserves the internal precision of the SonicWeave runtime.
 ```bash
 $ npx sonic-weave examples/pajara10.sw --format swi
-// Created using SonicWeave 0.0.20
+// Created using SonicWeave 0.0.33
 
 "Decanominal 2L 8s Pajara scale in 22edo"
 
-[1/11> "γ"
+[1/11> "η"
 [2/11> "D"
-[3/11> "δ"
+[3/11> "α"
 [4/11> "E"
-[1/2> "ζ"
+[1/2> "γ"
 [13/22> "G"
-[15/22> "η"
+[15/22> "δ"
 [17/22> "A"
-[19/22> "α"
+[19/22> "ε"
 [1> "C"
 ```
