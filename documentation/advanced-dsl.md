@@ -270,93 +270,77 @@ or `1Hz * (-1) * 2^3 * 5^1 * 11^1` if you break it down linearly.
 
 Two dots after a prime number indicate that exponents of successive primes follow.
 
-### True tone-splitters
-Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `a1`). The true semiwholetone `M2 % 2` is notated using interordinals as `n1.5` (or `n1½`).
+## The interordinal semioctave
+The stepspan of the octave is odd so the semioctave `P8 / 2` doesn't have an obvious ordinal associated with it like how the semififth `P5 / 2` is obviously a third.
 
-The difference `n1.5 - m2` is only `11.730c` so true tone-splitters are not very useful in their untempered form, but they do provide the notation `n4.5` for the semioctave `P8 / 2` which is present in all even equal divisions of the octave and stays in place during tempering.
+The semioctave is between a fourth and a fifth therefore SonicWeave designates it as a 4½th. It is the period of [10L 4s](https://en.xen.wiki/w/10L_4s) (with the semififth as the generator) therefore the designated quality is *perfect*.
+```c
+"These two are the same"
+P8 / 2 "Split octave"
+P4½    "The perfect fourth-and-a-halfth"
+```
 
-The basic tone-splitters are as follows:
+Another valid spelling for this perfect fourth-and-a-halfth is `P4.5`.
+
+### Interordinal intervals
+Adding or subtracting a period from an interval doesn't change its quality so we obtain the following central intervals.
+
 | Name                         | Logarithmic        | Linear            | Size in cents |
 | ---------------------------- | ------------------ | ----------------- | ------------- |
-| Neutral sesquith             | `n1.5`, `M2 / 2`   | `sqrt(9/8)`       | `101.955`     |
-| Neutral second-and-a-halfth  | `n2.5`, `M2 * 3/2` | `sqrt(729/512)`   | `305.865`     |
-| Neutral third-and-a-halfth   | `n3.5`, `M2 * 5/2` | `9/8 ^ 5/2`       | `509.775`     |
-| Neutral fourth-and-a-halfth  | `n4.5`, `P8 / 2`   | `sqrt(2)`         | `600.000`     |
-| Neutral fifth-and-a-halfth   | `n5.5`, `M10 / 2`  | `sqrt(81/32)`     | `803.910`     |
-| Neutral sixth-and-a-halfth   | `n6.5`, `a12 / 2`  | `sqrt(6561/2048)` | `1007.820`    |
-| Neutral seventh-and-a-halfth | `n7.5`, `m14 / 2`  | `sqrt(32/9)`      | `1098.045`    |
+| Perfect sesquith             | `P1.5`, `M2 / 2`   | `sqrt(9/8)`       | `101.955`     |
+| Neutral second-and-a-halfth  | `n2.5`, `P4 / 2`   | `sqrt(4/3)`       | `249.022`     |
+| Neutral third-and-a-halfth   | `n3.5`, `M6 / 2`   | `sqrt(27/16)`     | `452.933`     |
+| Perfect fourth-and-a-halfth  | `P4.5`, `P8 / 2`   | `sqrt(2)`         | `600.000`     |
+| Neutral fifth-and-a-halfth   | `n5.5`, `P4 * 3/2` | `(4/3) ^ (3/2)`   | `747.067`     |
+| Neutral sixth-and-a-halfth   | `n6.5`, `P12 / 2`  | `sqrt(3)`         | `950.978`     |
+| Perfect seventh-and-a-halfth | `P7.5`, `m14 / 2`  | `sqrt(32/9)`      | `1098.045`    |
 
-### Absolute semioctave dodecanominal notation
-When stacked against the semioctave the fifth spans a dodecatonal scale with ten large steps and two small steps inside the octave (10L 2s "soft-jaric" a.k.a. "jaramechromic").
+Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `a1`). The the perfect sesquith `P1½` is the true semiwholetone `M2 / 2`.
 
-The scale is nominated such that the Greek nominals form the Ionian mode starting from the semioctave. The nominals themselves follow their Latin counterparts: Alpha comes after A, beta comes after B, gamma after C, etc..
+The central intervals can be semiaugmented to reach other intervals in the √2.√3 subgroup e.g. `m6 / 2` = `(M6 + d1) / 2` = `n3½ + ½d1` = `m3.5` ~ `sqrt(128/81)`.
 
-| Nominal | ASCII    | Meaning     | Cents from C4 |
-| ------- | -------- | ----------- | ------------- |
-| `C4`    |          | `C4 + P1`   | `0.000`       |
-| `γ4`    | `gamma4` | `C4 + n1½`  | `101.955`     |
-| `D4`    |          | `C4 + M2`   | `203.910`     |
-| `δ4`    | `delta4` | `C4 + n2½`  | `305.865`     |
-| `E4`    |          | `C4 + M3`   | `407.820`     |
-| `F4`    |          | `C4 + P4`   | `498.045`     |
-| `ζ4`    | `zeta4`  | `C4 + n4½`  | `600.000`     |
-| `G4`    |          | `C4 + P5`   | `701.955`     |
-| `η4`    | `eta4`   | `C4 + n5½`  | `803.910`     |
-| `A4`    |          | `C4 + M6`   | `905.865`     |
-| `α4`    | `alpha4` | `C4 + n6½`  | `1007.820`    |
-| `β4`    | `beta4`  | `C4 + n7½`  | `1098.045`    |
-| `C5`    |          | `C4 + P8`   | `1200.000`    |
+### Absolute semioctave notation
+Absolute notation follows the ordinals. A scale starting at A has A 1st, B 2nd, C 3rd and so on alphabetically. What's the sesquith nominal in this sequence?
 
-Notice how the notation is half-way antisymmteric w.r.t. Latin and Greek nominals and how `B4` is missing. The final Greek nominal `ε4` (`epsilon4`) equal to `C4 + n3½` is also left out, but defined to complete the Ionian mode. Some temperaments stretch the scale to make room for both so e.g. 14-tone equal temperament can be fully notated with alternating Latin and Greek nominals.
+SonicWeave designates Greek counterparts to each of the seven diatonic Latin nominals separated by a semioctave. The octave numbers must still tick at C by convention. Greek capital letters like Alpha are visually indistinguishable from their Latin counterparts so we use lowercase Greek nominals as follows:
 
-By their construction the 12 nominals in the table above correspond to each of the 12-tones in 12-TET. The 12 nominals are also well-suited for 22-tone equal temperament.
+| Greek | Greek ASCII | Definition  | Cents from C4 |
+| ----- | ----------- | ----------- | ------------- |
+| `η4`  | `eta4`      | `G4 - P4.5` | `101.955`     |
+| `α4`  | `alp4`      | `A4 - P4.5` | `305.865`     |
+| `β4`  | `bet4`      | `B4 - P4.5` | `509.775`     |
+| `γ4`  | `gam4`      | `C4 + P4.5` | `600.000`     |
+| `δ4`  | `del4`      | `D4 + P4.5` | `803.910`     |
+| `ε4`  | `eps4`      | `E4 + P4.5` | `1007.82`     |
+| `ζ4`  | `zet4`      | `F4 + P4.5` | `1098.045`    |
 
-The accidentals associated with this bihexatonic scale are `r` and `p`.
+By their construction these nominals are all found in 12-tone equal temperament and are also well-suited for notating 22-TET which is connected to 12-TET along the diaschismic axis.
 
-| Accidental | Monzo       | Size in cents | Mnemonics                   |
-| ---------- | ----------- | ------------- | --------------------------- |
-| `r`        | `[-19/2 6>` | `+11.730`     | **r**_aise_, _paja_**r**_a_ |
-| `p`        | `[19/2 -6>` | `-11.730`     | (flipped `b`), **p**_ajara_ |
-
-Tone-splitter and decanominals are associated with the `t` flavor of commas e.g. `17/12` may be spelled `ζ4^17t` (assuming `C4 = 1/1`).
-
-#### Examples
-Using these nominals C major chord is still spelled:
 ```c
-"Major chord on C4"
-C4
+"Srutal[12] a.k.a. Diaschismic[12] tuned to 22-TET"
+defer 22@
+
+// First period: Latin-Greek-Latin
+C4 = mtof(60)
+η4
+D4
+α4
 E4
+β4
+
+// Second period: Greek-Latin-Greek
+γ4
 G4
-```
-However the lack of B necessitates that the perfect fifth in E minor becomes `βr4`:
-```c
-"Minor chord on E4"
-E4
-G4
-betar4
+δ4
+A4
+ε4
+B4
+
+// Third period: (implicit repetition)
+C5
 ```
 
-The table below samples more translations between heptatonic and dodecatonic thinking.
-
-| Heptanominal | Dodecanominal | Fraction against C4 |
-| ------------ | ------------- | ------------------- |
-| Cb4          | βp3           | 2048/2187           |
-| Gb4          | ζp4           | 1024/72             |
-| Db4          | γp4           | 256/243             |
-| Ab4          | ηp4           | 128/81              |
-| Eb4          | δp4           | 32/27               |
-| Bb4          | αp4           | 16/9                |
-| B4           | βr4           | 243/128             |
-| F#4          | ζr4           | 729/512             |
-| C#4          | γr4           | 2187/2048           |
-
-Similarly when you build a minor chord on α, you would spell it α, γ, Fr to remain dodecanominal.
-```c
-"Minor chord on α4"
-alpha4
-gamma5
-Fr5
-```
+Informally you may think of "α" as just the name of the black key between the white "D" and "E" keys on the 12-TET piano. Most equal temperaments with an even number of divisions of the octave can make good use of these new Greek notes.
 
 #### Alternative semioctave notation
 You can also declare ups to transport notes between the two periods if you wish to avoid using more than 7 nominals while still retaining notational compatibility with most even edos.
@@ -368,84 +352,50 @@ The labels indicate the equivalent Greek nominal.
 ^ = Aug4 - 1\2
 
 C4 = 1/1
-vC#4 "gamma"
+vC#4 "eta"
 D4
-vD#4 "delta"
+vD#4 "alpha"
 E4
 F4
-vF#4 "zeta"
+vF#4 "gamma"
 G4
-vG#4 "eta"
+vG#4 "delta"
 A4
-vA#4 "alpha"
-vB4  "beta"
+vA#4 "epsilon"
+vB4  "zeta"
 C5
 ```
 
-Note how it's vB instead of vB♯ like everything else in order to have beta to be a perfect fourth above zeta. This way we get two identical periods one semioctave apart.
+Note how it's vB instead of vB♯ like everything else in order to have zeta to be a perfect fourth above gamma. This way we get two identical periods one semioctave apart.
 
-Here the up inflection is mere 11.730 cents. You can also check out the [other alternative](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/semioctave-alternative-2.sw) where zeta = ^F instead resulting in more compact notation.
+Here the up inflection is mere 11.730 cents. You can also check out the [other alternative](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/semioctave-alternative-2.sw) where γ = ^F instead resulting in more compact notation.
 
-### The interordinal semifourth
-When combined with a semiaugmented unison the true tone-splitters induce the notation `m2.5` for the semifourth `P4 / 2` basically for free.
+### Splitting the fourth
+The perfect intervals `2`, `3/2` and `4/3` are connected by `4/3 == 2 / (3/2)` so splitting any two of these implies the third.
 
-Notable semiquartal intervals include:
-| Name                       | Logarithmic       | Linear         | Size in cents |
-| -------------------------- | ----------------- | -------------- | ------------- |
-| Minor second-and-a-halfth  | `m2½`, `P4 / 2`   | `sqrt(4/3)`    | `249.022`     |
-| Minor third-and-a-halfth   | `m3½`, `M6 / 2`   | `sqrt(27/16)`  | `452.933`     |
-| Minor fifth-and-a-halfth   | `m5½`, `P4 * 3/2` | `sqrt(64/27) ` | `747.067`     |
-| Minor sixth-and-a-halfth   | `m6½`, `P12 / 2`  | `sqrt(3)`      | `950.978`     |
-| Major seventh-and-a-halfth | `M7½`, `M14 / 2`  | `sqrt(243/64)` | `1154.888`    |
+In terms of interordinals `n2.5 == P4.5 - n3` so we already have relative notation for the split fourth.
 
-### Absolute semifourth pentanominal notation
-The split fourth spans a pentatonic (4L 1s "manual") scale:
-```javascript
-C4 = mtof(60)
-φ4
-F4
-G4
-ψ4
-C5
+Absolute semiquartal notation is obtained by mixing Greek nominals with half-sharps.
+```c
+"Semiquartal 5L 4s notation"
+C♮4 = mtof(60)
+D♮4 "Octave-reduced doubled 5th"
+αd4 "Split 4th"
+βd4
+F♮4 "Perfect 4th"
+G♮4 "Perfect 5th"
+δd4
+εd4 "Otave-complemented split 4th"
+B♭4 "Doubled 4th"
+C♮5 "Octave"
 ```
 
-As with semioctave nominals `φ` can be spelled in ASCII as `phi` and `ψ` as `psi`. *Phi* was chosen due to similarity to *F* and *psi* comes from the full enneatonic (5L 4s "semiquartal") scale:
-```javascript
-C4 = mtof(60)
-D4
-φ4
-χ4
-F4
-G4
-a4
-ψ4
-ω4
-C5
-```
+#### Nicknames
+Lumi, the lead developer, likes to call "C + P4 / 2" "φ" or "phi". Its octave complement is called "ψ" or "psi" and "beta half-flat" has the nickname "χ" or "chi". The last interordinal would be "ω" or "ome(ga)" but it tends to jump around depending on the mood and if the semiquartal scale was sullied by adding a flat sign ♭ in the mix or not.
 
-| Nominal | ASCII    | Meaning     |
-| ------- | -------- | ----------- |
-| `φ4`    | `phi4`   | `C4 + m2.5` |
-| `χ4`    | `chi4`   | `C4 + m3.5` |
-| `ψ4`    | `psi4`   | `C4 + m6.5` |
-| `ω4`    | `omega4` | `C4 + M7.5` |
+Absolute semiquartals might make a comeback as an opt-in, but for now they've been excluded from the main grammar.
 
-The accidentals are associated with the 4L 1s scale: *em* (`&`) denotes the difference between a semifourth and a whole tone: `C&4` is `C4 + (P4%2 - M2)`. The accidental *at* (`@`) is the opposite.
-
-`χ` is equal to `F@` while `ω` is equal to `C@` of the next octave.
-
-Due to technical reasons the accidentals for the 5L 4s scale, *scarab* (`¤`) and *pound* (`£`), must also be defined despite their large size.
-
-| Accidental  | Monzo      | Size in cents |
-| ----------- | ---------- | ------------- |
-| `&`         | `[4 -5/2>` | `+45.112`     |
-| `@`         | `[-4 5/2>` | `-45.112`     |
-| `¤`         | `[-7 9/2>` | `+158.798`    |
-| `£`         | `[7 -9/2>` | `-158.798`    |
-
-Semiquartals are associated with the `q` comma flavor e.g. `7/6` can be spelled `φ4^7q` (assuming `C4 = 1/1`).
-
-### Quarter-augmented Pythagorean notation
+## Quarter-augmented Pythagorean notation
 As previously mentioned the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.
 
 It does require an intermediary quality between major and neutral called _semimajor_ and correspondingly between neutral and minor called _semiminor_.
@@ -467,7 +417,7 @@ Vulgar fraction modifiers like `⅓` or `⅔` can be applied to augmented, major
 
 You may encounter them when splitting Pythagorean intervals like the *third-major second* `⅓M2` resulting from splitting the fourth into three parts `P4 / 3`.
 
-You can even make interordinals like the *quarter-minor sesquith* `qm1.5` by splitting the fifth eight ways `P5 / 8`.
+You can even make interordinals like the *eighth-diminished sesquith* `⅛d1½` by splitting the fifth eight ways `P5 / 8`.
 
 Absolute notation works too `C4 + M6 / 5` happens to be *D fifth-flat four* `D⅕♭4`.
 

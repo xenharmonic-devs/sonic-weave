@@ -62,9 +62,9 @@
     'while',
   ]);
 
-  const PERFECT_DEGREES = new Set([1, 4, 5]);
-  const MID_DEGREES = new Set([4, 5]);
-  const IMPERFECT_DEGREES = new Set([2, 3, 6, 7]);
+  const PERFECT_DEGREES = new Set([1, 4, 5, 1.5, 4.5, 7.5]);
+  const MID_DEGREES = new Set([4, 5, 1.5, 7.5]);
+  const IMPERFECT_DEGREES = new Set([2, 3, 6, 7, 2.5, 3.5, 5.5, 6.5]);
 
   function UpdateExpression(operator, argument) {
     return {
@@ -1292,8 +1292,8 @@ PerfectQuality
 }
 
 Degree
-  = sign: '-'? num: PositiveBasicInteger {
-    num--;
+  = sign: '-'? num: PositiveBasicInteger half: ('½' / '.5')? {
+    num = num - 1 + (half ? 0.5 : 0);
     return {
       negative: !!sign,
       base: (num % 7) + 1,
@@ -1316,17 +1316,8 @@ ImperfectDegree
     };
   }
 
-HalfDegree
-  = degree: Degree ('½' / '.5') {
-    return {
-      ...degree,
-      base: degree.base + 0.5,
-      imperfect: true,
-    };
-  }
-
 SplitPythagorean
-  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (HalfDegree / ImperfectDegree / PerfectDegree) {
+  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (ImperfectDegree / PerfectDegree) {
     return {
       type: 'Pythagorean',
       quality,
@@ -1334,7 +1325,7 @@ SplitPythagorean
       degree,
     };
   }
-  / quality: ImperfectQuality degree: (HalfDegree / ImperfectDegree) {
+  / quality: ImperfectQuality degree: ImperfectDegree {
     return {
       type: 'Pythagorean',
       quality,
@@ -1408,7 +1399,7 @@ FJS
   }
 
 AccidentalSign
-  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b&@rp¤£]
+  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b]
 
 Accidental 'accidental'
   = fraction: VulgarFraction accidental: AccidentalSign  {
@@ -1419,7 +1410,7 @@ Accidental 'accidental'
   }
 
 PitchNominal 'pitch nominal'
-  = 'alpha' / 'beta' / 'gamma' / 'delta' / 'epsilon' / 'zeta' / 'eta' / 'phi' / 'chi' / 'psi' / 'omega' / [\u03B1-ηφ-ωA-G]
+  = 'alp' / 'bet' / 'gam' / 'del' / 'eps' / 'zet' / 'eta' / [α-ηA-G]
 
 AbsolutePitch
   = nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {

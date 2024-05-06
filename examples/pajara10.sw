@@ -5,17 +5,17 @@ defer 22@
 
 // First period
 C4 = 1/1
-γ4
+η4
 D4
-δ4
+α4
 E4
 
 // Second period
-ζ4
+γ4
 G4
-η4
+δ4
 A4
-α4
+ε4
 
 // Repeat at the octave
 C5

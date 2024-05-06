@@ -6,7 +6,6 @@ import {
   AbsolutePitch,
   monzoToNode,
   absoluteToNode,
-  absoluteToSemiquartal,
   VulgarFraction,
   AugmentedQuality,
   SplitAccidental,
@@ -67,35 +66,47 @@ describe('Pythagorean interval construction from parts', () => {
     ['sa', 6, -9.5, 6.5],
     ['sa', 3, -11.5, 7.5],
     ['sa', 7, -12.5, 8.5],
-    // Tonesplitters
-    ['sd', 3.5, 3.5, -2],
-    ['n', 7.5, 2.5, -1],
-    ['n', 4.5, 0.5, 0],
-    ['n', 1.5, -1.5, 1],
-    ['n', 5.5, -2.5, 2],
-    ['n', 2.5, -4.5, 3],
-    ['n', 6.5, -5.5, 4],
-    ['n', 3.5, -7.5, 5],
-    ['sa', 7.5, -8.5, 6],
-    // Semiquartal
-    ['d', 2.5, 12, -7.5],
-    ['d', 6.5, 11, -6.5],
-    ['d', 3.5, 9, -5.5],
-    ['m', 7.5, 8, -4.5],
-    ['m', 4.5, 6, -3.5],
-    ['m', 1.5, 4, -2.5],
-    ['m', 5.5, 3, -1.5],
-    ['m', 2.5, 1, -0.5],
-    ['m', 6.5, 0, 0.5],
-    ['m', 3.5, -2, 1.5],
-    ['M', 7.5, -3, 2.5],
-    ['M', 4.5, -5, 3.5],
-    ['M', 1.5, -7, 4.5],
-    ['M', 5.5, -8, 5.5],
-    ['M', 2.5, -10, 6.5],
-    ['M', 6.5, -11, 7.5],
-    ['M', 3.5, -13, 8.5],
-    ['a', 7.5, -14, 9.5],
+    // Mid
+    ['n', 4, -3.5, 2.5],
+    ['n', 5, 4.5, -2.5],
+    // Semioctave - minor
+    ['m', 5.5, 8.5, -5],
+    ['m', 2.5, 6.5, -4],
+    ['m', 6.5, 5.5, -3],
+    ['m', 3.5, 3.5, -2],
+    // Semioctave - perfect
+    ['P', 7.5, 2.5, -1],
+    ['P', 4.5, 0.5, 0],
+    ['P', 1.5, -1.5, 1],
+    // Semioctave - major
+    ['M', 5.5, -2.5, 2],
+    ['M', 2.5, -4.5, 3],
+    ['M', 6.5, -5.5, 4],
+    ['M', 3.5, -7.5, 5],
+    // Semioctave - mid
+    ['n', 1.5, 4, -2.5],
+    ['n', 7.5, -3, 2.5],
+    // Semioctave - augmented of perfect
+    ['a', 7.5, -8.5, 6],
+    // Chain of fifths on the semifourth
+    ['sd', 5.5, 14, -8.5],
+    ['sd', 2.5, 12, -7.5],
+    ['sd', 6.5, 11, -6.5],
+    ['sd', 3.5, 9, -5.5],
+    ['sd', 7.5, 8, -4.5],
+    ['sd', 4.5, 6, -3.5],
+    ['sd', 1.5, 4, -2.5],
+    ['n', 5.5, 3, -1.5],
+    ['n', 2.5, 1, -0.5],
+    ['n', 6.5, 0, 0.5],
+    ['n', 3.5, -2, 1.5],
+    ['sa', 7.5, -3, 2.5],
+    ['sa', 4.5, -5, 3.5],
+    ['sa', 1.5, -7, 4.5],
+    ['sa', 5.5, -8, 5.5],
+    ['sa', 2.5, -10, 6.5],
+    ['sa', 6.5, -11, 7.5],
+    ['sa', 3.5, -13, 8.5],
     // Quarter augmented
     ['qa', 1, -2.75, 1.75],
     ['Qa', 1, -8.25, 5.25],
@@ -116,7 +127,7 @@ describe('Pythagorean interval construction from parts', () => {
     }
     const base = ((Math.abs(degree) - 1) % 7) + 1;
     const octaves = Math.floor((Math.abs(degree) - 1) / 7);
-    const imperfect = ![1, 4, 5].includes(base);
+    const imperfect = ![1, 4, 5, 1.5, 4.5, 7.5].includes(base);
     const node: Pythagorean = {
       type: 'Pythagorean',
       quality: {fraction, quality: quality as any},
@@ -237,10 +248,10 @@ describe('Monzo -> node converter', () => {
       type: 'Pythagorean',
       quality: {
         fraction: '',
-        quality: 'n',
+        quality: 'P',
       },
       augmentations: [],
-      degree: {base: 4.5, negative: false, octaves: 0, imperfect: true},
+      degree: {base: 4.5, negative: false, octaves: 0, imperfect: false},
     });
   });
 
@@ -269,21 +280,21 @@ describe('Absolute monzo -> node converter', () => {
     });
   });
 
-  it('converts zeta4', () => {
+  it('converts gam4', () => {
     const node = absoluteToNode(TimeMonzo.fromEqualTemperament('1/2'));
     expect(node).toEqual({
       type: 'AbsolutePitch',
-      nominal: 'ζ',
+      nominal: 'γ',
       accidentals: [{fraction: '', accidental: '♮'}],
       octave: 4,
     });
   });
 
-  it('converts alphad4', () => {
+  it('converts etad4', () => {
     const node = absoluteToNode(TimeMonzo.fromEqualTemperament('1/2', 3));
     expect(node).toEqual({
       type: 'AbsolutePitch',
-      nominal: 'α',
+      nominal: 'ε',
       accidentals: [{fraction: '', accidental: 'd'}],
       octave: 4,
     });
@@ -313,50 +324,6 @@ describe('Absolute monzo -> node converter', () => {
       nominal: 'C',
       octave: 4,
       type: 'AbsolutePitch',
-    });
-  });
-
-  it('converts C3', () => {
-    const node = absoluteToNode(TimeMonzo.fromFraction(0.5));
-    expect(node).toEqual({
-      type: 'AbsolutePitch',
-      nominal: 'C',
-      accidentals: [{fraction: '', accidental: '♮'}],
-      octave: 3,
-    });
-  });
-});
-
-describe('Absolute monzo -> semiquartal node converter', () => {
-  it.each([
-    ['9/8', 'D', '♮'],
-    ['32/27', 'χ', '£'],
-    ['81/64', 'φ', '¤'],
-    ['4/3', 'F', '♮'],
-    ['3/2', 'G', '♮'],
-    ['27/16', 'A', '♮'],
-    ['16/9', 'ω', '£'],
-    ['128/81', 'ψ', '£'],
-    ['243/128', 'ψ', '¤'],
-  ])('converts %s to %s%s4', (fraction, nominal, accidental) => {
-    const node = absoluteToSemiquartal(TimeMonzo.fromFraction(fraction));
-    expect(node).toEqual({
-      type: 'AbsolutePitch',
-      nominal,
-      accidentals: [{fraction: '', accidental}],
-      octave: 4,
-    });
-  });
-
-  it('converts phi4', () => {
-    const node = absoluteToSemiquartal(
-      TimeMonzo.fromEqualTemperament('1/2', '4/3')
-    );
-    expect(node).toEqual({
-      type: 'AbsolutePitch',
-      nominal: 'φ',
-      accidentals: [{fraction: '', accidental: '♮'}],
-      octave: 4,
     });
   });
 

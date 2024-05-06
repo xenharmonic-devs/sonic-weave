@@ -6,7 +6,7 @@ D=4
 D#4
 Eb4
 E=4
-E#4 // Or χ=4 if you want a unique nonimal for this one.
+E#4
 F=4
 F#4
 Gb4
@@ -17,7 +17,7 @@ A=4
 A#4
 Bb4
 B=4
-B#4 // Or ω=4 if you want a unique nonimal for this one.
+B#4
 C=5
 
 19@

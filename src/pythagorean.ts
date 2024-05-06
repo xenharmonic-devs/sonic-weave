@@ -88,7 +88,7 @@ export type Pythagorean = {
 };
 
 /**
- * Absolute pitch nominal: Traditional Pythagorean, semioctave or semiquartal.
+ * Absolute pitch nominal: Traditional Pythagorean or semioctave.
  */
 export type Nominal =
   | 'A'
@@ -98,28 +98,20 @@ export type Nominal =
   | 'E'
   | 'F'
   | 'G'
-  | 'alpha'
+  | 'alp'
   | 'α'
-  | 'beta'
+  | 'bet'
   | 'β'
-  | 'gamma'
+  | 'gam'
   | 'γ'
-  | 'delta'
+  | 'del'
   | 'δ'
-  | 'epsilon'
+  | 'eps'
   | 'ε'
-  | 'zeta'
+  | 'zet'
   | 'ζ'
   | 'eta'
-  | 'η'
-  | 'phi'
-  | 'φ'
-  | 'chi'
-  | 'χ'
-  | 'psi'
-  | 'ψ'
-  | 'omega'
-  | 'ω';
+  | 'η';
 
 /**
  * Musical accidental representing some powers of primes 2 and 3, possibly fractional.
@@ -138,13 +130,7 @@ export type Accidental =
   | '='
   | 'd'
   | '♭'
-  | 'b'
-  | '&'
-  | '@'
-  | 'r'
-  | 'p'
-  | '¤'
-  | '£';
+  | 'b';
 
 /**
  * Musical accidental representing some (possibly split) powers of primes 2 and 3, possibly fractional.
@@ -173,12 +159,13 @@ const NEGATIVE_HALF = F(-1, 2);
 const SESQUI = F(3, 2);
 const NEGATIVE_SESQUI = F(-3, 2);
 const NEGATIVE_TWO = Object.freeze(TWO.neg());
+const NEGATIVE_THREE = Object.freeze(THREE.neg());
 const NEGATIVE_SEVEN = Object.freeze(SEVEN.neg());
 const FOUR = F(4, 1);
-const NINE = F(9, 1);
 const NEGATIVE_ELEVEN = Object.freeze(ELEVEN.neg());
 const FOURTEEN = F(14, 1);
 const SEMIFIVE = F(5, 2);
+const NEGATIVE_SEMIFIVE = F(-5, 2);
 const SEMISEVEN = F(7, 2);
 const SEMININE = F(9, 2);
 const SEMIELEVEN = F(11, 2);
@@ -195,19 +182,20 @@ const PYTH_VECTORS: PythInflection[] = [
 ];
 
 const MID_FOURTH: PythInflection = [F(-7, 2), SEMIFIVE];
-const MID_FIFTH: PythInflection = [SEMININE, F(-5, 2)];
+const MID_FIFTH: PythInflection = [SEMININE, NEGATIVE_SEMIFIVE];
+const MID_SESQUITH: PythInflection = [FOUR, NEGATIVE_SEMIFIVE];
+const MID_SESQUITH_COMPLEMENT: PythInflection = [NEGATIVE_THREE, SEMIFIVE];
 
-// Exponents for "neutral" interordinal intervals related to Pythagoras by a semioctave.
-// Splits the whole tone in half precisely in the middle.
-// Implicitly define semiquartal intervals.
-// Associated with eighth sharps.
-const TONESPLITTER_VECTORS: PythInflection[] = [
+// Exponents for interordinal intervals related to Pythagoras by a semioctave.
+// Also splits the whole-tone in half precisely in the middle.
+// Also splits the perfect fourth.
+const SEMIOCTAVE_VECTORS: PythInflection[] = [
   [NEGATIVE_SESQUI, ONE],
-  [F(-9, 2), THREE],
-  [F(-15, 2), FIVE],
+  [ONE, NEGATIVE_HALF],
+  [NEGATIVE_TWO, SESQUI],
   [HALF, ZERO],
-  [F(-5, 2), TWO],
-  [F(-11, 2), FOUR],
+  [THREE, NEGATIVE_SESQUI],
+  [ZERO, HALF],
   [SEMIFIVE, NEGATIVE_ONE],
 ];
 
@@ -220,40 +208,35 @@ const NOMINAL_VECTORS = new Map<Nominal, PythInflection>([
   ['E', [F(-6, 1), FOUR]],
   ['B', [F(-7, 1), FIVE]],
 
-  // Tone-splitters
-  ['beta', [SEMIFIVE, NEGATIVE_ONE]],
-  ['β', [SEMIFIVE, NEGATIVE_ONE]],
+  // Latin +- semioctave = Greek
 
-  ['zeta', [HALF, ZERO]],
-  ['ζ', [HALF, ZERO]],
+  // F + 1\2
+  ['zet', [SEMIFIVE, NEGATIVE_ONE]],
+  ['ζ', [SEMIFIVE, NEGATIVE_ONE]],
 
-  ['gamma', [NEGATIVE_SESQUI, ONE]],
-  ['γ', [NEGATIVE_SESQUI, ONE]],
+  // C + 1\2
+  ['gam', [HALF, ZERO]],
+  ['γ', [HALF, ZERO]],
 
-  ['eta', [F(-5, 2), TWO]],
-  ['η', [F(-5, 2), TWO]],
+  // G - 1\2
+  ['eta', [NEGATIVE_SESQUI, ONE]],
+  ['η', [NEGATIVE_SESQUI, ONE]],
 
-  ['delta', [F(-9, 2), THREE]],
-  ['δ', [F(-9, 2), THREE]],
+  // D + 1\2
+  ['del', [F(-5, 2), TWO]],
+  ['δ', [F(-5, 2), TWO]],
 
-  ['alpha', [F(-11, 2), FOUR]],
-  ['α', [F(-11, 2), FOUR]],
+  // A - 1\2
+  ['alp', [F(-9, 2), THREE]],
+  ['α', [F(-9, 2), THREE]],
 
-  ['epsilon', [F(-15, 2), FIVE]],
-  ['ε', [F(-15, 2), FIVE]],
+  // E + 1\2
+  ['eps', [F(-11, 2), FOUR]],
+  ['ε', [F(-11, 2), FOUR]],
 
-  // Manual / semiquartal
-  ['phi', [ONE, NEGATIVE_HALF]],
-  ['φ', [ONE, NEGATIVE_HALF]],
-
-  ['chi', [NEGATIVE_TWO, SESQUI]],
-  ['χ', [NEGATIVE_TWO, SESQUI]],
-
-  ['psi', [ZERO, HALF]],
-  ['ψ', [ZERO, HALF]],
-
-  ['omega', [F(-3, 1), SEMIFIVE]],
-  ['ω', [F(-3, 1), SEMIFIVE]],
+  // B - 1\2
+  ['bet', [F(-15, 2), FIVE]],
+  ['β', [F(-15, 2), FIVE]],
 ]);
 
 const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
@@ -277,18 +260,6 @@ const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
 
   ['𝄳', [SEMIELEVEN, F(-7, 2)]],
   ['d', [SEMIELEVEN, F(-7, 2)]],
-
-  // Soft-jaric accidentals
-  ['r', [F(-19, 2), F(6, 1)]],
-  ['p', [F(19, 2), F(-6, 1)]],
-
-  // Manual Diamond-MOS accidentals
-  ['&', [FOUR, F(-5, 2)]],
-  ['@', [F(-4, 1), SEMIFIVE]],
-
-  // True semiquartal accidentals
-  ['¤', [F(-7, 1), SEMININE]],
-  ['£', [SEVEN, F(-9, 2)]],
 ]);
 
 const VULGAR_FRACTIONS = new Map<VulgarFraction, Fraction>([
@@ -331,11 +302,12 @@ const MINOR: PythInflection = [
 ];
 
 export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
+  const base = node.degree.base;
   let vector: PythInflection;
-  if (Number.isInteger(node.degree.base)) {
-    vector = [...PYTH_VECTORS[node.degree.base - 1]];
+  if (Number.isInteger(base)) {
+    vector = [...PYTH_VECTORS[base - 1]];
   } else {
-    vector = [...TONESPLITTER_VECTORS[node.degree.base - 1.5]];
+    vector = [...SEMIOCTAVE_VECTORS[base - 1.5]];
   }
 
   const quality = node.quality.quality;
@@ -356,10 +328,14 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     }
   } else {
     if (quality === 'n') {
-      if (node.degree.base === 4) {
+      if (base === 4) {
         vector = [...MID_FOURTH];
-      } else {
+      } else if (base === 5) {
         vector = [...MID_FIFTH];
+      } else if (base === 1.5) {
+        vector = [...MID_SESQUITH];
+      } else if (base === 7.5) {
+        vector = [...MID_SESQUITH_COMPLEMENT];
       }
     }
   }
@@ -484,7 +460,7 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   if (Number.isInteger(stepspan)) {
     offCenter = threes.sub(PYTH_VECTORS[base - 1][1]).div(SEVEN);
   } else if (mmod(stepspan, 1) === 0.5) {
-    offCenter = threes.sub(TONESPLITTER_VECTORS[base - 1.5][1]).div(SEVEN);
+    offCenter = threes.sub(SEMIOCTAVE_VECTORS[base - 1.5][1]).div(SEVEN);
   } else {
     return undefined;
   }
@@ -493,7 +469,7 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   if (offCenter.abs().compare(MAX_OFFSET) > 0) {
     return undefined;
   }
-  const imperfect = ![1, 4, 5].includes(base);
+  const imperfect = ![1, 4, 5, 1.5, 4.5, 7.5].includes(base);
   let quality: IntervalQuality | undefined;
   const augmentations: AugmentedQuality[] = [];
   if (imperfect) {
@@ -535,7 +511,7 @@ export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
 
 const PURE_NOMINALS: Nominal[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
-const TONESPLITTER_NOMINALS: Nominal[] = ['γ', 'δ', 'ε', 'ζ', 'η', 'α', 'β'];
+const SEMIOCTAVE_NOMINALS: Nominal[] = ['η', 'α', 'β', 'γ', 'δ', 'ε', 'ζ'];
 
 const ACCIDENTAL_BY_OFFSET = new Map<string, SplitAccidental>();
 const BASE_OFFSETS: [Fraction, Accidental][] = [];
@@ -575,7 +551,7 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   if (spanRemainder === 0) {
     nominal = PURE_NOMINALS[mmod(stepspan, 7)];
   } else if (spanRemainder === 0.5) {
-    nominal = TONESPLITTER_NOMINALS[mmod(stepspan - 0.5, 7)];
+    nominal = SEMIOCTAVE_NOMINALS[mmod(stepspan - 0.5, 7)];
   } else {
     return undefined;
   }
@@ -610,64 +586,6 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
     return undefined;
   }
   accidentals.unshift(ACCIDENTAL_BY_OFFSET.get(key)!);
-
-  return {
-    type: 'AbsolutePitch',
-    nominal,
-    accidentals,
-    octave,
-  };
-}
-
-const SEMIQUARTAL_NOMINALS: Nominal[] = [
-  'C',
-  'D',
-  'φ',
-  'χ',
-  'F',
-  'G',
-  'A',
-  'ψ',
-  'ω',
-];
-
-export function absoluteToSemiquartal(
-  monzo: TimeMonzo
-): AbsolutePitch | undefined {
-  const twos = monzo.primeExponents[0];
-  const threes = monzo.primeExponents[1];
-  const stepspan = twos.mul(NINE).add(threes.mul(FOURTEEN)).valueOf();
-  const octave = Math.floor(stepspan / 9) + 4;
-
-  if (!Number.isInteger(stepspan)) {
-    return undefined;
-  }
-  const nominal = SEMIQUARTAL_NOMINALS[mmod(stepspan, 9)];
-
-  let offCenter = threes.sub(NOMINAL_VECTORS.get(nominal)![1]).div(SEMININE);
-
-  // Enforce sanity limits.
-  if (offCenter.abs().compare(MAX_OFFSET) > 0) {
-    return undefined;
-  }
-
-  const accidentals: SplitAccidental[] = [];
-  while (offCenter.s < 0) {
-    accidentals.push({fraction: '', accidental: '£'});
-    offCenter = offCenter.add(ONE);
-  }
-  while (offCenter.s > 0) {
-    accidentals.push({fraction: '', accidental: '¤'});
-    offCenter = offCenter.sub(ONE);
-  }
-
-  if (offCenter.n) {
-    return undefined;
-  }
-
-  if (!accidentals.length) {
-    accidentals.push({fraction: '', accidental: '♮'});
-  }
 
   return {
     type: 'AbsolutePitch',

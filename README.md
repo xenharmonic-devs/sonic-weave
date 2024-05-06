@@ -53,7 +53,7 @@ Scale title, colors and labels.
 * Arseniiv A. - Co-developer / Language feedback
 * Inthar - Co-developer / Language feedback
 * Akselai - Quality assurance
-* Godtone - Language feedback
+* Godtone - Notation adviser / Language feedback
 * Joe Hildebrand - Grammar review
 * Marc Sabat - Notation adviser
 

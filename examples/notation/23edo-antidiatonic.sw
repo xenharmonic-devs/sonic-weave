@@ -7,7 +7,7 @@ D=4
 vE4
 E=4
 ^E4
-^^E4 // Or χ=4 if you want a unique nonimal for this one.
+^^E4
 vF4
 F=4
 ^F4
@@ -20,7 +20,7 @@ A=4
 vB4
 B=4
 ^B4
-^^B4 // Or ω=4 if you want a unique nonimal for this one.
+^^B4
 vC5
 C=5
 

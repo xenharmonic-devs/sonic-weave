@@ -202,7 +202,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('supports interordinal nominals', () => {
-    const scale = parseSource('C6 = 1000 Hz; ζ6;');
+    const scale = parseSource('C6 = 1000 Hz; γ6;');
     expect(scale).toHaveLength(1);
     expect(scale[0].value.valueOf()).toBeCloseTo(1414.213562373095);
   });
@@ -216,7 +216,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can spell the major scale in Greek', () => {
-    const scale = parseSource('ζ0=1/1;η0;α0;β0;γ1;δ1;ε1;ζ1;');
+    const scale = parseSource('γ0=1/1;δ0;ε0;ζ0;η1;α1;β1;γ1;');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
       '9/8;81/64;4/3;3/2;27/16;243/128;2'
@@ -230,19 +230,19 @@ describe('SonicWeave parser', () => {
       C0 = 1/1 = 261.6 Hz;
 
       // First cycle (Greek - Latin - Greek...)
-      gamma0; // Or γ0 if you want to get fancy.
+      eta0; // Or η0 if you want to get fancy.
       D0;
-      delta0;
+      alp0;
       E0;
-      epsilon0; // Or F0 depending on taste.
-      zeta0; // Period
+      bet0; // Or F0 depending on taste.
+      gam0; // Period
 
       // Second cycle (Latin - Greek - Latin ...)
       G0;
-      eta0;
+      del0;
       A0;
-      alpha0;
-      B0; // Or beta0 depending on taste.
+      eps0;
+      B0; // Or zet0 depending on taste.
       C1; // Equave = 2 * period
 
       // Temperament
@@ -267,15 +267,15 @@ describe('SonicWeave parser', () => {
   });
 
   it('has ups-and-downs', () => {
-    const scale = parseSource('C0=1/1;^C0;γ0;vD0;D0;22@;');
+    const scale = parseSource('C0=1/1;^C0;η0;vD0;D0;22@;');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\22;2\\22;3\\22;4\\22'
     );
   });
 
-  it('has soft-jaric accidentals', () => {
-    const scale = parseSource('C0=1/1;Cr0;γ0;Dp0;D0;22@;');
+  it('can make soft-jaric accidentals', () => {
+    const scale = parseSource('^=a4-P8/2;C0=1/1;^C0;η0;vD0;D0;22@;');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '1\\22;2\\22;3\\22;4\\22'
@@ -380,24 +380,32 @@ describe('SonicWeave parser', () => {
 
   it('has manual/semiquartal notation for 19edo', () => {
     const scale = parseSource(`
+      ^ = P4 / 2 - M2;
+
+      const φ0 = P4 / 2;
+      const χ0 = φ0 + M2;
+      const ψ0 = P8 - P4 / 2;
+      const ω0 = ψ0 + M2;
+      const [vχ0, vω0] = v{[χ0, ω0]};
+
       C0 = 1/1;
-      C&0;
-      D@0;
+      ^C0;
+      vD0;
       D0;
       φ0;
-      φ&0;
-      χ@0;
+      ^φ0;
+      vχ0;
       χ0;
       F0;
-      F&0;
-      G@0;
+      ^F0;
+      vG0;
       G0;
-      G&0;
-      A@0;
+      ^G0;
+      vA0;
       A0;
       ψ0;
-      ψ&0;
-      ω@0;
+      ^ψ0;
+      vω0;
       ω0;
       C1;
       19@;
