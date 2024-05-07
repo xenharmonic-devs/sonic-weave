@@ -214,7 +214,7 @@ SonicWeave doesn't have percentages so the CSS color `hsl(120, 60%, 70%)` is spe
 
 ## Code comments
 
-Anything after two slashes (`//`) is ignored until the end of the line. Everything after a slash and an asterisk (`/*`) is ignored until a corresponding pair (`*/`) is encountered. (This means you cannot nest multi-line comments, as in C and javascript.)
+Anything after two slashes (`//`) is ignored until the end of the line. Everything after a slash and an asterisk (`/*`) is ignored until a corresponding pair (`*/`) is encountered. (This means you cannot nest multi-line comments, as in C and JavaScript.)
 
 ```c
 1 = 432 Hz  // Good vibes only... Wait what are you doing?!
