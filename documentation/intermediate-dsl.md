@@ -353,7 +353,7 @@ The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 | SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |
 
-\* The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
+*) The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
 
 ### Numeric separators
 It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
