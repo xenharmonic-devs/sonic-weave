@@ -2360,4 +2360,27 @@ describe('Poor grammar / Fun with "<"', () => {
     const {fraction} = parseSingle('¶ dot logarithmic(1z)');
     expect(fraction).toBe('1');
   });
+
+  it('has "horizontal" precedence between √ and ÷', () => {
+    const {interval} = parseSingle('√2÷3');
+    expect(interval.toString()).toBe('2/9^1/2');
+    expect(interval.valueOf()).toBeCloseTo(Math.SQRT2 / 3);
+  });
+
+  it('has "vertical" precedence between √ and /', () => {
+    const {interval} = parseSingle('√3/2');
+    expect(interval.toString()).toBe('3/2^1/2');
+    expect(interval.valueOf()).toBeCloseTo(Math.sqrt(1.5));
+  });
+
+  it('has hemipyth monzos', () => {
+    const {interval} = parseSingle('[-1, 1>@√2.√3');
+    expect(interval.toString()).toBe('[-1 1>@√2.√3');
+    expect(interval.valueOf()).toBeCloseTo(Math.sqrt(1.5));
+  });
+
+  it('has hemipyth vals', () => {
+    const {fraction} = parseSingle('<12 19]@√2.√3 dot P5');
+    expect(fraction).toBe('14');
+  });
 });

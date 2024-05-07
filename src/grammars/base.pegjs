@@ -225,8 +225,9 @@ VectorComponents
   = VectorComponent|.., _ ','? _|
 
 Fraction
-  = numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
+  = radical: '√'? numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
     return {
+      radical: !!radical,
       numerator,
       denominator,
     };

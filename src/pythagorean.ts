@@ -4,6 +4,7 @@ import {
   ELEVEN,
   F,
   FIVE,
+  HALF,
   NEGATIVE_ONE,
   ONE,
   SEVEN,
@@ -166,7 +167,6 @@ export type AbsolutePitch = {
 
 type PythInflection = [Fraction, Fraction];
 
-const HALF = F(1, 2);
 const q = F(1, 4);
 const Q = F(3, 4);
 const NEGATIVE_HALF = F(-1, 2);

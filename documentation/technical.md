@@ -39,7 +39,7 @@ All operations are left-associative except exponentiation, recipropower, and log
 | `++x`, `--x`, `+x`, `^x`, `∧x`, `∨x`, `/x`, `\x` | Increment, decrement, no-op, up, down, lift, drop                       |
 | `/`                                              | Fraction                                                                |
 | `^`, `^/`, `/^`, `/_`                            | Exponentiation, recipropower, logdivision*                              |
-| `-x`, `%x`, `÷x`                                 | Negation, inversion                                                     |
+| `-x`, `%x`, `÷x`, `√x`                           | Negation, inversion, square root                                        |
 | `*`, `×`, `%`, `÷`, `\`, `dot`, `·`, `tns`, `⊗`, `tmpr` | Multiplication, division, N-of-EDO, val-monzo product, array tensoring, tempering |
 | `mod`, `modc`, `rd`, `rdc`, `ed`                 | Modulo, ceiling modulo, reduction, ceiling reduction, octave projection |
 | `+`, `-`, `/+`, `⊕`, `/-`, `⊖`                   | Addition, subtraction, lens addition, lens subtraction                  |

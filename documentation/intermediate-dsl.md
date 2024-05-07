@@ -371,6 +371,7 @@ Operations can be applied to intervals to create new intervals.
 | Inversion      | `%2`      | `1/2`       | `-P8`       | `P-8`         |
 | Inversion      | `÷3/2`    | `2/3`       | `-P5`       | `P-5`         |
 | Geom. inverse  | _N/A_     |             | `%P8`       | `<1 0 0 ...]` |
+| Square root    | `√4`      | `2`         | `√P15`      | `P8`          |
 | Logical NOT    | `not 2`   | `false`     | `not P8`    | `false`       |
 | Up             | `^2`      | *           | `^P8`       | `P8 + 1°`     |
 | Down           | `v{2}`    | *           | `vP8`       | `P8 - 1°`     |
@@ -379,6 +380,8 @@ Operations can be applied to intervals to create new intervals.
 | Increment      | `++i`     | `3`         | _N/A_       |               |
 | Decrement      | `--i`     | `1`         | _N/A_       |               |
 | Absolute value | `abs(-2)` | `2`         | `abs(-P8)`  | `P8`          |
+
+Square root uses the same operator in both domains because the square of a logarithmic quantity is undefined so there's no ambiguity.
 
 *) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. These operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
 

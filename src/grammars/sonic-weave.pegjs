@@ -805,8 +805,9 @@ MultiplicativeExpression
     return tail.reduce(operatorReducer, head);
   }
 
+// The radical is universal, but featured here for precedence.
 UniformUnaryOperator
-  = '-' / '%' / '÷'
+  = '-' / '%' / '÷' / '√'
 
 UniformUnaryExpression
   = operator: '--' argument: ExponentiationExpression {

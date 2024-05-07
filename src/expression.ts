@@ -64,6 +64,7 @@ export type NumericFlavor = '' | 'r' | 'e' | 'E' | 'z';
 export type Sign = '' | '+' | '-';
 
 export type BasisFraction = {
+  radical: boolean;
   numerator: number;
   denominator: number | null;
 };
@@ -467,6 +468,38 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
         denominator: Math.abs(node.denominator),
       };
   }
+  return undefined;
+}
+
+/** @hidden */
+export function sqrtNode(node?: IntervalLiteral): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  switch (node.type) {
+    case 'StepLiteral':
+      if (node.count % 2) {
+        return undefined;
+      }
+      return {
+        ...node,
+        count: node.count / 2,
+      };
+    case 'NedjiLiteral':
+      return {
+        ...node,
+        numerator: node.numerator % 2 ? node.numerator : node.numerator / 2,
+        denominator:
+          node.numerator % 2 ? node.denominator * 2 : node.denominator,
+      };
+    case 'FJS':
+    case 'AspiringFJS':
+      return {type: 'AspiringFJS', flavor: inferFJSFlavor(node)};
+    case 'AbsoluteFJS':
+    case 'AspiringAbsoluteFJS':
+      return {type: 'AspiringAbsoluteFJS', flavor: inferFJSFlavor(node)};
+  }
+
   return undefined;
 }
 
@@ -886,10 +919,11 @@ function formatNedji(literal: NedjiLiteral) {
 }
 
 function formatBasisFraction(fraction: BasisFraction) {
+  const radical = fraction.radical ? '√' : '';
   if (fraction.denominator) {
-    return `${fraction.numerator}/${fraction.denominator}`;
+    return `${radical}${fraction.numerator}/${fraction.denominator}`;
   }
-  return fraction.numerator.toString();
+  return `${radical}${fraction.numerator}`;
 }
 
 function formatSubgroupBasis(basis: BasisElement[]) {

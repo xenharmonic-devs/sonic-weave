@@ -946,14 +946,14 @@ function primeMonzo(
     for (let i = 0; i < pe.length; ++i) {
       if (pe[i].n) {
         components.push(fractionToVectorComponent(pe[i]));
-        basis.push({numerator: PRIMES[i], denominator});
+        basis.push({numerator: PRIMES[i], denominator, radical: false});
       }
     }
     const factors = primeFactorize(monzo.residual);
     const primes = Array.from(factors.keys()).sort((a, b) => a - b);
     for (const numerator of primes) {
       components.push(integerToVectorComponent(factors.get(numerator)!));
-      basis.push({numerator, denominator});
+      basis.push({numerator, denominator, radical: false});
     }
     const node: MonzoLiteral = {
       type: 'MonzoLiteral',

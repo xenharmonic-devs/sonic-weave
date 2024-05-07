@@ -123,7 +123,7 @@ riff domainOf(interval) {
 
 riff sqrt(x) {
   "Calculate the square root of the input.";
-  return x ~/^ 2;
+  return √x;
 }
 
 riff cbrt(x) {
