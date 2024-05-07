@@ -15,7 +15,7 @@ Statements can be separated with semicolons `;` or newlines. After these instruc
 3/2
 2/1
 ```
-...the scale consists of `$ = [5/4, 3/2, 2/1]`.
+...the scale consists of `$ = [5/4, 3/2, 2/1]`. Pushing respects order; see the [Function calls section](#function-calls) for an example of how to sort by pitch.
 
 ### Unrolling
 Sub-scales are automatically unrolled onto the current scale.
@@ -23,7 +23,7 @@ Sub-scales are automatically unrolled onto the current scale.
 4\12
 [7\12, 12\12]
 ```
-Results in the scale `$ = [4\12, 7\12, 12\12]`.
+Results in the scale `$ = [4\12, 7\12, 12\12]`. (Unrolling of a sub-scale essentially concatenates the interval list to that of the current scale (`$`). Compare with [record unrolling](#record-unrolling).)
 
 ### Coloring
 If an expression evaluates to a color it is applied to all the intervals in the scale that don't have a color yet.
@@ -146,7 +146,7 @@ let myComma = 81/80
 myComma = 250/243 // Valid: myComma now has the value 250/243
 ```
 
-Constancy is skin-deep. The elements of a `const` array may be re-assigned at will.
+**Constancy is shallow** (skin-deep): the elements of a `const` array may be re-assigned at will.
 
 ```c
 const myCommas = [81/80, 128/125];
@@ -191,7 +191,7 @@ let x, r
 // r has value [2, 3, 4]
 ```
 
-### Operator re-assignment
+### Reassignment operator
 Variables can be reassigned after declaration e.g. with `let i = 2` the statement `i += 3` sets `i` to `5`.
 
 ## Statements / line endings
@@ -228,7 +228,7 @@ Especially scalar multiplication and division can be hard to wrap your head arou
 
 This means that multiplication between linear and logarithmic quantities is the same as raising the underlying value of the logarithmic quantity to the underlying value of the linear quantity. Under the hood `P4 * 3` is actually doing `FJS( (4/3) ^ 3 )`.
 
-Similarly a logarithmic quantity divided by a linear quantity is equivalent to taking an nth root. `P5 / 2` is doing `FJS( (3/2) ^ (1/2) )` or taking advantage of the exotic *recipropower* operator and operator precedence of fractions in SonicWeave `FJS( 3/2 /^ 2)`
+Similarly a logarithmic quantity divided by a linear quantity is equivalent to taking an nth root. `P5 / 2` is doing `FJS( (3/2) ^ (1/2) )` or equivalently `FJS( 3/2 /^ 2)` or `FJS( 3/2 ^/ 2 )`. (The latter two examples take advantage of (two spellings of) the exotic *recipropower* operator.)
 
 Division of logarithmic quantities is a true mind-bender: `m7` is `2 * P4` so correspondingly `m7 / P4` evaluates to `2`, a linear scalar! The underlying operation is that of *logdivision* or log-in-the-base-of in conventional mathematical notation. You may verify for yourself that the logarithm of 16/9 in the base of 4/3 is indeed 2, written as `16/9 /_ 4/3` in SonicWeave. Looking at cents may offer a more natural perspective. It's hopefully less surprising that `1000. / 500.` is `2`.
 
