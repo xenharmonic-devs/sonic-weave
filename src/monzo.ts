@@ -1568,7 +1568,7 @@ export class TimeMonzo {
    * @returns The pitch-space half of the time monzo.
    */
   sqrt() {
-    const residual = this.residual.pow(HALF);
+    const residual = this.residual.sqrt();
     if (!residual) {
       return new TimeReal(this.timeExponent.valueOf(), this.valueOf()).sqrt();
     }
