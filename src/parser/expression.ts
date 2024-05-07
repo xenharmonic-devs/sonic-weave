@@ -949,8 +949,8 @@ export class ExpressionVisitor {
             newNode = uniformInvertNode(newNode);
             break;
           default:
-            // The grammar shouldn't let you get here.
-            throw new Error(`Uniform operation '${operator}' not supported.`);
+            // Runtime exception for √~
+            throw new Error(`Uniform operation ${operator}~ not supported.`);
         }
         if (operand.domain === 'cologarithmic') {
           if (value instanceof TimeMonzo) {
@@ -970,6 +970,8 @@ export class ExpressionVisitor {
         case '%':
         case '÷':
           return operand.inverse();
+        case '√':
+          return operand.sqrt();
       }
       if (operand instanceof Val) {
         throw new Error(`Unary operation '${operator}' not supported on vals.`);

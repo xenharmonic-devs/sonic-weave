@@ -20,6 +20,7 @@ import {
 import {
   ABSURD_EXPONENT,
   FRACTION_PRIMES,
+  HALF,
   NEGATIVE_ONE,
   ONE,
   TWO,
@@ -300,6 +301,13 @@ export class TimeReal {
     return new TimeReal(-this.timeExponent, 1 / this.value);
   }
 
+  /**
+   * Return the frequency-space square root of the time real.
+   * @returns The pitch-space half of the time real.
+   */
+  sqrt() {
+    return new TimeReal(this.timeExponent / 2, Math.sqrt(this.value));
+  }
   /**
    * Linear space absolute value of the time real.
    * @returns The time real unchanged or negated if negative originally.
@@ -713,7 +721,7 @@ export class TimeReal {
       });
     }
     if (this.value < 0) {
-      basis.push({numerator: -1, denominator: null});
+      basis.push({numerator: -1, denominator: null, radical: false});
       components.push({sign: '', left: 1, right: '', exponent: null});
     }
     if (this.value !== 0) {
@@ -1341,10 +1349,11 @@ export class TimeMonzo {
 
   /**
    * Convert the time monzo to pitch-space fraction of a frequency-space fraction.
+   * @param preferPositive Prefer a positive fraction of the equave.
    * @returns Pair of the pitch-space fraction and the equave as a frequency-space fraction.
    * @throws An error if the time monzo cannot be represented as an EDJI interval.
    */
-  toEqualTemperament(): EqualTemperament {
+  toEqualTemperament(preferPositive = false): EqualTemperament {
     if (!this.residual.isUnity()) {
       throw new Error(
         'Unable to convert non-representable fraction to equal temperament.'
@@ -1380,18 +1389,21 @@ export class TimeMonzo {
         equave: new Fraction(1),
       };
     }
-    const fractionOfEquave = new Fraction(numerator, denominator);
+    let fractionOfEquave = new Fraction(numerator, denominator);
     const equaveMonzo = this.pow(fractionOfEquave.inverse());
     if (!(equaveMonzo instanceof TimeMonzo && equaveMonzo.isFractional())) {
       throw new Error('Equal temperament conversion failed.');
     }
-    const equave = equaveMonzo.toFraction();
+    let equave = equaveMonzo.toFraction();
 
     if (equave.compare(ONE) < 0) {
-      return {
-        fractionOfEquave: fractionOfEquave.neg(),
-        equave: equave.inverse(),
-      };
+      fractionOfEquave = fractionOfEquave.neg();
+      equave = equave.inverse();
+    }
+
+    if (preferPositive && fractionOfEquave.s < 0 && equave.d !== 1) {
+      fractionOfEquave = fractionOfEquave.neg();
+      equave = equave.inverse();
     }
 
     return {
@@ -1549,6 +1561,22 @@ export class TimeMonzo {
     const vector = this.primeExponents.map(component => component.neg());
     const residual = this.residual.inverse();
     return new TimeMonzo(timeExponent, vector, residual);
+  }
+
+  /**
+   * Return the frequency-space square root of the time monzo.
+   * @returns The pitch-space half of the time monzo.
+   */
+  sqrt() {
+    const residual = this.residual.pow(HALF);
+    if (!residual) {
+      return new TimeReal(this.timeExponent.valueOf(), this.valueOf()).sqrt();
+    }
+    return new TimeMonzo(
+      this.timeExponent.mul(HALF),
+      this.primeExponents.map(e => e.mul(HALF)),
+      residual
+    );
   }
 
   /**
@@ -2381,7 +2409,7 @@ export class TimeMonzo {
       return undefined;
     }
     try {
-      const {fractionOfEquave, equave} = this.toEqualTemperament();
+      const {fractionOfEquave, equave} = this.toEqualTemperament(true);
       return {
         type: 'RadicalLiteral',
         argument: equave,
@@ -2539,13 +2567,13 @@ export class TimeMonzo {
     if (!this.residual.isUnity()) {
       const {s, n, d} = this.residual;
       if (d === 1) {
-        basis.push({numerator: s * n, denominator: null});
+        basis.push({numerator: s * n, denominator: null, radical: false});
         components.push({sign: '', left: 1, right: '', exponent: null});
       } else if (n === 1) {
-        basis.push({numerator: s * d, denominator: null});
+        basis.push({numerator: s * d, denominator: null, radical: false});
         components.push({sign: '-', left: 1, right: '', exponent: null});
       } else {
-        basis.push({numerator: s * n, denominator: d});
+        basis.push({numerator: s * n, denominator: d, radical: false});
         components.push({sign: '', left: 1, right: '', exponent: null});
       }
     }
@@ -2562,7 +2590,11 @@ export class TimeMonzo {
         index++;
       }
       if (pe.length) {
-        basis.push({numerator: PRIMES[index], denominator: null});
+        basis.push({
+          numerator: PRIMES[index],
+          denominator: null,
+          radical: false,
+        });
       }
       if (pe.length > 1) {
         // Two dots looks better IMO...
@@ -2608,7 +2640,7 @@ export class TimeMonzo {
           }
         } else if (this.isEqualTemperament()) {
           try {
-            const {fractionOfEquave, equave} = this.toEqualTemperament();
+            const {fractionOfEquave, equave} = this.toEqualTemperament(true);
             return `${equave.toFraction()}^${fractionOfEquave.toFraction()}`;
           } catch {
             /* Fall through */
@@ -2631,7 +2663,7 @@ export class TimeMonzo {
             }
           } else if (this.isEqualTemperament()) {
             try {
-              const {fractionOfEquave, equave} = this.toEqualTemperament();
+              const {fractionOfEquave, equave} = this.toEqualTemperament(true);
               return `${equave.toFraction()}^${fractionOfEquave.toFraction()} * 1Hz`;
             } catch {
               /* Fall through */

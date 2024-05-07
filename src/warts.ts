@@ -61,7 +61,10 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
       checkSpan();
     } else if (element === '') {
       span = true;
-    } else if (element.denominator === null || element.denominator === 1) {
+    } else if (
+      (element.denominator === null || element.denominator === 1) &&
+      !element.radical
+    ) {
       if (PRIMES.includes(element.numerator)) {
         const index = PRIMES.indexOf(element.numerator);
         if (span) {
@@ -82,9 +85,17 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
         checkSpan();
       }
     } else {
-      const monzo = TimeMonzo.fromFraction(
-        new Fraction(element.numerator, element.denominator)
+      let monzo = TimeMonzo.fromFraction(
+        new Fraction(element.numerator, element.denominator ?? undefined)
       );
+      if (element.radical) {
+        const sqrt = monzo.sqrt();
+        if (sqrt instanceof TimeMonzo) {
+          monzo = sqrt;
+        } else {
+          throw new Error('Not enough components for a radical subgroup.');
+        }
+      }
       subgroup.push(monzo);
       nonPrimes.push(monzo);
       checkSpan();

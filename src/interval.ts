@@ -25,6 +25,7 @@ import {
   MonzoLiteral,
   literalToJSON,
   literalFromJSON,
+  sqrtNode,
 } from './expression';
 import {TimeMonzo, TimeReal} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -386,6 +387,20 @@ export class Interval {
       return new Interval(this.value.abs(), this.domain, 0, node, this);
     }
     return new Interval(this.value.pitchAbs(), this.domain, 0, node, this);
+  }
+
+  sqrt() {
+    if (this.steps % 2) {
+      throw new Error('Cannot split steps using √.');
+    }
+    const node = sqrtNode(this.node);
+    return new Interval(
+      this.value.sqrt(),
+      this.domain,
+      this.steps / 2,
+      node,
+      this
+    );
   }
 
   /**
@@ -1030,7 +1045,7 @@ export class Interval {
     const node = this.value.asMonzoLiteral();
     if (this.steps) {
       if (!node.basis.length && node.components.length) {
-        node.basis.push({numerator: 2, denominator: null});
+        node.basis.push({numerator: 2, denominator: null, radical: false});
         if (node.components.length > 1) {
           node.basis.push('');
           node.basis.push('');
@@ -1312,6 +1327,18 @@ export class Val {
    */
   abs() {
     return new Val(this.value.pitchAbs(), this.equave);
+  }
+
+  /**
+   * A meaningless operation.
+   * @returns A new Val obtained by pretending its value represents a linear quantity.
+   */
+  sqrt() {
+    const value = this.value.sqrt();
+    if (value instanceof TimeMonzo) {
+      return new Val(value, this.equave);
+    }
+    throw new Error('Val square root operation failed.');
   }
 
   /**

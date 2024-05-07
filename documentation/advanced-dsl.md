@@ -260,6 +260,8 @@ Let's take a look at [Barbados temperament](https://en.xen.wiki/w/The_Archipelag
 
 An explicit subgroup may be given with monzos as well e.g. `[0 1 -1>@2.3.13/5` for `logarithmic(15/13)`.
 
+You can even use square roots in the basis e.g. `[-1 1>@√2.√3` is monzo representation for the neutral third `n3`.
+
 ## Universal monzos
 The monzo basis also supports the special symbols `s`, `Hz`, `-1`, `0`, `rc` and `1°`. A conversion like `monzo(-440Hz)` evaluates to
 ```c

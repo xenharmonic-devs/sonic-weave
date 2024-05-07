@@ -9,6 +9,7 @@ export function F(n: number, d?: number) {
 export const ZERO = F(0);
 export const ONE = F(1);
 export const NEGATIVE_ONE = F(-1);
+export const HALF = F(1, 2);
 
 export const FRACTION_PRIMES: Fraction[] = [];
 for (const prime of PRIMES) {
