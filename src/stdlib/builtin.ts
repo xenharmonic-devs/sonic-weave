@@ -877,7 +877,7 @@ function labelAbsoluteFJS(
   interval.label = formatAbsoluteFJS(interval.node, false);
   interval.color = new Color('white');
   for (const accidental of interval.node.pitch.accidentals) {
-    if (accidental.accidental === '♮' || accidental.accidental === '=') {
+    if (accidental.accidental === '♮' || accidental.accidental === '_') {
       continue;
     }
     interval.color = new Color('black');

@@ -880,7 +880,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can declare reference frequency at the same time as reference pitch', () => {
-    const two = evaluateExpression('A=4 = 440z = 1/1; str(relin(A=5))');
+    const two = evaluateExpression('A_4 = 440z = 1/1; str(relin(A5))');
     expect(two).toBe('2');
   });
 

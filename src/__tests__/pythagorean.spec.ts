@@ -155,7 +155,7 @@ describe('Absolute Pythagorean interval construction from parts', () => {
     ['B', [{fraction: '', accidental: 'b'}], 3, 3, -2],
     ['E', [{fraction: '', accidental: 'd'}], 4, -0.5, 0.5],
     ['C', [{fraction: 'q', accidental: '#'}], 4, -2.75, 1.75],
-    ['C', [{fraction: '', accidental: '='}], 5, 1, 0],
+    ['C', [{fraction: '', accidental: '_'}], 5, 1, 0],
   ])('constructs %s%s', (nominal, accidentals, octave, twos, threes) => {
     const node: AbsolutePitch = {
       type: 'AbsolutePitch',

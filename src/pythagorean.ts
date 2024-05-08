@@ -92,14 +92,14 @@ export type Pythagorean = {
  * Absolute pitch nominal: Traditional Pythagorean or semioctave.
  */
 export type Nominal =
-  | 'A'
+  | 'A' // Diatonic
   | 'B'
   | 'C'
   | 'D'
   | 'E'
   | 'F'
   | 'G'
-  | 'alp'
+  | 'alp' // Semioctave
   | 'α'
   | 'bet'
   | 'β'
@@ -112,7 +112,45 @@ export type Nominal =
   | 'zet'
   | 'ζ'
   | 'eta'
-  | 'η';
+  | 'η'
+  | 'phi' // Semiquartal
+  | 'φ'
+  | 'chi'
+  | 'χ'
+  | 'psi'
+  | 'ψ'
+  | 'ome'
+  | 'ω'
+  | 'H' // Latin reserve
+  | 'I'
+  | 'the' // Greek reserve
+  | 'θ'
+  | 'iot'
+  | 'ι'
+  | 'kap'
+  | 'κ'
+  | 'lam'
+  | 'λ'
+  | 'muu' // 'mu' is too short
+  | 'μ'
+  | 'nuu'
+  | 'ν'
+  | 'xii'
+  | 'ξ'
+  | 'omi'
+  | 'ο'
+  | 'pii'
+  | 'π'
+  | 'rho'
+  | 'ρ'
+  | 'fsi' // Final sigma
+  | 'ς'
+  | 'sig'
+  | 'σ'
+  | 'tau'
+  | 'τ'
+  | 'ups'
+  | 'υ';
 
 /**
  * Musical accidental representing some powers of primes 2 and 3, possibly fractional.
@@ -128,7 +166,7 @@ export type Accidental =
   | '‡'
   | 't'
   | '♮'
-  | '='
+  | '_'
   | 'd'
   | '♭'
   | 'b';
@@ -237,11 +275,25 @@ const NOMINAL_VECTORS = new Map<Nominal, PythInflection>([
   // B - 1\2
   ['bet', [F(-15, 2), FIVE]],
   ['β', [F(-15, 2), FIVE]],
+
+  // Manual / semiquartal
+  ['phi', [ONE, NEGATIVE_HALF]],
+  ['φ', [ONE, NEGATIVE_HALF]],
+
+  ['chi', [NEGATIVE_TWO, SESQUI]],
+  ['χ', [NEGATIVE_TWO, SESQUI]],
+
+  ['psi', [ZERO, HALF]],
+  ['ψ', [ZERO, HALF]],
+
+  ['ome', [NEGATIVE_THREE, SEMIFIVE]],
+  ['ω', [NEGATIVE_THREE, SEMIFIVE]],
 ]);
 
-const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
+/** @hidden */
+export const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
   ['♮', [ZERO, ZERO]],
-  ['=', [ZERO, ZERO]],
+  ['_', [ZERO, ZERO]],
 
   ['♯', [F(-11, 1), SEVEN]],
   ['#', [F(-11, 1), SEVEN]],
@@ -262,7 +314,8 @@ const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
   ['d', [SEMIELEVEN, F(-7, 2)]],
 ]);
 
-const VULGAR_FRACTIONS = new Map<VulgarFraction, Fraction>([
+/** @hidden */
+export const VULGAR_FRACTIONS = new Map<VulgarFraction, Fraction>([
   ['', ONE],
   ['s', HALF],
   ['½', HALF],
@@ -385,9 +438,15 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
 }
 
 export function absoluteMonzo(node: AbsolutePitch) {
+  if (!NOMINAL_VECTORS.has(node.nominal)) {
+    throw new Error(`Nominal ${node.nominal} is unassigned.`);
+  }
   const vector = [...NOMINAL_VECTORS.get(node.nominal)!];
   for (const accidental of node.accidentals) {
     const fraction = VULGAR_FRACTIONS.get(accidental.fraction)!;
+    if (!ACCIDENTAL_VECTORS.has(accidental.accidental)) {
+      throw new Error(`Accidental ${accidental.accidental} is unassigned.`);
+    }
     const modification = ACCIDENTAL_VECTORS.get(accidental.accidental)!;
     vector[0] = vector[0].add(modification[0].mul(fraction));
     vector[1] = vector[1].add(modification[1].mul(fraction));

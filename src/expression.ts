@@ -7,6 +7,7 @@ import {
   validateBigInt,
 } from './utils';
 import {Pythagorean, AbsolutePitch} from './pythagorean';
+import {AbsoluteMosPitch, MosStep} from './diamond-mos';
 import {Fraction, bigAbs, lcm} from 'xen-dev-utils';
 
 /**
@@ -171,7 +172,7 @@ export type AbsoluteFJS = {
   type: 'AbsoluteFJS';
   ups: number;
   lifts: number;
-  pitch: AbsolutePitch;
+  pitch: AbsolutePitch | AbsoluteMosPitch;
   superscripts: FJSInflection[];
   subscripts: FJSInflection[];
 };
@@ -183,6 +184,15 @@ export type AbsoluteFJS = {
 export type AspiringAbsoluteFJS = {
   type: 'AspiringAbsoluteFJS';
   flavor: FJSFlavor;
+};
+
+export type MosStepLiteral = {
+  type: 'MosStepLiteral';
+  ups: number;
+  lifts: number;
+  mosStep: MosStep;
+  superscripts: FJSInflection[];
+  subscripts: FJSInflection[];
 };
 
 export type WartsLiteral = {
@@ -248,6 +258,7 @@ export type IntervalLiteral =
   | AspiringFJS
   | AbsoluteFJS
   | AspiringAbsoluteFJS
+  | MosStepLiteral
   | HertzLiteral
   | SecondLiteral
   | ReciprocalLogarithmicHertzLiteral
@@ -1122,6 +1133,7 @@ export function literalToJSON(literal?: IntervalLiteral) {
     case 'AspiringFJS':
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
+    case 'MosStepLiteral':
     case 'HertzLiteral':
     case 'SecondLiteral':
     case 'ReciprocalLogarithmicHertzLiteral':
@@ -1171,6 +1183,7 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
     case 'AspiringFJS':
     case 'AbsoluteFJS':
     case 'AspiringAbsoluteFJS':
+    case 'MosStepLiteral':
     case 'HertzLiteral':
     case 'SecondLiteral':
     case 'ReciprocalLogarithmicHertzLiteral':

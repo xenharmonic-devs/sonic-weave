@@ -393,9 +393,16 @@ C♮5 "Octave"
 ```
 
 #### Nicknames
-Lumi, the lead developer, likes to call "C + P4 / 2" "φ" or "phi". Its octave complement is called "ψ" or "psi" and "beta half-flat" has the nickname "χ" or "chi". The last interordinal would be "ω" or "ome(ga)" but it tends to jump around depending on the mood and if the semiquartal scale was sullied by adding a flat sign ♭ in the mix or not.
+The semifourth against C has a nickname "φ" or "phi". Other nicknames include:
 
-Absolute semiquartals might make a comeback as an opt-in, but for now they've been excluded from the main grammar.
+| Expression    | Standard | Nickname | ASCII  |
+| ------------- | -------- | -------- | ------ |
+| `C4 + P4 / 2` | `αd4`    | `φ4`     | `phi4` |
+| `C5 - P4 / 2` | `εd4`    | `ψ4`     | `psi4` |
+| `φ4 + M2`     | `βd4`    | `χ4`     | `chi4` |
+| `ψ4 + M2`     | `ζt4`    | `ω4`     | `ome4` |
+
+The scale C, D, φ, χ, F, G, A, ψ, ω, (C) is the 6|2 (*Stellerian*) mode of [5L 4s](https://en.xen.wiki/w/5L_4s) spellable without accidentals.
 
 ## Quarter-augmented Pythagorean notation
 As previously mentioned the fifth spans 4 degrees so we can split it again without breaking the ordinal notation.

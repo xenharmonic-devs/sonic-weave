@@ -1,7 +1,7 @@
 "Recommended notation for 3 divisions of the octave"
-C=4 = mtof(60)
-E=4
+C_4 = mtof(60)
+E_4
 Ab4
-C=5
+C_5
 
 3@2.81
