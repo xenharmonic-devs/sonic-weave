@@ -563,12 +563,12 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(ast.expression.type).toBe('SquareSuperparticular');
   });
 
-  it('differentiates natural accidentals from variable declaration', () => {
-    const ast = parseSingle('D=4');
+  it('uses underscores as natural accidentals', () => {
+    const ast = parseSingle('D_4');
     expect(ast.expression.type).toBe('AbsoluteFJS');
   });
 
-  it("still parses variable declaration when there's no conflict with FJS", () => {
+  it('parses single letter variable assignment', () => {
     const ast = parseSingle('d=4');
     expect(ast.type).toBe('AssignmentStatement');
   });
@@ -1112,6 +1112,25 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
         {type: 'ImportElement', id: 'baz', alias: 'quux'},
       ],
       module: 'foo',
+    });
+  });
+
+  it('has MOS-step syntax', () => {
+    const ast = parseSingle('P0ms');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        ups: 0,
+        lifts: 0,
+        type: 'MosStepLiteral',
+        mosStep: {
+          type: 'MosStep',
+          quality: {fraction: '', quality: 'P'},
+          degree: 0,
+        },
+        superscripts: [],
+        subscripts: [],
+      },
     });
   });
 });

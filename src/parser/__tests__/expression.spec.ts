@@ -363,10 +363,10 @@ describe('SonicWeave expression evaluator', () => {
         'logarithmic',
       ]) {
         const value = evaluate(
-          `A=4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`
+          `A4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`
         ) as Interval;
         const iterated = evaluate(
-          `A=4 = 440 Hz = 27/16; ${value.toString()}`
+          `A4 = 440 Hz = 27/16; ${value.toString()}`
         ) as Interval;
         expect(iterated.domain).toBe(value.domain);
         expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
@@ -376,7 +376,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a string representation for an absurd absolute quantity', () => {
     const value = evaluate(
-      'A=4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))'
+      'A4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))'
     ) as Interval;
     const iterated = evaluate(value.toString()) as Interval;
     expect(iterated.domain).toBe(value.domain);

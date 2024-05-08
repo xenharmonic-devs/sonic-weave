@@ -19,6 +19,7 @@ import {
   IntervalLiteral,
   SparseOffsetVal,
   SquareSuperparticular,
+  MosStepLiteral,
 } from '../expression';
 import {
   Interval,
@@ -55,7 +56,7 @@ import {
   BinaryPrefix,
   F,
 } from '../utils';
-import {pythagoreanMonzo, absoluteMonzo} from '../pythagorean';
+import {pythagoreanMonzo, absoluteMonzo, AbsolutePitch} from '../pythagorean';
 import {inflect} from '../fjs';
 import {
   STEP_ELEMENT,
@@ -93,6 +94,12 @@ import {
   UpdateOperator,
 } from '../ast';
 import {type StatementVisitor} from './statement';
+import {
+  AbsoluteMosPitch,
+  MosConfig,
+  absoluteMosMonzo,
+  mosMonzo,
+} from '../diamond-mos';
 
 /**
  * Local context within a SonicWeave code block or a function.
@@ -173,6 +180,16 @@ const CENT_MONZO = new TimeMonzo(ZERO, [F(1, 1200)]);
 const CENT_REAL = new TimeReal(0, 1.0005777895065548);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [F(1200)]);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
+
+const PLACEHOLDER_MOS_CONFIG: MosConfig = {
+  J4: TEN_MONZO,
+  equave: TEN_MONZO,
+  period: TEN_MONZO,
+  am: TEN_MONZO,
+  semiam: TEN_MONZO,
+  scale: new Map(),
+  degrees: [],
+};
 
 function typesCompatible(
   a: IntervalLiteral | undefined,
@@ -342,6 +359,8 @@ export class ExpressionVisitor {
         return this.visitFJS(node);
       case 'AbsoluteFJS':
         return this.visitAbsoluteFJS(node);
+      case 'MosStepLiteral':
+        return this.visitMosStepLiteral(node);
       case 'HertzLiteral':
         return this.visitHertzLiteral(node);
       case 'SecondLiteral':
@@ -637,7 +656,7 @@ export class ExpressionVisitor {
 
   protected upLift(
     value: TimeMonzo | TimeReal,
-    node: MonzoLiteral | FJS | AbsoluteFJS
+    node: MonzoLiteral | FJS | AbsoluteFJS | MosStepLiteral
   ) {
     if (!this.rootContext) {
       throw new Error('Root context required for uplift.');
@@ -751,7 +770,12 @@ export class ExpressionVisitor {
 
   protected visitAbsoluteFJS(node: AbsoluteFJS) {
     const relativeToC4 = inflect(
-      absoluteMonzo(node.pitch),
+      /[J-Z]/.test(node.pitch.nominal)
+        ? absoluteMosMonzo(
+            node.pitch as AbsoluteMosPitch,
+            PLACEHOLDER_MOS_CONFIG
+          )
+        : absoluteMonzo(node.pitch as AbsolutePitch),
       node.superscripts,
       node.subscripts
     );
@@ -762,6 +786,17 @@ export class ExpressionVisitor {
       upLifted.steps,
       node
     );
+    this.rootContext!.fragiles.push(result);
+    return result;
+  }
+
+  protected visitMosStepLiteral(node: MosStepLiteral) {
+    const monzo = inflect(
+      mosMonzo(node.mosStep, PLACEHOLDER_MOS_CONFIG),
+      node.superscripts,
+      node.subscripts
+    );
+    const result = this.upLift(monzo, node);
     this.rootContext!.fragiles.push(result);
     return result;
   }

@@ -37,4 +37,4 @@ B♭4 black
 B♮4 white
 
 // The equal sign is the ASCII equivalent of ♮
-C=5 white
+C_5 white

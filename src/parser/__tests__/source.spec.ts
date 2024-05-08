@@ -196,7 +196,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('supports pythagorean absolute notation', () => {
-    const scale = parseSource('C4 = 262 Hz; A=4;');
+    const scale = parseSource('C4 = 262 Hz; A4;');
     expect(scale).toHaveLength(1);
     expect(scale[0].value.valueOf()).toBeCloseTo(442.12);
   });
@@ -382,12 +382,6 @@ describe('SonicWeave parser', () => {
     const scale = parseSource(`
       ^ = P4 / 2 - M2;
 
-      const φ0 = P4 / 2;
-      const χ0 = φ0 + M2;
-      const ψ0 = P8 - P4 / 2;
-      const ω0 = ψ0 + M2;
-      const [vχ0, vω0] = v{[χ0, ω0]};
-
       C0 = 1/1;
       ^C0;
       vD0;
@@ -495,10 +489,10 @@ describe('SonicWeave parser', () => {
 
   it('supports other roots besides C4', () => {
     const scale = parseSource(`
-      A=3 = 200 Hz
-      D=4
-      E=4
-      A=4
+      A_3 = 200 Hz
+      D_4
+      E_4
+      A_4
       relative;
     `);
     const ratios = scale.map(i => i.value.valueOf());
@@ -562,7 +556,7 @@ describe('SonicWeave parser', () => {
 
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
-      'A=4 = 440 Hz = 1/1;^D4;A=4 = 432 Hz;^ = 2°;const syn=81/80;vD4~*syn;3;$[-1]=5;',
+      'A4 = 440 Hz = 1/1;^D4;A4 = 432 Hz;^ = 2°;const syn=81/80;vD4~*syn;3;$[-1]=5;',
       false
     );
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
@@ -1457,5 +1451,17 @@ describe('SonicWeave parser', () => {
         false
       )
     ).toThrow('Illegal BreakStatement inside a deferred block.');
+  });
+
+  it('rejects unassigned absolute pitches (ASCII)', () => {
+    expect(() => evaluateSource('fsi#4')).toThrow('Nominal fsi is unassigned.');
+  });
+
+  it('rejects unassigned absolute pitches (unicode)', () => {
+    expect(() => evaluateSource('ς♭2')).toThrow('Nominal ς is unassigned.');
+  });
+
+  it('rejects unassigned accidentals', () => {
+    expect(() => evaluateSource('Ce4')).toThrow('Accidental e is unassigned.');
   });
 });

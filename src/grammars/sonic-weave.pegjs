@@ -992,9 +992,10 @@ Primary
   / StepLiteral
   / ScalarMultiple
   / ColorLiteral
-  / FJS
-  / AbsoluteFJS
   / SquareSuperparticular
+  / FJS
+  / MosStepLiteral
+  / AbsoluteFJS
   / Identifier
   / TemplateArgument
   / ArrayLiteral
@@ -1348,6 +1349,23 @@ SplitPythagorean
     };
   }
 
+MosStep
+  = quality: AugmentedQuality augmentations: AugmentedToken* degree: SignedBasicInteger 'ms' {
+    return {
+      type: 'MosStep',
+      quality,
+      augmentations,
+      degree,
+    };
+  }
+  / quality: (ImperfectQuality / PerfectQuality) degree: SignedBasicInteger 'ms' {
+    return {
+      type: 'MosStep',
+      quality,
+      degree,
+    };
+  }
+
 InflectionFlavor = 'n' / 'l' / 'h' / 'm' / 's' / 'f' / 'c' / 'q' / 't' / ''
 
 Inflections
@@ -1399,8 +1417,21 @@ FJS
     };
   }
 
+MosStepLiteral
+  = upsAndDowns: UpsAndDowns
+    mosStep: MosStep
+    hyperscripts: Hyperscripts {
+      return {
+        ...upsAndDowns,
+        type: 'MosStepLiteral',
+        mosStep,
+        superscripts: hyperscripts.superscripts,
+        subscripts: hyperscripts.subscripts,
+      };
+    }
+
 AccidentalSign
-  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮=d♭b]
+  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮_d♭b&ea@]
 
 Accidental 'accidental'
   = fraction: VulgarFraction accidental: AccidentalSign  {
@@ -1411,8 +1442,34 @@ Accidental 'accidental'
   }
 
 PitchNominal 'pitch nominal'
-  = 'alp' / 'bet' / 'gam' / 'del' / 'eps' / 'zet' / 'eta' / [α-ηA-G]
+  = [α-ωA-Z]
+  / 'alp'
+  / 'bet'
+  / 'gam'
+  / 'del'
+  / 'eps'
+  / 'zet'
+  / 'eta'
+  / 'the'
+  / 'iot'
+  / 'kap'
+  / 'lam'
+  / 'muu' // 'mu' is too short
+  / 'nuu' // 'nu'
+  / 'xii' // 'xi'
+  / 'omi'
+  / 'pii' // 'pi'
+  / 'rho'
+  / 'fsi' // Final sigma
+  / 'sig'
+  / 'tau'
+  / 'ups'
+  / 'phi'
+  / 'chi'
+  / 'psi'
+  / 'ome'
 
+// Some pitches like M3 or S9 are inaccessible due to other rules and require accidentals to disambiguate.
 AbsolutePitch
   = nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
     return {
@@ -1463,15 +1520,23 @@ ArrowFunction
     };
   }
 
-// This rule is a faster version of the part of (FJS / AbsoluteFJS / SquareSuperparticular) which overlaps with identifiers.
+// This rule is a faster version of the part of (FJS / AbsoluteFJS / (SquareSuperparticular)) which overlaps with identifiers.
 ReservedPattern
-  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ ([_v] [0-9])*
-  / PitchNominal [sqQxdbrp]* [0-9]+ ([_v] [0-9])*
-  / 'S' [0-9]+
+  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ 'ms'? ([_v] [0-9])*
+  / PitchNominal [sqQxdb_ae]* [0-9]+ ([_v] [0-9])*
+
+// TODO: Figure out where to put this
+InvalidIdentifier
+  = word:IdentifierName {
+    if (RESERVED_WORDS.has(word)) {
+      error(`${word} is a reserved keyword`);
+    }
+    error(`${word} is a reserved pattern`);
+  }
 
 ValidIdentifierName
   = @word:IdentifierName &{
-    return !RESERVED_WORDS.has(word)
+    return !RESERVED_WORDS.has(word);
   }
 
 Identifier
