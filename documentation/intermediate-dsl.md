@@ -364,22 +364,23 @@ Operations can be applied to intervals to create new intervals.
 
 ### Unary operators
 
-| Name           | Linear    | Result      | Logarithmic | Result        |
-| -------------- | --------- | ----------- | ----------- | ------------- |
-| Identity       | `+2`      | `2`         | `+P8`       | `P8`          |
-| Negation       | `-2`      | `-2`        | _N/A_       |               |
-| Inversion      | `%2`      | `1/2`       | `-P8`       | `P-8`         |
-| Inversion      | `÷3/2`    | `2/3`       | `-P5`       | `P-5`         |
-| Geom. inverse  | _N/A_     |             | `%P8`       | `<1 0 0 ...]` |
-| Square root    | `√4`      | `2`         | `√P15`      | `P8`          |
-| Logical NOT    | `not 2`   | `false`     | `not P8`    | `false`       |
-| Up             | `^2`      | *           | `^P8`       | `P8 + 1°`     |
-| Down           | `v{2}`    | *           | `vP8`       | `P8 - 1°`     |
-| Lift           | `/2`      | *           | `/P8`       | `P8 + 5°`     |
-| Drop           | `\2`      | *           | `\P8`       | `P8 - 5°`     |
-| Increment      | `++i`     | `3`         | _N/A_       |               |
-| Decrement      | `--i`     | `1`         | _N/A_       |               |
-| Absolute value | `abs(-2)` | `2`         | `abs(-P8)`  | `P8`          |
+| Name           | Linear     | Result      | Logarithmic | Result        |
+| -------------- | ---------- | ----------- | ----------- | ------------- |
+| Identity       | `+2`       | `2`         | `+P8`       | `P8`          |
+| Negation       | `-2`       | `-2`        | _N/A_       |               |
+| Inversion      | `%2`       | `1/2`       | `-P8`       | `P-8`         |
+| Inversion      | `÷3/2`     | `2/3`       | `-P5`       | `P-5`         |
+| Geom. inverse  | _N/A_      |             | `%P8`       | `<1 0 0 ...]` |
+| Square root    | `√4`       | `2`         | `√P15`      | `P8`          |
+| Logical NOT    | `not 2`    | `false`     | `not P8`    | `false`       |
+| Up             | `^2`       | *           | `^P8`       | `P8 + 1°`     |
+| Down           | `v{2}`     | *           | `vP8`       | `P8 - 1°`     |
+| Lift           | `/2`       | *           | `/P8`       | `P8 + 5°`     |
+| Drop           | `\2`       | *           | `\P8`       | `P8 - 5°`     |
+| Increment      | `++i`      | `3`         | _N/A_       |               |
+| Decrement      | `--i`      | `1`         | _N/A_       |               |
+| Absolute value | `abs -2`   | `2`         | `abs(-P8)`  | `P8`          |
+| Geometric abs  | `labs 1/2` | `2`         | _N/A_       |               |
 
 Square root uses the same operator in both domains because the square of a logarithmic quantity is undefined so there's no ambiguity.
 
@@ -389,7 +390,7 @@ The down operator sometimes requires curly brackets due to `v` colliding with th
 
 Drop `\` can be spelled `drop` to avoid using the backslash inside template literals. Lift `/` may be spelled `lift` for minor grammatical reasons.
 
-Note that the absolute value is technically a function call and that it behaves differently depending on the domain of the argument. In the logarithmic domain it inverts values below unity e.g. `linear(abs(logarithmic(1/2)))` evaluates to `2`.
+Geometric (i.e. logarithmic) absolute value takes the normal absolute value and further inverts the result if it's below 1/1.
 
 #### Vectorized unary operators
 

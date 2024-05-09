@@ -973,6 +973,7 @@ export class ExpressionVisitor {
     if (operand instanceof Interval || operand instanceof Val) {
       if (node.uniform) {
         let value: TimeMonzo | TimeReal;
+        let newSteps = 0;
         let newNode = operand.node;
         switch (operator) {
           case '-':
@@ -982,6 +983,13 @@ export class ExpressionVisitor {
           case '÷':
             value = operand.value.inverse();
             newNode = uniformInvertNode(newNode);
+            newSteps = operand instanceof Interval ? -operand.steps : 0;
+            break;
+          case 'abs':
+            value = operand.value.abs();
+            break;
+          case 'labs':
+            value = operand.value.pitchAbs();
             break;
           default:
             // Runtime exception for √~
@@ -993,7 +1001,7 @@ export class ExpressionVisitor {
           }
           throw new Error('Val unary operation failed.');
         }
-        return new Interval(value, operand.domain, 0, newNode, operand);
+        return new Interval(value, operand.domain, newSteps, newNode, operand);
       }
       switch (operator) {
         case 'vnot':
@@ -1005,6 +1013,10 @@ export class ExpressionVisitor {
         case '%':
         case '÷':
           return operand.inverse();
+        case 'abs':
+          return operand.abs();
+        case 'labs':
+          return operand.pitchAbs();
         case '√':
           return operand.sqrt();
       }

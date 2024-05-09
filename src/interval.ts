@@ -26,6 +26,7 @@ import {
   literalToJSON,
   literalFromJSON,
   sqrtNode,
+  pitchAbsNode,
 } from './expression';
 import {TimeMonzo, TimeReal} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
@@ -380,7 +381,7 @@ export class Interval {
    */
   abs() {
     if (this.steps) {
-      throw new Error('Steps are ambiguous in abs().');
+      throw new Error('Steps are ambiguous in abs.');
     }
     const node = absNode(this.node);
     if (this.domain === 'linear') {
@@ -389,6 +390,27 @@ export class Interval {
     return new Interval(this.value.pitchAbs(), this.domain, 0, node, this);
   }
 
+  /**
+   * Calculate the geometric absolute value of a linter interval.
+   * @returns Superunitary value.
+   */
+  pitchAbs() {
+    if (this.domain === 'logarithmic') {
+      throw new Error(
+        'Logarithmic absolute value not implemented in the already-logarithmic domain.'
+      );
+    }
+    if (this.steps) {
+      throw new Error('Steps are ambiguous in labs.');
+    }
+    const node = pitchAbsNode(this.node);
+    return new Interval(this.value.pitchAbs(), this.domain, 0, node, this);
+  }
+
+  /**
+   * Calculate the square root of the underlying value regardless of domain.
+   * @returns The square root.
+   */
   sqrt() {
     if (this.steps % 2) {
       throw new Error('Cannot split steps using √.');
@@ -1327,6 +1349,15 @@ export class Val {
    */
   abs() {
     return new Val(this.value.pitchAbs(), this.equave);
+  }
+
+  /**
+   * Throws an error.
+   */
+  pitchAbs(): Val {
+    throw new Error(
+      'Logarithmic extension of the already-cologarithmic domain not implemented.'
+    );
   }
 
   /**

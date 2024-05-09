@@ -1833,18 +1833,6 @@ function ceil(
 ceil.__doc__ = 'Round value up to the nearest integer.';
 ceil.__node__ = builtinNode(ceil);
 
-function abs(
-  this: ExpressionVisitor,
-  interval: SonicWeaveValue
-): SonicWeaveValue {
-  if (typeof interval === 'boolean' || interval instanceof Interval) {
-    return upcastBool(interval).abs();
-  }
-  return unaryBroadcast.bind(this)(interval, abs.bind(this));
-}
-abs.__doc__ = 'Calculate the absolute value of the interval.';
-abs.__node__ = builtinNode(abs);
-
 /**
  * Obtain the argument with the minimum value.'
  * @param this {@link ExpressionVisitor} instance providing context for comparing across echelons.
@@ -2555,7 +2543,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   slice,
   zip,
   zipLongest,
-  abs,
   minimum,
   maximum,
   random,

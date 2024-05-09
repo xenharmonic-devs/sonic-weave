@@ -93,11 +93,6 @@ riff sanitize(interval) {
   return bleach(simplify interval);
 }
 
-riff labs(x) {
-  "Calculate the logarithmic absolute value. Inputs below unison are inverted.";
-  return x logarithmic abs;
-}
-
 riff fail(message) {
   "Throw the given message as an error.";
   throw message;
@@ -193,7 +188,7 @@ riff oddLimitOf(x, equave = 2) {
 }
 riff weilHeight(x) {
   "Calculate the Weil height of the interval. Natural logarithm of the maximum of numerator or denominator.";
-  return (tenneyHeight x ~+ log(labs x)) ~/ 2;
+  return (tenneyHeight x ~+ log(labs~x)) ~/ 2;
 }
 riff hypot(...args) {
   "Calculate the square root of the sum of squares of the arguments.";
@@ -228,7 +223,7 @@ riff circleDifference(a, b, equave = 2) {
 
 riff circleDistance(a, b, equave = 2) {
   "Calculate the geometric distance of two intervals on a circle.";
-  return abs(circleDifference(a, b, equave));
+  return labs~circleDifference(a, b, equave);
 }
 
 riff mtof(index) {
@@ -619,7 +614,7 @@ riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2)
   const witnesses = [];
   for (const numerator of [denominator .. maxNumerator]) {
     const candidate = numerator % denominator;
-    if (labs((candidate ~by step) %~ candidate) < tolerance) {
+    if (labs~((candidate ~by step) %~ candidate) < tolerance) {
       const witness = candidate ~rd equave;
       if (witness not of witnesses) {
         candidate;
@@ -1000,7 +995,7 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
   let last;
   let group = [];
   for (const [i, interval] of enumerate(scale)) {
-    if (group and (labs(last %~ interval) > tolerance or i == length(scale)-1)) {
+    if (group and (labs~(last %~ interval) > tolerance or i == length(scale)-1)) {
       if (action == 'lowest') {
         group[0];
       } else if (action == 'highest') {
@@ -1024,9 +1019,9 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
     push(interval, group);
   }
   if (not preserveBoundary) {
-    while ($$ and labs $$[0] <= tolerance)
+    while ($$ and labs~$$[0] <= tolerance)
       void(shift($$));
-    while ($$ and labs($$[-1] %~ scale[-1]) <= tolerance)
+    while ($$ and labs~($$[-1] %~ scale[-1]) <= tolerance)
       void(pop($$));
   }
   scale[-1];

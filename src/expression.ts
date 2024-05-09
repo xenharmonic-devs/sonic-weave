@@ -483,6 +483,34 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
 }
 
 /** @hidden */
+export function pitchAbsNode(
+  node?: IntervalLiteral
+): IntervalLiteral | undefined {
+  if (!node) {
+    return undefined;
+  }
+  if (node.type === 'IntegerLiteral') {
+    if (node.value === 0n) {
+      return undefined;
+    }
+    return {type: 'IntegerLiteral', value: bigAbs(node.value)};
+  }
+  if (node.type === 'FractionLiteral') {
+    let numerator = bigAbs(node.numerator);
+    let denominator = bigAbs(node.denominator);
+    if (denominator > numerator) {
+      [numerator, denominator] = [denominator, numerator];
+    }
+    return {
+      type: 'FractionLiteral',
+      numerator,
+      denominator,
+    };
+  }
+  return undefined;
+}
+
+/** @hidden */
 export function sqrtNode(node?: IntervalLiteral): IntervalLiteral | undefined {
   if (!node) {
     return undefined;

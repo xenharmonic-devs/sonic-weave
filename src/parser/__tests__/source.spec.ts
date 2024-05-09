@@ -190,7 +190,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can call functions from arrays', () => {
-    const scale = parseSource('[round, abs][0](3,14);');
+    const scale = parseSource('[round, trunc][0](3,14);');
     expect(scale).toHaveLength(1);
     expect(scale[0].toString()).toBe('3');
   });
@@ -1454,14 +1454,20 @@ describe('SonicWeave parser', () => {
   });
 
   it('rejects unassigned absolute pitches (ASCII)', () => {
-    expect(() => evaluateSource('fsi#4')).toThrow('Nominal fsi is unassigned.');
+    expect(() => evaluateSource('fsi#4', false)).toThrow(
+      'Nominal fsi is unassigned.'
+    );
   });
 
   it('rejects unassigned absolute pitches (unicode)', () => {
-    expect(() => evaluateSource('ς♭2')).toThrow('Nominal ς is unassigned.');
+    expect(() => evaluateSource('ς♭2', false)).toThrow(
+      'Nominal ς is unassigned.'
+    );
   });
 
   it('rejects unassigned accidentals', () => {
-    expect(() => evaluateSource('Ce4')).toThrow('Accidental e is unassigned.');
+    expect(() => evaluateSource('Ce4', false)).toThrow(
+      'Accidental e is unassigned.'
+    );
   });
 });

@@ -763,7 +763,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('calculates geometric absolute value', () => {
-    const {interval} = parseSingle('abs(logarithmic(-1/6))');
+    const {interval} = parseSingle('abs logarithmic(-1/6)');
     expect(interval.toString()).toBe('1\\1<6>');
   });
 
@@ -2115,7 +2115,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has implicit fallback call semantics for chaining unary functions', () => {
-    const {interval} = parseSingle('(-6/4) simplify abs logarithmic');
+    const {interval} = parseSingle('(abs -6/4) simplify logarithmic');
     expect(interval.toString()).toBe('1\\1<3/2>');
   });
 

@@ -8,6 +8,7 @@
   };
 
   const RESERVED_WORDS = new Set([
+    'abs',
     'al',
     'and',
     'as',
@@ -30,6 +31,7 @@
     'if',
     'import',
     'in',
+    'labs',
     'lest',
     'let',
     'lift',
@@ -133,6 +135,7 @@ Program
     };
   }
 
+AbsToken           = @'abs'      !IdentifierPart
 AlToken            = @'al'       !IdentifierPart
 AndToken           = @'and'      !IdentifierPart
 AsToken            = @'as'       !IdentifierPart
@@ -154,6 +157,7 @@ FromToken          = @'from'     !IdentifierPart
 IfToken            = @'if'       !IdentifierPart
 ImportToken        = @'import'   !IdentifierPart
 InToken            = @'in'       !IdentifierPart
+LogAbsToken        = @'labs'     !IdentifierPart
 LestToken          = @'lest'     !IdentifierPart
 LetToken           = @'let'      !IdentifierPart
 LiftToken          = @'lift'     !IdentifierPart
@@ -807,7 +811,7 @@ MultiplicativeExpression
 
 // The radical is universal, but featured here for precedence.
 UniformUnaryOperator
-  = '-' / '%' / '÷' / '√'
+  = '-' / '%' / '÷' / (@AbsToken _) / (@LogAbsToken _) / '√'
 
 UniformUnaryExpression
   = operator: '--' argument: ExponentiationExpression {

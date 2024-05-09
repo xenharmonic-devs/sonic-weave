@@ -39,7 +39,7 @@ All operations are left-associative except exponentiation, recipropower, and log
 | `++x`, `--x`, `+x`, `^x`, `∧x`, `∨x`, `/x`, `\x` | Increment, decrement, no-op, up, down, lift, drop                       |
 | `/`                                              | Fraction                                                                |
 | `^`, `^/`, `/^`, `/_`                            | Exponentiation, recipropower, logdivision*                              |
-| `-x`, `%x`, `÷x`, `√x`                           | Negation, inversion, square root                                        |
+| `-x`, `%x`, `÷x`, `abs x`, `labs x`, `√x`        | Negation, inversion, absolute value, geometric absolute value, square root |
 | `*`, `×`, `%`, `÷`, `\`, `dot`, `·`, `tns`, `⊗`, `tmpr` | Multiplication, division, N-of-EDO, val-monzo product, array tensoring, tempering |
 | `mod`, `modc`, `rd`, `rdc`, `ed`                 | Modulo, ceiling modulo, reduction, ceiling reduction, octave projection |
 | `+`, `-`, `/+`, `⊕`, `/-`, `⊖`                   | Addition, subtraction, lens addition, lens subtraction                  |
@@ -51,7 +51,7 @@ All operations are left-associative except exponentiation, recipropower, and log
 | `and`, `vand`                                    | Boolean and, vector and                                                 |
 | `or`, `vor`, `al`                                | Boolean or, vector or, niente coalescing                                |
 | `x if y else z`                                  | Ternary conditional                                                     |
-| `lest`                                           | Fallback[^1]                                                                |
+| `lest`                                           | Fallback[^1]                                                            |
 
 Parenthesis, `^`, `×`, `÷`, `+`, `-` follow [PEMDAS](https://en.wikipedia.org/wiki/Order_of_operations). The fraction slash `/` represents vertically aligned fractions similar to `$\frac{3}{2}^\frac{1}{2}$` in LaTeX e.g. `3/2 ^ 1/2` evaluates to `sqrt(3 ÷ 2)`.
 

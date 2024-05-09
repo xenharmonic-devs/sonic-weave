@@ -3,9 +3,6 @@
 
 ## Built-in functions
 
-### abs(*interval*)
-Calculate the absolute value of the interval.
-
 ### absolute(*interval*)
 Convert interval to absolute representation. Normalized to a frequency.
 
@@ -565,9 +562,6 @@ Apply labels (or colors) from the first array to a copy of the current/given sca
 
 ### labelsOf(*scale = $$*)
 Obtain an array of labels of the current/given scale.
-
-### labs(*x*)
-Calculate the logarithmic absolute value. Inputs below unison are inverted.
 
 ### log(*x*, *y = E*)
 Calculate the logarithm of x base y. Base defaults to E.

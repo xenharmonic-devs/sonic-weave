@@ -5,6 +5,8 @@ export type UnaryOperator =
   | '-'
   | '%'
   | '÷'
+  | 'abs'
+  | 'labs'
   | '√'
   | 'not'
   | 'vnot'
