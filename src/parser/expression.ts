@@ -94,12 +94,7 @@ import {
   UpdateOperator,
 } from '../ast';
 import {type StatementVisitor} from './statement';
-import {
-  AbsoluteMosPitch,
-  MosConfig,
-  absoluteMosMonzo,
-  mosMonzo,
-} from '../diamond-mos';
+import {AbsoluteMosPitch, absoluteMosMonzo, mosMonzo} from '../diamond-mos';
 
 /**
  * Local context within a SonicWeave code block or a function.
@@ -180,16 +175,6 @@ const CENT_MONZO = new TimeMonzo(ZERO, [F(1, 1200)]);
 const CENT_REAL = new TimeReal(0, 1.0005777895065548);
 const RECIPROCAL_CENT_MONZO = new TimeMonzo(ZERO, [F(1200)]);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
-
-const PLACEHOLDER_MOS_CONFIG: MosConfig = {
-  J4: TEN_MONZO,
-  equave: TEN_MONZO,
-  period: TEN_MONZO,
-  am: TEN_MONZO,
-  semiam: TEN_MONZO,
-  scale: new Map(),
-  degrees: [],
-};
 
 function typesCompatible(
   a: IntervalLiteral | undefined,
@@ -769,16 +754,22 @@ export class ExpressionVisitor {
   }
 
   protected visitAbsoluteFJS(node: AbsoluteFJS) {
-    const relativeToC4 = inflect(
-      /[J-Z]/.test(node.pitch.nominal)
-        ? absoluteMosMonzo(
-            node.pitch as AbsoluteMosPitch,
-            PLACEHOLDER_MOS_CONFIG
-          )
-        : absoluteMonzo(node.pitch as AbsolutePitch),
-      node.superscripts,
-      node.subscripts
-    );
+    if (!this.rootContext) {
+      throw new Error('Root context is required.');
+    }
+    let relativeToC4: TimeMonzo | TimeReal;
+    if (/[J-Z]/.test(node.pitch.nominal)) {
+      if (!this.rootContext.mosConfig) {
+        throw new Error('Missing MOS declaration.');
+      }
+      relativeToC4 = absoluteMosMonzo(
+        node.pitch as AbsoluteMosPitch,
+        this.rootContext.mosConfig
+      );
+    } else {
+      relativeToC4 = absoluteMonzo(node.pitch as AbsolutePitch);
+    }
+    relativeToC4 = inflect(relativeToC4, node.superscripts, node.subscripts);
     const upLifted = this.upLift(relativeToC4, node);
     const result = new Interval(
       this.rootContext!.C4.mul(upLifted.value),
@@ -786,13 +777,19 @@ export class ExpressionVisitor {
       upLifted.steps,
       node
     );
-    this.rootContext!.fragiles.push(result);
+    this.rootContext.fragiles.push(result);
     return result;
   }
 
   protected visitMosStepLiteral(node: MosStepLiteral) {
+    if (!this.rootContext) {
+      throw new Error('Root context is required.');
+    }
+    if (!this.rootContext.mosConfig) {
+      throw new Error('Missing MOS declaration.');
+    }
     const monzo = inflect(
-      mosMonzo(node.mosStep, PLACEHOLDER_MOS_CONFIG),
+      mosMonzo(node.mosStep, this.rootContext.mosConfig),
       node.superscripts,
       node.subscripts
     );

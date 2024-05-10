@@ -1,4 +1,4 @@
-// Depends on base.pegjs
+// Depends on base.pegjs and mos.pegjs
 
 {{
   const TYPES_TO_PROPERTY_NAMES = {
@@ -41,6 +41,7 @@
     'mod',
     'modc',
     'module',
+    'MOS',
     'niente',
     'not',
     'of',
@@ -219,6 +220,8 @@ Statement
   / ExportAllStatement
   / ImportAllStatement
   / ImportStatement
+  / MosDeclaration
+  / MosUndeclaration
   / EmptyStatement
 
 ReassignmentTail
@@ -997,8 +1000,8 @@ Primary
   / ScalarMultiple
   / ColorLiteral
   / SquareSuperparticular
-  / FJS
   / MosStepLiteral
+  / FJS
   / AbsoluteFJS
   / Identifier
   / TemplateArgument

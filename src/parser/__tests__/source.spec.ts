@@ -1470,4 +1470,154 @@ describe('SonicWeave parser', () => {
       'Accidental e is unassigned.'
     );
   });
+
+  it('can generate absolute Diamond mos notation for the lambda scale', () => {
+    const scale = parseSource(`
+      MOS 121212121<3>
+      J3 = 100 Hz = 1
+      K3
+      L3
+      M_3 // Looks like major third
+      N3 // Let's not do capital neutrals, OK?
+      O3
+      P3 // Perfect thirds don't exist
+      Q3
+      R3
+      J4
+      map(str)
+    `);
+    expect(scale.map(i => i.valueOf())).toEqual([
+      108.8182243463317, 128.8560769230961, 140.21889487005652,
+      166.03888560010878, 180.68056703447525, 213.95119415112754,
+      232.8178904430297, 275.68911531325966, 300,
+    ]);
+    expect(scale.map(i => i.label)).toEqual([
+      'K3',
+      'L3',
+      'M_3',
+      'N3',
+      'O3',
+      'P3',
+      'Q3',
+      'R3',
+      'J4',
+    ]);
+  });
+
+  it('can generate relative Diamond mos notation for ekic', () => {
+    const scale = parseSource(`
+      "Ekic - LLsLLLsL (Nightmare)"
+      MOS {
+        6L 2s
+        hardness = 3
+      }
+      P1ms
+      M2ms
+      P3ms
+      P4ms
+      P5ms
+      M6ms
+      P7ms
+      P8ms
+      map(str)
+    `);
+    expect(
+      scale.map(i => i.value.toEqualTemperament().fractionOfEquave.toFraction())
+    ).toEqual(['3/20', '3/10', '17/20', '1/2', '13/20', '4/5', '27/20', '1']);
+    expect(scale.map(i => i.label)).toEqual([
+      'P1ms',
+      'M2ms',
+      'P3ms',
+      'P4ms',
+      'P5ms',
+      'M6ms',
+      'P7ms',
+      'P8ms',
+    ]);
+  });
+
+  it('generates the basic bright mode by defalt', () => {
+    const scale = expand(`
+      MOS 3L 2s
+      K4
+      L4
+      M_4
+      N4
+      J5
+      nedji
+    `);
+    expect(scale).toEqual([
+      'MOS {LLsLs;L=2^1/4;s=2^1/8}',
+      '1\\4',
+      '1\\2',
+      '5\\8',
+      '7\\8',
+      '1\\1',
+    ]);
+  });
+
+  it('supports large/small declaration in MOS', () => {
+    const scale = expand(`
+      MOS {LLsLs;L=2^1/4;s=2^1/8}
+      K4
+      L4
+      M_4
+      N4
+      J5
+      nedji
+    `);
+    expect(scale).toEqual([
+      'MOS {LLsLs;L=2^1/4;s=2^1/8}',
+      '1\\4',
+      '1\\2',
+      '5\\8',
+      '7\\8',
+      '1\\1',
+    ]);
+  });
+
+  it('makes the exception for nL ns', () => {
+    const scale = expand(`
+      MOS 4L 4s;
+      m1ms;
+      P2ms;
+      M3ms;
+      P4ms;
+      n5ms;
+      P6ms;
+      P8ms;
+      MOS niente;
+    `);
+    expect(scale).toEqual([
+      '1\\12',
+      '1\\4',
+      '5\\12',
+      '1\\2',
+      '5\\8',
+      '3\\4',
+      '1\\1',
+    ]);
+  });
+
+  it('supports step sizes larger than 10 in MOS declaration', () => {
+    const scale = expand(`
+      MOS 43,43, 43, 43,
+        43, 10, 43, 43,
+      J&4;
+      K@4;
+      Ka4;
+      K4;
+      Ke4;
+      J5;
+      MOS niente;
+    `);
+    expect(scale).toEqual([
+      '33\\311',
+      '10\\311',
+      '53\\622',
+      '43\\311',
+      '119\\622',
+      '1\\1',
+    ]);
+  });
 });

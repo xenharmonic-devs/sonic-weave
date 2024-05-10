@@ -42,6 +42,7 @@ import {
   ExportAllStatement,
   ImportStatement,
   ImportAllStatement,
+  MosDeclaration,
 } from '../ast';
 import {
   ExpressionVisitor,
@@ -49,6 +50,7 @@ import {
   arrayRecordOrString,
   containerToArray,
 } from './expression';
+import {Tardigrade} from './mos';
 
 /**
  * An interrupt representing a return, break or continue statement.
@@ -312,10 +314,29 @@ export class StatementVisitor {
         return this.visitImportStatement(node);
       case 'ImportAllStatement':
         return this.visitImportAllStatement(node);
+      case 'MosDeclaration':
+        return this.visitMosDeclaration(node);
       case 'EmptyStatement':
         return;
     }
     node satisfies never;
+  }
+
+  protected visitMosDeclaration(node: MosDeclaration) {
+    if (!this.rootContext) {
+      throw new Error('Root context is required.');
+    }
+    if (!node.body.length) {
+      this.rootContext.mosConfig = undefined;
+      return undefined;
+    }
+    const subVisitor = this.createExpressionVisitor();
+    const mosPiglet = new Tardigrade(subVisitor);
+    for (const expression of node.body) {
+      mosPiglet.visit(expression);
+    }
+    this.rootContext.mosConfig = mosPiglet.createMosConfig();
+    return undefined;
   }
 
   protected visitModuleDeclaration(node: ModuleDeclaration) {

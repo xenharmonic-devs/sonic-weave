@@ -1133,6 +1133,59 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('has MOS declarations (simple)', () => {
+    const ast = parseSingle('MOS 5252525');
+    expect(ast).toEqual({
+      type: 'MosDeclaration',
+      body: [
+        {
+          type: 'IntegerPattern',
+          pattern: [5, 2, 5, 2, 5, 2, 5],
+          equave: null,
+        },
+      ],
+    });
+  });
+
+  it('has MOS declaration', () => {
+    const ast = parseSingle(`
+      MOS {
+        10L 2s 4|6(2)
+        hardness = 2
+        equave = 8/3
+      }
+    `);
+    expect(ast).toEqual({
+      type: 'MosDeclaration',
+      body: [
+        {
+          type: 'PatternUpDownPeriod',
+          countLarge: 10,
+          countSmall: 2,
+          udp: {
+            type: 'UDP',
+            up: 4,
+            down: 6,
+            period: 2,
+          },
+          equave: null,
+        },
+        {
+          type: 'HardnessDeclaration',
+          value: {type: 'IntegerLiteral', value: 2n},
+        },
+        {
+          type: 'EquaveDeclaration',
+          value: {
+            denominator: 3n,
+            numerator: 8n,
+            type: 'FractionLiteral',
+          },
+        },
+      ],
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

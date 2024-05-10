@@ -1268,12 +1268,20 @@ export class Interval {
       this.node = {type: 'AspiringFJS', flavor: inferFJSFlavor(this.node)};
     }
     if (this.node?.type === 'AbsoluteFJS') {
-      this.node = {
-        type: 'AspiringAbsoluteFJS',
-        flavor: inferFJSFlavor(this.node),
-      };
+      if (/[J-Z]/.test(this.node.pitch.nominal)) {
+        this.node = undefined;
+      } else {
+        this.node = {
+          type: 'AspiringAbsoluteFJS',
+          flavor: inferFJSFlavor(this.node),
+        };
+      }
     }
-    if (this.node?.type === 'MonzoLiteral' || force) {
+    if (
+      this.node?.type === 'MonzoLiteral' ||
+      this.node?.type === 'MosStepLiteral' ||
+      force
+    ) {
       this.node = undefined;
     }
   }
