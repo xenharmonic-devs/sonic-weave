@@ -23,10 +23,6 @@ export type MosDegree = {
  */
 export type MosConfig = {
   /**
-   * Current value of middle J.
-   */
-  J4: TimeMonzo;
-  /**
    * Interval of equivalence. The distance between J4 and J5.
    */
   equave: TimeMonzo;
@@ -97,6 +93,7 @@ export type AbsoluteMosPitch = {
 
 export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
+  const periods = (node.degree - baseDegree) / config.degrees.length;
   const mosDegree = config.degrees[baseDegree];
   const quality = node.quality.quality;
   let inflection = new TimeMonzo(ZERO, []);
@@ -143,13 +140,24 @@ export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
     } else if (quality === 'd' || quality === 'dim') {
       inflection = inflection.div(config.semiam) as TimeMonzo;
     }
+    if (quality === 'P') {
+      throw new Error(
+        `The mosstep ${baseDegree} does not have a perfect variant.`
+      );
+    }
   } else if (quality === 'n') {
     if (!mosDegree.mid) {
       throw new Error('Missing mid mosstep quality.');
     }
     return mosDegree.mid;
+  } else if (quality === 'M' || quality === 'm') {
+    throw new Error(
+      `The mosstep ${baseDegree} does not have minor or major variants.`
+    );
   }
-  return mosDegree.center.mul(inflection) as TimeMonzo;
+  return mosDegree.center
+    .mul(inflection)
+    .mul(config.period.pow(periods)) as TimeMonzo;
 }
 
 function mosInflection(
@@ -191,5 +199,5 @@ export function absoluteMosMonzo(
     }
     result = result.mul(fractionalInflection) as TimeMonzo;
   }
-  return result;
+  return result.mul(config.equave.pow(node.octave - 4)) as TimeMonzo;
 }

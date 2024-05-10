@@ -2,6 +2,8 @@ import {SonicWeaveValue} from './stdlib';
 import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
+import {MosConfig} from './diamond-mos';
+import {stepString} from './words';
 
 /**
  * Root context of a SonicWeave runtime containing the scale title, root pitch, value of the 'up' inflection etc.
@@ -35,6 +37,7 @@ export class RootContext {
   private C4_: TimeMonzo;
   private up_: Interval;
   private lift_: Interval;
+  private mosConfig_?: MosConfig;
 
   /**
    * Create a new root context.
@@ -82,6 +85,17 @@ export class RootContext {
   }
   set lift(value: Interval) {
     this.lift_ = value;
+    this.breakFragiles();
+  }
+
+  /**
+   * MOS declaration result.
+   */
+  get mosConfig() {
+    return this.mosConfig_;
+  }
+  set mosConfig(value: MosConfig | undefined) {
+    this.mosConfig_ = value;
     this.breakFragiles();
   }
 
@@ -152,6 +166,23 @@ export class RootContext {
     }
     if (!this.lift.strictEquals(defaults.lift)) {
       lines.push(`/ = ${this.lift.toString()}`);
+    }
+    if (this.mosConfig) {
+      const entries = Array.from(this.mosConfig.scale.entries());
+      entries.sort((a, b) => a[0].localeCompare(b[0]));
+      const monzos = entries.map(entry => entry[1]);
+      monzos.push(monzos.shift()!.mul(this.mosConfig.equave) as TimeMonzo);
+      const ss = stepString(monzos);
+      let large: TimeMonzo;
+      let small: TimeMonzo;
+      if (ss.startsWith('L')) {
+        large = monzos[0];
+        small = large.div(this.mosConfig.am) as TimeMonzo;
+      } else {
+        small = monzos[0];
+        large = small.mul(this.mosConfig.am) as TimeMonzo;
+      }
+      lines.push(`MOS {${ss};L=${large};s=${small}}`);
     }
     return lines.join('\n');
   }

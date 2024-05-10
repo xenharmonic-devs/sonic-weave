@@ -275,6 +275,7 @@ export type Statement =
   | ExportAllStatement
   | ImportStatement
   | ImportAllStatement
+  | MosDeclaration
   | ThrowStatement
   | BreakStatement
   | ContinueStatement
@@ -450,6 +451,72 @@ export type Expression =
   | RecordLiteral
   | StringLiteral
   | HarmonicSegment;
+
+export type RationalEquave = {
+  numerator: number;
+  denominator: number;
+};
+
+export type AbstractStepPattern = {
+  type: 'AbstractStepPattern';
+  pattern: ('L' | 's')[];
+  equave: RationalEquave | null;
+};
+
+export type IntegerPattern = {
+  type: 'IntegerPattern';
+  pattern: number[];
+  equave: RationalEquave | null;
+};
+
+export type UpDownPeriod = {
+  type: 'UDP';
+  up: number;
+  down: number;
+  period: number | null;
+};
+
+export type PatternUpDownPeriod = {
+  type: 'PatternUpDownPeriod';
+  countLarge: number;
+  countSmall: number;
+  udp: UpDownPeriod | null;
+  equave: RationalEquave | null;
+};
+
+export type HardnessDeclaration = {
+  type: 'HardnessDeclaration';
+  value: Expression;
+};
+
+export type LargeDeclaration = {
+  type: 'LargeDeclaration';
+  value: Expression;
+};
+
+export type SmallDeclaration = {
+  type: 'SmallDeclaration';
+  value: Expression;
+};
+
+export type EquaveDeclaration = {
+  type: 'EquaveDeclaration';
+  value: Expression;
+};
+
+export type MosExpression =
+  | AbstractStepPattern
+  | IntegerPattern
+  | PatternUpDownPeriod
+  | HardnessDeclaration
+  | LargeDeclaration
+  | SmallDeclaration
+  | EquaveDeclaration;
+
+export type MosDeclaration = {
+  type: 'MosDeclaration';
+  body: MosExpression[];
+};
 
 /**
  * Convert an AST node to a string representation.

@@ -857,7 +857,7 @@ export function pitchRoundToNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }
 
-function formatUps(literal: MonzoLiteral | FJS | AbsoluteFJS) {
+function formatUps(literal: MonzoLiteral | FJS | AbsoluteFJS | MosStepLiteral) {
   let result: string;
   if (literal.lifts < 0) {
     result = '\\'.repeat(-literal.lifts);
@@ -872,7 +872,7 @@ function formatUps(literal: MonzoLiteral | FJS | AbsoluteFJS) {
   return result;
 }
 
-function tailFJS(literal: FJS | AbsoluteFJS) {
+function tailFJS(literal: FJS | AbsoluteFJS | MosStepLiteral) {
   let result = '';
   if (literal.superscripts.length) {
     result += '^' + literal.superscripts.map(i => i.join('')).join(',');
@@ -891,6 +891,16 @@ function formatFJS(literal: FJS) {
   return `${base}${q.fraction}${q.quality}${aa}${d.negative ? '-' : ''}${
     d.base + 7 * d.octaves
   }${tailFJS(literal)}`;
+}
+
+function formatMosStepLiteral(literal: MosStepLiteral) {
+  const base = formatUps(literal);
+  const ms = literal.mosStep;
+  const q = ms.quality;
+  const aa = (ms.augmentations ?? []).join('');
+  return `${base}${q.fraction}${q.quality}${aa}${ms.degree}ms${tailFJS(
+    literal
+  )}`;
 }
 
 /** @hidden */
@@ -1060,6 +1070,8 @@ export function literalToString(literal: IntervalLiteral) {
       return literal.value.toString();
     case 'SquareSuperparticular':
       return formatSquareSuperparticular(literal);
+    case 'MosStepLiteral':
+      return formatMosStepLiteral(literal);
     default:
       throw new Error(`Cannot format ${literal.type}`);
   }
