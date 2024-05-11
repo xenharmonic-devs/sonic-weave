@@ -76,7 +76,7 @@ export function parseVals(
       if (node.type === 'WartsLiteral') {
         val = wartsToVal(node);
       } else if (node.type === 'SparseOffsetVal') {
-        val = sparseOffsetToVal(node);
+        [val] = sparseOffsetToVal(node);
       }
       result.push(basis.map(e => val.dot(e).valueOf()));
     }

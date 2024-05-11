@@ -1620,4 +1620,14 @@ describe('SonicWeave parser', () => {
       '1\\1',
     ]);
   });
+
+  it('supports radicals in SOV', () => {
+    const scale = expand(`
+      9/8
+      3/2
+      3/^2
+      [√3]8@2.√3
+    `);
+    expect(scale).toEqual(['1\\8<3>', '3\\8<3>', '1\\2<3>']);
+  });
 });

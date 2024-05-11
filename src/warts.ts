@@ -8,6 +8,7 @@ import {
 } from './expression';
 import {NEGATIVE_ONE, ONE, ZERO} from './utils';
 
+const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const SECOND_MONZO = new TimeMonzo(ONE, []);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
 const REAL_CENT_MONZO = new TimeReal(0, 1.0005777895065548);
@@ -271,12 +272,22 @@ export function wartsToVal(node: WartsLiteral) {
   return valToTimeMonzo(val, subgroup);
 }
 
-export function sparseOffsetToVal(node: SparseOffsetVal) {
+export function sparseOffsetToVal(
+  node: SparseOffsetVal
+): [TimeMonzo, TimeMonzo] {
   const {subgroup} = parseValSubgroup(node.basis);
+  let equave = TWO_MONZO;
   if (node.equave) {
-    const equave = TimeMonzo.fromFraction(
+    equave = TimeMonzo.fromFraction(
       new Fraction(node.equave.numerator, node.equave.denominator ?? 1)
     );
+    if (node.equave.radical) {
+      const splitEquave = equave.sqrt();
+      if (splitEquave instanceof TimeReal) {
+        throw new Error('Unable to split val equave.');
+      }
+      equave = splitEquave;
+    }
     shiftEquave(equave, subgroup);
   }
   const val = patentVal(node.divisions, subgroup);
@@ -295,5 +306,5 @@ export function sparseOffsetToVal(node: SparseOffsetVal) {
       throw new Error('Tweak outside subgroup.');
     }
   }
-  return valToTimeMonzo(val, subgroup);
+  return [valToTimeMonzo(val, subgroup), equave];
 }

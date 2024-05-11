@@ -442,27 +442,32 @@ export function temper(
   interval: Interval | Interval[]
 ): typeof interval {
   const divisions = val.divisions;
-  const equave = val.equave.toFraction();
-  let equaveNumerator: number | null = null;
-  let equaveDenominator: number | null = null;
-  if (equave.compare(TWO)) {
-    equaveNumerator = equave.n;
-    if (equave.d !== 1) {
-      equaveDenominator = equave.d;
+  let step: Interval;
+  try {
+    const equave = val.equave.toFraction();
+    let equaveNumerator: number | null = null;
+    let equaveDenominator: number | null = null;
+    if (equave.compare(TWO)) {
+      equaveNumerator = equave.n;
+      if (equave.d !== 1) {
+        equaveDenominator = equave.d;
+      }
     }
+    step = new Interval(
+      TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
+      'logarithmic',
+      0,
+      {
+        type: 'NedjiLiteral',
+        numerator: divisions.d,
+        denominator: divisions.n,
+        equaveNumerator,
+        equaveDenominator,
+      }
+    );
+  } catch {
+    step = new Interval(val.equave.pow(divisions.inverse()), 'logarithmic');
   }
-  const step = new Interval(
-    TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
-    'logarithmic',
-    0,
-    {
-      type: 'NedjiLiteral',
-      numerator: divisions.d,
-      denominator: divisions.n,
-      equaveNumerator,
-      equaveDenominator,
-    }
-  );
   const rel = relative.bind(this);
   if (Array.isArray(interval)) {
     return interval.map(i => {

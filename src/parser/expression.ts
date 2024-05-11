@@ -732,13 +732,7 @@ export class ExpressionVisitor {
   }
 
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
-    const val = sparseOffsetToVal(node);
-    let equave = TWO_MONZO;
-    if (node.equave) {
-      equave = TimeMonzo.fromFraction(
-        new Fraction(node.equave.numerator, node.equave.denominator ?? 1)
-      );
-    }
+    const [val, equave] = sparseOffsetToVal(node);
     return new Val(val, equave, node);
   }
 
