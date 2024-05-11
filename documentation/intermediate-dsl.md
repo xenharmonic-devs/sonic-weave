@@ -532,7 +532,7 @@ Absolute quantities are converted to relative before comparison so `440 Hz > 1` 
 | Multiplication         | `2 * 3`        | `6`      | `P8 + P12`       | `P19`      |
 | Multiplication         | `110 Hz × 5`   | `550 Hz` | `A♮2 + M17^5`    | `C♯5^5`    |
 | Division               | `6 % 2`        | `3`      | `P19 - P8`       | `P12`      |
-| Division               | `220 hz ÷ 2`   | `110 Hz` | `A=3 - P8`       | `A=2`      |
+| Division               | `220 hz ÷ 2`   | `110 Hz` | `A_3 - P8`       | `A_2`      |
 | Fractions              | `(1+2)/2`      | `3/2`    | `P12 - P8`       | `P5`       |
 | Exponentiation         | `3 ^ 2`        | `9`      | `P12 * 2`        | `M23`      |
 
