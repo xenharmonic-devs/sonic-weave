@@ -358,6 +358,49 @@ The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something
 ### Numeric separators
 It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
 
+### Formatting
+In addition to the value, domain and echelon there's also formatting information attached to intervals. A decimal like `12e-1` is not automatically simplified to `6/5` and neither is `6/4` fractionally reduced to `3/2` (remember that plain `reduce()` refers to octave-reduction in SonicWeave).
+
+Formatting tries to be smart to make relationships between intervals easier to see. A harmonic segment like `6::12` formats as
+```c
+7/6
+8/6
+9/6
+10/6
+11/6
+12/6
+```
+instead of
+```c
+7/6
+4/3
+3/2
+5/3
+11/6
+2
+```
+to make it clear that the fractions all came from a shared segment.
+
+Same goes for equal temperaments `tet(6)` formats as
+```c
+1\6
+2\6
+3\6
+4\6
+5\6
+6\6
+```
+instead of
+```c
+1\6
+1\3
+1\2
+2\3
+5\6
+1\1
+```
+but as far as the values, domains and echelons go, the above scales are equivalent.
+
 ## Operators
 
 Operations can be applied to intervals to create new intervals.
@@ -657,7 +700,7 @@ However this allows us to use non-uniform shapes. `[[1, 2], [3, [4, 5]]] + [10, 
 #### Universal operation and preference
 Domain-aware operators can be instructed to ignore domain using tildes.
 
-An expression like `x ~op y` is roughly equivalent to
+An expression like `x ~op y` is value-equivalent to
 ```c
 domainOf(x)(linear(x) op linear(y))
 ```
@@ -669,6 +712,8 @@ domainOf(y)(linear(x) op linear(y))
 With tilde wings on both sides `x ~op~ y` evaluates to a linear quantity unless both operands are logarithmic.
 
 The *wings of preference* also tries to format the result similar to the preferred operand. `P5 ~+ 3/2` formats as `P12` while `P5 +~ 3/2` formats as `6/2` trying to preserve the denominator between 3/2 and 6/2.
+
+The formatting rules of SonicWeave are too complicated to summarize here and there's no way to express them all in the language itself. Just know that the runtime is trying to be smart about the formatting of tilde'd operations.
 
 ## Arrays
 
