@@ -229,13 +229,13 @@ Obtain the smallest (linear) interval that shares both arguments as multiplicati
 Return the number of intervals in the scale.
 
 ### linear(*interval*)
-Convert interval to linear representation.
+Convert interval to linear representation. Formatting information of logarithmic quantities is lost.
 
 ### log1p(*x*)
 Calculate log1p x.
 
 ### logarithmic(*interval*)
-Convert interval to logarithmic representation.
+Convert interval to logarithmic representation. Formatting information of linear quantities is lost.
 
 ### map(*mapper*, *scale = $$*)
 Map a riff over the given/current scale producing a new scale.

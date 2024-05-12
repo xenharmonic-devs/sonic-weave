@@ -382,7 +382,8 @@ function linear(
   }
   return unaryBroadcast.bind(this)(interval, linear.bind(this));
 }
-linear.__doc__ = 'Convert interval to linear representation.';
+linear.__doc__ =
+  'Convert interval to linear representation. Formatting information of logarithmic quantities is lost.';
 linear.__node__ = builtinNode(linear);
 
 function logarithmic(
@@ -395,7 +396,8 @@ function logarithmic(
   }
   return unaryBroadcast.bind(this)(interval, logarithmic.bind(this));
 }
-logarithmic.__doc__ = 'Convert interval to logarithmic representation.';
+logarithmic.__doc__ =
+  'Convert interval to logarithmic representation. Formatting information of linear quantities is lost.';
 logarithmic.__node__ = builtinNode(logarithmic);
 
 function absolute(
