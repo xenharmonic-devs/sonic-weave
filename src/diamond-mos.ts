@@ -91,6 +91,14 @@ export type AbsoluteMosPitch = {
   octave: number;
 };
 
+export function scaleMonzos(config: MosConfig) {
+  const entries = Array.from(config.scale);
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  const monzos = entries.map(entry => entry[1]);
+  monzos.push(monzos.shift()!.mul(config.equave) as TimeMonzo);
+  return monzos;
+}
+
 export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
   const periods = (node.degree - baseDegree) / config.degrees.length;

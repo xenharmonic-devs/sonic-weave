@@ -30,6 +30,9 @@ Calculate atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to li
 ### atanXY(*x*, *y*)
 Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.
 
+### automos()
+If the current scale is empty, generate absolute Diamond-mos notation based on the current config.
+
 ### bleach(*interval*)
 Get rid of interval coloring and label.
 

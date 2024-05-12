@@ -16,6 +16,7 @@ import {
   primeFactorize,
   nthPrime as xduNthPrime,
   primeRange as xduPrimeRange,
+  mmod,
 } from 'xen-dev-utils';
 import {Color, Interval, Val} from '../interval';
 import {
@@ -71,6 +72,7 @@ import {
   factorColor as pubFactorColor,
   compare,
 } from './public';
+import {MosNominal, scaleMonzos} from '../diamond-mos';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
@@ -1926,6 +1928,36 @@ function keepUnique(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
 keepUnique.__doc__ = 'Only keep unique intervals in the current/given scale.';
 keepUnique.__node__ = builtinNode(keepUnique);
 
+function automos(this: ExpressionVisitor) {
+  const scale = this.currentScale;
+  if (!this.rootContext?.mosConfig || scale.length) {
+    return;
+  }
+  const J4 = this.rootContext.C4;
+  const monzos = scaleMonzos(this.rootContext.mosConfig).map(m => J4.mul(m));
+  return monzos.map(
+    (m, i) =>
+      new Interval(m, 'logarithmic', 0, {
+        type: 'AbsoluteFJS',
+        pitch: {
+          type: 'AbsolutePitch',
+          nominal: String.fromCharCode(
+            'J'.charCodeAt(0) + mmod(i + 1, monzos.length)
+          ) as MosNominal,
+          accidentals: [{accidental: '♮', fraction: ''}],
+          octave: i === monzos.length - 1 ? 5 : 4,
+        },
+        ups: 0,
+        lifts: 0,
+        superscripts: [],
+        subscripts: [],
+      })
+  );
+}
+automos.__doc__ =
+  'If the current scale is empty, generate absolute Diamond-mos notation based on the current config.';
+automos.__node__ = builtinNode(automos);
+
 function reverse(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   scale ??= this.currentScale;
   scale.reverse();
@@ -2551,6 +2583,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   sorted,
   keepUnique,
   uniquesOf,
+  automos,
   reverse,
   reversed,
   pop,

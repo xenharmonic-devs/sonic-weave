@@ -1630,4 +1630,26 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['1\\8<3>', '3\\8<3>', '1\\2<3>']);
   });
+
+  it('generates automos', () => {
+    const scale = parseSource(`
+      MOS 4L 3s 3|3
+      J4 = 100z
+      automos()
+      map(str)
+    `);
+    expect(scale.map(i => i.label)).toEqual([
+      'K♮4',
+      'L♮4',
+      'M♮4',
+      'N♮4',
+      'O♮4',
+      'P♮4',
+      'J♮5',
+    ]);
+    expect(scale.map(i => i.valueOf())).toEqual([
+      113.4312522195463, 120.80894444044476, 137.03509847201238,
+      145.94801056814464, 165.55065597696213, 176.31825099920434, 200,
+    ]);
+  });
 });

@@ -922,6 +922,17 @@ The accidental `&` (read "am") raises pitch by `L - s` while its opposite `@` (r
 
 The accidental `e` (read "semiam") raises pitch by a half *am* while `a` (read "semiat") corresponingly lowest pitch by a half *at*.
 
+#### Auto-MOS
+The easiest way to generate Diamond-mos notation for one equave is to call the `automos()` helper.
+```c
+"Specific mode (Anti-phrygian) of specific hardness of octave-equivalent Antidiatonic"
+MOS 4333433
+J4 = 263 Hz
+automos()
+```
+
+A tool such as Scale Workshop may do this automatically as `automos()` doesn't do anything if the scale isn't empty or if `MOS` is undeclared. (It's possible to use `MOS niente` to undeclare an existing `MOS`.)
+
 ### TAMNAMS relative intervals
 You can also [name relative intervals](https://en.xen.wiki/w/TAMNAMS#Naming_mos_intervals) after declaring `MOS`.
 

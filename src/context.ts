@@ -2,7 +2,7 @@ import {SonicWeaveValue} from './stdlib';
 import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
-import {MosConfig} from './diamond-mos';
+import {MosConfig, scaleMonzos} from './diamond-mos';
 import {stepString} from './words';
 
 /**
@@ -168,10 +168,7 @@ export class RootContext {
       lines.push(`/ = ${this.lift.toString()}`);
     }
     if (this.mosConfig) {
-      const entries = Array.from(this.mosConfig.scale.entries());
-      entries.sort((a, b) => a[0].localeCompare(b[0]));
-      const monzos = entries.map(entry => entry[1]);
-      monzos.push(monzos.shift()!.mul(this.mosConfig.equave) as TimeMonzo);
+      const monzos = scaleMonzos(this.mosConfig);
       const ss = stepString(monzos);
       let large: TimeMonzo;
       let small: TimeMonzo;
