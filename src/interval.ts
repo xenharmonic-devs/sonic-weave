@@ -261,9 +261,9 @@ export class Interval {
 
   /**
    * Serialize the time monzo to a JSON compatible object.
-   * @returns The serialized object with property `type` set to `'TimeMonzo'`.
+   * @returns The serialized object with property `type` set to `'Interval'`.
    */
-  toJSON() {
+  toJSON(): any {
     return {
       type: 'Interval',
       value: this.value.toJSON(),
@@ -1001,7 +1001,7 @@ export class Interval {
    * @param context Current root context with information about root pitch and size of ups and lifts.
    * @returns A true AST node suitable for string conversion or `undefined` realization is impossible in the given context.
    */
-  realizeNode(context: RootContext) {
+  realizeNode(context: RootContext): IntervalLiteral | undefined {
     if (!this.node) {
       return this.node;
     }

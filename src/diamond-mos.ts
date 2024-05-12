@@ -9,7 +9,7 @@ import {
   VULGAR_FRACTIONS,
   VulgarFraction,
 } from './pythagorean';
-import {ZERO, hasOwn} from './utils';
+import {ZERO} from './utils';
 
 export type MosDegree = {
   center: TimeMonzo;

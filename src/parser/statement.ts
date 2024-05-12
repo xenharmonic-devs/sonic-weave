@@ -919,7 +919,7 @@ export class StatementVisitor {
 
   /**
    * Execute the abstract syntax tree of a SonicWeave program.
-   * @param body Program containing the AST to be executed.
+   * @param program Program containing the AST to be executed.
    */
   executeProgram(program: Program) {
     const interrupt = this.executeStatements(program.body);

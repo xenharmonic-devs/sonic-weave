@@ -244,6 +244,9 @@ export type SquareSuperparticular = {
   end: bigint | null;
 };
 
+/**
+ * AST node produced by the parser or a synthetic one used for formatting.
+ */
 export type IntervalLiteral =
   | IntegerLiteral
   | DecimalLiteral
@@ -1132,7 +1135,7 @@ export function integerToVectorComponent(num: number): VectorComponent {
   };
 }
 
-export function literalToJSON(literal?: IntervalLiteral) {
+export function literalToJSON(literal?: IntervalLiteral): any {
   if (!literal) {
     return undefined;
   }

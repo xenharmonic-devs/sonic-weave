@@ -17,6 +17,7 @@ export {
   type Nominal,
   type AbsolutePitch,
 } from './pythagorean';
+export * from './diamond-mos';
 export * from './tools';
 export {
   MetricPrefix,
