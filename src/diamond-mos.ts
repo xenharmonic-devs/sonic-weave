@@ -11,9 +11,21 @@ import {
 } from './pythagorean';
 import {ZERO} from './utils';
 
+/**
+ * Base degree for a mosstep in a 0-indexed array.
+ */
 export type MosDegree = {
+  /**
+   * The perfect or neutral central interval.
+   */
   center: TimeMonzo;
+  /**
+   * Flag to indicate if the degree has minor and major variants.
+   */
   imperfect: boolean;
+  /**
+   * The lopsided neutral variant of a bright or dark generator.
+   */
   mid?: TimeMonzo;
 };
 
@@ -48,6 +60,9 @@ export type MosConfig = {
   degrees: MosDegree[];
 };
 
+/**
+ * Generic 0-indexed mosstep.
+ */
 export type MosStep = {
   type: 'MosStep';
   quality: IntervalQuality;
@@ -55,13 +70,29 @@ export type MosStep = {
   degree: 0;
 };
 
+/**
+ * Accidental in Diamond-mos notation.
+ *
+ * & = Raises a note by a moschroma +(L-s)
+ * e = Raises a note by half a moschroma +(L-s)/2
+ * a = Lowers a note by half a moschroma -(L-s)/2
+ * @ = Lowers a note by a moschroma -(L-s)
+ */
 export type MosAccidental = '&' | 'e' | 'a' | '@';
 
+/**
+ * Potentially fractional Diamond-mos accidental.
+ */
 export type SplitMosAccidental = {
   fraction: VulgarFraction;
   accidental: Accidental | MosAccidental;
 };
 
+/**
+ * Diamond-mos nominals from J to Z.
+ *
+ * The number of valid nominals corresponds to the size of the MOS scale and repeats every equave.
+ */
 export type MosNominal =
   | 'J'
   | 'K'
@@ -91,6 +122,11 @@ export type AbsoluteMosPitch = {
   octave: number;
 };
 
+/**
+ * Obtain relative values for one equave-run of the given config of a MOS declaration with implicit unison.
+ * @param config Result of a MOS declaration.
+ * @returns An array of relative time monzos.
+ */
 export function scaleMonzos(config: MosConfig) {
   const entries = Array.from(config.scale);
   entries.sort((a, b) => a[0].localeCompare(b[0]));
@@ -99,6 +135,12 @@ export function scaleMonzos(config: MosConfig) {
   return monzos;
 }
 
+/**
+ * Convert a generic 0-indexed TAMNAMS mosstep to a relative time monzo.
+ * @param node MosStep like P0ms.
+ * @param config Result of a MOS declaration.
+ * @returns A relative time monzo.
+ */
 export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
   const periods = (node.degree - baseDegree) / config.degrees.length;
@@ -189,6 +231,12 @@ function mosInflection(
   return new TimeMonzo(ZERO, vector);
 }
 
+/**
+ * Convert a Diamond-mos note to a time monzo relative to J4 = C4.
+ * @param node Absolute note like J@5.
+ * @param config Result of a MOS declaration.
+ * @returns A time monzo relative to J4.
+ */
 export function absoluteMosMonzo(
   node: AbsoluteMosPitch,
   config: MosConfig
