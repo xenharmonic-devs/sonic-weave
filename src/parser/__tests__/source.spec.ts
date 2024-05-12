@@ -1523,7 +1523,7 @@ describe('SonicWeave parser', () => {
     `);
     expect(
       scale.map(i => i.value.toEqualTemperament().fractionOfEquave.toFraction())
-    ).toEqual(['3/20', '3/10', '17/20', '1/2', '13/20', '4/5', '27/20', '1']);
+    ).toEqual(['3/20', '3/10', '7/20', '1/2', '13/20', '4/5', '17/20', '1']);
     expect(scale.map(i => i.label)).toEqual([
       'P1ms',
       'M2ms',
