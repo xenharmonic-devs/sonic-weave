@@ -931,7 +931,7 @@ J4 = 263 Hz
 automos()
 ```
 
-A tool such as Scale Workshop may do this automatically as `automos()` doesn't do anything if the scale isn't empty or if `MOS` is undeclared. (It's possible to use `MOS niente` to undeclare an existing `MOS`.)
+Calling `automos()` doesn't do anything if the scale isn't empty or if `MOS` is undeclared. (It's possible to use `MOS niente` to undeclare an existing `MOS`.)
 
 ### TAMNAMS relative intervals
 You can also [name relative intervals](https://en.xen.wiki/w/TAMNAMS#Naming_mos_intervals) after declaring `MOS`.
