@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {sw, swr} from '../../parser';
+import {sw, sw$, sw$r, swr} from '../../parser';
 import {Color, Interval, Val} from '../../interval';
 import {Fraction} from 'xen-dev-utils';
 
@@ -162,5 +162,17 @@ describe('SonicWeave raw template tag', () => {
   it('evaluates the TypeDoc example', () => {
     const interval = swr`7\12` as Interval;
     expect(interval.totalCents()).toBe(700);
+  });
+});
+
+describe('SonicWeave scale template tags', () => {
+  it('has an escaping variant', () => {
+    const scale = sw$`rank2(7\\12, 4)`;
+    expect(scale.map(i => i.totalCents())).toEqual([200, 400, 700, 900, 1200]);
+  });
+
+  it('has a raw variant', () => {
+    const scale = sw$r`rank2(7\12, 4)`;
+    expect(scale.map(i => i.totalCents())).toEqual([200, 400, 700, 900, 1200]);
   });
 });

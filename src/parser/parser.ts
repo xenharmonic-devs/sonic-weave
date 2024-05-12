@@ -210,12 +210,14 @@ function convert(value: any): SonicWeaveValue {
 
 /**
  * Create a tag for [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) to evaluate SonicWeave programs inside JavaScript code.
+ * @param expression Whether or not this tag is intended for evaluation single expressions or full scales producing arrays of {@link Interval} instances.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
  * @param escapeStrings If `true` all escape sequences are evaluated before interpreting the literal as a SonicWeave program.
  * @returns A tag that can be attached to template literals in order to evaluate them.
  */
 export function createTag(
+  expression = true,
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>,
   escapeStrings = false
@@ -232,29 +234,34 @@ export function createTag(
       source += `¥${i}` + fragments[i + 1];
     }
     const program = parseAST(source);
-    for (const statement of program.body.slice(0, -1)) {
-      const interrupt = visitor.visit(statement);
-      if (interrupt) {
-        throw new Error(`Illegal ${interrupt.type}.`);
+    if (expression) {
+      for (const statement of program.body.slice(0, -1)) {
+        const interrupt = visitor.visit(statement);
+        if (interrupt) {
+          throw new Error(`Illegal ${interrupt.type}.`);
+        }
       }
+      if (visitor.deferred.length) {
+        throw new Error(
+          'Deferred actions not allowed when evaluating tagged templates.'
+        );
+      }
+      const finalStatement = program.body[program.body.length - 1];
+      if (finalStatement.type !== 'ExpressionStatement') {
+        throw new Error(`Expected expression. Got ${finalStatement.type}.`);
+      }
+      const subVisitor = visitor.createExpressionVisitor();
+      return subVisitor.visit(finalStatement.expression);
+    } else {
+      visitor.executeProgram(program);
+      return visitor.currentScale;
     }
-    if (visitor.deferred.length) {
-      throw new Error(
-        'Deferred actions not allowed when evaluating tagged templates.'
-      );
-    }
-    const finalStatement = program.body[program.body.length - 1];
-    if (finalStatement.type !== 'ExpressionStatement') {
-      throw new Error(`Expected expression. Got ${finalStatement.type}.`);
-    }
-    const subVisitor = visitor.createExpressionVisitor();
-    return subVisitor.visit(finalStatement.expression);
   }
   return tag;
 }
 
 /**
- * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave programs.
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave expressions.
  * Has raw (unescaped) semantics.
  *
  * Example:
@@ -270,7 +277,26 @@ Object.defineProperty(swr, 'name', {
 });
 
 /**
- * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave programs.
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave scales.
+ * Has raw (unescaped) semantics.
+ *
+ * Example:
+ * ```ts
+ * const pentatonic = sw$r`rank2(7\12, 4)`;
+ * console.log(pentatonic.map(interval => interval.totalCents())); // [200, 400, 700, 900, 1200]
+ * ```
+ */
+export const sw$r = createTag(false) as (
+  strings: TemplateStringsArray,
+  ...args: any[]
+) => Interval[];
+Object.defineProperty(swr, 'name', {
+  value: 'sw$r',
+  enumerable: false,
+});
+
+/**
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave expressions.
  * Evaluates escapes before interpreting the program so e.g. a double backslash means only a single backslash within the program.
  *
  * Example:
@@ -279,8 +305,27 @@ Object.defineProperty(swr, 'name', {
  * console.log(interval.totalCents()); // 700
  * ```
  */
-export const sw = createTag(true, undefined, true);
+export const sw = createTag(true, true, undefined, true);
 Object.defineProperty(sw, 'name', {
   value: 'sw',
+  enumerable: false,
+});
+
+/**
+ * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave scales.
+ * Evaluates escapes before interpreting the program so e.g. a double backslash means only a single backslash within the program.
+ *
+ * Example:
+ * ```ts
+ * const pentatonic = sw$`rank2(7\\12, 4)`;
+ * console.log(pentatonic.map(interval => interval.totalCents())); // [200, 400, 700, 900, 1200]
+ * ```
+ */
+export const sw$ = createTag(false, true, undefined, true) as (
+  strings: TemplateStringsArray,
+  ...args: any[]
+) => Interval[];
+Object.defineProperty(swr, 'name', {
+  value: 'sw$',
   enumerable: false,
 });
