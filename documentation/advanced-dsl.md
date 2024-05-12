@@ -440,12 +440,33 @@ Pitch can be declared as a period of oscillation, but it's coearced to Hz to pre
 
 E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 
+## Implicit intrinsic calls
+Associating two values like `3/2 "fif"` invokes intrinsic behavior between the interval `3/2` and the string `"fif"` resulting in an interval with the value 3/2 and the label "fif".
+
+Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior.
+| left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Function      |
+| ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- |
+| **Niente**   | ?             | ?             | ?             | bleach         | ?              | `right(left)` |
+| **String**   | ?             | concatenate   | ?             | label          | ?              | `right(left)` |
+| **Color**    | ?             | ?             | ?             | paint          | ?              | `right(left)` |
+| **Interval** | bleach        | label         | paint         | `left × right` | `left × right` | `right(left)` |
+| **Val**      | ?             | ?             | ?             | `left × right` | ?              | `right(left)` |
+| **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` |
+
+Intrinsic behavior vectorizes and broadcasts like other binary operations.
+
+Intrinsic behavior may be evoked explicitly by simply calling a value e.g. `3/2("fif")` and `"fif"(3/2)` both work.
+
+Some expressions like `440Hz` or `440 Hz` appear similar to intrinsic calls and would correspond to `440 × (1 Hz)` but `600.0 Hz` is actually `600.0e × (1 Hz)` instead of cents multiplied by Hertz. This exception only applies to units like `Hz`. `600.0 PI` is just `logarithmic(sqrt(2) * PI)`.
+It's legal to declare `let Hz = 'whatever'`, but the grammar prevents the `Hz` variable from invoking intrinsic behavior of integer literals from the right.
+
 ### Obscure types
-| Type         | Literal | Meaning                                                |
-| ------------ | ------- | ------------------------------------------------------ |
-| Second       | `1s`    | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1`      |
-| Jorp         | `€`     | Geometric inverse of `c` i.e. `€` is equal to `<1200]` |
-| Pilcrowspoob | `¶`     | Geometric inverse of `logarithmic(1Hz)`                |
+| Type              | Literal    | Meaning                                                    |
+| ----------------- | ---------- | ---------------------------------------------------------- |
+| Second            | `1s`       | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1`          |
+| Jorp              | `€`        | Geometric inverse of `c` i.e. `€` is equal to `<1200]`     |
+| Pilcrowspoob      | `¶`        | Geometric inverse of `logarithmic(1Hz)`                    |
+| Template argument | `¥0`, `¥1` | Arguments passed to the `sw\`${arg0} ${arg1}\`` tag in JS. |
 
 ### Obscure operations
 | Name                      | Linear       | Result   | Logarithmic      | Result     |

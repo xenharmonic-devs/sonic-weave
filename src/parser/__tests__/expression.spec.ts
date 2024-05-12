@@ -2367,4 +2367,9 @@ describe('Poor grammar / Fun with "<"', () => {
     const {fraction} = parseSingle('<12 19]@√2.√3 dot P5');
     expect(fraction).toBe('14');
   });
+
+  it('evokes intrinsic behavior between PI and E', () => {
+    const product = evaluateExpression('PI(E)', false) as Interval;
+    expect(product.valueOf()).toBeCloseTo(8.5397);
+  });
 });

@@ -1806,11 +1806,12 @@ export class ExpressionVisitor {
 
   protected visitCallExpression(node: CallExpression) {
     const args = this.spread(node.args);
+    let callee: SonicWeaveValue;
     if (node.callee.type === 'Identifier') {
-      const callee = this.get(node.callee.id) as SonicWeaveFunction;
-      return callee.bind(this)(...args);
+      callee = this.get(node.callee.id);
+    } else {
+      callee = this.visit(node.callee);
     }
-    const callee = this.visit(node.callee);
     if (typeof callee === 'function') {
       return (callee as SonicWeaveFunction).bind(this)(...args);
     }
