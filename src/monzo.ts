@@ -180,6 +180,10 @@ export class TimeReal {
    * @param value Multiplier of the time unit.
    */
   constructor(timeExponent: number, value: number) {
+    // Intentional normalization for 0 and NaN.
+    if (!value) {
+      timeExponent = 0;
+    }
     this.timeExponent = timeExponent;
     this.value = value;
   }
@@ -386,7 +390,7 @@ export class TimeReal {
       return new TimeReal(this.timeExponent * exponent, this.value ** exponent);
     }
     if (typeof other === 'number') {
-      if (!other) {
+      if (other === 0) {
         return new TimeMonzo(ZERO, []);
       }
       return new TimeReal(this.timeExponent * other, this.value ** other);
@@ -450,10 +454,17 @@ export class TimeReal {
    * @returns The linear sum of the time reals.
    */
   add(other: TimeMonzo | TimeReal) {
+    if (this.value === 0) {
+      return other.clone();
+    }
+    const otherValue = other.valueOf();
+    if (otherValue === 0) {
+      return this.clone();
+    }
     if (other.timeExponent.valueOf() !== this.timeExponent) {
       throw new Error('Time exponents must match in addition.');
     }
-    return new TimeReal(this.timeExponent, this.value + other.valueOf());
+    return new TimeReal(this.timeExponent, this.value + otherValue);
   }
 
   /**
@@ -462,10 +473,17 @@ export class TimeReal {
    * @returns The linear difference of the time reals.
    */
   sub(other: TimeMonzo | TimeReal) {
+    if (this.value === 0) {
+      return other.neg();
+    }
+    const otherValue = other.valueOf();
+    if (otherValue === 0) {
+      return this.clone();
+    }
     if (other.timeExponent.valueOf() !== this.timeExponent) {
       throw new Error('Time exponents must match in subtraction.');
     }
-    return new TimeReal(this.timeExponent, this.value - other.valueOf());
+    return new TimeReal(this.timeExponent, this.value - otherValue);
   }
 
   /** @hidden */
@@ -589,6 +607,9 @@ export class TimeReal {
    * @returns This modulo the other.
    */
   mmod(other: TimeMonzo | TimeReal, ceiling = false) {
+    if (this.value === 0) {
+      return ceiling ? other.clone() : this.clone();
+    }
     if (other.timeExponent.valueOf() !== this.timeExponent) {
       throw new Error('Time exponents must match in modulo.');
     }
@@ -699,69 +720,48 @@ export class TimeReal {
 
   /**
    * Obtain an AST node representing the time real as a monzo literal.
+   * @param interchange Boolean flag to use Hz basis for the absolute echelon.
    * @returns Monzo literal.
    */
-  asMonzoLiteral(): MonzoLiteral {
+  asMonzoLiteral(interchange = false): MonzoLiteral | undefined {
+    if (!isFinite(this.value)) {
+      return undefined;
+    }
     const components: VectorComponent[] = [];
     const basis: BasisElement[] = [];
-    if (this.timeExponent === -1) {
-      basis.push('Hz');
-      components.push({sign: '', left: 1, right: '', exponent: null});
-    } else if (this.timeExponent) {
-      basis.push('s');
-      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
-        this.timeExponent,
-        'r'
-      );
-      components.push({
-        sign,
-        left: Number(whole),
-        separator: '.',
-        right: fractional,
-        exponent,
-      });
-    }
-    if (this.value < 0) {
-      basis.push({numerator: -1, denominator: null, radical: false});
-      components.push({sign: '', left: 1, right: '', exponent: null});
-    }
-    if (this.value !== 0) {
-      basis.push('rc');
-      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
-        this.totalCents(true),
-        'r'
-      );
-      components.push({
-        sign,
-        left: Number(whole),
-        separator: '.',
-        right: fractional,
-        exponent,
-      });
-    }
-    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
-  }
-
-  /**
-   * Obtain an AST node representing the time monzo as a monzo literal suitable for interchange between programs.
-   * @returns Monzo literal.
-   */
-  asInterchangeLiteral(): MonzoLiteral {
-    const components: VectorComponent[] = [];
-    const basis: BasisElement[] = [];
-    if (this.timeExponent) {
-      basis.push('Hz');
-      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
-        -this.timeExponent,
-        'r'
-      );
-      components.push({
-        sign,
-        left: Number(whole),
-        separator: '.',
-        right: fractional,
-        exponent,
-      });
+    if (interchange) {
+      if (this.timeExponent) {
+        basis.push('Hz');
+        const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+          -this.timeExponent,
+          'r'
+        );
+        components.push({
+          sign,
+          left: Number(whole),
+          separator: '.',
+          right: fractional,
+          exponent,
+        });
+      }
+    } else {
+      if (this.timeExponent === -1) {
+        basis.push('Hz');
+        components.push({sign: '', left: 1, right: '', exponent: null});
+      } else if (this.timeExponent) {
+        basis.push('s');
+        const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+          this.timeExponent,
+          'r'
+        );
+        components.push({
+          sign,
+          left: Number(whole),
+          separator: '.',
+          right: fractional,
+          exponent,
+        });
+      }
     }
     if (this.value < 0) {
       basis.push({numerator: -1, denominator: null, radical: false});
@@ -769,6 +769,15 @@ export class TimeReal {
     } else if (this.value === 0) {
       basis.push({numerator: 0, denominator: null, radical: false});
       components.push({sign: '', left: 1, right: '', exponent: null});
+      basis.push('rc');
+      components.push({
+        sign: '',
+        left: 0,
+        separator: '.',
+        right: '',
+        exponent: null,
+      });
+      return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
     }
     basis.push('rc');
     const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
@@ -783,6 +792,29 @@ export class TimeReal {
       exponent,
     });
     return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+  }
+
+  /**
+   * Obtain an AST node representing the time monzo as a monzo literal suitable for interchange between programs.
+   * @returns Monzo literal.
+   */
+  asInterchangeLiteral(): MonzoLiteral | undefined {
+    return this.asMonzoLiteral(true);
+  }
+
+  /** @hidden */
+  formatTimeExponent() {
+    if (!this.timeExponent) {
+      return '';
+    } else if (this.timeExponent === -1) {
+      return 'Hz';
+    } else if (this.timeExponent === 1) {
+      return 's';
+    } else {
+      return `s^${literalToString(
+        numberToDecimalLiteral(this.timeExponent, 'r')
+      )}`;
+    }
   }
 
   /**
@@ -803,7 +835,10 @@ export class TimeReal {
       }
     }
     if (!isFinite(this.value)) {
-      const value = this.value < 0 ? '-Infinity' : 'Infinity';
+      let value = this.value < 0 ? '-Infinity' : 'Infinity';
+      if (this.timeExponent) {
+        value = `${value} * 1${this.formatTimeExponent()}`;
+      }
       switch (domain) {
         case 'linear':
           return value;
@@ -815,18 +850,7 @@ export class TimeReal {
       const scalar = this.clone();
       scalar.timeExponent = 0;
       const value = literalToString(scalar.asDecimalLiteral()!);
-      if (!this.timeExponent) {
-        return value;
-      } else if (this.timeExponent === -1) {
-        return `${value}Hz`;
-      } else if (this.timeExponent === 1) {
-        return `${value}s`;
-      } else {
-        return `${value}s^${literalToString(
-          numberToDecimalLiteral(this.timeExponent, 'r')
-        )}`;
-      }
-      return value;
+      return `${value}${this.formatTimeExponent()}`;
     }
     if (!this.timeExponent) {
       const node = this.asCentsLiteral();
@@ -834,7 +858,11 @@ export class TimeReal {
         return literalToString(node);
       }
     }
-    return literalToString(this.asMonzoLiteral());
+    const node = this.asMonzoLiteral();
+    if (!node) {
+      throw new Error('Unable to represent real quantity as a string.');
+    }
+    return literalToString(node);
   }
 
   /**
@@ -1030,6 +1058,11 @@ export class TimeMonzo {
   ) {
     if (residual === undefined) {
       residual = new Fraction(1);
+    }
+    if (!residual.n) {
+      timeExponent = new Fraction(0);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      primeExponents = primeExponents.map(_ => new Fraction(0));
     }
     this.timeExponent = timeExponent;
     this.primeExponents = primeExponents;
@@ -1632,6 +1665,12 @@ export class TimeMonzo {
     if (other instanceof TimeReal) {
       return other.add(this);
     }
+    if (!this.residual.n) {
+      return other.clone();
+    }
+    if (!other.residual.n) {
+      return this.clone();
+    }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(
         `Cannot add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
@@ -1659,6 +1698,12 @@ export class TimeMonzo {
   sub(other: TimeMonzo | TimeReal): TimeMonzo | TimeReal {
     if (other instanceof TimeReal) {
       return other.lsub(this);
+    }
+    if (!this.residual.n) {
+      return other.neg();
+    }
+    if (!other.residual.n) {
+      return this.clone();
     }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
@@ -2130,6 +2175,9 @@ export class TimeMonzo {
   mmod(other: TimeMonzo | TimeReal, ceiling = false): TimeMonzo | TimeReal {
     if (other instanceof TimeReal) {
       return other.lmmod(this, ceiling);
+    }
+    if (!this.residual.n) {
+      return ceiling ? other.clone() : this.clone();
     }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(

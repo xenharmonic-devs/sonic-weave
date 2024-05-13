@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {evaluateExpression} from '..';
 import {Color, Interval, Val} from '../../interval';
-import {TimeMonzo} from '../../monzo';
+import {TimeMonzo, TimeReal} from '../../monzo';
 
 function parseSingle(source: string) {
   const interval = evaluateExpression(source, false);
@@ -2371,5 +2371,30 @@ describe('Poor grammar / Fun with "<"', () => {
   it('evokes intrinsic behavior between PI and E', () => {
     const product = evaluateExpression('PI(E)', false) as Interval;
     expect(product.valueOf()).toBeCloseTo(8.5397);
+  });
+
+  it('normalizes zero (frequency)', () => {
+    const {interval, fraction} = parseSingle('0 Hz');
+    expect(interval.isAbsolute()).toBe(false);
+    expect(fraction).toBe('0');
+  });
+
+  it("doesn't normalize real zero to rational", () => {
+    const interval = evaluate('0r') as Interval;
+    expect(interval.isAbsolute()).toBe(false);
+    expect(interval.valueOf()).toBe(0);
+    expect(interval.value).toBeInstanceOf(TimeReal);
+  });
+
+  it('can add zero to anything (frequency)', () => {
+    const {interval} = parseSingle('440 Hz + 0');
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.valueOf()).toBe(440);
+  });
+
+  it('can add zero to anything (real)', () => {
+    const interval = evaluate('PI + 0') as Interval;
+    expect(interval.isAbsolute()).toBe(false);
+    expect(interval.valueOf()).toBeCloseTo(Math.PI);
   });
 });

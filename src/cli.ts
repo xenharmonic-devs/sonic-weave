@@ -12,6 +12,7 @@ import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
 import {parse as parenCounter} from './parser/paren-counter';
 import {literalToString} from './expression';
+import {TimeReal} from './monzo';
 const {version} = require('../package.json');
 
 /**
