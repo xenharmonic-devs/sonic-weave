@@ -184,6 +184,10 @@ export class TimeReal {
     if (!value) {
       timeExponent = 0;
     }
+    // Checks for Infinity and NaN
+    if (!isFinite(timeExponent)) {
+      throw new Error('Time exponent must be finite.');
+    }
     this.timeExponent = timeExponent;
     this.value = value;
   }
@@ -233,7 +237,15 @@ export class TimeReal {
       value !== null &&
       value.type === 'TimeReal'
     ) {
-      return new TimeReal(value.timeExponent, value.value);
+      let v: number | string = value.value;
+      if (v === 'NaN') {
+        v = NaN;
+      } else if (v === 'Infinity') {
+        v = Infinity;
+      } else if (v === '-Infinity') {
+        v = -Infinity;
+      }
+      return new TimeReal(value.timeExponent, v as number);
     }
     return value;
   }
@@ -243,10 +255,20 @@ export class TimeReal {
    * @returns The serialized object with property `type` set to `'TimeReal'`.
    */
   toJSON() {
+    let value: number | string = this.value;
+    // JSON sure is a standard
+    if (isNaN(value)) {
+      value = 'NaN';
+    } else if (value === Infinity) {
+      value = 'Infinity';
+    } else if (value === -Infinity) {
+      value = '-Infinity';
+    }
+
     return {
       type: 'TimeReal',
       timeExponent: this.timeExponent,
-      value: this.value,
+      value,
     };
   }
 

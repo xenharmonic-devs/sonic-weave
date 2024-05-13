@@ -461,16 +461,18 @@ describe('JSON serialization', () => {
       3.5,
       TimeMonzo.fromFraction('81/80'),
       null,
+      new TimeReal(0, NaN),
+      new TimeReal(1, Infinity),
     ];
     const serialized = JSON.stringify(data);
     expect(serialized).toBe(
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null]'
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"NaN"},{"type":"TimeReal","timeExponent":1,"value":"Infinity"}]'
     );
   });
 
   it('can deserialize an array of primitives, fractions and monzos', () => {
     const serialized =
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null]';
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"NaN"},{"type":"TimeReal","timeExponent":1,"value":"Infinity"}]';
     function reviver(key: string, value: any) {
       return TimeMonzo.reviver(
         key,
@@ -478,7 +480,7 @@ describe('JSON serialization', () => {
       );
     }
     const data = JSON.parse(serialized, reviver);
-    expect(data).toHaveLength(6);
+    expect(data).toHaveLength(8);
 
     expect(data[0]).toBe('Hello, world!');
 
@@ -495,5 +497,13 @@ describe('JSON serialization', () => {
     expect(data[4].toFraction().toFraction()).toBe('81/80');
 
     expect(data[5]).toBeNull();
+
+    expect(data[6]).toBeInstanceOf(TimeReal);
+    expect(data[6].timeExponent).toBe(0);
+    expect(data[6].value).toBeNaN();
+
+    expect(data[7]).toBeInstanceOf(TimeReal);
+    expect(data[7].timeExponent).toBe(1);
+    expect(data[7].value).toBe(Infinity);
   });
 });
