@@ -65,6 +65,13 @@
     'vor',
     'where',
     'while',
+    // Future reserved words
+    'case',
+    'debugger',
+    'default',
+    'delete',
+    'match',
+    'yield',
   ]);
 
   const PERFECT_DEGREES = new Set([1, 4, 5, 1.5, 4.5, 7.5]);
