@@ -150,6 +150,14 @@ export type ReciprocalLogarithmicHertzLiteral = {
   type: 'ReciprocalLogarithmicHertzLiteral';
 };
 
+export type NotANumberLiteral = {
+  type: 'NotANumberLiteral';
+};
+
+export type InfinityLiteral = {
+  type: 'InfinityLiteral';
+};
+
 export type FJS = {
   type: 'FJS';
   ups: number;
@@ -257,6 +265,8 @@ export type IntervalLiteral =
   | CentsLiteral
   | CentLiteral
   | ReciprocalCentLiteral
+  | NotANumberLiteral
+  | InfinityLiteral
   | FJS
   | AspiringFJS
   | AbsoluteFJS
@@ -1051,6 +1061,10 @@ export function literalToString(literal: IntervalLiteral) {
       return '€';
     case 'ReciprocalLogarithmicHertzLiteral':
       return '¶';
+    case 'NotANumberLiteral':
+      return 'nan';
+    case 'InfinityLiteral':
+      return 'inf';
     case 'FJS':
       return formatFJS(literal);
     case 'AbsoluteFJS':
@@ -1076,6 +1090,7 @@ export function literalToString(literal: IntervalLiteral) {
     case 'MosStepLiteral':
       return formatMosStepLiteral(literal);
     default:
+      literal satisfies AspiringFJS | AspiringAbsoluteFJS;
       throw new Error(`Cannot format ${literal.type}`);
   }
 }
@@ -1172,6 +1187,8 @@ export function literalToJSON(literal?: IntervalLiteral): any {
     case 'NedjiLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
+    case 'NotANumberLiteral':
+    case 'InfinityLiteral':
     case 'FJS':
     case 'AspiringFJS':
     case 'AbsoluteFJS':
@@ -1222,6 +1239,8 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
     case 'NedjiLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
+    case 'NotANumberLiteral':
+    case 'InfinityLiteral':
     case 'FJS':
     case 'AspiringFJS':
     case 'AbsoluteFJS':

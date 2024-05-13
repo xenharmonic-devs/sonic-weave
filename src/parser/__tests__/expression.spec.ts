@@ -1218,15 +1218,15 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has not-a-number', () => {
-    const nan = evaluate('NaN') as Interval;
+    const nan = evaluate('nan') as Interval;
     expect(nan.valueOf()).toBeNaN();
-    expect(nan.toString()).toBe('NaN');
+    expect(nan.toString()).toBe('nan');
   });
 
   it('has negative infinity', () => {
-    const inf = evaluate('-Infinity') as Interval;
+    const inf = evaluate('-inf') as Interval;
     expect(inf.valueOf()).toBe(-Infinity);
-    expect(inf.toString()).toBe('-Infinity');
+    expect(inf.toString()).toBe('-inf');
   });
 
   it('has root half', () => {
@@ -1250,7 +1250,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('produces nan from asin', () => {
     const wishIwasAcomplexNumber = evaluate('asin(2)') as Interval;
-    expect(wishIwasAcomplexNumber.toString()).toBe('NaN');
+    expect(wishIwasAcomplexNumber.toString()).toBe('nan');
   });
 
   it('has domain-crossing acos', () => {

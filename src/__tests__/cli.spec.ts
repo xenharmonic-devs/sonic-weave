@@ -8,22 +8,22 @@ describe('Interchange format', () => {
   });
 
   it('has representation for infinity', () => {
-    const result = toSonicWeaveInterchange('Infinity');
-    expect(result).toContain('Infinity');
+    const result = toSonicWeaveInterchange('inf');
+    expect(result).toContain('inf');
   });
 
-  it('has representation for NaN', () => {
-    const result = toSonicWeaveInterchange('NaN');
-    expect(result).toContain('NaN');
+  it('has representation for nan', () => {
+    const result = toSonicWeaveInterchange('nan');
+    expect(result).toContain('nan');
   });
 
-  it('has representation for Infinity Hz', () => {
-    const result = toSonicWeaveInterchange('Infinity * 1 Hz');
-    expect(result).toContain('Infinity * 1Hz');
+  it('has representation for infinity Hz', () => {
+    const result = toSonicWeaveInterchange('inf * 1 Hz');
+    expect(result).toContain('inf * 1Hz');
   });
 
-  it('has representation for NaN Hz (normalizes)', () => {
-    const result = toSonicWeaveInterchange('NaN * 1 Hz');
-    expect(result).toContain('NaN');
+  it('has representation for nan Hz (normalizes)', () => {
+    const result = toSonicWeaveInterchange('nan * 1 Hz');
+    expect(result).toContain('nan');
   });
 });

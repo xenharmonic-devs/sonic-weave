@@ -372,6 +372,10 @@ export class ExpressionVisitor {
         return node.value;
       case 'NoneLiteral':
         return undefined;
+      case 'NotANumberLiteral':
+        return new Interval(new TimeReal(0, NaN), 'linear', 0, node);
+      case 'InfinityLiteral':
+        return new Interval(new TimeReal(0, Infinity), 'linear', 0, node);
       case 'DownExpression':
         return this.visitDownExpression(node);
       case 'StepLiteral':

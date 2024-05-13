@@ -390,7 +390,7 @@ describe('SonicWeave vector broadcasting', () => {
     const polarity = sw1D`[-1/2, PI] sign`;
     expect(polarity).toEqual([-1, 1]);
 
-    const circleOfNaN = sw2D`sign([[0, LN2], [-1, NaN]])`;
+    const circleOfNaN = sw2D`sign([[0, LN2], [-1, nan]])`;
     expect(circleOfNaN).toEqual([
       [0, 1],
       [-1, NaN],

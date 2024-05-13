@@ -87,8 +87,6 @@ const PI = new Interval(TimeReal.fromValue(Math.PI), 'linear');
 const SQRT1_2 = new Interval(TimeMonzo.fromEqualTemperament('-1/2'), 'linear');
 const SQRT2 = new Interval(TimeMonzo.fromEqualTemperament('1/2'), 'linear');
 const TAU = new Interval(TimeReal.fromValue(2 * Math.PI), 'linear');
-const NAN = new Interval(TimeReal.fromValue(NaN), 'linear');
-const INFINITY = new Interval(TimeReal.fromValue(Infinity), 'linear');
 
 // == Real-valued Math wrappers ==
 const MATH_WRAPPERS: Record<string, SonicWeaveFunction> = {};
@@ -1221,7 +1219,7 @@ function flatten(array: SonicWeaveValue, depth?: Interval) {
   return [array];
 }
 flatten.__doc__ =
-  'Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `Infinity`).';
+  'Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `inf`).';
 flatten.__node__ = builtinNode(flatten);
 
 function clear(this: ExpressionVisitor, scale?: Interval[]) {
@@ -2487,8 +2485,6 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   SQRT1_2,
   SQRT2,
   TAU,
-  NaN: NAN,
-  Infinity: INFINITY,
   VERSION,
   // First-party wrappers
   numComponents,

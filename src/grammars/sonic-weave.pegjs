@@ -31,6 +31,7 @@
     'if',
     'import',
     'in',
+    'inf',
     'labs',
     'lest',
     'let',
@@ -42,6 +43,7 @@
     'modc',
     'module',
     'MOS',
+    'nan',
     'niente',
     'not',
     'of',
@@ -158,6 +160,7 @@ FromToken          = @'from'     !IdentifierPart
 IfToken            = @'if'       !IdentifierPart
 ImportToken        = @'import'   !IdentifierPart
 InToken            = @'in'       !IdentifierPart
+InfinityToken      = @'inf'      !IdentifierPart
 LogAbsToken        = @'labs'     !IdentifierPart
 LestToken          = @'lest'     !IdentifierPart
 LetToken           = @'let'      !IdentifierPart
@@ -168,6 +171,7 @@ MinToken           = @'min'      !IdentifierPart
 ModToken           = @'mod'      !IdentifierPart
 ModCeilingToken    = @'modc'     !IdentifierPart
 ModuleToken        = @'module'   !IdentifierPart
+NotANumberToken    = @'nan'      !IdentifierPart
 NoneToken          = @'niente'   !IdentifierPart
 NotToken           = @'not'      !IdentifierPart
 OfToken            = @'of'       !IdentifierPart
@@ -995,6 +999,8 @@ Primary
   / NoneLiteral
   / TrueLiteral
   / FalseLiteral
+  / NotANumberLiteral
+  / InfinityLiteral
   / NedjiLiteral
   / StepLiteral
   / ScalarMultiple
@@ -1246,6 +1252,12 @@ TrueLiteral
 
 FalseLiteral
   = FalseToken { return { type: 'FalseLiteral' }; }
+
+NotANumberLiteral
+  = NotANumberToken { return { type: 'NotANumberLiteral' }; }
+
+InfinityLiteral
+  = InfinityToken { return { type: 'InfinityLiteral' }; }
 
 ColorLiteral
   = value: (@RGB8 / @RGB4) {

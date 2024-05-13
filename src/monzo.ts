@@ -238,11 +238,11 @@ export class TimeReal {
       value.type === 'TimeReal'
     ) {
       let v: number | string = value.value;
-      if (v === 'NaN') {
+      if (v === 'nan') {
         v = NaN;
-      } else if (v === 'Infinity') {
+      } else if (v === 'inf') {
         v = Infinity;
-      } else if (v === '-Infinity') {
+      } else if (v === '-inf') {
         v = -Infinity;
       }
       return new TimeReal(value.timeExponent, v as number);
@@ -258,11 +258,11 @@ export class TimeReal {
     let value: number | string = this.value;
     // JSON sure is a standard
     if (isNaN(value)) {
-      value = 'NaN';
+      value = 'nan';
     } else if (value === Infinity) {
-      value = 'Infinity';
+      value = 'inf';
     } else if (value === -Infinity) {
-      value = '-Infinity';
+      value = 'inf';
     }
 
     return {
@@ -851,13 +851,13 @@ export class TimeReal {
     if (isNaN(this.value)) {
       switch (domain) {
         case 'linear':
-          return 'NaN';
+          return 'nan';
         case 'logarithmic':
-          return 'logarithmic(NaN)';
+          return 'logarithmic(nan)';
       }
     }
     if (!isFinite(this.value)) {
-      let value = this.value < 0 ? '-Infinity' : 'Infinity';
+      let value = this.value < 0 ? '-inf' : 'inf';
       if (this.timeExponent) {
         value = `${value} * 1${this.formatTimeExponent()}`;
       }

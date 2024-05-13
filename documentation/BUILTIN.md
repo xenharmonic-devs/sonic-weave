@@ -124,7 +124,7 @@ Obtain a copy of the given/current scale containing values that evaluate to `tru
 Convert interval to (relative) FJS.
 
 ### flatten(*array*, *depth*)
-Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `Infinity`).
+Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth (default `inf`).
 
 ### floor(*interval*)
 Round value down to the nearest integer.

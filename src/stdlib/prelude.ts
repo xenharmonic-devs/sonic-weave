@@ -179,7 +179,7 @@ riff denominator(x) {
 }
 riff sign(x) {
   "Calculate the sign of x.";
-  return 1 where x > 0 else -1 where x < 0 else 0 where x == 0 else NaN;
+  return 1 where x > 0 else -1 where x < 0 else 0 where x == 0 else nan;
 }
 riff oddLimitOf(x, equave = 2) {
   "Calculate the odd limit of x. Here 'odd' means not divisible by the equave.";

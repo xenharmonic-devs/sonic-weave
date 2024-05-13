@@ -463,6 +463,8 @@ It's legal to declare `let Hz = 'whatever'`, but the grammar prevents the `Hz` v
 ### Obscure types
 | Type              | Literal    | Meaning                                                    |
 | ----------------- | ---------- | ---------------------------------------------------------- |
+| Infinity          | `inf`      | Linear relative infinity                                   |
+| Not-a-number      | `nan`      | Generic invalid real value                                 |
 | Second            | `1s`       | Inverse of `1Hz` i.e. `1s * 1Hz` evaluates to `1`          |
 | Jorp              | `€`        | Geometric inverse of `c` i.e. `€` is equal to `<1200]`     |
 | Pilcrowspoob      | `¶`        | Geometric inverse of `logarithmic(1Hz)`                    |

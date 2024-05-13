@@ -13,13 +13,13 @@ describe('Real value with time', () => {
   it('can represent NaN', () => {
     const nan = TimeReal.fromValue(NaN);
     expect(nan.value).toBeNaN();
-    expect(nan.toString()).toBe('NaN');
+    expect(nan.toString()).toBe('nan');
   });
 
   it('can represent Infinity', () => {
     const inf = TimeReal.fromValue(Infinity);
     expect(inf.value).toBe(Infinity);
-    expect(inf.toString()).toBe('Infinity');
+    expect(inf.toString()).toBe('inf');
   });
 });
 
@@ -466,13 +466,13 @@ describe('JSON serialization', () => {
     ];
     const serialized = JSON.stringify(data);
     expect(serialized).toBe(
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"NaN"},{"type":"TimeReal","timeExponent":1,"value":"Infinity"}]'
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"nan"},{"type":"TimeReal","timeExponent":1,"value":"inf"}]'
     );
   });
 
   it('can deserialize an array of primitives, fractions and monzos', () => {
     const serialized =
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"NaN"},{"type":"TimeReal","timeExponent":1,"value":"Infinity"}]';
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"nan"},{"type":"TimeReal","timeExponent":1,"value":"inf"}]';
     function reviver(key: string, value: any) {
       return TimeMonzo.reviver(
         key,
