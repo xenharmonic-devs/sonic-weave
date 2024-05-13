@@ -76,7 +76,7 @@ export function toSonicWeaveInterchange(source: string) {
   }
   for (const interval of visitor.currentScale) {
     const universal = interval.shallowClone();
-    universal.node = universal.asMonzoLiteral();
+    universal.node = universal.asMonzoLiteral(true);
     let line = universal.toString(context);
     if (line.startsWith('(') && line.endsWith(')')) {
       line = line.slice(1, -1);

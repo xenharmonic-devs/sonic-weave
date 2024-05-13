@@ -2,6 +2,8 @@
 
 import {Fraction, PRIMES} from 'xen-dev-utils';
 
+export const NUM_INTERCHANGE_COMPONENTS = 9;
+
 export function F(n: number, d?: number) {
   return Object.freeze(new Fraction(n, d));
 }

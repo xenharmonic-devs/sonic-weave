@@ -22,6 +22,7 @@ import {
   FRACTION_PRIMES,
   HALF,
   NEGATIVE_ONE,
+  NUM_INTERCHANGE_COMPONENTS,
   ONE,
   TWO,
   ZERO,
@@ -59,7 +60,7 @@ export type EqualTemperament = {
   equave: Fraction;
 };
 
-let NUMBER_OF_COMPONENTS = 9; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
+let NUMBER_OF_COMPONENTS = NUM_INTERCHANGE_COMPONENTS; // Primes 2, 3, 5, 7, 11, 13, 17, 19 and 23
 
 /**
  * Set the default number of components in the vector part of time monzos.
@@ -738,6 +739,49 @@ export class TimeReal {
         exponent,
       });
     }
+    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+  }
+
+  /**
+   * Obtain an AST node representing the time monzo as a monzo literal suitable for interchange between programs.
+   * @returns Monzo literal.
+   */
+  asInterchangeLiteral(): MonzoLiteral {
+    const components: VectorComponent[] = [];
+    const basis: BasisElement[] = [];
+    if (this.timeExponent) {
+      basis.push('Hz');
+      const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+        -this.timeExponent,
+        'r'
+      );
+      components.push({
+        sign,
+        left: Number(whole),
+        separator: '.',
+        right: fractional,
+        exponent,
+      });
+    }
+    if (this.value < 0) {
+      basis.push({numerator: -1, denominator: null, radical: false});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    } else if (this.value === 0) {
+      basis.push({numerator: 0, denominator: null, radical: false});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    }
+    basis.push('rc');
+    const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
+      this.totalCents(true),
+      'r'
+    );
+    components.push({
+      sign,
+      left: Number(whole),
+      separator: '.',
+      right: fractional,
+      exponent,
+    });
     return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
   }
 
@@ -2612,8 +2656,61 @@ export class TimeMonzo {
     return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
   }
 
+  /**
+   * Obtain an AST node representing the time monzo as a monzo literal suitable for interchange between programs.
+   * @returns Monzo literal.
+   */
+  asInterchangeLiteral(): MonzoLiteral {
+    const components: VectorComponent[] = [];
+    const basis: BasisElement[] = [];
+    if (this.timeExponent.n) {
+      basis.push('Hz');
+      components.push(
+        fractionToVectorComponent(this.timeExponent.inverse().neg())
+      );
+    }
+    if (this.residual.s < 0) {
+      basis.push({numerator: -1, denominator: null, radical: false});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    } else if (!this.residual.s) {
+      basis.push({numerator: 0, denominator: null, radical: false});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    }
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      const component = this.primeExponents[i];
+      if (component.n) {
+        basis.push({numerator: PRIMES[i], denominator: null, radical: false});
+        components.push(fractionToVectorComponent(component));
+      }
+    }
+    if (this.residual.n > 1) {
+      basis.push({
+        numerator: this.residual.n,
+        denominator: null,
+        radical: false,
+      });
+      components.push({sign: '', left: 1, right: '', exponent: null});
+    }
+    if (this.residual.d > 1) {
+      basis.push({
+        numerator: this.residual.d,
+        denominator: null,
+        radical: false,
+      });
+      components.push({sign: '-', left: 1, right: '', exponent: null});
+      if (this.residual.n > this.residual.d) {
+        basis.push(basis.pop()!, basis.pop()!);
+        components.push(components.pop()!, components.pop()!);
+      }
+    }
+    return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+  }
+
+  /**
+   * Obtain an AST node representing the time monzo as a val literal.
+   * @returns Val literal.
+   */
   asValLiteral(): ValLiteral {
-    // TODO: Check that the basis is legal.
     return {...this.asMonzoLiteral(false), type: 'ValLiteral'} as ValLiteral;
   }
 

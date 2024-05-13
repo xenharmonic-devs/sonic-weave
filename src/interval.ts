@@ -31,7 +31,13 @@ import {
 import {TimeMonzo, TimeReal} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {type RootContext} from './context';
-import {ONE, ZERO, countUpsAndLifts, setUnion} from './utils';
+import {
+  NUM_INTERCHANGE_COMPONENTS,
+  ONE,
+  ZERO,
+  countUpsAndLifts,
+  setUnion,
+} from './utils';
 import {Fraction, FractionValue} from 'xen-dev-utils';
 
 /**
@@ -992,6 +998,10 @@ export class Interval {
     );
   }
 
+  /**
+   * Return `true` if this interval is only composed of abstract edosteps.
+   * @returns `true` if the interval is a unit scalar, possibly with edosteps, `false` otherwise.
+   */
   isPureSteps() {
     return this.value.isScalar() && this.value.isUnity();
   }
@@ -1063,8 +1073,32 @@ export class Interval {
     return this.node;
   }
 
-  asMonzoLiteral(): MonzoLiteral {
-    const node = this.value.asMonzoLiteral();
+  /**
+   * Convert the interval to a virtual AST node representing the universal type.
+   * @param interchange Boolean flag to format everything explicitly.
+   * @returns A virtual monzo literal.
+   */
+  asMonzoLiteral(interchange = false): MonzoLiteral {
+    let node: MonzoLiteral;
+    if (
+      interchange &&
+      this.value instanceof TimeMonzo &&
+      !this.value.residual.isUnity()
+    ) {
+      const clone = this.value.clone();
+      clone.numberOfComponents = NUM_INTERCHANGE_COMPONENTS;
+      node = clone.asMonzoLiteral();
+    } else {
+      node = this.value.asMonzoLiteral();
+    }
+    if (
+      interchange &&
+      (node.basis.length ||
+        node.components.length > NUM_INTERCHANGE_COMPONENTS ||
+        this.steps)
+    ) {
+      node = this.value.asInterchangeLiteral();
+    }
     if (this.steps) {
       if (!node.basis.length && node.components.length) {
         node.basis.push({numerator: 2, denominator: null, radical: false});

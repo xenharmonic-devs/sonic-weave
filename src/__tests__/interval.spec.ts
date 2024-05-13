@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {TimeMonzo} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo';
 import {Interval, intervalValueAs} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
@@ -41,6 +41,92 @@ describe('Idempontent formatting', () => {
     }) as NedjiLiteral;
     expect(node.numerator).toBe(4);
     expect(node.denominator).toBe(12);
+  });
+});
+
+describe('Interchange format', () => {
+  it('uses plain monzos up to 23-limit', () => {
+    const interval = new Interval(TimeMonzo.fromFraction('23/16'), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[-4 0 0 0 0 0 0 0 1>');
+  });
+
+  it('uses plain monzos up to 23-limit (poor internal value)', () => {
+    const interval = new Interval(TimeMonzo.fromFraction('5/4', 2), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[-2 0 1>');
+  });
+
+  it('switches to subgroup monzos for 29-limit', () => {
+    const interval = new Interval(
+      TimeMonzo.fromFraction('29/16', 20),
+      'logarithmic'
+    );
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[-4 1>@2.29');
+  });
+
+  it('uses explicit basis with the absolute echelon', () => {
+    const interval = new Interval(
+      TimeMonzo.fromFractionalFrequency(440),
+      'linear'
+    );
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[1 3 1 1>@Hz.2.5.11');
+  });
+
+  it('uses explicit basis with steps', () => {
+    const interval = new Interval(
+      TimeMonzo.fromFraction('5/3'),
+      'logarithmic',
+      -3
+    );
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[-3 -1 1>@1°.3.5');
+  });
+
+  it('uses increasing non-fractional basis', () => {
+    const interval = new Interval(TimeMonzo.fromFraction('103/101'), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[-1 1>@101.103');
+  });
+
+  it('has an expression for rational unity', () => {
+    const interval = new Interval(TimeMonzo.fromFraction(1), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[>');
+  });
+
+  it('has an expression for rational zero', () => {
+    const interval = new Interval(TimeMonzo.fromFraction(0), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[1>@0');
+  });
+
+  it('has an expression for rational -2', () => {
+    const interval = new Interval(TimeMonzo.fromFraction(-2), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[1 1>@-1.2');
+  });
+
+  it('has an expression for real unity', () => {
+    const interval = new Interval(TimeReal.fromValue(1), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[0.>@rc');
+  });
+
+  // Real zero skipped
+
+  it('has an expression for real -2', () => {
+    const interval = new Interval(TimeReal.fromValue(-2), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[1 1200.>@-1.rc');
+  });
+
+  it('has an expression for real 256Hz', () => {
+    const interval = new Interval(TimeReal.fromFrequency(256), 'linear');
+    interval.node = interval.asMonzoLiteral(true);
+    expect(interval.toString()).toBe('[1. 9600.>@Hz.rc');
   });
 });
 
