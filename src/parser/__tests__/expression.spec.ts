@@ -604,16 +604,16 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('supports hsl colors', () => {
-    const greenish = evaluate('hsl(123, 45, 67)') as Color;
-    expect(greenish.value).toBe('hsl(123.000, 45.000%, 67.000%)');
-    expect(greenish.toString()).toBe('hsl(123.000, 45.000, 67.000)');
+    const greenish = evaluate('hsl(123deg 45% 67%)') as Color;
+    expect(greenish.value).toBe('hsl(123deg 45% 67%)');
+    expect(greenish.toString()).toBe('hsl(123deg 45% 67%)');
     const retry = evaluate(greenish.toString()) as Color;
     expect(retry.value).toBe(greenish.value);
   });
 
   it('supports rgb color labels and reprs', () => {
     const lightFifth = evaluate('repr(3/2 rgb(200, 222, 256))');
-    expect(lightFifth).toBe('(3/2 rgb(200.000, 222.000, 256.000))');
+    expect(lightFifth).toBe('(3/2 rgb(200.000 222.000 256.000))');
   });
 
   it('can concatenate strings', () => {
@@ -642,9 +642,9 @@ describe('SonicWeave expression evaluator', () => {
     expect(nothing).toHaveLength(0);
   });
 
-  it('interpretes cents as linear decimals in rgba', () => {
-    const faded = evaluate('rgba(255, 255, 255, 0.5)') as Color;
-    expect(faded.value).toBe('rgba(255.000, 255.000, 255.000, 0.50000)');
+  it('has rgba syntax', () => {
+    const faded = evaluate('rgba(255 255 255 / 0.5)') as Color;
+    expect(faded.value).toBe('rgba(255 255 255 / 0.5)');
   });
 
   it('preserves labels based on preference (left)', () => {

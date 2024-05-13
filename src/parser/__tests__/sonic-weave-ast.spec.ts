@@ -1186,6 +1186,25 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       ],
     });
   });
+
+  it('parses CSS hsl literals', () => {
+    const ast = parseSingle('hsl( -.5deg -50%  10 / 40%  )');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ColorLiteral',
+        value: 'hsl( -.5deg -50%  10 / 40%  )',
+      },
+    });
+  });
+
+  it('parses CSS rgb literals', () => {
+    const ast = parseSingle('rgba(255 50% 5 / .5)');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {type: 'ColorLiteral', value: 'rgba(255 50% 5 / .5)'},
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

@@ -57,6 +57,10 @@ RGB4
 RGB8
   = $('#' HexDigit|6|)
 
+CSSNumber
+  = [+-]? ('0' / ([1-9] DecimalDigit*)) ('.' DecimalDigit*)?
+  / [+-]? '.' DecimalDigit+
+
 IdentifierName
   = $(IdentifierStart IdentifierPart*)
 

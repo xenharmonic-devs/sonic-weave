@@ -365,7 +365,7 @@ export function centsColor(this: ExpressionVisitor, interval: Interval) {
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
   const l = Math.tanh(octaves * 0.2) * 50 + 50;
-  return new Color(`hsl(${h.toFixed(3)}, ${s.toFixed(3)}%, ${l.toFixed(3)}%)`);
+  return new Color(`hsl(${h.toFixed(3)}deg ${s.toFixed(3)}% ${l.toFixed(3)}%)`);
 }
 
 // Prime colors for over/under.
@@ -426,7 +426,7 @@ export function factorColor(this: ExpressionVisitor, interval: Interval) {
       b += prgb[2] * m;
     }
   }
-  return new Color(`rgb(${tanh255(r)}, ${tanh255(g)}, ${tanh255(b)})`);
+  return new Color(`rgb(${tanh255(r)} ${tanh255(g)} ${tanh255(b)})`);
 }
 
 /**

@@ -710,7 +710,7 @@ describe('SonicWeave standard library', () => {
 
   it('preserves labels when rotating', () => {
     const scale = parseSource(
-      '5/4 yellow "third";3/2 white "fifth";2/1 rgba(255, 255, 255, 0.5) "octave";rotate()'
+      '5/4 yellow "third";3/2 white "fifth";2/1 rgba(255, 255, 255, 0.5e) "octave";rotate()'
     );
     expect(scale).toHaveLength(3);
     expect(scale[0].valueOf()).toBeCloseTo(6 / 5);
@@ -718,7 +718,7 @@ describe('SonicWeave standard library', () => {
     expect(scale[0].label).toBe('fifth');
     expect(scale[1].valueOf()).toBeCloseTo(8 / 5);
     expect(scale[1].color?.value).toBe(
-      'rgba(255.000, 255.000, 255.000, 0.50000)'
+      'rgba(255.000 255.000 255.000 / 0.50000)'
     );
     expect(scale[1].label).toBe('octave');
     expect(scale[2].valueOf()).toBeCloseTo(2);
@@ -1101,10 +1101,10 @@ describe('SonicWeave standard library', () => {
   it('colors intervals based on deviation from 12ed2', () => {
     const scale = expand('5/4;3/2;7/4;2;edColors()');
     expect(scale).toEqual([
-      '5/4 hsl(310.729, 100.000, 50.000)',
-      '3/2 hsl(7.038, 100.000, 50.000)',
-      '7/4 hsl(247.773, 100.000, 50.000)',
-      '2 hsl(0.000, 100.000, 50.000)',
+      '5/4 hsl(310.729deg 100.000% 50.000%)',
+      '3/2 hsl(7.038deg 100.000% 50.000%)',
+      '7/4 hsl(247.773deg 100.000% 50.000%)',
+      '2 hsl(0.000deg 100.000% 50.000%)',
     ]);
   });
 

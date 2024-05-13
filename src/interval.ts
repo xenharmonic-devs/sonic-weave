@@ -57,10 +57,10 @@ export class Color {
 
   /**
    * SonicWeave representation of the CSS color.
-   * @returns A string without percentage signs.
+   * @returns The color value as a string.
    */
   toString() {
-    return this.value.replace(/%/g, '');
+    return this.value;
   }
 }
 

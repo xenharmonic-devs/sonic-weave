@@ -1266,11 +1266,24 @@ NotANumberLiteral
 InfinityLiteral
   = InfinityToken { return { type: 'InfinityLiteral' }; }
 
+// RGB and HSL use modern CSS syntax, no legacy support
 ColorLiteral
   = value: (@RGB8 / @RGB4) {
     return {
       type: 'ColorLiteral',
       value,
+    };
+  }
+  / 'rgb' 'a'? '(' __ CSSNumber '%'? __ CSSNumber '%'? __ CSSNumber '%'? (__ '/' __ __ CSSNumber '%'?)? __ ')' {
+    return {
+      type: 'ColorLiteral',
+      value: text(),
+    };
+  }
+  / 'hsl' 'a'? '(' __ CSSNumber 'deg'? __ CSSNumber '%'? __ CSSNumber '%'? (__ '/' __ CSSNumber '%'?)? __ ')' {
+    return {
+      type: 'ColorLiteral',
+      value: text(),
     };
   }
 

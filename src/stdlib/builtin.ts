@@ -2394,15 +2394,12 @@ help.__node__ = builtinNode(help);
 
 // CSS color generation
 function cc(x: Interval, fractionDigits = 3) {
-  if (x?.node?.type === 'CentsLiteral') {
-    return x.totalCents().toFixed(fractionDigits);
-  }
   return x.value.valueOf().toFixed(fractionDigits);
 }
 
 function rgb(red: Interval, green: Interval, blue: Interval) {
   requireParameters({red, green, blue});
-  return new Color(`rgb(${cc(red)}, ${cc(green)}, ${cc(blue)})`);
+  return new Color(`rgb(${cc(red)} ${cc(green)} ${cc(blue)})`);
 }
 rgb.__doc__ =
   'RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).';
@@ -2411,7 +2408,7 @@ rgb.__node__ = builtinNode(rgb);
 function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
   requireParameters({red, green, blue, alpha});
   return new Color(
-    `rgba(${cc(red)}, ${cc(green)}, ${cc(blue)}, ${cc(alpha, 5)})`
+    `rgba(${cc(red)} ${cc(green)} ${cc(blue)} / ${cc(alpha, 5)})`
   );
 }
 rgba.__doc__ =
@@ -2420,7 +2417,7 @@ rgba.__node__ = builtinNode(rgba);
 
 function hsl(hue: Interval, saturation: Interval, lightness: Interval) {
   requireParameters({hue, saturation, lightness});
-  return new Color(`hsl(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%)`);
+  return new Color(`hsl(${cc(hue)}deg ${cc(saturation)}% ${cc(lightness)}%)`);
 }
 hsl.__doc__ =
   'HSL color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100).';
@@ -2434,7 +2431,7 @@ function hsla(
 ) {
   requireParameters({hue, saturation, lightness, alpha});
   return new Color(
-    `hsla(${cc(hue)}, ${cc(saturation)}%, ${cc(lightness)}%, ${cc(alpha, 5)})`
+    `hsla(${cc(hue)}deg ${cc(saturation)}% ${cc(lightness)}% / ${cc(alpha, 5)})`
   );
 }
 hsla.__doc__ =

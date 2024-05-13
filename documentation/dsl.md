@@ -207,10 +207,8 @@ Colors may be specified using
 - [Keywords](https://www.w3.org/wiki/CSS/Properties/color/keywords) like `red`, `white` or `black`
 - Short hexadecimal colors like `#d13` for crimson red
 - Long hexadecimal colors like `#e6e6fa` for lavender
-- RGB values like `rgb(160, 82, 45)` for sienna brown
-- HSL values like `hsl(120, 60, 70)` for pastel green
-
-SonicWeave doesn't have percentages so the CSS color `hsl(120, 60%, 70%)` is spelled without the percent signs.
+- RGB values like `rgb(160 82 45)` for sienna brown
+- HSL values like `hsl(120deg 60% 70%)` for pastel green
 
 ## Code comments
 
