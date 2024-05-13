@@ -12,6 +12,7 @@ const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const SECOND_MONZO = new TimeMonzo(ONE, []);
 const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
 const REAL_CENT_MONZO = new TimeReal(0, 1.0005777895065548);
+const INF_MONZO = new TimeReal(0, Infinity);
 
 export const STEP_ELEMENT = Symbol();
 
@@ -57,6 +58,8 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
     } else if (element === 'rc' || element === 'r¢') {
       subgroup.push(REAL_CENT_MONZO);
       checkSpan();
+    } else if (element === 'inf') {
+      subgroup.push(INF_MONZO);
     } else if (element === '1°') {
       subgroup.push(STEP_ELEMENT);
       checkSpan();

@@ -74,7 +74,7 @@ export type WartBasisElement = BasisFraction | '';
 
 export type ValBasisElement = WartBasisElement | 's' | 'Hz' | 'hz';
 
-export type BasisElement = ValBasisElement | 'rc' | 'r¢' | '1°';
+export type BasisElement = ValBasisElement | 'rc' | 'r¢' | 'inf' | '1°';
 
 export type IntegerLiteral = {
   type: 'IntegerLiteral';

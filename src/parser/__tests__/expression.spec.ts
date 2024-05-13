@@ -2397,4 +2397,10 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(interval.isAbsolute()).toBe(false);
     expect(interval.valueOf()).toBeCloseTo(Math.PI);
   });
+
+  it('parses universal negative infinite frequency', () => {
+    const interval = evaluate('[1. 1 1>@Hz.-1.inf') as Interval;
+    expect(interval.isAbsolute()).toBe(true);
+    expect(interval.valueOf()).toBe(-Infinity);
+  });
 });

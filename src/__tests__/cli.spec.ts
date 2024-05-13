@@ -17,9 +17,9 @@ describe('Interchange format', () => {
     expect(result).toContain('nan');
   });
 
-  it('has representation for infinity Hz', () => {
-    const result = toSonicWeaveInterchange('inf * 1 Hz');
-    expect(result).toContain('inf * 1Hz');
+  it('has representation for negative infinity Hz', () => {
+    const result = toSonicWeaveInterchange('-inf * 1 Hz');
+    expect(result).toContain('[1. 1 1>@Hz.-1.inf');
   });
 
   it('has representation for nan Hz (normalizes)', () => {

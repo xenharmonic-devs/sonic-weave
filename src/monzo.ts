@@ -746,7 +746,7 @@ export class TimeReal {
    * @returns Monzo literal.
    */
   asMonzoLiteral(interchange = false): MonzoLiteral | undefined {
-    if (!isFinite(this.value)) {
+    if (isNaN(this.value)) {
       return undefined;
     }
     const components: VectorComponent[] = [];
@@ -799,6 +799,11 @@ export class TimeReal {
         right: '',
         exponent: null,
       });
+      return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+    }
+    if (!isFinite(this.value)) {
+      basis.push('inf');
+      components.push({sign: '', left: 1, right: '', exponent: null});
       return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
     }
     basis.push('rc');
