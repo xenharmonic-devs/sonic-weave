@@ -118,7 +118,7 @@ describe('Interchange format', () => {
   it('has an expression for real zero', () => {
     const interval = new Interval(TimeReal.fromValue(0), 'linear');
     interval.node = interval.asMonzoLiteral(true);
-    expect(interval.toString()).toBe('[1 0.>@0.rc');
+    expect(interval.toString()).toBe('[-1>@inf');
   });
 
   it('has an expression for real -2', () => {

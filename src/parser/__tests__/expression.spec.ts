@@ -2403,4 +2403,11 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(interval.isAbsolute()).toBe(true);
     expect(interval.valueOf()).toBe(-Infinity);
   });
+
+  it('parses the universal real zero', () => {
+    const interval = evaluate('[-1>@inf') as Interval;
+    expect(interval.isAbsolute()).toBe(false);
+    expect(interval.valueOf()).toBe(0);
+    expect(interval.value).toBeInstanceOf(TimeReal);
+  });
 });

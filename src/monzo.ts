@@ -789,16 +789,8 @@ export class TimeReal {
       basis.push({numerator: -1, denominator: null, radical: false});
       components.push({sign: '', left: 1, right: '', exponent: null});
     } else if (this.value === 0) {
-      basis.push({numerator: 0, denominator: null, radical: false});
-      components.push({sign: '', left: 1, right: '', exponent: null});
-      basis.push('rc');
-      components.push({
-        sign: '',
-        left: 0,
-        separator: '.',
-        right: '',
-        exponent: null,
-      });
+      basis.push('inf');
+      components.push({sign: '-', left: 1, right: '', exponent: null});
       return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
     }
     if (!isFinite(this.value)) {
