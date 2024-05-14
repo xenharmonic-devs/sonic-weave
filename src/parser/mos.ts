@@ -148,6 +148,9 @@ export class Tardigrade {
       period: r(notation.period),
       scale,
       degrees,
+      pattern: this.pattern,
+      large,
+      small,
     };
   }
 

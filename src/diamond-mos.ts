@@ -58,6 +58,18 @@ export type MosConfig = {
    * Intervals for relative notation. Use period to reach larger intervals.
    */
   degrees: MosDegree[];
+  /**
+   * Pattern for reconstructing the MOS declaration.
+   */
+  pattern: string;
+  /**
+   * Value of the large step.
+   */
+  large: TimeMonzo;
+  /**
+   * Value of the small step.
+   */
+  small: TimeMonzo;
 };
 
 /**

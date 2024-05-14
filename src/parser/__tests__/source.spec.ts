@@ -1652,4 +1652,72 @@ describe('SonicWeave parser', () => {
       145.94801056814464, 165.55065597696213, 176.31825099920434, 200,
     ]);
   });
+
+  it('allows you to call the smaller step L in MOS declaration', () => {
+    const scale = expand(`
+      MOS {
+        3L 2s
+        L = 9/8
+      }
+      automos()
+      relative
+      linear
+    `);
+    expect(scale).toEqual([
+      'MOS {LLsLs;L=9/8;s=32/27}',
+      '9/8',
+      '81/64',
+      '3/2',
+      '27/16',
+      '2',
+    ]);
+  });
+
+  it('allows you to create negative steps', () => {
+    const scale = expand(`
+      MOS {
+        6L 1s
+        L = 9/8
+      }
+      automos()
+      relative
+      linear
+    `);
+    expect(scale).toEqual([
+      'MOS {LLLLLLs;L=9/8;s=524288/531441}',
+      '9/8',
+      '81/64',
+      '729/512',
+      '6561/4096',
+      '59049/32768',
+      '531441/262144',
+      '2',
+    ]);
+  });
+
+  it('preserves equalized MOS declaration', () => {
+    const scale = expand(`
+      MOS {
+        5L 2s
+        L = 1\\7
+      }
+      M1ms
+      M2ms
+      P3ms
+      P4ms
+      M5ms
+      M6ms
+      P7ms
+    `);
+    expect(scale).toEqual([
+      'MOS {LLLsLLs;L=2^1/7;s=2^1/7}',
+      'M1ms',
+      'M2ms',
+      'P3ms',
+      'P4ms',
+      'M5ms',
+      'M6ms',
+      'P7ms',
+    ]);
+  });
 });

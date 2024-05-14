@@ -2,8 +2,7 @@ import {SonicWeaveValue} from './stdlib';
 import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
-import {MosConfig, scaleMonzos} from './diamond-mos';
-import {stepString} from './words';
+import {MosConfig} from './diamond-mos';
 
 /**
  * Root context of a SonicWeave runtime containing the scale title, root pitch, value of the 'up' inflection etc.
@@ -168,18 +167,9 @@ export class RootContext {
       lines.push(`/ = ${this.lift.toString()}`);
     }
     if (this.mosConfig) {
-      const monzos = scaleMonzos(this.mosConfig);
-      const ss = stepString(monzos);
-      let large: TimeMonzo;
-      let small: TimeMonzo;
-      if (ss.startsWith('L')) {
-        large = monzos[0];
-        small = large.div(this.mosConfig.am) as TimeMonzo;
-      } else {
-        small = monzos[0];
-        large = small.mul(this.mosConfig.am) as TimeMonzo;
-      }
-      lines.push(`MOS {${ss};L=${large};s=${small}}`);
+      lines.push(
+        `MOS {${this.mosConfig.pattern};L=${this.mosConfig.large};s=${this.mosConfig.small}}`
+      );
     }
     return lines.join('\n');
   }
