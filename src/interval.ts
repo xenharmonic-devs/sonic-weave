@@ -1078,7 +1078,7 @@ export class Interval {
    * @param interchange Boolean flag to format everything explicitly.
    * @returns A virtual monzo literal.
    */
-  asMonzoLiteral(interchange = false): MonzoLiteral | undefined {
+  asMonzoLiteral(interchange = false): MonzoLiteral {
     let node: MonzoLiteral;
     if (
       interchange &&
@@ -1089,11 +1089,7 @@ export class Interval {
       clone.numberOfComponents = NUM_INTERCHANGE_COMPONENTS;
       node = clone.asMonzoLiteral();
     } else {
-      const maybeNode = this.value.asMonzoLiteral();
-      if (maybeNode === undefined) {
-        return undefined;
-      }
-      node = maybeNode;
+      node = this.value.asMonzoLiteral();
     }
     if (
       interchange &&
@@ -1129,11 +1125,7 @@ export class Interval {
         result = `${this.steps}°`;
       } else {
         const node = this.asMonzoLiteral();
-        if (node) {
-          result = literalToString(node);
-        } else {
-          result = this.value.toString();
-        }
+        result = literalToString(node);
       }
       if (this.domain === 'linear') {
         return `linear(${result})`;

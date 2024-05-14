@@ -745,12 +745,16 @@ export class TimeReal {
    * @param interchange Boolean flag to use Hz basis for the absolute echelon.
    * @returns Monzo literal.
    */
-  asMonzoLiteral(interchange = false): MonzoLiteral | undefined {
-    if (isNaN(this.value)) {
-      return undefined;
-    }
+  asMonzoLiteral(interchange = false): MonzoLiteral {
     const components: VectorComponent[] = [];
     const basis: BasisElement[] = [];
+    if (isNaN(this.value)) {
+      basis.push({numerator: 0, denominator: null, radical: false});
+      components.push({sign: '', left: 1, right: '', exponent: null});
+      basis.push('inf');
+      components.push({sign: '', left: 1, right: '', exponent: null});
+      return {type: 'MonzoLiteral', components, ups: 0, lifts: 0, basis};
+    }
     if (interchange) {
       if (this.timeExponent) {
         basis.push('Hz');
@@ -817,7 +821,7 @@ export class TimeReal {
    * Obtain an AST node representing the time monzo as a monzo literal suitable for interchange between programs.
    * @returns Monzo literal.
    */
-  asInterchangeLiteral(): MonzoLiteral | undefined {
+  asInterchangeLiteral(): MonzoLiteral {
     return this.asMonzoLiteral(true);
   }
 

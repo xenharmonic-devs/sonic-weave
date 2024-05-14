@@ -109,16 +109,16 @@ To support tempering after interchanging data, the special `1°` basis element i
 ```
 
 ### Not-a-number
-The special token `nan` indicates a value that can't be interpreted as an interval.
+The special combination `[1 1>@0.inf` indicates a value that can't be interpreted as an interval.
 ```c
-nan "asin(2)" niente
+[1 1>@0.inf "asin(2)" niente
 ```
 
 ## Example
 See [examples/interchange.sw](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/interchange.sw) for various extreme values supported by the original SonicWeave runtime.
 
 ```c
-// Created using SonicWeave 0.0.37
+// Created using SonicWeave 0.1.0
 
 "Various values to test the .swi interchange format"
 
@@ -151,5 +151,5 @@ See [examples/interchange.sw](https://github.com/xenharmonic-devs/sonic-weave/bl
 [-5 1 5/2 1 1>@1°.Hz.2.3.37 "" niente
 [1>@inf "infinity" niente
 [1 1>@-1.inf "negative infinity" niente
-nan "not-a-number" niente
+[1 1>@0.inf "not-a-number" niente
 ```

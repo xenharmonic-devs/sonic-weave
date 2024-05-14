@@ -2410,4 +2410,10 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(interval.valueOf()).toBe(0);
     expect(interval.value).toBeInstanceOf(TimeReal);
   });
+
+  it('parses the universal not-a-number', () => {
+    const interval = evaluate('[1 1>@0.inf') as Interval;
+    expect(interval.valueOf()).toBeNaN();
+    expect(interval.value).toBeInstanceOf(TimeReal);
+  });
 });
