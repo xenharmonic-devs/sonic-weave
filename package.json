@@ -67,7 +67,7 @@
     "vitest": "^1.4.0"
   },
   "dependencies": {
-    "moment-of-symmetry": "^0.5.2",
+    "moment-of-symmetry": "^0.5.3",
     "xen-dev-utils": "^0.7.0"
   },
   "engines": {
