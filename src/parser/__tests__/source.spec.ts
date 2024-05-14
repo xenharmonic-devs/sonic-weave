@@ -1354,7 +1354,7 @@ describe('SonicWeave parser', () => {
       '3/2 white',
       '5/3 black',
       '16/9 white',
-      '2 white "2/1"',
+      '2 "2/1" white',
     ]);
   });
 
@@ -1365,18 +1365,18 @@ describe('SonicWeave parser', () => {
       sort()
     `);
     expect(scale).toEqual([
-      '256/243 black "A♭"',
-      '9/8 white "A"',
-      '32/27 black "B♭"',
-      '81/64 white "B"',
-      '4/3 white "C"',
-      '1024/729 black "D♭"',
-      '3/2 white "D"',
-      '128/81 black "E♭"',
-      '27/16 white "E"',
-      '16/9 white "F"',
-      '4096/2187 black "G♭"',
-      '2 white "G"',
+      '256/243 "A♭" black',
+      '9/8 "A" white',
+      '32/27 "B♭" black',
+      '81/64 "B" white',
+      '4/3 "C" white',
+      '1024/729 "D♭" black',
+      '3/2 "D" white',
+      '128/81 "E♭" black',
+      '27/16 "E" white',
+      '16/9 "F" white',
+      '4096/2187 "G♭" black',
+      '2 "G" white',
     ]);
   });
 

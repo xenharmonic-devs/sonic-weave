@@ -116,7 +116,7 @@ Enneatonic 5L 4s subset of 313edo used in Sevish's track Desert Island Rain
 ```
 
 ### SonicWeave Interchange format
-The .swi format is suitable for data interchange between programs. It preserves the internal precision of the SonicWeave runtime.
+The [.swi format](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/interchange.md) is suitable for data interchange between programs. It preserves the internal precision of the SonicWeave runtime.
 ```bash
 $ npx sonic-weave examples/pajara10.sw --format swi
 // Created using SonicWeave 0.0.33

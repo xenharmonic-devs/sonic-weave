@@ -1184,18 +1184,21 @@ export class Interval {
   /**
    * Convert this interval to a string that faithfully represents it including color and label.
    * @param context Current root context with information about root pitch and size of ups and lifts.
+   * @param interchange Boolean flag to always include label and color.
    * @returns String that has the same value and domain as this interval if evaluated as a SonicWeave expression.
    */
-  toString(context?: RootContext) {
+  toString(context?: RootContext, interchange = false) {
     const base = this.str(context);
     const color = this.color ? this.color.toString() : '';
-    if (this.color || this.label) {
+    if (interchange) {
+      return `${base} ${JSON.stringify(this.label)} ${color || 'niente'}`;
+    } else if (color || this.label) {
       let result = '(' + base;
-      if (color) {
-        result += ' ' + color;
-      }
       if (this.label) {
         result += ' ' + JSON.stringify(this.label);
+      }
+      if (color) {
+        result += ' ' + color;
       }
       return result + ')';
     }

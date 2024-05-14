@@ -64,13 +64,11 @@ export function toSonicWeaveInterchange(source: string) {
     throw new Error('Missing root context.');
   }
   const lines = [`// Created using SonicWeave ${version}`, ''];
-  if (context.title) {
-    lines.push(JSON.stringify(context.title));
-    lines.push('');
-  }
+  lines.push(JSON.stringify(context.title));
+  lines.push('');
   if (context.unisonFrequency) {
     const unisonFrequency = literalToString(
-      context.unisonFrequency.asMonzoLiteral()
+      context.unisonFrequency.asInterchangeLiteral()
     );
     lines.push(`1 = ${unisonFrequency}`);
     lines.push('');
@@ -78,7 +76,7 @@ export function toSonicWeaveInterchange(source: string) {
   for (const interval of visitor.currentScale) {
     const universal = interval.shallowClone();
     universal.node = universal.asMonzoLiteral(true);
-    let line = universal.toString(context);
+    let line = universal.toString(context, true);
     if (line.startsWith('(') && line.endsWith(')')) {
       line = line.slice(1, -1);
     }

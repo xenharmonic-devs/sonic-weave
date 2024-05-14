@@ -734,7 +734,7 @@ describe('SonicWeave standard library', () => {
       2/1 "root" blue
       rotate(0)
     `);
-    expect(scale).toEqual(['4/3 red', '3/2 "fifth"', '7/4', '2/1 blue "root"']);
+    expect(scale).toEqual(['4/3 red', '3/2 "fifth"', '7/4', '2/1 "root" blue']);
   });
 
   it('coalesces cents geometrically', () => {
@@ -760,7 +760,7 @@ describe('SonicWeave standard library', () => {
       label(cs)
       label(ls)
     }`);
-    expect(scale).toEqual(['4/3 red "one"', '5/3 "two"', '6/3']);
+    expect(scale).toEqual(['4/3 "one" red', '5/3 "two"', '6/3']);
   });
 
   it('generates Raga Kafi with everything simplified', () => {
@@ -813,18 +813,18 @@ describe('SonicWeave standard library', () => {
       sort()
     `);
     expect(pythagoras).toEqual([
-      '256/243 black "Ab"',
-      '9/8 white "A"',
-      '32/27 black "Bb"',
-      '81/64 white "B"',
-      '4/3 white "C"',
-      '1024/729 black "Db"',
-      '3/2 white "D"',
-      '128/81 black "Eb"',
-      '27/16 white "E"',
-      '16/9 white "F"',
-      '4096/2187 black "Gb"',
-      '2 white "G"',
+      '256/243 "Ab" black',
+      '9/8 "A" white',
+      '32/27 "Bb" black',
+      '81/64 "B" white',
+      '4/3 "C" white',
+      '1024/729 "Db" black',
+      '3/2 "D" white',
+      '128/81 "Eb" black',
+      '27/16 "E" white',
+      '16/9 "F" white',
+      '4096/2187 "Gb" black',
+      '2 "G" white',
     ]);
   });
 
@@ -923,9 +923,9 @@ describe('SonicWeave standard library', () => {
   it('can paint the whole scale', () => {
     const scale = expand('3::6;white;label("bob")');
     expect(scale).toEqual([
-      '4/3 white "bob"',
-      '5/3 white "bob"',
-      '6/3 white "bob"',
+      '4/3 "bob" white',
+      '5/3 "bob" white',
+      '6/3 "bob" white',
     ]);
   });
 

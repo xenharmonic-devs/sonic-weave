@@ -14,6 +14,7 @@ The `sonic-weave` package is many things.
 - A [command-line interface](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/cli.md) for calculating musical quantities
 - A TypeScript compatible [npm package](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/package.md)
 - A [template language](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tag.md) for running SonicWeave programs inside JavaScript
+- An [interchange format](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/interchange.md) (extension `.swi`)
 
 You may also be interested in the [technical overview](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md) of SonicWeave as a programming language.
 
