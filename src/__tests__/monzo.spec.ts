@@ -466,13 +466,13 @@ describe('JSON serialization', () => {
     ];
     const serialized = JSON.stringify(data);
     expect(serialized).toBe(
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"nan"},{"type":"TimeReal","timeExponent":1,"value":"inf"}]'
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","t":-1,"v":777},3.5,{"type":"TimeMonzo","t":{"n":0,"d":1},"p":[-4,1,4,1,-1,1,0,1,0,1,0,1,0,1,0,1,0,1],"r":{"n":1,"d":1}},null,{"type":"TimeReal","t":0,"v":"nan"},{"type":"TimeReal","t":1,"v":"inf"}]'
     );
   });
 
   it('can deserialize an array of primitives, fractions and monzos', () => {
     const serialized =
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","timeExponent":-1,"value":777},3.5,{"type":"TimeMonzo","timeExponent":{"n":0,"d":1},"primeExponents":[{"n":-4,"d":1},{"n":4,"d":1},{"n":-1,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1},{"n":0,"d":1}],"residual":{"n":1,"d":1}},null,{"type":"TimeReal","timeExponent":0,"value":"nan"},{"type":"TimeReal","timeExponent":1,"value":"inf"}]';
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","t":-1,"v":777},3.5,{"type":"TimeMonzo","t":{"n":0,"d":1},"p":[-4,1,4,1,-1,1,0,1,0,1,0,1,0,1,0,1,0,1],"r":{"n":1,"d":1}},null,{"type":"TimeReal","t":0,"v":"nan"},{"type":"TimeReal","t":1,"v":"inf"}]';
     function reviver(key: string, value: any) {
       return TimeMonzo.reviver(
         key,

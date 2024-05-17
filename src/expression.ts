@@ -1156,26 +1156,40 @@ export function literalToJSON(literal?: IntervalLiteral): any {
   }
   const type = literal.type;
   switch (literal.type) {
+    // Compress most common types
     case 'IntegerLiteral':
-      return {type, value: literal.value.toString()};
-    case 'DecimalLiteral':
-      return {...literal, whole: literal.whole.toString()};
+      return {type: 'i', v: literal.value.toString()};
     case 'FractionLiteral':
       return {
-        type,
-        numerator: literal.numerator.toString(),
-        denominator: literal.denominator.toString(),
+        type: 'f',
+        n: literal.numerator.toString(),
+        d: literal.denominator.toString(),
       };
+    case 'CentsLiteral':
+      return {
+        type: 'c',
+        s: literal.sign,
+        w: literal.whole.toString(),
+        f: literal.fractional,
+        e: literal.exponent,
+        r: literal.real,
+      };
+    case 'NedjiLiteral':
+      return {
+        type: 'n',
+        n: literal.numerator,
+        d: literal.denominator,
+        p: literal.equaveNumerator,
+        q: literal.equaveDenominator,
+      };
+    // Keep the rest more human-readable
+    case 'DecimalLiteral':
+      return {...literal, whole: literal.whole.toString()};
     case 'RadicalLiteral':
       return {
         type,
         argument: literal.argument.toJSON(),
         exponent: literal.exponent.toJSON(),
-      };
-    case 'CentsLiteral':
-      return {
-        ...literal,
-        whole: literal.whole.toString(),
       };
     case 'SquareSuperparticular':
       return {
@@ -1184,7 +1198,6 @@ export function literalToJSON(literal?: IntervalLiteral): any {
         end: literal.end && literal.end.toString(),
       };
     case 'StepLiteral':
-    case 'NedjiLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
     case 'NotANumberLiteral':
@@ -1209,26 +1222,43 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
   if (object === undefined) {
     return undefined;
   }
-  const type: IntervalLiteral['type'] = object.type;
+  const type: IntervalLiteral['type'] | 'i' | 'f' | 'c' | 'n' = object.type;
   switch (type) {
-    case 'IntegerLiteral':
-      return {type, value: BigInt(object.value)};
+    // Decompress most common types
+    case 'i':
+      return {type: 'IntegerLiteral', value: BigInt(object.v)};
+    case 'f':
+      return {
+        type: 'FractionLiteral',
+        numerator: BigInt(object.n),
+        denominator: BigInt(object.d),
+      };
+    case 'c':
+      return {
+        type: 'CentsLiteral',
+        sign: object.s,
+        whole: BigInt(object.w),
+        fractional: object.f,
+        exponent: object.e,
+        real: object.r,
+      };
+    case 'n':
+      return {
+        type: 'NedjiLiteral',
+        numerator: object.n,
+        denominator: object.d,
+        equaveNumerator: object.p,
+        equaveDenominator: object.q,
+      };
+    // Revive BigInts
     case 'DecimalLiteral':
       return {...object, whole: BigInt(object.whole)};
-    case 'FractionLiteral':
-      return {
-        type,
-        numerator: BigInt(object.numerator),
-        denominator: BigInt(object.denominator),
-      };
     case 'RadicalLiteral':
       return {
         type,
         argument: Fraction.reviver('argument', object.argument),
         exponent: Fraction.reviver('exponent', object.exponent),
       };
-    case 'CentsLiteral':
-      return {...object, whole: BigInt(object.whole)};
     case 'SquareSuperparticular':
       return {
         type,
@@ -1236,7 +1266,6 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
         end: object.end && BigInt(object.end),
       };
     case 'StepLiteral':
-    case 'NedjiLiteral':
     case 'CentLiteral':
     case 'ReciprocalCentLiteral':
     case 'NotANumberLiteral':
@@ -1254,5 +1283,10 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
     case 'SparseOffsetVal':
     case 'WartsLiteral':
       return object;
+    case 'IntegerLiteral':
+    case 'FractionLiteral':
+    case 'NedjiLiteral':
+    case 'CentsLiteral':
+      throw new Error('Unexpected uncompressed literal.');
   }
 }

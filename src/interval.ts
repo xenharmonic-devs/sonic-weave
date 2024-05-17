@@ -246,20 +246,20 @@ export class Interval {
       value.type === 'Interval'
     ) {
       let monzo: TimeMonzo | TimeReal;
-      if (value.value.type === 'TimeMonzo') {
-        monzo = TimeMonzo.reviver('value', value.value);
+      if (value.v.type === 'TimeMonzo') {
+        monzo = TimeMonzo.reviver('value', value.v);
       } else {
-        monzo = TimeReal.reviver('value', value.value);
+        monzo = TimeReal.reviver('value', value.v);
       }
       const result = new Interval(
         monzo,
-        value.domain,
-        value.steps,
-        literalFromJSON(value.node)
+        value.d ? 'logarithmic' : 'linear',
+        value.s,
+        literalFromJSON(value.n)
       );
-      result.label = value.label;
-      result.color = value.color && new Color(value.color);
-      result.trackingIds = new Set(value.trackingIds);
+      result.label = value.l;
+      result.color = value.c && new Color(value.c);
+      result.trackingIds = new Set(value.t);
       return result;
     }
     return value;
@@ -272,13 +272,13 @@ export class Interval {
   toJSON(): any {
     return {
       type: 'Interval',
-      value: this.value.toJSON(),
-      domain: this.domain,
-      steps: this.steps,
-      label: this.label,
-      color: this.color && this.color.value,
-      node: literalToJSON(this.node),
-      trackingIds: Array.from(this.trackingIds),
+      v: this.value.toJSON(),
+      d: this.domain === 'linear' ? 0 : 1,
+      s: this.steps,
+      l: this.label,
+      c: this.color && this.color.value,
+      n: literalToJSON(this.node),
+      t: Array.from(this.trackingIds),
     };
   }
 

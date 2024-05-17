@@ -14,7 +14,6 @@ import {
   monzoToCents,
   sum,
   primeFactorize,
-  UnsignedFraction,
 } from 'xen-dev-utils';
 
 import {
@@ -237,7 +236,7 @@ export class TimeReal {
       value !== null &&
       value.type === 'TimeReal'
     ) {
-      let v: number | string = value.value;
+      let v: number | string = value.v;
       if (v === 'nan') {
         v = NaN;
       } else if (v === 'inf') {
@@ -245,7 +244,7 @@ export class TimeReal {
       } else if (v === '-inf') {
         v = -Infinity;
       }
-      return new TimeReal(value.timeExponent, v as number);
+      return new TimeReal(value.t, v as number);
     }
     return value;
   }
@@ -267,8 +266,8 @@ export class TimeReal {
 
     return {
       type: 'TimeReal',
-      timeExponent: this.timeExponent,
-      value,
+      t: this.timeExponent,
+      v: value,
     };
   }
 
@@ -1270,11 +1269,12 @@ export class TimeMonzo {
       value !== null &&
       value.type === 'TimeMonzo'
     ) {
-      const timeExponent = Fraction.reviver('timeExponent', value.timeExponent);
-      const primeExponents = (value.primeExponents as UnsignedFraction[]).map(
-        (component, i) => Fraction.reviver(i.toString(), component)
-      );
-      const residual = Fraction.reviver('residual', value.residual);
+      const timeExponent = Fraction.reviver('t', value.t);
+      const primeExponents: Fraction[] = [];
+      for (let i = 0; i < value.p.length; i += 2) {
+        primeExponents.push(new Fraction(value.p[i], value.p[i + 1]));
+      }
+      const residual = Fraction.reviver('r', value.r);
       return new TimeMonzo(timeExponent, primeExponents, residual);
     }
     return value;
@@ -1287,9 +1287,11 @@ export class TimeMonzo {
   toJSON() {
     return {
       type: 'TimeMonzo',
-      timeExponent: this.timeExponent.toJSON(),
-      primeExponents: this.primeExponents.map(component => component.toJSON()),
-      residual: this.residual.toJSON(),
+      t: this.timeExponent.toJSON(),
+      p: this.primeExponents
+        .map(component => [component.s * component.n, component.d])
+        .flat(),
+      r: this.residual.toJSON(),
     };
   }
 
