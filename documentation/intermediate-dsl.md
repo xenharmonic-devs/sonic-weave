@@ -942,6 +942,8 @@ Below `n` is an integer, `x` and `y` are integers in the range from 1 to 9, and 
 | Large declaration    | `L = expr`                           |
 | Small declaration    | `s = expr`                           |
 
+It's also legal to set `hardness = inf` implying `s = 0.0c`.
+
 ### Diamond-mos notation
 Once `MOS` has been declared [Diamond-mos notation](https://en.xen.wiki/w/Diamond-mos_notation) becomes available.
 

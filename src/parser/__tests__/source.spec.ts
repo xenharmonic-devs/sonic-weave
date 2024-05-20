@@ -1720,4 +1720,60 @@ describe('SonicWeave parser', () => {
       'P7ms',
     ]);
   });
+
+  it('supports infinite hardness (explicit)', () => {
+    const scale = expand(`
+      MOS {
+        5L 2s
+        hardness = inf
+      }
+      J4 = 123 Hz
+      automos()
+      nedji
+    `);
+    expect(scale).toEqual([
+      'MOS {LLLsLLs;L=2^1/5;s=1}',
+      '1\\5',
+      '2\\5',
+      '3\\5',
+      '3\\5',
+      '4\\5',
+      '1\\1',
+      '1\\1',
+    ]);
+  });
+
+  it('supports infinite hardness (implicit)', () => {
+    const scale = expand(`
+      MOS 101010;
+      automos()
+      nedji
+    `);
+    expect(scale).toEqual([
+      'MOS {LsLsLs;L=2^1/3;s=1}',
+      '1\\3',
+      '1\\3',
+      '2\\3',
+      '2\\3',
+      '1\\1',
+      '1\\1',
+    ]);
+  });
+
+  it('supports infinite hardness (s=1)', () => {
+    const scale = expand(`
+      MOS {LsLsLs;L=2^1/3;s=1}
+      automos()
+      nedji
+    `);
+    expect(scale).toEqual([
+      'MOS {LsLsLs;L=2^1/3;s=1}',
+      '1\\3',
+      '1\\3',
+      '2\\3',
+      '2\\3',
+      '1\\1',
+      '1\\1',
+    ]);
+  });
 });

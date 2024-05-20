@@ -58,7 +58,7 @@ AbstractStepPattern
   }
 
 SmallIntegerPattern
-  = pattern: [1-9]+ __ equave: RationalEquave? {
+  = pattern: [0-9]+ __ equave: RationalEquave? {
     return {
       type: 'IntegerPattern',
       pattern: pattern.map(d => parseInt(d, 10)),
@@ -67,7 +67,7 @@ SmallIntegerPattern
   }
 
 LargeIntegerPattern
-  = pattern: PositiveBasicInteger|2.., _ ',' _| equave: (__ ','? __ @RationalEquave?) {
+  = pattern: BasicInteger|2.., _ ',' _| equave: (__ ','? __ @RationalEquave?) {
     return {
       type: 'IntegerPattern',
       pattern,

@@ -29,7 +29,7 @@ function realize(mosMonzo: MosMonzo, large: TimeMonzo, small: TimeMonzo) {
 export class Tardigrade {
   subVisitor: ExpressionVisitor;
   equave?: TimeMonzo;
-  hardness?: TimeMonzo;
+  hardness?: TimeMonzo | TimeReal;
   large?: TimeMonzo;
   small?: TimeMonzo;
   pattern?: string;
@@ -50,17 +50,22 @@ export class Tardigrade {
     let large: TimeMonzo | TimeReal;
     if (this.equave) {
       if (this.hardness) {
-        // L /_ s = r
-        // L = s^r
-        // L^countL * s^countS = equave
-        // s^(countL * r + countS) = equave
-        small = this.equave.pow(
-          TimeMonzo.fromFraction(countL)
-            .mul(this.hardness)
-            .add(TimeMonzo.fromFraction(countS))
-            .inverse()
-        );
-        large = small.pow(this.hardness);
+        if (this.hardness.valueOf() === Infinity) {
+          small = this.equave.pow(0);
+          large = this.equave.pow(countL.inverse());
+        } else {
+          // L /_ s = r
+          // L = s^r
+          // L^countL * s^countS = equave
+          // s^(countL * r + countS) = equave
+          small = this.equave.pow(
+            TimeMonzo.fromFraction(countL)
+              .mul(this.hardness)
+              .add(TimeMonzo.fromFraction(countS))
+              .inverse()
+          );
+          large = small.pow(this.hardness);
+        }
       } else if (this.large) {
         large = this.large;
         small = this.equave
@@ -78,21 +83,35 @@ export class Tardigrade {
       }
     } else {
       if (this.hardness) {
-        if (this.large) {
-          large = this.large;
-          small = large.pow(this.hardness.inverse());
-        } else if (this.small) {
-          small = this.small;
-          large = small.pow(this.hardness);
+        if (this.hardness.valueOf() === Infinity) {
+          if (this.large) {
+            large = this.large;
+          } else if (this.small) {
+            throw new Error(
+              'Small step may not be given with infinite hardness.'
+            );
+          } else {
+            // Assume octave
+            large = TWO_MONZO.pow(countL.inverse());
+          }
+          small = large.pow(0);
         } else {
-          // Assume octave
-          small = TWO_MONZO.pow(
-            TimeMonzo.fromFraction(countL)
-              .mul(this.hardness)
-              .add(TimeMonzo.fromFraction(countS))
-              .inverse()
-          );
-          large = small.pow(this.hardness);
+          if (this.large) {
+            large = this.large;
+            small = large.pow(this.hardness.inverse());
+          } else if (this.small) {
+            small = this.small;
+            large = small.pow(this.hardness);
+          } else {
+            // Assume octave
+            small = TWO_MONZO.pow(
+              TimeMonzo.fromFraction(countL)
+                .mul(this.hardness)
+                .add(TimeMonzo.fromFraction(countS))
+                .inverse()
+            );
+            large = small.pow(this.hardness);
+          }
         }
       } else if (this.large) {
         large = this.large;
@@ -188,7 +207,11 @@ export class Tardigrade {
     const small = Math.min(...node.pattern);
     const large = Math.max(...node.pattern);
     this.pattern = node.pattern.map(i => (i === small ? 's' : 'L')).join('');
-    this.hardness = TimeMonzo.fromFraction(new Fraction(large, small));
+    if (small) {
+      this.hardness = TimeMonzo.fromFraction(new Fraction(large, small));
+    } else {
+      this.hardness = TimeReal.fromValue(Infinity);
+    }
     if (node.equave) {
       this.equave = this.visitRationalEquave(node.equave);
     }
@@ -234,6 +257,9 @@ export class Tardigrade {
     const value = this.subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
       throw new Error(`${node.type} must evaluate to an interval.`);
+    }
+    if (node.type === 'HardnessDeclaration' && value.valueOf() === Infinity) {
+      return (this.hardness = value.value);
     }
     if (!(value.value instanceof TimeMonzo)) {
       throw new Error(`${node.type} must evaluate to a radical.`);
