@@ -1776,4 +1776,22 @@ describe('SonicWeave parser', () => {
       '1\\1',
     ]);
   });
+
+  it('supports large MOS scales', () => {
+    const scale = expand(`
+      MOS 42L 7s
+      JK_4
+      JT♮4
+      KQ&4
+      J5
+      i => i str(nedji(i, niente, 91))
+    `);
+    expect(scale).toEqual([
+      'MOS {LLLLLLsLLLLLLsLLLLLLsLLLLLLsLLLLLLsLLLLLLsLLLLLLs;L=2^2/91;s=2^1/91}',
+      'JK_4 "34\\\\91"',
+      'JT♮4 "51\\\\91"',
+      'KQ&4 "78\\\\91"',
+      'J5 "91\\\\91"',
+    ]);
+  });
 });

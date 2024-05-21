@@ -26,7 +26,7 @@ import {
   setNumberOfComponents,
 } from '../monzo';
 import {type ExpressionVisitor} from '../parser';
-import {MosOptions, mos} from 'moment-of-symmetry';
+import {MosOptions, mos, nthNominal} from 'moment-of-symmetry';
 import {expressionToString} from '../ast';
 import {
   BasisElement,
@@ -72,7 +72,7 @@ import {
   factorColor as pubFactorColor,
   compare,
 } from './public';
-import {MosNominal, scaleMonzos} from '../diamond-mos';
+import {scaleMonzos} from '../diamond-mos';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
@@ -1941,9 +1941,7 @@ function automos(this: ExpressionVisitor) {
         type: 'AbsoluteFJS',
         pitch: {
           type: 'AbsolutePitch',
-          nominal: String.fromCharCode(
-            'J'.charCodeAt(0) + mmod(i + 1, monzos.length)
-          ) as MosNominal,
+          nominal: nthNominal(mmod(i + 1, monzos.length)),
           accidentals: [{accidental: '♮', fraction: ''}],
           octave: i === monzos.length - 1 ? 5 : 4,
         },

@@ -53,7 +53,7 @@ export type MosConfig = {
   /**
    * Relative scale from J onwards. Echelon depends on J. Use equave to reach higher octave numbers.
    */
-  scale: Map<MosNominal, TimeMonzo>;
+  scale: Map<string, TimeMonzo>;
   /**
    * Intervals for relative notation. Use period to reach larger intervals.
    */
@@ -101,35 +101,11 @@ export type SplitMosAccidental = {
 };
 
 /**
- * Diamond-mos nominals from J to Z.
- *
- * The number of valid nominals corresponds to the size of the MOS scale and repeats every equave.
- */
-export type MosNominal =
-  | 'J'
-  | 'K'
-  | 'L'
-  | 'M'
-  | 'N'
-  | 'O'
-  | 'P'
-  | 'Q'
-  | 'R'
-  | 'S'
-  | 'T'
-  | 'U'
-  | 'V'
-  | 'W'
-  | 'X'
-  | 'Y'
-  | 'Z';
-
-/**
  * Absolute Diamond-mos pitch.
  */
 export type AbsoluteMosPitch = {
   type: 'AbsolutePitch';
-  nominal: MosNominal;
+  nominal: string;
   accidentals: SplitMosAccidental[];
   octave: number;
 };

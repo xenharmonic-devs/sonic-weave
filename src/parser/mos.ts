@@ -14,7 +14,7 @@ import {TimeMonzo, TimeReal} from '../monzo';
 import {ExpressionVisitor} from './expression';
 import {MosMonzo, MosOptions, generateNotation, mos} from 'moment-of-symmetry';
 import {Interval} from '../interval';
-import {MosConfig, MosDegree, MosNominal} from '../diamond-mos';
+import {MosConfig, MosDegree} from '../diamond-mos';
 import {ONE, TWO, ZERO} from '../utils';
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
@@ -148,7 +148,7 @@ export class Tardigrade {
     const semiam = am.sqrt() as TimeMonzo;
     const r = (m: MosMonzo) =>
       realize(m, large as TimeMonzo, small as TimeMonzo);
-    const scale = notation.scale as unknown as Map<MosNominal, TimeMonzo>;
+    const scale = notation.scale as unknown as Map<string, TimeMonzo>;
     for (const [key, value] of notation.scale) {
       scale.set(key, r(value));
     }

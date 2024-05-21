@@ -1509,8 +1509,17 @@ PitchNominal 'pitch nominal'
   / 'ome'
 
 // Some pitches like M3 or S9 are inaccessible due to other rules and require accidentals to disambiguate.
+// Absurd nominals like SQRT#4 also require accidentals to disambiguate.
 AbsolutePitch
-  = nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
+  = nominal: $[J-Z]|2..| accidentals: Accidental+ octave: SignedBasicInteger {
+    return {
+      type: 'AbsolutePitch',
+      nominal,
+      accidentals,
+      octave,
+    };
+  }
+  / nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
     return {
       type: 'AbsolutePitch',
       nominal,
@@ -1562,6 +1571,7 @@ ArrowFunction
 // This rule is a faster version of the part of (FJS / AbsoluteFJS / (SquareSuperparticular)) which overlaps with identifiers.
 ReservedPattern
   = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ 'ms'? ([_v] [0-9])*
+  / [J-Z]|2..| [sqQxdb_ae]+ [0-9]+ ([_v] [0-9])*
   / PitchNominal [sqQxdb_ae]* [0-9]+ ([_v] [0-9])*
 
 // TODO: Figure out where to put this
