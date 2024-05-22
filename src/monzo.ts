@@ -14,6 +14,7 @@ import {
   monzoToCents,
   sum,
   primeFactorize,
+  modc,
 } from 'xen-dev-utils';
 
 import {
@@ -636,10 +637,7 @@ export class TimeReal {
     }
     const modulus = other.valueOf();
     if (ceiling) {
-      return new TimeReal(
-        this.timeExponent,
-        mmod(this.value, modulus) || modulus
-      );
+      return new TimeReal(this.timeExponent, modc(this.value, modulus));
     }
     return new TimeReal(this.timeExponent, mmod(this.value, modulus));
   }
@@ -2221,10 +2219,9 @@ export class TimeMonzo {
       return result;
     }
     const modulus = other.valueOf();
-    let value = mmod(this.valueOf(), modulus);
-    if (ceiling) {
-      value = value || modulus;
-    }
+    const value = ceiling
+      ? modc(this.valueOf(), modulus)
+      : mmod(this.valueOf(), modulus);
     return new TimeReal(this.timeExponent.valueOf(), value);
   }
 

@@ -1512,4 +1512,30 @@ describe('SonicWeave standard library', () => {
       '18\\18',
     ]);
   });
+
+  it('produces MOS scales of negative hardness', () => {
+    const scale = expand('mos(5, 2, 2, -1)');
+    expect(scale).toEqual([
+      '2\\8',
+      '4\\8',
+      '6\\8',
+      '5\\8',
+      '7\\8',
+      '9\\8',
+      '8\\8',
+    ]);
+  });
+
+  it('produces descending MOS scales', () => {
+    const scale = expand('mos(5, 2, -2, -1, 5)');
+    expect(scale).toEqual([
+      '-2\\12',
+      '-4\\12',
+      '-5\\12',
+      '-7\\12',
+      '-9\\12',
+      '-11\\12',
+      '-12\\12',
+    ]);
+  });
 });

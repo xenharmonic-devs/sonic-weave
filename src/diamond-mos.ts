@@ -117,7 +117,13 @@ export type AbsoluteMosPitch = {
  */
 export function scaleMonzos(config: MosConfig) {
   const entries = Array.from(config.scale);
-  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  entries.sort((a, b) =>
+    a[0].length < b[0].length
+      ? -1
+      : a[0].length > b[0].length
+        ? 1
+        : a[0].localeCompare(b[0])
+  );
   const monzos = entries.map(entry => entry[1]);
   monzos.push(monzos.shift()!.mul(config.equave) as TimeMonzo);
   return monzos;

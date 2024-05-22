@@ -474,7 +474,7 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   Alternatively \`down\` defines the darkness of the mode i.e. the number of minor intervals from the root. \\
   The default \`equave\` is the octave \`2/1\`.";
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
-  const divisions = $[-1];
+  const divisions = abs $[-1];
   if (equave == 2)
     step => step \\ divisions;
   else

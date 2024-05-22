@@ -1794,4 +1794,33 @@ describe('SonicWeave parser', () => {
       'J5 "91\\\\91"',
     ]);
   });
+
+  it('has automos that works with two-character nominals', () => {
+    const scale = expand(`
+      MOS 9L 9s
+      automos()
+      i => nedji(i, niente, 27)
+    `);
+    expect(scale).toEqual([
+      'MOS {LsLsLsLsLsLsLsLsLs;L=2^2/27;s=2^1/27}',
+      '2\\27',
+      '3\\27',
+      '5\\27',
+      '6\\27',
+      '8\\27',
+      '9\\27',
+      '11\\27',
+      '12\\27',
+      '14\\27',
+      '15\\27',
+      '17\\27',
+      '18\\27',
+      '20\\27',
+      '21\\27',
+      '23\\27',
+      '24\\27',
+      '26\\27',
+      '27\\27',
+    ]);
+  });
 });

@@ -12,7 +12,12 @@ import {
 } from '../ast';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {ExpressionVisitor} from './expression';
-import {MosMonzo, MosOptions, generateNotation, mos} from 'moment-of-symmetry';
+import {
+  MosMonzo,
+  MosOptions,
+  generateNotation,
+  stepString,
+} from 'moment-of-symmetry';
 import {Interval} from '../interval';
 import {MosConfig, MosDegree} from '../diamond-mos';
 import {ONE, TWO, ZERO} from '../utils';
@@ -229,19 +234,7 @@ export class Tardigrade {
         throw new Error('Period must be consistent with counts if given.');
       }
     }
-    // moment-of-symmetry generates the brightest mode by default
-    const basic = mos(node.countLarge, node.countSmall, options);
-    let pattern = '';
-    let previous = 0;
-    for (const step of basic) {
-      if (step - previous === 2) {
-        pattern += 'L';
-      } else {
-        pattern += 's';
-      }
-      previous = step;
-    }
-    this.pattern = pattern;
+    this.pattern = stepString(node.countLarge, node.countSmall, options);
     if (node.equave) {
       this.equave = this.visitRationalEquave(node.equave);
     }
