@@ -22,22 +22,22 @@ Appendix: [tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/
 
 ## Highlights
 Harmonic segment from the 8th harmonic to the 16th (repeating at the octave).
-```c
+```ocaml
 8::16
 ```
 
 10-tone equal temperament
-```c
+```ocaml
 tet(10)
 ```
 
 The major scale in Pythagorean tuning i.e. 3-limit just intonation.
-```c
+```ocaml
 sorted(3^[-1..5] rdc 2)
 ```
 
 Scale title, colors and labels.
-```c
+```ocaml
 "Japanese pentatonic koto scale, theoretical. Helmholz/Ellis p.519, nr.110"
 
 9/8 white "Major 2nd"
@@ -65,6 +65,7 @@ SonicWeave looks like Javascript with Python semantics, has Haskell ranges and o
 * Python - Guido van Rossum et. al.
 * Haskell - Lennart Augustsson et. al.
 * Zig - Andrew Kelley et. al.
+* OCaml - Xavier Leroy et. al.
 * NumPy - Travis Oliphant et. al.
 * Scala - Manuel Op de Coul
 * Scale Workshop 1 - Sean Archibald et. al.

@@ -6,7 +6,7 @@ This document describes the SonicWeave domain-specific language for manipulating
 SonicWeave is related to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor of Scale Workshop 2. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
 
 Let's start with a basic major scale in just intonation:
-```c
+```ocaml
 9/8
 5/4
 4/3
@@ -19,7 +19,7 @@ Let's start with a basic major scale in just intonation:
 Note that there's no `1/1` to mark the root. The octave `2/1` does double duty as the root note and the interval of repetition.
 
 Let's give labels to the notes with the root on "C".
-```c
+```ocaml
 9/8  "D"
 5/4  "E"
 4/3  "F"
@@ -33,7 +33,7 @@ Notice again how the root and its label come last in the list.
 
 Our scale is still pretty abstract in the sense that the notes do not correspond to any specific frequencies. A tool like Scale Workshop 3 sets the reference frequency automatically but let's set it manually here:
 
-```c
+```ocaml
 1/1 = 262 Hz
 9/8  "D"
 5/4  "E"
@@ -50,7 +50,7 @@ Now the first note has the frequency of 262 oscillations per second and the note
 
 SonicWeave is a major upgrade compared to Scale Workshop 2. One of the new features is support for an extended version of the [Functional Just System](https://en.xen.wiki/w/Functional_Just_System) which allows us to spell our scale as follows:
 
-```c
+```ocaml
 C4 = 262 Hz
 D4
 E4^5
@@ -66,7 +66,7 @@ C5
 Another common way to notate pitch is using [cents](https://en.wikipedia.org/wiki/Cent_(music)). The octave is worth 1200 cents and following Scala's convention SonicWeave dedicates the decimal dot (`.`) for representing relative musical intervals measured in cents.
 
 Using cents up to one decimal of precision our major scale becomes:
-```c
+```ocaml
 1/1 = 262 Hz
 203.9  "D"
 386.3  "E"
@@ -88,7 +88,7 @@ In addition to just intonation and cents SonicWeave has notation for equal divis
 The notation `n \ m` denotes n steps of m-tone equal temperament.
 
 Let's update our example and use the common A440 pitch standard:
-```c
+```ocaml
 A4 = 440 Hz = 9\12
 
 2\12  "D"
@@ -104,7 +104,7 @@ The expression `440 Hz = 9\12` implicitly sets the reference frequency for 1/1 a
 
 To get a taste of the powerful tempering features in SonicWeave we'll spell our scale using (absolute) FJS but add `12@` at the end to tell the runtime to interprete everything in 12-TET.
 
-```c
+```ocaml
 A4 = 440 Hz = 9\12
 
 D4
@@ -122,7 +122,7 @@ We could drop the FJS inflection `^5` from `E4` because in 12-tone equal `E4` an
 
 To highlight the power of tempering we can convert our major scale to 31-tone equal temperament simply by switching out the reference interval and the final `12@` with `31@`.
 
-```c
+```ocaml
 A4 = 440 Hz = 23\31
 
 D4
@@ -140,7 +140,7 @@ C5
 
 [FJS](https://en.xen.wiki/w/Functional_Just_System) also has notation for relative intervals like the perfect fifth `P5` between C and G or the major second `M2` between G and A. The microtonal inflections that come after the ordinal number work the same as in absolute FJS. Going back to just intonation our little major scale becomes:
 
-```c
+```ocaml
 P1 = 262 Hz
 M2
 M3^5
@@ -184,7 +184,7 @@ Another breaking change is that *comma decimals* are no longer allowed in comple
 Microtonal scales can get complicated pretty fast so in addition to string labels we saw before SonicWeave has built-in support for CSS colors.
 
 Let's spell out all the notes of 12-tone equal temperament with labels and the usual colors you would find on a piano keyboard, and let's also introduce a handy helper function (`mtof`) from the standard library for converting MIDI note number to a frequency in the A440 pitch standard:
-```c
+```ocaml
 0\12 = mtof(60)
 
 1\12  "C# / Db" black
@@ -212,19 +212,22 @@ Colors may be specified using
 
 ## Code comments
 
-Anything after two slashes (`//`) is ignored until the end of the line. Everything after a slash and an asterisk (`/*`) is ignored until a corresponding pair (`*/`) is encountered. (This means you cannot nest multi-line comments, as in C and JavaScript.)
+Anything between a pair `(*` and `*)` is ignored. Unlike C or JavaScript comments are nestable.
 
-```c
-1 = 432 Hz  // Good vibes only... Wait what are you doing?!
+```ocaml
+1 = 432 Hz  (* Good vibes only... Wait what are you doing?! *)
 11/8
-/**
+(**
  * The undecimal superfourth 11/8 of about 551.3¢ is the simplest superfourth in just intonation,
  * and as it falls about halfway between 12edo's perfect fourth and tritone, it is very xenharmonic.
  *
  * The YouTuber mannfishh has made a video revealing the terrifying truths of the 11th harmonic.
- */
+ *
+ * (* This is a nested comment *)
+ * This is still part of the outer comment block.
+ *)
 
-// Did you know you can repeat scales at the fifth too?
+(* Did you know you can repeat scales at the fifth too? *)
 3/2
 ```
 
@@ -241,56 +244,56 @@ By default[^1] adding a sharp sign (`#` or `♯`) to an absolute pitch multiplie
 Conversely a flat sign (`b` or `♭`) on an absolute pitch shifts its pitch down by around `113.685 c` corresponding to a multiplication by `2048/2187` ≈ `0.93644e` of the underlying frequency.
 
 Let's play around with these a bit to get a feel for them:
-```c
+```ocaml
 C4 = 262 Hz
 
-/*
-Pitch // Frequency |    Cents | Ratio
-*/
-Db4   // 276.016Hz |   90.225 | 1.053
-C#4   // 279.782Hz |  113.685 | 1.068
-D4    // 294.750Hz |  203.910 | 1.125
-G4    // 393.000Hz |  701.955 | 1.500
-C5    // 524.000Hz | 1200.000 | 2.000
+(*
+Pitch (* Frequency |    Cents | Ratio *)
+*)
+Db4   (* 276.016Hz |   90.225 | 1.053 *)
+C#4   (* 279.782Hz |  113.685 | 1.068 *)
+D4    (* 294.750Hz |  203.910 | 1.125 *)
+G4    (* 393.000Hz |  701.955 | 1.500 *)
+C5    (* 524.000Hz | 1200.000 | 2.000 *)
 ```
 
 Looking at the frequencies or the width of the interval against the root note we can see that D flat is lower in pitch than C sharp. They differ by a [Pythagorean comma](https://en.xen.wiki/w/Pythagorean_comma) of around `23.460 c`. The art and science of musical tuning often deals with small intervals like this. One approach is to make it go away i.e. temper it out which leads to 12-tone equal temperament a.k.a. 12ed2.
 
-```c
+```ocaml
 C4 = 262 Hz
 
-// Merge sharps together with the flat of the note above.
+(* Merge sharps together with the flat of the note above. *)
 defer 12@
 
-/*
-Pitch // Frequency |    Cents | Ratio
-*/
-Db4   // 277.579Hz |  100.000 | 1.059
-C#4   // 277.579Hz |  100.000 | 1.059
-D4    // 294.085Hz |  200.000 | 1.122
-G4    // 392.556Hz |  700.000 | 1.498
-C5    // 524.000Hz | 1200.000 | 2.000
+(*
+Pitch (* Frequency |    Cents | Ratio *)
+*)
+Db4   (* 277.579Hz |  100.000 | 1.059 *)
+C#4   (* 277.579Hz |  100.000 | 1.059 *)
+D4    (* 294.085Hz |  200.000 | 1.122 *)
+G4    (* 392.556Hz |  700.000 | 1.498 *)
+C5    (* 524.000Hz | 1200.000 | 2.000 *)
 
-// Tempering using 12@ was deferred here.
+(* Tempering using 12@ was deferred here. *)
 ```
 
 Another thing we might notice is that the fifth at `700.0` is only about two cents flat of the frequency ratio `1.5e` of the justly intoned fifth. The major third at `200.0` on the other hand is almost four cents flat of `1.125e`. Small tuning error like these tend to compound the further you go along the chain of fifths.
 
 Let's do one final comparison in 19-tone equal temperament:
-```c
+```ocaml
 C4 = 262 Hz
 
-// Temper to 19ed2
+(* Temper to 19ed2 *)
 defer 19@
 
-/*
-Pitch // Frequency |    Cents | Ratio
-*/
-C#4   // 271.735Hz |   63.158 | 1.037
-Db4   // 281.831Hz |  126.316 | 1.076
-D4    // 292.302Hz |  189.474 | 1.116
-G4    // 391.365Hz |  694.737 | 1.494
-C5    // 524.000Hz | 1200.000 | 2.000
+(*
+Pitch (* Frequency |    Cents | Ratio *)
+*)
+C#4   (* 271.735Hz |   63.158 | 1.037 *)
+Db4   (* 281.831Hz |  126.316 | 1.076 *)
+D4    (* 292.302Hz |  189.474 | 1.116 *)
+G4    (* 391.365Hz |  694.737 | 1.494 *)
+C5    (* 524.000Hz | 1200.000 | 2.000 *)
 ```
 
 I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
@@ -413,7 +416,7 @@ There is a well-known tension between visual similarity with fractions and the d
 Listing out all of the fractions in a scale can get tedious so there's a shorthand for harmonic (a.k.a. overtonal or otonal) chords where the intervals have simple relationships with each other.
 
 Let's take a look at a subset of our major scale:
-```c
+```ocaml
 1/1 = 262 Hz
 
 9/8
@@ -424,7 +427,7 @@ Let's take a look at a subset of our major scale:
 ```
 
 Expanding the factors for a common denominator gives:
-```c
+```ocaml
 8/8 = 262 Hz
 
 9/8
@@ -436,14 +439,14 @@ Expanding the factors for a common denominator gives:
 
 So it's clear that they're in a 8:9:10:12:15:16 relationship. This makes our scale fragment a two liner.
 
-```c
+```ocaml
 1 = 262 Hz
 8:9:10:12:15:16
 ```
 
 The missing 4/3 and 5/3 are in a 3:4:5 relationship with the root. With a final call to `sort()` our full major scale becomes.
 
-```c
+```ocaml
 1 = 262 Hz
 8:9:10:12:15:16
 3:4:5
@@ -454,19 +457,19 @@ Just as in scales, the unison is implicit in enumerated chords.
 
 Enumerations can span multiple lines so something like this is valid syntax:
 
-```c
+```ocaml
 1 = 262 Hz
 
-8  "C" : // Implicit
+8  "C" : (* Implicit *)
 9  "D" :
 10 "E" :
 12 "G" :
 15 "B"
 
-3 "C"  : // Implicit
+3 "C"  : (* Implicit *)
 4 "F"  :
 5 "A"  :
-6 "C"    // Octave, interval of repetition
+6 "C"    (* Octave, interval of repetition *)
 
 sort()
 ```
@@ -475,10 +478,10 @@ sort()
 
 Simple consecutive harmonics often sound consonant or at least fuse together so there's syntax for segments of the harmonic series.
 
-```c
+```ocaml
 1 = 262 Hz
 
-// Same as 8:9:10:11:12:13:14:15:16
+(* Same as 8:9:10:11:12:13:14:15:16 *)
 8::16
 ```
 
@@ -494,7 +497,7 @@ The difference between the perspectives is that of inversion i.e. reflection abo
 
 A string of characters that is not attached to an interval becomes the title of the scale visible on export.
 
-```c
+```ocaml
 "Subharmonics 10 through 5"
 
 1 = 262 Hz
@@ -511,7 +514,7 @@ Equal temperaments simplify this complexity to a finite collection of distinct p
 
 Let's demonstrate with an approximation of the 5-limit major scale in 22edo:
 
-```c
+```ocaml
 C4 = 262 Hz
 
 D4
@@ -535,7 +538,7 @@ We can change this using a *lift declaration* `/ = (newLiftAmount)`. The syntax 
 
 Declaring a lift to be worth 6 degrees of 311edo we arrive at this version of our major scale:
 
-```c
+```ocaml
 defer 311@
 / = 6°
 C4 = 262 Hz
@@ -570,14 +573,14 @@ We already saw `mtof(60)` and `sort()` above. There are plenty more, but here's 
 
 Some helpers need to be called like `sort()` while other's like `simplify` are implicitly mapped over the current scale. Let's demonstrate with our major that has been code-golfed to obscurity:
 
-```c
+```ocaml
 1=262z
 24:27:30:32:36:40:45:48
 ```
 
 The intervals will format as `27/24`, `30/24`, etc. but those are just `9/8` and `5/4` with a complicated denominator. Tagging a `simplify` at the end reduces the fractions:
 
-```c
+```ocaml
 1 = 262 Hz
 24:27:30:32:36:40:45:48
 simplify
@@ -587,7 +590,7 @@ The result will format as `9/8`, `5/4`, `4/3`, etc. .
 
 With `FJS` tagged at the end
 
-```c
+```ocaml
 1 = 262 Hz
 24:27:30:32:36:40:45:48
 FJS
@@ -597,7 +600,7 @@ we obtain `M2`, `M3^5`, `P4`, etc. .
 
 To go from (absolute) FJS to fractions we can use `relin`:
 
-```c
+```ocaml
 A4 = 440 Hz
 
 B4
@@ -612,7 +615,7 @@ relin
 ```
 
 The result is the same as if we had entered:
-```c
+```ocaml
 1/1 = 440 Hz
 
 9/8
@@ -626,7 +629,7 @@ The result is the same as if we had entered:
 
 The `reduce` helper allows us to be imprecise with octaves. The above spelled sloppily is:
 
-```c
+```ocaml
 defer reduce
 1 = 440 Hz
 

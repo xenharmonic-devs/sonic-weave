@@ -642,7 +642,7 @@ ImportAllStatement
   }
 
 EmptyStatement
-  = (_ ';' / __ SingleLineComment LineTerminatorSequence) {
+  = (_ ';' / __ LineTerminatorSequence) {
     return {
       type: 'EmptyStatement',
     };
@@ -880,7 +880,7 @@ UnaryExpression
 
 // Val literals must be excluded to keep comparisons working
 ImplicitCallExpression
-  = head: CallExpression tail: (@' ' __ !'<' @CallExpression)* {
+  = head: CallExpression tail: (@NonEmptyInlineWhiteSpace __ !'<' @CallExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
@@ -889,7 +889,7 @@ Label
   = TrueCallExpression / TrueAccessExpression / Identifier / TemplateArgument / ColorLiteral / StringLiteral / NoneLiteral
 
 LabeledCommaDecimal
-  = __ object: CommaDecimal labels: (@' ' __ @Label)* {
+  = __ object: CommaDecimal labels: (@NonEmptyInlineWhiteSpace __ @Label)* {
     return labels.reduce(operatorReducerLite, object);
   }
 

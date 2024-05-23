@@ -29,7 +29,7 @@ describe('SonicWeave module system', () => {
 
       {
         import * from foo;
-        bar; // 1
+        bar; (* 1 *)
 
         module corge {
           2/1 "block-scope modules make little sense, but banning them is more work."
@@ -38,12 +38,12 @@ describe('SonicWeave module system', () => {
 
         import baz as grault from corge;
 
-        grault(10); // 11
+        grault(10); (* 11 *)
       }
 
       import bar, baz as quux from foo;
-      quux(100);  // 101
-      bar + 1000; // 1001
+      quux(100);  (* 101 *)
+      bar + 1000; (* 1001 *)
     `);
     expect(scale).toEqual(['1', '11', '101', '1001']);
   });

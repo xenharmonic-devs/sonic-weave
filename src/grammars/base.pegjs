@@ -142,12 +142,16 @@ _ 'whitespace'
   = (WhiteSpace / LineTerminatorSequence / Comment)*
 
 __ 'inline whitespace'
-  = (WhiteSpace / MultiLineCommentNoLineTerminator)*
+  = (WhiteSpace / CommentNoLineTerminator)*
+
+NonEmptyInlineWhiteSpace = (WhiteSpace / CommentNoLineTerminator) {
+  return ' ';
+}
 
 // Automatic Semicolon Insertion
 EOS = _ ';'
-  / __ SingleLineComment? LineTerminatorSequence
-  / __ &"}"
+  / __ LineTerminatorSequence
+  / __ &'}'
   / _ EOF
 
 EOF
@@ -199,19 +203,10 @@ ID_Continue
   = c:SourceCharacter &{ return ID_CONTINUE_RE.test(c); }
 
 Comment
-  = MultiLineComment
-  / SingleLineComment
+  = '(*' ((!('(*' / '*)') SourceCharacter) / Comment)* '*)'
 
-MultiLineComment = '/*' $(!'*/' SourceCharacter)* '*/'
-
-MultiLineCommentNoLineTerminator
-  = "/*" (!("*/" / LineTerminator) SourceCharacter)* "*/"
-
-SingleLineComment
-  = '//' $SingleLineCommentChar*
-
-SingleLineCommentChar
-  = !LineTerminator SourceCharacter
+CommentNoLineTerminator
+  = '(*' ((!('(*' / '*)' / LineTerminator) SourceCharacter) / CommentNoLineTerminator)* '*)'
 
 // Chord parser needs to know what monzo components look like
 VectorComponent

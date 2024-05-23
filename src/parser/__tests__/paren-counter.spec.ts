@@ -32,15 +32,16 @@ describe('Parenthesis counter', () => {
   it('ignores curly braces inside comments #1', () => {
     const counts = parse(`
       for (const i of $) {
-        /* Stealthy curly brace } */
-        // More stealthy braces {{{
-        // Oh no it's an unpaired square bracket [ !
+        (* Stealthy curly brace } *)
+        (* More stealthy braces {{{
+          (* Oh no it's an unpaired square bracket [ ! *)
+            *)
     `);
     expect(counts).toEqual({parens: 0, squares: 0, curlies: 1});
   });
 
   it('ignores curly braces inside comments #2', () => {
-    const counts = parse('if (0) {\n//}\n');
+    const counts = parse('if (0) {\n(*//}*)\n');
     expect(counts).toEqual({parens: 0, squares: 0, curlies: 1});
   });
 

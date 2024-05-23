@@ -972,7 +972,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses comments after dot product', () => {
-    const ast = parseSingle('3 dot 12@ // Are the comments fixed now?');
+    const ast = parseSingle('3 dot 12@ (* Are the comments fixed now? *)');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
@@ -1239,6 +1239,44 @@ describe('Automatic semicolon insertion', () => {
   });
 });
 
+describe('Nested comments', () => {
+  it('works inline like whitespace', () => {
+    const ast = parseSingle('foo(* inline comment *)bar');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: ' ',
+        left: {type: 'Identifier', id: 'foo'},
+        right: {type: 'Identifier', id: 'bar'},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('spans multiple lines', () => {
+    const ast = parse(`(*
+      multi-
+      line
+      comment
+    *)`);
+    expect(ast.body).toHaveLength(0);
+  });
+
+  it('can be nested', () => {
+    const ast = parse(`
+      (* inline (*nesting*) *)
+      (*
+       * Multiline
+       * (*nesting*)
+       * test
+       *)
+    `);
+    expect(ast.body).toHaveLength(0);
+  });
+});
+
 describe('Negative tests', () => {
   it('rejects numbers without digits', () => {
     expect(() => parse('._')).toThrow();
@@ -1305,5 +1343,9 @@ describe('Negative tests', () => {
 
   it('rejects empty arrow function parameters', () => {
     expect(() => parse('=> 0')).toThrow();
+  });
+
+  it('rejects unclosed comments', () => {
+    expect(() => parse('(* comment )')).toThrow();
   });
 });

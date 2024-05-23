@@ -1,5 +1,5 @@
 export const PRELUDE_VOLATILES = `
-// XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn().
+(* XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn(). *)
 riff reduce(scale = $$) {
   "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
   if (not scale) {
@@ -14,11 +14,13 @@ riff reduce(scale = $$) {
 `;
 
 export const PRELUDE_SOURCE = `
-// == Root context dependents ==
+(** Root context dependents **)
 
-// Note that this could be golfed to:
-// const ablin = i => i linear absolute,
-// but it would lead to weird behavior if i is a function.
+(**
+ * Note that this could be golfed to:
+ * const ablin = i => i linear absolute,
+ * but it would lead to weird behavior if i is a function.
+ *)
 riff ablin(interval) {
   "Convert interval to absolute linear representation.";
   return absolute(linear interval);
@@ -59,11 +61,11 @@ riff absoluteHEJI(interval) {
   return absoluteFJS(interval, 'h');
 }
 
-// == Constants ==
+(** Constants **)
 const edostep = 1°;
 const edosteps = edostep;
 
-// == Functions ==
+(** Functions **)
 riff vbool(value) {
   "Convert value to a boolean. Vectorizes over arrays.";
   return vnot vnot value;
@@ -454,7 +456,7 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
   return edColor;
 }
 
-// == Scale generation ==
+(** Scale generation **)
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
   if (equave == 2)
@@ -551,7 +553,7 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     const up = pop(ups);
     const down = pop(downs);
 
-    // Don't impose color on unity.
+    (* Don't impose color on unity. *)
     const axis = generator ~^ [-down..up];
     axis[down] = bleach(axis[down]);
 
@@ -751,7 +753,7 @@ riff realizeWord(word, sizes, equave = niente) {
   stack();
 }
 
-// == Scale modification ==
+(** Scale modification **)
 riff equaveReduce(scale = $$) {
   "Reduce the current/given scale by its equave.";
   remap(i => i ~rdc scale[-1], scale);
