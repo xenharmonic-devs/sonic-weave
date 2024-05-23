@@ -506,7 +506,7 @@ riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHin
   const scales = zip(scale, hint ~rdc periodSizeHint);
   sort(scales, (a, b) => compare(a[1], b[1]));
   [a for [a, b] of scales];
-  pop() vor period;
+  period vor pop();
   repeat(numPeriods);
 }
 
@@ -551,7 +551,11 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     const up = pop(ups);
     const down = pop(downs);
 
-    popAll($$) tns~ generator ~^ [-down..up];
+    // Don't impose color on unity.
+    const axis = generator ~^ [-down..up];
+    axis[down] = bleach(axis[down]);
+
+    axis ~tns~ popAll($$);
   }
 
   if (basisSizeHints == niente and equaveSizeHint == niente) {
@@ -578,7 +582,7 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     const up = pop(ups);
     const down = pop(downs);
 
-    popAll($$) tns~ generator ~^ [-down..up];
+    generator ~^ [-down..up] ~tns~ popAll($$);
   }
 
   const hint = popAll();
