@@ -2416,4 +2416,24 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(interval.valueOf()).toBeNaN();
     expect(interval.value).toBeInstanceOf(TimeReal);
   });
+
+  it('can stack ups', () => {
+    const {interval} = parseSingle('^^^P1 tmpr 12@');
+    expect(interval.totalCents()).toBe(300);
+  });
+
+  it('can stack downs', () => {
+    const {interval} = parseSingle('vvvP1 tmpr 12@');
+    expect(interval.totalCents()).toBe(-300);
+  });
+
+  it('can stack lifts', () => {
+    const {interval} = parseSingle('///P1 tmpr 12@');
+    expect(interval.totalCents()).toBe(1500);
+  });
+
+  it('can stack drops', () => {
+    const {interval} = parseSingle(String.raw`\\\P1 tmpr 12@`);
+    expect(interval.totalCents()).toBe(-1500);
+  });
 });

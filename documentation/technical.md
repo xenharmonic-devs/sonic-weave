@@ -71,27 +71,27 @@ Parenthesis, `^`, `×`, `÷`, `+`, `-` follow [PEMDAS](https://en.wikipedia.org/
 
 ### For..of
 The contents of arrays and records can be iterated over using
-```c
+```ocaml
 for (const element of container) {
-  /* body of the loop utilizing element */
+  (* body of the loop utilizing element *)
 }
 ```
 
 ### For..in
 The indices of arrays or keys of records can be iterated over using
-```c
+```ocaml
 for (const element in container) {
-  /* body of the loop utilizing element */
+  (* body of the loop utilizing element *)
 }
 ```
 
 ### While
 The body of a while loop is executed until the condition becomes falsy.
-```c
+```ocaml
 let i = 10;
 while (--i)
   i;
-// Result is numbers from 9 to 1 pushed onto the implicit array $.
+(* Result is numbers from 9 to 1 pushed onto the implicit array $. *)
 ```
 
 ### Break, continue

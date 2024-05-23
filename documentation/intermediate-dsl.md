@@ -10,7 +10,7 @@ SonicWeave is intended for designing musical scales so a fundamental concept is 
 The current scale starts empty (`$ = []`) and the basic action is to push intervals onto the scale.
 
 Statements can be separated with semicolons `;` or newlines. After these instructions ...
-```c
+```ocaml
 5/4
 3/2
 2/1
@@ -19,7 +19,7 @@ Statements can be separated with semicolons `;` or newlines. After these instruc
 
 ### Unrolling
 Sub-scales are automatically unrolled onto the current scale.
-```c
+```ocaml
 4\12
 [7\12, 12\12]
 ```
@@ -27,7 +27,7 @@ Results in the scale `$ = [4\12, 7\12, 12\12]`. (Unrolling of a sub-scale essent
 
 ### Coloring
 If an expression evaluates to a color it is applied to all the intervals in the scale that don't have a color yet.
-```c
+```ocaml
 5/4
 3/2
 green
@@ -37,7 +37,7 @@ red
 Results in a scale equivalent to `$ = [5/4 #008000, 3/2 #008000, 2/1 #FF0000]`.
 
 #### Inline colors
-```c
+```ocaml
 5/4
 3/2 green
 2/1 red
@@ -48,7 +48,7 @@ It is up to a user interface to interprete colors. The original intent is to col
 
 ### Scale title
 If an expression evaluates to a string it is used as the scale title.
-```c
+```ocaml
 "My fourth and octave"
 4/3
 2/1
@@ -58,7 +58,7 @@ Results in the scale `$ = [4/3, 2/1]`.
 The title is included in the `.scl` export.
 
 #### Inline labels
-```c
+```ocaml
 4/3 "My perfect fourth"
 2/1 'octave'
 ```
@@ -73,7 +73,7 @@ Scales are intended to repeat from the last interval in the scale (a.k.a. *equav
 ### Function calls
 Functions have access to the current scale and may modify it. E.g. a call to `sort()` puts everything in ascending order.
 
-```c
+```ocaml
 3/2
 2/1
 7/6
@@ -86,7 +86,7 @@ Some functions like `simplify` operate on individual intervals instead of full s
 
 Such functions can be mapped over every interval in the current scale replacing the contents.
 
-```c
+```ocaml
 10/8
 12/8
 16/8
@@ -104,7 +104,7 @@ In addition to musical intervals SonicWeave features something known as *vals* w
 
 Upon encountering a *val* like `12@` the current scale is converted with no effect on subsequent intervals.
 
-```c
+```ocaml
 4/3
 3/2
 
@@ -120,7 +120,7 @@ To learn more see [tempering.md](https://github.com/xenharmonic-devs/sonic-weave
 ### Record unrolling
 When a record is encountered its values are sorted by size and the keys are used for labels.
 
-```c
+```ocaml
 4/3
 {
   fif: 3/2,
@@ -136,21 +136,21 @@ Results in `$ = [4/3, 5/4 "my third", 3/2 "fif", 2 "octave"]`. Notice how 4/3 wa
 ## Variables
 Variables in SonicWeave can hold any type of value. They must be declared before use. Variables declared `const` cannot be re-assigned while `let` variables may change what value they refer to.
 
-```c
+```ocaml
 const myComma = 81/80
-myComma = 250/243 // WRONG! Throws an error.
+myComma = 250/243 (** WRONG! Throws an error. **)
 ```
 
-```c
+```ocaml
 let myComma = 81/80
-myComma = 250/243 // Valid: myComma now has the value 250/243
+myComma = 250/243 (* Valid: myComma now has the value 250/243 *)
 ```
 
 **Constancy is shallow** (skin-deep): the elements of a `const` array may be re-assigned at will.
 
-```c
+```ocaml
 const myCommas = [81/80, 128/125];
-myCommas[1] = 250/243 // Valid: myCommas now contains [81/80, 250/243]
+myCommas[1] = 250/243 (* Valid: myCommas now contains [81/80, 250/243] *)
 ```
 
 Un-initialized `let` variables default to `niente`.
@@ -158,7 +158,7 @@ Un-initialized `let` variables default to `niente`.
 ### Destructuring
 Variables may be declared from an array.
 
-```c
+```ocaml
 const [x, y] = [1, 2]
 y
 x
@@ -166,7 +166,7 @@ x
 Results in `$ = [2, 1]`.
 
 Variables may be re-assigned from an array.
-```c
+```ocaml
 let x, y
 [x, y] = [1, 2]
 y
@@ -177,18 +177,22 @@ Results in `$ = [2, 1]`.
 ### Rest parameter
 
 Rest declaration:
-```c
+```ocaml
 const [x, ...r] = [1, 2, 3, 4]
-// x has value 1
-// r has value [2, 3, 4]
+(**
+ * x has value 1
+ * r has value [2, 3, 4]
+ *)
 ```
 
 Rest assignment:
-```c
+```ocaml
 let x, r
 [x, ...r] = [1, 2, 3, 4]
-// x has value 1
-// r has value [2, 3, 4]
+(**
+ * x has value 1
+ * r has value [2, 3, 4]
+ *)
 ```
 
 ### Reassignment operator
@@ -197,7 +201,7 @@ Variables can be reassigned after declaration e.g. with `let i = 2` the statemen
 ## Statements / line endings
 Statements in SonicWeave end in a semicolon. Newlines use automatic semicolon insertion where applicable.
 
-```c
+```ocaml
 6/5
 3/2
 2
@@ -237,7 +241,7 @@ Division of logarithmic quantities is a true mind-bender: `m7` is `2 * P4` so co
 There are two *echelons* in SonicWeave: *absolute* and *relative*. Relative intervals are also called scalars and absolute intervals non-scalars.
 
 Frequencies are the most common non-scalars. They're required for declaring the reference frequency and we can use them as is:
-```c
+```ocaml
 1 = 256 Hz
 320 Hz
 384 Hz
@@ -246,24 +250,24 @@ Frequencies are the most common non-scalars. They're required for declaring the 
 
 Re-declaring the reference is not recommended as it involves an implicit relative-to-absolute conversion.
 
-```c
+```ocaml
 1 = 256 Hz
-// Every scalar is henceforth interpreted as multiples of 256 hertz.
-5/4 // 320 Hz
-3/2 // 384 Hz
-2   // 512 Hz
+(* Every scalar is henceforth interpreted as multiples of 256 hertz. *)
+5/4 (* 320 Hz *)
+3/2 (* 384 Hz *)
+2   (* 512 Hz *)
 
-// Upon unison frequency re-declaration the existing content is converted to frequencies.
+(* Upon unison frequency re-declaration the existing content is converted to frequencies. *)
 1 = 440 Hz
-// From now on scalars are multiples of 440 hertz instead.
-16/11 // 640 Hz
-9/5   // 792 Hz
-2     // 880 Hz
+(* From now on scalars are multiples of 440 hertz instead. *)
+16/11 (* 640 Hz *)
+9/5   (* 792 Hz *)
+2     (* 880 Hz *)
 ```
 
 Durations like seconds or milliseconds are also supported. They're interpreted as periods of oscillation i.e. inverse frequencies.
 
-```c
+```ocaml
 "Upwards sounding minor chord /6:5:4:3"
 1 = 6 ms
 5 ms
@@ -272,33 +276,33 @@ Durations like seconds or milliseconds are also supported. They're interpreted a
 ```
 
 Beware that the unison reference is always a frequency even if declared as a duration.
-```c
-1 = 1 ms // 1 = 1000 Hz
-3/2      // 1500 Hz
-2        // 2000 Hz
+```ocaml
+1 = 1 ms (* 1 = 1000 Hz *)
+3/2      (* 1500 Hz *)
+2        (* 2000 Hz *)
 ```
 
 ### Operations on absolute intervals
 
 Addition of frequencies and scalar multiplication works as you'd expect:
-```c
+```ocaml
 1 = 100 Hz
-100 Hz + 50 Hz // 150 Hz
-2 * 100 Hz     // 200 Hz
+100 Hz + 50 Hz (* 150 Hz *)
+2 * 100 Hz     (* 200 Hz *)
 ```
 
 Division of frequencies produces scalars:
-```c
+```ocaml
 1 = 100 Hz
-4000 Hz / 2000 Hz // Same as plain 2
+4000 Hz / 2000 Hz (* Same as plain 2 *)
 ```
 
 The produced scalars are in turn interpreted against the reference. In the end `4000 Hz / 2000 Hz` results in 200 Hz above.
 
 Squaring a frequency does seemingly nothing:
-```c
+```ocaml
 1 = 200 Hz
-(300 Hz)^2 // Sounds just like 300 Hz
+(300 Hz)^2 (* Sounds just like 300 Hz *)
 400 Hz
 ```
 
@@ -306,28 +310,28 @@ This is because absolute intervals are by their nature *projective* i.e. they're
 
 This causes an absolute pitch reference to behave in two distinct ways:
 
-```c
+```ocaml
 "Relative reference for absolute FJS"
 C4 = 1 = 200 Hz
-E4^5 + Eb4_5 // Same as 5/4 * 6/5 i.e. 3/2
-C5           // Same as 2/1
+E4^5 + Eb4_5 (* Same as 5/4 * 6/5 i.e. 3/2 *)
+C5           (* Same as 2/1 *)
 ```
 
 ...or with an absolute reference:
 
-```c
+```ocaml
 "Absolute reference for absolute FJS"
 C4 = 200 Hz = 1
-E4^5 + Eb4_5 // Same as 250 Hz * 240 Hz
-C5           // Same as 400 Hz
+E4^5 + Eb4_5 (* Same as 250 Hz * 240 Hz *)
+C5           (* Same as 400 Hz *)
 ```
 That 250 Hz * 240 Hz is normalized to `sqrt(60000) Hz` i.e. a neutral third above 200 Hz. Addition means averaging with projective quantities. Scalar multiplication merely biases the weights.
 
-```c
+```ocaml
 "Absolute reference for absolute FJS"
 C4 = 200 Hz = 1
-2 * E4^5 + Eb4_5 // Same as (250 Hz)^2 * 240 Hz
-C5               // Same as 400 Hz
+2 * E4^5 + Eb4_5 (* Same as (250 Hz)^2 * 240 Hz *)
+C5               (* Same as 400 Hz *)
 ```
 
 The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something between a neutral and a major third above 200 Hz.
@@ -362,7 +366,7 @@ It is possible to separate numbers into groups using underscores for readability
 In addition to the value, domain and echelon there's also formatting information attached to intervals. A decimal like `12e-1` is not automatically simplified to `6/5` and neither is `6/4` fractionally reduced to `3/2` (remember that plain `reduce()` refers to octave-reduction in SonicWeave).
 
 Formatting tries to be smart to make relationships between intervals easier to see. A harmonic segment like `6::12` formats as
-```c
+```ocaml
 7/6
 8/6
 9/6
@@ -371,7 +375,7 @@ Formatting tries to be smart to make relationships between intervals easier to s
 12/6
 ```
 instead of
-```c
+```ocaml
 7/6
 4/3
 3/2
@@ -382,7 +386,7 @@ instead of
 to make it clear that the fractions all came from a shared segment.
 
 Same goes for equal temperaments `tet(6)` formats as
-```c
+```ocaml
 1\6
 2\6
 3\6
@@ -391,7 +395,7 @@ Same goes for equal temperaments `tet(6)` formats as
 6\6
 ```
 instead of
-```c
+```ocaml
 1\6
 1\3
 1\2
@@ -445,11 +449,11 @@ The vectorized boolean NOT is called `vnot` so `vnot [0, 1, 2]` evaluates to `[t
 
 Vectorized increment/decrement creates a new copy of the affected array.
 
-```c
+```ocaml
 let i = [1, 2];
 const j = i;
-++i; // Changes i to [2, 3] and pushes 2 and 3 onto the scale
-j    // Still [1, 2]
+++i; (* Changes i to [2, 3] and pushes 2 and 3 onto the scale *)
+j    (* Still [1, 2] *)
 ```
 
 ### Binary operators
@@ -461,9 +465,9 @@ The expression `foo() lest bar()` executes `foo()` and returns the result if it 
 In `foo() lest bar() lest baz()` execution proceeds from left to right until an operand evaluates successfully. If all fail, the exception from `baz()` is thrown.
 
 It's the inline version of `try..catch`.
-```javascript
-fraction(P5) lest P5 // Successfully evaluates to 3/2
-fraction(PI) lest PI // Falls back to 3.141592653589793r
+```ocaml
+fraction(P5) lest P5 (* Successfully evaluates to 3/2 *)
+fraction(PI) lest PI (* Falls back to 3.141592653589793r *)
 ```
 
 #### Coalescing
@@ -477,7 +481,7 @@ Logical operators check for *truthiness*. The falsy values are `false`, `niente`
 
 Coalescing operators short-circuit. Execution stops once the value of the expression is known.
 
-```c
+```ocaml
 1 and print('This executes')
 0 and print("This won't execute")
 
@@ -511,7 +515,7 @@ Key inclusion is similar to JavaScript's `in` operator e.g. `"foo" in {foo: 1, b
 Index inclusion allows for negative indices `-1 in [0]` evaluates to `false` while `-1 ~in [0]` evaluates to `true`.
 
 Outer product a.k.a. tensoring expands all possible products in two arrays into an array of arrays e.g. `[2, 3, 5] tns [7, 11]` evaluates to
-```c
+```ocaml
 [
   [14, 22],
   [21, 33],
@@ -520,7 +524,7 @@ Outer product a.k.a. tensoring expands all possible products in two arrays into 
 ```
 
 Beware that the product is domain-aware! Most of the time you want all possible stacks of intervals regardless of the domain. Use `~tns` to achieve this e.g. `[9/8, m2, M3] ~tns [P5, 8/7]` evaluates to
-```c
+```ocaml
 [
   [27/16, 9/7],
   [m6, m3_7],
@@ -602,7 +606,7 @@ The logarithmic rounding operator (`by`) measures closeness geometrically `dista
 The non-ceiling a.k.a floor variants of modulo behave as they commonly do in mathematics where `x mod x` evaluates to `0` while the ceiling variants are more useful in a musical context.
 
 Just as the clockface starts from 12 `12 modc 12` evaluates to `12`. The fact that `P1 modc P8` evaluates to `P8` and that the unison is implicit in SonicWeave environments like Scale Workshop means that the major pentatonic scale becomes a simple oneliner `sorted([-1..3] * P5 modc P8)` evaluating to:
-```c
+```ocaml
 M2
 P4
 P5
@@ -671,7 +675,7 @@ All binary operators vectorize over arrays starting from vectorized logical oper
 E.g. `2 * [3, 4, 5]` broadcasts to `[2, 2, 2] * [3, 4, 5]` evaluating to `[2*3, 2*4, 2*5]` or `[6, 8, 10]`.
 
 Broadcasting descends one level at a time so the meaning is reversed from that of NumPy where shapes are matched from tail to head instead. E.g.
-```c
+```ocaml
 [
   [1, 2],
   [3, 4],
@@ -679,7 +683,7 @@ Broadcasting descends one level at a time so the meaning is reversed from that o
 ] + [10, 100, 1000]
 ```
 proceeds to
-```c
+```ocaml
 [
   [1, 2] + 10,
   [3, 4] + 100,
@@ -687,7 +691,7 @@ proceeds to
 ]
 ```
 resulting in
-```c
+```ocaml
 [
   [11, 12],
   [103, 104],
@@ -701,11 +705,11 @@ However this allows us to use non-uniform shapes. `[[1, 2], [3, [4, 5]]] + [10, 
 Domain-aware operators can be instructed to ignore domain using tildes.
 
 An expression like `x ~op y` is value-equivalent to
-```c
+```ocaml
 domainOf(x)(linear(x) op linear(y))
 ```
 while `x op~ y` prefers y
-```c
+```ocaml
 domainOf(y)(linear(x) op linear(y))
 ```
 
@@ -747,13 +751,13 @@ In effect `/a:b:c` is shorthand for `1/a:1/b:1/c`. The stdlib `u()` helper offer
 
 #### Mixed enumerations
 Plain enumerals and harmonic segments may be freely mixed e.g. `8::10:12:14::16` is the same as `8:9:10:12:14:15:16` i.e.
-```c
+```ocaml
 9/8
-10/8 // 5/4
-12/8 // 3/2
-14/8 // 7/4
+10/8 (* 5/4 *)
+12/8 (* 3/2 *)
+14/8 (* 7/4 *)
 15/8
-16/8 // 2
+16/8 (* 2 *)
 ```
 
 ### Array access
@@ -767,7 +771,7 @@ To obtain a subset of an array use an array of indices e.g. `[1, 2, 3, 4][[0, 2]
 
 #### Using an array of booleans
 Another way to obtain a subset is to use an array of booleans. This works especially well with vectorized operators like `>` here:
-```c
+```ocaml
 const smallPrimes = [2, 3, 5, 7, 11]
 smallPrimes[smallPrimes > 4]
 ```
@@ -822,8 +826,8 @@ In addition to the various intervals between the unison and the octave there are
 You may have noticed that the gap between an augmented third and a diminished third is wider than between an augmented fourth and a diminished fourth: `cents(a3 - d3, 3)` is `341.055` while `cents(a4 - d4, 3)` is mere `227.370`.
 
 The central interval between the fourths `(dim4 + Aug4) / 2` is just `P4` but the central third lands between minor and major:
-```c
-(dim3 + Aug3) / 2 // n3, the neutral third
+```ocaml
+(dim3 + Aug3) / 2 (* n3, the neutral third *)
 ```
 
 Another way to think about the neutral third is as the split fifth `n3` = `P5 / 2`. (The ordinal notation obscures the fact that the *stepspan* of `P5` is four which evenly divides into two.)
@@ -879,14 +883,14 @@ Some of these can be handy for using neutral intervals as the center of just maj
 ## Up/lift declaration
 Usually you would declare ups and lifts in terms of edosteps, but nothing is preventing you from co-opting the system for notating just intonation and skipping the tempering step altogether.
 
-```c
-^ = 81/80  // Ups are syntonic now
+```ocaml
+^ = 81/80  (* Ups are syntonic now *)
 
 C4 = 263z = 1/1
-vE4      // 5/4
-G4       // 3/2
-^Bb4     // 9/5
-C5       // 2/1
+vE4      (* 5/4 *)
+G4       (* 3/2 *)
+^Bb4     (* 9/5 *)
+C5       (* 2/1 *)
 ```
 
 ## MOS declaration
@@ -895,32 +899,32 @@ C5       // 2/1
 While the intervals of such scales are readily obtained using the `mos(countL, countS)` or `rank2(generator)` helpers there's a complete system for generating relative and absolute notation for these scales.
 
 MOS can be declared in many ways.
-```c
+```ocaml
 "Brightest mode (Ryonian) of basic octave-equivalent Archeotonic"
 MOS 6L 1s
 ```
 
-```c
+```ocaml
 "Specific mode (Nightmare) of basic octave-equivalent Ekic"
 MOS LLsLLLsL
 ```
 
-```c
+```ocaml
 "Specific mode (Anti-phrygian) of specific hardness of octave-equivalent Antidiatonic"
 MOS 4333433
 ```
 
-```c
+```ocaml
 "Specific mode (Salmon) of specific hardness of octave-equivalent Pine"
 MOS 43, 43, 10, 43, 43, 43, 43, 43
 ```
 
-```c
+```ocaml
 "Brightest mode of the tritave-equivalent Lambda scale"
 MOS 4L 5s <3>
 ```
 
-```c
+```ocaml
 "Gil mode of octave-equivalent Mosh with large step equal to 9/8"
 MOS {
   3L 4s 5|1
@@ -951,18 +955,18 @@ The absolute pitch `J4` always corresponds to `C4` and nominals K, L, M, N, etc.
 
 Diamond-mos nominals are second-class syntax so you'll need to dodge previous syntax: `M_3` instead of `M3` (major third), `P_4` instead of `P4` (perfect fourth) and `S_9` instead of `S9` (square superparticular). The recommendation is to always use a natural sign (`_` or `♮`) with Diamond-mos pitches.
 
-```c
+```ocaml
 "Brightest mode (Ryonian) of basic octave-equivalent Archeotonic"
 MOS 6L 1s
 
 J_4 = 263 Hz
-K_4 // 2\13
-L_4 // 4\13
-M_4 // 6\13
-N_4 // 8\13
-O_4 // 10\13
-P_4 // 12\13
-J_5 // 13\13
+K_4 (* 2\13 *)
+L_4 (* 4\13 *)
+M_4 (* 6\13 *)
+N_4 (* 8\13 *)
+O_4 (* 10\13 *)
+P_4 (* 12\13 *)
+J_5 (* 13\13 *)
 ```
 
 The accidental `&` (read "am") raises pitch by `L - s` while its opposite `@` (read "at") correspondingly lowers pitch by the same amount.
@@ -971,7 +975,7 @@ The accidental `e` (read "semiam") raises pitch by a half *am* while `a` (read "
 
 #### Auto-MOS
 The easiest way to generate Diamond-mos notation for one equave is to call the `automos()` helper.
-```c
+```ocaml
 "Specific mode (Anti-phrygian) of specific hardness of octave-equivalent Antidiatonic"
 MOS 4333433
 J4 = 263 Hz
@@ -985,35 +989,35 @@ You can also [name relative intervals](https://en.xen.wiki/w/TAMNAMS#Naming_mos_
 
 The indexing starts from 0 instead of 1.
 
-```c
+```ocaml
 "Specific mode (Nightmare) of basic octave-equivalent Ekic"
 MOS LLsLLLsL
 
-P0ms = 333 Hz // Same as 1 = 333 Hz
-P1ms // 2\14
-M2ms // 4\14
-P3ms // 5\14
-P4ms // 7\14
-P5ms // 9\14
-M6ms // 11\14
-P7ms // 12\14
-P8ms // 14\14
+P0ms = 333 Hz (* Same as 1 = 333 Hz *)
+P1ms (* 2\14 *)
+M2ms (* 4\14 *)
+P3ms (* 5\14 *)
+P4ms (* 7\14 *)
+P5ms (* 9\14 *)
+M6ms (* 11\14 *)
+P7ms (* 12\14 *)
+P8ms (* 14\14 *)
 ```
 
 Neutral (e.g. `n2ms`) and mid intervals (e.g. `n1ms`) are also available. (Semi-)augmented intervals have similar logic to their diatonic counterparts: Augmentation is counted from major upwards and diminishment from minor downwards unless the central interval has perfect quality.
 
 #### Exception for nL ns
 When there's only one other interval per period the bright (wide) variant is designated major while the dark (narrow) variant is designated minor.
-```c
+```ocaml
 "A scale spelled using relative Triwood intervals"
 MOS 3L 3s
 
 P0ms = 333 Hz
-M1ms // 2\9
-P2ms // 3\9
-m3ms // 4\9
-P4ms // 6\9
-P6ms // 9\9
+M1ms (* 2\9 *)
+P2ms (* 3\9 *)
+m3ms (* 4\9 *)
+P4ms (* 6\9 *)
+P6ms (* 9\9 *)
 ```
 
 ## Next steps

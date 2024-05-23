@@ -55,7 +55,7 @@ describe('SonicWeave parser', () => {
   });
 
   it('can declare variables', () => {
-    const ast = parseAST('const i = 676/675 /* The Island comma */;');
+    const ast = parseAST('const i = 676/675 (* The Island comma *);');
     const visitor = new StatementVisitor();
     visitor.rootContext = new RootContext();
     visitor.visit(ast.body[0]);
@@ -64,11 +64,11 @@ describe('SonicWeave parser', () => {
 
   it('can invert a scale', () => {
     const scale = parseSource(`
-      2;3;4;5;6;7;8; // Build scale
-      const equave = pop(); // Pop from the scale
-      i => equave %~ i; // Functions map over the scale implicitly
-      reverse(); // Reverse the current scale
-      equave; // The default action is to push onto the current scale
+      2;3;4;5;6;7;8; (* Build scale *)
+      const equave = pop(); (* Pop from the scale *)
+      i => equave %~ i; (* Functions map over the scale implicitly *)
+      reverse(); (* Reverse the current scale *)
+      equave; (* The default action is to push onto the current scale *)
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '8/7;4/3;8/5;2;8/3;4;8'
@@ -225,27 +225,28 @@ describe('SonicWeave parser', () => {
 
   it('can spell diaschismic antisymmetrically', () => {
     const scale = parseSource(`
-      // Scale Workshop 3 will add this line automatically.
-      // Declare base nominal and frequency.
+      (* Scale Workshop 3 will add this line automatically.
+        (* Declare base nominal and frequency. *)
+      *)
       C0 = 1/1 = 261.6 Hz;
 
-      // First cycle (Greek - Latin - Greek...)
-      eta0; // Or η0 if you want to get fancy.
+      (* First cycle: Greek - Latin - Greek... *)
+      eta0; (* Or η0 if you want to get fancy. *)
       D0;
       alp0;
       E0;
-      bet0; // Or F0 depending on taste.
-      gam0; // Period
+      bet0; (* Or F0 depending on taste. *)
+      gam0; (* Period *)
 
-      // Second cycle (Latin - Greek - Latin ...)
+      (* Second cycle: Latin - Greek - Latin ... *)
       G0;
       del0;
       A0;
       eps0;
-      B0; // Or zet0 depending on taste.
-      C1; // Equave = 2 * period
+      B0; (* Or zet0 depending on taste. *)
+      C1; (* Equave = 2 * period *)
 
-      // Temperament
+      (* Temperament *)
       12@;
     `);
     expect(scale).toHaveLength(12);
@@ -284,16 +285,16 @@ describe('SonicWeave parser', () => {
 
   it('can construct well-temperaments (manual)', () => {
     const scale = parseSource(`
-      // Bach / Louie 2018
+      (* Bach / Louie 2018 *)
       const g = logarithmic(3/2);
       const p = logarithmic(531441/524288);
       const equave = logarithmic(2);
-      // Down
+      (* Down *)
       -g;
       $[-1] - g;
       $[-1] - g;
       $[-1] - g;
-      // Up
+      (* Up *)
       g - p % 6;
       $[-1] + g - p % 6;
       $[-1] + g - p % 6;
@@ -301,10 +302,10 @@ describe('SonicWeave parser', () => {
       $[-1] + g - p % 6;
       $[-1] + g - p % 18;
       $[-1] + g - p % 18;
-      // Reduce
+      (* Reduce *)
       i => i mod equave;
       sort();
-      // Equave
+      (* Equave *)
       equave;
       cents;
     `);
@@ -322,7 +323,7 @@ describe('SonicWeave parser', () => {
       ^m6
       P8
 
-      // Break fragiles
+      (* Break fragiles *)
       ^ = 1°
 
       FJS
@@ -1276,19 +1277,19 @@ describe('SonicWeave parser', () => {
   it('freezes existing content on unison frequency re-declaration', () => {
     const scale = parseSource(`
       1 = 256 Hz
-      // Every scalar is henceforth interpreted as multiples of 256 hertz.
-      5/4 // 320 Hz
-      3/2 // 384 Hz
-      2   // 512 Hz
+      (* Every scalar is henceforth interpreted as multiples of 256 hertz. *)
+      5/4 (* 320 Hz *)
+      3/2 (* 384 Hz *)
+      2   (* 512 Hz *)
 
-      // Upon re-declaration of the unison frequency the existing content is converted to frequencies.
+      (* Upon re-declaration of the unison frequency the existing content is converted to frequencies. *)
       1 = 440 Hz
-      // From now on scalars are multiples of 440 hertz instead.
-      16/11 // 640 Hz
-      9/5   // 792 Hz
-      2     // 880 Hz
+      (* From now on scalars are multiples of 440 hertz instead. *)
+      16/11 (* 640 Hz *)
+      9/5   (* 792 Hz *)
+      2     (* 880 Hz *)
 
-      // Manual conversion
+      (* Manual conversion *)
       absolute
     `);
     const freqs = scale.map(i => i.valueOf());
@@ -1318,7 +1319,7 @@ describe('SonicWeave parser', () => {
       }
 
       5:8:7:9:6:10;
-      popSort; // Pushes [sorted($), [], [], ...] onto the scale
+      popSort; (* Pushes [sorted($), [], [], ...] onto the scale *)
     }`);
     expect(scale).toEqual(['6/5', '7/5', '8/5', '9/5', '10/5']);
   });
@@ -1477,10 +1478,10 @@ describe('SonicWeave parser', () => {
       J3 = 100 Hz = 1
       K3
       L3
-      M_3 // Looks like major third
-      N3 // Let's not do capital neutrals, OK?
+      M_3 (* Looks like major third *)
+      N3 (* Let's not do capital neutrals, OK? *)
       O3
-      P3 // Perfect thirds don't exist
+      P3 (* Perfect thirds don't exist *)
       Q3
       R3
       J4

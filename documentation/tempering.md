@@ -23,7 +23,7 @@ The linear unary inverse operator has no logarithmic analogue so `%logarithmic(2
 By default a geometric inverse is only associated with the monzo it's the inverse of. To change the association use the `withEquave(...)` built-in function. To obtain the associated equave (as a linear quantity) use the `equaveOf(...)` function.
 
 By default co-vectors are associated with the octave so the basis of the co-logarithmic domain consists of `%logarithmic(2)`, `withEquave(%logarithmic(3), 2)`, `withEquave(%logarithmic(5), 2)`, etc. so a val literal such as `<12 19 28]` means
-```c
+```ocaml
 12 * %logarithmic(2) + 19 * withEquave(%logarithmic(3), 2) + 28 * withEquave(%logarithmic(5), 2)
 ```
 if spelled out in full.
@@ -35,7 +35,7 @@ The dot product between a val and a monzo is straighforward enough: `<12 19 28] 
 The association with an equave is important in tempering to know which equal temperament we're targetting. The `tmpr` operator infers the number of divisions from `val dot equaveOf(val)`. It's also more graceful with a higher prime tail and leaves it alone.
 
 The operation `v tmpr m` is equivalent to:
-```c
+```ocaml
 ((v dot relative(m)) \ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))
 ```
 E.g. `<12 19 28] tmpr 7/5` evaluates to `[-28/12 0 0 1>`.
@@ -45,7 +45,7 @@ In practice the higher prime tail is usually irrelevant and the vals have enough
 ### Implicit tempering
 Implicit tempering refers to what SonicWeave does to the scale when it encounters a val.
 
-```c
+```ocaml
 5/4
 3/2
 2/1
@@ -65,15 +65,15 @@ While a simple `i => i by~ step` doesn't work consistently we can still think of
 Let's say we have this major chord as our scale `$ = [5/4, 3/2, 2]` and we wish to convert it to 12-tone equal temperament.
 
 First we'll measure out the primes:
-```javascript
+```ocaml
 2^-2 * 3^0 * 5^1
 2^-1 * 3^1 * 5^0
 2^+1 * 3^0 * 5^0
 ```
 
 Then we replace each prime with their closest approximation:
-```javascript
-const st = 2^1/12 // One semitone
+```ocaml
+const st = 2^1/12 (* One semitone *)
 
 (2 by st)^-2 * (3 by st)^0 * (5 by st)^1
 (2 by st)^-1 * (3 by st)^1 * (5 by st)^0
@@ -82,6 +82,6 @@ const st = 2^1/12 // One semitone
 Which results in `$ = [2^4/12, 2^7/12, 2^12/12]`.
 
 The the 5-limit val `12@2.3.5` = `<12 19 28]` can be obtained using this method as well:
-```c
+```ocaml
 valFromPrimeArray(([2, 3, 5] by st) /_ st)
 ```

@@ -3,7 +3,7 @@ This document describes programming in the SonicWeave domain-specific language.
 
 ## Record broadcasting
 Records behave like arrays in that operations are broadcast over their values e.g. `{a: 1, b: 2, c:3} * 5` evaluates to
-```c
+```ocaml
 {
   a: 1*5,
   b: 2*5,
@@ -30,7 +30,7 @@ The current scale of the parent block can be accessed using `$$`.
 ## Defer
 Defer is used to execute a statement while exiting the current block.
 
-```c
+```ocaml
 let x = 5;
 {
     defer x += 2;
@@ -41,7 +41,7 @@ assert(x == 7);
 
 When there are multiple defers in a single block, they are executed in reverse order.
 
-```c
+```ocaml
 let x = 5;
 {
     defer x += 2;
@@ -54,7 +54,7 @@ Defer is useful for pushing implicit tempering and general housekeeping to the t
 
 ## While
 "While" loops repeat a statement until the test becames *falsy* e.g.
-```c
+```ocaml
 let i = 5
 while (--i) {
   i
@@ -64,7 +64,7 @@ results in `$ = [4, 3, 2, 1]`.
 
 ## For...of
 "For..of" loops iterate over array contents or record values e.g.
-```c
+```ocaml
 for (const i of [1..5]) {
   2 ^ (i % 5)
 }
@@ -73,7 +73,7 @@ results in `$ = [2^1/5, 2^2/5, 2^3/5, 2^4/5, 2]`.
 
 ## For..in
 "For..in" loops iterate over array indices or record keys e.g.
-```c
+```ocaml
 for (const k in {a: 123, b: 456}) {
   1 k
 }
@@ -82,7 +82,7 @@ results in `$ = [1 "b", 1 "a"]`. With records the order of iteration is indeterm
 
 ## Break
 "While" and "for" loops can be broken out of using the `break` keyword.
-```c
+```ocaml
 for (const i of [1..10]) {
   i \ 6
   if (i >= 6)
@@ -93,7 +93,7 @@ results in `$ = [1\6, 2\6, 3\6, 4\6, 5\6, 6\6]`.
 
 ## Continue
 The `continue` keyword terminates the execution of the current iteration of a "while" or "for" loop and continues with the next iteration.
-```c
+```ocaml
 let i = 8
 while (++i <= 16) {
   if (i > 12 and i mod 2) {
@@ -106,7 +106,7 @@ results in `$ = [9/8, 10/8, 11/8, 12/8, 14/8, 16/8]`.
 
 ## While..else and for..of..else
 The `else` branch of a "while" or "for" loop is executed if no `break` statement was encountered e.g. this computes all primes below 12:
-```c
+```ocaml
 for (const i of [2..12]) {
   for (const j of [2..i-1]) {
     if (i mod j == 0) break
@@ -119,14 +119,14 @@ result is `$ = [2, 3, 5, 7, 11]`.
 
 ### Array comprehensions
 "For" loops have an inline counterpart in array comprehensions e.g.
-```c
+```ocaml
 [2 ^ i/7 for i of [1..7]]
 ```
 results in `$ = [2^1/7, 2^2/7, 2^3/7, 2^4/7, 2^5/7, 2^6/7, 2]`.
 
 #### If clause
 To conditionally include elements use an `if` clause e.g.
-```c
+```ocaml
 [i for i of [1..9] if i mod 3 <> 0]
 ```
 results in `$ = [1, 2, 4, 5, 7, 8]` i.e. all [throdd](https://en.xen.wiki/w/Threeven) numbers below 10.
@@ -135,7 +135,7 @@ Above the `<> 0` part is unnecessary. `[i for i of [1..9] if i mod 3]` works the
 
 ## If...else
 Conditional statements are evaluated if the test expression evaluates to `true` otherwise the `else` branch is taken.
-```javascript
+```ocaml
 if (3/2 > 700.) {
   print("The Pythagorean fifth is larger than the perfect fifth of 12-TET")
 } else {
@@ -150,7 +150,7 @@ Ternary expressions short-circuit i.e. only the test expression and the chosen r
 
 ## Function declaration
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
-```javascript
+```ocaml
 riff subharmonics(start, end) {
   return retroverted(start::end)
 }
@@ -160,7 +160,7 @@ Above the `return` statement is suprefluous. We could've left it out and let the
 Default values for function parameters may be given using `param = value` syntax.
 
 Due to popular demand there's also the `fn` alias for function declaration.
-```javascript
+```ocaml
 fn pythagoras(up, down = 0) {
   sorted([3^i rdc 2 for i of [-down..up]])
 }
@@ -176,19 +176,19 @@ Functions can be defined inline using the arrow (`=>`). e.g. `const subharmonics
 
 ## Throwing
 To interupt execution you can throw a string message.
-```javascript
+```ocaml
 throw "Something wrong here!"
 ```
 
 ## Exception handling
 To resume execution after an error use `try`, `catch` and `finally`.
-```javascript
+```ocaml
 try {
-  fraction(PI) // This throws because PI is irrational.
+  fraction(PI) (* This throws because PI is irrational. *)
   print("This won't print");
 } catch (e) {
   print("Caught an exception!");
-  print(e); // Prints: "Input is irrational and no tolerance given."
+  print(e); (* Prints: "Input is irrational and no tolerance given." *)
 } finally {
   print("This will print regardless.");
 }
@@ -196,7 +196,7 @@ try {
 
 ## Implicit mapping
 Recall that the default action when encountering a function is to remap the current scale using it. Arrow functions are very handy here:
-```javascript
+```ocaml
 primes(3, 17)
 prime => prime rd 2
 2
@@ -264,8 +264,8 @@ You can even use square roots in the basis e.g. `[-1 1>@√2.√3` is monzo repr
 
 ## Universal monzos
 The monzo basis also supports the special symbols `s`, `Hz`, `-1`, `0`, `rc` and `1°`. A conversion like `monzo(-440Hz)` evaluates to
-```c
-// Hz, -1, 2, 3, 5, 7, 11
+```ocaml
+(* Hz, -1, 2, 3, 5, 7, 11 *)
 [   1,  1, 3, 0, 1, 0, 1 >@Hz.-1.2..
 ```
 or `1Hz * (-1) * 2^3 * 5^1 * 11^1` if you break it down linearly.
@@ -276,7 +276,7 @@ Two dots after a prime number indicate that exponents of successive primes follo
 The stepspan of the octave is odd so the semioctave `P8 / 2` doesn't have an obvious ordinal associated with it like how the semififth `P5 / 2` is obviously a third.
 
 The semioctave is between a fourth and a fifth therefore SonicWeave designates it as a 4½th. It is the period of [10L 4s](https://en.xen.wiki/w/10L_4s) (with the semififth as the generator) therefore the designated quality is *perfect*.
-```c
+```ocaml
 "These two are the same"
 P8 / 2 "Split octave"
 P4½    "The perfect fourth-and-a-halfth"
@@ -318,11 +318,11 @@ SonicWeave designates Greek counterparts to each of the seven diatonic Latin nom
 
 By their construction these nominals are all found in 12-tone equal temperament and are also well-suited for notating 22-TET which is connected to 12-TET along the diaschismic axis.
 
-```c
+```ocaml
 "Srutal[12] a.k.a. Diaschismic[12] tuned to 22-TET"
 defer 22@
 
-// First period: Latin-Greek-Latin
+(* First period: Latin-Greek-Latin *)
 C4 = mtof(60)
 η4
 D4
@@ -330,7 +330,7 @@ D4
 E4
 β4
 
-// Second period: Greek-Latin-Greek
+(* Second period: Greek-Latin-Greek *)
 γ4
 G4
 δ4
@@ -338,7 +338,7 @@ A4
 ε4
 B4
 
-// Third period: (implicit repetition)
+(* Third period: (implicit repetition) *)
 C5
 ```
 
@@ -349,7 +349,7 @@ You can also declare ups to transport notes between the two periods if you wish 
 
 The labels indicate the equivalent Greek nominal.
 
-```c
+```ocaml
 "Semioctave heptanominal alternative I"
 ^ = Aug4 - 1\2
 
@@ -378,7 +378,7 @@ The perfect intervals `2`, `3/2` and `4/3` are connected by `4/3 == 2 / (3/2)` s
 In terms of interordinals `n2.5 == P4.5 - n3` so we already have relative notation for the split fourth.
 
 Absolute semiquartal notation is obtained by mixing Greek nominals with half-sharps.
-```c
+```ocaml
 "Semiquartal 5L 4s notation"
 C♮4 = mtof(60)
 D♮4 "Octave-reduced doubled 5th"

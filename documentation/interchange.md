@@ -2,15 +2,18 @@
 This documentation describes the .swi interchange format for transferring microtonal scales between programs
 
 ## Comments
-Comments work as in JavaScript. Everything after `//` is ignored until the end of the line. Everything after `/*` is ignored until `*/` is encountered. (This includes other `/*` i.e. no nested grammar for comments.)
-```c
-// single line comment
-/*
+Comments work as in OCaml. Everything between a pair of `(*` and  `*)` is ignored. Comments can be nested
+```ocaml
+(* single comment *)
+
+(*
 Comment
 spanning
 multiple
 lines.
-*/
+(* A nested comment. *)
+Still part of the comment.
+*)
 ```
 
 ## Empty lines
@@ -30,7 +33,7 @@ Valid CSS colors include:
 
 ## Scale title
 The first string in the file indicates the title of the scale.
-```c
+```ocaml
 "The scale title"
 ```
 
@@ -38,8 +41,8 @@ A scale title is mandatory. Untitled scales must provide an empty string.
 
 ## Unison frequency
 The reference frequency is given with the syntax `1 = expr` where expressions is a valid absolute interval (described below).
-```c
-// Set reference frequency to 256 Hz
+```ocaml
+(* Set reference frequency to 256 Hz *)
 1 = [1 8>@Hz.2
 ```
 
@@ -55,7 +58,7 @@ Relative interval are to be interpreted against the reference frequency if it is
 Intervals with prime factors below 29 are given as ket-vectors a.k.a. monzos starting with `[` and ending with `>`.
 
 Below the labels indicate the meaning of each monzo:
-```c
+```ocaml
 [> "1/1" niente
 [-4 4 -1> "81/80" niente
 [7/12> "7 sof 12" niente
@@ -65,21 +68,21 @@ Below the labels indicate the meaning of each monzo:
 
 #### Higher primes
 Prime factors above 23 require an explicit subgroup basis given after `@` separated by periods `.`. Subgroup basis elements must be integers. No check is made to ensure that basis elements are actually prime numbers.
-```c
+```ocaml
 [-1 1>@29.31 "31/29" niente
 [-9 1>@2.899 "899/512" rgb(90% 80% 70% / 70%)
 ```
 
 #### Non-primes
 The special symbols `-1` and `0` indicate negative numbers and zero respectively. Their vector component must be `1` if present.
-```c
+```ocaml
 [1>@0 "0" niente
 [1 1>@-1.2 "-2" niente
 ```
 
 #### Real values
 Scalars that cannot be expressed as fractional monzos are given as *real* cents `rc`. The corresponding vector component is a floating-point literal. The special basis element `inf` indicates floating-point infinity. A negative unity component of `inf` indicates real zero.
-```c
+```ocaml
 [-1>@inf "0r" niente
 [0.>@rc "1r" niente
 [1 1200.>@-1.rc "-2r" niente
@@ -89,7 +92,7 @@ Scalars that cannot be expressed as fractional monzos are given as *real* cents 
 
 ### Absolute pitches
 The special basis element `Hz` indicates frequencies.
-```c
+```ocaml
 [1 3 1 1>@Hz.2.5.11 "440 Hz" niente
 [-1 2 -2>@Hz.2.5 "10ms" niente
 ```
@@ -98,27 +101,27 @@ A tool such as Scale Workshop normalizes durations (periods of oscillation) to f
 
 #### Real absolute pitches
 The Hz exponent of real frequencies is a floating-point literal.
-```c
+```ocaml
 [1. 1981.7953553667824>@Hz.rc "PI * 1Hz" niente
 ```
 
 ### Edosteps
 To support tempering after interchanging data, the special `1°` basis element is used.
-```c
+```ocaml
 [5>@1° "/P1" niente
 ```
 
 ### Not-a-number
 The special combination `[1 1>@0.inf` indicates a value that can't be interpreted as an interval.
-```c
+```ocaml
 [1 1>@0.inf "asin(2)" niente
 ```
 
 ## Example
 See [examples/interchange.sw](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/interchange.sw) for various extreme values supported by the original SonicWeave runtime.
 
-```c
-// Created using SonicWeave 0.1.0
+```ocaml
+(* Created using SonicWeave 0.4.0 *)
 
 "Various values to test the .swi interchange format"
 

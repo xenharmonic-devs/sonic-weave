@@ -63,7 +63,7 @@ export function toSonicWeaveInterchange(source: string) {
   if (!context) {
     throw new Error('Missing root context.');
   }
-  const lines = [`// Created using SonicWeave ${version}`, ''];
+  const lines = [`(* Created using SonicWeave ${version} *)`, ''];
   lines.push(JSON.stringify(context.title));
   lines.push('');
   if (context.unisonFrequency) {

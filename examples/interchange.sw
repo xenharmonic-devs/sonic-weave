@@ -1,14 +1,14 @@
 "Various values to test the .swi interchange format"
 
-// Need more components for that sqrt(29/16)
+(* Need more components for that sqrt(29/16) *)
 numComponents(20)
 
-// MOS declaration and this comment should be ignored in .swi output
+(* MOS declaration and this comment should be ignored in .swi output *)
 MOS 5L 2s
 
-/*
+(*
 Constants should also be ignored.
-*/
+*)
 const fif = P4ms
 let foo = 123.4rc
 
