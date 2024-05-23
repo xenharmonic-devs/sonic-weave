@@ -43,10 +43,15 @@ export class Tardigrade {
     this.subVisitor = subVisitor;
   }
 
+  spendGas(amount?: number) {
+    this.subVisitor.spendGas(amount);
+  }
+
   createMosConfig(): MosConfig {
     if (!this.pattern) {
       throw new Error('Mode must be given in MOS declaration.');
     }
+    this.spendGas(this.pattern.length);
     const notation = generateNotation(this.pattern);
     const N = new Fraction(this.pattern.length);
     const countL = new Fraction((this.pattern.match(/L/g) ?? []).length);
@@ -179,6 +184,7 @@ export class Tardigrade {
   }
 
   visit(node: MosExpression) {
+    this.spendGas();
     switch (node.type) {
       case 'AbstractStepPattern':
         return this.visitAbstractStepPattern(node);
@@ -202,6 +208,7 @@ export class Tardigrade {
   }
 
   visitAbstractStepPattern(node: AbstractStepPattern) {
+    this.spendGas(node.pattern.length);
     this.pattern = node.pattern.join('');
     if (node.equave) {
       this.equave = this.visitRationalEquave(node.equave);
@@ -209,6 +216,7 @@ export class Tardigrade {
   }
 
   visitIntegerPattern(node: IntegerPattern) {
+    this.spendGas(node.pattern.length);
     const small = Math.min(...node.pattern);
     const large = Math.max(...node.pattern);
     this.pattern = node.pattern.map(i => (i === small ? 's' : 'L')).join('');
@@ -223,6 +231,7 @@ export class Tardigrade {
   }
 
   visitPatternUpDownPeriod(node: PatternUpDownPeriod) {
+    this.spendGas(Math.abs(node.countLarge) + Math.abs(node.countSmall));
     const options: MosOptions = {};
     if (node.udp) {
       options.up = node.udp.up;

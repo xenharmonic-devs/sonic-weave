@@ -1933,6 +1933,7 @@ function automos(this: ExpressionVisitor) {
   if (!this.rootContext?.mosConfig || scale.length) {
     return;
   }
+  this.spendGas(this.rootContext.mosConfig.scale.size);
   const J4 = this.rootContext.C4;
   const monzos = scaleMonzos(this.rootContext.mosConfig).map(m => J4.mul(m));
   return monzos.map(

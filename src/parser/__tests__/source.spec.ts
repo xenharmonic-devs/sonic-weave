@@ -1823,4 +1823,24 @@ describe('SonicWeave parser', () => {
       '27\\27',
     ]);
   });
+
+  it('supports guard rails against absurd MOS declarations', () => {
+    const ast = parseAST('MOS 420L 69s');
+
+    const visitor = getSourceVisitor(false);
+    visitor.rootContext!.gas = 100;
+    expect(() => visitor.executeProgram(ast)).toThrow();
+  });
+
+  it('supports guard rails against unreasonable automos', () => {
+    const ast = parseAST(`
+      MOS 20L 20s
+      automos()
+    `);
+
+    const visitor = getSourceVisitor(false);
+    visitor.rootContext!.gas = 100;
+    visitor.visit(ast.body[0]);
+    expect(() => visitor.visit(ast.body[1])).toThrow();
+  });
 });
