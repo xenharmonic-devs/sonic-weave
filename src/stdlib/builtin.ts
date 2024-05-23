@@ -1580,6 +1580,30 @@ lcm.__doc__ =
   'Obtain the smallest (linear) interval that shares both arguments as multiplicative factors. Applies to the current scale if not arguments are given.';
 lcm.__node__ = builtinNode(lcm);
 
+function builtinCompare(
+  this: ExpressionVisitor,
+  x: SonicWeaveValue,
+  y: SonicWeaveValue
+): SonicWeaveValue {
+  if (isArrayOrRecord(x) || isArrayOrRecord(y)) {
+    return binaryBroadcast.bind(this)(x, y, builtinCompare.bind(this));
+  }
+  const c = compare.bind(this)(upcastBool(x), upcastBool(y));
+  if (c < 0) {
+    return fromInteger(-1);
+  } else if (c > 0) {
+    return fromInteger(1);
+  }
+  return fromInteger(0);
+}
+Object.defineProperty(builtinCompare, 'name', {
+  value: 'compare',
+  enumerable: false,
+});
+builtinCompare.__doc__ =
+  'Compare two values. Result is -1 if x < y, +1 if x > y and 0 if the arguments are equal.';
+builtinCompare.__node__ = builtinNode(builtinCompare);
+
 function toPrimeArray(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -2558,6 +2582,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   wilsonHeight,
   gcd,
   lcm,
+  compare: builtinCompare,
   toPrimeArray,
   monzoFromPrimeArray,
   valFromPrimeArray,
