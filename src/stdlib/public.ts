@@ -270,7 +270,7 @@ export function track(this: ExpressionVisitor, interval: Interval) {
  * @param scale Musical scale to sort (defaults to context scale).
  * @param compareFn SonicWeave riff for comparing elements.
  */
-export function sort(
+export function sortInPlace(
   this: ExpressionVisitor,
   scale?: Interval[],
   compareFn?: Function

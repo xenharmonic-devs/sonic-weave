@@ -400,19 +400,19 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can spell the just major chord sub-overtonally', () => {
-    const subOvertone = parseSource('revposed(6:5:4)');
+    const subOvertone = parseSource('revpose(6:5:4)');
     expect(subOvertone[0].totalCents()).toBeCloseTo(386.313714); // major third
     expect(subOvertone[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord retroverted', () => {
-    const retroversion = parseSource('retroverted(10:12:15)');
+    const retroversion = parseSource('retrovert(10:12:15)');
     expect(retroversion[0].totalCents()).toBeCloseTo(386.313714); // major third
     expect(retroversion[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
 
   it('can spell the just major chord reflected', () => {
-    const reflection = parseSource('reflected(15:12:10)');
+    const reflection = parseSource('reflect(15:12:10)');
     expect(reflection[0].totalCents()).toBeCloseTo(386.313714); // major third
     expect(reflection[1].totalCents()).toBeCloseTo(701.955001); // perfect fifth
   });
@@ -438,13 +438,13 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can spell the just minor chord in first inversion with root on 1/1', () => {
-    const firstInversion = parseSource('reflected(3:5:4)');
+    const firstInversion = parseSource('reflect(3:5:4)');
     expect(firstInversion[0].totalCents()).toBeCloseTo(-884.358713); // major sixth
     expect(firstInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
 
   it('can spell the just minor chord in second inversion with root on 1/1', () => {
-    const secondInversion = parseSource('reflected(6:5:8)');
+    const secondInversion = parseSource('reflect(6:5:8)');
     expect(secondInversion[0].totalCents()).toBeCloseTo(315.641287); // major sixth
     expect(secondInversion[1].totalCents()).toBeCloseTo(-498.044999); // perfect fourth
   });
@@ -498,23 +498,10 @@ describe('SonicWeave standard library', () => {
   });
 
   it('has a copying repeater', () => {
-    const bigScale = expand('repeated(2, 3::6)');
+    const bigScale = expand('repeat(2, 3::6)');
     // XXX: Would be cool if that last 4/1 was 12/3, but can't come up
     // with formatting rules that wouldn't mess up everything else.
     expect(bigScale).toEqual(['4/3', '5/3', '6/3', '8/3', '10/3', '4/1']);
-  });
-
-  it('can label intervals after generating', () => {
-    const scale = parseSource(`
-      4/3
-      3/2
-      2
-      label(["fourth", "fifth", "octave"])
-    `);
-    expect(scale).toHaveLength(3);
-    expect(scale[0].label).toBe('fourth');
-    expect(scale[1].label).toBe('fifth');
-    expect(scale[2].label).toBe('octave');
   });
 
   it('preserves color upon reflection', () => {
@@ -757,8 +744,8 @@ describe('SonicWeave standard library', () => {
       const ls = labelsOf()
       clear()
       3::6
-      label(cs)
-      label(ls)
+      £ cs
+      £ ls
     }`);
     expect(scale).toEqual(['4/3 "one" red', '5/3 "two"', '6/3']);
   });
@@ -808,8 +795,8 @@ describe('SonicWeave standard library', () => {
 
   it('has inline labeling', () => {
     const pythagoras = expand(`
-      labeled(['F', 'C', 'G', 'D', 'A', 'E', 'B'], [3^i rdc 2 white for i of [-2..4]])
-      labeled(['Gb', 'Db', 'Ab', 'Eb', 'Bb'], [3^i rdc 2 black for i of [-7..-3]])
+      ['F', 'C', 'G', 'D', 'A', 'E', 'B'] [3^i rdc 2 white for i of [-2..4]]
+      ['Gb', 'Db', 'Ab', 'Eb', 'Bb'] [3^i rdc 2 black for i of [-7..-3]]
       sort()
     `);
     expect(pythagoras).toEqual([
@@ -920,15 +907,6 @@ describe('SonicWeave standard library', () => {
     ]);
   });
 
-  it('can paint the whole scale', () => {
-    const scale = expand('3::6;white;label("bob")');
-    expect(scale).toEqual([
-      '4/3 "bob" white',
-      '5/3 "bob" white',
-      '6/3 "bob" white',
-    ]);
-  });
-
   it('can detect domains (linear)', () => {
     const scale = expand(
       '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i'
@@ -1008,12 +986,12 @@ describe('SonicWeave standard library', () => {
   });
 
   it('is stacked', () => {
-    const scale = expand('stacked([5/4, 6/5])');
+    const scale = expand('stack([5/4, 6/5])');
     expect(scale).toEqual(['5/4', '3/2']);
   });
 
   it("isn't that stacked actually", () => {
-    const scale = expand('unstacked([5/4, 3/2])');
+    const scale = expand('unstack([5/4, 3/2])');
     expect(scale).toEqual(['5/4', '6/5']);
   });
 

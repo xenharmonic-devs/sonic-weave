@@ -1,15 +1,14 @@
 export const PRELUDE_VOLATILES = `
 (* XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn(). *)
-riff reduce(scale = $$) {
-  "Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.";
-  if (not scale) {
-    return;
-  }
+riff reduce(scale = ££) {
+  "Obtain a copy of the popped/given scale reduced by its equave. Issue a warning if the scale was already reduced.";
+  if (not scale)
+    return [];
   if (every(scale >= 1 vand scale <= scale[-1])) {
     warn("The scale was already reduced by its equave. Did you mean 'simplify'?");
-    return;
+    return scale[..];
   }
-  equaveReduce(scale);
+  return equaveReduce(scale);
 }
 `;
 
@@ -262,42 +261,32 @@ riff mul(...factors) {
   return prod factors;
 }
 
-riff stackLinear(array = $$) {
-  "Cumulatively sum the numbers of the current/given array.";
-  $ = array;
+riff stackLinear(array = ££) {
+  "Cumulatively sum the numbers of the popped/given array.";
+  array;
   let i = 0r;
   const len = real(length($));
   while (++i < len)
     $[i] ~+= $[i-1r];
-  return;
 }
 
 riff cumsum(array) {
   "Calculate the cumulative sums of the terms in the array.";
-  array;
-  stackLinear();
+  return stackLinear(array);
 }
 
-riff stack(array = $$) {
-  "Cumulatively stack the current/given intervals on top of each other.";
-  $ = array;
+riff stack(array = ££) {
+  "Cumulatively stack the popped/given intervals on top of each other.";
+  array;
   let i = 0r;
   const len = real(length($));
   while (++i < len)
     $[i] ~*= $[i-1r];
-  return;
 }
 
 riff cumprod(array) {
   "Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.";
-  array;
-  stack();
-}
-
-riff stacked(array) {
-  "Obtain a copy of the current/given intervals cumulatively stacked on top of each other.";
-  array;
-  stack();
+  return stack(array);
 }
 
 riff diff(array) {
@@ -308,85 +297,49 @@ riff diff(array) {
     $[i] ~-= $[i - 1r];
 }
 
-riff unstack(array = $$) {
-  "Unstack the current/given scale into steps.";
-  $ = array;
+riff unstack(array = ££) {
+  "Unstack the popped/given scale into steps.";
+  array;
   let i = real(length($));
   while (--i)
     $[i] ~%= $[i - 1r];
-  return;
 }
 
 riff geodiff(array) {
   "Calculate the geometric differences between the factors.";
-  array;
-  unstack();
+  return unstack(array);
 }
 
-riff unstacked(array) {
-  "Calculate the relative steps in the current/given scale.";
+riff unperiostack(array = ££) {
+  "Convert the popped/given periodic sequence of steps into inflections of the last interval as the guide generator.";
   array;
-  unstack();
-}
-
-riff unperiostack(array = $$) {
-  "Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.";
-  $ = array;
   const first = $[0] ~% $[-1];
   let i = real(length($));
   while (--i)
     $[i] ~%= $[i - 1r];
   $[0] = first;
-  return;
 }
 
 riff periodiff(array) {
   "Calculate the geometric differences of the periodic interval pattern.";
-  array;
-  unperiostack();
+  return unperiostack(array);
 }
 
-riff periostack(guideGenerator, array = $$) {
-  "Stack the current/given inflections along with the guide generator into a periodic sequence of steps.";
+riff periostack(guideGenerator, array = ££) {
+  "Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.";
   if (not isInterval(guideGenerator))
     throw "Guide generator must be an interval.";
-  $ = array;
+  array;
   $[0] ~*= guideGenerator;
   let i = 0r;
   const len = real(length($));
   while (++i < len)
     $[i] ~*= $[i-1r];
-  return;
 }
 
 riff antiperiodiff(constantOfIntegration, array) {
   "Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.";
-  array;
-  periostack(constantOfIntegration);
-}
-
-riff label(labels, scale = $$) {
-  "Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.";
-  if (isArray(labels)) {
-    let i = -1r;
-    const len = real(length(labels) min length(scale));
-    while (++i < len)
-      scale[i] = scale[i] labels[i];
-  } else {
-    remap(i => i labels, scale);
-  }
-}
-
-riff labeled(labels, scale = $$) {
-  "Apply labels (or colors) from the first array to a copy of the current/given scale. Can also apply a single color to the whole scale.";
-  if (isArray(labels)) {
-    for (const [i, l] of zip(scale, labels)) {
-      i l;
-    }
-    scale[length(labels)..];
-  } else {
-    scale labels;
-  }
+  return periostack(constantOfIntegration, array);
 }
 
 riff enumerate(array = $$) {
@@ -402,7 +355,7 @@ riff tune(a, b, numIter = 1, weighting = 'tenney') {
     const y = a + b;
     const z = 2 * b - a;
 
-    [a, b] = sorted([a, b, x, y, z], (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
+    [a, b] = sort([a, b, x, y, z], (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
   }
   return a;
 }
@@ -430,7 +383,7 @@ riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
       b + c - a,
     ];
 
-    [a, b, c] = sorted(combos, (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
+    [a, b, c] = sort(combos, (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
   }
   return a;
 }
@@ -478,9 +431,9 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = abs $[-1];
   if (equave == 2)
-    £ \\ divisions;
+    return $ \\ divisions;
   else
-    £ \\ divisions ed equave;
+    return $ \\ divisions ed equave;
 }
 
 riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHint = niente, periodSizeHint = niente) {
@@ -506,10 +459,10 @@ riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHin
   const periods = ceil(hint ~/_ periodSizeHint) - 1;
   const scale = generator ~^ [-down..up] ~% period ~^ periods;
   const scales = zip(scale, hint ~rdc periodSizeHint);
-  sort(scales, (a, b) => compare(a[1], b[1]));
+  sortInPlace(scales, (a, b) => compare(a[1], b[1]));
   [a for [a, b] of scales];
   period vor pop();
-  repeat(numPeriods);
+  return repeat(numPeriods);
 }
 
 riff cps(factors, count, equave = 2, withUnity = false) {
@@ -521,7 +474,7 @@ riff cps(factors, count, equave = 2, withUnity = false) {
     ground();
   equave;
   equaveReduce();
-  sort();
+  return sort();
 }
 
 riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, period = 2) {
@@ -557,17 +510,13 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     const axis = generator ~^ [-down..up];
     axis[down] = bleach(axis[down]);
 
-    axis ~tns~ popAll($$);
+    axis ~tns~ ££;
   }
 
-  if (basisSizeHints == niente and equaveSizeHint == niente) {
-    $ = $$;
-    £ ~rdc equave;
-    sort();
-    return $;
-  }
+  if (basisSizeHints == niente and equaveSizeHint == niente)
+    return sort($ ~rdc equave);
 
-  const scale = popAll();
+  const scale = £;
   basis = basis_;
   ups = ups_;
   downs = downs_;
@@ -584,15 +533,14 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     const up = pop(ups);
     const down = pop(downs);
 
-    generator ~^ [-down..up] ~tns~ popAll($$);
+    generator ~^ [-down..up] ~tns~ ££;
   }
 
-  const hint = popAll();
+  const hint = £;
   const equaves = ceil(hint ~/_ equaveSizeHint) - 1;
 
   const scales = zip(scale ~% equave ~^ equaves, hint ~rdc equaveSizeHint);
-  sort(scales, (a, b) => compare(a[1], b[1]));
-  [a for [a, b] of scales];
+  [a for [a, b] of sort(scales, (a, b) => compare(a[1], b[1]))];
 }
 
 riff eulerGenus(guide, root = 1, equave = 2) {
@@ -621,10 +569,11 @@ riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
   b1 ~^ s1 ~* b2 ~^ s2;
 
   sort();
-  if (not withUnity) ground();
+  if (not withUnity)
+    ground();
   equave;
   equaveReduce();
-  sort();
+  return sort();
 }
 
 riff gs(generators, size, period = 2, numPeriods = 1) {
@@ -635,7 +584,7 @@ riff gs(generators, size, period = 2, numPeriods = 1) {
   period;
   equaveReduce();
   sort();
-  repeat(numPeriods);
+  return repeat(numPeriods);
 }
 
 riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
@@ -654,12 +603,12 @@ riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
     if (length($$) > maxSize) {
       throw "No constant structure found before reaching maximum size.";
     }
-    sort($$);
+    sortInPlace($$);
     if (hasConstantStructure($$)) {
       void(--ordinal);
     }
   }
-  repeat(numPeriods);
+  return repeat(numPeriods);
 }
 
 riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2) {
@@ -696,10 +645,10 @@ riff concordanceShell(denominator, maxNumerator, divisions = 12, tolerance = 5.0
     }
   }
   equave = divisions * step;
-  if (equave not of result) {
+  if (equave not of result)
     equave;
-  }
-  sorted(result);
+  result;
+  return sort();
 }
 
 riff oddLimit(limit, equave = 2) {
@@ -708,10 +657,8 @@ riff oddLimit(limit, equave = 2) {
   while (++remainder < equave) {
     [remainder, remainder ~+ equave .. limit];
   }
-  const odds = popAll();
-  [n % d for n of odds for d of odds if gcd(n, d) == 1];
-  £ rdc equave;
-  sort();
+  [n % d for n of £ for d of £ if gcd(n, d) == 1];
+  return sort($ rdc equave);
 }
 
 riff realizeWord(word, sizes, equave = niente) {
@@ -750,100 +697,64 @@ riff realizeWord(word, sizes, equave = niente) {
   for (const letter of word) {
     sizes[letter];
   }
-  stack();
+  return stack();
 }
 
 (** Scale modification **)
-riff equaveReduce(scale = $$) {
-  "Reduce the current/given scale by its equave.";
-  remap(i => i ~rdc scale[-1], scale);
+riff equaveReduce(scale = ££) {
+  "Obtain a copy of the popped/given scale reduced by its equave.";
+  return scale ~rdc scale[-1];
 }
 
-riff equaveReduced(scale = $$) {
-  "Obtain a copy of the current/given scale reduced by its equave.";
+riff revpose(scale = ££) {
+  "Obtain a copy of the popped/given scale that sounds in the opposite direction."
   scale;
-  equaveReduce();
-}
-
-riff reduced(scale = $$) {
-  "Obtain a copy of the current/given scale reduced by its equave. Issue a warning if the scale was already reduced.";
-  scale;
-  reduce();
-}
-
-riff revpose(scale = $$) {
-  "Change the sounding direction. Converts a descending scale to an ascending one."
-  $ = scale;
   const equave = pop();
   £ ~% equave;
   reverse();
   %equave;
-  return;
 }
 
-riff revposed(scale = $$) {
-  "Obtain a copy of the current/given scale that sounds in the opposite direction."
+riff retrovert(scale = ££) {
+  "Obtain an retroverted copy of the popped/given scale (negative harmony i.e. reflect and transpose).";
   scale;
-  revpose();
-}
-
-riff retrovert(scale = $$) {
-  "Retrovert the current/given scale (negative harmony i.e reflect and transpose).";
-  $ = scale;
   const equave = pop();
   equave %~ £;
   reverse();
   equave;
-  return;
 }
 
-riff retroverted(scale = $$) {
-  "Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).";
-  scale;
-  retrovert();
+riff reflect(scale = ££) {
+  "Obtain a copy of the popped/given scale reflected about unison.";
+  return %~scale;
 }
 
-riff reflect(scale = $$) {
-  "Reflect the current/given scale about unison.";
-  remap(i => %~i, scale);
-}
-
-riff reflected(scale = $$) {
-  "Obtain a copy of the current/given scale reflected about unison.";
-  map(i => %~i, scale);
-}
-
-riff u(scale = $$) {
-  "Obtain a undertonal reflection of the current/given overtonal scale.";
-  return reflected(scale)
+riff u(scale = ££) {
+  "Obtain a undertonal reflection of the popped/given overtonal scale.";
+  return reflect(scale);
 };
 
-riff o(scale = $$) {
-  "Obtain a copy of the current/given scale in the default overtonal interpretation.";
+riff o(scale = ££) {
+  "Obtain a copy of the popped/given scale in the default overtonal interpretation.";
   scale;
 }
 
-riff rotate(onto = 1, scale = $$) {
-  "Rotate the current/given scale onto the given degree.";
-  $ = scale;
+riff rotate(onto = 1, scale = ££) {
+  "Obtain a copy of the popped/given scale rotated onto the given degree.";
+  scale;
   onto = real(onto mod length($));
-  if (not onto) return;
+  if (not onto)
+    return $;
   const equave = $[-1];
-  while (--onto) equave *~ shift();
+  while (--onto)
+    equave *~ shift();
   const root = shift();
   £ ~% root;
   equave colorOf(root) labelOf(root);
-  return;
 }
 
-riff rotated(onto = 1, scale = $$) {
-  "Obtain a copy of the current/given scale rotated onto the given degree.";
-  scale;
-  rotate(onto);
-}
-
-riff repeated(times = 2, scale = $$) {
-  "Stack the current/given scale on top of itself.";
+riff repeat(times = 2, scale = ££) {
+  "Stack the popped/given scale on top of itself.";
   if (not times)
     return [];
   scale;
@@ -852,17 +763,8 @@ riff repeated(times = 2, scale = $$) {
     scale ~* level;
 }
 
-riff repeat(times = 2, scale = $$) {
-  "Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.";
-  $ = scale;
-  const segment = $[..];
-  clear();
-  repeated(times, segment);
-  return;
-}
-
-riff repeatedLinear(times = 2, scale = $$) {
-  "Repeat the current/given scale shifted linearly each time.";
+riff repeatLinear(times = 2, scale = ££) {
+  "Repeat the popped/given scale shifted linearly each time.";
   if (not times)
     return [];
   scale;
@@ -871,55 +773,28 @@ riff repeatedLinear(times = 2, scale = $$) {
     (scale ~- 1) ~+ level ~+ 1;
 }
 
-riff repeatLinear(times = 2, scale = $$) {
-  "Repeat the current/given scale shifted linearly each time. Clears the scale if the number of repeats is zero.";
-  $ = scale;
-  const segment = $[..];
-  clear();
-  repeatedLinear(times, segment);
-  return;
+riff flatRepeat(times = 2, scale = ££) {
+  "Repeat the popped/given intervals as-is without accumulating equaves.";
+  return arrayRepeat(times, scale);
 }
 
-riff flatRepeat(times = 2, scale = $$) {
-  "Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.";
-  $ = scale;
-  const segment = $[..];
-  clear();
-  arrayRepeat(times, segment);
-  return;
-}
-
-riff ground(scale = $$) {
-  "Use the first interval in the current/given scale as the implicit unison.";
-  $ = scale;
-  const root = shift();
-  £ ~% root;
-  return;
-}
-
-riff grounded(scale = $$) {
-  "Obtain a copy of the current/given scale that uses the first interval as the implicit unison.";
+riff ground(scale = ££) {
+  "Obtain a copy of the popped/given scale that uses the first interval as the implicit unison.";
   scale;
-  ground();
+  const root = shift();
+  return $ ~% root;
 }
 
-riff elevate(scale = $$) {
-  "Remove denominators and make the root explicit in the current/given scale.";
-  $ = scale;
+riff elevate(scale = ££) {
+  "Obtain a copy of the popped/given scale with denominators removed and the root made explicit.";
+  scale;
   unshift(sanitize($[-1]~^0));
   const root = sanitize(%~gcd());
-  £ ~* root;
-  return;
+  return $ ~* root;
 }
 
-riff elevated(scale = $$) {
-  "Obtain a copy of the current/given scale with denominators removed and the root made explicit.";
-  scale;
-  elevate();
-}
-
-riff subsetOf(degrees, scale = $$) {
-  "Obtain a copy of the current/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.";
+riff subset(degrees, scale = ££) {
+  "Obtain a copy of the popped/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.";
   scale = scale[..];
   const equave = pop(scale);
   unshift(equave ~^ 0, scale);
@@ -928,61 +803,30 @@ riff subsetOf(degrees, scale = $$) {
   equave;
 }
 
-riff subset(degrees, scale = $$) {
-  "Only keep the given degrees of the current/given scale. Omitting the zero degree rotates the scale.";
-  $ = scale;
-  const result = subsetOf(degrees);
-  clear();
-  result;
-  return;
+riff toHarmonics(fundamental, scale = ££) {
+  "Obtain a copy of the popped/given scale quantized to harmonics of the given fundamental.";
+  return scale to~ %~fundamental colorOf(scale) labelOf(scale);
 }
 
-riff toHarmonics(fundamental, scale = $$) {
-  "Quantize the current/given scale to harmonics of the given fundamental.";
-  $ = scale;
-  £ to~ %~fundamental colorOf(£) labelOf(£);
-  return;
-}
-
-riff harmonicsOf(fundamental, scale = $$) {
-  "Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.";
-  scale;
-  toHarmonics();
-}
-
-riff toSubharmonics(overtone, scale = $$) {
-  "Quantize the current/given scale to subharmonics of the given overtone.";
-  $ = scale;
-  %~(%~£ to~ %~overtone) colorOf(£) labelOf(£);
-  return;
-}
-
-riff subharmonicsOf(overtone, scale = $$) {
+riff toSubharmonics(overtone, scale = ££) {
   "Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.";
-  scale;
-  toSubharmonics();
+  return %~(%~scale to~ %~overtone) colorOf(scale) labelOf(scale);
 }
 
-riff equalize(divisions, scale = $$) {
-  "Quantize the current/given scale to given equal divisions of its equave.";
-  $ = scale;
+riff equalize(divisions, scale = ££) {
+  "Obtain a copy of the popped/given scale quantized to given equal divisions of its equave.";
+  scale;
   let step = 1 \\ divisions;
   if ($[-1] <> 2)
     step ed= $[-1];
-  £ by~ step colorOf(£) labelOf(£);
-  return;
+  return $ by~ step colorOf($) labelOf($);
 }
 
-riff equalized(divisions, scale = $$) {
-  "Obtain a copy of the current/given scale quantized to given equal divisions of its equave.";
+riff mergeOffset(offsets, overflow = 'drop', scale = ££) {
+  "Obtain a copy of the popped/given scale with the given offset or polyoffset merged into it. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
+  if (not isArray(offsets))
+    offsets = [offsets];
   scale;
-  equalize();
-}
-
-riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
-  "Merge the given offset or polyoffset of the current/given scale onto itself. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
-  if (not isArray(offsets)) offsets = [offsets];
-  $ = scale;
   const equave = pop();
 
   unshift(equave ~^ 0);
@@ -1002,49 +846,31 @@ riff mergeOffset(offsets, overflow = 'drop', scale = $$) {
   if (overflow <> 'keep') {
     equave;
   }
-  keepUnique();
-  return;
+  return keepUnique();
 }
 
-riff withOffset(offsets, overflow = 'drop', scale = $$) {
-  "Obtain a copy of the current/given scale with the given offset or polyoffset merged into it. \`overflow\` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.";
+riff stretch(amount, scale = ££) {
+  "Obtain a copy of the popped/given scale streched by the given amount. A value of \`1\` corresponds to no change.";
+  return scale ~^ amount;
+}
+
+riff randomVariance(amount, varyEquave = false, scale = ££) {
+  "Obtain a copy of the popped/given scale with random variance added.";
   scale;
-  mergeOffset(offsets, overflow);
-}
-
-riff stretch(amount, scale = $$) {
-  "Stretch the current/given scale by the given amount. A value of \`1\` corresponds to no change.";
-  $ = scale;
-  £ ~^ amount;
-  return;
-}
-
-riff stretched(amount, scale = $$) {
-  "Obtain a copy of the current/given scale streched by the given amount. A value of \`1\` corresponds to no change.";
-  scale ~^ amount;
-}
-
-riff randomVariance(amount, varyEquave = false, scale = $$) {
-  "Add random variance to the current/given scale.";
-  $ = scale;
   let equave;
-  if (not varyEquave) equave = pop();
+  if (not varyEquave)
+    equave = pop();
   i => i ~* (amount ~^ (2 * random() - 1));
-  if (not varyEquave) equave;
-  return;
+  if (not varyEquave)
+    equave;
 }
 
-riff randomVaried(amount, varyEquave = false, scale = $$) {
-  "Obtain a copy of the current/given scale with random variance added.";
-  scale;
-  randomVariance(amount, varyEquave);
-}
-
-riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
-  "Obtain a copy of the current/given scale where groups of intervals separated by \`tolerance\` are coalesced into one.\\
+riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = ££) {
+  "Obtain a copy of the popped/given scale where groups of intervals separated by \`tolerance\` are coalesced into one.\\
   \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.\\
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
-  if (not scale) return [];
+  if (not scale)
+    return [];
 
   let last;
   let group = [];
@@ -1061,11 +887,9 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
       } else if (action == 'geoavg') {
         geoavg(...group);
       } else if (action == 'wilson') {
-        sort(group, (a, b) => wilsonHeight(a) - wilsonHeight(b));
-        group[0];
+        sort(group, (a, b) => wilsonHeight(a) - wilsonHeight(b))[0];
       } else {
-        sort(group, (a, b) => tenneyHeight(a) - tenneyHeight(b));
-        group[0];
+        sort(group, (a, b) => tenneyHeight(a) - tenneyHeight(b))[0];
       }
       group = [];
     }
@@ -1079,24 +903,14 @@ riff coalesced(tolerance = 3.5, action = 'simplest', preserveBoundary = false, s
       void(pop($$));
   }
   scale[-1];
-  if (length(scale) == 1) return;
+  if (length(scale) == 1)
+    return $;
   while ($[-1] ~= $[-2])
     void(pop());
 }
 
-riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = $$) {
-  "Coalesce intervals in the current/given scale separated by \`tolerance\` (default 3.5 cents) into one. \\
-   \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.\\
-   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
-  $ = scale;
-  scale = $[..];
-  clear();
-  coalesced(tolerance, action, preserveBoundary, scale);
-  return;
-}
-
-riff replaced(interval, replacement, scale = $$) {
-  "Obtain a copy of the current/given scale with occurences of \`interval\` replaced by \`replacement\`.";
+riff replace(interval, replacement, scale = ££) {
+  "Obtain a copy of the popped/given scale with occurences of \`interval\` replaced by \`replacement\`.";
   for (const existing of scale) {
     if (existing == interval) {
       replacement;
@@ -1106,46 +920,22 @@ riff replaced(interval, replacement, scale = $$) {
   }
 }
 
-riff replace(interval, replacement, scale = $$) {
-  "Replace occurences of \`interval\` in the current/given scale by \`replacement\`.";
-  $ = scale;
-  scale = $[..];
-  clear();
-  replaced(interval, replacement, scale);
-  return;
-}
-
-riff replaceStep(step, replacement, scale = $$) {
-  "Replace relative occurences of \`step\` in the current/given scale by \`replacement\`.";
-  $ = scale;
-  unstack();
+riff replaceStep(step, replacement, scale = ££) {
+  "Obtain a copy of the popped/given scale with relative occurences of \`step\` replaced by \`replacement\`.";
+  unstack(scale);
   replace(step, replacement);
-  stack();
-  return;
+  return stack();
 }
 
-riff stepReplaced(step, replacement, scale = $$) {
-  "Obtain a copy of the current/given scale with relative occurences of \`step\` replaced by \`replacement\`.";
-  return cumprod(replaced(step, replacement, geodiff(scale)));
-}
-
-riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = $$) {
-  "Reduce the current/given scale by its last interval, sort the result and filter out duplicates.\\
+riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = ££) {
+  "Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out.\\
   If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.\\
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
-  $ = scale;
-  equaveReduce();
-  if (tolerance == niente) keepUnique();
+  equaveReduce(scale);
+  if (tolerance == niente)
+    keepUnique();
   sort();
-  if (tolerance <> niente) coalesce(tolerance, action, preserveBoundary);
-  return;
-}
-
-riff organized(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = $$) {
-  "Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out.\\
-  If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.\\
-  If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
-  scale;
-  organize(tolerance, action, preserveBoundary);
+  if (tolerance <> niente)
+    coalesce(tolerance, action, preserveBoundary);
 }
 `;

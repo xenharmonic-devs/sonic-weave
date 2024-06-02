@@ -27,7 +27,7 @@ import {
 } from '../monzo';
 import {type ExpressionVisitor} from '../parser';
 import {MosOptions, mos, nthNominal} from 'moment-of-symmetry';
-import {expressionToString} from '../ast';
+import {Expression, expressionToString} from '../ast';
 import {
   BasisElement,
   FJSFlavor,
@@ -65,7 +65,7 @@ import {
   tenneyHeight as pubTenney,
   wilsonHeight as pubWilson,
   track as pubTrack,
-  sort as pubSort,
+  sortInPlace as pubSortInPlace,
   repr as pubRepr,
   str as pubStr,
   centsColor as pubCentsColor,
@@ -76,6 +76,18 @@ import {scaleMonzos} from '../diamond-mos';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
+
+const PARENT_SCALE: Record<string, Expression> = {
+  // Only one of these ends up being used.
+  scale: {
+    type: 'Identifier',
+    id: '$$',
+  },
+  array: {
+    type: 'Identifier',
+    id: '$$',
+  },
+};
 
 // == Constants
 const E = new Interval(TimeReal.fromValue(Math.E), 'linear');
@@ -1223,11 +1235,12 @@ flatten.__doc__ =
 flatten.__node__ = builtinNode(flatten);
 
 function clear(this: ExpressionVisitor, scale?: Interval[]) {
+  // Remember that built-ins don't have full scope construction so this is the parent scale.
   scale ??= this.currentScale;
   scale.length = 0;
 }
 clear.__doc__ = 'Remove the contents of the current/given scale.';
-clear.__node__ = builtinNode(clear);
+clear.__node__ = builtinNode(clear, PARENT_SCALE);
 
 function tail(
   this: ExpressionVisitor,
@@ -1717,7 +1730,10 @@ Object.defineProperty(hasConstantStructure_, 'name', {
 });
 hasConstantStructure_.__doc__ =
   'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
-hasConstantStructure_.__node__ = builtinNode(hasConstantStructure_);
+hasConstantStructure_.__node__ = builtinNode(
+  hasConstantStructure_,
+  PARENT_SCALE
+);
 
 function stepString_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
@@ -1731,7 +1747,7 @@ Object.defineProperty(stepString_, 'name', {
 });
 stepString_.__doc__ =
   'Obtain the step string associated with the scale e.g. "LLsLLLs" for Ionian.';
-stepString_.__node__ = builtinNode(stepString_);
+stepString_.__node__ = builtinNode(stepString_, PARENT_SCALE);
 
 function slice(
   array: string | SonicWeavePrimitive[],
@@ -1891,39 +1907,43 @@ function maximum(
 maximum.__doc__ = 'Obtain the argument with the maximum value.';
 maximum.__node__ = builtinNode(maximum);
 
-function sort(
+function sortInPlace(
   this: ExpressionVisitor,
   scale?: SonicWeaveValue,
   compareFn?: SonicWeaveFunction
 ) {
   // XXX: The implementation works for strings, we just cheat the types here.
-  pubSort.bind(this)(scale as Interval[], compareFn);
+  pubSortInPlace.bind(this)(scale as Interval[], compareFn);
 }
-sort.__doc__ = 'Sort the current/given scale in ascending order.';
-sort.__node__ = builtinNode(sort);
+sortInPlace.__doc__ = 'Sort the current/given scale in ascending order.';
+sortInPlace.__node__ = builtinNode(sortInPlace, PARENT_SCALE);
 
 /**
- * Obtain a sorted copy of the current/given scale in ascending order.
+ * Obtain a sorted copy of the popped/given scale in ascending order.
  * @param this {@link ExpressionVisitor} instance providing the current scale and context for comparing across echelons.
  * @param scale Musical scale to sort (defaults to context scale).
  * @param compareFn SonicWeave riff for comparing elements.
  */
-function sorted(
+function sort(
   this: ExpressionVisitor,
   scale?: SonicWeavePrimitive[],
   compareFn?: SonicWeaveFunction
 ) {
-  scale ??= this.currentScale;
+  // Remember that built-ins don't have full scope construction so this is the parent scale.
+  scale ??= this.popScale(false);
+  if (!Array.isArray(scale)) {
+    throw new Error('Only arrays can be sorted.');
+  }
   scale = [...scale];
-  sort.bind(this)(scale, compareFn);
+  sortInPlace.bind(this)(scale, compareFn);
   return scale;
 }
-sorted.__doc__ =
-  'Obtain a sorted copy of the current/given scale in ascending order.';
-sorted.__node__ = builtinNode(sorted);
+sort.__doc__ =
+  'Obtain a sorted copy of the popped/given scale in ascending order.';
+sort.__node__ = builtinNode(sort);
 
-function uniquesOf(this: ExpressionVisitor, scale?: SonicWeaveValue) {
-  scale ??= this.currentScale;
+function keepUnique(this: ExpressionVisitor, scale?: SonicWeaveValue) {
+  scale ??= this.popScale(false);
   if (!Array.isArray(scale)) {
     throw new Error('An array is required.');
   }
@@ -1939,17 +1959,8 @@ function uniquesOf(this: ExpressionVisitor, scale?: SonicWeaveValue) {
   }
   return result;
 }
-uniquesOf.__doc__ =
-  'Obtain a copy of the current/given scale with only unique intervals kept.';
-uniquesOf.__node__ = builtinNode(uniquesOf);
-
-function keepUnique(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
-  scale ??= this.currentScale;
-  const uniques = uniquesOf.bind(this)(scale);
-  scale.length = 0;
-  scale.push(...uniques);
-}
-keepUnique.__doc__ = 'Only keep unique intervals in the current/given scale.';
+keepUnique.__doc__ =
+  'Obtain a copy of the popped/given scale with only unique intervals kept.';
 keepUnique.__node__ = builtinNode(keepUnique);
 
 function automos(this: ExpressionVisitor) {
@@ -1981,22 +1992,24 @@ automos.__doc__ =
   'If the current scale is empty, generate absolute Diamond-mos notation based on the current config.';
 automos.__node__ = builtinNode(automos);
 
-function reverse(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
+function reverseInPlace(
+  this: ExpressionVisitor,
+  scale?: SonicWeavePrimitive[]
+) {
   scale ??= this.currentScale;
   scale.reverse();
 }
-reverse.__doc__ = 'Reverse the order of the current/given scale.';
-reverse.__node__ = builtinNode(reverse);
+reverseInPlace.__doc__ = 'Reverse the order of the current/given scale.';
+reverseInPlace.__node__ = builtinNode(reverseInPlace, PARENT_SCALE);
 
-function reversed(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
-  scale ??= this.currentScale;
+function reverse(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
+  scale ??= this.popScale(false);
   scale = [...scale];
-  reverse.bind(this)(scale);
+  reverseInPlace.bind(this)(scale);
   return scale;
 }
-reversed.__doc__ =
-  'Obtain a copy of the current/given scale in reversed order.';
-reversed.__node__ = builtinNode(reversed);
+reverse.__doc__ = 'Obtain a copy of the popped/given scale in reversed order.';
+reverse.__node__ = builtinNode(reverse);
 
 function pop(
   this: ExpressionVisitor,
@@ -2021,7 +2034,7 @@ function pop(
 }
 pop.__doc__ =
   'Remove and return the last interval in the current/given scale. Optionally an index to pop may be given.';
-pop.__node__ = builtinNode(pop);
+pop.__node__ = builtinNode(pop, PARENT_SCALE);
 
 function popAll(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   scale ??= this.currentScale;
@@ -2030,7 +2043,7 @@ function popAll(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   return result;
 }
 popAll.__doc__ = 'Remove and return all intervals in the current/given scale.';
-popAll.__node__ = builtinNode(popAll);
+popAll.__node__ = builtinNode(popAll, PARENT_SCALE);
 
 function push(
   this: ExpressionVisitor,
@@ -2060,7 +2073,7 @@ function push(
 }
 push.__doc__ =
   'Append an interval onto the current/given scale. Optionally an index to push after may be given.';
-push.__node__ = builtinNode(push);
+push.__node__ = builtinNode(push, PARENT_SCALE);
 
 function shift(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   scale ??= this.currentScale;
@@ -2071,7 +2084,7 @@ function shift(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
 }
 shift.__doc__ =
   'Remove and return the first interval in the current/given scale.';
-shift.__node__ = builtinNode(shift);
+shift.__node__ = builtinNode(shift, PARENT_SCALE);
 
 function unshift(
   this: ExpressionVisitor,
@@ -2084,7 +2097,7 @@ function unshift(
 }
 unshift.__doc__ =
   'Prepend an interval at the beginning of the current/given scale.';
-unshift.__node__ = builtinNode(unshift);
+unshift.__node__ = builtinNode(unshift, PARENT_SCALE);
 
 function insert(
   this: ExpressionVisitor,
@@ -2104,7 +2117,7 @@ function insert(
 }
 insert.__doc__ =
   'Insert an interval into the current/given scale keeping it sorted.';
-insert.__node__ = builtinNode(insert);
+insert.__node__ = builtinNode(insert, PARENT_SCALE);
 
 function dislodge(
   this: ExpressionVisitor,
@@ -2131,7 +2144,7 @@ function dislodge(
 }
 dislodge.__doc__ =
   'Remove and return the first element equal to the given one from the current/given scale.';
-dislodge.__node__ = builtinNode(dislodge);
+dislodge.__node__ = builtinNode(dislodge, PARENT_SCALE);
 
 function extend(
   this: ExpressionVisitor,
@@ -2167,7 +2180,7 @@ function length(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   return fromInteger(scale.length);
 }
 length.__doc__ = 'Return the number of intervals in the scale.';
-length.__node__ = builtinNode(length);
+length.__node__ = builtinNode(length, PARENT_SCALE);
 
 function map(
   this: ExpressionVisitor,
@@ -2182,7 +2195,7 @@ function map(
   );
 }
 map.__doc__ = 'Map a riff over the given/current scale producing a new scale.';
-map.__node__ = builtinNode(map);
+map.__node__ = builtinNode(map, PARENT_SCALE);
 
 function remap(
   this: ExpressionVisitor,
@@ -2197,7 +2210,7 @@ function remap(
 }
 remap.__doc__ =
   'Map a riff over the given/current scale replacing the contents.';
-remap.__node__ = builtinNode(remap);
+remap.__node__ = builtinNode(remap, PARENT_SCALE);
 
 function filter(
   this: ExpressionVisitor,
@@ -2213,7 +2226,7 @@ function filter(
 }
 filter.__doc__ =
   'Obtain a copy of the given/current scale containing values that evaluate to `true` according to the `tester` riff.';
-filter.__node__ = builtinNode(filter);
+filter.__node__ = builtinNode(filter, PARENT_SCALE);
 
 function distill(
   this: ExpressionVisitor,
@@ -2228,7 +2241,7 @@ function distill(
 }
 distill.__doc__ =
   'Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.';
-distill.__node__ = builtinNode(distill);
+distill.__node__ = builtinNode(distill, PARENT_SCALE);
 
 function arrayReduce(
   this: ExpressionVisitor,
@@ -2261,7 +2274,7 @@ function arrayReduce(
 }
 arrayReduce.__doc__ =
   'Reduce the given/current scale to a single value by the `reducer` riff which takes an accumulator, the current value, the current index and the array as arguments.';
-arrayReduce.__node__ = builtinNode(arrayReduce);
+arrayReduce.__node__ = builtinNode(arrayReduce, PARENT_SCALE);
 
 function arrayRepeat(
   this: ExpressionVisitor,
@@ -2277,10 +2290,11 @@ function arrayRepeat(
     return [];
   }
   scale ??= this.currentScale;
+  // XXX: Should these be independent copies?
   return [].concat(...Array(c).fill(scale));
 }
 arrayRepeat.__doc__ = 'Repeat the given/current array or string `count` times.';
-arrayRepeat.__node__ = builtinNode(arrayRepeat);
+arrayRepeat.__node__ = builtinNode(arrayRepeat, PARENT_SCALE);
 
 function some(
   this: ExpressionVisitor,
@@ -2298,7 +2312,7 @@ function some(
 }
 some.__doc__ =
   "Test whether at least one element in the array passes the test implemented by the provided function. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.";
-some.__node__ = builtinNode(some);
+some.__node__ = builtinNode(some, PARENT_SCALE);
 
 function every(
   this: ExpressionVisitor,
@@ -2316,7 +2330,7 @@ function every(
 }
 every.__doc__ =
   "Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.";
-every.__node__ = builtinNode(every);
+every.__node__ = builtinNode(every, PARENT_SCALE);
 
 /**
  * Obtain an array of `[key, value]` pairs of the record.
@@ -2599,12 +2613,11 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   random,
   randomCents,
   sort,
-  sorted,
+  sortInPlace,
   keepUnique,
-  uniquesOf,
   automos,
   reverse,
-  reversed,
+  reverseInPlace,
   pop,
   popAll,
   push,

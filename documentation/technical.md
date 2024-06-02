@@ -287,32 +287,72 @@ The Basic Latin block is listed in full. Other blocks only where used.
 | U+007D         | }     | Block end, record end |
 | U+007E         | ~     | Universal operator preference wing |
 | U+007F         | *DEL* | *N/A* |
-| TODO           | Â     | TODO |
-| TODO           | ⊕     | TODO |
-| TODO           | ⊖     | TODO |
-| TODO           | ×     | TODO |
-| TODO           | ÷     | TODO |
-| TODO           | ⊗     | TODO |
-| TODO           | √     | TODO |
-| TODO           | ∧     | TODO |
-| U+2228         | ∨     | TODO |
-| TODO           | °     | TODO |
-| TODO           | ¢     | TODO |
-| TODO           | €     | TODO |
-| TODO           | ¶     | TODO |
-| TODO           | ¼     | TODO |
-| TODO           | ½     | TODO |
-| TODO           | ¾     | TODO |
-| TODO           | 𝄪     | TODO |
-| TODO           | 𝄫     | TODO |
-| TODO           | 𝄳     | TODO |
-| TODO           | 𝄲     | TODO |
-| TODO           | ♯     | TODO |
-| TODO           | ‡     | TODO |
-| TODO           | ♮     | TODO |
-| TODO           | ♭     | TODO |
-| TODO           | ¥     | TODO |
-| TODO           | (Greek lowercase) | TODO |
+| U+00A2         | ¢     | Cents unit |
+| U+00A3         | £     | Popped scale |
+| U+00A5         | ¥     | Template argument |
+| U+00B0         | °     | Edosteps unit |
+| U+00B6         | ¶     | Pilcrowspoob (meme) |
+| U+00BC         | ¼     | One-quarter accidental prefix |
+| U+00BD         | ½     | Semi accidental prefix, interordinal interval |
+| U+00BE         | ¾     | Three-quarters accidental prefix |
+| U+00C2         | Â     | Augmented interval |
+| U+00D7         | ×     | Multiplication |
+| U+00F7         | ÷     | Unary inversion, binary division (loose binding) |
+| U+03B1         | α     | Semioctave pitch alpha |
+| U+03B2         | β     | Semioctave pitch beta |
+| U+03B3         | γ     | Semioctave pitch gamma |
+| U+03B4         | δ     | Semioctave pitch delta |
+| U+03B5         | ε     | Semioctave pitch epsilon |
+| U+03B6         | ζ     | Semioctave pitch zeta |
+| U+03B7         | η     | Semioctave pitch eta |
+| U+03B8         | θ     | *Reserved pitch theta* |
+| U+03B9         | ι     | *Reserved pitch iota* |
+| U+03BA         | κ     | *Reserved pitch kappa* |
+| U+03BB         | λ     | *Reserved pitch lambda* |
+| U+03BC         | μ     | *Reserved pitch mu* |
+| U+03BD         | ν     | *Reserved pitch nu* |
+| U+03BE         | ξ     | *Reserved pitch xi* |
+| U+03BF         | ο     | *Reserved pitch omicron* |
+| U+03C0         | π     | *Reserved pitch pi* |
+| U+03C1         | ρ     | *Reserved pitch rho* |
+| U+03C2         | ς     | *Reserved pitch final sigma* |
+| U+03C3         | σ     | *Reserved pitch sigma* |
+| U+03C4         | τ     | *Reserved pitch tau* |
+| U+03C5         | υ     | *Reserved pitch upsilon* |
+| U+03C6         | φ     | Semiquartal pitch phi |
+| U+03C7         | χ     | Semiquartal pitch chi |
+| U+03C8         | ψ     | Semiquartal pitch psi |
+| U+03C9         | ω     | Semiquartal pitch omega |
+| U+2021         | ‡     | Semisharp accidental |
+| U+20AC         | €     | Jorp (meme) |
+| U+2150         | ⅐     | One-seventh accidental prefix |
+| U+2151         | ⅑     | One-ninth accidental prefix |
+| U+2152         | ⅒     | One-tenth accidental prefix |
+| U+2153         | ⅓     | One-third accidental prefix |
+| U+2154         | ⅔     | Two-thirds accidental prefix |
+| U+2155         | ⅕     | One-fifth accidental prefix |
+| U+2156         | ⅖     | Two-fifths accidental prefix |
+| U+2157         | ⅗     | Three-fifths accidental prefix |
+| U+2158         | ⅘     | Four-fifths accidental prefix |
+| U+2159         | ⅙     | One-sixth accidental prefix |
+| U+215A         | ⅚     | Five-sixths accidental prefix |
+| U+215B         | ⅛     | One-eighth accidental prefix |
+| U+215C         | ⅜     | Three-eighths accidental prefix |
+| U+215D         | ⅝     | Five-eighths accidental prefix |
+| U+215E         | ⅞     | Seven-eighths accidental prefix |
+| U+221A         | √     | Unary square root |
+| U+2227         | ∧     | Unary up |
+| U+2228         | ∨     | Unary down |
+| U+226F         | ♯     | Sharp accidental |
+| U+2295         | ⊕     | Lens-addition |
+| U+2296         | ⊖     | Lens-subtraction |
+| U+2297         | ⊗     | Tensor product |
+| U+266E         | ♮     | Natural accidental |
+| U+266D         | ♭     | Flat accidental |
+| U+1D12A        | 𝄪     | Double-sharp accidental |
+| U+1D12B        | 𝄫     | Double-flat accidental |
+| U+1D133        | 𝄳     | Semiflat accidental |
+| U+1D132        | 𝄲     | Semisharp accidental |
 
 ## Next steps
 

@@ -102,7 +102,7 @@ Obtain an array of `[key, value]` pairs of the record.
 ### equaveOf(*val*)
 Return the equave of the val.
 
-### every(*array*, *test*)
+### every(*array = $$*, *test*)
 Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
 
 ### expm1(*x*)
@@ -216,8 +216,8 @@ The Just Intonation Point. Converts intervals to real cents.
 ### kCombinations(*set*, *k*)
 Obtain all k-sized combinations in a set
 
-### keepUnique(*scale = $$*)
-Only keep unique intervals in the current/given scale.
+### keepUnique(*scale = ££*)
+Obtain a copy of the popped/given scale with only unique intervals kept.
 
 ### labelAbsoluteFJS(*interval*, *flavor = ""*)
 Convert interval to absolute FJS and label without octaves. Color black if there are accidentals, white otherwise.
@@ -312,11 +312,11 @@ Map a riff over the given/current scale replacing the contents.
 ### repr(*value*)
 Obtain a string representation of the value (with color and label).
 
-### reverse(*scale = $$*)
-Reverse the order of the current/given scale.
+### reverse(*scale = ££*)
+Obtain a copy of the popped/given scale in reversed order.
 
-### reversed(*scale = $$*)
-Obtain a copy of the current/given scale in reversed order.
+### reverseInPlace(*scale = $$*)
+Reverse the order of the current/given scale.
 
 ### rgb(*red*, *green*, *blue*)
 RGB color (Red range 0-255, Green range 0-255, Blue range 0-255).
@@ -339,14 +339,14 @@ Calculate sin x.
 ### slice(*array*, *indexStart*, *indexEnd*)
 Obtain a slice of a string or scale between the given indices.
 
-### some(*array*, *test*)
+### some(*array = $$*, *test*)
 Test whether at least one element in the array passes the test implemented by the provided function. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
 
-### sort(*scale = $$*, *compareFn*)
-Sort the current/given scale in ascending order.
+### sort(*scale = ££*, *compareFn*)
+Obtain a sorted copy of the popped/given scale in ascending order.
 
-### sorted(*scale = $$*, *compareFn*)
-Obtain a sorted copy of the current/given scale in ascending order.
+### sortInPlace(*scale = $$*, *compareFn*)
+Sort the current/given scale in ascending order.
 
 ### stepSignature(*word*)
 Calculate the step signature of an entire scale word.
@@ -383,9 +383,6 @@ Transpose a matrix. For modal transposition see rotate().
 
 ### trunc(*interval*)
 Truncate value towards zero to the nearest integer.
-
-### uniquesOf(*scale = $$*)
-Obtain a copy of the current/given scale with only unique intervals kept.
 
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
@@ -455,11 +452,8 @@ Calculate the geometric difference of two intervals on a circle.
 ### circleDistance(*a*, *b*, *equave = 2*)
 Calculate the geometric distance of two intervals on a circle.
 
-### coalesce(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Coalesce intervals in the current/given scale separated by `tolerance` (default 3.5 cents) into one.    `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg' defaulting to 'simplest'.   If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
-
-### coalesced(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Obtain a copy of the current/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+### coalesce(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = ££*)
+Obtain a copy of the popped/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### colorsOf(*scale = $$*)
 Obtain an array of colors of the current/given scale.
@@ -494,26 +488,17 @@ Return the domain of the given interval as a callable converter.
 ### edColors(*divisions = 12*, *offset = 0*, *equave = 2*)
 Color every interval in the scale with hue repeating every step of an equal division of `equave`. `offset` rotates the hue wheel.
 
-### elevate(*scale = $$*)
-Remove denominators and make the root explicit in the current/given scale.
-
-### elevated(*scale = $$*)
-Obtain a copy of the current/given scale with denominators removed and the root made explicit.
+### elevate(*scale = ££*)
+Obtain a copy of the popped/given scale with denominators removed and the root made explicit.
 
 ### enumerate(*array = $$*)
 Produce an array of [index, element] pairs from the given current/given array.
 
-### equalize(*divisions*, *scale = $$*)
-Quantize the current/given scale to given equal divisions of its equave.
+### equalize(*divisions*, *scale = ££*)
+Obtain a copy of the popped/given scale quantized to given equal divisions of its equave.
 
-### equalized(*divisions*, *scale = $$*)
-Obtain a copy of the current/given scale quantized to given equal divisions of its equave.
-
-### equaveReduce(*scale = $$*)
-Reduce the current/given scale by its equave.
-
-### equaveReduced(*scale = $$*)
-Obtain a copy of the current/given scale reduced by its equave.
+### equaveReduce(*scale = ££*)
+Obtain a copy of the popped/given scale reduced by its equave.
 
 ### eulerGenus(*guide*, *root = 1*, *equave = 2*)
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
@@ -524,8 +509,8 @@ Calculate e raised to the power of x.
 ### fail(*message*)
 Throw the given message as an error.
 
-### flatRepeat(*times = 2*, *scale = $$*)
-Repeat the current/given intervals as-is without accumulating equaves. Clears the scale if the number of repeats is zero.
+### flatRepeat(*times = 2*, *scale = ££*)
+Repeat the popped/given intervals as-is without accumulating equaves.
 
 ### ftom(*freq*)
 Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).
@@ -536,17 +521,11 @@ Calculate the geometric mean of the factors.
 ### geodiff(*array*)
 Calculate the geometric differences between the factors.
 
-### ground(*scale = $$*)
-Use the first interval in the current/given scale as the implicit unison.
-
-### grounded(*scale = $$*)
-Obtain a copy of the current/given scale that uses the first interval as the implicit unison.
+### ground(*scale = ££*)
+Obtain a copy of the popped/given scale that uses the first interval as the implicit unison.
 
 ### gs(*generators*, *size*, *period = 2*, *numPeriods = 1*)
 Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.
-
-### harmonicsOf(*fundamental*, *scale = $$*)
-Obtain a copy of the current/given scale quantized to harmonics of the given fundamental.
 
 ### havg(*...terms*)
 Calculate the harmonic mean of the terms.
@@ -560,12 +539,6 @@ Calculate the square root of the sum of squares of the arguments.
 ### keys(*record*)
 Obtain an array of keys of the record.
 
-### label(*labels*, *scale = $$*)
-Apply labels (or colors) from the first array to the current/given scale. Can also apply a single color to the whole scale.
-
-### labeled(*labels*, *scale = $$*)
-Apply labels (or colors) from the first array to a copy of the current/given scale. Can also apply a single color to the whole scale.
-
 ### labelsOf(*scale = $$*)
 Obtain an array of labels of the current/given scale.
 
@@ -578,8 +551,8 @@ Calculate the logarithm of x base 10.
 ### log2(*x*)
 Calculate the logarithm of x base 2.
 
-### mergeOffset(*offsets*, *overflow = "drop"*, *scale = $$*)
-Merge the given offset or polyoffset of the current/given scale onto itself. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
+### mergeOffset(*offsets*, *overflow = "drop"*, *scale = ££*)
+Obtain a copy of the popped/given scale with the given offset or polyoffset merged into it. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 
 ### mos(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep = 2*, *sizeOfSmallStep = 1*, *up = niente*, *down = niente*, *equave = 2*)
 Generate a Moment-Of-Symmetry scale with the given number number of large and small steps.   `up` defines the brightness of the mode i.e. the number of major intervals from the root.   Alternatively `down` defines the darkness of the mode i.e. the number of minor intervals from the root.   The default `equave` is the octave `2/1`.
@@ -596,8 +569,8 @@ Convert interval to (relative) FJS using neutral comma flavors.
 ### numerator(*x*)
 Calculate the numerator of x in reduced form.
 
-### o(*scale = $$*)
-Obtain a copy of the current/given scale in the default overtonal interpretation.
+### o(*scale = ££*)
+Obtain a copy of the popped/given scale in the default overtonal interpretation.
 
 ### octaplex(*b0*, *b1*, *b2*, *b3*, *equave = 2*, *withUnity = false*)
 Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
@@ -608,11 +581,8 @@ Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive
 ### oddLimitOf(*x*, *equave = 2*)
 Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 
-### organize(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Reduce the current/given scale by its last interval, sort the result and filter out duplicates.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
-
-### organized(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = $$*)
-Obtain a copy of the current/given scale reduced by its last interval, sorted and with duplicates filtered out.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+### organize(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = ££*)
+Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.  The size hints are used to get the correct period reduction when generating a preimage.
@@ -620,8 +590,8 @@ Span a parallelotope by extending a basis combinatorically. `ups` defaults to al
 ### periodiff(*array*)
 Calculate the geometric differences of the periodic interval pattern.
 
-### periostack(*guideGenerator*, *array = $$*)
-Stack the current/given inflections along with the guide generator into a periodic sequence of steps.
+### periostack(*guideGenerator*, *array = ££*)
+Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.
 
 ### pow(*x*, *y*)
 Calculate x to the power of y.
@@ -629,11 +599,8 @@ Calculate x to the power of y.
 ### prod(*factors = $$*)
 Calculate the (linear) product of the factors or the current scale i.e. the logarithmic sum.
 
-### randomVariance(*amount*, *varyEquave = false*, *scale = $$*)
-Add random variance to the current/given scale.
-
-### randomVaried(*amount*, *varyEquave = false*, *scale = $$*)
-Obtain a copy of the current/given scale with random variance added.
+### randomVariance(*amount*, *varyEquave = false*, *scale = ££*)
+Obtain a copy of the popped/given scale with random variance added.
 
 ### range(*start*, *stop = niente*, *step = 1*)
 Obtain an array of integers from `start` to `stop - 1`. When only a single parameter is given `range(0, n)` is returned.
@@ -644,17 +611,11 @@ Create a finite segment of a Rank-2 scale by stacking the given generator agains
 ### realizeWord(*word*, *sizes*, *equave = niente*)
 Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes. One step size may be omitted and inferred based on the size of the `equave` (default `2`).
 
-### reduce(*scale = $$*)
-Reduce the current/given scale by its equave. Issue a warning if the scale was already reduced.
+### reduce(*scale = ££*)
+Obtain a copy of the popped/given scale reduced by its equave. Issue a warning if the scale was already reduced.
 
-### reduced(*scale = $$*)
-Obtain a copy of the current/given scale reduced by its equave. Issue a warning if the scale was already reduced.
-
-### reflect(*scale = $$*)
-Reflect the current/given scale about unison.
-
-### reflected(*scale = $$*)
-Obtain a copy of the current/given scale reflected about unison.
+### reflect(*scale = ££*)
+Obtain a copy of the popped/given scale reflected about unison.
 
 ### relin(*interval*)
 Convert interval to relative linear representation.
@@ -662,44 +623,26 @@ Convert interval to relative linear representation.
 ### relog(*interval*)
 Convert interval to relative logarithmic representation.
 
-### repeat(*times = 2*, *scale = $$*)
-Stack the current scale on top of itself. Clears the scale if the number of repeats is zero.
+### repeat(*times = 2*, *scale = ££*)
+Stack the popped/given scale on top of itself.
 
-### repeated(*times = 2*, *scale = $$*)
-Stack the current/given scale on top of itself.
+### repeatLinear(*times = 2*, *scale = ££*)
+Repeat the popped/given scale shifted linearly each time.
 
-### repeatedLinear(*times = 2*, *scale = $$*)
-Repeat the current/given scale shifted linearly each time.
+### replace(*interval*, *replacement*, *scale = ££*)
+Obtain a copy of the popped/given scale with occurences of `interval` replaced by `replacement`.
 
-### repeatLinear(*times = 2*, *scale = $$*)
-Repeat the current/given scale shifted linearly each time. Clears the scale if the number of repeats is zero.
+### replaceStep(*step*, *replacement*, *scale = ££*)
+Obtain a copy of the popped/given scale with relative occurences of `step` replaced by `replacement`.
 
-### replace(*interval*, *replacement*, *scale = $$*)
-Replace occurences of `interval` in the current/given scale by `replacement`.
+### retrovert(*scale = ££*)
+Obtain an retroverted copy of the popped/given scale (negative harmony i.e. reflect and transpose).
 
-### replaced(*interval*, *replacement*, *scale = $$*)
-Obtain a copy of the current/given scale with occurences of `interval` replaced by `replacement`.
+### revpose(*scale = ££*)
+Obtain a copy of the popped/given scale that sounds in the opposite direction.
 
-### replaceStep(*step*, *replacement*, *scale = $$*)
-Replace relative occurences of `step` in the current/given scale by `replacement`.
-
-### retrovert(*scale = $$*)
-Retrovert the current/given scale (negative harmony i.e reflect and transpose).
-
-### retroverted(*scale = $$*)
-Obtain an retroverted copy of the current/given scale (negative harmony i.e. reflect and transpose).
-
-### revpose(*scale = $$*)
-Change the sounding direction. Converts a descending scale to an ascending one.
-
-### revposed(*scale = $$*)
-Obtain a copy of the current/given scale that sounds in the opposite direction.
-
-### rotate(*onto = 1*, *scale = $$*)
-Rotate the current/given scale onto the given degree.
-
-### rotated(*onto = 1*, *scale = $$*)
-Obtain a copy of the current/given scale rotated onto the given degree.
+### rotate(*onto = 1*, *scale = ££*)
+Obtain a copy of the popped/given scale rotated onto the given degree.
 
 ### sanitize(*interval*)
 Get rid of interval formatting, color and label.
@@ -713,35 +656,20 @@ Calculate the hyperbolic sine of x.
 ### sqrt(*x*)
 Calculate the square root of the input.
 
-### stack(*array = $$*)
-Cumulatively stack the current/given intervals on top of each other.
+### stack(*array = ££*)
+Cumulatively stack the popped/given intervals on top of each other.
 
-### stacked(*array*)
-Obtain a copy of the current/given intervals cumulatively stacked on top of each other.
+### stackLinear(*array = ££*)
+Cumulatively sum the numbers of the popped/given array.
 
-### stackLinear(*array = $$*)
-Cumulatively sum the numbers of the current/given array.
-
-### stepReplaced(*step*, *replacement*, *scale = $$*)
-Obtain a copy of the current/given scale with relative occurences of `step` replaced by `replacement`.
-
-### stretch(*amount*, *scale = $$*)
-Stretch the current/given scale by the given amount. A value of `1` corresponds to no change.
-
-### stretched(*amount*, *scale = $$*)
-Obtain a copy of the current/given scale streched by the given amount. A value of `1` corresponds to no change.
+### stretch(*amount*, *scale = ££*)
+Obtain a copy of the popped/given scale streched by the given amount. A value of `1` corresponds to no change.
 
 ### subharmonics(*start*, *end*)
 Generate a subharmonic segment including the given start and end points.
 
-### subharmonicsOf(*overtone*, *scale = $$*)
-Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.
-
-### subset(*degrees*, *scale = $$*)
-Only keep the given degrees of the current/given scale. Omitting the zero degree rotates the scale.
-
-### subsetOf(*degrees*, *scale = $$*)
-Obtain a copy of the current/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.
+### subset(*degrees*, *scale = ££*)
+Obtain a copy of the popped/given scale with only the given degrees kept. Omitting the zero degree rotates the scale.
 
 ### sum(*terms = $$*)
 Calculate the (linear) sum of the terms or the current scale.
@@ -752,11 +680,11 @@ Calculate the hyperbolic tangent of x.
 ### tet(*divisions*, *equave = 2*)
 Generate an equal temperament with the given number of divisions of the given equave/octave.
 
-### toHarmonics(*fundamental*, *scale = $$*)
-Quantize the current/given scale to harmonics of the given fundamental.
+### toHarmonics(*fundamental*, *scale = ££*)
+Obtain a copy of the popped/given scale quantized to harmonics of the given fundamental.
 
-### toSubharmonics(*overtone*, *scale = $$*)
-Quantize the current/given scale to subharmonics of the given overtone.
+### toSubharmonics(*overtone*, *scale = ££*)
+Obtain a copy of the current/given scale quantized to subharmonics of the given overtone.
 
 ### trap(*message*)
 Produce a function that fails with the given message when called.
@@ -767,17 +695,14 @@ Find a combination of two vals that is closer to just intonation.
 ### tune3(*a*, *b*, *c*, *numIter = 1*, *weighting = "tenney"*)
 Find a combination of three vals that is closer to just intonation.
 
-### u(*scale = $$*)
-Obtain a undertonal reflection of the current/given overtonal scale.
+### u(*scale = ££*)
+Obtain a undertonal reflection of the popped/given overtonal scale.
 
-### unperiostack(*array = $$*)
-Convert the current/given periodic sequence of steps into inflections of the last interval as the guide generator.
+### unperiostack(*array = ££*)
+Convert the popped/given periodic sequence of steps into inflections of the last interval as the guide generator.
 
-### unstack(*array = $$*)
-Unstack the current/given scale into steps.
-
-### unstacked(*array*)
-Calculate the relative steps in the current/given scale.
+### unstack(*array = ££*)
+Unstack the popped/given scale into steps.
 
 ### values(*record*)
 Obtain an array of values of the record.
@@ -796,7 +721,4 @@ Calculate the Weil height of the interval. Natural logarithm of the maximum of n
 
 ### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = 2*)
 Generate a well-temperament by cumulatively modifying the pure fifth `3/2` (or a given generator) by fractions of the syntonic/given comma.
-
-### withOffset(*offsets*, *overflow = "drop"*, *scale = $$*)
-Obtain a copy of the current/given scale with the given offset or polyoffset merged into it. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 
