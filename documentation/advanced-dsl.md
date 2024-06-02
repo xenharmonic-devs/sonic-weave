@@ -27,6 +27,9 @@ Blocks start with a curly bracket `{`, have their own instance of a current scal
 ### Parent scale
 The current scale of the parent block can be accessed using `$$`.
 
+### Popped parent scale
+A copy of the current scale of the parent block can be obtained using `££` (or the ASCII variant `pop$$`) while simultaneously clearing the original.
+
 ## Defer
 Defer is used to execute a statement while exiting the current block.
 

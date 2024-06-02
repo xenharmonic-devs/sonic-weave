@@ -1844,4 +1844,41 @@ describe('SonicWeave parser', () => {
     visitor.visit(ast.body[0]);
     expect(() => visitor.visit(ast.body[1])).toThrow();
   });
+
+  it('can pop the current scale as a magic variable', () => {
+    const scale = expand(`
+      5/4
+      3/2
+      2/1
+      sorted(%£ rdc pop$[-1])
+    `);
+    expect(scale).toEqual(['4/3', '8/5', '2']);
+  });
+
+  it('can pop the parent scale as a magic variable', () => {
+    const scale = expand(String.raw`{
+      fn poppyStack(array = ££) {
+        "Cumulatively stack the current/given intervals on top of each other.";
+        array;
+        let i = 0r;
+        const len = real(length($));
+        while (++i < len)
+          $[i] ~*= $[i-1r];
+      }
+      2 \ 12
+      2 \ 12
+      1 \ 12
+      poppyStack();
+      $[-1] + poppyStack([2, 2, 2, 1] \ 12);
+    }`);
+    expect(scale).toEqual([
+      '2\\12',
+      '4\\12',
+      '5\\12',
+      '7\\12',
+      '9\\12',
+      '11\\12',
+      '12\\12',
+    ]);
+  });
 });

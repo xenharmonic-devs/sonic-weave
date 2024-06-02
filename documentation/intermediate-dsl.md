@@ -99,6 +99,17 @@ Inspired by [NumPy](https://numpy.org/), most functions that accept intervals ma
 
 The previous example is equivalent to `$ = simplify([10/8, 12/8, 16/8])`.
 
+### Popped scale
+Using the current scale `$` as a variable often leads to duplicated data. There's a magic variable `£` (or the ASCII variant `pop$`) that obtains a copy of the current scale and clears the existing scale when used. Very handy with [vector broadcasting](#vector-broadcasting).
+
+```ocaml
+10/9
+4/3
+16/9
+£ * 9/8
+```
+Results in `$ = [5/4, 3/2, 2]`.
+
 ### Implicit tempering
 In addition to musical intervals SonicWeave features something known as *vals* which are mainly used for converting scales in just intonation to equally tempered scales.
 

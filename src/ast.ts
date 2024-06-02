@@ -347,6 +347,11 @@ export type Identifier = {
   id: string;
 };
 
+export type PopScale = {
+  type: 'PopScale';
+  parent: boolean;
+};
+
 export type TemplateArgument = {
   type: 'TemplateArgument';
   index: number;
@@ -443,6 +448,7 @@ export type Expression =
   | FalseLiteral
   | ColorLiteral
   | Identifier
+  | PopScale
   | TemplateArgument
   | EnumeratedChord
   | Range
@@ -555,6 +561,8 @@ export function expressionToString(node: Expression) {
       return 'niente';
     case 'Identifier':
       return node.id;
+    case 'PopScale':
+      return node.parent ? '££' : '£';
     case 'TemplateArgument':
       return `¥${node.index}`;
     case 'StringLiteral':

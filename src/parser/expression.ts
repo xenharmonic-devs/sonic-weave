@@ -281,6 +281,26 @@ export class ExpressionVisitor {
     this.parent.currentScale = scale;
   }
 
+  popScale(parent: boolean): Interval[] {
+    if (parent) {
+      if (!this.mutables.has('££')) {
+        const scale = this.get('$$') as Interval[];
+        if (!Array.isArray(scale)) {
+          throw new Error('Context corruption detected.');
+        }
+        this.mutables.set('££', [...scale]);
+        scale.length = 0;
+      }
+      return this.mutables.get('££') as Interval[];
+    }
+    if (!this.mutables.has('£')) {
+      const scale = this.currentScale;
+      this.mutables.set('£', [...scale]);
+      scale.length = 0;
+    }
+    return this.mutables.get('£') as Interval[];
+  }
+
   spendGas(amount?: number) {
     this.parent.spendGas(amount);
   }
@@ -358,6 +378,8 @@ export class ExpressionVisitor {
         return new Color(node.value);
       case 'Identifier':
         return this.visitIdentifier(node);
+      case 'PopScale':
+        return this.popScale(node.parent);
       case 'EnumeratedChord':
         return this.visitEnumeratedChord(node);
       case 'Range':

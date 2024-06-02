@@ -478,9 +478,9 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
   mosSubset(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep, sizeOfSmallStep, up, down);
   const divisions = abs $[-1];
   if (equave == 2)
-    step => step \\ divisions;
+    £ \\ divisions;
   else
-    step => step \\ divisions ed equave;
+    £ \\ divisions ed equave;
 }
 
 riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHint = niente, periodSizeHint = niente) {
@@ -529,7 +529,7 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
   1;
   generator ~* comma ~^ commaFractions;
   stack();
-  i => i ~/ $[down] rdc period;
+  £ ~/ £[down] rdc period;
   sort();
   period vor pop();
 }
@@ -562,7 +562,7 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
 
   if (basisSizeHints == niente and equaveSizeHint == niente) {
     $ = $$;
-    i => i ~rdc equave;
+    £ ~rdc equave;
     sort();
     return $;
   }
@@ -710,7 +710,7 @@ riff oddLimit(limit, equave = 2) {
   }
   const odds = popAll();
   [n % d for n of odds for d of odds if gcd(n, d) == 1];
-  i => i rdc equave;
+  £ rdc equave;
   sort();
 }
 
@@ -775,7 +775,7 @@ riff revpose(scale = $$) {
   "Change the sounding direction. Converts a descending scale to an ascending one."
   $ = scale;
   const equave = pop();
-  i => i ~% equave;
+  £ ~% equave;
   reverse();
   %equave;
   return;
@@ -791,7 +791,7 @@ riff retrovert(scale = $$) {
   "Retrovert the current/given scale (negative harmony i.e reflect and transpose).";
   $ = scale;
   const equave = pop();
-  i => equave %~ i;
+  equave %~ £;
   reverse();
   equave;
   return;
@@ -831,7 +831,7 @@ riff rotate(onto = 1, scale = $$) {
   const equave = $[-1];
   while (--onto) equave *~ shift();
   const root = shift();
-  i => i ~% root;
+  £ ~% root;
   equave colorOf(root) labelOf(root);
   return;
 }
@@ -893,7 +893,7 @@ riff ground(scale = $$) {
   "Use the first interval in the current/given scale as the implicit unison.";
   $ = scale;
   const root = shift();
-  i => i ~% root;
+  £ ~% root;
   return;
 }
 
@@ -908,7 +908,7 @@ riff elevate(scale = $$) {
   $ = scale;
   unshift(sanitize($[-1]~^0));
   const root = sanitize(%~gcd());
-  i => i ~* root;
+  £ ~* root;
   return;
 }
 
@@ -940,7 +940,7 @@ riff subset(degrees, scale = $$) {
 riff toHarmonics(fundamental, scale = $$) {
   "Quantize the current/given scale to harmonics of the given fundamental.";
   $ = scale;
-  i => i to~ %~fundamental colorOf(i) labelOf(i);
+  £ to~ %~fundamental colorOf(£) labelOf(£);
   return;
 }
 
@@ -953,7 +953,7 @@ riff harmonicsOf(fundamental, scale = $$) {
 riff toSubharmonics(overtone, scale = $$) {
   "Quantize the current/given scale to subharmonics of the given overtone.";
   $ = scale;
-  i => %~(%~i to~ %~overtone) colorOf(i) labelOf(i);
+  %~(%~£ to~ %~overtone) colorOf(£) labelOf(£);
   return;
 }
 
@@ -969,7 +969,7 @@ riff equalize(divisions, scale = $$) {
   let step = 1 \\ divisions;
   if ($[-1] <> 2)
     step ed= $[-1];
-  i => i by~ step colorOf(i) labelOf(i);
+  £ by~ step colorOf(£) labelOf(£);
   return;
 }
 
@@ -1015,7 +1015,7 @@ riff withOffset(offsets, overflow = 'drop', scale = $$) {
 riff stretch(amount, scale = $$) {
   "Stretch the current/given scale by the given amount. A value of \`1\` corresponds to no change.";
   $ = scale;
-  i => i ~^ amount;
+  £ ~^ amount;
   return;
 }
 

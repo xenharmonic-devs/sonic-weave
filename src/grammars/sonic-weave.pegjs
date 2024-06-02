@@ -48,6 +48,8 @@
     'not',
     'of',
     'or',
+    'pop$',
+    'pop$$',
     'rd',
     'rdc',
     'return',
@@ -183,6 +185,8 @@ NoneToken          = @'niente'   !IdentifierPart
 NotToken           = @'not'      !IdentifierPart
 OfToken            = @'of'       !IdentifierPart
 OrToken            = @'or'       !IdentifierPart
+PopScaleToken      = @'pop$'     !IdentifierPart
+PopParentToken     = @'pop$$'    !IdentifierPart
 ReduceToken        = @'rd'       !IdentifierPart
 ReduceCeilingToken = @'rdc'      !IdentifierPart
 ReturnToken        = @'return'   !IdentifierPart
@@ -993,6 +997,7 @@ Quantity
   / SparseOffsetVal
   / ReciprocalCentLiteral
   / ReciprocalLogarithmicHertzLiteral
+  / PopScale
   / MonzoLiteral
   / ValLiteral
   / DownExpression
@@ -1250,6 +1255,20 @@ ReciprocalCentLiteral
 
 ReciprocalLogarithmicHertzLiteral
   = '¶' { return { type: 'ReciprocalLogarithmicHertzLiteral' }; }
+
+PopScale
+  = ('££' / PopParentToken) {
+    return {
+      type: 'PopScale',
+      parent: true,
+    };
+  }
+  / ('£' / PopScaleToken) {
+    return {
+      type: 'PopScale',
+      parent: false,
+    };
+  }
 
 NoneLiteral
   = NoneToken { return { type: 'NoneLiteral' }; }
