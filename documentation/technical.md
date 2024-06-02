@@ -153,6 +153,167 @@ The number of prime components is set by calling `numComponents(n)`. Any value w
 
 Real values are double precision floating point numbers.
 
+## List of used characters
+
+The Basic Latin block is listed in full. Other blocks only where used.
+
+| Character code | Text  | Usage |
+| -------------- | ----- | ----- |
+| U+0000         | *NUL* | *N/A* |
+| U+0001         | *SOH* | *N/A* |
+| U+0002         | *STX* | *N/A* |
+| U+0003         | *ETX* | *N/A* |
+| U+0004         | *EOT* | *N/A* |
+| U+0005         | *ENQ* | *N/A* |
+| U+0006         | *ACK* | *N/A* |
+| U+0007         | *BEL* | *N/A* |
+| U+0008         | *BS*  | Whitespace |
+| U+0009         | *HT*  | Whitespace |
+| U+000A         | *LF*  | Whitespace |
+| U+000B         | *VT*  | Whitespace |
+| U+000C         | *FF*  | Whitespace |
+| U+000D         | *CR*  | Whitespace |
+| U+000E         | *SO*  | *N/A* |
+| U+000F         | *SI*  | *N/A* |
+| U+0010         | *DLE* | *N/A* |
+| U+0011         | *DC1* | *N/A* |
+| U+0012         | *DC2* | *N/A* |
+| U+0013         | *DC3* | *N/A* |
+| U+0014         | *DC4* | *N/A* |
+| U+0015         | *NAK* | *N/A* |
+| U+0016         | *SYN* | *N/A* |
+| U+0017         | *ETB* | *N/A* |
+| U+0018         | *CAN* | *N/A* |
+| U+0019         | *EOM* | *N/A* |
+| U+001A         | *SUB* | *N/A* |
+| U+001B         | *ESC* | *N/A* |
+| U+001C         | *FS*  | *N/A* |
+| U+001D         | *GS*  | *N/A* |
+| U+001E         | *RS*  | *N/A* |
+| U+001F         | *US*  | *N/A* |
+| U+0020         | *SP*  | Whitespace |
+| U+0021         | !     | *Reserved for future use* |
+| U+0022         | "     | String literals |
+| U+0023         | #     | Sharp accidental |
+| U+0024         | $     | Current scale |
+| U+0025         | %     | Unary inversion, binary division (loose binding) |
+| U+0026         | &     | MOS chroma up accidental |
+| U+0027         | '     | String literals |
+| U+0028         | (     | Parameters start |
+| U+0029         | )     | Parameters end |
+| U+002A         | *     | Binary multiplication, import/export all, comments using `(* ... *)` |
+| U+002B         | +     | Unary no-op, unary increment, binary addition, SOV prime widening |
+| U+002C         | ,     | List separator, decimal separator (limited context) |
+| U+002D         | -     | Unary negation, unary decrement, binary subtraction, SOV prime narrowing |
+| U+002E         | .     | Subgroup prime separator, decimal separator (generic context) |
+| U+002F         | /     | Unary lift, binary fraction (tight binding), enumeration reflection, exotic operators: `/+`, `/-`, `/^`, `^/`, `/_` |
+| U+0030         | 0     | Numeric literals |
+| U+0031         | 1     | Numeric literals |
+| U+0032         | 2     | Numeric literals |
+| U+0033         | 3     | Numeric literals |
+| U+0034         | 4     | Numeric literals |
+| U+0035         | 5     | Numeric literals |
+| U+0036         | 6     | Numeric literals |
+| U+0037         | 7     | Numeric literals |
+| U+0038         | 8     | Numeric literals |
+| U+0039         | 9     | Numeric literals |
+| U+003A         | :     | Enumeration separator, record separator |
+| U+003B         | ;     | End-of-statement |
+| U+003C         | <     | Less-than, range penultimate flag, NEDJI equave, val bracket |
+| U+003D         | =     | Assignment, equality, arrow functions using `=>` |
+| U+003E         | >     | Greater-than, NEDJI equave, monzo bracket, arrow functions using `=>` |
+| U+003F         | ?     | *Reserved for future use* |
+| U+0040         | @     | MOS chroma down accidental, subgroup separator |
+| U+0041         | A     | Absolute pitch A, identifiers |
+| U+0042         | B     | Absolute pitch B, identifiers |
+| U+0043         | C     | Absolute pitch C, identifiers |
+| U+0044         | D     | Absolute pitch D, identifiers |
+| U+0045         | E     | Absolute pitch E, decimal exponent separator, identifiers |
+| U+0046         | F     | Absolute pitch F, identifiers |
+| U+0047         | G     | Absolute pitch G, identifiers |
+| U+0048         | H     | Hertz unit with `Hz`, identifiers |
+| U+0049         | I     | Identifiers |
+| U+004A         | J     | Diamond-mos pitch J, identifiers |
+| U+004B         | K     | Diamond-mos pitch K, identifiers |
+| U+004C         | L     | Diamond-mos pitch L, identifiers |
+| U+004D         | M     | Diamond-mos pitch M, major interval, identifiers |
+| U+004E         | N     | Diamond-mos pitch N, identifiers |
+| U+004F         | O     | Diamond-mos pitch O, identifiers |
+| U+0050         | P     | Diamond-mos pitch P, perfect interval, identifiers |
+| U+0051         | Q     | Diamond-mos pitch Q, three-quarters accidental prefix, identifiers |
+| U+0052         | R     | Diamond-mos pitch R, identifiers |
+| U+0053         | S     | Diamond-mos pitch S, identifiers |
+| U+0054         | T     | Diamond-mos pitch T, identifiers |
+| U+0055         | U     | Diamond-mos pitch U, identifiers |
+| U+0056         | V     | Diamond-mos pitch V, identifiers |
+| U+0057         | W     | Diamond-mos pitch W, identifiers |
+| U+0058         | X     | Diamond-mos pitch X, identifiers |
+| U+0059         | Y     | Diamond-mos pitch Y, identifiers |
+| U+005A         | Z     | Diamond-mos pitch Z, identifiers |
+| U+005B         | [     | Array (access) start, monzo bracket, SOV equave start, SOV prime tweaks start |
+| U+005C         | \     | Unary drop, binary steps-of-equal-temperament |
+| U+005D         | ]     | Array (access) end, monzo bracket, SOV equave end, SOV prime tweaks end |
+| U+005E         | ^     | Unary up, binary exponentiation, SOV prime widening |
+| U+005F         | _     | Natural accidental, identifiers |
+| U+0060         | `     | *N/A* |
+| U+0061         | a     | MOS half chroma down accidental, augmented interval, identifiers |
+| U+0062         | b     | Flat accidental, identifiers |
+| U+0063         | c     | Cents unit, classic inflection flavor, identifiers |
+| U+0064         | d     | Semiflat accidental, identifiers |
+| U+0065         | e     | MOS half chroma up accidental, decimal exponent separator, identifiers |
+| U+0066         | f     | FloraC inflection flavor, identifiers |
+| U+0067         | g     | Identifiers |
+| U+0068         | h     | Hertz unit with `hz`, HEJI inflection flavor, identifiers |
+| U+0069         | i     | Identifiers |
+| U+006A         | j     | Identifiers |
+| U+006B         | k     | Identifiers |
+| U+006C         | l     | Lumi inflection flavor, Identifiers |
+| U+006D         | m     | Minor interval, HEWM inflection flavor, identifiers |
+| U+006E         | n     | Neutral interval, neutral inflection flavor, identifiers |
+| U+006F         | o     | Identifiers |
+| U+0070         | p     | Identifiers |
+| U+0071         | q     | One-quarter accidental prefix, semiquartal inflection flavor, identifiers |
+| U+0072         | r     | Real numeric flavor, identifiers |
+| U+0073         | s     | Semi accidental prefix, seconds unit, syntonic-rastmic inflection flavor, identifiers |
+| U+0074         | t     | Semisharp accidental, tone-splitter inflection flavor, identifiers |
+| U+0075         | u     | Identifiers |
+| U+0076         | v     | Pseudo-unary down, SOV prime narrowing, identifiers |
+| U+0077         | w     | Identifiers |
+| U+0078         | x     | Double-sharp accidental, identifiers |
+| U+0079         | y     | Identifiers |
+| U+007A         | z     | Frequency literals, identifiers |
+| U+007B         | {     | Block start, record start |
+| U+007C         | |     | MOS UDP separator |
+| U+007D         | }     | Block end, record end |
+| U+007E         | ~     | Universal operator preference wing |
+| U+007F         | *DEL* | *N/A* |
+| TODO           | Â     | TODO |
+| TODO           | ⊕     | TODO |
+| TODO           | ⊖     | TODO |
+| TODO           | ×     | TODO |
+| TODO           | ÷     | TODO |
+| TODO           | ⊗     | TODO |
+| TODO           | √     | TODO |
+| TODO           | ∧     | TODO |
+| U+2228         | ∨     | TODO |
+| TODO           | °     | TODO |
+| TODO           | ¢     | TODO |
+| TODO           | €     | TODO |
+| TODO           | ¶     | TODO |
+| TODO           | ¼     | TODO |
+| TODO           | ½     | TODO |
+| TODO           | ¾     | TODO |
+| TODO           | 𝄪     | TODO |
+| TODO           | 𝄫     | TODO |
+| TODO           | 𝄳     | TODO |
+| TODO           | 𝄲     | TODO |
+| TODO           | ♯     | TODO |
+| TODO           | ‡     | TODO |
+| TODO           | ♮     | TODO |
+| TODO           | ♭     | TODO |
+| TODO           | ¥     | TODO |
+| TODO           | (Greek lowercase) | TODO |
+
 ## Next steps
 
 The standard library of SonicWeave is written in SonicWeave. Check out the [prelude](https://github.com/xenharmonic-devs/sonic-weave/blob/main/src/stdlib/prelude.ts).
