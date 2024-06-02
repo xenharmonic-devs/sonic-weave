@@ -685,7 +685,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has array comprehensions', () => {
-    const pyth12 = evaluate('map(str, sorted([3^i rdc 2 for i of [-4..7]]))');
+    const pyth12 = evaluate('map(str, sort([3^i rdc 2 for i of [-4..7]]))');
     expect(pyth12).toEqual([
       '2187/2048',
       '9/8',
@@ -1742,7 +1742,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can sort an array of strings', () => {
-    const swac = evaluate('sorted([..."SonicWeave"])') as string[];
+    const swac = evaluate('sort([..."SonicWeave"])') as string[];
     expect(swac.join('')).toBe('SWaceeinov');
   });
 

@@ -3,6 +3,7 @@ import {
   type ArrowFunction,
   type FunctionDeclaration,
   type Parameter,
+  Expression,
 } from '../ast';
 import {Color, Interval, Val} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
@@ -101,7 +102,10 @@ export function linearOne() {
  * @param builtin Function to extract node information from.
  * @returns Virtual {@link FunctionDeclaration} to be attached to `builtin.__node__`.
  */
-export function builtinNode(builtin: Function): FunctionDeclaration {
+export function builtinNode(
+  builtin: Function,
+  defaults?: Record<string, Expression>
+): FunctionDeclaration {
   const parameters: Parameter[] = builtin
     .toString()
     .split('(', 2)[1]
@@ -131,9 +135,12 @@ export function builtinNode(builtin: Function): FunctionDeclaration {
       }
     } else if (parameter.id === 'scale') {
       parameter.defaultValue = {
-        type: 'Identifier',
-        id: '$$',
+        type: 'PopScale',
+        parent: true,
       };
+    }
+    if (defaults && parameter.id in defaults) {
+      parameter.defaultValue = defaults[parameter.id];
     }
   }
   return {

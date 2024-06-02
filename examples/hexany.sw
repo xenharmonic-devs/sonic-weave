@@ -19,11 +19,11 @@ for (const i in factors) {
 
 (* Now we have a scale with combinations {3, 5, 7, 15, 21, 35} (in some order) *)
 
-(* Make 3 the root *)
-combo => combo % 3
+(* Make 3 the root using implicit mapping *)
+combo => combo / 3
 
-(* Reduce each by the octave *)
-combo => combo rd 2
+(* Reduce each by the octave using vector broadcasting over the popped scale *)
+pop$ rd 2
 
 (* Sort in ascending order *)
 sort()

@@ -159,7 +159,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource(`
       const segment = [1..5];
       segment;
-      reverse(segment);
+      reverseInPlace(segment);
       map(i => i + 10, segment);
     `);
     expect(scale).toHaveLength(10);
@@ -1313,9 +1313,9 @@ describe('SonicWeave parser', () => {
     const scale = expand(`{
       riff popSort(i) {
         if (isArray(i)) {
-          return sorted(popAll(i));
+          return sort(popAll(i));
         }
-        return sorted(popAll($$));
+        return sort(popAll($$));
       }
 
       5:8:7:9:6:10;
@@ -1850,7 +1850,7 @@ describe('SonicWeave parser', () => {
       5/4
       3/2
       2/1
-      sorted(%£ rdc pop$[-1])
+      sort(%£ rdc pop$[-1])
     `);
     expect(scale).toEqual(['4/3', '8/5', '2']);
   });
@@ -1879,6 +1879,28 @@ describe('SonicWeave parser', () => {
       '9\\12',
       '11\\12',
       '12\\12',
+    ]);
+  });
+
+  it('can label intervals after generating', () => {
+    const scale = parseSource(`
+      4/3
+      3/2
+      2
+      £ ["fourth", "fifth", "octave"]
+    `);
+    expect(scale).toHaveLength(3);
+    expect(scale[0].label).toBe('fourth');
+    expect(scale[1].label).toBe('fifth');
+    expect(scale[2].label).toBe('octave');
+  });
+
+  it('can paint the whole scale', () => {
+    const scale = expand('3::6;white;£ "bob"');
+    expect(scale).toEqual([
+      '4/3 "bob" white',
+      '5/3 "bob" white',
+      '6/3 "bob" white',
     ]);
   });
 });

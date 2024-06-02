@@ -902,6 +902,15 @@ export class ExpressionVisitor {
       return empty;
     }
 
+    if (
+      node.start === null &&
+      node.second === null &&
+      node.penultimate === false &&
+      node.end === null
+    ) {
+      return typeof object === 'string' ? object : ([...object] as Interval[]);
+    }
+
     let start = 0;
     let step = 1;
     const pu = node.penultimate;

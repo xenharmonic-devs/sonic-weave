@@ -616,7 +616,7 @@ The logarithmic rounding operator (`by`) measures closeness geometrically `dista
 
 The non-ceiling a.k.a floor variants of modulo behave as they commonly do in mathematics where `x mod x` evaluates to `0` while the ceiling variants are more useful in a musical context.
 
-Just as the clockface starts from 12 `12 modc 12` evaluates to `12`. The fact that `P1 modc P8` evaluates to `P8` and that the unison is implicit in SonicWeave environments like Scale Workshop means that the major pentatonic scale becomes a simple oneliner `sorted([-1..3] * P5 modc P8)` evaluating to:
+Just as the clockface starts from 12 `12 modc 12` evaluates to `12`. The fact that `P1 modc P8` evaluates to `P8` and that the unison is implicit in SonicWeave environments like Scale Workshop means that the major pentatonic scale becomes a simple oneliner `sort([-1..3] * P5 modc P8)` evaluating to:
 ```ocaml
 M2
 P4

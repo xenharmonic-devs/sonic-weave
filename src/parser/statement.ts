@@ -7,7 +7,7 @@ import {
   repr,
   upcastBool,
   SonicWeavePrimitive,
-  sort,
+  sortInPlace,
   temper,
   absolute,
 } from '../stdlib';
@@ -866,7 +866,7 @@ export class StatementVisitor {
       }
       const tail = scale.slice(-entries.length);
       scale.length = scale.length - tail.length;
-      sort.bind(subVisitor)(tail);
+      sortInPlace.bind(subVisitor)(tail);
       scale.push(...tail);
     } else {
       this.spendGas(scale.length);

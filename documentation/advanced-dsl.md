@@ -155,7 +155,7 @@ Ternary expressions short-circuit i.e. only the test expression and the chosen r
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
 ```ocaml
 riff subharmonics(start, end) {
-  return retroverted(start::end)
+  return /end::start
 }
 ```
 Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
@@ -165,7 +165,7 @@ Default values for function parameters may be given using `param = value` syntax
 Due to popular demand there's also the `fn` alias for function declaration.
 ```ocaml
 fn pythagoras(up, down = 0) {
-  sorted([3^i rdc 2 for i of [-down..up]])
+  sort([3^i rdc 2 for i of [-down..up]])
 }
 ```
 
@@ -174,8 +174,21 @@ Once declared, functions can be called: `subharmonics(4, 8)` evaluates to `[8/7,
 
 while `pythagoras(4)` evaluates to `[9/8, 81/64, 3/2, 27/16, 2]`. The missing `down` argument defaulted to `0`.
 
+#### Stblib conventions
+You may have noticed that we passed an argument to `sort` in the body of `fn pythagoras`. We could've achieved the same with.
+```ocaml
+fn pythagoras(up, down = 0) {
+  [3^i rdc 2 for i of [-down..up]]
+  return sort()
+}
+```
+
+This is because by convention built-in and standard library functions use the popped parent scale `££` (i.e. `pop$$`) as a default argument. If an argument is passed in, the pop doesn't happen and anything the riff/function produces is concatenated onto the current scale instead of replacing its contents.
+
+Some functions like `sort` and `reverse` have in-place variants (`sortInPlace` and `reverseInplace`) that return nothing but modify the contents of the input array instead.
+
 ### Lambda expressions
-Functions can be defined inline using the arrow (`=>`). e.g. `const subharmonics = ((start, end) => retroverted(start::end))`.
+Functions can be defined inline using the arrow (`=>`). e.g. `const subharmonics = ((start, end) => retrovert(start::end))`.
 
 ## Throwing
 To interupt execution you can throw a string message.
@@ -207,7 +220,7 @@ sort()
 ```
 This first results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
 
-Or the same with a oneliner `sorted(primes(17) rdc 2)` demonstrating the utility of broadcasting and *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
+Or the same with a oneliner `sort(primes(17) rdc 2)` demonstrating the utility of broadcasting and *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
 
 ## Stdlib
 SonicWeave comes with batteries included.
