@@ -72,6 +72,7 @@
     'debugger',
     'default',
     'delete',
+    'immutable',
     'match',
     'yield',
   ]);

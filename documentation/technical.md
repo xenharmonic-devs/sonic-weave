@@ -349,6 +349,8 @@ The Basic Latin block is listed in full. Other blocks only where used.
 | U+2297         | ⊗     | Tensor product |
 | U+266E         | ♮     | Natural accidental |
 | U+266D         | ♭     | Flat accidental |
+| U+27E8         | ⟨     | Val angle bracket |
+| U+27E9         | ⟩     | Monzo angle bracket |
 | U+1D12A        | 𝄪     | Double-sharp accidental |
 | U+1D12B        | 𝄫     | Double-flat accidental |
 | U+1D133        | 𝄳     | Semiflat accidental |
