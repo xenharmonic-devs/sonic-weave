@@ -1903,4 +1903,72 @@ describe('SonicWeave parser', () => {
       '6/3 "bob" white',
     ]);
   });
+
+  it('can delete record entries', () => {
+    const scale = expand(`{
+      const foo = {bar: 1, baz: 2}
+      del foo['bar']
+      foo
+    }`);
+    expect(scale).toEqual(['2 "baz"']);
+  });
+
+  it('can delete array elements', () => {
+    const scale = expand(`{
+      const foo = primeRange(5)
+      del foo[2]
+      foo
+    }`);
+    expect(scale).toEqual(['2', '3', '7', '11']);
+  });
+
+  it('can delete multiple array elements (boolean)', () => {
+    const scale = expand(`{
+      const primes = [2..30]
+      let i = -1
+      while (++i < length(primes))
+        del primes[primes > primes[i] vand vnot primes mod primes[i]]
+      primes
+    }`);
+    expect(scale).toEqual([
+      '2',
+      '3',
+      '5',
+      '7',
+      '11',
+      '13',
+      '17',
+      '19',
+      '23',
+      '29',
+    ]);
+  });
+
+  it('can delete multiple array elements (indices)', () => {
+    const scale = expand(`{
+      const foo = primeRange(6)
+      del foo[[1, 3]]
+      foo
+    }`);
+    expect(scale).toEqual(['2', '5', '11', '13']);
+  });
+
+  it('can delete multiple array elements (slice)', () => {
+    const scale = expand(`{
+      const foo = primeRange(7)
+      del foo[1,3..]
+      foo
+    }`);
+    expect(scale).toEqual(['2', '5', '11', '17']);
+  });
+
+  it('throws for out-of-bounds delete', () => {
+    expect(() => parseSource('del [1, 2][3]')).toThrow('Index out of range.');
+  });
+
+  it("doesn't throw for out-of-bounds nullish delete", () => {
+    expect(() => parseSource('del [1, 2]~[3]')).not.toThrow(
+      'Index out of range.'
+    );
+  });
 });

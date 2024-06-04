@@ -18,6 +18,7 @@
     'const',
     'continue',
     'defer',
+    'del',
     'dot',
     'drop',
     'ed',
@@ -71,7 +72,6 @@
     'case',
     'debugger',
     'default',
-    'delete',
     'immutable',
     'match',
     'yield',
@@ -158,6 +158,7 @@ CatchToken         = @'catch'    !IdentifierPart
 ConstToken         = @'const'    !IdentifierPart
 ContinueToken      = @'continue' !IdentifierPart
 DeferToken         = @'defer'    !IdentifierPart
+DeleteToken        = @'del'      !IdentifierPart
 DotToken           = @'dot'      !IdentifierPart
 DropToken          = @'drop'     !IdentifierPart
 EdToken            = @'ed'       !IdentifierPart
@@ -230,6 +231,7 @@ Statement
   / IterationStatement
   / TryStatement
   / DeferStatement
+  / DeleteStatement
   / ModuleDeclaration
   / ExportConstantStatement
   / ExportFunctionStatement
@@ -354,6 +356,14 @@ LiftDeclaration
     return {
       type: 'LiftDeclaration',
       value,
+    };
+  }
+
+DeleteStatement
+  = DeleteToken _ entry: (TrueAccessExpression / ArraySlice) EOS {
+    return {
+      type: 'DeleteStatement',
+      entry,
     };
   }
 

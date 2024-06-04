@@ -249,6 +249,11 @@ export type ImportAllStatement = {
   module: string;
 };
 
+export type DeleteStatement = {
+  type: 'DeleteStatement';
+  entry: AccessExpression | ArraySlice;
+};
+
 export type ExpressionStatement = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -263,6 +268,7 @@ export type Statement =
   | PitchDeclaration
   | UpDeclaration
   | LiftDeclaration
+  | DeleteStatement
   | BlockStatement
   | WhileStatement
   | IfStatement
