@@ -1622,6 +1622,26 @@ describe('SonicWeave parser', () => {
     ]);
   });
 
+  it('supports irrational hardness in MOS declaration', () => {
+    const scale = expand(`
+      MOS {
+        5L 2s
+        hardness = PI
+      }
+      automos()
+      MOS niente
+    `);
+    expect(scale).toEqual([
+      '212.8935511816436r¢',
+      '425.7871023632872r¢',
+      '638.6806535449307r¢',
+      '706.446775590823r¢',
+      '919.3403267724666r¢',
+      '1132.23387795411r¢',
+      '1200.0000000000025r¢',
+    ]);
+  });
+
   it('supports radicals in SOV', () => {
     const scale = expand(`
       9/8

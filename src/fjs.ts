@@ -325,7 +325,7 @@ export function getInflection(
 }
 
 export function inflect(
-  pythagorean: TimeMonzo,
+  pythagorean: TimeMonzo | TimeReal,
   superscripts: FJSInflection[],
   subscripts: FJSInflection[]
 ) {

@@ -22,10 +22,12 @@ import {Interval} from '../interval';
 import {MosConfig, MosDegree} from '../diamond-mos';
 import {ONE, TWO, ZERO} from '../utils';
 
+type Monzo = TimeMonzo | TimeReal;
+
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 
-function realize(mosMonzo: MosMonzo, large: TimeMonzo, small: TimeMonzo) {
-  return large.pow(mosMonzo[0]).mul(small.pow(mosMonzo[1])) as TimeMonzo;
+function realize(mosMonzo: MosMonzo, large: Monzo, small: Monzo) {
+  return large.pow(mosMonzo[0]).mul(small.pow(mosMonzo[1]));
 }
 
 /**
@@ -33,10 +35,10 @@ function realize(mosMonzo: MosMonzo, large: TimeMonzo, small: TimeMonzo) {
  */
 export class Tardigrade {
   subVisitor: ExpressionVisitor;
-  equave?: TimeMonzo;
-  hardness?: TimeMonzo | TimeReal;
-  large?: TimeMonzo;
-  small?: TimeMonzo;
+  equave?: Monzo;
+  hardness?: Monzo;
+  large?: Monzo;
+  small?: Monzo;
   pattern?: string;
 
   constructor(subVisitor: ExpressionVisitor) {
@@ -56,8 +58,8 @@ export class Tardigrade {
     const N = new Fraction(this.pattern.length);
     const countL = new Fraction((this.pattern.match(/L/g) ?? []).length);
     const countS = N.sub(countL);
-    let small: TimeMonzo | TimeReal;
-    let large: TimeMonzo | TimeReal;
+    let small: Monzo;
+    let large: Monzo;
     if (this.equave) {
       if (this.hardness) {
         if (this.hardness.valueOf() === Infinity) {
@@ -78,14 +80,10 @@ export class Tardigrade {
         }
       } else if (this.large) {
         large = this.large;
-        small = this.equave
-          .div(large.pow(countL))
-          .pow(countS.inverse()) as TimeMonzo;
+        small = this.equave.div(large.pow(countL)).pow(countS.inverse());
       } else if (this.small) {
         small = this.small;
-        large = this.equave
-          .div(small.pow(countS))
-          .pow(countL.inverse()) as TimeMonzo;
+        large = this.equave.div(small.pow(countS)).pow(countL.inverse());
       } else {
         // Assume basic
         small = this.equave.pow(countL.mul(TWO).add(countS).inverse());
@@ -150,15 +148,10 @@ export class Tardigrade {
       throw new Error('Inconsistent MOS declaration.');
     }
 
-    if (large instanceof TimeReal || small instanceof TimeReal) {
-      throw new Error('MOS declaration must remain radical.');
-    }
-
     const am = large.div(small) as TimeMonzo;
     const semiam = am.sqrt() as TimeMonzo;
-    const r = (m: MosMonzo) =>
-      realize(m, large as TimeMonzo, small as TimeMonzo);
-    const scale = notation.scale as unknown as Map<string, TimeMonzo>;
+    const r = (m: MosMonzo) => realize(m, large, small);
+    const scale = notation.scale as unknown as Map<string, Monzo>;
     for (const [key, value] of notation.scale) {
       scale.set(key, r(value));
     }
@@ -262,9 +255,6 @@ export class Tardigrade {
     }
     if (node.type === 'HardnessDeclaration' && value.valueOf() === Infinity) {
       return (this.hardness = value.value);
-    }
-    if (!(value.value instanceof TimeMonzo)) {
-      throw new Error(`${node.type} must evaluate to a radical.`);
     }
     switch (node.type) {
       case 'HardnessDeclaration':

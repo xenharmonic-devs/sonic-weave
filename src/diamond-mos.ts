@@ -11,6 +11,8 @@ import {
 } from './pythagorean';
 import {ZERO} from './utils';
 
+type Monzo = TimeMonzo | TimeReal;
+
 /**
  * Base degree for a mosstep in a 0-indexed array.
  */
@@ -18,7 +20,7 @@ export type MosDegree = {
   /**
    * The perfect or neutral central interval.
    */
-  center: TimeMonzo;
+  center: Monzo;
   /**
    * Flag to indicate if the degree has minor and major variants.
    */
@@ -26,7 +28,7 @@ export type MosDegree = {
   /**
    * The lopsided neutral variant of a bright or dark generator.
    */
-  mid?: TimeMonzo;
+  mid?: Monzo;
 };
 
 /**
@@ -37,23 +39,23 @@ export type MosConfig = {
   /**
    * Interval of equivalence. The distance between J4 and J5.
    */
-  equave: TimeMonzo;
+  equave: Monzo;
   /**
    * Period of repetition.
    */
-  period: TimeMonzo;
+  period: Monzo;
   /**
    * Current value of the '&' accidental.
    */
-  am: TimeMonzo;
+  am: Monzo;
   /**
    * Current value of the 'e' accidental.
    */
-  semiam: TimeMonzo;
+  semiam: Monzo;
   /**
    * Relative scale from J onwards. Echelon depends on J. Use equave to reach higher octave numbers.
    */
-  scale: Map<string, TimeMonzo>;
+  scale: Map<string, Monzo>;
   /**
    * Intervals for relative notation. Use period to reach larger intervals.
    */
@@ -65,11 +67,11 @@ export type MosConfig = {
   /**
    * Value of the large step.
    */
-  large: TimeMonzo;
+  large: Monzo;
   /**
    * Value of the small step.
    */
-  small: TimeMonzo;
+  small: Monzo;
 };
 
 /**
@@ -125,7 +127,7 @@ export function scaleMonzos(config: MosConfig) {
         : a[0].localeCompare(b[0])
   );
   const monzos = entries.map(entry => entry[1]);
-  monzos.push(monzos.shift()!.mul(config.equave) as TimeMonzo);
+  monzos.push(monzos.shift()!.mul(config.equave));
   return monzos;
 }
 
@@ -135,12 +137,12 @@ export function scaleMonzos(config: MosConfig) {
  * @param config Result of a MOS declaration.
  * @returns A relative time monzo.
  */
-export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
+export function mosMonzo(node: MosStep, config: MosConfig): Monzo {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
   const periods = (node.degree - baseDegree) / config.degrees.length;
   const mosDegree = config.degrees[baseDegree];
   const quality = node.quality.quality;
-  let inflection = new TimeMonzo(ZERO, []);
+  let inflection: Monzo = new TimeMonzo(ZERO, []);
   if (
     quality === 'a' ||
     quality === 'Â' ||
@@ -158,17 +160,14 @@ export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
   if (node.quality.fraction !== '') {
     const fraction = VULGAR_FRACTIONS.get(node.quality.fraction)!;
     const fractionalInflection = inflection.pow(fraction);
-    if (fractionalInflection instanceof TimeReal) {
-      throw new Error('Failed to fractionally inflect mosstep.');
-    }
     inflection = fractionalInflection;
   }
 
   for (const augmentation of node.augmentations ?? []) {
     if (augmentation === 'd' || augmentation === 'dim') {
-      inflection = inflection.div(config.am) as TimeMonzo;
+      inflection = inflection.div(config.am);
     } else {
-      inflection = inflection.mul(config.am) as TimeMonzo;
+      inflection = inflection.mul(config.am);
     }
   }
 
@@ -180,9 +179,9 @@ export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
       quality === 'aug' ||
       quality === 'Aug'
     ) {
-      inflection = inflection.mul(config.semiam) as TimeMonzo;
+      inflection = inflection.mul(config.semiam);
     } else if (quality === 'd' || quality === 'dim') {
-      inflection = inflection.div(config.semiam) as TimeMonzo;
+      inflection = inflection.div(config.semiam);
     }
     if (quality === 'P') {
       throw new Error(
@@ -199,9 +198,7 @@ export function mosMonzo(node: MosStep, config: MosConfig): TimeMonzo {
       `The mosstep ${baseDegree} does not have minor or major variants.`
     );
   }
-  return mosDegree.center
-    .mul(inflection)
-    .mul(config.period.pow(periods)) as TimeMonzo;
+  return mosDegree.center.mul(inflection).mul(config.period.pow(periods));
 }
 
 function mosInflection(
@@ -234,7 +231,7 @@ function mosInflection(
 export function absoluteMosMonzo(
   node: AbsoluteMosPitch,
   config: MosConfig
-): TimeMonzo {
+): Monzo {
   if (!config.scale.has(node.nominal)) {
     throw new Error(`Nominal ${node.nominal} is unassigned.`);
   }
@@ -244,10 +241,7 @@ export function absoluteMosMonzo(
 
     const fraction = VULGAR_FRACTIONS.get(accidental.fraction)!;
     const fractionalInflection = inflection.pow(fraction);
-    if (fractionalInflection instanceof TimeReal) {
-      throw new Error('Failed to fracture mos accidental.');
-    }
-    result = result.mul(fractionalInflection) as TimeMonzo;
+    result = result.mul(fractionalInflection);
   }
-  return result.mul(config.equave.pow(node.octave - 4)) as TimeMonzo;
+  return result.mul(config.equave.pow(node.octave - 4));
 }
