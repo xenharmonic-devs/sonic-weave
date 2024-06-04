@@ -945,7 +945,7 @@ MOS {
 ### MOS declaration syntax
 The syntax for MOS declarations withing the curly brackets after `MOS` is as follows:
 
-Below `n` is an integer, `x` and `y` are integers in the range from 1 to 9, and `expr` is any SonicWeave expression that evaluates to a radical interval. Syntax followed by a question mark is optional.
+Below `n` is an integer, `x` and `y` are integers in the range from 1 to 9, and `expr` is any SonicWeave expression that evaluates to an interval. Syntax followed by a question mark is optional.
 | Name                 | Pattern                              |
 | -------------------- | ------------------------------------ |
 | Counts with UDP      | `nL ns up\|down(period)? <equave>?`  |

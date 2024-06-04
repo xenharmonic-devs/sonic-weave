@@ -1971,7 +1971,7 @@ function automos(this: ExpressionVisitor) {
   this.spendGas(this.rootContext.mosConfig.scale.size);
   const J4 = this.rootContext.C4;
   const monzos = scaleMonzos(this.rootContext.mosConfig).map(m => J4.mul(m));
-  return monzos.map(
+  const result = monzos.map(
     (m, i) =>
       new Interval(m, 'logarithmic', 0, {
         type: 'AbsoluteFJS',
@@ -1987,6 +1987,8 @@ function automos(this: ExpressionVisitor) {
         subscripts: [],
       })
   );
+  this.rootContext.fragiles.push(...result);
+  return result;
 }
 automos.__doc__ =
   'If the current scale is empty, generate absolute Diamond-mos notation based on the current config.';
