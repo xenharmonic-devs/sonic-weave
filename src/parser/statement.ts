@@ -43,6 +43,7 @@ import {
   ImportStatement,
   ImportAllStatement,
   MosDeclaration,
+  DeleteStatement,
 } from '../ast';
 import {
   ExpressionVisitor,
@@ -51,6 +52,7 @@ import {
   containerToArray,
 } from './expression';
 import {Tardigrade} from './mos';
+import {hasOwn} from '../utils';
 
 /**
  * An interrupt representing a return, break or continue statement.
@@ -316,10 +318,178 @@ export class StatementVisitor {
         return this.visitImportAllStatement(node);
       case 'MosDeclaration':
         return this.visitMosDeclaration(node);
+      case 'DeleteStatement':
+        return this.visitDeleteStatement(node);
       case 'EmptyStatement':
         return;
     }
     node satisfies never;
+  }
+
+  protected visitDeleteStatement(node: DeleteStatement) {
+    const subVisitor = this.createExpressionVisitor();
+    const entry = node.entry;
+    const object = arrayRecordOrString(subVisitor.visit(entry.object));
+    if (typeof object === 'string') {
+      throw new Error('Strings are immutable.');
+    }
+    if (entry.type === 'AccessExpression') {
+      if (!Array.isArray(object)) {
+        const key = subVisitor.visit(entry.key);
+        if (!(typeof key === 'string')) {
+          throw new Error('Record keys must be strings.');
+        }
+        if (!hasOwn(object, key) && !entry.nullish) {
+          throw new Error(`Key error: "${key}".`);
+        }
+        delete object[key];
+        return undefined;
+      }
+      let index = subVisitor.visit(entry.key);
+      if (Array.isArray(index)) {
+        const toDelete = new Set<number>();
+        index = index.flat(Infinity);
+        for (let i = 0; i < index.length; ++i) {
+          const idx = index[i];
+          if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
+            throw new Error(
+              'Only booleans and intervals can be used as indices.'
+            );
+          }
+          if (idx === true) {
+            if (i >= object.length) {
+              if (!entry.nullish) {
+                throw new Error('Indexing boolean out of range.');
+              }
+            } else {
+              toDelete.add(i);
+            }
+            continue;
+          } else if (idx === false) {
+            continue;
+          }
+          let j = idx.toInteger();
+          if (j < 0) {
+            j += object.length;
+          }
+          if (j < 0 || j >= object.length) {
+            if (!entry.nullish) {
+              throw new Error('Index out of range.');
+            }
+          } else {
+            toDelete.add(j);
+          }
+        }
+        // Delete elements from largest to smallest.
+        for (const i of Array.from(toDelete).sort((a, b) => b - a)) {
+          object.splice(i, 1);
+        }
+        return undefined;
+      }
+      if (!(index instanceof Interval)) {
+        throw new Error('Array delete access with a non-integer.');
+      }
+      let i = index.toInteger();
+      if (i < 0) {
+        i += object.length;
+      }
+      if (i < 0 || i >= object.length) {
+        if (entry.nullish) {
+          return undefined;
+        }
+        throw new Error('Index out of range.');
+      }
+      object.splice(i, 1);
+      return undefined;
+    }
+
+    entry.type satisfies 'ArraySlice';
+    if (!Array.isArray(object)) {
+      throw new Error('Array slice delete on non-array.');
+    }
+    if (
+      entry.start === null &&
+      entry.second === null &&
+      entry.penultimate === false &&
+      entry.end === null
+    ) {
+      object.length = 0;
+      return undefined;
+    }
+
+    // TODO: Refactor bounds calculation to be shared with ExpressionVisitor.visitArraySlice.
+    let start = 0;
+    let step = 1;
+    const pu = entry.penultimate;
+    let end = -1;
+
+    if (entry.start) {
+      const interval = subVisitor.visit(entry.start);
+      if (!(interval instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals.');
+      }
+      start = interval.toInteger();
+    }
+
+    if (entry.end) {
+      const interval = subVisitor.visit(entry.end);
+      if (!(interval instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals.');
+      }
+      end = interval.toInteger();
+    }
+
+    if (entry.second) {
+      const second = subVisitor.visit(entry.second);
+      if (!(second instanceof Interval)) {
+        throw new Error('Slice indices must consist of intervals.');
+      }
+      step = second.toInteger() - start;
+    }
+
+    if (start < 0) {
+      start += object.length;
+    }
+    if (end < 0) {
+      end += object.length;
+    }
+
+    const toDelete = new Set<number>();
+
+    if (step > 0) {
+      start = Math.max(0, start);
+      if ((pu ? start >= end : start > end) || start >= object.length) {
+        return undefined;
+      }
+      end = Math.min(object.length - 1, end);
+
+      toDelete.add(start);
+      let next = start + step;
+      while (pu ? next < end : next <= end) {
+        toDelete.add(next);
+        next += step;
+      }
+    } else if (step < 0) {
+      start = Math.min(object.length - 1, start);
+      if ((pu ? start <= end : start < end) || start < 0) {
+        return undefined;
+      }
+      end = Math.max(0, end);
+
+      toDelete.add(start);
+      let next = start + step;
+      while (pu ? next > end : next >= end) {
+        toDelete.add(next);
+        next += step;
+      }
+    } else {
+      throw new Error('Slice step must not be zero.');
+    }
+    // Delete elements from largest to smallest.
+    for (const i of Array.from(toDelete).sort((a, b) => b - a)) {
+      object.splice(i, 1);
+    }
+    return undefined;
   }
 
   protected visitMosDeclaration(node: MosDeclaration) {

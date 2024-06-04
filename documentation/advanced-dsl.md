@@ -21,6 +21,20 @@ or `{a: 5, b: 10, c: 15}`.
 
 The `r` at the end of real literals just means that they're not cents or associated with the octave in any way. Real cent literals like `600rc` have the same size as their radical counterparts but `linear(2 * 600rc)` won't simplify to `2` like `linear(2 * 600.0)` does.
 
+## Deleting container contents
+Record or array entries can be removed using the `del` keyword. Access using individual keys, arrays of indices, boolean arrays and slices are valid targets for removal. The specified entries are popped from the array and subsequent entries are shifted back similar to how `del` works in Python.
+
+```ocaml
+"Sieve of Eratosthenes using boolean indexing with del"
+const primes = [2..100]
+let i = -1
+while (++i < length(primes))
+  del primes[primes > primes[i] vand vnot primes mod primes[i]]
+primes
+```
+
+Deleting a non-existent entry throws an error unless the access was nullish i.e. `del arr~[idx]`.
+
 ## Blocks
 Blocks start with a curly bracket `{`, have their own instance of a current scale `$` and end with `}`. The current scale is unrolled onto the parent scale at the end of the block.
 
