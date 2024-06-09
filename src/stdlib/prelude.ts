@@ -513,6 +513,12 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
     axis ~tns~ ££;
   }
 
+  (* It's too hard to keep track of good formatting during tensoring. Simplify non-unison linears. *)
+  const l = isLinear($)
+  if (l)
+    l[0] = false
+  $[l] = simplify $[l]
+
   if (basisSizeHints == niente and equaveSizeHint == niente)
     return sort($ ~rdc equave);
 

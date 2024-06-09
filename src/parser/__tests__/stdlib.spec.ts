@@ -1576,4 +1576,22 @@ describe('SonicWeave standard library', () => {
       '2 blue',
     ]);
   });
+
+  it('has reasonable default formatting for a parallellotope', () => {
+    const scale = expand('parallelotope([3/2, 7/81], [5, 1], [0, 0], 2/1)');
+    expect(scale).toEqual([
+      '28/27',
+      '9/8',
+      '7/6',
+      '81/64',
+      '21/16',
+      '112/81',
+      '3/2',
+      '14/9',
+      '27/16',
+      '7/4',
+      '243/128',
+      '2/1',
+    ]);
+  });
 });
