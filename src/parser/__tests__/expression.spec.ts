@@ -2138,44 +2138,7 @@ describe('SonicWeave expression evaluator', () => {
     const strings = evaluate('keepUnique(["hello", "world", "hello"])');
     expect(strings).toEqual(['hello', 'world']);
   });
-});
 
-describe('Poor grammar / Fun with "<"', () => {
-  it('rejects nedji with trailing garbage', () => {
-    expect(() => evaluate('1\\2<3>4')).toThrow();
-  });
-
-  it('knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4', () => {
-    const no = evaluate('1 \\2<3>4');
-    expect(no).toBe(false);
-  });
-
-  it('knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4', () => {
-    const no = evaluate('1\\ 2<3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the return of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2 <3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the persistence of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2< 3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the obstinence of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2<3 >4');
-    expect(no).toBe(false);
-  });
-
-  it('has quadruple semitwelfth', () => {
-    const {fraction} = parseSingle('1\\2<3> 4');
-    expect(fraction).toBe('9');
-  });
-
-  // TODO: Move under the correct heading.
   it('multiplies a monzo from the left', () => {
     const {fraction} = parseSingle('2 [2 -1>');
     expect(fraction).toBe('16/9');
@@ -2441,5 +2404,41 @@ describe('Poor grammar / Fun with "<"', () => {
   it('can stack drops', () => {
     const {interval} = parseSingle(String.raw`\\\P1 tmpr 12@`);
     expect(interval.totalCents()).toBe(-1500);
+  });
+});
+
+describe('Poor grammar / Fun with "<"', () => {
+  it('rejects nedji with trailing garbage', () => {
+    expect(() => evaluate('1\\2<3>4')).toThrow();
+  });
+
+  it('knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4', () => {
+    const no = evaluate('1 \\2<3>4');
+    expect(no).toBe(false);
+  });
+
+  it('knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4', () => {
+    const no = evaluate('1\\ 2<3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the return of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2 <3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the persistence of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2< 3>4');
+    expect(no).toBe(false);
+  });
+
+  it('features the obstinence of (1°2 < 3) > 4', () => {
+    const no = evaluate('1\\2<3 >4');
+    expect(no).toBe(false);
+  });
+
+  it('has quadruple semitwelfth', () => {
+    const {fraction} = parseSingle('1\\2<3> 4');
+    expect(fraction).toBe('9');
   });
 });
