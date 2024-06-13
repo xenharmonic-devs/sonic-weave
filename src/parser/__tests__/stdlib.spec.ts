@@ -1594,4 +1594,9 @@ describe('SonicWeave standard library', () => {
       '2/1',
     ]);
   });
+
+  it('preserves equave formatting in organize()', () => {
+    const scale = expand('1;2/1;organize()');
+    expect(scale).toEqual(['2/1']);
+  });
 });

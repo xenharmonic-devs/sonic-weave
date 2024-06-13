@@ -1947,7 +1947,16 @@ function keepUnique(this: ExpressionVisitor, scale?: SonicWeaveValue) {
   if (!Array.isArray(scale)) {
     throw new Error('An array is required.');
   }
+  if (!scale.length) {
+    return [];
+  }
   const seen = new Set();
+  const equave = scale.pop()!;
+  if (equave instanceof Interval) {
+    seen.add(equave.valueOf());
+  } else {
+    scale.push(equave);
+  }
   const result: SonicWeavePrimitive[] = [];
   for (const interval of scale) {
     const value = interval ? interval.valueOf() : interval;
@@ -1956,6 +1965,9 @@ function keepUnique(this: ExpressionVisitor, scale?: SonicWeaveValue) {
     }
     result.push(interval);
     seen.add(value);
+  }
+  if (equave instanceof Interval) {
+    result.push(equave);
   }
   return result;
 }

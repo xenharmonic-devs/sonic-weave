@@ -2133,6 +2133,11 @@ describe('SonicWeave expression evaluator', () => {
     const {fraction} = parseSingle('2 -1');
     expect(fraction).toBe('1');
   });
+
+  it('keeps unique strings', () => {
+    const strings = evaluate('keepUnique(["hello", "world", "hello"])');
+    expect(strings).toEqual(['hello', 'world']);
+  });
 });
 
 describe('Poor grammar / Fun with "<"', () => {
@@ -2170,6 +2175,7 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(fraction).toBe('9');
   });
 
+  // TODO: Move under the correct heading.
   it('multiplies a monzo from the left', () => {
     const {fraction} = parseSingle('2 [2 -1>');
     expect(fraction).toBe('16/9');
