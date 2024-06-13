@@ -414,6 +414,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.totalCents()).toBe(0);
   });
 
+  it('has steps (ASCII)', () => {
+    const {interval} = parseSingle('5 deg');
+    expect(interval.steps).toBe(5);
+    expect(interval.totalCents()).toBe(0);
+  });
+
   it('has gcd', () => {
     const {interval} = parseSingle('gcd(30, 84)');
     expect(interval.toString()).toBe('6');
@@ -2104,9 +2110,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.totalCents()).toBe(1901.9);
   });
 
-  it('has implicit elementwise product', () => {
-    const numpyIndexingTears = evaluate('[2, 3] [5, 7]') as Interval[];
-    expect(numpyIndexingTears.map(i => i.toInteger())).toEqual([10, 21]);
+  it('no longer has implicit elementwise product', () => {
+    expect(() => evaluate('[2, 3] [5, 7]')).toThrow(
+      'Undefined intrinsic call.'
+    );
   });
 
   it('has implicit function calls', () => {
@@ -2119,14 +2126,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('1\\1<3/2>');
   });
 
-  it('has implicit multiplication', () => {
-    const {fraction} = parseSingle('(3) 5');
-    expect(fraction).toBe('15');
+  it('has deprecated implicit multiplication', () => {
+    expect(() => parseSingle('(3) 5')).toThrow('Undefined intrinsic call.');
   });
 
-  it('has explicit intrinsic multiplication', () => {
-    const {fraction} = parseSingle('3(5)');
-    expect(fraction).toBe('15');
+  it('has explicit deprecated intrinsic multiplication', () => {
+    expect(() => parseSingle('3(5)')).toThrow('Undefined intrinsic call.');
   });
 
   it("doesn't have negative literals for a good reason", () => {
@@ -2140,7 +2145,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('multiplies a monzo from the left', () => {
-    const {fraction} = parseSingle('2 [2 -1>');
+    const {fraction} = parseSingle('2 × [2 -1>');
     expect(fraction).toBe('16/9');
   });
 
@@ -2153,10 +2158,8 @@ describe('SonicWeave expression evaluator', () => {
     expect(() => evaluate('2 <2 -1]')).toThrow();
   });
 
-  it('accepts val multiplication from the left if you speak softly enough', () => {
-    const val = evaluate('2 ⟨2 -1]') as Val;
-    expect(val.value.primeExponents[0].toFraction()).toBe('4');
-    expect(val.value.primeExponents[1].toFraction()).toBe('-2');
+  it('accepts deprecated val multiplication from the left if you speak softly enough', () => {
+    expect(() => evaluate('2 ⟨2 -1]')).toThrow('Undefined intrinsic call.');
   });
 
   it('has pythonic string multiplication (right)', () => {
@@ -2338,8 +2341,9 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('evokes intrinsic behavior between PI and E', () => {
-    const product = evaluateExpression('PI(E)', false) as Interval;
-    expect(product.valueOf()).toBeCloseTo(8.5397);
+    expect(() => evaluateExpression('PI(E)')).toThrow(
+      'Undefined intrinsic call.'
+    );
   });
 
   it('normalizes zero (frequency)', () => {
@@ -2437,8 +2441,7 @@ describe('Poor grammar / Fun with "<"', () => {
     expect(no).toBe(false);
   });
 
-  it('has quadruple semitwelfth', () => {
-    const {fraction} = parseSingle('1\\2<3> 4');
-    expect(fraction).toBe('9');
+  it('parses deprecated quadruple semitwelfth', () => {
+    expect(() => parseSingle('1\\2<3> 4')).toThrow('Undefined intrinsic call.');
   });
 });

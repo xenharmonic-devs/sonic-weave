@@ -1090,7 +1090,7 @@ DownExpression
   }
 
 StepLiteral
-  = count: BasicInteger '°' {
+  = count: BasicInteger __ ('°' / DegreeToken) {
     return {
       type: 'StepLiteral',
       count,
