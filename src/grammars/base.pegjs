@@ -233,15 +233,16 @@ Fraction
   }
 
 // Tokens representing units can only appear along scalars so they're not reserved.
-CentToken     = @'c'  !IdentifierPart
-HertzToken    = @'Hz' !IdentifierPart
-LowHertzToken = @'hz' !IdentifierPart
-RealCentToken = @'rc' !IdentifierPart
-SecondToken   = @'s'  !IdentifierPart
+CentToken     = @'c'   !IdentifierPart
+DegreeToken   = @'deg' !IdentifierPart
+HertzToken    = @'Hz'  !IdentifierPart
+LowHertzToken = @'hz'  !IdentifierPart
+RealCentToken = @'rc'  !IdentifierPart
+SecondToken   = @'s'   !IdentifierPart
 
 ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
 
-BasisElement = ValBasisElement / RealCentToken / 'r¢' / 'inf' / '1°' / ''
+BasisElement = ValBasisElement / RealCentToken / 'r¢' / 'inf' / '1°' / DegreeToken / ''
 
 ValBasis = (ValBasisElement / '')|.., '.'|
 

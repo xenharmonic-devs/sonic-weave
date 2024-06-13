@@ -1633,17 +1633,14 @@ export class ExpressionVisitor {
         callee.label = caller;
         return callee;
       case 'boolean':
-        if (caller) {
-          return callee.shallowClone();
-        }
-        return fromInteger(0);
+        throw new Error('Undefined intrinsic call.');
       case 'undefined':
         callee = callee.shallowClone();
         callee.color = undefined;
         return callee;
     }
     if (caller instanceof Interval || caller instanceof Val) {
-      return caller.mul(callee);
+      throw new Error('Undefined intrinsic call.');
     } else if (caller instanceof Color) {
       callee = callee.shallowClone();
       callee.color = caller;
@@ -1658,7 +1655,7 @@ export class ExpressionVisitor {
     caller: SonicWeaveValue
   ): SonicWeaveValue {
     if (typeof caller === 'boolean' || caller instanceof Interval) {
-      return upcastBool(caller).mul(callee);
+      throw new Error('Undefined intrinsic call.');
     }
     const ic = this.intrinsicValCall.bind(this);
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));

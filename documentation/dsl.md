@@ -534,7 +534,7 @@ Normally `E4` would temper to `8\22` but using the down inflection we made it a 
 
 Larger edos are more accurate while still being simpler to work with than pure just intonation. One downside is that a single edosteps becomes almost unnoticeably small so we need a new symbol for groups of them. By default the lift inflection (`/`) is worth 5 positive edosteps while the corresponding drop inflection (`\`) is worth 5 negative edosteps.
 
-We can change this using a *lift declaration* `/ = (newLiftAmount)`. The syntax for an edosteps is `1°` or `1 edostep`.
+We can change this using a *lift declaration* `/ = (newLiftAmount)`. The syntax for an edosteps is `1°` or `1 deg`.
 
 Declaring a lift to be worth 6 degrees of 311edo we arrive at this version of our major scale:
 

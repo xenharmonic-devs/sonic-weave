@@ -60,10 +60,6 @@ riff absoluteHEJI(interval) {
   return absoluteFJS(interval, 'h');
 }
 
-(** Constants **)
-const edostep = 1°;
-const edosteps = edostep;
-
 (** Functions **)
 riff vbool(value) {
   "Convert value to a boolean. Vectorizes over arrays.";

@@ -1369,18 +1369,6 @@ describe('SonicWeave standard library', () => {
     expect(duckDuckGooseDuck).toEqual([false, false, true, false]);
   });
 
-  it('has soft ASCII for step literals (singular)', () => {
-    const oneStep = parseSingle('1 edostep');
-    expect(oneStep.steps).toBe(1);
-    expect(oneStep.totalCents()).toBe(0);
-  });
-
-  it('has soft ASCII for step literals (plural)', () => {
-    const oneStep = parseSingle('-3 edosteps');
-    expect(oneStep.steps).toBe(-3);
-    expect(oneStep.totalCents()).toBe(0);
-  });
-
   it('has a broadcasting domain extractor', () => {
     const scale = expand(`{
       const x = [2, P5]

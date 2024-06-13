@@ -78,68 +78,68 @@ describe('SonicWeave vector broadcasting', () => {
     );
   });
 
-  it('implicitly multiplies a scalar with a 1D array', () => {
-    const vec = sw1D`3 [5, 7]`;
+  it('multiplies a scalar with a 1D array', () => {
+    const vec = sw1D`3 * [5, 7]`;
     expect(vec).toEqual([15, 21]);
   });
 
-  it('implicitly multiplies a scalar with a 2D array', () => {
-    const mat = sw2D`3 [[5, 7], [11, 13]]`;
+  it('multiplies a scalar with a 2D array', () => {
+    const mat = sw2D`3 * [[5, 7], [11, 13]]`;
     expect(mat).toEqual([
       [15, 21],
       [33, 39],
     ]);
   });
 
-  it('implicitly multiplies a scalar with a scalar', () => {
-    const x = sw0D`3 5`;
+  it('multiplies a scalar with a scalar', () => {
+    const x = sw0D`3 * 5`;
     expect(x).toEqual(15);
   });
 
-  it('implicitly multiplies a 1D array with a scalar', () => {
-    const vec = sw1D`[3, 5] 7`;
+  it('multiplies a 1D array with a scalar', () => {
+    const vec = sw1D`[3, 5] * 7`;
     expect(vec).toEqual([21, 35]);
   });
 
-  it('implicitly multiplies a 1D array with a 1D array', () => {
-    const vec = sw1D`[3, 5] [7, 11]`;
+  it('multiplies a 1D array with a 1D array', () => {
+    const vec = sw1D`[3, 5] * [7, 11]`;
     expect(vec).toEqual([21, 55]);
   });
 
-  it('implicitly multiplies a 1D array with a 2D array', () => {
-    const mat = sw2D`[3, 5] [[7, 11], [13, 17]]`;
+  it('multiplies a 1D array with a 2D array', () => {
+    const mat = sw2D`[3, 5] * [[7, 11], [13, 17]]`;
     expect(mat).toEqual([
       [21, 33],
       [65, 85],
     ]);
   });
 
-  it('implicitly multiplies a 2D array with a scalar', () => {
-    const mat = sw2D`[[3, 5], [7, 11]] 13`;
+  it('multiplies a 2D array with a scalar', () => {
+    const mat = sw2D`[[3, 5], [7, 11]] * 13`;
     expect(mat).toEqual([
       [39, 65],
       [91, 143],
     ]);
   });
 
-  it('implicitly multiplies a 2D array with a 1D array', () => {
-    const mat = sw2D`[[3, 5], [7, 11]] [13, 17]`;
+  it('multiplies a 2D array with a 1D array', () => {
+    const mat = sw2D`[[3, 5], [7, 11]] * [13, 17]`;
     expect(mat).toEqual([
       [39, 65],
       [119, 187],
     ]);
   });
 
-  it('implicitly multiplies a 2D array with a 2D array', () => {
-    const mat = sw2D`[[3, 5], [7, 11]] [[13, 17], [19, 23]]`;
+  it('multiplies a 2D array with a 2D array', () => {
+    const mat = sw2D`[[3, 5], [7, 11]] * [[13, 17], [19, 23]]`;
     expect(mat).toEqual([
       [39, 85],
       [133, 253],
     ]);
   });
 
-  it('implicitly multiplies records', () => {
-    const rec = swRec`{a: 3, b: 5} {a: 7, b: 11}`;
+  it('multiplies records', () => {
+    const rec = swRec`{a: 3, b: 5} * {a: 7, b: 11}`;
     expect(rec).toEqual({a: 21, b: 55});
   });
 

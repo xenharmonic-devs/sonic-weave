@@ -293,7 +293,7 @@ An explicit subgroup may be given with monzos as well e.g. `[0 1 -1>@2.3.13/5` f
 You can even use square roots in the basis e.g. `[-1 1>@√2.√3` is monzo representation for the neutral third `n3`.
 
 ## Universal monzos
-The monzo basis also supports the special symbols `s`, `Hz`, `-1`, `0`, `rc` and `1°`. A conversion like `monzo(-440Hz)` evaluates to
+The monzo basis also supports the special symbols `s`, `Hz`, `-1`, `0`, `rc`, `1°` and `deg`. A conversion like `monzo(-440Hz)` evaluates to
 ```ocaml
 (* Hz, -1, 2, 3, 5, 7, 11 *)
 [   1,  1, 3, 0, 1, 0, 1 >@Hz.-1.2..
@@ -473,21 +473,21 @@ E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 ## Implicit intrinsic calls
 Associating two values like `3/2 "fif"` invokes intrinsic behavior between the interval `3/2` and the string `"fif"` resulting in an interval with the value 3/2 and the label "fif".
 
-Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior.
+Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been depracated.
 | left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Function      |
 | ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- |
 | **Niente**   | ?             | ?             | ?             | bleach         | ?              | `right(left)` |
 | **String**   | ?             | concatenate   | ?             | label          | ?              | `right(left)` |
 | **Color**    | ?             | ?             | ?             | paint          | ?              | `right(left)` |
-| **Interval** | bleach        | label         | paint         | `left × right` | `left × right` | `right(left)` |
-| **Val**      | ?             | ?             | ?             | `left × right` | ?              | `right(left)` |
+| **Interval** | bleach        | label         | paint         | ?!             | ?!             | `right(left)` |
+| **Val**      | ?             | ?             | ?             | ?!             | ?              | `right(left)` |
 | **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` |
 
 Intrinsic behavior vectorizes and broadcasts like other binary operations.
 
 Intrinsic behavior may be evoked explicitly by simply calling a value e.g. `3/2("fif")` and `"fif"(3/2)` both work.
 
-Some expressions like `440Hz` or `440 Hz` appear similar to intrinsic calls and would correspond to `440 × (1 Hz)` but `600.0 Hz` is actually `600.0e × (1 Hz)` instead of cents multiplied by Hertz. This exception only applies to units like `Hz`. `600.0 PI` is just `logarithmic(sqrt(2) * PI)`.
+Some expressions like `440Hz` or `440 Hz` appear similar to intrinsic calls and would correspond to `440 × (1 Hz)` but `600.0 Hz` is actually `600.0e × (1 Hz)`.
 It's legal to declare `let Hz = 'whatever'`, but the grammar prevents the `Hz` variable from invoking intrinsic behavior of integer literals from the right.
 
 ### Obscure types
