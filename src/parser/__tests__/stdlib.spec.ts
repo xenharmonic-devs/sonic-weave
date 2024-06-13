@@ -1599,4 +1599,29 @@ describe('SonicWeave standard library', () => {
     const scale = expand('1;2/1;organize()');
     expect(scale).toEqual(['2/1']);
   });
+
+  it('coalesces an empty scale', () => {
+    const scale = parseSource('coalesce()');
+    expect(scale).toEqual([]);
+  });
+
+  it('coalesces a scale of one element', () => {
+    const scale = expand('4/3;coalesce()');
+    expect(scale).toEqual(['4/3']);
+  });
+
+  it('coalesces a scale of two different elements', () => {
+    const scale = expand('4/3;3/2;coalesce()');
+    expect(scale).toEqual(['4/3', '3/2']);
+  });
+
+  it('coalesces a scale of two equivalent elements', () => {
+    const scale = expand('1;2/1;coalesce()');
+    expect(scale).toEqual(['2/1']);
+  });
+
+  it('coalesces a scale of three equivalent elements', () => {
+    const scale = expand('2;2/1;P8;coalesce(3.5, "simplest", true)');
+    expect(scale).toEqual(['P8']);
+  });
 });

@@ -909,10 +909,10 @@ riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, sc
       void(pop($$));
   }
   scale[-1];
-  if (length(scale) == 1)
+  if (length($) <= 1)
     return $;
-  while ($[-1] ~= $[-2])
-    void(pop());
+  while (length($) > 1 and $[-1] ~= $[-2])
+    void(pop($, -2));
 }
 
 riff replace(interval, replacement, scale = ££) {
