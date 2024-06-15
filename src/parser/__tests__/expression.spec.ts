@@ -2409,6 +2409,57 @@ describe('SonicWeave expression evaluator', () => {
     const {interval} = parseSingle(String.raw`\\\P1 tmpr 12@`);
     expect(interval.totalCents()).toBe(-1500);
   });
+
+  it('coerces too large integers to real', () => {
+    const interval = evaluate('9007199254740997') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(9007199254740996);
+  });
+
+  it('coerces too accurate fractions to real', () => {
+    const interval = evaluate('9007199254740997/9000000000000000') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(1.0008, 6);
+  });
+
+  it('coerces too accurate decimals to real', () => {
+    const interval = evaluate('1.23456789012345678901e') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(1.23456);
+  });
+
+  it('coerces too accurate hertz to real', () => {
+    const interval = evaluate('1.23456789012345678901Hz') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(1.23456);
+    expect(interval.isAbsolute()).toBe(true);
+  });
+
+  it('coarces too accurate nedji to real', () => {
+    const interval = evaluate(
+      '1000000000000000\\9007199254740997<3>'
+    ) as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(1.12972);
+  });
+
+  it('coerces too accurate cents to real', () => {
+    const interval = evaluate('1234.56789012345678901') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(2.04);
+  });
+
+  it('coerces too accurate monzos to real', () => {
+    const ronzo = evaluate('[1.234567890123456780901>') as Interval;
+    expect(ronzo.value).toBeInstanceOf(TimeReal);
+    expect(ronzo.valueOf()).toBeCloseTo(2.3531);
+  });
+
+  it('coerces too complex nedo subtraction', () => {
+    const interval = evaluate('103\\94906266 - 1\\94906267') as Interval;
+    expect(interval.value).toBeInstanceOf(TimeReal);
+    expect(interval.valueOf()).toBeCloseTo(1.000000745, 10);
+  });
 });
 
 describe('Poor grammar / Fun with "<"', () => {

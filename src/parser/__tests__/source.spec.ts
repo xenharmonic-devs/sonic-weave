@@ -1991,4 +1991,34 @@ describe('SonicWeave parser', () => {
       'Index out of range.'
     );
   });
+
+  it('can handle too complex multiplication resulting from too accurate prime mappings', () => {
+    const scale = expand(`
+      14/13
+      8/7
+      44/35
+      4/3
+      99/70
+      99/65
+      396/245
+      2178/1225
+      66/35
+      9801/4900
+      (* Commas = 1716/1715, 2080/2079 *)
+      PrimeMapping(1200., 1902.0236738027506, 2786.2942222449124, 3369.11433503606, 4151.361209675464, 4440.252343874884)
+      cents(£, 3)
+    `);
+    expect(scale).toEqual([
+      '128.862',
+      '230.886',
+      '395.953',
+      '497.976',
+      '600.',
+      '728.862',
+      '830.886',
+      '995.953',
+      '1097.976',
+      '1200.',
+    ]);
+  });
 });
