@@ -1,4 +1,4 @@
-import {Fraction, gcd} from 'xen-dev-utils';
+import {Fraction, PRIMES, gcd} from 'xen-dev-utils';
 import {
   NedjiLiteral,
   IntegerLiteral,
@@ -662,7 +662,18 @@ export class ExpressionVisitor {
 
   protected visitComponent(component: VectorComponent) {
     // XXX: This is so backwards...
-    return new Fraction(formatComponent(component));
+    const str = formatComponent(component);
+    try {
+      return new Fraction(str);
+    } catch {
+      if (component.separator === '/') {
+        return (
+          (component.left / parseInt(component.right)) *
+          10 ** (component.exponent ?? 0)
+        );
+      }
+      return parseFloat(str);
+    }
   }
 
   protected upLift(
@@ -703,7 +714,21 @@ export class ExpressionVisitor {
         }
       }
     } else {
-      value = new TimeMonzo(ZERO, exponents);
+      let valid = true;
+      for (const exponent of exponents) {
+        if (typeof exponent === 'number') {
+          valid = false;
+        }
+      }
+      if (valid) {
+        value = new TimeMonzo(ZERO, exponents as Fraction[]);
+      } else {
+        let num = 1;
+        for (let i = 0; i < exponents.length; ++i) {
+          num *= PRIMES[i] ** exponents[i].valueOf();
+        }
+        value = new TimeReal(0, num);
+      }
     }
     const result = this.upLift(value, node);
     if (steps.d !== 1) {
@@ -719,6 +744,11 @@ export class ExpressionVisitor {
 
   protected visitValLiteral(node: ValLiteral) {
     const val = node.components.map(this.visitComponent);
+    for (const component of val) {
+      if (typeof component === 'number') {
+        throw new Error('Invalid val literal.');
+      }
+    }
     let value: TimeMonzo;
     let equave = TWO_MONZO;
     if (node.basis.length) {
@@ -729,7 +759,7 @@ export class ExpressionVisitor {
       value = valToTimeMonzo(val, subgroup);
       equave = subgroup[0];
     } else {
-      value = new TimeMonzo(ZERO, val);
+      value = new TimeMonzo(ZERO, val as Fraction[]);
     }
     return new Val(value, equave, node);
   }
@@ -1874,8 +1904,13 @@ export class ExpressionVisitor {
   }
 
   protected visitIntegerLiteral(node: IntegerLiteral): Interval {
-    const value = TimeMonzo.fromBigInt(node.value);
-    return new Interval(value, 'linear', 0, node);
+    try {
+      const value = TimeMonzo.fromBigInt(node.value);
+      return new Interval(value, 'linear', 0, node);
+    } catch {
+      const value = TimeReal.fromValue(Number(node.value));
+      return new Interval(value, 'linear');
+    }
   }
 
   protected visitDecimalLiteral(node: DecimalLiteral): Interval {
@@ -1899,11 +1934,26 @@ export class ExpressionVisitor {
       numerator = 10n * numerator + BigInt(c);
       denominator *= 10n;
     }
-    const value = TimeMonzo.fromBigNumeratorDenominator(numerator, denominator);
-    if (node.flavor === 'z') {
-      value.timeExponent = NEGATIVE_ONE;
+    try {
+      const value = TimeMonzo.fromBigNumeratorDenominator(
+        numerator,
+        denominator
+      );
+      if (node.flavor === 'z') {
+        value.timeExponent = NEGATIVE_ONE;
+      }
+      return new Interval(value, 'linear', 0, node);
+    } catch {
+      const value = TimeReal.fromValue(
+        parseFloat(
+          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`
+        )
+      );
+      if (node.flavor === 'z') {
+        value.timeExponent = -1;
+      }
+      return new Interval(value, 'linear');
     }
-    return new Interval(value, 'linear', 0, node);
   }
 
   protected visitCentsLiteral(node: CentsLiteral): Interval {
@@ -1937,25 +1987,43 @@ export class ExpressionVisitor {
   }
 
   protected visitFractionLiteral(node: FractionLiteral): Interval {
-    const value = TimeMonzo.fromBigNumeratorDenominator(
-      node.numerator,
-      node.denominator
-    );
-    return new Interval(value, 'linear', 0, node);
+    try {
+      const value = TimeMonzo.fromBigNumeratorDenominator(
+        node.numerator,
+        node.denominator
+      );
+      return new Interval(value, 'linear', 0, node);
+    } catch {
+      const value = TimeReal.fromValue(
+        Number(node.numerator) / Number(node.denominator)
+      );
+      return new Interval(value, 'linear');
+    }
   }
 
   protected visitNedjiLiteral(node: NedjiLiteral): Interval {
-    let value: TimeMonzo;
-    const fractionOfEquave = new Fraction(node.numerator, node.denominator);
-    if (node.equaveNumerator !== null) {
-      value = TimeMonzo.fromEqualTemperament(
-        fractionOfEquave,
-        new Fraction(node.equaveNumerator, node.equaveDenominator ?? undefined)
+    try {
+      let value: TimeMonzo;
+      const fractionOfEquave = new Fraction(node.numerator, node.denominator);
+      if (node.equaveNumerator !== null) {
+        value = TimeMonzo.fromEqualTemperament(
+          fractionOfEquave,
+          new Fraction(
+            node.equaveNumerator,
+            node.equaveDenominator ?? undefined
+          )
+        );
+      } else {
+        value = TimeMonzo.fromEqualTemperament(fractionOfEquave);
+      }
+      return new Interval(value, 'logarithmic', 0, node);
+    } catch {
+      const base = (node.equaveNumerator ?? 2) / (node.equaveDenominator ?? 1);
+      const value = TimeReal.fromValue(
+        base ** (node.numerator / node.denominator)
       );
-    } else {
-      value = TimeMonzo.fromEqualTemperament(fractionOfEquave);
+      return new Interval(value, 'logarithmic');
     }
-    return new Interval(value, 'logarithmic', 0, node);
   }
 
   protected visitHertzLiteral(node: HertzLiteral): Interval {

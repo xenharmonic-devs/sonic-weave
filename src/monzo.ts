@@ -1827,7 +1827,14 @@ export class TimeMonzo {
     }
     const vector = [];
     for (let i = 0; i < other.primeExponents.length; ++i) {
-      vector.push(this.primeExponents[i].add(other.primeExponents[i]));
+      try {
+        vector.push(this.primeExponents[i].add(other.primeExponents[i]));
+      } catch {
+        return new TimeReal(
+          this.timeExponent.valueOf() + other.timeExponent.valueOf(),
+          this.valueOf() * other.valueOf()
+        );
+      }
     }
     try {
       const residual = this.residual.mul(other.residual);
@@ -1929,7 +1936,14 @@ export class TimeMonzo {
     }
     const vector = [];
     for (let i = 0; i < other.primeExponents.length; ++i) {
-      vector.push(self.primeExponents[i].sub(other.primeExponents[i]));
+      try {
+        vector.push(self.primeExponents[i].sub(other.primeExponents[i]));
+      } catch {
+        return new TimeReal(
+          self.timeExponent.valueOf() - other.timeExponent.valueOf(),
+          self.valueOf() / other.valueOf()
+        );
+      }
     }
     try {
       const residual = self.residual.div(other.residual);
@@ -2063,8 +2077,8 @@ export class TimeMonzo {
         if (solution === undefined) {
           if (other.primeExponents[i].n) {
             solution = self.primeExponents[i].div(other.primeExponents[i]);
-          } else if (this.primeExponents[i].n) {
-            return this.totalCents() / other.totalCents();
+          } else if (self.primeExponents[i].n) {
+            return self.totalCents() / other.totalCents();
           }
         } else if (solution !== undefined) {
           if (
@@ -2072,20 +2086,20 @@ export class TimeMonzo {
               other.primeExponents[i].mul(solution)
             )
           ) {
-            return this.totalCents() / other.totalCents();
+            return self.totalCents() / other.totalCents();
           }
         }
       }
       if (solution === undefined) {
-        const residualLog = this.residual.log(other.residual);
+        const residualLog = self.residual.log(other.residual);
         if (residualLog === null) {
-          return this.totalCents() / other.totalCents();
+          return self.totalCents() / other.totalCents();
         }
         return residualLog;
       }
       const residualPow = other.residual.pow(solution);
-      if (residualPow === null || !residualPow.equals(this.residual)) {
-        return this.totalCents() / other.totalCents();
+      if (residualPow === null || !residualPow.equals(self.residual)) {
+        return self.totalCents() / other.totalCents();
       }
       return solution;
     }
