@@ -287,6 +287,11 @@ export type Statement =
   | ContinueStatement
   | ReturnStatement;
 
+export type BlockExpression = {
+  type: 'BlockExpression';
+  body: Statement[];
+};
+
 export type ConditionalExpression = {
   type: 'ConditionalExpression';
   kind: ConditionalKind;
@@ -439,6 +444,7 @@ export type FalseLiteral = {
 };
 
 export type Expression =
+  | BlockExpression
   | ConditionalExpression
   | AccessExpression
   | ArraySlice

@@ -102,7 +102,7 @@ export class StatementVisitor {
   /**
    * Parent context of the surrounding code block.
    */
-  parent?: StatementVisitor;
+  parent?: StatementVisitor | ExpressionVisitor;
   /**
    * Local context for mutable (let) variables.
    */
@@ -138,7 +138,7 @@ export class StatementVisitor {
    * Construct a new visitor for a block of code inside the AST.
    * @param parent Parent context of the surrounding code block.
    */
-  constructor(parent?: StatementVisitor) {
+  constructor(parent?: StatementVisitor | ExpressionVisitor) {
     this.parent = parent;
     this.mutables = new Map();
     this.mutables.set('$', []);
@@ -199,6 +199,12 @@ export class StatementVisitor {
       return new ExpressionVisitor(this, this.mutables);
     }
     return new ExpressionVisitor(this);
+  }
+
+  // Chicken-and-egg method to prevent circular dependency with ExpressionVisitor
+  /** @hidden */
+  _createStatementVisitor(parent: ExpressionVisitor) {
+    return new StatementVisitor(parent);
   }
 
   /**
@@ -570,7 +576,7 @@ export class StatementVisitor {
     if (this.modules.has(name)) {
       return this.modules.get(name)!;
     }
-    if (this.parent) {
+    if (this.parent && this.parent instanceof StatementVisitor) {
       return this.parent.getModule(name);
     }
     throw new Error(`Module ${name} not found.`);
@@ -1369,7 +1375,7 @@ export class StatementVisitor {
    * @param value Value for the variable.
    * @throws An error if there is no variable declared under the given name or the given variable is declared constant.
    */
-  set(name: string, value: SonicWeaveValue): undefined {
+  set(name: string, value: SonicWeaveValue): void {
     if (this.immutables.has(name)) {
       throw new Error('Assignment to a constant variable.');
     }

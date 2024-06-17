@@ -92,6 +92,7 @@ import {
   TemplateArgument,
   UpdateExpression,
   UpdateOperator,
+  BlockExpression,
 } from '../ast';
 import {type StatementVisitor} from './statement';
 import {AbsoluteMosPitch, absoluteMosMonzo, mosMonzo} from '../diamond-mos';
@@ -313,6 +314,8 @@ export class ExpressionVisitor {
   visit(node: Expression): SonicWeaveValue {
     this.spendGas();
     switch (node.type) {
+      case 'BlockExpression':
+        return this.visitBlockExpression(node);
       case 'ConditionalExpression':
         return this.visitConditionalExpression(node);
       case 'AccessExpression':
@@ -416,6 +419,17 @@ export class ExpressionVisitor {
         return this.visitTemplateArgument(node);
     }
     node satisfies never;
+  }
+
+  protected visitBlockExpression(node: BlockExpression) {
+    const subVisitor = this.parent._createStatementVisitor(this);
+    const scale = this.currentScale;
+    subVisitor.mutables.set('$$', scale);
+    const interrupt = subVisitor.executeStatements(node.body);
+    if (interrupt) {
+      throw new Error('Illegal interupt.');
+    }
+    return subVisitor.currentScale;
   }
 
   protected visitTemplateArgument(node: TemplateArgument) {

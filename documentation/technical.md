@@ -23,7 +23,7 @@ Values in SonicWeave fall into these categories
 | Interval | `7/5`                    | There are many kinds of intervals with their own operator semantics. |
 | Val      | `12@`                    | Used to convert scales in just intonation to equal temperaments.     |
 | Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals.            |
-| Record   | `{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings.                                 |
+| Record   | `#{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings.                                 |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase.                  |
 
 Array and record types are recursive i.e. arrays may contain other arrays or records and the values of records can be anything.

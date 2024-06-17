@@ -1649,49 +1649,49 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('has record syntax', () => {
-    const record = evaluate('{foo: "a", "bar": "b", "here be spaces": "c"}');
+    const record = evaluate('#{foo: "a", "bar": "b", "here be spaces": "c"}');
     expect(record).toEqual({bar: 'b', 'here be spaces': 'c', foo: 'a'});
   });
 
   it('has record access', () => {
-    const {interval} = parseSingle('{foo: 3/2}["foo"]');
+    const {interval} = parseSingle('#{foo: 3/2}["foo"]');
     expect(interval.toString()).toBe('3/2');
   });
 
   it('has the empty record', () => {
-    const blank = evaluate('{}');
+    const blank = evaluate('#{}');
     expect(blank).toEqual({});
   });
 
   it('has nullish record access', () => {
-    const nothing = evaluate('{}~["zero nothings"]');
+    const nothing = evaluate('#{}~["zero nothings"]');
     expect(nothing).toBe(undefined);
   });
 
   it('is resistant to pathological JS record keys', () => {
-    expect(() => evaluate('{}["toString"]')).toThrow('Key error: "toString"');
+    expect(() => evaluate('#{}["toString"]')).toThrow('Key error: "toString"');
   });
 
   it('has string representation of records', () => {
-    const str = evaluate('str({foo: 1})');
-    expect(str).toBe('{"foo": 1}');
+    const str = evaluate('str(#{foo: 1})');
+    expect(str).toBe('#{"foo": 1}');
   });
 
   it('can assign record keys', () => {
-    const record = evaluate('const rec = {foo: "a"};rec["bar"] = "b";rec');
+    const record = evaluate('const rec = #{foo: "a"};rec["bar"] = "b";rec');
     expect(record).toEqual({foo: 'a', bar: 'b'});
   });
 
   it('can re-assign record values', () => {
     const record = evaluate(
-      'const rec = {foo: 1, bar: 2};rec["bar"] *= 3; rec'
+      'const rec = #{foo: 1, bar: 2};rec["bar"] *= 3; rec'
     ) as Record<string, Interval>;
     expect(record['foo'].toString()).toBe('1');
     expect(record['bar'].toString()).toBe('6');
   });
 
   it('can get the entries of a record', () => {
-    const entries = evaluate('entries({foo: "a", bar: "b"})') as unknown as [
+    const entries = evaluate('entries(#{foo: "a", bar: "b"})') as unknown as [
       string,
       string,
     ][];
@@ -1703,12 +1703,12 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can test for presence of keys in a record', () => {
-    const yes = evaluate('"foo" in {foo: 1}');
+    const yes = evaluate('"foo" in #{foo: 1}');
     expect(yes).toBe(true);
   });
 
   it('has a record shorthand', () => {
-    const record = evaluate('const foo = "a";{foo}');
+    const record = evaluate('const foo = "a";#{foo}');
     const foo = 'a';
     expect(record).toEqual({foo});
   });
@@ -2042,7 +2042,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('increments a record value', () => {
-    const rec = evaluate('const rec = {a: 1, b: 2};++rec["a"];rec') as Record<
+    const rec = evaluate('const rec = #{a: 1, b: 2};++rec["a"];rec') as Record<
       string,
       Interval
     >;
@@ -2233,7 +2233,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('ignores ternary broadcasting of records', () => {
-    const oof = evaluate('1 where [true, false] else {a: 2}') as any;
+    const oof = evaluate('1 where [true, false] else #{a: 2}') as any;
     expect(oof).toHaveLength(2);
     expect(oof[0].valueOf()).toBe(1);
     expect(oof[1].a.valueOf()).toBe(2);

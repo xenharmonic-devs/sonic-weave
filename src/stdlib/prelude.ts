@@ -685,7 +685,7 @@ riff realizeWord(word, sizes, equave = niente) {
         continue;
       total = total *~ sizes[letter] ~^ count;
     }
-    sizes = {...sizes};
+    sizes = #{...sizes};
     sizes[missingLetter] = (equave %~ total) ~/^ signature[missingLetter];
   } else if (equave <> niente) {
     let total = 1;

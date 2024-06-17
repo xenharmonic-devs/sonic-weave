@@ -2,15 +2,15 @@
 This document describes programming in the SonicWeave domain-specific language.
 
 ## Record broadcasting
-Records behave like arrays in that operations are broadcast over their values e.g. `{a: 1, b: 2, c:3} * 5` evaluates to
+Records behave like arrays in that operations are broadcast over their values e.g. `#{a: 1, b: 2, c:3} * 5` evaluates to
 ```ocaml
-{
+#{
   a: 1*5,
   b: 2*5,
   c: 3*5,
 }
 ```
-or `{a: 5, b: 10, c: 15}`.
+or `#{a: 5, b: 10, c: 15}`.
 
 ## Tiers
  * natural (`1`, `-3`, `7`, `P8`, etc.)
@@ -37,6 +37,18 @@ Deleting a non-existent entry throws an error unless the access was nullish i.e.
 
 ## Blocks
 Blocks start with a curly bracket `{`, have their own instance of a current scale `$` and end with `}`. The current scale is unrolled onto the parent scale at the end of the block.
+
+### Block expressions
+Blocks are valid expressions and evaluate to arrays. They have the lowest precedence and usually need to be wrapped in parenthesis.
+```ocaml
+10 * ({
+  defer sort()
+  2
+  1
+  3
+})
+(* $ = [10, 20, 30] *)
+```
 
 ### Parent scale
 The current scale of the parent block can be accessed using `$$`.
