@@ -2061,4 +2061,28 @@ describe('SonicWeave parser', () => {
     `);
     expect(truth).toEqual(expand('true'));
   });
+
+  it('captures outside variables in block expressions', () => {
+    const pentic = expand(`{
+      const octave = 2;
+      const fifth = 3/2;
+      const pentic = {
+        (fifth ^ 2) / octave
+        (fifth ^ 4) / (octave ^ 2)
+        fifth
+        (fifth ^ 3) / octave
+        octave
+      };
+      pentic;
+    }`);
+    expect(pentic).toEqual(
+      expand(`{
+        9/8
+        81/64
+        3/2
+        27/16
+        2
+      }`)
+    );
+  });
 });
