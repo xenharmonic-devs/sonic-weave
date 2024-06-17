@@ -2046,4 +2046,19 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['10', '20', '30']);
   });
+
+  it('supports block expressions as function arguments', () => {
+    const truth = expand(`
+      hasConstantStructure({
+        9/8
+        81/64
+        4/3
+        3/2
+        27/16
+        243/128
+        2/1
+      })
+    `);
+    expect(truth).toEqual(expand('true'));
+  });
 });
