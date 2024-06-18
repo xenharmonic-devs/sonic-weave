@@ -283,10 +283,10 @@ Many helper functions have arithmetic and geometric variants.
 | Action           | Linear           | Logarithmic    | Logarithmic (accumulative)    |
 | ---------------- | ---------------- | -------------- | ----------------------------- |
 | Averaging        | `avg(x, y)`      | `geoavg(x, y)` | *N/A*                         |
-| Array of deltas  | `diff(arr)`      | `geodiff(arr)` | `periodiff(arr)`              |
-| Cumulative sum   | `cumsum(arr)`    | `cumprod(arr)` | `antiperiodif(guideGen, arr)` |
-| Stacking         | `stackLinear()`  | `stack()`      | *N/A*                         |
-| Repeating        | `flatRepeat()`   | `flatRepeat()` | `repeat()`                    |
+| Array of deltas  | `diff(arr)`      | `geodiff(arr)` | `unstackPeriodic(arr)`        |
+| Cumulative sum   | `cumsum(arr)`    | `cumprod(arr)` | `stackPeriodic(guideGen, arr)`|
+| Stacking         | `stackLinear()`  | `stack()`      | `stackPeriodic(guideGen)`     |
+| Repeating        | `repeatFlat()`   | `repeatFlat()` | `repeat()`                    |
 
 There's also the linearly accumulating `repeatLinear()` for repeating harmonic segments arithmetically.
 
