@@ -75,7 +75,16 @@ export type AugmentedQuality = 'd' | 'dim' | 'a' | 'Â' | 'aug' | 'Aug';
  */
 export type IntervalQuality = {
   fraction: VulgarFraction;
-  quality: 'P' | 'n' | 'm' | 'M' | AugmentedQuality;
+  quality:
+    | 'm'
+    | 'min'
+    | 'n'
+    | 'neu'
+    | 'P'
+    | 'M'
+    | 'maj'
+    | 'Maj'
+    | AugmentedQuality;
 };
 
 /**
@@ -380,7 +389,7 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
       vector[1] = vector[1].sub(SEMISEVEN);
     }
   } else {
-    if (quality === 'n') {
+    if (quality === 'n' || quality === 'neu') {
       if (base === 4) {
         vector = [...MID_FOURTH];
       } else if (base === 5) {
@@ -405,9 +414,9 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
     inflection = [...AUGMENTED];
   } else if (quality === 'd' || quality === 'dim') {
     inflection = [...DIMINISHED];
-  } else if (quality === 'M') {
+  } else if (quality === 'M' || quality === 'maj' || quality === 'Maj') {
     inflection = [...MAJOR];
-  } else if (quality === 'm') {
+  } else if (quality === 'm' || quality === 'min') {
     inflection = [...MINOR];
   }
 

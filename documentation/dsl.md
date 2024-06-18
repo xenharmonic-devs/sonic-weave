@@ -356,6 +356,8 @@ The chain is infinite so after `Aug4` comes `Aug1` representing `2187/2048` whic
 
 Another spelling for `dim` is `d` and for `Aug` we have both `a` and `Â`, so `aa1` is the doubly augmented unison. During the development of SonicWeave there was some debate about if all pitch nominals should be upper-case or if `A4` was allowed to stand in for the augmented fourth. In the end consistency in absolute notation won and `Â4` got its circumflex to visually distinguish it[^2].
 
+Minor `m` may be spelled `min` while both `maj` and `Maj` are valid alternatives for `M`.
+
 [^2]: The Greek Alpha `Α` would've been a free machine-readable codepoint, but it's not visually distinguishable by humans.
 
 ### Pythagorean absolute notation

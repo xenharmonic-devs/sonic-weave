@@ -152,9 +152,9 @@ export function mosMonzo(node: MosStep, config: MosConfig): Monzo {
     inflection = config.am;
   } else if (quality === 'd' || quality === 'dim') {
     inflection = config.am.inverse();
-  } else if (quality === 'M') {
+  } else if (quality === 'M' || quality === 'maj' || quality === 'Maj') {
     inflection = config.semiam;
-  } else if (quality === 'm') {
+  } else if (quality === 'm' || quality === 'min') {
     inflection = config.semiam.inverse();
   }
   if (node.quality.fraction !== '') {
@@ -188,12 +188,18 @@ export function mosMonzo(node: MosStep, config: MosConfig): Monzo {
         `The mosstep ${baseDegree} does not have a perfect variant.`
       );
     }
-  } else if (quality === 'n') {
+  } else if (quality === 'n' || quality === 'neu') {
     if (!mosDegree.mid) {
       throw new Error('Missing mid mosstep quality.');
     }
     return mosDegree.mid;
-  } else if (quality === 'M' || quality === 'm') {
+  } else if (
+    quality === 'M' ||
+    quality === 'maj' ||
+    quality === 'Maj' ||
+    quality === 'm' ||
+    quality === 'min'
+  ) {
     throw new Error(
       `The mosstep ${baseDegree} does not have minor or major variants.`
     );

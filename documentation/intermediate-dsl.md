@@ -855,6 +855,8 @@ A semiaugmented non-perfectable interval is semiaugmented w.r.t to major e.g. `s
 
 Perfectable intervals are more straightforward e.g. `sa4` is simply `P4 + sa1` or `32/27 ^ 3/2` if expressed linearly.
 
+Another spelling for `n` is `neu`.
+
 ### Semisharps and semiflats
 The accidental associated with `sa1` is the semisharp (`s#`, `½♯`, `𝄲`, `‡` or plain ASCII `t`) while the accidental corresponding to `sd1` is the semiflat (`sb`, `½♭`, `𝄳` or plain ASCII `d`). (The unicode `𝄲` tries to be clever by combining `4` with the sharp sign to say "one quarter-tone sharp".)
 

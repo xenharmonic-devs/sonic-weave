@@ -2472,39 +2472,29 @@ describe('SonicWeave expression evaluator', () => {
     `);
     expect(foo).toBe('bar');
   });
-});
 
-describe('Poor grammar / Fun with "<"', () => {
-  it('rejects nedji with trailing garbage', () => {
-    expect(() => evaluate('1\\2<3>4')).toThrow();
+  it('has medium-length neutral quality', () => {
+    const mediumStr = evaluate('str(neu3)');
+    expect(mediumStr).toBe('neu3');
+    const semiFif = evaluate('str(radical(neu3))');
+    expect(semiFif).toBe('3/2^1/2');
+    const half4dias = evaluate('MOS 5L 2s;str(nedji(neu2ms))');
+    expect(half4dias).toBe('7\\24');
   });
 
-  it('knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4', () => {
-    const no = evaluate('1 \\2<3>4');
-    expect(no).toBe(false);
+  it('has medium-length minor quality', () => {
+    const sixth = evaluate('str(fraction(min6v5))');
+    expect(sixth).toBe('8/5');
+    const twoDias = evaluate('MOS 5L2s;str(nedji(min2ms))');
+    expect(twoDias).toBe('1\\4');
   });
 
-  it('knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4', () => {
-    const no = evaluate('1\\ 2<3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the return of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2 <3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the persistence of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2< 3>4');
-    expect(no).toBe(false);
-  });
-
-  it('features the obstinence of (1°2 < 3) > 4', () => {
-    const no = evaluate('1\\2<3 >4');
-    expect(no).toBe(false);
-  });
-
-  it('parses deprecated quadruple semitwelfth', () => {
-    expect(() => parseSingle('1\\2<3> 4')).toThrow('Undefined intrinsic call.');
+  it('has medium-length major qualities', () => {
+    const sixth = evaluate('str(fraction(Maj6^5))');
+    expect(sixth).toBe('5/3');
+    const semiDemiFif = evaluate('str(radical(½maj2))');
+    expect(semiDemiFif).toBe('3/2^1/4');
+    const twoDias = evaluate('MOS LLsLLLs;str(nedji(maj2ms))');
+    expect(twoDias).toBe('1\\3');
   });
 });

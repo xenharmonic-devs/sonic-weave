@@ -1329,11 +1329,20 @@ ColorLiteral
 VulgarFraction 'vulgar fraction'
   = '¼' / 'q' / '½' / 's' / '¾' / 'Q' / [⅐-⅞] / ''
 
+DiminishedToken = 'dim' / 'd'
+
+MinorToken = 'min' / 'm'
+
+NeutralToken = 'neu' / 'n'
+
+MajorToken 'major quality'
+  = 'maj' / 'Maj' / 'M'
+
 AugmentedToken 'augmented quality'
-  = 'dim' / 'aug' / 'Aug' / [daÂ]
+  = 'aug' / 'Aug' / [aÂ]
 
 AugmentedQuality
-  = fraction: VulgarFraction quality: AugmentedToken {
+  = fraction: VulgarFraction quality: (DiminishedToken / AugmentedToken) {
     return {
       fraction,
       quality,
@@ -1341,13 +1350,13 @@ AugmentedQuality
   }
 
 ImperfectQuality
-  = 'n' {
+  = quality: NeutralToken {
     return {
       fraction: '',
-      quality: 'n',
+      quality,
     };
   }
-  / fraction: VulgarFraction quality: [mM] {
+  / fraction: VulgarFraction quality: (MajorToken / MinorToken) {
     return {
       fraction,
       quality,
@@ -1356,7 +1365,7 @@ ImperfectQuality
 
 // Neutral is mid or ~ from ups-and-downs
 MidQuality
-  = quality: ('P' / 'n') {
+  = quality: ('P' / NeutralToken) {
   return {
     fraction: '',
     quality,
@@ -1609,7 +1618,7 @@ ArrowFunction
 
 // This rule is a faster version of the part of (FJS / AbsoluteFJS / (SquareSuperparticular)) which overlaps with identifiers.
 ReservedPattern
-  = [sqQ]? (AugmentedToken+ / [mMnP]) [0-9]+ 'ms'? ([_v] [0-9])*
+  = [sqQ]? (DiminishedToken+ / AugmentedToken+ / MajorToken / MinorToken / NeutralToken / 'P') [0-9]+ 'ms'? ([_v] [0-9])*
   / [J-Z]|2..| [sqQxdb_ae]+ [0-9]+ ([_v] [0-9])*
   / PitchNominal [sqQxdb_ae]* [0-9]+ ([_v] [0-9])*
 
