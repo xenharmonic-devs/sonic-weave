@@ -216,12 +216,12 @@ Statements
 Statement
   = VariableManipulationStatement
   / PitchDeclaration
+  / BlockStatement
   / ExpressionStatement
   / VariableDeclaration
   / FunctionDeclaration
   / UpDeclaration
   / LiftDeclaration
-  / BlockStatement
   / ThrowStatement
   / ReturnStatement
   / BreakStatement
@@ -671,8 +671,16 @@ ExpressionStatement
     };
   }
 
+BlockExpression
+  = '{' _ body: Statements? _ '}' {
+    return {
+      type: 'BlockExpression',
+      body: body ?? [],
+    };
+  }
+
 Expression
-  = LestExpression
+  = LestExpression / BlockExpression
 
 AssigningOperator
   = CoalescingOperator
@@ -1036,6 +1044,7 @@ Primary
   / TemplateArgument
   / ArrayLiteral
   / RecordLiteral
+  / SetLiteral
   / StringLiteral
 
 UnitStepRange
@@ -1639,17 +1648,25 @@ ArrayLiteral
     return {
       type: 'ArrayLiteral',
       elements,
-    }
+    };
+  }
+
+SetLiteral
+  = '#[' _ elements: ArgumentList _ ']' {
+    return {
+      type: 'SetLiteral',
+      elements,
+    };
   }
 
 RecordLiteral
-  = '{' _ '}' {
+  = '#{' _ '}' {
     return {
       type: 'RecordLiteral',
       properties: [],
     };
   }
-  / '{' _ properties: PropertyNameAndValueList _ (',' _)? '}' {
+  / '#{' _ properties: PropertyNameAndValueList _ (',' _)? '}' {
     return {
       type: 'RecordLiteral',
       properties,

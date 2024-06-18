@@ -287,6 +287,11 @@ export type Statement =
   | ContinueStatement
   | ReturnStatement;
 
+export type BlockExpression = {
+  type: 'BlockExpression';
+  body: Statement[];
+};
+
 export type ConditionalExpression = {
   type: 'ConditionalExpression';
   kind: ConditionalKind;
@@ -420,6 +425,11 @@ export type ArrayLiteral = {
   elements: Argument[];
 };
 
+export type SetLiteral = {
+  type: 'SetLiteral';
+  elements: Argument[];
+};
+
 export type RecordLiteral = {
   type: 'RecordLiteral';
   properties: [string | null, Expression][];
@@ -439,6 +449,7 @@ export type FalseLiteral = {
 };
 
 export type Expression =
+  | BlockExpression
   | ConditionalExpression
   | AccessExpression
   | ArraySlice
@@ -460,6 +471,7 @@ export type Expression =
   | Range
   | ArrayComprehension
   | ArrayLiteral
+  | SetLiteral
   | RecordLiteral
   | StringLiteral
   | HarmonicSegment;

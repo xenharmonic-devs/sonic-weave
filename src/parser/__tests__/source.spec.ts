@@ -1193,7 +1193,7 @@ describe('SonicWeave parser', () => {
 
   it('has inline labels for ordered scales using records', () => {
     const scale = expand(
-      '3/1 "pre-existing";{third: 6/5, "The Octave": 2/1, fif: 3/2}'
+      '3/1 "pre-existing";#{third: 6/5, "The Octave": 2/1, fif: 3/2}'
     );
     expect(scale).toEqual([
       '3/1 "pre-existing"',
@@ -1926,7 +1926,7 @@ describe('SonicWeave parser', () => {
 
   it('can delete record entries', () => {
     const scale = expand(`{
-      const foo = {bar: 1, baz: 2}
+      const foo = #{bar: 1, baz: 2}
       del foo['bar']
       foo
     }`);
@@ -2020,5 +2020,69 @@ describe('SonicWeave parser', () => {
       '1097.976',
       '1200.',
     ]);
+  });
+
+  it('supports block expressions as valid RHS in assignment', () => {
+    const scale = expand(`{
+      const arr = {
+        2
+        1
+        3
+        sort()
+      }
+      arr;
+    }`);
+    expect(scale).toEqual(['1', '2', '3']);
+  });
+
+  it('supports block expressions as operands', () => {
+    const scale = expand(`
+      10 * ({
+        defer sort()
+        2
+        1
+        3
+      })
+    `);
+    expect(scale).toEqual(['10', '20', '30']);
+  });
+
+  it('supports block expressions as function arguments', () => {
+    const truth = expand(`
+      hasConstantStructure({
+        9/8
+        81/64
+        4/3
+        3/2
+        27/16
+        243/128
+        2/1
+      })
+    `);
+    expect(truth).toEqual(expand('true'));
+  });
+
+  it('captures outside variables in block expressions', () => {
+    const pentic = expand(`{
+      const octave = 2;
+      const fifth = 3/2;
+      const pentic = {
+        (fifth ^ 2) / octave
+        (fifth ^ 4) / (octave ^ 2)
+        fifth
+        (fifth ^ 3) / octave
+        octave
+      };
+      pentic;
+    }`);
+    expect(pentic).toEqual(
+      expand(`{
+        9/8
+        81/64
+        3/2
+        27/16
+        2
+      }`)
+    );
   });
 });

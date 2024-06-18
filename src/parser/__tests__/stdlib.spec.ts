@@ -1188,19 +1188,21 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can get the keys of a record', () => {
-    const keys = evaluateExpression('keys({foo: 1, bar: 2})') as string[];
+    const keys = evaluateExpression('keys(#{foo: 1, bar: 2})') as string[];
     keys.sort();
     expect(keys).toEqual(['bar', 'foo']);
   });
 
   it('can get the values of a record', () => {
-    const keys = evaluateExpression('values({foo: "a", bar: "b"})') as string[];
+    const keys = evaluateExpression(
+      'values(#{foo: "a", bar: "b"})'
+    ) as string[];
     keys.sort();
     expect(keys).toEqual(['a', 'b']);
   });
 
   it('realizes a scale word', () => {
-    const scale = expand('realizeWord("LLsLLLs", {L: 9/8, s: 256/243})');
+    const scale = expand('realizeWord("LLsLLLs", #{L: 9/8, s: 256/243})');
     expect(scale).toEqual([
       '9/8',
       '81/64',
@@ -1213,7 +1215,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes a scale word with a missing step', () => {
-    const scale = expand('realizeWord("sLsLsLs", {L: 2\\10})');
+    const scale = expand('realizeWord("sLsLsLs", #{L: 2\\10})');
     expect(scale).toEqual([
       '1\\10',
       '3\\10',
@@ -1227,7 +1229,7 @@ describe('SonicWeave standard library', () => {
 
   it('gracefully handles extra step sizes in the record', () => {
     const scale = expand(
-      'realizeWord("LLsLLLs", {L: 9/8, m: 16/15, s: 256/243, c: 81/80})'
+      'realizeWord("LLsLLLs", #{L: 9/8, m: 16/15, s: 256/243, c: 81/80})'
     );
     expect(scale).toEqual([
       '9/8',
@@ -1241,11 +1243,11 @@ describe('SonicWeave standard library', () => {
   });
 
   it('realizes edge cases of `realizeWord`', () => {
-    const emptiness = parseSource('realizeWord("", {L: 2})');
+    const emptiness = parseSource('realizeWord("", #{L: 2})');
     expect(emptiness).toEqual([]);
-    const octave = expand('realizeWord("L", {})');
+    const octave = expand('realizeWord("L", #{})');
     expect(octave).toEqual(['2']);
-    const threeWholeTones = expand('realizeWord("LLL", {L: 9/8})');
+    const threeWholeTones = expand('realizeWord("LLL", #{L: 9/8})');
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
   });
 

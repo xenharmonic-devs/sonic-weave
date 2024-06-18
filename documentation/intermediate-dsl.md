@@ -133,7 +133,7 @@ When a record is encountered its values are sorted by size and the keys are used
 
 ```ocaml
 4/3
-{
+#{
   fif: 3/2,
   octave: 2,
   "my third": 5/4,
@@ -232,7 +232,7 @@ Values in SonicWeave fall into these categories
 | Interval | `7/5`                    | There are many kinds of intervals with their own operator semantics. |
 | Val      | `12@`                    | Used to convert scales in just intonation to equal temperaments.     |
 | Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals.            |
-| Record   | `{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings.                                 |
+| Record   | `#{fif: 3/2, "p/e": 2}`  | Associative data indexed by strings.                                 |
 | Function | `riff f(x){ x+1 }`       | _Riff_ is a music term for a short repeated phrase.                  |
 
 ## Interval domains
@@ -796,12 +796,12 @@ In slice syntax the end points are optional e.g. `[1, 2, 3][..]` evaluates to `[
 Excluding the end point can be handy to get the first n elements. `"Greetings!"[..<5]` evaluates to `"Greet"`.
 
 ## Records
-Record literals are constructed using `key: value` pairs inside curly brackets e.g. `{fif: 3/2, "my octave": 2/1}`.
+Record literals are constructed using `key: value` pairs inside hash curly brackets e.g. `#{fif: 3/2, "my octave": 2/1}`.
 
 ### Record access
-Records are accessed with the same syntax as arrays but using string indices e.g. `{fif: 3/2}["fif"]` evaluates to `3/2`.
+Records are accessed with the same syntax as arrays but using string indices e.g. `#{fif: 3/2}["fif"]` evaluates to `3/2`.
 
-Nullish access is supported e.g. `{}~["nothing here"]` evaluates to `niente`.
+Nullish access is supported e.g. `#{}~["nothing here"]` evaluates to `niente`.
 
 ## Metric prefixes
 Frequency literals support [metric prefixes](https://en.wikipedia.org/wiki/Metric_prefix) e.g. `1.2 kHz` is the same as `1200 Hz`. [Binary prefixes](https://en.wikipedia.org/wiki/Binary_prefix) are also supported for no particular reason.

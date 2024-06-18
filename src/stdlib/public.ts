@@ -321,7 +321,7 @@ function repr_(
   if (typeof value === 'object') {
     const s = repr_.bind(this);
     return (
-      '{' +
+      '#{' +
       Object.entries(value)
         .map(([k, v]) => `${s(k)}: ${s(v)}`)
         .join(', ') +

@@ -926,7 +926,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
   });
 
   it('parses record literals', () => {
-    const ast = parseSingle('{foo: 1, "bar": 2}');
+    const ast = parseSingle('#{foo: 1, "bar": 2}');
     expect(ast).toEqual({
       type: 'ExpressionStatement',
       expression: {
@@ -1205,6 +1205,28 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       expression: {type: 'ColorLiteral', value: 'rgba(255 50% 5 / .5)'},
     });
   });
+
+  it('parses set literals', () => {
+    const ast = parseSingle('#[1, 2]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'SetLiteral',
+        elements: [
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {type: 'IntegerLiteral', value: 1n},
+          },
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {type: 'IntegerLiteral', value: 2n},
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {
@@ -1298,10 +1320,8 @@ describe('Negative tests', () => {
     expect(() => parse('a\\b<c/d>')).toThrow();
   });
 
-  // XXX: Without the parenthesis this is actually a valid block statement containing an enumeration.
-  // Might need to rethink record syntax if this causes more issues.
   it('rejects dim5 as an identifier', () => {
-    expect(() => parse('({dim5: "no good"})')).toThrow();
+    expect(() => parse('(#{dim5: "no good"})')).toThrow();
   });
 
   it('rejects Pythonic matrix multiplication with a human readable error message', () => {
