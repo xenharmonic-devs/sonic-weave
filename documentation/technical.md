@@ -194,7 +194,7 @@ The Basic Latin block is listed in full. Other blocks only where used.
 | U+0020         | *SP*  | Whitespace |
 | U+0021         | !     | *Reserved for future use* |
 | U+0022         | "     | String literals |
-| U+0023         | #     | Sharp accidental |
+| U+0023         | #     | Sharp accidental, record literals |
 | U+0024         | $     | Current scale |
 | U+0025         | %     | Unary inversion, binary division (loose binding) |
 | U+0026         | &     | MOS chroma up accidental |

@@ -417,6 +417,9 @@ export class ExpressionVisitor {
         return this.visitSquareSuperparticular(node);
       case 'TemplateArgument':
         return this.visitTemplateArgument(node);
+      case 'SetLiteral':
+        // This requires hashable Intervals and support in xen-dev-utils.
+        throw new Error('Set literals not implemented yet.');
     }
     node satisfies never;
   }

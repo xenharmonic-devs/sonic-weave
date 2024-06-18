@@ -1044,6 +1044,7 @@ Primary
   / TemplateArgument
   / ArrayLiteral
   / RecordLiteral
+  / SetLiteral
   / StringLiteral
 
 UnitStepRange
@@ -1647,7 +1648,15 @@ ArrayLiteral
     return {
       type: 'ArrayLiteral',
       elements,
-    }
+    };
+  }
+
+SetLiteral
+  = '#[' _ elements: ArgumentList _ ']' {
+    return {
+      type: 'SetLiteral',
+      elements,
+    };
   }
 
 RecordLiteral

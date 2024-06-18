@@ -425,6 +425,11 @@ export type ArrayLiteral = {
   elements: Argument[];
 };
 
+export type SetLiteral = {
+  type: 'SetLiteral';
+  elements: Argument[];
+};
+
 export type RecordLiteral = {
   type: 'RecordLiteral';
   properties: [string | null, Expression][];
@@ -466,6 +471,7 @@ export type Expression =
   | Range
   | ArrayComprehension
   | ArrayLiteral
+  | SetLiteral
   | RecordLiteral
   | StringLiteral
   | HarmonicSegment;
