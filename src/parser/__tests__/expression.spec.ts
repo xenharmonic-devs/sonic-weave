@@ -2460,6 +2460,18 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.value).toBeInstanceOf(TimeReal);
     expect(interval.valueOf()).toBeCloseTo(1.000000745, 10);
   });
+
+  it('allows return from block expressions', () => {
+    const foo = evaluate(`
+      const foo = ({
+        const ba = "ba"
+        return ba "r"
+        throw "not executed"
+      })
+      foo
+    `);
+    expect(foo).toBe('bar');
+  });
 });
 
 describe('Poor grammar / Fun with "<"', () => {

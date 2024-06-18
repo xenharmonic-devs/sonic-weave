@@ -429,7 +429,9 @@ export class ExpressionVisitor {
     const scale = this.currentScale;
     subVisitor.mutables.set('$$', scale);
     const interrupt = subVisitor.executeStatements(node.body);
-    if (interrupt) {
+    if (interrupt?.type === 'ReturnStatement') {
+      return interrupt.value;
+    } else if (interrupt) {
       throw new Error('Illegal interupt.');
     }
     return subVisitor.currentScale;

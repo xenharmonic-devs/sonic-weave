@@ -50,6 +50,17 @@ Blocks are valid expressions and evaluate to arrays. They have the lowest preced
 (* $ = [10, 20, 30] *)
 ```
 
+#### Block expression return value
+Use a `return` statement inside a block expression to evaluate to the returned value.
+```ocaml
+const foo = {
+  const bar = 2
+  const baz = 3
+  return bar + baz
+}
+(* const foo = 5 *)
+```
+
 ### Parent scale
 The current scale of the parent block can be accessed using `$$`.
 
