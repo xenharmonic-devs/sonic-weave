@@ -306,7 +306,7 @@ riff geodiff(array) {
   return unstack(array);
 }
 
-riff unperiostack(array = ££) {
+riff unstackPeriodic(array = ££) {
   "Convert the popped/given periodic sequence of steps into inflections of the last interval as the guide generator.";
   array;
   const first = $[0] ~% $[-1];
@@ -316,12 +316,7 @@ riff unperiostack(array = ££) {
   $[0] = first;
 }
 
-riff periodiff(array) {
-  "Calculate the geometric differences of the periodic interval pattern.";
-  return unperiostack(array);
-}
-
-riff periostack(guideGenerator, array = ££) {
+riff stackPeriodic(guideGenerator, array = ££) {
   "Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.";
   if (not isInterval(guideGenerator))
     throw "Guide generator must be an interval.";
@@ -331,11 +326,6 @@ riff periostack(guideGenerator, array = ££) {
   const len = real(length($));
   while (++i < len)
     $[i] ~*= $[i-1r];
-}
-
-riff antiperiodiff(constantOfIntegration, array) {
-  "Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.";
-  return periostack(constantOfIntegration, array);
 }
 
 riff enumerate(array = $$) {
@@ -775,7 +765,7 @@ riff repeatLinear(times = 2, scale = ££) {
     (scale ~- 1) ~+ level ~+ 1;
 }
 
-riff flatRepeat(times = 2, scale = ££) {
+riff repeatFlat(times = 2, scale = ££) {
   "Repeat the popped/given intervals as-is without accumulating equaves.";
   return arrayRepeat(times, scale);
 }

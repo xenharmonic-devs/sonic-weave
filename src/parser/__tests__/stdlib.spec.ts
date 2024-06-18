@@ -514,7 +514,7 @@ describe('SonicWeave standard library', () => {
 
   it('can reduce Raga Bhairavi to a comma recipe (inline)', () => {
     const scale = expand(
-      'periodiff(geodiff([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]))'
+      'unstackPeriodic(unstack([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]))'
     );
     expect(scale).toEqual([
       '24/25',
@@ -530,7 +530,7 @@ describe('SonicWeave standard library', () => {
 
   it('can reduce Raga Bhairavi to a comma recipe (verbs)', () => {
     const scale = expand(
-      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unperiostack()'
+      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unstackPeriodic()'
     );
     expect(scale).toEqual([
       '24/25',
@@ -547,7 +547,7 @@ describe('SonicWeave standard library', () => {
   it('can recover Raga Bhairavi from its comma recipe (inline)', () => {
     const scale = expand(`
       cumprod(
-        antiperiodiff(
+        stackPeriodic(
           10/9,
           [
             24/25,
@@ -585,7 +585,7 @@ describe('SonicWeave standard library', () => {
       24/25
       135/128
       80/81
-      periostack(10/9)
+      stackPeriodic(10/9)
       stack()
       simplify
     `);
@@ -948,7 +948,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can repeat unstacked steps', () => {
-    const zarlino7 = expand('5;3/5;flatRepeat(3);stack();2;reduce();sort()');
+    const zarlino7 = expand('5;3/5;repeatFlat(3);stack();2;reduce();sort()');
     expect(zarlino7).toEqual([
       '9/8',
       '5/4',

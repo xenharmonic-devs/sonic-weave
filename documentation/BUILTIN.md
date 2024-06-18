@@ -425,9 +425,6 @@ Calculate the inverse hyperbolic cosine of x.
 ### add(*...terms*)
 Calculate the (linear) sum of the arguments.
 
-### antiperiodiff(*constantOfIntegration*, *array*)
-Calculate the cumulative geometric sums of a periodic difference pattern. Undoes what periodiff does.
-
 ### asinh(*x*)
 Calculate the inverse hyperbolic sine of x.
 
@@ -509,9 +506,6 @@ Calculate e raised to the power of x.
 ### fail(*message*)
 Throw the given message as an error.
 
-### flatRepeat(*times = 2*, *scale = ££*)
-Repeat the popped/given intervals as-is without accumulating equaves.
-
 ### ftom(*freq*)
 Convert absolute frequency to MIDI note number / MTS value (fractional semitones with A440 = 69).
 
@@ -587,12 +581,6 @@ Obtain a copy of the popped/given scale reduced by its last interval, sorted and
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.  The size hints are used to get the correct period reduction when generating a preimage.
 
-### periodiff(*array*)
-Calculate the geometric differences of the periodic interval pattern.
-
-### periostack(*guideGenerator*, *array = ££*)
-Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.
-
 ### pow(*x*, *y*)
 Calculate x to the power of y.
 
@@ -625,6 +613,9 @@ Convert interval to relative logarithmic representation.
 
 ### repeat(*times = 2*, *scale = ££*)
 Stack the popped/given scale on top of itself.
+
+### repeatFlat(*times = 2*, *scale = ££*)
+Repeat the popped/given intervals as-is without accumulating equaves.
 
 ### repeatLinear(*times = 2*, *scale = ££*)
 Repeat the popped/given scale shifted linearly each time.
@@ -662,6 +653,9 @@ Cumulatively stack the popped/given intervals on top of each other.
 ### stackLinear(*array = ££*)
 Cumulatively sum the numbers of the popped/given array.
 
+### stackPeriodic(*guideGenerator*, *array = ££*)
+Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.
+
 ### stretch(*amount*, *scale = ££*)
 Obtain a copy of the popped/given scale streched by the given amount. A value of `1` corresponds to no change.
 
@@ -698,11 +692,11 @@ Find a combination of three vals that is closer to just intonation.
 ### u(*scale = ££*)
 Obtain a undertonal reflection of the popped/given overtonal scale.
 
-### unperiostack(*array = ££*)
-Convert the popped/given periodic sequence of steps into inflections of the last interval as the guide generator.
-
 ### unstack(*array = ££*)
 Unstack the popped/given scale into steps.
+
+### unstackPeriodic(*array = ££*)
+Convert the popped/given periodic sequence of steps into inflections of the last interval as the guide generator.
 
 ### values(*record*)
 Obtain an array of values of the record.
