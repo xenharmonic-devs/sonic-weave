@@ -2557,7 +2557,12 @@ export class TimeMonzo {
       return undefined;
     }
     if (this.isPowerOfTwo()) {
-      const cents = this.octaves.mul(1200);
+      let cents: Fraction;
+      try {
+        cents = this.octaves.mul(1200);
+      } catch {
+        return undefined;
+      }
       if (isDecimal(cents)) {
         const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
           cents,
