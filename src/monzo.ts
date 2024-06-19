@@ -951,6 +951,11 @@ export class TimeReal {
   }
 
   /** @hidden */
+  isSqrt() {
+    return false;
+  }
+
+  /** @hidden */
   isEqualTemperament() {
     return false;
   }
@@ -1609,6 +1614,22 @@ export class TimeMonzo {
   isFractional() {
     for (const component of this.primeExponents) {
       if (component.d !== 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if the time monzo represents a square root of a fraction or fractional amount of time or frequency.
+   * @returns `true` if the square of time monzo can be interpreted as a ratio in frequency-space.
+   */
+  isSqrt() {
+    if (this.residual.s < 0) {
+      return false;
+    }
+    for (const component of this.primeExponents) {
+      if (component.d > 2) {
         return false;
       }
     }

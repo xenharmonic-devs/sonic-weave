@@ -1,12 +1,16 @@
-import {Fraction, PRIMES, primeLimit} from 'xen-dev-utils';
+import {BIG_INT_PRIMES, Fraction, PRIMES} from 'xen-dev-utils';
 import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
 import {
   BasisElement,
+  BasisFraction,
+  PatentTweak,
   SparseOffsetVal,
   ValBasisElement,
+  WartBasisElement,
   WartsLiteral,
 } from './expression';
 import {NEGATIVE_ONE, ONE, ZERO} from './utils';
+import {ValBasis} from './interval';
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const SECOND_MONZO = new TimeMonzo(ONE, []);
@@ -32,6 +36,22 @@ function wartToBasisElement(
     return nonPrimes[index - 16];
   }
   return undefined;
+}
+
+function basisElementToWart(element: TimeMonzo, nonPrimes: TimeMonzo[]) {
+  for (let i = 0; i < nonPrimes.length; ++i) {
+    if (element.equals(nonPrimes[i])) {
+      if (i > 9) {
+        throw new Error('Out of non-prime letters.');
+      }
+      return String.fromCharCode(113 + i);
+    }
+  }
+  const i = BIG_INT_PRIMES.indexOf(element.toBigInteger());
+  if (i < 0 || i > 14) {
+    throw new Error('Out of prime letters.');
+  }
+  return String.fromCharCode(97 + i);
 }
 
 export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
@@ -136,12 +156,6 @@ export function parseValSubgroup(
   };
 }
 
-export function inferEquave(node: WartsLiteral) {
-  const {subgroup, nonPrimes} = parseValSubgroup(node.basis);
-
-  return wartToBasisElement(node.equave, subgroup, nonPrimes);
-}
-
 function patentVal(divisions: number, subgroup: TimeMonzo[]) {
   for (const element of subgroup) {
     if (element.timeExponent.n) {
@@ -161,64 +175,21 @@ function patentVal(divisions: number, subgroup: TimeMonzo[]) {
 }
 
 /**
- * Convert an array of components to a val in a subgroup.
- * WARNING: Modifies subgroup elements' prime limit.
+ * Convert an array of components to a val in a subgroup of the given basis.
  * @param val Components of the val.
- * @param subgroup Basis of the val.
+ * @param basis Basis of the val.
  */
-export function valToTimeMonzo(
-  val: (number | Fraction)[],
-  subgroup: TimeMonzo[]
-) {
-  let numberOfComponents = 0;
-  for (const element of subgroup) {
-    if (!element.residual.isUnity()) {
-      if (element.residual.s !== 1) {
-        throw new Error('Only positive elements supported in val subgroups.');
-      }
-      numberOfComponents = Math.max(
-        primeLimit(element.residual.n, true),
-        primeLimit(element.residual.d, true),
-        numberOfComponents
-      );
-    } else {
-      const pe = [...element.primeExponents];
-      while (pe.length && !pe[pe.length - 1].n) {
-        pe.pop();
-      }
-      numberOfComponents = Math.max(pe.length, numberOfComponents);
-    }
-  }
-
-  if (isNaN(numberOfComponents)) {
-    throw new Error('Unable to determine val prime limit.');
-  }
-
-  // XXX: This should be fine...
-  for (const element of subgroup) {
-    element.numberOfComponents = numberOfComponents;
-  }
-
-  // Perform Gram process
-  const orthoBasis = [...subgroup];
-  const dualBasis: TimeMonzo[] = [];
-
-  for (let i = 0; i < orthoBasis.length; ++i) {
-    for (let j = 0; j < i; ++j) {
-      orthoBasis[i] = orthoBasis[i].div(
-        orthoBasis[j].pow(dualBasis[j].dot(orthoBasis[i]))
-      ) as TimeMonzo;
-    }
-    dualBasis.push(orthoBasis[i].geometricInverse());
-  }
-
+export function valToTimeMonzo(val: (number | Fraction)[], basis: ValBasis) {
   // Build the cologarithmic vector adjusting dual basis weights as necessary.
-  let result = new TimeMonzo(ZERO, Array(numberOfComponents).fill(ZERO));
-  for (let i = 0; i < subgroup.length; ++i) {
-    const missingWeight = ONE.sub(subgroup[i].dot(result));
+  let result = new TimeMonzo(
+    ZERO,
+    Array(basis.value[0].numberOfComponents).fill(ZERO)
+  );
+  for (let i = 0; i < basis.value.length; ++i) {
+    const missingWeight = ONE.sub(basis.value[i].dot(result));
     result = result.mul(
-      dualBasis[i].pow(
-        missingWeight.mul(val[i]).div(subgroup[i].dot(dualBasis[i]))
+      basis.dual[i].pow(
+        missingWeight.mul(val[i]).div(basis.value[i].dot(basis.dual[i]))
       )
     ) as TimeMonzo;
   }
@@ -235,7 +206,7 @@ function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
   throw new Error('Equave outside subgroup.');
 }
 
-export function wartsToVal(node: WartsLiteral) {
+export function wartsToVal(node: WartsLiteral): [TimeMonzo, ValBasis] {
   const {subgroup, nonPrimes} = parseValSubgroup(node.basis);
 
   const equave = wartToBasisElement(node.equave, subgroup, nonPrimes);
@@ -272,12 +243,13 @@ export function wartsToVal(node: WartsLiteral) {
     }
   }
 
-  return valToTimeMonzo(val, subgroup);
+  const basis = new ValBasis(subgroup);
+  return [valToTimeMonzo(val, basis), basis];
 }
 
 export function sparseOffsetToVal(
   node: SparseOffsetVal
-): [TimeMonzo, TimeMonzo] {
+): [TimeMonzo, ValBasis] {
   const {subgroup} = parseValSubgroup(node.basis);
   let equave = TWO_MONZO;
   if (node.equave) {
@@ -309,5 +281,90 @@ export function sparseOffsetToVal(
       throw new Error('Tweak outside subgroup.');
     }
   }
-  return [valToTimeMonzo(val, subgroup), equave];
+  const basis = new ValBasis(subgroup);
+  return [valToTimeMonzo(val, basis), basis];
+}
+
+export function valToWarts(
+  monzo: TimeMonzo,
+  basis: WartBasisElement[]
+): WartsLiteral {
+  const {subgroup, nonPrimes} = parseValSubgroup(basis);
+  const components = subgroup.map(m => m.dot(monzo).valueOf());
+  const divisions = components[0].valueOf();
+  if (!Number.isInteger(divisions)) {
+    throw new Error('Fractional divisions cannot be formatted as warts.');
+  }
+  const warts: string[] = [];
+  for (let i = 1; i < subgroup.length; ++i) {
+    const log = subgroup[i].log(subgroup[0]).valueOf() * divisions;
+    const patent = Math.round(log);
+    const tweak = components[i] - patent;
+    if (tweak) {
+      const wart = basisElementToWart(subgroup[i], nonPrimes);
+      let count = 2 * Math.abs(tweak);
+      if (log > patent) {
+        if (tweak > 0) {
+          count--;
+        }
+      } else if (tweak < 0) {
+        count--;
+      }
+      for (let j = 0; j < count; ++j) {
+        warts.push(wart);
+      }
+    }
+  }
+  return {
+    type: 'WartsLiteral',
+    equave: '',
+    divisions: divisions,
+    warts: warts,
+    basis,
+  };
+}
+
+export function valToSparseOffset(
+  monzo: TimeMonzo,
+  basis: WartBasisElement[]
+): SparseOffsetVal {
+  const {subgroup} = parseValSubgroup(basis);
+  const components = subgroup.map(m => m.dot(monzo).valueOf());
+  const divisions = components[0].valueOf();
+  if (!Number.isInteger(divisions)) {
+    throw new Error(
+      'Fractional divisions cannot be formatted as Sparse Offset Vals.'
+    );
+  }
+  const tweaks: PatentTweak[] = [];
+  for (let i = 1; i < subgroup.length; ++i) {
+    const log = subgroup[i].log(subgroup[0]).valueOf() * divisions;
+    const patent = Math.round(log);
+    const tweak = components[i] - patent;
+    if (tweak) {
+      let monzo = subgroup[i];
+      let radical = false;
+      if (!monzo.isFractional()) {
+        radical = true;
+        monzo = monzo.pow(2) as TimeMonzo;
+      }
+      const {s, n, d} = subgroup[i].toFraction();
+      const element: BasisFraction = {
+        radical,
+        numerator: s * n,
+        denominator: d === 1 ? null : d,
+      };
+      tweaks.push({
+        element,
+        tweak,
+      });
+    }
+  }
+  return {
+    type: 'SparseOffsetVal',
+    equave: '',
+    divisions: divisions,
+    tweaks: tweaks,
+    basis,
+  };
 }

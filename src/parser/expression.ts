@@ -20,6 +20,7 @@ import {
   SparseOffsetVal,
   SquareSuperparticular,
   MosStepLiteral,
+  ValBasisLiteral,
 } from '../expression';
 import {
   Interval,
@@ -29,6 +30,7 @@ import {
   log,
   Val,
   IntervalDomain,
+  ValBasis,
 } from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {
@@ -60,7 +62,6 @@ import {pythagoreanMonzo, absoluteMonzo, AbsolutePitch} from '../pythagorean';
 import {inflect} from '../fjs';
 import {
   STEP_ELEMENT,
-  inferEquave,
   parseSubgroup,
   parseValSubgroup,
   sparseOffsetToVal,
@@ -113,7 +114,8 @@ export function arrayRecordOrString(
     typeof value !== 'object' ||
     value instanceof Interval ||
     value instanceof Val ||
-    value instanceof Color
+    value instanceof Color ||
+    value instanceof ValBasis
   ) {
     throw new Error(message);
   }
@@ -348,11 +350,11 @@ export class ExpressionVisitor {
         }
         return new Interval(CENT_MONZO, 'logarithmic', 0, node);
       case 'ReciprocalCentLiteral':
-        return new Val(RECIPROCAL_CENT_MONZO, TWO_MONZO, {
+        return new Val(RECIPROCAL_CENT_MONZO, new ValBasis(1), {
           type: 'ReciprocalCentLiteral',
         });
       case 'ReciprocalLogarithmicHertzLiteral':
-        return new Val(HERTZ_MONZO, HERTZ_MONZO, {
+        return new Val(HERTZ_MONZO, new ValBasis([HERTZ_MONZO]), {
           type: 'ReciprocalLogarithmicHertzLiteral',
         });
       case 'TrueLiteral':
@@ -417,11 +419,18 @@ export class ExpressionVisitor {
         return this.visitSquareSuperparticular(node);
       case 'TemplateArgument':
         return this.visitTemplateArgument(node);
+      case 'ValBasisLiteral':
+        return this.visitValBasisLiteral(node);
       case 'SetLiteral':
         // This requires hashable Intervals and support in xen-dev-utils.
         throw new Error('Set literals not implemented yet.');
     }
     node satisfies never;
+  }
+
+  protected visitValBasisLiteral(node: ValBasisLiteral) {
+    const {subgroup} = parseValSubgroup(node.basis);
+    return new ValBasis(subgroup, node);
   }
 
   protected visitBlockExpression(node: BlockExpression) {
@@ -561,6 +570,7 @@ export class ExpressionVisitor {
           spread instanceof Interval ||
           spread instanceof Val ||
           spread instanceof Color ||
+          spread instanceof ValBasis ||
           Array.isArray(spread)
         ) {
           throw new Error('Spread argument must be a record.');
@@ -769,18 +779,19 @@ export class ExpressionVisitor {
       }
     }
     let value: TimeMonzo;
-    let equave = TWO_MONZO;
-    if (node.basis.length) {
+    let basis: ValBasis;
+    if (node.basis?.length) {
       const {subgroup} = parseValSubgroup(node.basis, val.length);
       if (val.length !== subgroup.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
-      value = valToTimeMonzo(val, subgroup);
-      equave = subgroup[0];
+      basis = new ValBasis(subgroup);
+      value = valToTimeMonzo(val, basis);
     } else {
       value = new TimeMonzo(ZERO, val as Fraction[]);
+      basis = new ValBasis(val.length);
     }
-    return new Val(value, equave, node);
+    return new Val(value, basis, node);
   }
 
   protected project(
@@ -798,12 +809,8 @@ export class ExpressionVisitor {
   }
 
   protected visitWartsLiteral(node: WartsLiteral) {
-    const val = wartsToVal(node);
-    const equave = inferEquave(node);
-    if (!equave) {
-      throw new Error('Failed to infer wart equave.');
-    }
-    return new Val(val, equave, node);
+    const [val, basis] = wartsToVal(node);
+    return new Val(val, basis, node);
   }
 
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
@@ -868,9 +875,24 @@ export class ExpressionVisitor {
   }
 
   protected visitAccessExpression(node: AccessExpression): SonicWeaveValue {
+    const object_ = this.visit(node.object);
+    if (object_ instanceof ValBasis) {
+      const index = this.visit(node.key);
+      if (!(index instanceof Interval)) {
+        throw new Error('Basis index must be an integer.');
+      }
+      let i = index.toInteger();
+      if (i < 0) {
+        i += object_.value.length;
+      }
+      if (i < 0 || i >= object_.value.length) {
+        throw new Error('Index out of range.');
+      }
+      return new Interval(object_.value[i], 'linear');
+    }
     const object = arrayRecordOrString(
-      this.visit(node.object),
-      'Can only access arrays, records or strings.'
+      object_,
+      'Can only access bases, arrays, records or strings.'
     );
     if (!Array.isArray(object) && typeof object !== 'string') {
       const key = this.visit(node.key);
@@ -1049,7 +1071,7 @@ export class ExpressionVisitor {
       if (node.uniform) {
         let value: TimeMonzo | TimeReal;
         let newSteps = 0;
-        let newNode = operand.node;
+        let newNode = operand instanceof Interval ? operand.node : undefined;
         switch (operator) {
           case '-':
             value = operand.value.neg();
@@ -1072,7 +1094,7 @@ export class ExpressionVisitor {
         }
         if (operand.domain === 'cologarithmic') {
           if (value instanceof TimeMonzo) {
-            return new Val(value, operand.equave, newNode);
+            return new Val(value, operand.basis, undefined);
           }
           throw new Error('Val unary operation failed.');
         }
@@ -1118,6 +1140,7 @@ export class ExpressionVisitor {
       // The runtime shouldn't let you get here.
       throw new Error(`Unexpected unary operation '${operator}'.`);
     } else if (
+      operand instanceof ValBasis ||
       operand instanceof Color ||
       typeof operand === 'string' ||
       typeof operand === 'function' ||
@@ -1581,6 +1604,24 @@ export class ExpressionVisitor {
           `Operator '${operator}' not implemented between strings and intervals.`
         );
       }
+    } else if (left instanceof Color) {
+      if (right instanceof Color) {
+        if (operator === '==') {
+          return left.strictEquals(right);
+        } else if (operator === '<>') {
+          return !left.strictEquals(right);
+        }
+      }
+    } else if (left instanceof ValBasis) {
+      if (right instanceof ValBasis) {
+        if (operator === '==') {
+          return left.strictEquals(right);
+        } else if (operator === '<>') {
+          return !left.strictEquals(right);
+        } else if (operator === '~=') {
+          return left.equals(right);
+        }
+      }
     }
     switch (operator) {
       case '==':
@@ -1628,6 +1669,8 @@ export class ExpressionVisitor {
       return this.intrinsicValCall(left, right);
     } else if (left instanceof Color) {
       return this.intrinsicColorCall(left, right);
+    } else if (left instanceof ValBasis) {
+      throw new Error('Basis has no intrinsic behavior.');
     }
     const ic = this.implicitCall.bind(this);
     return binaryBroadcast.bind(this)(left, right, ic);

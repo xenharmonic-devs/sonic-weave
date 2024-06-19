@@ -5,7 +5,7 @@ import {
   type Parameter,
   Expression,
 } from '../ast';
-import {Color, Interval, Val} from '../interval';
+import {Color, Interval, Val, ValBasis} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {type ExpressionVisitor} from '../parser/expression';
 import {ZERO} from '../utils';
@@ -25,6 +25,7 @@ export type SonicWeavePrimitive =
   | SonicWeaveFunction
   | Interval
   | Val
+  | ValBasis
   | Color
   | string
   | undefined
@@ -179,7 +180,8 @@ export function isArrayOrRecord(container: SonicWeaveValue) {
   return !(
     container instanceof Interval ||
     container instanceof Color ||
-    container instanceof Val
+    container instanceof Val ||
+    container instanceof ValBasis
   );
 }
 
@@ -205,7 +207,8 @@ export function unaryBroadcast(
   if (
     container instanceof Color ||
     container instanceof Val ||
-    container instanceof Interval
+    container instanceof Interval ||
+    container instanceof ValBasis
   ) {
     throw new Error('Invalid container to map over.');
   }
@@ -245,7 +248,8 @@ export function binaryBroadcast(
       !(
         right instanceof Color ||
         right instanceof Interval ||
-        right instanceof Val
+        right instanceof Val ||
+        right instanceof ValBasis
       )
     ) {
       right satisfies Record<string, SonicWeavePrimitive>;
@@ -256,7 +260,12 @@ export function binaryBroadcast(
   }
   if (
     typeof left === 'object' &&
-    !(left instanceof Color || left instanceof Interval || left instanceof Val)
+    !(
+      left instanceof Color ||
+      left instanceof Interval ||
+      left instanceof Val ||
+      left instanceof ValBasis
+    )
   ) {
     left satisfies Record<string, SonicWeavePrimitive>;
     if (Array.isArray(right)) {
@@ -268,7 +277,8 @@ export function binaryBroadcast(
       !(
         right instanceof Color ||
         right instanceof Interval ||
-        right instanceof Val
+        right instanceof Val ||
+        right instanceof ValBasis
       )
     ) {
       right satisfies Record<string, SonicWeavePrimitive>;
@@ -303,7 +313,8 @@ export function binaryBroadcast(
     typeof right !== 'object' ||
     right instanceof Color ||
     right instanceof Interval ||
-    right instanceof Val
+    right instanceof Val ||
+    right instanceof ValBasis
   ) {
     throw new Error('Invalid container broadcast.');
   }

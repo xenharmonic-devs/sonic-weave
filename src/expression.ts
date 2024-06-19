@@ -76,6 +76,11 @@ export type ValBasisElement = WartBasisElement | 's' | 'Hz' | 'hz';
 
 export type BasisElement = ValBasisElement | 'rc' | 'r¢' | 'inf' | '1°' | 'deg';
 
+export type ValBasisLiteral = {
+  type: 'ValBasisLiteral';
+  basis: ValBasisElement[];
+};
+
 export type IntegerLiteral = {
   type: 'IntegerLiteral';
   value: bigint;
@@ -218,7 +223,7 @@ export type PatentTweak = {
 
 export type SparseOffsetVal = {
   type: 'SparseOffsetVal';
-  equave: BasisFraction;
+  equave: BasisFraction | '';
   divisions: number;
   tweaks: PatentTweak[];
   basis: WartBasisElement[];
@@ -243,7 +248,7 @@ export type MonzoLiteral = {
 export type ValLiteral = {
   type: 'ValLiteral';
   components: VectorComponent[];
-  basis: ValBasisElement[];
+  basis?: ValBasisElement[];
 };
 
 export type SquareSuperparticular = {
@@ -264,7 +269,6 @@ export type IntervalLiteral =
   | NedjiLiteral
   | CentsLiteral
   | CentLiteral
-  | ReciprocalCentLiteral
   | NotANumberLiteral
   | InfinityLiteral
   | FJS
@@ -274,12 +278,15 @@ export type IntervalLiteral =
   | MosStepLiteral
   | HertzLiteral
   | SecondLiteral
-  | ReciprocalLogarithmicHertzLiteral
   | MonzoLiteral
+  | SquareSuperparticular;
+
+export type CoIntervalLiteral =
   | ValLiteral
   | SparseOffsetVal
   | WartsLiteral
-  | SquareSuperparticular;
+  | ReciprocalCentLiteral
+  | ReciprocalLogarithmicHertzLiteral;
 
 /**
  * Validate AST literal for display formatting.
@@ -1023,7 +1030,7 @@ function formatMonzo(literal: MonzoLiteral) {
 
 function formatVal(literal: ValLiteral) {
   let result = `<${formatComponents(literal.components)}]`;
-  if (literal.basis.length) {
+  if (literal.basis?.length) {
     result += `@${formatSubgroupBasis(literal.basis)}`;
   }
   return result;
@@ -1041,7 +1048,9 @@ function formatSquareSuperparticular(literal: SquareSuperparticular) {
  * @param literal Interval literal to convert.
  * @returns Text representation of the literal.
  */
-export function literalToString(literal: IntervalLiteral) {
+export function literalToString(
+  literal: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral
+) {
   switch (literal.type) {
     case 'NedjiLiteral':
       return formatNedji(literal);
@@ -1089,6 +1098,8 @@ export function literalToString(literal: IntervalLiteral) {
       return formatSquareSuperparticular(literal);
     case 'MosStepLiteral':
       return formatMosStepLiteral(literal);
+    case 'ValBasisLiteral':
+      return '@' + formatSubgroupBasis(literal.basis);
     default:
       literal satisfies AspiringFJS | AspiringAbsoluteFJS;
       throw new Error(`Cannot format ${literal.type}`);
@@ -1150,7 +1161,9 @@ export function integerToVectorComponent(num: number): VectorComponent {
   };
 }
 
-export function literalToJSON(literal?: IntervalLiteral): any {
+export function literalToJSON(
+  literal?: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral
+): any {
   if (!literal) {
     return undefined;
   }
@@ -1214,11 +1227,14 @@ export function literalToJSON(literal?: IntervalLiteral): any {
     case 'ValLiteral':
     case 'SparseOffsetVal':
     case 'WartsLiteral':
+    case 'ValBasisLiteral':
       return literal;
   }
 }
 
-export function literalFromJSON(object: any): IntervalLiteral | undefined {
+export function intervalLiteralFromJSON(
+  object: any
+): IntervalLiteral | undefined {
   if (object === undefined) {
     return undefined;
   }
@@ -1267,7 +1283,6 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
       };
     case 'StepLiteral':
     case 'CentLiteral':
-    case 'ReciprocalCentLiteral':
     case 'NotANumberLiteral':
     case 'InfinityLiteral':
     case 'FJS':
@@ -1277,11 +1292,7 @@ export function literalFromJSON(object: any): IntervalLiteral | undefined {
     case 'MosStepLiteral':
     case 'HertzLiteral':
     case 'SecondLiteral':
-    case 'ReciprocalLogarithmicHertzLiteral':
     case 'MonzoLiteral':
-    case 'ValLiteral':
-    case 'SparseOffsetVal':
-    case 'WartsLiteral':
       return object;
     case 'IntegerLiteral':
     case 'FractionLiteral':
