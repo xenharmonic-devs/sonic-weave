@@ -8,6 +8,7 @@ import {
 } from '../../parser';
 import {Interval, Val} from '../../interval';
 import {builtinNode, track} from '../../stdlib';
+import {Fraction} from 'xen-dev-utils';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
@@ -1623,5 +1624,31 @@ describe('SonicWeave standard library', () => {
   it('can stack edfsteps', () => {
     const scale = expand('tetStack([2, 3, 2, 1], 3/2)');
     expect(scale).toEqual(['2\\8<3/2>', '5\\8<3/2>', '7\\8<3/2>', '8\\8<3/2>']);
+  });
+
+  it('generates 5afdo', () => {
+    const scale = expand('afdo(5)');
+    expect(scale).toEqual(['6/5', '7/5', '8/5', '9/5', '2']);
+  });
+
+  it('generates 5afdt', () => {
+    const scale = expand('afdo(5, 3)');
+    expect(scale).toEqual(['7/5', '9/5', '11/5', '13/5', '3']);
+    // Verify that it's an arithmetic progression
+    const fracs = scale.map(f => new Fraction(f));
+    fracs.unshift(new Fraction(1));
+    for (let i = 0; i < fracs.length - 1; ++i) {
+      expect(fracs[i + 1].sub(fracs[i]).equals('2/5')).toBe(true);
+    }
+  });
+
+  it('can stack afdosteps', () => {
+    const scale = expand('afdoStack([2, 3, 1, 2, 3])');
+    expect(scale).toEqual(['13/11', '16/11', '17/11', '19/11', '2']);
+  });
+
+  it('can stack afdfsteps', () => {
+    const scale = expand('afdoStack([1, 3, 1, 2, 1], 3/2)');
+    expect(scale).toEqual(['17/16', '5/4', '21/16', '23/16', '3/2']);
   });
 });

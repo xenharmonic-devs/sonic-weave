@@ -425,6 +425,12 @@ Calculate the inverse hyperbolic cosine of x.
 ### add(*...terms*)
 Calculate the (linear) sum of the arguments.
 
+### afdo(*divisions*, *equave = 2*)
+Generate arithmetic frequency divisions of the given equave/octave.
+
+### afdoStack(*steps*, *equave = 2*)
+Stack arithmetic frequency deltas up to the given equave/octave.
+
 ### asinh(*x*)
 Calculate the inverse hyperbolic sine of x.
 

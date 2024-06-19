@@ -405,10 +405,23 @@ riff tet(divisions, equave = 2) {
 
 riff tetStack(steps, equave = 2) {
   "Stack relative edosteps up to the given equave/octave.";
-  stackLinear(steps)
+  stackLinear(steps);
   if (equave == 2)
     return $ \\ $[-1];
   return $ \\ $[-1] ed equave;
+}
+
+riff afdo(divisions, equave = 2) {
+  "Generate arithmetic frequency divisions of the given equave/octave.";
+  const delta = (equave ~- 1) ~/ divisions;
+  return 1 +~ [1..divisions] *~ delta;
+}
+
+riff afdoStack(steps, equave = 2) {
+  "Stack arithmetic frequency deltas up to the given equave/octave.";
+  stackLinear(steps);
+  const delta = (equave ~- 1) ~/ $[-1];
+  return 1 +~ $ *~ delta;
 }
 
 riff subharmonics(start, end) {
