@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {TimeMonzo, TimeReal} from '../monzo';
-import {Interval, intervalValueAs} from '../interval';
+import {Interval, ValBasis, intervalValueAs} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
 
@@ -200,5 +200,25 @@ describe('Interval JSON serialization', () => {
       0.003,
       1.875,
     ]);
+  });
+});
+
+describe('(Val) subgroup basis', () => {
+  it('has an orthogonalized state', () => {
+    const basis = new ValBasis([
+      TimeMonzo.fromArray([1, -1, 3]),
+      TimeMonzo.fromArray([1, 0, 5]),
+      TimeMonzo.fromArray([1, 2, 6]),
+    ]);
+    expect(
+      basis.ortho.map(m => m.primeExponents.map(c => c.toFraction()))
+    ).toEqual([
+      ['1', '-1', '3'],
+      ['-5/11', '16/11', '7/11'],
+      ['1/2', '1/5', '-1/10'],
+    ]);
+    expect(basis.ortho[0].dot(basis.ortho[1]).n).toBe(0);
+    expect(basis.ortho[0].dot(basis.ortho[2]).n).toBe(0);
+    expect(basis.ortho[1].dot(basis.ortho[2]).n).toBe(0);
   });
 });

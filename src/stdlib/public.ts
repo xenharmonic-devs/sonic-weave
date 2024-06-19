@@ -65,7 +65,7 @@ export function simplify(interval: Interval | boolean): Interval;
 export function simplify(interval: Val): Val;
 export function simplify(interval: Val | Interval | boolean): typeof interval {
   if (interval instanceof Val) {
-    return new Val(interval.value.clone(), interval.equave.clone());
+    return new Val(interval.value.clone(), interval.basis);
   }
   if (typeof interval === 'boolean') {
     return upcastBool(interval);

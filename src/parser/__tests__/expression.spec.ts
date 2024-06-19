@@ -1008,12 +1008,14 @@ describe('SonicWeave expression evaluator', () => {
   it('formats non-standard simplified vals', () => {
     const orphanBohlenPierce = evaluate('simplify(b13@)') as Val;
     expect(orphanBohlenPierce.toString()).toBe(
-      'withEquave(<8 13 19 23 28 30 34 35 37], 3)'
+      'withBasis(<8 13 19 23 28 30 34 35 37], @3.2.5.7.11.13.17.19.23)'
     );
   });
 
   it('parses non-standard vals', () => {
-    const orphanBohlenPierce = evaluate('withEquave(<8 13 19 23], 3)') as Val;
+    const orphanBohlenPierce = evaluate(
+      'withBasis(<8 13 19 23], @3.2.5..)'
+    ) as Val;
     expect(orphanBohlenPierce.equave.toString()).toBe('3');
     expect(
       orphanBohlenPierce.value.primeExponents.map(pe => pe.toFraction())
@@ -2013,7 +2015,7 @@ describe('SonicWeave expression evaluator', () => {
     const {value} = parseSingle(`
       const v = <12 19 28]
       const m = 7/5
-      ((v dot relative(m)) \\ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))
+      ((v dot relative(m)) \\ (v dot basisOf(v)[0]) ed basisOf(v)[0]) ~* tail(relative(m), complexityOf(v, true))
     `);
     const pe = [...value.primeExponents];
     while (!pe[pe.length - 1].n) {
@@ -2309,7 +2311,15 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has string representation for the geometric inverse of the logarithmic Hertz', () => {
     const whatIsThis = evaluate('str(%logarithmic(1z))');
-    expect(whatIsThis).toBe('withEquave(<1]@Hz, 1 Hz)');
+    expect(whatIsThis).toBe('withBasis(<1]@Hz, @Hz)');
+  });
+
+  it('can evaluate the hertz val', () => {
+    const pilcrowspoob = evaluate('withBasis(<1]@Hz, @Hz)') as Val;
+    expect(pilcrowspoob.value.isUnity()).toBe(true);
+    expect(pilcrowspoob.basis.value[0].isUnity()).toBe(true);
+    expect(pilcrowspoob.value.timeExponent.equals(-1)).toBe(true);
+    expect(pilcrowspoob.basis.value[0].timeExponent.equals(-1)).toBe(true);
   });
 
   it('has a literal for the geometric inverse of the logarithmic Hertz', () => {
@@ -2496,5 +2506,40 @@ describe('SonicWeave expression evaluator', () => {
     expect(semiDemiFif).toBe('3/2^1/4');
     const twoDias = evaluate('MOS LLsLLLs;str(nedji(maj2ms))');
     expect(twoDias).toBe('1\\3');
+  });
+
+  it('compares colors', () => {
+    expect(evaluate('str(#f00 == #f00)')).toBe('true');
+    expect(evaluate('str(red == blue)')).toBe('false');
+  });
+
+  it('compares bases', () => {
+    expect(evaluate('str(@2.3.5 == @2.3.5)')).toBe('true');
+    expect(evaluate('str(@2.3.5 == @2.3.7)')).toBe('false');
+  });
+
+  it('converts a val literal to wartless warts', () => {
+    const tet12 = evaluate('str(warts(<12 19 28]))');
+    expect(tet12).toBe('12@2.3.5');
+  });
+
+  it('converts a hemipyth val to wartless warts', () => {
+    const val = evaluate('str(warts(<11 17]@√2.√3))');
+    expect(val).toBe('11@√2.√3');
+  });
+
+  it('converts a val literal to warts', () => {
+    const tet17c = evaluate('str(warts(<17 27 40]))');
+    expect(tet17c).toBe('17c@2.3.5');
+  });
+
+  it('converts a val literal to tweakless SOV', () => {
+    const tet5 = evaluate('str(SOV(<5 8 12]))');
+    expect(tet5).toBe('5[]@2.3.5');
+  });
+
+  it('converts a warts literal to SOV', () => {
+    const b13 = evaluate('str(SOV(b13@))');
+    expect(b13).toBe('13[]@3.2.5.7.11.13.17.19.23');
   });
 });

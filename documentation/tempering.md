@@ -20,11 +20,11 @@ In some sense the dot product measures how well two vectors are aligned with eac
 
 The linear unary inverse operator has no logarithmic analogue so `%logarithmic(2)` evaluates to a co-vector that measures two's content in monzos, i.e. it is the *geometric inverse* of the *ket* `[1>`. We notate it correspondingly as a *bra* `<1]` and call these new objects *vals*.
 
-By default a geometric inverse is only associated with the monzo it's the inverse of. To change the association use the `withEquave(...)` built-in function. To obtain the associated equave (as a linear quantity) use the `equaveOf(...)` function.
+By default a geometric inverse is only associated with the monzo it's the inverse of. To change the association use the `withBasis(...)` built-in function. To obtain the associated basis use the `basisOf(...)` function.
 
-By default co-vectors are associated with the octave so the basis of the co-logarithmic domain consists of `%logarithmic(2)`, `withEquave(%logarithmic(3), 2)`, `withEquave(%logarithmic(5), 2)`, etc. so a val literal such as `<12 19 28]` means
+By default co-vectors are associated with the octave so the basis of the co-logarithmic domain consists of `withBasis(%logarithmic(2), @)`, `withBasis(%logarithmic(3), @)`, `withBasis(%logarithmic(5), @)`, etc. so a val literal such as `<12 19 28]` means
 ```ocaml
-12 * %logarithmic(2) + 19 * withEquave(%logarithmic(3), 2) + 28 * withEquave(%logarithmic(5), 2)
+12 * withBasis(%logarithmic(2), @2.3.5) + 19 * withBasis(%logarithmic(3), @2.3.5) + 28 * withBasis(%logarithmic(5), @2.3.5)
 ```
 if spelled out in full.
 
@@ -32,15 +32,15 @@ if spelled out in full.
 The dot product between a val and a monzo is straighforward enough: `<12 19 28] dot [-3 1 1>` evaluates to `12*(-3) + 19*1 + 28*1` or `11` in total.
 
 ### Tempering operator
-The association with an equave is important in tempering to know which equal temperament we're targetting. The `tmpr` operator infers the number of divisions from `val dot equaveOf(val)`. It's also more graceful with a higher prime tail and leaves it alone.
+The association with an equave is important in tempering to know which equal temperament we're targetting. The `tmpr` operator infers the number of divisions from `val dot basisOf(val)[0]`. It's also more graceful with a higher prime tail and leaves it alone.
 
 The operation `v tmpr m` is equivalent to:
 ```ocaml
-((v dot relative(m)) \ (v dot equaveOf(v)) ed equaveOf(v)) ~* tail(relative(m), complexityOf(v, true))
+((v dot relative(m)) \ (v dot basisOf(v)[0]) ed basisOf(v)[0]) ~* tail(relative(m), complexityOf(v, true))
 ```
 E.g. `<12 19 28] tmpr 7/5` evaluates to `[-28/12 0 0 1>`.
 
-In practice the higher prime tail is usually irrelevant and the vals have enough components to map everything. `12@ tmpr 7/5` is simply `6\12`. The equave association does come into play though: `withEquave(12@, 3) tmpr 7/5` evaluates to `6\19<3>` owing to the three's component being 19 here.
+In practice the higher prime tail is usually irrelevant and the vals have enough components to map everything. `12@ tmpr 7/5` is simply `6\12`. The equave association does come into play though: `withBasis(12@, @3.2.5.7) tmpr 7/5` evaluates to `6\19<3>` owing to the three's component being 19 here.
 
 ### Implicit tempering
 Implicit tempering refers to what SonicWeave does to the scale when it encounters a val.

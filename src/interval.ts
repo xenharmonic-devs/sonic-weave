@@ -24,11 +24,14 @@ import {
   integerToVectorComponent,
   MonzoLiteral,
   literalToJSON,
-  literalFromJSON,
+  intervalLiteralFromJSON,
   sqrtNode,
   pitchAbsNode,
+  ValBasisLiteral,
+  CoIntervalLiteral,
+  WartBasisElement,
 } from './expression';
-import {TimeMonzo, TimeReal} from './monzo';
+import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {type RootContext} from './context';
 import {
@@ -38,7 +41,13 @@ import {
   countUpsAndLifts,
   setUnion,
 } from './utils';
-import {Fraction, FractionValue} from 'xen-dev-utils';
+import {
+  BIG_INT_PRIMES,
+  Fraction,
+  FractionValue,
+  PRIMES,
+  primeLimit,
+} from 'xen-dev-utils';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
@@ -61,6 +70,15 @@ export class Color {
    */
   toString() {
     return this.value;
+  }
+
+  /**
+   * Check if this color is strictly the same as another.
+   * @param other Another Color instance.
+   * @returns `true` if the colors have the same value.
+   */
+  strictEquals(other: Color) {
+    return this.value === other.value;
   }
 }
 
@@ -255,7 +273,7 @@ export class Interval {
         monzo,
         value.d ? 'logarithmic' : 'linear',
         value.s,
-        literalFromJSON(value.n)
+        intervalLiteralFromJSON(value.n)
       );
       result.label = value.l;
       result.color = value.c && new Color(value.c);
@@ -378,7 +396,11 @@ export class Interval {
       throw new Error('Unable to convert irrational number to val.');
     }
     // This overload should be fine because multiplication is not implemented in the logarithmic domain.
-    return new Val(this.value.geometricInverse(), this.value.clone(), node);
+    return new Val(
+      this.value.geometricInverse(),
+      new ValBasis([this.value.clone()]),
+      undefined
+    );
   }
 
   /**
@@ -1329,13 +1351,222 @@ export class Interval {
 const ZOMBIE = new Interval(TWO, 'logarithmic');
 
 /**
+ * A basis of a fractional just intonation subgroup.
+ */
+export class ValBasis {
+  value: TimeMonzo[];
+  ortho: TimeMonzo[];
+  dual: TimeMonzo[];
+  node?: ValBasisLiteral;
+
+  /**
+   * Construct a basis for a fractional just intonation subgroup.
+   * @param basis Array of basis elements or number of primes starting from 2.
+   * @param node Virtual AST node associated with this basis.
+   */
+  constructor(basis: TimeMonzo[] | number, node?: ValBasisLiteral) {
+    this.node = node;
+    if (typeof basis === 'number') {
+      const numberOfComponents = basis;
+      this.value = PRIMES.slice(0, numberOfComponents).map(p =>
+        TimeMonzo.fromFraction(p, numberOfComponents)
+      );
+      this.ortho = this.value;
+      this.dual = this.value;
+      return;
+    }
+    basis = [...basis];
+    let numberOfComponents = 0;
+    for (const element of basis) {
+      if (!element.residual.isUnity()) {
+        if (element.residual.s !== 1) {
+          throw new Error('Only positive elements supported in val subgroups.');
+        }
+        numberOfComponents = Math.max(
+          primeLimit(element.residual.n, true),
+          primeLimit(element.residual.d, true),
+          numberOfComponents
+        );
+      } else {
+        const pe = [...element.primeExponents];
+        while (pe.length && !pe[pe.length - 1].n) {
+          pe.pop();
+        }
+        numberOfComponents = Math.max(pe.length, numberOfComponents);
+      }
+    }
+
+    if (isNaN(numberOfComponents)) {
+      throw new Error('Unable to determine val prime limit.');
+    }
+
+    for (let i = 0; i < basis.length; ++i) {
+      if (basis[i].numberOfComponents !== numberOfComponents) {
+        basis[i] = basis[i].clone();
+        basis[i].numberOfComponents = numberOfComponents;
+      }
+    }
+    this.value = basis;
+
+    // Perform Gram process
+    this.ortho = [...this.value];
+    this.dual = [];
+
+    for (let i = 0; i < this.ortho.length; ++i) {
+      for (let j = 0; j < i; ++j) {
+        const oi = this.ortho[i].div(
+          this.ortho[j].pow(this.dual[j].dot(this.ortho[i]))
+        );
+        if (oi instanceof TimeReal) {
+          throw new Error('Basis orthoginalization failed.');
+        }
+        this.ortho[i] = oi;
+      }
+      this.dual.push(this.ortho[i].geometricInverse());
+    }
+  }
+
+  /**
+   * Check if this basis is the same as another.
+   * @param other Another basis.
+   * @returns `true` if this basis is the same as the other.
+   */
+  equals(other: ValBasis) {
+    if (this.value.length !== other.value.length) {
+      return false;
+    }
+    for (let i = 0; i < this.value.length; ++i) {
+      if (!this.value[i].equals(other.value[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if this basis is strictly the same as another.
+   * @param other Another basis.
+   * @returns `true` if this basis is strictly the same as the other.
+   */
+  strictEquals(other: ValBasis) {
+    if (this.value.length !== other.value.length) {
+      return false;
+    }
+    for (let i = 0; i < this.value.length; ++i) {
+      if (!this.value[i].strictEquals(other.value[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if this basis is the standard prime basis.
+   * @param soft Only check for primality, not length of basis.
+   * @returns `true` if the basis consists of prime numbers in order.
+   */
+  isStandard(soft = false) {
+    if (!soft && this.value.length !== getNumberOfComponents()) {
+      return false;
+    }
+    for (let i = 0; i < this.value.length; ++i) {
+      if (!this.value[i].isIntegral()) {
+        return false;
+      }
+      if (this.value[i].toBigInteger() !== BIG_INT_PRIMES[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Convert this basis to a virtual AST fragment compatible with wart notation.
+   * @returns Array of wart basis elements.
+   */
+  toWartBasis(): WartBasisElement[] {
+    if (this.isStandard()) {
+      return [''];
+    }
+    const result: WartBasisElement[] = [];
+    for (let monzo of this.value) {
+      if (monzo.isScalar() && monzo.isSqrt()) {
+        let radical = false;
+        if (!monzo.isFractional()) {
+          radical = true;
+          monzo = monzo.pow(2) as TimeMonzo;
+        }
+        const {s, n, d} = monzo.toFraction();
+        if (s <= 0) {
+          throw new Error('Invalid basis.');
+        }
+        result.push({
+          radical,
+          numerator: n,
+          denominator: d === 1 ? null : d,
+        });
+      } else {
+        throw new Error('Basis is imcompatible with warts and SOV.');
+      }
+    }
+    // TODO: Trim if primes
+    return result;
+  }
+
+  /**
+   * Convert this basis to a string that faithfully represents it.
+   * @returns String that has the same value as this basis if evaluated as a SonicWeave expression.
+   */
+  toString() {
+    if (this.node) {
+      return literalToString(this.node);
+    }
+    const node: ValBasisLiteral = {
+      type: 'ValBasisLiteral',
+      basis: [],
+    };
+    const bail = () => `basis(${this.value.map(m => m.toString()).join(', ')})`;
+    for (let monzo of this.value) {
+      if (monzo.isUnity()) {
+        if (monzo.timeExponent.equals(-1)) {
+          node.basis.push('Hz');
+        } else if (monzo.timeExponent.equals(1)) {
+          node.basis.push('s');
+        } else {
+          return bail();
+        }
+      } else if (monzo.isSqrt()) {
+        let radical = false;
+        if (!monzo.isFractional()) {
+          radical = true;
+          monzo = monzo.pow(2) as TimeMonzo;
+        }
+        const {s, n, d} = monzo.toFraction();
+        if (s <= 0) {
+          throw new Error('Invalid basis.');
+        }
+        node.basis.push({
+          radical,
+          numerator: n,
+          denominator: d === 1 ? null : d,
+        });
+      } else {
+        return bail();
+      }
+    }
+    // TODO: Trim if primes
+    return literalToString(node);
+  }
+}
+
+/**
  * A mappping vector commonly used to convert intervals in just intonation to steps of an equal temperament.
  */
 export class Val {
   value: TimeMonzo;
-  equave: TimeMonzo;
+  basis: ValBasis;
   domain = 'cologarithmic' as const;
-  node?: IntervalLiteral;
+  node?: CoIntervalLiteral;
 
   /**
    * Construct a mapping vector.
@@ -1343,26 +1574,30 @@ export class Val {
    * @param equave The interval of equivalence of the equal temperament associated with this val.
    * @param node Node in the abstract syntax tree used for string representation.
    */
-  constructor(value: TimeMonzo, equave: TimeMonzo, node?: IntervalLiteral) {
+  constructor(value: TimeMonzo, basis: ValBasis, node?: CoIntervalLiteral) {
     this.value = value;
-    this.equave = equave;
+    this.basis = basis;
     this.node = node;
   }
 
   /**
    * Construct a val from an array of mapping entries representing equal divisions of an equave.
    * @param primeExponentMap Val components.
-   * @param equave Equave of the equal temperament. Defaults to the octave.
+   * @param basis Basis of the subgroup. Defaults to the primes.
    * @returns A cologarithmic mapping vector.
    */
-  static fromArray(
-    primeExponentMap: FractionValue[],
-    equave?: TimeMonzo | FractionValue
-  ) {
-    if (!(equave instanceof TimeMonzo)) {
-      equave = TimeMonzo.fromFraction(equave ?? 2);
+  static fromArray(primeExponentMap: FractionValue[], basis?: ValBasis) {
+    if (!basis) {
+      basis = new ValBasis(primeExponentMap.length);
     }
-    return new Val(TimeMonzo.fromArray(primeExponentMap), equave);
+    return new Val(TimeMonzo.fromArray(primeExponentMap), basis);
+  }
+
+  /**
+   * The interval this val is equally dividing.
+   */
+  get equave() {
+    return this.basis.value[0];
   }
 
   /**
@@ -1377,7 +1612,7 @@ export class Val {
    * @returns The negative of this val.
    */
   neg() {
-    return new Val(this.value.inverse(), this.equave);
+    return new Val(this.value.inverse(), this.basis);
   }
 
   /**
@@ -1394,7 +1629,7 @@ export class Val {
    * @returns A new val obtained by pretending its value represents a logarithmic quantity.
    */
   abs() {
-    return new Val(this.value.pitchAbs(), this.equave);
+    return new Val(this.value.pitchAbs(), this.basis);
   }
 
   /**
@@ -1413,7 +1648,7 @@ export class Val {
   sqrt() {
     const value = this.value.sqrt();
     if (value instanceof TimeMonzo) {
-      return new Val(value, this.equave);
+      return new Val(value, this.basis);
     }
     throw new Error('Val square root operation failed.');
   }
@@ -1424,7 +1659,7 @@ export class Val {
    * @returns `true` if the vals have the same size and their equaves have the same size.
    */
   equals(other: Val) {
-    return this.value.equals(other.value) && this.equave.equals(other.equave);
+    return this.value.equals(other.value) && this.basis.equals(other.basis);
   }
 
   /**
@@ -1435,7 +1670,7 @@ export class Val {
   strictEquals(other: Val) {
     return (
       this.value.strictEquals(other.value) &&
-      this.equave.strictEquals(other.equave)
+      this.basis.strictEquals(other.basis)
     );
   }
 
@@ -1445,15 +1680,14 @@ export class Val {
    * @returns The sum of the vals.
    */
   add(other: Val) {
-    if (!this.equave.strictEquals(other.equave)) {
-      throw new Error('Val equaves must match in addition');
+    if (!this.basis.strictEquals(other.basis)) {
+      throw new Error('Val basis must match in addition.');
     }
-    const node = addNodes(this.node, other.node);
     const value = this.value.mul(other.value);
     if (value instanceof TimeReal) {
       throw new Error('Val addition failed.');
     }
-    return new Val(value, this.equave, node);
+    return new Val(value, this.basis);
   }
 
   /**
@@ -1462,15 +1696,14 @@ export class Val {
    * @returns The difference of the vals.
    */
   sub(other: Val) {
-    if (!this.equave.strictEquals(other.equave)) {
-      throw new Error('Val equaves must match in subtraction');
+    if (!this.basis.strictEquals(other.basis)) {
+      throw new Error('Val basis must match in subtraction.');
     }
-    const node = subNodes(this.node, other.node);
     const value = this.value.div(other.value);
     if (value instanceof TimeReal) {
       throw new Error('Val subtraction failed.');
     }
-    return new Val(value, this.equave, node);
+    return new Val(value, this.basis);
   }
 
   /**
@@ -1489,7 +1722,7 @@ export class Val {
     if (value instanceof TimeReal) {
       throw new Error('Val scalar multiplication failed.');
     }
-    return new Val(value, this.equave);
+    return new Val(value, this.basis);
   }
 
   /**
@@ -1505,7 +1738,7 @@ export class Val {
     if (value instanceof TimeReal) {
       throw new Error('Val scalar multiplication failed.');
     }
-    return new Val(value, this.equave);
+    return new Val(value, this.basis);
   }
 
   /**
@@ -1534,8 +1767,8 @@ export class Val {
       return literalToString(this.node);
     }
     const result = this.value.toString('cologarithmic');
-    if (this.equave.compare(TWO)) {
-      return `withEquave(${result}, ${this.equave.toString()})`;
+    if (result.includes('@') || !this.basis.isStandard(true)) {
+      return `withBasis(${result}, ${this.basis.toString()})`;
     }
     return result;
   }

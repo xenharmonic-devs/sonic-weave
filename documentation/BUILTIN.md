@@ -33,6 +33,15 @@ Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y
 ### automos()
 If the current scale is empty, generate absolute Diamond-mos notation based on the current config.
 
+### basis(*...intervals*)
+Construct a subgroup basis from intervals.
+
+### basisOf(*val*)
+Return the basis of the val.
+
+### basisToArray(*basis*)
+Convert a subgroup basis to an array of basis elements.
+
 ### bleach(*interval*)
 Get rid of interval coloring and label.
 
@@ -98,9 +107,6 @@ Obtain the docstring of the given riff.
 
 ### entries(*record*)
 Obtain an array of `[key, value]` pairs of the record.
-
-### equaveOf(*val*)
-Return the equave of the val.
 
 ### every(*array = $$*, *test*)
 Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
@@ -348,6 +354,9 @@ Obtain a sorted copy of the popped/given scale in ascending order.
 ### sortInPlace(*scale = $$*, *compareFn*)
 Sort the current/given scale in ascending order.
 
+### SOV(*val*)
+Format a val using Sparse Offset Val notation.
+
 ### stepSignature(*word*)
 Calculate the step signature of an entire scale word.
 
@@ -387,17 +396,20 @@ Truncate value towards zero to the nearest integer.
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
 
-### valFromPrimeArray(*primeExponents*, *equave*)
+### valFromPrimeArray(*primeExponents*, *basis*)
 Convert an array of prime mapping entries to a val.
 
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.
 
+### warts(*val*)
+Format a val using warts shorthand notation.
+
 ### wilsonHeight(*interval*)
 Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition..
 
-### withEquave(*val*, *equave*)
-Change the equave of the val.
+### withBasis(*val*, *basis*)
+Change the basis of the val.
 
 ### zip(*...args*)
 Combine elements of each array into tuples until one of them is exhausted.

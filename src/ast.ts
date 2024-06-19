@@ -1,4 +1,9 @@
-import {IntervalLiteral, literalToString} from './expression';
+import {
+  IntervalLiteral,
+  CoIntervalLiteral,
+  ValBasisLiteral,
+  literalToString,
+} from './expression';
 
 export type UnaryOperator =
   | '+'
@@ -460,6 +465,8 @@ export type Expression =
   | CallExpression
   | ArrowFunction
   | IntervalLiteral
+  | CoIntervalLiteral
+  | ValBasisLiteral
   | NoneLiteral
   | TrueLiteral
   | FalseLiteral

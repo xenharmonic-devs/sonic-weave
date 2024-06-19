@@ -1044,6 +1044,7 @@ Primary
   / TemplateArgument
   / ArrayLiteral
   / RecordLiteral
+  / ValBasisLiteral
   / SetLiteral
   / StringLiteral
 
@@ -1196,12 +1197,22 @@ MonzoLiteral
     };
   }
 
+WartBasis = (Fraction / '')|.., '.'|
+
+ValBasisLiteral
+  = '@' basis: ValBasis {
+    return {
+      type: 'ValBasisLiteral',
+      basis,
+    };
+  }
+
 ValLiteral
-  = [<⟨] _ components: VectorComponents _ ']' basis: ('@' @ValBasis)? {
+  = [<⟨] _ components: VectorComponents _ ']' basis: ValBasisLiteral? {
     return {
       type: 'ValLiteral',
       components,
-      basis: basis ?? [],
+      basis: basis?.basis,
     };
   }
 
@@ -1242,8 +1253,6 @@ SparseOffsetVal
       basis,
     }
   }
-
-WartBasis = (Fraction / '')|.., '.'|
 
 CentLiteral
   = real: 'r'? (CentToken / '¢') { return { type: 'CentLiteral', real: !!real }; }
