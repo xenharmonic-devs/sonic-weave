@@ -399,9 +399,16 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
   if (equave == 2)
-    [1..divisions] \\ divisions;
-  else
-    [1..divisions] \\ divisions ed equave;
+    return [1..divisions] \\ divisions;
+  return [1..divisions] \\ divisions ed equave;
+}
+
+riff tetStack(steps, equave = 2) {
+  "Stack relative edosteps up to the given equave/octave.";
+  stackLinear(steps)
+  if (equave == 2)
+    return $ \\ $[-1];
+  return $ \\ $[-1] ed equave;
 }
 
 riff subharmonics(start, end) {

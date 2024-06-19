@@ -1614,4 +1614,14 @@ describe('SonicWeave standard library', () => {
     const scale = expand('2;2/1;P8;coalesce(3.5, "simplest", true)');
     expect(scale).toEqual(['P8']);
   });
+
+  it('can stack edosteps', () => {
+    const scale = expand('tetStack([1, 2, 3, 1, 2])');
+    expect(scale).toEqual(['1\\9', '3\\9', '6\\9', '7\\9', '9\\9']);
+  });
+
+  it('can stack edfsteps', () => {
+    const scale = expand('tetStack([2, 3, 2, 1], 3/2)');
+    expect(scale).toEqual(['2\\8<3/2>', '5\\8<3/2>', '7\\8<3/2>', '8\\8<3/2>']);
+  });
 });

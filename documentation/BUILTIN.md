@@ -674,6 +674,9 @@ Calculate the hyperbolic tangent of x.
 ### tet(*divisions*, *equave = 2*)
 Generate an equal temperament with the given number of divisions of the given equave/octave.
 
+### tetStack(*steps*, *equave = 2*)
+Stack relative edosteps up to the given equave/octave.
+
 ### toHarmonics(*fundamental*, *scale = ££*)
 Obtain a copy of the popped/given scale quantized to harmonics of the given fundamental.
 
