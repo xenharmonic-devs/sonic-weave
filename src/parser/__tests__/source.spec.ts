@@ -2115,4 +2115,9 @@ describe('SonicWeave parser', () => {
       '1199.795072',
     ]);
   });
+
+  it('converts a val basis to an array', () => {
+    const scale = expand('basisToArray(@√2.√3.5)');
+    expect(scale).toEqual(['2^1/2', '3^1/2', '5']);
+  });
 });

@@ -291,8 +291,6 @@ describe('SonicWeave vector broadcasting', () => {
 
   // 'colorOf',
   // 'labelOf',
-  // 'equaveOf',
-  // 'withEquave',
 
   // 'isAbsolute',
   // 'isRelative',

@@ -18,7 +18,7 @@ import {
   primeRange as xduPrimeRange,
   mmod,
 } from 'xen-dev-utils';
-import {Color, Interval, Val} from '../interval';
+import {Color, Interval, Val, ValBasis} from '../interval';
 import {
   TimeMonzo,
   TimeReal,
@@ -39,7 +39,7 @@ import {
   fractionToVectorComponent,
   integerToVectorComponent,
 } from '../expression';
-import {ONE, TWO, ZERO} from '../utils';
+import {TWO, ZERO} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
 import {hasConstantStructure} from '../tools';
 import {
@@ -73,6 +73,7 @@ import {
   compare,
 } from './public';
 import {scaleMonzos} from '../diamond-mos';
+import {valToSparseOffset, valToWarts} from '../warts';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
@@ -1345,42 +1346,39 @@ complexityOf.__doc__ =
   'Compute the prime limit ordinal of an interval or val. 1/1 has a complexity of 0, 2/1 has complexity 1, 3/1 has complexity 2, 5/1 has complexity 3, etc.. If `countZeros` is true, measure the complexity of the internal representation instead.';
 complexityOf.__node__ = builtinNode(complexityOf);
 
-function equaveOf(
+function basisOf(
   this: ExpressionVisitor,
   val: SonicWeaveValue
 ): SonicWeaveValue {
   if (isArrayOrRecord(val)) {
-    const e = equaveOf.bind(this);
+    const e = basisOf.bind(this);
     return unaryBroadcast.bind(this)(val, e);
   }
   if (val instanceof Val) {
-    return new Interval(val.equave.clone(), 'linear');
+    return val.basis;
   }
   throw new Error('A val is required.');
 }
-equaveOf.__doc__ = 'Return the equave of the val.';
-equaveOf.__node__ = builtinNode(equaveOf);
+basisOf.__doc__ = 'Return the basis of the val.';
+basisOf.__node__ = builtinNode(basisOf);
 
-function withEquave(
+function withBasis(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
-  equave: Interval
+  basis: ValBasis
 ): SonicWeaveValue {
-  requireParameters({val, equave});
+  requireParameters({val, basis});
   if (isArrayOrRecord(val)) {
-    const w = withEquave.bind(this);
-    return unaryBroadcast.bind(this)(val, v => w(v, equave));
-  }
-  if (equave.value instanceof TimeReal) {
-    throw new Error('Irrational equaves not supported.');
+    const w = withBasis.bind(this);
+    return unaryBroadcast.bind(this)(val, v => w(v, basis));
   }
   if (val instanceof Val) {
-    return new Val(val.value.clone(), equave.value.clone());
+    return new Val(val.value.clone(), basis);
   }
   throw new Error('A val is required.');
 }
-withEquave.__doc__ = 'Change the equave of the val.';
-withEquave.__node__ = builtinNode(withEquave);
+withBasis.__doc__ = 'Change the basis of the val.';
+withBasis.__node__ = builtinNode(withBasis);
 
 function cosJIP(
   this: ExpressionVisitor,
@@ -1461,6 +1459,36 @@ function real(
 }
 real.__doc__ = 'Convert interval to a linear real value.';
 real.__node__ = builtinNode(real);
+
+function warts(this: ExpressionVisitor, val: SonicWeaveValue): SonicWeaveValue {
+  requireParameters({val});
+  if (val instanceof Val) {
+    if (val.node?.type === 'WartsLiteral') {
+      return val;
+    }
+    const basis = val.basis.toWartBasis();
+    const node = valToWarts(val.value, basis);
+    return new Val(val.value, val.basis, node);
+  }
+  return unaryBroadcast.bind(this)(val, warts.bind(this));
+}
+warts.__doc__ = 'Format a val using warts shorthand notation.';
+warts.__node__ = builtinNode(warts);
+
+function SOV(this: ExpressionVisitor, val: SonicWeaveValue): SonicWeaveValue {
+  requireParameters({val});
+  if (val instanceof Val) {
+    if (val.node?.type === 'SparseOffsetVal') {
+      return val;
+    }
+    const basis = val.basis.toWartBasis();
+    const node = valToSparseOffset(val.value, basis);
+    return new Val(val.value, val.basis, node);
+  }
+  return unaryBroadcast.bind(this)(val, SOV.bind(this));
+}
+SOV.__doc__ = 'Format a val using Sparse Offset Val notation.';
+SOV.__node__ = builtinNode(SOV);
 
 function PrimeMapping(
   this: ExpressionVisitor,
@@ -1662,7 +1690,7 @@ monzoFromPrimeArray.__node__ = builtinNode(monzoFromPrimeArray);
 function valFromPrimeArray(
   this: ExpressionVisitor,
   primeExponents: Interval[],
-  equave?: Interval
+  basis?: ValBasis
 ) {
   if (!Array.isArray(primeExponents)) {
     throw new Error('An array is required.');
@@ -1671,21 +1699,34 @@ function valFromPrimeArray(
     ZERO,
     primeExponents.map(i => upcastBool(i).toFraction())
   );
-  let equaveMonzo: TimeMonzo;
-  if (equave === undefined) {
-    equaveMonzo = new TimeMonzo(ZERO, [ONE]);
-  } else {
-    equave = upcastBool(equave);
-    if (equave.value instanceof TimeReal) {
-      throw new Error('Irrational equaves not supported');
-    }
-    equaveMonzo = equave.value.clone();
+  if (basis === undefined) {
+    basis = new ValBasis(primeExponents.length);
   }
-  return new Val(value, equaveMonzo);
+  return new Val(value, basis);
 }
 valFromPrimeArray.__doc__ =
   'Convert an array of prime mapping entries to a val.';
 valFromPrimeArray.__node__ = builtinNode(valFromPrimeArray);
+
+function basis(this: ExpressionVisitor, ...intervals: Interval[]) {
+  const subgroup: TimeMonzo[] = [];
+  for (const interval of intervals) {
+    if (interval.value instanceof TimeReal) {
+      throw new Error('Can only create basis from radicals.');
+    }
+    subgroup.push(interval.value);
+  }
+  return new ValBasis(subgroup);
+}
+basis.__doc__ = 'Construct a subgroup basis from intervals.';
+basis.__node__ = builtinNode(basis);
+
+function basisToArray(this: ExpressionVisitor, basis: ValBasis) {
+  return basis.value.map(monzo => new Interval(monzo, 'linear'));
+}
+basisToArray.__doc__ =
+  'Convert a subgroup basis to an array of basis elements.';
+basisToArray.__node__ = builtinNode(basisToArray);
 
 function transpose(matrix: SonicWeaveValue[][]) {
   if (!Array.isArray(matrix)) {
@@ -2600,11 +2641,13 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   colorOf,
   labelOf,
   complexityOf,
-  equaveOf,
-  withEquave,
+  basisOf,
+  withBasis,
   cosJIP,
   JIP,
   real,
+  warts,
+  SOV,
   PrimeMapping,
   tenneyHeight,
   wilsonHeight,
@@ -2614,6 +2657,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   toPrimeArray,
   monzoFromPrimeArray,
   valFromPrimeArray,
+  basis,
+  basisToArray,
   transpose,
   hasConstantStructure: hasConstantStructure_,
   stepString: stepString_,

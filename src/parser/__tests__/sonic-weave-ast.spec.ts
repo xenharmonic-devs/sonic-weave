@@ -1324,7 +1324,8 @@ describe('Negative tests', () => {
     expect(() => parse('(#{dim5: "no good"})')).toThrow();
   });
 
-  it('rejects Pythonic matrix multiplication with a human readable error message', () => {
+  // Plain @ is @2.3.5..
+  it.skip('rejects Pythonic matrix multiplication with a human readable error message', () => {
     let rejected = false;
     try {
       parse('foo @ bar');

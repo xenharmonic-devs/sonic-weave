@@ -22,8 +22,9 @@ Values in SonicWeave fall into these categories
 | Boolean  | `true` or `false`        | Converted to `1` or `0` inside scales.                               |
 | Interval | `7/5`                    | There are many kinds of intervals with their own operator semantics. |
 | Val      | `12@`                    | Used to convert scales in just intonation to equal temperaments.     |
+| Basis    | `@`, `basis(cbrt(2), 9)` | Fractional just intonation subgroup basis for vals.             |
 | Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals.            |
-| Record   | `#{fif: 3/2, "p/e": 2}`   | Associative data indexed by strings.                                 |
+| Record   | `#{fif: 3/2, "p/e": 2}`  | Associative data indexed by strings.                                 |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase.                  |
 
 Array and record types are recursive i.e. arrays may contain other arrays or records and the values of records can be anything.
@@ -135,7 +136,7 @@ To defer execution to the end of the current block prefix the statement with `de
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 | SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |
 | Jorp         | `€`                     | Cologarithmic | Relative  | `<1200]` |
-| Pilcrowspoob | `¶`                     | Cologarithmic | Absolute  | `withEquave(<1]@Hz, 1 Hz)` |
+| Pilcrowspoob | `¶`                     | Cologarithmic | Absolute  | `<1]@Hz` |
 
 ## Domains
 
