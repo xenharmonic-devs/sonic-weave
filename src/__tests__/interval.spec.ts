@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {TimeMonzo, TimeReal} from '../monzo';
-import {Interval, intervalValueAs} from '../interval';
+import {Interval, ValBasis, intervalValueAs} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
 
@@ -199,6 +199,59 @@ describe('Interval JSON serialization', () => {
       111,
       0.003,
       1.875,
+    ]);
+  });
+});
+
+describe('(Val) subgroup basis', () => {
+  it('has an orthogonalized state', () => {
+    const basis = new ValBasis([
+      TimeMonzo.fromArray([1, -1, 3]),
+      TimeMonzo.fromArray([1, 0, 5]),
+      TimeMonzo.fromArray([1, 2, 6]),
+    ]);
+    expect(
+      basis.ortho.map(m => m.primeExponents.map(c => c.toFraction()))
+    ).toEqual([
+      ['1', '-1', '3'],
+      ['-5/11', '16/11', '7/11'],
+      ['1/2', '1/5', '-1/10'],
+    ]);
+    expect(basis.ortho[0].dot(basis.ortho[1]).n).toBe(0);
+    expect(basis.ortho[0].dot(basis.ortho[2]).n).toBe(0);
+    expect(basis.ortho[1].dot(basis.ortho[2]).n).toBe(0);
+  });
+
+  it('can LLL reduce', () => {
+    const basis = new ValBasis([
+      TimeMonzo.fromArray([1, 1, 1]),
+      TimeMonzo.fromArray([-1, 0, 2]),
+      TimeMonzo.fromArray([3, 5, 6]),
+    ]);
+    const lll = basis.lenstraLenstraLovasz();
+    // Size-reduction
+    for (let i = 0; i < 3; ++i) {
+      for (let j = 0; j < i; ++j) {
+        expect(lll.value[i].dot(lll.dual[j]).abs().compare(0.5) <= 0).toBe(
+          true
+        );
+      }
+    }
+    // Lovász condition
+    for (let k = 1; k < 3; ++k) {
+      const ok = lll.ortho[k];
+      const ok1 = lll.ortho[k - 1];
+      const mu = lll.value[k].dot(lll.dual[k - 1]);
+      const n1 = ok1.dot(ok1);
+      expect(
+        n1.mul('3/4').compare(ok.dot(ok).add(mu.mul(mu).mul(n1))) <= 0
+      ).toBe(true);
+    }
+
+    expect(lll.value.map(m => m.toIntegerMonzo())).toEqual([
+      [0, 1, 0],
+      [1, 0, 1],
+      [-1, 0, 2],
     ]);
   });
 });

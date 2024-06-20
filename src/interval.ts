@@ -35,6 +35,7 @@ import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {type RootContext} from './context';
 import {
+  HALF,
   NUM_INTERCHANGE_COMPONENTS,
   ONE,
   ZERO,
@@ -1414,12 +1415,59 @@ export class ValBasis {
 
     for (let i = 0; i < this.ortho.length; ++i) {
       for (let j = 0; j < i; ++j) {
-        this.ortho[i] = this.ortho[i].div(
+        const oi = this.ortho[i].div(
           this.ortho[j].pow(this.dual[j].dot(this.ortho[i]))
-        ) as TimeMonzo;
+        );
+        if (oi instanceof TimeReal) {
+          throw new Error('Basis orthogonalization failed.');
+        }
+        this.ortho[i] = oi;
       }
       this.dual.push(this.ortho[i].geometricInverse());
     }
+  }
+
+  /**
+   * Obtain a Lenstra-Lenstra-Lovász reduced copy.
+   * Assumes a rational basis (integral monzos).
+   * @returns A copy of the basis where the basis elements are rational, small and nearly orthogonal.
+   */
+  lenstraLenstraLovasz(delta = 0.75) {
+    // https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz_lattice_basis_reduction_algorithm#LLL_algorithm_pseudocode
+    const basis = [...this.value];
+    let ortho = this.ortho;
+    let dual = this.dual;
+    let k = 1;
+    while (k < basis.length) {
+      for (let j = k - 1; j >= 0; --j) {
+        const mu = basis[k].dot(dual[j]);
+        if (mu.abs().compare(HALF) > 0) {
+          const bk = basis[k].div(basis[j].pow(mu.round()));
+          if (bk instanceof TimeReal) {
+            throw new Error('LLL reduction failed.');
+          }
+          basis[k] = bk;
+
+          ({ortho, dual} = new ValBasis(basis));
+        }
+      }
+      const mu = basis[k].dot(dual[k - 1]).valueOf();
+      if (
+        ortho[k].dot(ortho[k]).valueOf() >
+        (delta - mu * mu) * ortho[k - 1].dot(ortho[k - 1]).valueOf()
+      ) {
+        k++;
+      } else {
+        const bk = basis[k];
+        basis[k] = basis[k - 1];
+        basis[k - 1] = bk;
+
+        ({ortho, dual} = new ValBasis(basis));
+
+        k = Math.max(k - 1, 1);
+      }
+    }
+    return new ValBasis(basis);
   }
 
   /**
