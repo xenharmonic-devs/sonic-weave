@@ -2542,4 +2542,50 @@ describe('SonicWeave expression evaluator', () => {
     const b13 = evaluate('str(SOV(b13@))');
     expect(b13).toBe('13[]@3.2.5.7.11.13.17.19.23');
   });
+
+  it('can construct the zero val (literal)', () => {
+    const rank0 = evaluate('<0 0 0]') as Val;
+    expect(rank0).toBeInstanceOf(Val);
+    expect(rank0.value.isUnity()).toBe(true);
+  });
+
+  it('can construct the zero val (warts)', () => {
+    const rank0 = evaluate('0@2.3.5') as Val;
+    expect(rank0).toBeInstanceOf(Val);
+    expect(rank0.value.isUnity()).toBe(true);
+  });
+
+  it('can construct the zero val (SOV)', () => {
+    const rank0 = evaluate('0[]@2.3.5') as Val;
+    expect(rank0).toBeInstanceOf(Val);
+    expect(rank0.value.isUnity()).toBe(true);
+  });
+
+  it('can construct <0 0 1] (literal)', () => {
+    const fives = evaluate('<0 0 1]') as Val;
+    expect(fives).toBeInstanceOf(Val);
+    expect(fives.value.toIntegerMonzo()).toEqual([0, 0, 1]);
+  });
+
+  it('can construct <0 0 1] (warts)', () => {
+    const fives = evaluate('0c@.5') as Val;
+    expect(fives).toBeInstanceOf(Val);
+    expect(fives.value.toIntegerMonzo()).toEqual([0, 0, 1]);
+  });
+
+  it('can construct <0 0 1] (SOV)', () => {
+    const fives = evaluate('0[+5]@2..5') as Val;
+    expect(fives).toBeInstanceOf(Val);
+    expect(fives.value.toIntegerMonzo()).toEqual([0, 0, 1]);
+  });
+
+  it('can convert <0 0 1] to warts', () => {
+    const c0 = evaluate('str(warts(<0 0 1]))');
+    expect(c0).toBe('0c@2.3.5');
+  });
+
+  it('can convert <0 0 1] to SOV', () => {
+    const c0 = evaluate('str(SOV(<0 0 1]))');
+    expect(c0).toBe('0[^5]@2.3.5');
+  });
 });

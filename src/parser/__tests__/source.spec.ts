@@ -2120,4 +2120,20 @@ describe('SonicWeave parser', () => {
     const scale = expand('basisToArray(@√2.√3.5)');
     expect(scale).toEqual(['2^1/2', '3^1/2', '5']);
   });
+
+  it('can temper using the zero val', () => {
+    const scale = expand('3/2;5/3;2/1;0@');
+    expect(scale).toEqual(['0\\1', '0\\1', '0\\1']);
+  });
+
+  it("tells the user to reflect on their life's choices when using the 0c val", () => {
+    expect(() => expand('3/2;5/3;2/1;0[^5]@')).toThrow(
+      'Non-unitary tempering by zero divisions of an equave.'
+    );
+  });
+
+  it('can temper using the 0c val if the equave is correct', () => {
+    const scale = expand('3/2;5/3;2/1;c0c@');
+    expect(scale).toEqual(['0\\1<5>', '1\\1<5>', '0\\1<5>']);
+  });
 });

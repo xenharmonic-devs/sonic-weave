@@ -443,37 +443,47 @@ export function temper(
 ): typeof interval {
   const divisions = val.divisions;
   let step: Interval;
-  try {
-    const equave = val.equave.toFraction();
-    let equaveNumerator: number | null = null;
-    let equaveDenominator: number | null = null;
-    if (equave.compare(TWO)) {
-      equaveNumerator = equave.n;
-      if (equave.d !== 1) {
-        equaveDenominator = equave.d;
+  if (divisions.n) {
+    try {
+      const equave = val.equave.toFraction();
+      let equaveNumerator: number | null = null;
+      let equaveDenominator: number | null = null;
+      if (equave.compare(TWO)) {
+        equaveNumerator = equave.n;
+        if (equave.d !== 1) {
+          equaveDenominator = equave.d;
+        }
       }
+      step = new Interval(
+        TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
+        'logarithmic',
+        0,
+        {
+          type: 'NedjiLiteral',
+          numerator: divisions.d,
+          denominator: divisions.n,
+          equaveNumerator,
+          equaveDenominator,
+        }
+      );
+    } catch {
+      step = new Interval(val.equave.pow(divisions.inverse()), 'logarithmic');
     }
-    step = new Interval(
-      TimeMonzo.fromFraction(equave).pow(divisions.inverse()),
-      'logarithmic',
-      0,
-      {
-        type: 'NedjiLiteral',
-        numerator: divisions.d,
-        denominator: divisions.n,
-        equaveNumerator,
-        equaveDenominator,
-      }
-    );
-  } catch {
-    step = new Interval(val.equave.pow(divisions.inverse()), 'logarithmic');
+  } else {
+    step = new Interval(val.equave.pow(0), 'logarithmic');
   }
   const rel = relative.bind(this);
   if (Array.isArray(interval)) {
     return interval.map(i => {
       i = rel(i);
       const t = i.value.tail(val.value.numberOfComponents);
-      const result = i.dot(val).mul(step);
+      const d = i.dot(val);
+      if (!divisions.n && d.valueOf()) {
+        throw new Error(
+          'Non-unitary tempering by zero divisions of an equave.'
+        );
+      }
+      const result = d.mul(step);
       if (t.totalCents(true)) {
         return new Interval(t, 'logarithmic').add(result);
       }
@@ -482,7 +492,11 @@ export function temper(
   }
   interval = rel(interval);
   const t = interval.value.tail(val.value.numberOfComponents);
-  const result = interval.dot(val).mul(step);
+  const d = interval.dot(val);
+  if (!divisions.n && d.valueOf()) {
+    throw new Error('Non-unitary tempering by zero divisions of an equave.');
+  }
+  const result = d.mul(step);
   if (t.totalCents(true)) {
     return new Interval(t, 'logarithmic').add(result);
   }

@@ -236,7 +236,7 @@ export function wartsToVal(node: WartsLiteral): [TimeMonzo, ValBasis] {
     if (modification[i] % 2 === 0) {
       delta = -delta;
     }
-    if (scaledLogs[i] - val[i] > 0) {
+    if (scaledLogs[i] - val[i] >= 0) {
       val[i] += delta;
     } else {
       val[i] -= delta;
@@ -303,7 +303,7 @@ export function valToWarts(
     if (tweak) {
       const wart = basisElementToWart(subgroup[i], nonPrimes);
       let count = 2 * Math.abs(tweak);
-      if (log > patent) {
+      if (log >= patent) {
         if (tweak > 0) {
           count--;
         }

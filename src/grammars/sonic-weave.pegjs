@@ -1217,7 +1217,7 @@ ValLiteral
   }
 
 WartsLiteral
-  = equave: [a-z]i? divisions: PositiveBasicInteger warts: [a-z]i* '@' basis: WartBasis {
+  = equave: [a-z]i? divisions: BasicInteger warts: [a-z]i* '@' basis: WartBasis {
     return {
       type: 'WartsLiteral',
       equave: (equave ?? '').toLowerCase(),
@@ -1244,7 +1244,7 @@ PatentTweak
 PatentTweaks = PatentTweak|.., _ ',' _|
 
 SparseOffsetVal
-  = equave: ('[' @Fraction ']')? divisions: PositiveBasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
+  = equave: ('[' @Fraction ']')? divisions: BasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
     return {
       type: 'SparseOffsetVal',
       equave: equave ?? '',

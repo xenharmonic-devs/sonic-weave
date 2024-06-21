@@ -366,7 +366,7 @@ The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something
 | S-expression | `S8`, `S5..8`           | Logarithmic   | Relative  | Additive spelling of [square superparticulars](https://en.xen.wiki/w/Square_superparticular). |
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative  | Used to temper scales. |
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
-| SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |
+| SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notation) for vals. |
 
 *) The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
 
@@ -679,6 +679,10 @@ The dot product is meaningful only between a val and an interval and the operand
 Beware that the dot product between cologarithmic quantities is unweighted. The value of `5@ ~dot 7@` depends on the default number of components in the runtime. When restricted to a prime limit like 5 here the result is well-defined `5@.5 ~dot 7@.5` is the same as `<5 8 12] ~· <7 11 16]` and evaluates to `5*7 + 8*11 + 12*16` or `315`.
 
 Explicit tempering is basically the dot product multipled with one step of the equal temperament associated with the val if we ignore the [technicalities](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md).
+
+The zero val `<0 0 0]`, `0@` or `0[]@` stands in for the trivial rank-0 temperament that maps everything to the unison 1/1.
+
+Non-zero vals with a leading zero `<0 0 1]` = `0c@2.3.5` can be constructed, but tempering with them results in an error. Use `<1 0 0]@5.2.3` or `c0c@` instead to make the leading component non-zero.
 
 #### Vector broadcasting
 All binary operators vectorize over arrays starting from vectorized logical operators above. They also broadcast their operands together to the largest shape involved in the operation.
