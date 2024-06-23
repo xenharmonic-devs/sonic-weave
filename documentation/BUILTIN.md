@@ -246,6 +246,9 @@ Return the number of intervals in the scale.
 ### linear(*interval*)
 Convert interval to linear representation. Formatting information of logarithmic quantities is lost.
 
+### lll(*basis*, *weighting = "tenney"*)
+Perform Lensta-Lenstra-Lovász basis reduction.
+
 ### log1p(*x*)
 Calculate log1p x.
 
@@ -323,6 +326,9 @@ Map a riff over the given/current scale replacing the contents.
 
 ### repr(*value*)
 Obtain a string representation of the value (with color and label).
+
+### respell(*commaBasis*)
+Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. (Creates a respelling function.)
 
 ### reverse(*scale = ££*)
 Obtain a copy of the popped/given scale in reversed order.

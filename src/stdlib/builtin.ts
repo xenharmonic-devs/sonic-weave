@@ -217,6 +217,19 @@ function divisors(this: ExpressionVisitor, interval: SonicWeaveValue) {
 divisors.__doc__ = 'Obtain an array of divisors of a natural number.';
 divisors.__node__ = builtinNode(divisors);
 
+function lll(
+  this: ExpressionVisitor,
+  basis: SonicWeaveValue,
+  weighting: 'none' | 'tenney' = 'tenney'
+) {
+  if (!(basis instanceof ValBasis)) {
+    throw new Error('A basis is required.');
+  }
+  return basis.lll(weighting);
+}
+lll.__doc__ = 'Perform Lensta-Lenstra-Lovász basis reduction.';
+lll.__node__ = builtinNode(lll);
+
 // == Third-party wrappers ==
 function kCombinations(set: any[], k: SonicWeaveValue) {
   requireParameters({set});
@@ -1579,6 +1592,59 @@ wilsonHeight.__doc__ =
   'Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition..';
 wilsonHeight.__node__ = builtinNode(wilsonHeight);
 
+function _repspell(
+  this: ExpressionVisitor,
+  interval: SonicWeaveValue,
+  commas: TimeMonzo[]
+): SonicWeaveValue {
+  if (typeof interval === 'boolean' || interval instanceof Interval) {
+    const tenney = pubTenney.bind(this);
+    let result = upcastBool(interval);
+    let height = tenney(result);
+    let improved = true;
+    while (improved) {
+      improved = false;
+      for (const comma of commas) {
+        const candidate = new Interval(result.value.mul(comma), result.domain);
+        const candidateHeight = tenney(candidate);
+        if (candidateHeight.compare(height) < 0) {
+          improved = true;
+          result = candidate;
+          height = candidateHeight;
+        }
+      }
+    }
+    return result;
+  }
+  const r = _repspell.bind(this);
+  return unaryBroadcast.bind(this)(interval, i => r(i, commas));
+}
+
+function respell(this: ExpressionVisitor, commaBasis: SonicWeaveValue) {
+  if (commaBasis instanceof Interval) {
+    commaBasis = [commaBasis];
+  }
+  if (Array.isArray(commaBasis)) {
+    commaBasis = basis.bind(this)(...commaBasis);
+  }
+  if (!(commaBasis instanceof ValBasis)) {
+    throw new Error('A basis is required.');
+  }
+  commaBasis = commaBasis.lll('tenney');
+  const r = _repspell.bind(this);
+  const commas = [...commaBasis.value];
+  for (const comma of commaBasis.value) {
+    commas.push(comma.inverse());
+  }
+  const mapper = (i: SonicWeaveValue) => r(i, commas);
+  mapper.__doc__ = 'Respeller';
+  mapper.__node__ = builtinNode(mapper);
+  return mapper;
+}
+respell.__doc__ =
+  'Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. (Creates a respelling function.)';
+respell.__node__ = builtinNode(respell);
+
 function gcd(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
@@ -1713,9 +1779,10 @@ valFromPrimeArray.__doc__ =
   'Convert an array of prime mapping entries to a val.';
 valFromPrimeArray.__node__ = builtinNode(valFromPrimeArray);
 
-function basis(this: ExpressionVisitor, ...intervals: Interval[]) {
+function basis(this: ExpressionVisitor, ...intervals: SonicWeaveValue[]) {
   const subgroup: TimeMonzo[] = [];
-  for (const interval of intervals) {
+  for (let interval of intervals) {
+    interval = upcastBool(interval);
     if (interval.value instanceof TimeReal) {
       throw new Error('Can only create basis from radicals.');
     }
@@ -2652,6 +2719,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   numComponents,
   stepSignature,
   divisors,
+  lll,
   // Third-party wrappers
   mosSubset,
   isPrime,
@@ -2724,6 +2792,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   PrimeMapping,
   tenneyHeight,
   wilsonHeight,
+  respell,
   gcd,
   lcm,
   compare: builtinCompare,

@@ -2631,4 +2631,26 @@ describe('SonicWeave expression evaluator', () => {
     const d = evaluate('det([[-PI, E], [1\\3, 0r]])');
     expect(d?.valueOf()).toBeCloseTo(-3.42482);
   });
+
+  it('can do the LLL', () => {
+    const reduced = evaluate('str(lll(basis(4125/4096, 385/384)))');
+    expect(reduced).toBe('@225/224.540/539');
+  });
+
+  it('respells 531441/262144 using 81/80', () => {
+    const {fraction} = parseSingle('respell(81/80)(531441/262144)');
+    expect(fraction).toBe('125/64');
+  });
+
+  it('respells 531441/262144 using 128/125', () => {
+    const {fraction} = parseSingle('respell(128/125)(531441/262144)');
+    expect(fraction).toBe('531441/250000');
+  });
+
+  it('respells 531441/262144 using [81/80, 128/125, 135/128]', () => {
+    const {fraction} = parseSingle(
+      'respell([81/80, 128/125, 135/128])(531441/262144)'
+    );
+    expect(fraction).toBe('1');
+  });
 });

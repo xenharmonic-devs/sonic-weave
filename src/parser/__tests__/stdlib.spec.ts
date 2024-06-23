@@ -1651,4 +1651,34 @@ describe('SonicWeave standard library', () => {
     const scale = expand('afdoStack([1, 3, 1, 2, 1], 3/2)');
     expect(scale).toEqual(['17/16', '5/4', '21/16', '23/16', '3/2']);
   });
+
+  it('Unimarvs double duodene', () => {
+    const scale = expand(
+      'eulerGenus(675*7, 9);respell([225/224, 385/384]);organize()'
+    );
+    expect(scale).toEqual([
+      '45/44',
+      '25/24',
+      '35/32',
+      '10/9',
+      '7/6',
+      '40/33',
+      '5/4',
+      '21/16',
+      '4/3',
+      '15/11',
+      '25/18',
+      '35/24',
+      '3/2',
+      '14/9',
+      '18/11',
+      '5/3',
+      '7/4',
+      '16/9',
+      '20/11',
+      '15/8',
+      '35/18',
+      '2',
+    ]);
+  });
 });

@@ -6,7 +6,7 @@ import {
   tenneyHeight as xduTenney,
   wilsonHeight as xduWilson,
 } from 'xen-dev-utils';
-import {Color, Interval, Val} from '../interval';
+import {Color, Interval, Val, ValBasis} from '../interval';
 import {type ExpressionVisitor} from '../parser/expression';
 import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
@@ -315,7 +315,11 @@ function repr_(
   if (typeof value === 'string') {
     return JSON.stringify(value);
   }
-  if (value instanceof Color || value instanceof Val) {
+  if (
+    value instanceof Color ||
+    value instanceof Val ||
+    value instanceof ValBasis
+  ) {
     return value.toString();
   }
   if (typeof value === 'object') {

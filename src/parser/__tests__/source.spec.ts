@@ -2136,4 +2136,9 @@ describe('SonicWeave parser', () => {
     const scale = expand('3/2;5/3;2/1;c0c@');
     expect(scale).toEqual(['0\\1<5>', '1\\1<5>', '0\\1<5>']);
   });
+
+  it('respells pyth to zarlino', () => {
+    const scale = expand('3^[-1..5] rdc 2;sort();respell(S9)');
+    expect(scale).toEqual(['9/8', '5/4', '4/3', '3/2', '5/3', '15/8', '2']);
+  });
 });

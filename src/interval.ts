@@ -45,8 +45,14 @@ import {
   BIG_INT_PRIMES,
   Fraction,
   FractionValue,
+  FractionalMonzo,
+  LOG_PRIMES,
   PRIMES,
+  applyWeights,
+  fractionalLenstraLenstraLovasz,
+  lenstraLenstraLovasz,
   primeLimit,
+  unapplyWeights,
 } from 'xen-dev-utils';
 
 /**
@@ -1424,6 +1430,45 @@ export class ValBasis {
       }
       this.dual.push(this.ortho[i].geometricInverse());
     }
+  }
+
+  lll(weighting: 'none' | 'tenney') {
+    for (const element of this.value) {
+      if (!element.isScalar()) {
+        throw new Error(
+          'LLL reduction is only implemented in the relative echelon.'
+        );
+      }
+    }
+    if (weighting === 'none') {
+      try {
+        const basis: FractionalMonzo[] = this.value.map(m => m.primeExponents);
+        const lll = fractionalLenstraLenstraLovasz(basis);
+        return new ValBasis(
+          lll.basis.map(pe => new TimeMonzo(ZERO, pe).pitchAbs())
+        );
+      } catch {
+        /** Fall through */
+      }
+    }
+    let basis: number[][] = this.value.map(m =>
+      m.primeExponents.map(f => f.valueOf())
+    );
+    if (weighting === 'tenney') {
+      basis = basis.map(pe => applyWeights(pe, LOG_PRIMES));
+    }
+    const lll = lenstraLenstraLovasz(basis);
+    if (weighting === 'tenney') {
+      lll.basis = lll.basis.map(pe => unapplyWeights(pe, LOG_PRIMES));
+    }
+    return new ValBasis(
+      lll.basis.map(pe =>
+        new TimeMonzo(
+          ZERO,
+          pe.map(c => new Fraction(Math.round(c)))
+        ).pitchAbs()
+      )
+    );
   }
 
   /**
