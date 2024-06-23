@@ -994,6 +994,11 @@ export class TimeReal {
   }
 
   /** @hidden */
+  toMonzo(): number[] {
+    throw new Error('Cannot convert irrational value to an array of numbers.');
+  }
+
+  /** @hidden */
   toEqualTemperament(): EqualTemperament {
     throw new Error('Cannot convert real value to equal temperament.');
   }
@@ -1033,6 +1038,11 @@ export class TimeReal {
   /** @hidden */
   divisors(): number[] {
     throw new Error('Can only calculate the divisors of a natural number.');
+  }
+
+  /** @hidden */
+  factorize(): Map<number, Fraction> {
+    throw new Error('Can only factorize radicals.');
   }
 
   /** @hidden */
@@ -1528,6 +1538,28 @@ export class TimeMonzo {
       if (component.d !== 1) {
         throw new Error('Cannot convert fractional monzo to integers.');
       }
+      result.push(component.valueOf());
+    }
+    while (trim && result.length && !result[result.length - 1]) {
+      result.pop();
+    }
+    return result;
+  }
+
+  /**
+   * Convert the time monzo to a simple array of numbers.
+   * @returns Array of prime exponents.
+   * @param trim If `true` trim zero components from the tail.
+   * @throws An error if the time monzo cannot be represented as sufficiently simple ratio in frequency-space.
+   */
+  toMonzo(trim?: boolean): number[] {
+    if (!this.residual.isUnity()) {
+      throw new Error(
+        'Cannot convert time monzo with residual to an array of numbers.'
+      );
+    }
+    const result: number[] = [];
+    for (const component of this.primeExponents) {
       result.push(component.valueOf());
     }
     while (trim && result.length && !result[result.length - 1]) {
@@ -2529,6 +2561,24 @@ export class TimeMonzo {
     }
     divisors.sort((a, b) => a - b);
     return divisors;
+  }
+
+  /**
+   * Factorize the time monzo into a Map instace with prime numbers as keys and their multiplicity as values.
+   * @returns A sparse monzo.
+   */
+  factorize() {
+    if (this.timeExponent.n) {
+      throw new Error('Time exponent prevents factorization over integers.');
+    }
+    const result: Map<number, Fraction> = primeFactorize(this.residual) as any;
+    for (const [key, value] of result) {
+      result.set(key, new Fraction(value));
+    }
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      result.set(PRIMES[i], this.primeExponents[i]);
+    }
+    return result;
   }
 
   /**

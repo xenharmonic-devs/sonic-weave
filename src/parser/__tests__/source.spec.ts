@@ -2141,4 +2141,57 @@ describe('SonicWeave parser', () => {
     const scale = expand('3^[-1..5] rdc 2;sort();respell(S9)');
     expect(scale).toEqual(['9/8', '5/4', '4/3', '3/2', '5/3', '15/8', '2']);
   });
+
+  it('tempers zarlino to TE meantone (large prime limit)', () => {
+    const scale = expand(`
+      9/8
+      5/4
+      4/3
+      3/2
+      5/3
+      15/8
+      2
+      TE([12@, 19@])
+      cents(£, 3)
+    `);
+    expect(scale).toEqual([
+      '192.104',
+      '384.209',
+      '504.002',
+      '696.107',
+      '888.211',
+      '1080.315',
+      '1200.109',
+    ]);
+  });
+
+  it('tempers barbados to near-CTE', () => {
+    const scale = expand(
+      'sort(15/13^[-2..2] rdc 2);TE([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)'
+    );
+    expect(scale).toEqual(['248.7', '497.4', '702.596', '951.296', '1199.996']);
+  });
+
+  it('generates TE marveldene', () => {
+    const scale = expand(`
+      3^[0..3] tns 5^[0..2]
+      sort(£ rdc 2)
+      TE([225/224])
+      cents(£, 3)
+    `);
+    expect(scale).toEqual([
+      '84.902',
+      '200.915',
+      '267.816',
+      '383.829',
+      '468.731',
+      '584.744',
+      '700.756',
+      '767.658',
+      '901.671',
+      '968.573',
+      '1084.585',
+      '1200.598',
+    ]);
+  });
 });
