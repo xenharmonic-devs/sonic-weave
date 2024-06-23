@@ -90,6 +90,9 @@ Cosine of the angle between the val and the just intonation point. Weighting is 
 ### decimal(*interval*, *fractionDigits*)
 Convert interval to a decimal number.
 
+### det(*matrix*)
+Compute the determinant of a matrix. Domain is ignored, all values coerced to linear.
+
 ### dir(*arg*)
 Obtain the javascript representation of the value.
 
@@ -173,6 +176,9 @@ Insert an interval into the current/given scale keeping it sorted.
 
 ### int(*interval*)
 Convert value to an integer. Throws an error if conversion is impossible.
+
+### inv(*matrix*)
+Compute the inverse of a matrix. Domain is ignored, all values coerced to linear.
 
 ### isAbsolute(*interval*)
 Return `true` if the interval belongs to the absolute echelon.

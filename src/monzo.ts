@@ -15,6 +15,7 @@ import {
   sum,
   primeFactorize,
   modc,
+  FractionalMonzo,
 } from 'xen-dev-utils';
 
 import {
@@ -43,11 +44,6 @@ import {
   literalToString,
   ValLiteral,
 } from './expression';
-
-/**
- * Fractional prime exponents of rational numbers for exact representation of square roots etc.
- */
-export type FractionalMonzo = Fraction[];
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.

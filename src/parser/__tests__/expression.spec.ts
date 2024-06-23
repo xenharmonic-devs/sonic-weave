@@ -2588,4 +2588,47 @@ describe('SonicWeave expression evaluator', () => {
     const c0 = evaluate('str(SOV(<0 0 1]))');
     expect(c0).toBe('0[^5]@2.3.5');
   });
+
+  it('can invert a rational matrix', () => {
+    const inverse = evaluate(`
+      inv([
+        [1, 2, 3],
+        [-4, 5, 6],
+        [7, 8, -9],
+      ])
+    `) as unknown as Interval[][];
+    expect(
+      inverse.map(row => row.map(i => i.toFraction().toFraction()))
+    ).toEqual([
+      ['31/94', '-7/47', '1/94'],
+      ['-1/47', '5/47', '3/47'],
+      ['67/282', '-1/47', '-13/282'],
+    ]);
+  });
+
+  it('can invert a real matrix', () => {
+    const inverse = evaluate(
+      'inv([[PI, 1\\2], [-E, √5 - √3]])'
+    ) as unknown as Interval[][];
+    expect(inverse.map(row => row.map(i => i.valueOf().toFixed(4)))).toEqual([
+      ['0.0929', '-0.2606'],
+      ['0.5008', '0.5788'],
+    ]);
+  });
+
+  it('can compute a rational determinant', () => {
+    const {fraction} = parseSingle(`
+      det([
+        [1, 2, 3],
+        [-1/2, 1/3, 1/4],
+        [0, 2, 7/5],
+      ]);
+    `);
+    expect(fraction).toBe('-49/30');
+  });
+
+  it('can compute a real determinant', () => {
+    const d = evaluate('det([[-PI, E], [1\\3, 0r]])');
+    expect(d?.valueOf()).toBeCloseTo(-3.42482);
+  });
 });

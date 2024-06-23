@@ -16,7 +16,12 @@ import {
   primeFactorize,
   nthPrime as xduNthPrime,
   primeRange as xduPrimeRange,
+  inv as xduInv,
+  fractionalInv,
+  det as xduDet,
+  fractionalDet,
   mmod,
+  FractionalMonzo,
 } from 'xen-dev-utils';
 import {Color, Interval, Val, ValBasis} from '../interval';
 import {
@@ -1749,6 +1754,74 @@ function transpose(matrix: SonicWeaveValue[][]) {
 transpose.__doc__ = 'Transpose a matrix. For modal transposition see rotate().';
 transpose.__node__ = builtinNode(transpose);
 
+function collectMatrix(matrix: SonicWeaveValue[][]) {
+  if (!Array.isArray(matrix) || !Array.isArray(matrix[0])) {
+    throw new Error('Argument must be a matrix.');
+  }
+  let isFractional = true;
+  const fracMat: FractionalMonzo[] = [];
+  const mat: number[][] = [];
+  for (const row of matrix) {
+    const fr: FractionalMonzo = [];
+    const r: number[] = [];
+    for (const component of row) {
+      const interval = upcastBool(component);
+      if (!interval.isRelative()) {
+        throw new Error(
+          'Matrix methods are only implemented in the relative echelon.'
+        );
+      }
+      try {
+        fr.push(interval.toFraction());
+      } catch {
+        isFractional = false;
+      }
+      r.push(interval.valueOf());
+    }
+    fracMat.push(fr);
+    mat.push(r);
+  }
+  return {
+    isFractional,
+    fracMat,
+    mat,
+  };
+}
+
+function inv(matrix: SonicWeaveValue[][]) {
+  const {isFractional, fracMat, mat} = collectMatrix(matrix);
+  if (isFractional) {
+    try {
+      const inverse = fractionalInv(fracMat);
+      return inverse.map(row => row.map(f => Interval.fromFraction(f)));
+    } catch {
+      /** Fall through */
+    }
+  }
+  const inverse = xduInv(mat);
+  return inverse.map(row => row.map(c => Interval.fromValue(c)));
+}
+inv.__doc__ =
+  'Compute the inverse of a matrix. Domain is ignored, all values coerced to linear.';
+inv.__node__ = builtinNode(inv);
+
+function det(matrix: SonicWeaveValue[][]) {
+  const {isFractional, fracMat, mat} = collectMatrix(matrix);
+  if (isFractional) {
+    try {
+      const determinant = fractionalDet(fracMat);
+      return Interval.fromFraction(determinant);
+    } catch {
+      /** Fall through */
+    }
+  }
+  const determinant = xduDet(mat);
+  return Interval.fromValue(determinant);
+}
+det.__doc__ =
+  'Compute the determinant of a matrix. Domain is ignored, all values coerced to linear.';
+det.__node__ = builtinNode(det);
+
 function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
   this.spendGas(scale.length * scale.length);
@@ -2660,6 +2733,8 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   basis,
   basisToArray,
   transpose,
+  inv,
+  det,
   hasConstantStructure: hasConstantStructure_,
   stepString: stepString_,
   str,
