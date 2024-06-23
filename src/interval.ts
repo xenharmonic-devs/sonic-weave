@@ -48,12 +48,17 @@ import {
   FractionalMonzo,
   LOG_PRIMES,
   PRIMES,
+  PRIME_CENTS,
+  add,
   applyWeights,
+  dot,
   fractionalLenstraLenstraLovasz,
   lenstraLenstraLovasz,
   primeLimit,
+  scale,
   unapplyWeights,
 } from 'xen-dev-utils';
+import {TuningMap} from './temper';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
@@ -1451,9 +1456,7 @@ export class ValBasis {
         /** Fall through */
       }
     }
-    let basis: number[][] = this.value.map(m =>
-      m.primeExponents.map(f => f.valueOf())
-    );
+    let basis: number[][] = this.value.map(m => m.toMonzo());
     if (weighting === 'tenney') {
       basis = basis.map(pe => applyWeights(pe, LOG_PRIMES));
     }
@@ -1523,6 +1526,25 @@ export class ValBasis {
       }
     }
     return true;
+  }
+
+  /**
+   * Fix a map in this basis to the stadard basis.
+   * @param map Tuning map of this basis' elements to cents.
+   * @returns Tuning map of primes to cents.
+   */
+  standardFix(map: TuningMap): TuningMap {
+    let result = PRIME_CENTS.slice(0, this.value[0].numberOfComponents);
+    const basis = this.value.map(m => m.toMonzo());
+    const dual = this.dual.map(m => m.toMonzo());
+    for (let i = 0; i < basis.length; ++i) {
+      const cents = dot(basis[i], result);
+      result = add(
+        result,
+        scale(dual[i], (map[i] - cents) / dot(basis[i], dual[i]))
+      );
+    }
+    return result;
   }
 
   /**

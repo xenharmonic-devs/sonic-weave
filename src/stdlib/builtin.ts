@@ -22,6 +22,9 @@ import {
   fractionalDet,
   mmod,
   FractionalMonzo,
+  unapplyWeights,
+  applyWeights,
+  valueToCents,
 } from 'xen-dev-utils';
 import {Color, Interval, Val, ValBasis} from '../interval';
 import {
@@ -79,6 +82,7 @@ import {
 } from './public';
 import {scaleMonzos} from '../diamond-mos';
 import {valToSparseOffset, valToWarts} from '../warts';
+import {TuningMap, combineTuningMaps, vanishCommas} from '../temper';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
@@ -1413,7 +1417,7 @@ function cosJIP(
       'Only vals may be measured against the just intonation point.'
     );
   }
-  const pe = val.value.primeExponents.map(e => e.valueOf());
+  const pe = val.value.toMonzo();
   let value = 0;
   weighting = weighting.toLowerCase() as typeof weighting;
   if (weighting === 'tenney') {
@@ -1553,7 +1557,7 @@ function PrimeMapping(
   }
   const r = repr.bind(this);
   Object.defineProperty(mapper, 'name', {
-    value: `PrimeMapping${newPrimes.map(r).join(', ')}`,
+    value: `PrimeMapping(${newPrimes.map(r).join(', ')})`,
     enumerable: false,
   });
   mapper.__doc__ = 'Prime re-mapper.';
@@ -1563,6 +1567,174 @@ function PrimeMapping(
 PrimeMapping.__doc__ =
   'Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.';
 PrimeMapping.__node__ = builtinNode(PrimeMapping);
+
+function valsTE(this: ExpressionVisitor, vals: Val[], weights: number[]) {
+  const basis = vals[0].basis;
+  for (const val of vals) {
+    if (!basis.equals(val.basis)) {
+      throw new Error('Bases must match between vals.');
+    }
+  }
+  const jip: TuningMap = basis.value.map(m => m.totalCents());
+  const maps: TuningMap[] = [];
+  for (const val of vals) {
+    const divisions = val.divisions.valueOf();
+    // Scaling by jip[0] / divisions shouldn't matter, but let's be safe.
+    const map = basis.value.map(
+      m => (jip[0] * val.value.dot(m).valueOf()) / divisions
+    );
+    // Tenney (co-)weights and user weights
+    maps.push(applyWeights(unapplyWeights(map, jip), weights));
+  }
+  const teJip = applyWeights(Array(jip.length).fill(1), weights);
+  const map = combineTuningMaps(teJip, maps);
+
+  const primeMap = basis.standardFix(
+    unapplyWeights(applyWeights(map, jip), weights)
+  );
+
+  return PrimeMapping.bind(this)(
+    ...primeMap.map(
+      cents => new Interval(TimeReal.fromCents(cents), 'logarithmic')
+    )
+  );
+}
+
+function commasTE(
+  this: ExpressionVisitor,
+  commas: TimeMonzo[],
+  weights: number[]
+) {
+  const factorizations = commas.map(comma => comma.factorize());
+  const jip = new Map<number, number>();
+  for (const fs of factorizations) {
+    for (const prime of fs.keys()) {
+      if (prime === 0) {
+        throw new Error('Zero cannot be tempered out.');
+      }
+      if (prime < 0) {
+        throw new Error('Negative values cannot be tempered out.');
+      }
+      if (!jip.has(prime)) {
+        jip.set(prime, valueToCents(prime));
+      }
+    }
+  }
+  const primes: number[] = [];
+  const jipVector: TuningMap = [];
+  const ws: number[] = [];
+  for (const [prime, cents] of jip) {
+    primes.push(prime);
+    jipVector.push(cents);
+    ws.push(weights[PRIMES.indexOf(prime)] ?? 1);
+  }
+  const C: number[][] = [];
+  for (const fs of factorizations) {
+    const row = primes.map(p => (fs.get(p) ?? 0).valueOf());
+    C.push(unapplyWeights(applyWeights(row, jipVector), ws));
+  }
+  // Note that ws is the same as TE co-weighted JIP.
+  const map = unapplyWeights(applyWeights(vanishCommas(ws, C), jipVector), ws);
+  const tuningMap = new Map<number, number>();
+  for (let i = 0; i < map.length; ++i) {
+    tuningMap.set(primes[i], map[i]);
+  }
+
+  function mapper(
+    this: ExpressionVisitor,
+    interval: SonicWeaveValue
+  ): SonicWeaveValue {
+    if (isArrayOrRecord(interval)) {
+      const m = mapper.bind(this);
+      return unaryBroadcast.bind(this)(interval, m);
+    }
+    interval = upcastBool(interval);
+    const monzo = pubRelative.bind(this)(interval).value;
+    if (monzo instanceof TimeReal) {
+      return new Interval(
+        monzo,
+        'logarithmic',
+        0,
+        monzo.asCentsLiteral(),
+        interval
+      );
+    }
+    const factors = monzo.factorize();
+    let cents = 0;
+    for (const [prime, count] of factors) {
+      if (tuningMap.has(prime)) {
+        cents += count.valueOf() * tuningMap.get(prime)!;
+      } else {
+        cents += count.valueOf() * valueToCents(prime);
+      }
+    }
+    const value = TimeReal.fromCents(cents);
+    return new Interval(
+      value,
+      'logarithmic',
+      0,
+      value.asCentsLiteral(),
+      interval
+    );
+  }
+  Object.defineProperty(mapper, 'name', {
+    value: `TE([${commas.map(c => c.toString()).join(',')}}], [${weights
+      .map(w => w.toString() + 'r')
+      .join(',')}])}`,
+    enumerable: false,
+  });
+  mapper.__doc__ = 'Interval re-mapper.';
+  mapper.__node__ = builtinNode(mapper);
+  return mapper;
+}
+
+function TE(
+  this: ExpressionVisitor,
+  valsOrCommas: SonicWeaveValue,
+  weights: SonicWeaveValue
+) {
+  if (valsOrCommas instanceof Val || valsOrCommas instanceof Interval) {
+    valsOrCommas = [valsOrCommas];
+  }
+  if (!Array.isArray(valsOrCommas)) {
+    throw new Error('An array of vals or commas is required.');
+  }
+  if (!valsOrCommas.length) {
+    throw new Error('Empty array is ambiguous in terms of vals or commas.');
+  }
+  const ws: number[] = [];
+  if (weights instanceof Interval) {
+    ws.push(weights.valueOf());
+  } else if (weights) {
+    if (!Array.isArray(weights)) {
+      throw new Error('Weights must be an array if given.');
+    }
+    ws.push(...weights.map(i => upcastBool(i).valueOf()));
+  }
+  if (valsOrCommas[0] instanceof Val) {
+    for (const val of valsOrCommas) {
+      if (!(val instanceof Val)) {
+        throw new Error('Vals and commas may not be mixed.');
+      }
+    }
+    return valsTE.bind(this)(valsOrCommas as Val[], ws);
+  }
+  for (const comma of valsOrCommas) {
+    if (!(comma instanceof Interval)) {
+      throw new Error('Vals and commas may not be mixed.');
+    }
+    if (comma.value instanceof TimeReal) {
+      throw new Error('Non-radical real numbers may not be tempered out.');
+    }
+  }
+  return commasTE.bind(this)(
+    valsOrCommas.map(i => (i as Interval).value as TimeMonzo),
+    ws
+  );
+}
+TE.__doc__ =
+  'Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.';
+TE.__node__ = builtinNode(TE);
 
 function tenneyHeight(
   this: ExpressionVisitor,
@@ -2790,6 +2962,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   warts,
   SOV,
   PrimeMapping,
+  TE,
   tenneyHeight,
   wilsonHeight,
   respell,

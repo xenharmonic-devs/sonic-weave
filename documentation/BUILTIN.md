@@ -384,6 +384,9 @@ Return the higher prime tail of an interval starting from the given index. Prime
 ### tan(*x*)
 Calculate tan x.
 
+### TE(*valsOrCommas*, *weights*)
+Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.
+
 ### templateArg(*index*)
 Access the nth template argument when using the `sw` tag inside JavaScript.
 

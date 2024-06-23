@@ -3,6 +3,7 @@ import {TimeMonzo, TimeReal} from '../monzo';
 import {Interval, ValBasis, intervalValueAs} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
+import {dot} from 'xen-dev-utils';
 
 describe('Idempontent formatting', () => {
   it('has stable ratios (common factor)', () => {
@@ -220,5 +221,18 @@ describe('(Val) subgroup basis', () => {
     expect(basis.ortho[0].dot(basis.ortho[1]).n).toBe(0);
     expect(basis.ortho[0].dot(basis.ortho[2]).n).toBe(0);
     expect(basis.ortho[1].dot(basis.ortho[2]).n).toBe(0);
+  });
+
+  it('can fix subgroup maps to the standard basis', () => {
+    const basis = new ValBasis([
+      TimeMonzo.fromFraction('3/2'),
+      TimeMonzo.fromFraction('10/9'),
+      TimeMonzo.fromFraction('7/5'),
+    ]);
+    const map = [700, 200, 600];
+    const fixed = basis.standardFix(map);
+    expect(dot(basis.value[0].toIntegerMonzo(), fixed)).toBeCloseTo(700);
+    expect(dot(basis.value[1].toIntegerMonzo(), fixed)).toBeCloseTo(200);
+    expect(dot(basis.value[2].toIntegerMonzo(), fixed)).toBeCloseTo(600);
   });
 });
