@@ -22,6 +22,7 @@ import {
   unapplyWeights,
   applyWeights,
   valueToCents,
+  binomial,
 } from 'xen-dev-utils';
 import {Color, Interval, Val, ValBasis} from '../interval';
 import {
@@ -197,10 +198,11 @@ numComponents.__doc__ =
   'Get/set the number of prime exponents to support in monzos. Also sets the length of vals.';
 numComponents.__node__ = builtinNode(numComponents);
 
-function stepSignature(word: string) {
+function stepSignature(this: ExpressionVisitor, word: string) {
   if (typeof word !== 'string') {
     throw new Error('A string is required.');
   }
+  this.spendGas(word.length);
   const result: Record<string, Interval> = {};
   for (const [letter, count] of Object.entries(wordsStepSignature(word))) {
     result[letter] = fromInteger(count);
@@ -226,19 +228,26 @@ function lll(
   if (!(basis instanceof ValBasis)) {
     throw new Error('A basis is required.');
   }
+  this.spendGas(basis.numberOfComponents * basis.size ** 5);
   return basis.lll(weighting);
 }
 lll.__doc__ = 'Perform Lensta-Lenstra-Lovász basis reduction.';
 lll.__node__ = builtinNode(lll);
 
 // == Third-party wrappers ==
-function kCombinations(set: any[], k: SonicWeaveValue) {
+function kCombinations(
+  this: ExpressionVisitor,
+  set: any[],
+  k: SonicWeaveValue
+) {
   requireParameters({set});
   k = upcastBool(k);
   if (!Array.isArray(set)) {
     throw new Error('Set must be an array.');
   }
-  return xduKCombinations(set, k.toInteger());
+  const i = k.toInteger();
+  this.spendGas(binomial(set.length, i));
+  return xduKCombinations(set, i);
 }
 kCombinations.__doc__ = 'Obtain all k-sized combinations in a set';
 kCombinations.__node__ = builtinNode(kCombinations);
@@ -1555,6 +1564,7 @@ function valsTE(this: ExpressionVisitor, vals: Val[], weights: number[]) {
     maps.push(applyWeights(unapplyWeights(map, jip), weights));
   }
   const teJip = applyWeights(Array(jip.length).fill(1), weights);
+  this.spendGas(maps.length * jip.length ** 2);
   const map = combineTuningMaps(teJip, maps);
 
   const primeMap = basis.standardFix(
@@ -1601,6 +1611,7 @@ function commasTE(
     const row = primes.map(p => (fs.get(p) ?? 0).valueOf());
     C.push(unapplyWeights(applyWeights(row, jipVector), ws));
   }
+  this.spendGas(C.length * jipVector.length ** 2);
   // Note that ws is the same as TE co-weighted JIP.
   const map = unapplyWeights(applyWeights(vanishCommas(ws, C), jipVector), ws);
   const tuningMap = new Map<number, number>();
@@ -1628,6 +1639,7 @@ function commasTE(
       );
     }
     const factors = monzo.factorize();
+    this.spendGas(factors.size ** 2);
     let cents = 0;
     for (const [prime, count] of factors) {
       if (tuningMap.has(prime)) {
@@ -1720,9 +1732,10 @@ function errorTE(
       }
       ws.push(...weights.map(i => upcastBool(i).valueOf()));
     }
-    while (ws.length < val.basis.value.length) {
+    while (ws.length < val.basis.size) {
       ws.push(1);
     }
+    this.spendGas(ws.length);
     return Interval.fromValue(val.errorTE(ws));
   }
   const e = errorTE.bind(this);
@@ -1773,6 +1786,7 @@ function _repspell(
     while (improved) {
       improved = false;
       for (const comma of commas) {
+        this.spendGas();
         const candidate = new Interval(result.value.mul(comma), result.domain);
         const candidateHeight = tenney(candidate);
         if (candidateHeight.compare(height) < 0) {
@@ -1798,6 +1812,7 @@ function respell(this: ExpressionVisitor, commaBasis: SonicWeaveValue) {
   if (!(commaBasis instanceof ValBasis)) {
     throw new Error('A basis is required.');
   }
+  this.spendGas(commaBasis.numberOfComponents * commaBasis.size ** 5);
   commaBasis = commaBasis.lll('tenney');
   const r = _repspell.bind(this);
   const commas = [...commaBasis.value];
@@ -1968,7 +1983,7 @@ basisToArray.__doc__ =
   'Convert a subgroup basis to an array of basis elements.';
 basisToArray.__node__ = builtinNode(basisToArray);
 
-function transpose(matrix: SonicWeaveValue[][]) {
+function transpose(this: ExpressionVisitor, matrix: SonicWeaveValue[][]) {
   if (!Array.isArray(matrix)) {
     return matrix;
   }
@@ -1976,6 +1991,7 @@ function transpose(matrix: SonicWeaveValue[][]) {
     return [...matrix];
   }
   const width = matrix.reduce((w, row) => Math.max(w, row.length), 0);
+  this.spendGas(matrix.length * width);
   const result: SonicWeaveValue[][] = [];
   for (let i = 0; i < width; ++i) {
     const row: SonicWeaveValue[] = [];
@@ -2023,8 +2039,9 @@ function collectMatrix(matrix: SonicWeaveValue[][]) {
   };
 }
 
-function inv(matrix: SonicWeaveValue[][]) {
+function inv(this: ExpressionVisitor, matrix: SonicWeaveValue[][]) {
   const {isFractional, fracMat, mat} = collectMatrix(matrix);
+  this.spendGas(mat.length ** 3);
   if (isFractional) {
     try {
       const inverse = fractionalInv(fracMat);
@@ -2040,8 +2057,9 @@ inv.__doc__ =
   'Compute the inverse of a matrix. Domain is ignored, all values coerced to linear.';
 inv.__node__ = builtinNode(inv);
 
-function det(matrix: SonicWeaveValue[][]) {
+function det(this: ExpressionVisitor, matrix: SonicWeaveValue[][]) {
   const {isFractional, fracMat, mat} = collectMatrix(matrix);
+  this.spendGas(mat.length ** 3);
   if (isFractional) {
     try {
       const determinant = fractionalDet(fracMat);
@@ -2088,6 +2106,7 @@ function stepString_(this: ExpressionVisitor, scale?: Interval[]) {
   scale ??= this.currentScale;
   const rel = pubRelative.bind(this);
   const monzos = scale.map(i => rel(i).value);
+  this.spendGas(monzos.length ** 2);
   return stepString(monzos);
 }
 Object.defineProperty(stepString_, 'name', {

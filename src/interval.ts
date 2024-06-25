@@ -1439,6 +1439,14 @@ export class ValBasis {
     }
   }
 
+  get size() {
+    return this.value.length;
+  }
+
+  get numberOfComponents() {
+    return this.value[0].numberOfComponents;
+  }
+
   get nonPrimes(): TimeMonzo[] {
     const result: TimeMonzo[] = [];
     for (const monzo of this.value) {
@@ -1496,7 +1504,7 @@ export class ValBasis {
    * @returns `true` if this basis is the same as the other.
    */
   equals(other: ValBasis) {
-    if (this.value.length !== other.value.length) {
+    if (this.size !== other.size) {
       return false;
     }
     for (let i = 0; i < this.value.length; ++i) {
@@ -1513,7 +1521,7 @@ export class ValBasis {
    * @returns `true` if this basis is strictly the same as the other.
    */
   strictEquals(other: ValBasis) {
-    if (this.value.length !== other.value.length) {
+    if (this.size !== other.size) {
       return false;
     }
     for (let i = 0; i < this.value.length; ++i) {
@@ -1530,7 +1538,7 @@ export class ValBasis {
    * @returns `true` if the basis consists of prime numbers in order.
    */
   isStandard(soft = false) {
-    if (!soft && this.value.length !== getNumberOfComponents()) {
+    if (!soft && this.size !== getNumberOfComponents()) {
       return false;
     }
     for (let i = 0; i < this.value.length; ++i) {
@@ -1550,7 +1558,7 @@ export class ValBasis {
    * @returns Tuning map of primes to cents.
    */
   standardFix(map: TuningMap): TuningMap {
-    let result = PRIME_CENTS.slice(0, this.value[0].numberOfComponents);
+    let result = PRIME_CENTS.slice(0, this.numberOfComponents);
     const basis = this.value.map(m => m.toMonzo());
     const dual = this.dual.map(m => m.toMonzo());
     for (let i = 0; i < basis.length; ++i) {

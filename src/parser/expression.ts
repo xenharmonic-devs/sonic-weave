@@ -32,7 +32,7 @@ import {
   IntervalDomain,
   ValBasis,
 } from '../interval';
-import {TimeMonzo, TimeReal} from '../monzo';
+import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -434,6 +434,7 @@ export class ExpressionVisitor {
 
   protected visitValBasisLiteral(node: ValBasisLiteral) {
     const {subgroup} = parseValSubgroup(node.basis);
+    this.spendGas(subgroup.length ** 2);
     return new ValBasis(subgroup, node);
   }
 
@@ -793,6 +794,7 @@ export class ExpressionVisitor {
       if (val.length !== subgroup.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
+      this.spendGas(subgroup.length ** 2);
       const basis = new ValBasis(subgroup);
       const value = valToTimeMonzo(val, basis);
       return new Val(value, basis, node);
@@ -819,11 +821,13 @@ export class ExpressionVisitor {
 
   protected visitWartsLiteral(node: WartsLiteral) {
     if (Array.isArray(node.basis)) {
+      this.spendGas((node.basis.length || getNumberOfComponents()) ** 2);
       const [val, basis] = wartsToVal(node);
       return new Val(val, basis, node);
     }
     const basis_ = this.visit(node.basis);
     if (basis_ instanceof ValBasis) {
+      this.spendGas(basis_.size ** 2);
       const [val, basis] = wartsToVal(node, basis_);
       return new Val(val, basis);
     }
@@ -834,11 +838,13 @@ export class ExpressionVisitor {
 
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
     if (Array.isArray(node.basis)) {
+      this.spendGas((node.basis.length || getNumberOfComponents()) ** 2);
       const [val, basis] = sparseOffsetToVal(node);
       return new Val(val, basis, node);
     }
     const basis_ = this.visit(node.basis);
     if (basis_ instanceof ValBasis) {
+      this.spendGas(basis_.size ** 2);
       const [val, basis] = sparseOffsetToVal(node, basis_);
       return new Val(val, basis);
     }

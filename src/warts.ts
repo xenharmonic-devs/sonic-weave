@@ -181,10 +181,7 @@ function patentVal(divisions: number, subgroup: TimeMonzo[]) {
  */
 export function valToTimeMonzo(val: (number | Fraction)[], basis: ValBasis) {
   // Build the cologarithmic vector adjusting dual basis weights as necessary.
-  let result = new TimeMonzo(
-    ZERO,
-    Array(basis.value[0].numberOfComponents).fill(ZERO)
-  );
+  let result = new TimeMonzo(ZERO, Array(basis.numberOfComponents).fill(ZERO));
   for (let i = 0; i < basis.value.length; ++i) {
     const missingWeight = ONE.sub(basis.value[i].dot(result));
     result = result.mul(
