@@ -1208,16 +1208,16 @@ ValBasisLiteral
   }
 
 ValLiteral
-  = [<⟨] _ components: VectorComponents _ ']' basis: ValBasisLiteral? {
+  = [<⟨] _ components: VectorComponents _ ']' basis: ('@' @((!ValBasisElement @Identifier) / ValBasis))? {
     return {
       type: 'ValLiteral',
       components,
-      basis: basis?.basis,
+      basis: basis ?? [],
     };
   }
 
 WartsLiteral
-  = equave: [a-z]i? divisions: BasicInteger warts: [a-z]i* '@' basis: WartBasis {
+  = equave: [a-z]i? divisions: BasicInteger warts: [a-z]i* '@' basis: (Identifier / WartBasis)  {
     return {
       type: 'WartsLiteral',
       equave: (equave ?? '').toLowerCase(),
@@ -1244,7 +1244,7 @@ PatentTweak
 PatentTweaks = PatentTweak|.., _ ',' _|
 
 SparseOffsetVal
-  = equave: ('[' @Fraction ']')? divisions: BasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: WartBasis {
+  = equave: ('[' @Fraction ']')? divisions: BasicInteger tweaks: ('[' _ @PatentTweaks _ ']')? '@' basis: (Identifier / WartBasis) {
     return {
       type: 'SparseOffsetVal',
       equave: equave ?? '',

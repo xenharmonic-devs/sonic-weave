@@ -3,7 +3,10 @@ import {
   CoIntervalLiteral,
   ValBasisLiteral,
   literalToString,
+  Identifier,
 } from './expression';
+
+export {Identifier} from './expression';
 
 export type UnaryOperator =
   | '+'
@@ -356,11 +359,6 @@ export type NoneLiteral = {
 export type ColorLiteral = {
   type: 'ColorLiteral';
   value: string;
-};
-
-export type Identifier = {
-  type: 'Identifier';
-  id: string;
 };
 
 export type PopScale = {

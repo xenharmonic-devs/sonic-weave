@@ -206,8 +206,21 @@ function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
   throw new Error('Equave outside subgroup.');
 }
 
-export function wartsToVal(node: WartsLiteral): [TimeMonzo, ValBasis] {
-  const {subgroup, nonPrimes} = parseValSubgroup(node.basis);
+export function wartsToVal(
+  node: WartsLiteral,
+  basis?: ValBasis
+): [TimeMonzo, ValBasis] {
+  let subgroup: TimeMonzo[];
+  let nonPrimes: TimeMonzo[];
+  if (Array.isArray(node.basis)) {
+    ({subgroup, nonPrimes} = parseValSubgroup(node.basis));
+  } else {
+    if (!basis) {
+      throw new Error('An explicit basis must be provided.');
+    }
+    subgroup = [...basis.value];
+    nonPrimes = basis.nonPrimes;
+  }
 
   const equave = wartToBasisElement(node.equave, subgroup, nonPrimes);
 
@@ -243,14 +256,25 @@ export function wartsToVal(node: WartsLiteral): [TimeMonzo, ValBasis] {
     }
   }
 
-  const basis = new ValBasis(subgroup);
+  // Commit shifted equave
+  basis = new ValBasis(subgroup);
+
   return [valToTimeMonzo(val, basis), basis];
 }
 
 export function sparseOffsetToVal(
-  node: SparseOffsetVal
+  node: SparseOffsetVal,
+  basis?: ValBasis
 ): [TimeMonzo, ValBasis] {
-  const {subgroup} = parseValSubgroup(node.basis);
+  let subgroup: TimeMonzo[];
+  if (Array.isArray(node.basis)) {
+    ({subgroup} = parseValSubgroup(node.basis));
+  } else {
+    if (!basis) {
+      throw new Error('An explicit basis must be provided.');
+    }
+    subgroup = [...basis.value];
+  }
   let equave = TWO_MONZO;
   if (node.equave) {
     equave = TimeMonzo.fromFraction(
@@ -281,7 +305,8 @@ export function sparseOffsetToVal(
       throw new Error('Tweak outside subgroup.');
     }
   }
-  const basis = new ValBasis(subgroup);
+  // Commit shifted equave
+  basis = new ValBasis(subgroup);
   return [valToTimeMonzo(val, basis), basis];
 }
 

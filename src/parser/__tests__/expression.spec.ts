@@ -2653,4 +2653,9 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(fraction).toBe('1');
   });
+
+  it('re-organizes named subgroups', () => {
+    const str = evaluate('const S = @2.3.7;str(b39@S) " but " str(S)');
+    expect(str).toBe('withBasis(<25 39 0 69], @3.2.7) but @2.3.7');
+  });
 });

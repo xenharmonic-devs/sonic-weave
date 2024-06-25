@@ -2194,4 +2194,17 @@ describe('SonicWeave parser', () => {
       '1200.598',
     ]);
   });
+
+  it('generates TE orgone with a named subgroup', () => {
+    const scale = expand(`{
+      77/64
+      16/11
+      7/4
+      2/1
+      const S = @2.7.11
+      TE([11@S, 26@S])
+      cents(£, 3)
+    }`);
+    expect(scale).toEqual(['323.28', '646.56', '969.84', '1199.66']);
+  });
 });

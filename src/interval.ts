@@ -1437,6 +1437,20 @@ export class ValBasis {
     }
   }
 
+  get nonPrimes(): TimeMonzo[] {
+    const result: TimeMonzo[] = [];
+    for (const monzo of this.value) {
+      if (monzo.isIntegral()) {
+        if (!PRIMES.includes(monzo.valueOf())) {
+          result.push(monzo);
+        }
+      } else {
+        result.push(monzo);
+      }
+    }
+    return result;
+  }
+
   lll(weighting: 'none' | 'tenney') {
     for (const element of this.value) {
       if (!element.isScalar()) {

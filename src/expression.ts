@@ -76,6 +76,11 @@ export type ValBasisElement = WartBasisElement | 's' | 'Hz' | 'hz';
 
 export type BasisElement = ValBasisElement | 'rc' | 'r¢' | 'inf' | '1°' | 'deg';
 
+export type Identifier = {
+  type: 'Identifier';
+  id: string;
+};
+
 export type ValBasisLiteral = {
   type: 'ValBasisLiteral';
   basis: ValBasisElement[];
@@ -213,7 +218,7 @@ export type WartsLiteral = {
   equave: string;
   divisions: number;
   warts: string[];
-  basis: WartBasisElement[];
+  basis: WartBasisElement[] | Identifier;
 };
 
 export type PatentTweak = {
@@ -226,7 +231,7 @@ export type SparseOffsetVal = {
   equave: BasisFraction | '';
   divisions: number;
   tweaks: PatentTweak[];
-  basis: WartBasisElement[];
+  basis: WartBasisElement[] | Identifier;
 };
 
 export type VectorComponent = {
@@ -248,7 +253,7 @@ export type MonzoLiteral = {
 export type ValLiteral = {
   type: 'ValLiteral';
   components: VectorComponent[];
-  basis?: ValBasisElement[];
+  basis: ValBasisElement[] | Identifier;
 };
 
 export type SquareSuperparticular = {
@@ -995,7 +1000,10 @@ function formatBasisFraction(fraction: BasisFraction) {
   return `${radical}${fraction.numerator}`;
 }
 
-function formatSubgroupBasis(basis: BasisElement[]) {
+function formatSubgroupBasis(basis: BasisElement[] | Identifier) {
+  if (!Array.isArray(basis)) {
+    throw new Error('Unexpected unpruned identifier.');
+  }
   return basis
     .map(b => (typeof b === 'string' ? b : formatBasisFraction(b)))
     .join('.');
@@ -1030,7 +1038,10 @@ function formatMonzo(literal: MonzoLiteral) {
 
 function formatVal(literal: ValLiteral) {
   let result = `<${formatComponents(literal.components)}]`;
-  if (literal.basis?.length) {
+  if (!Array.isArray(literal.basis)) {
+    throw new Error('Unexpected unpruned identifier.');
+  }
+  if (literal.basis.length) {
     result += `@${formatSubgroupBasis(literal.basis)}`;
   }
   return result;

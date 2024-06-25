@@ -778,20 +778,28 @@ export class ExpressionVisitor {
         throw new Error('Invalid val literal.');
       }
     }
-    let value: TimeMonzo;
-    let basis: ValBasis;
-    if (node.basis?.length) {
+    if (!Array.isArray(node.basis)) {
+      const basis = this.visit(node.basis);
+      if (!(basis instanceof ValBasis)) {
+        throw new Error(
+          `The identifier ${node.basis.id} does not refer to a basis.`
+        );
+      }
+      const value = valToTimeMonzo(val, basis);
+      return new Val(value, basis);
+    } else if (node.basis.length) {
       const {subgroup} = parseValSubgroup(node.basis, val.length);
       if (val.length !== subgroup.length) {
         throw new Error('Val components must be given for the whole subgroup.');
       }
-      basis = new ValBasis(subgroup);
-      value = valToTimeMonzo(val, basis);
+      const basis = new ValBasis(subgroup);
+      const value = valToTimeMonzo(val, basis);
+      return new Val(value, basis, node);
     } else {
-      value = new TimeMonzo(ZERO, val as Fraction[]);
-      basis = new ValBasis(val.length);
+      const value = new TimeMonzo(ZERO, val as Fraction[]);
+      const basis = new ValBasis(val.length);
+      return new Val(value, basis, node);
     }
-    return new Val(value, basis, node);
   }
 
   protected project(
@@ -809,13 +817,33 @@ export class ExpressionVisitor {
   }
 
   protected visitWartsLiteral(node: WartsLiteral) {
-    const [val, basis] = wartsToVal(node);
-    return new Val(val, basis, node);
+    if (Array.isArray(node.basis)) {
+      const [val, basis] = wartsToVal(node);
+      return new Val(val, basis, node);
+    }
+    const basis_ = this.visit(node.basis);
+    if (basis_ instanceof ValBasis) {
+      const [val, basis] = wartsToVal(node, basis_);
+      return new Val(val, basis);
+    }
+    throw new Error(
+      `The identifier ${node.basis.id} does not refer to a basis.`
+    );
   }
 
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
-    const [val, equave] = sparseOffsetToVal(node);
-    return new Val(val, equave, node);
+    if (Array.isArray(node.basis)) {
+      const [val, basis] = sparseOffsetToVal(node);
+      return new Val(val, basis, node);
+    }
+    const basis_ = this.visit(node.basis);
+    if (basis_ instanceof ValBasis) {
+      const [val, basis] = sparseOffsetToVal(node, basis_);
+      return new Val(val, basis);
+    }
+    throw new Error(
+      `The identifier ${node.basis.id} does not refer to a basis.`
+    );
   }
 
   protected visitFJS(node: FJS) {
