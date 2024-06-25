@@ -764,9 +764,44 @@ RelationalOperator 'relational operator'
   / $('~' InToken)
   / (NotToken __ '~' InToken) { return 'not ~in'; }
 
+RelationTail
+  = __ leftOperator: ('<=' / '<') __ middle: RoundingExpression __ rightOperator: ('<=' / '<') _ right: RoundingExpression {
+    return {
+      type: 'RangeRelation',
+      leftOperator,
+      middle,
+      rightOperator,
+      right,
+    };
+  }
+  / __ leftOperator: ('>=' / '>') __ middle: RoundingExpression __ rightOperator: ('>=' / '>') _ right: RoundingExpression {
+    return {
+      type: 'RangeRelation',
+      leftOperator,
+      middle,
+      rightOperator,
+      right,
+    };
+  }
+  / __ operator: RelationalOperator _ right: RoundingExpression {
+    return {
+      type: 'BinaryExpression',
+      operator,
+      right,
+      preferLeft: false,
+      preferRight: false,
+    };
+  }
+
 RelationalExpression
-  = head: RoundingExpression tail: (__ @RelationalOperator __ @RoundingExpression)* {
-    return tail.reduce(operatorReducerLite, head);
+  = left: RoundingExpression tail: RelationTail? {
+    if (tail) {
+      return {
+        ...tail,
+        left,
+      };
+    }
+    return left;
   }
 
 RoundingOperator

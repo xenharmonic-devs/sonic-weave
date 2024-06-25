@@ -46,6 +46,7 @@ import {
   unaryBroadcast,
   isArrayOrRecord,
   binaryBroadcast,
+  ternaryBroadcast,
 } from '../stdlib';
 import {
   metricExponent,
@@ -94,6 +95,7 @@ import {
   UpdateExpression,
   UpdateOperator,
   BlockExpression,
+  RangeRelation,
 } from '../ast';
 import {type StatementVisitor} from './statement';
 import {AbsoluteMosPitch, absoluteMosMonzo, mosMonzo} from '../diamond-mos';
@@ -421,6 +423,8 @@ export class ExpressionVisitor {
         return this.visitTemplateArgument(node);
       case 'ValBasisLiteral':
         return this.visitValBasisLiteral(node);
+      case 'RangeRelation':
+        return this.visitRangeRelation(node);
       case 'SetLiteral':
         // This requires hashable Intervals and support in xen-dev-utils.
         throw new Error('Set literals not implemented yet.');
@@ -610,70 +614,6 @@ export class ExpressionVisitor {
     return this.down(operand, node.count);
   }
 
-  protected where(
-    test: SonicWeaveValue,
-    consequent: SonicWeaveValue,
-    alternate: SonicWeaveValue
-  ): SonicWeaveValue {
-    const w = this.where.bind(this);
-    if (Array.isArray(test)) {
-      this.spendGas(test.length);
-      if (Array.isArray(consequent)) {
-        if (Array.isArray(alternate)) {
-          if (
-            test.length !== consequent.length ||
-            consequent.length !== alternate.length
-          ) {
-            throw new Error(
-              `Unable to broadcast arrays together with lengths ${consequent.length}, ${test.length} and ${alternate.length}.`
-            );
-          }
-          return test.map((t, i) =>
-            w(t, consequent[i], alternate[i])
-          ) as SonicWeaveValue;
-        }
-        if (test.length !== consequent.length) {
-          throw new Error(
-            `Unable to broadcast arrays together with lengths ${consequent.length}, ${test.length} and *.`
-          );
-        }
-        return test.map((t, i) =>
-          w(t, consequent[i], alternate)
-        ) as SonicWeaveValue;
-      }
-      if (Array.isArray(alternate)) {
-        if (test.length !== alternate.length) {
-          throw new Error(
-            `Unable to broadcast arrays together with lengths *, ${test.length} and ${alternate.length}.`
-          );
-        }
-        return test.map((t, i) =>
-          w(t, consequent, alternate[i])
-        ) as SonicWeaveValue;
-      }
-      return test.map(t => w(t, consequent, alternate)) as SonicWeaveValue;
-    }
-    if (Array.isArray(consequent)) {
-      this.spendGas(consequent.length);
-      if (Array.isArray(alternate)) {
-        if (consequent.length !== alternate.length) {
-          throw new Error(
-            `Unable to broadcast arrays together with lengths ${consequent.length}, * and ${alternate.length}.`
-          );
-        }
-        return consequent.map((c, i) =>
-          w(test, c, alternate[i])
-        ) as SonicWeaveValue;
-      }
-      return consequent.map(c => w(test, c, alternate)) as SonicWeaveValue;
-    }
-    if (Array.isArray(alternate)) {
-      this.spendGas(alternate.length);
-      return alternate.map(a => w(test, consequent, a)) as SonicWeaveValue;
-    }
-    return sonicTruth(test) ? consequent : alternate;
-  }
-
   protected visitConditionalExpression(node: ConditionalExpression) {
     if (node.kind === 'if') {
       const test = this.visit(node.test);
@@ -682,10 +622,71 @@ export class ExpressionVisitor {
       }
       return this.visit(node.alternate);
     }
-    return this.where(
-      this.visit(node.test),
-      this.visit(node.consequent),
-      this.visit(node.alternate)
+    const tbc = ternaryBroadcast.bind(this);
+    function where(
+      test: SonicWeavePrimitive | SonicWeavePrimitive[],
+      consequent: SonicWeavePrimitive | SonicWeavePrimitive[],
+      alternate: SonicWeavePrimitive | SonicWeavePrimitive[]
+    ) {
+      if (
+        Array.isArray(test) ||
+        Array.isArray(consequent) ||
+        Array.isArray(alternate)
+      ) {
+        return tbc(test, consequent, alternate, where);
+      }
+      return sonicTruth(test) ? consequent : alternate;
+    }
+    return where(
+      this.visit(node.test) as any,
+      this.visit(node.consequent) as any,
+      this.visit(node.alternate) as any
+    );
+  }
+
+  protected visitRangeRelation(node: RangeRelation) {
+    const tbc = ternaryBroadcast.bind(this);
+    const c = compare.bind(this);
+    const lop = node.leftOperator;
+    const rop = node.rightOperator;
+    function rr(
+      left: SonicWeavePrimitive | SonicWeavePrimitive[],
+      middle: SonicWeavePrimitive | SonicWeavePrimitive[],
+      right: SonicWeavePrimitive | SonicWeavePrimitive[]
+    ) {
+      if (
+        Array.isArray(left) ||
+        Array.isArray(middle) ||
+        Array.isArray(right)
+      ) {
+        return tbc(left, middle, right, rr);
+      }
+      const l = c(left, middle);
+      if (lop === '<') {
+        if (l >= 0) return false;
+      } else if (lop === '<=') {
+        if (l > 0) return false;
+      } else if (lop === '>') {
+        if (l <= 0) return false;
+      } else if (lop === '>=') {
+        if (l < 0) return false;
+      }
+      const r = c(middle, right);
+      switch (rop) {
+        case '<':
+          return r < 0;
+        case '<=':
+          return r <= 0;
+        case '>':
+          return r > 0;
+        case '>=':
+          return r >= 0;
+      }
+    }
+    return rr(
+      this.visit(node.left) as any,
+      this.visit(node.middle) as any,
+      this.visit(node.right) as any
     );
   }
 

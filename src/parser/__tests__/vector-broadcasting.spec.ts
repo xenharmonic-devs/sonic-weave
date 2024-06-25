@@ -395,6 +395,20 @@ describe('SonicWeave vector broadcasting', () => {
     ]);
   });
 
+  it('has a broadcasting range relation', () => {
+    const nah = sw0D`round(0 < PI < 3)`;
+    expect(nah).toBe(0);
+
+    const facts = sw1D`round([0, 1, 4] < PI <= [5, 4, 4])`;
+    expect(facts).toEqual([1, 1, 0]);
+
+    const mat = sw2D`round(3 >= [[-1, 1], [PI, E]] > 0)`;
+    expect(mat).toEqual([
+      [0, 1],
+      [0, 1],
+    ]);
+  });
+
   it('has a broadcasting Weil height', () => {
     const ln5 = sw0D`weilHeight 3/5`;
     expect(ln5.valueOf()).toBeCloseTo(Math.log(5));

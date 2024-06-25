@@ -2658,4 +2658,14 @@ describe('SonicWeave expression evaluator', () => {
     const str = evaluate('const S = @2.3.7;str(b39@S) " but " str(S)');
     expect(str).toBe('withBasis(<25 39 0 69], @3.2.7) but @2.3.7');
   });
+
+  it('has pythonic ternary comparison (less than)', () => {
+    const sure = evaluate('-1 < 0 < 1');
+    expect(sure).toBe(true);
+  });
+
+  it('has pythonic ternary comparison (greater than)', () => {
+    const sure = evaluate('5 >= 5 > 4');
+    expect(sure).toBe(true);
+  });
 });
