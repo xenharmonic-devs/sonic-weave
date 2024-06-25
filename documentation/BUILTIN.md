@@ -84,9 +84,6 @@ Combine two or more arrays/strings.
 ### cos(*x*)
 Calculate cos x.
 
-### cosJIP(*val*, *weighting = "tenney"*)
-Cosine of the angle between the val and the just intonation point. Weighting is either "none", "tenney" or "wilson".
-
 ### decimal(*interval*, *fractionDigits*)
 Convert interval to a decimal number.
 
@@ -110,6 +107,9 @@ Obtain the docstring of the given riff.
 
 ### entries(*record*)
 Obtain an array of `[key, value]` pairs of the record.
+
+### errorTE(*val*, *weights*)
+Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given.
 
 ### every(*array = $$*, *test*)
 Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
@@ -719,11 +719,14 @@ Obtain a copy of the current/given scale quantized to subharmonics of the given 
 ### trap(*message*)
 Produce a function that fails with the given message when called.
 
-### tune(*a*, *b*, *numIter = 1*, *weighting = "tenney"*)
+### tune2(*a*, *b*, *numIter = 1*, *weights = niente*)
 Find a combination of two vals that is closer to just intonation.
 
-### tune3(*a*, *b*, *c*, *numIter = 1*, *weighting = "tenney"*)
+### tune3(*a*, *b*, *c*, *numIter = 1*, *weights = niente*)
 Find a combination of three vals that is closer to just intonation.
+
+### tune4(*a*, *b*, *c*, *d*, *numIter = 1*, *weights = niente*)
+Find a combination of four vals that is closer to just intonation.
 
 ### u(*scale = ££*)
 Obtain a undertonal reflection of the popped/given overtonal scale.

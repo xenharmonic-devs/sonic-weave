@@ -333,21 +333,33 @@ riff enumerate(array = $$) {
   return [[i, array[i]] for i in array];
 }
 
-riff tune(a, b, numIter = 1, weighting = 'tenney') {
+riff tune2(a, b, numIter = 1, weights = niente) {
   "Find a combination of two vals that is closer to just intonation.";
+
+  let error = (v => errorTE(v, weights));
+  if (isFunction(weights)) {
+    error = weights;
+  }
+
   numIter = real(numIter) + 1r;
   while (--numIter) {
     const x = 2 * a - b;
     const y = a + b;
     const z = 2 * b - a;
 
-    [a, b] = sort([a, b, x, y, z], (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
+    [a, b] = sort([a, b, x, y, z], (u, v) => error(u) - error(v));
   }
   return a;
 }
 
-riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
+riff tune3(a, b, c, numIter = 1, weights = niente) {
   "Find a combination of three vals that is closer to just intonation.";
+
+  let error = (v => errorTE(v, weights));
+  if (isFunction(weights)) {
+    error = weights;
+  }
+
   numIter = real(numIter) + 1r;
   while (--numIter) {
     const combos = [
@@ -369,7 +381,83 @@ riff tune3(a, b, c, numIter = 1, weighting = 'tenney') {
       b + c - a,
     ];
 
-    [a, b, c] = sort(combos, (u, v) => cosJIP(v, weighting) - cosJIP(u, weighting));
+    [a, b, c] = sort(combos, (u, v) => error(u) - error(v));
+  }
+  return a;
+}
+
+riff tune4(a, b, c, d, numIter = 1, weights = niente) {
+  "Find a combination of four vals that is closer to just intonation.";
+
+  let error = (v => errorTE(v, weights));
+  if (isFunction(weights)) {
+    error = weights;
+  }
+
+  numIter = real(numIter) + 1r;
+  while (--numIter) {
+    const combos = [
+      a,
+      b,
+      c,
+      d,
+
+      a + b,
+      a + c,
+      a + d,
+      b + c,
+      b + d,
+      c + d,
+
+      2 * a - b,
+      2 * a - c,
+      2 * a - d,
+      2 * b - a,
+      2 * b - c,
+      2 * b - d,
+      2 * c - a,
+      2 * c - b,
+      2 * c - d,
+      2 * d - a,
+      2 * d - b,
+      2 * d - c,
+
+      3 * a - b - c,
+      3 * a - b - d,
+      3 * a - c - d,
+      3 * b - a - c,
+      3 * b - a - d,
+      3 * b - c - d,
+      3 * c - a - b,
+      3 * c - a - d,
+      3 * c - b - d,
+      3 * d - a - b,
+      3 * d - a - c,
+      3 * d - b - c,
+
+      a + b + c,
+      a + b + d,
+      a + c + d,
+      b + c + d,
+
+      a + b - c,
+      a + b - d,
+      a + c - b,
+      a + c - d,
+      a + d - b,
+      a + d - c,
+      b + c - a,
+      b + c - d,
+      c + d - a,
+      c + d - b,
+
+      a + b + c + d,
+      a - b + c + d,
+      a + b - c + d,
+      a + b + c - d,
+    ];
+
+    [a, b, c, d] = sort(combos, (u, v) => error(u) - error(v));
   }
   return a;
 }

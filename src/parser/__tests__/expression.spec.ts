@@ -491,11 +491,11 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('can measure the quality of vals', () => {
-    const prettyGood = evaluate('cosJIP(12@.5)') as Interval;
-    expect(prettyGood.valueOf()).toBeCloseTo(1, 5);
+    const prettyGood = evaluate('errorTE(12@.5)') as Interval;
+    expect(prettyGood.valueOf()).toBeCloseTo(0, 4);
 
-    const great = evaluate('cosJIP(53@.5)') as Interval;
-    expect(great.valueOf()).toBeCloseTo(1, 7);
+    const great = evaluate('errorTE(53@.5)') as Interval;
+    expect(great.valueOf()).toBeCloseTo(0, 6);
   });
 
   it('can strip colors and labels to get a plain string representation', () => {

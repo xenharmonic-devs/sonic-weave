@@ -4,14 +4,11 @@ import {
   isPrime as xduIsPrime,
   primes as xduPrimes,
   approximateRadical,
-  LOG_PRIMES,
-  norm,
   BIG_INT_PRIMES,
   fareySequence as xduFareySequence,
   fareyInterior as xduFareyInterior,
   hasMarginConstantStructure,
   primeLimit,
-  dotPrecise,
   PRIMES,
   primeFactorize,
   nthPrime as xduNthPrime,
@@ -1009,35 +1006,45 @@ primeMonzo.__node__ = builtinNode(primeMonzo);
 
 // == Type detection ==
 function isInterval(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return value instanceof Interval;
 }
 isInterval.__doc__ = 'Return `true` if the value is an interval.';
 isInterval.__node__ = builtinNode(isInterval);
 
 function isColor(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return value instanceof Color;
 }
 isColor.__doc__ = 'Return `true` if the value is a color.';
 isColor.__node__ = builtinNode(isColor);
 
 function isString(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return typeof value === 'string';
 }
 isString.__doc__ = 'Return `true` if the value is a string.';
 isString.__node__ = builtinNode(isString);
 
 function isBoolean(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return typeof value === 'boolean';
 }
 isBoolean.__doc__ = 'Return `true` if the value is a boolean.';
 isBoolean.__node__ = builtinNode(isBoolean);
 
 function isFunction(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return typeof value === 'function';
 }
 isFunction.__doc__ =
@@ -1045,7 +1052,9 @@ isFunction.__doc__ =
 isFunction.__node__ = builtinNode(isFunction);
 
 function isArray(value: SonicWeaveValue) {
-  requireParameters({value});
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
   return Array.isArray(value);
 }
 isArray.__doc__ = 'Return `true` if the value is an array.';
@@ -1402,47 +1411,6 @@ function withBasis(
 withBasis.__doc__ = 'Change the basis of the val.';
 withBasis.__node__ = builtinNode(withBasis);
 
-function cosJIP(
-  this: ExpressionVisitor,
-  val: SonicWeaveValue,
-  weighting: 'none' | 'tenney' | 'wilson' = 'tenney'
-): SonicWeaveValue {
-  requireParameters({val});
-  if (isArrayOrRecord(val)) {
-    const c = cosJIP.bind(this);
-    return unaryBroadcast.bind(this)(val, v => c(v, weighting));
-  }
-  if (!(val instanceof Val)) {
-    throw new Error(
-      'Only vals may be measured against the just intonation point.'
-    );
-  }
-  const pe = val.value.toMonzo();
-  let value = 0;
-  weighting = weighting.toLowerCase() as typeof weighting;
-  if (weighting === 'tenney') {
-    let n2 = 0;
-    for (let i = 0; i < pe.length; ++i) {
-      const e = pe[i] / LOG_PRIMES[i];
-      value += e;
-      n2 += e * e;
-    }
-    value /= Math.sqrt(n2 * pe.length);
-  } else if (weighting === 'wilson') {
-    pe.map((e, i) => e / PRIMES[i]);
-    const jip = LOG_PRIMES.slice(0, pe.length).map((e, i) => e / PRIMES[i]);
-    value = dotPrecise(jip, pe) / norm(pe) / norm(jip);
-  } else {
-    const peNorm = norm(pe);
-    const jipNorm = norm(LOG_PRIMES.slice(0, pe.length));
-    value = dotPrecise(LOG_PRIMES, pe) / peNorm / jipNorm;
-  }
-  return new Interval(TimeReal.fromValue(value), 'linear');
-}
-cosJIP.__doc__ =
-  'Cosine of the angle between the val and the just intonation point. Weighting is either "none", "tenney" or "wilson".';
-cosJIP.__node__ = builtinNode(cosJIP);
-
 function JIP(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -1735,6 +1703,34 @@ function TE(
 TE.__doc__ =
   'Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.';
 TE.__node__ = builtinNode(TE);
+
+// Optimize by pre-calculating stuff that gets re-used during tuning.
+function errorTE(
+  this: ExpressionVisitor,
+  val: SonicWeaveValue,
+  weights: SonicWeaveValue
+): SonicWeaveValue {
+  if (val instanceof Val) {
+    const ws: number[] = [];
+    if (weights instanceof Interval) {
+      ws.push(weights.valueOf());
+    } else if (weights) {
+      if (!Array.isArray(weights)) {
+        throw new Error('Weights must be an array if given.');
+      }
+      ws.push(...weights.map(i => upcastBool(i).valueOf()));
+    }
+    while (ws.length < val.basis.value.length) {
+      ws.push(1);
+    }
+    return Interval.fromValue(val.errorTE(ws));
+  }
+  const e = errorTE.bind(this);
+  return unaryBroadcast.bind(this)(val, v => e(v, weights));
+}
+errorTE.__doc__ =
+  'Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given.';
+errorTE.__node__ = builtinNode(errorTE);
 
 function tenneyHeight(
   this: ExpressionVisitor,
@@ -2956,13 +2952,13 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   complexityOf,
   basisOf,
   withBasis,
-  cosJIP,
   JIP,
   real,
   warts,
   SOV,
   PrimeMapping,
   TE,
+  errorTE,
   tenneyHeight,
   wilsonHeight,
   respell,

@@ -52,10 +52,12 @@ import {
   add,
   applyWeights,
   dot,
+  dotPrecise,
   fractionalLenstraLenstraLovasz,
   lenstraLenstraLovasz,
   primeLimit,
   scale,
+  sub,
   unapplyWeights,
 } from 'xen-dev-utils';
 import {TuningMap} from './temper';
@@ -1837,6 +1839,23 @@ export class Val {
       return Interval.fromInteger(product.s * product.n);
     }
     return Interval.fromFraction(product);
+  }
+
+  /**
+   * Compute the weighted squared error against the just intonation point.
+   * @param weights Additional weights to apply on top of Tenney weights.
+   * @returns The TE error.
+   */
+  errorTE(weights: number[]) {
+    const jip = this.basis.value.map(m => m.totalCents());
+    const divisions = this.divisions.valueOf();
+    if (!divisions) {
+      return Infinity;
+    }
+    const n = jip[0] / this.divisions.valueOf();
+    const map = this.basis.value.map(m => this.value.dot(m).valueOf() * n);
+    const diff = sub(weights, applyWeights(unapplyWeights(map, jip), weights));
+    return dotPrecise(diff, diff);
   }
 
   /**

@@ -701,6 +701,9 @@ export class TimeReal {
     if (this.timeExponent) {
       return undefined;
     }
+    if (isNaN(this.value) || !isFinite(this.value)) {
+      return undefined;
+    }
     return numberToDecimalLiteral(this.valueOf(), 'r');
   }
 
