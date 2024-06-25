@@ -10,27 +10,34 @@ describe('Angle brackets vs. comparisons', () => {
     expect(() => evaluate('1\\2<3>4')).toThrow();
   });
 
-  it('knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4', () => {
-    const no = evaluate('1 \\2<3>4');
-    expect(no).toBe(false);
-  });
+  // Preventing comparison chaining incidentally "fixes" these.
+  it.fails(
+    'knows that sqrt(2) is smaller than 3 and that true is not larger than 4: (1°2 < 3) > 4',
+    () => {
+      const no = evaluate('1 \\2<3>4');
+      expect(no).toBe(false);
+    }
+  );
 
-  it('knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4', () => {
-    const no = evaluate('1\\ 2<3>4');
-    expect(no).toBe(false);
-  });
+  it.fails(
+    'knows that a double step is smaller than 3 etc. ((1° * 2) < 3) > 4',
+    () => {
+      const no = evaluate('1\\ 2<3>4');
+      expect(no).toBe(false);
+    }
+  );
 
-  it('features the return of (1°2 < 3) > 4', () => {
+  it.fails('features the return of (1°2 < 3) > 4', () => {
     const no = evaluate('1\\2 <3>4');
     expect(no).toBe(false);
   });
 
-  it('features the persistence of (1°2 < 3) > 4', () => {
+  it.fails('features the persistence of (1°2 < 3) > 4', () => {
     const no = evaluate('1\\2< 3>4');
     expect(no).toBe(false);
   });
 
-  it('features the obstinence of (1°2 < 3) > 4', () => {
+  it.fails('features the obstinence of (1°2 < 3) > 4', () => {
     const no = evaluate('1\\2<3 >4');
     expect(no).toBe(false);
   });

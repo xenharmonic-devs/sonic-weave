@@ -325,3 +325,63 @@ export function binaryBroadcast(
     entries.map(([key, value]) => [key, fn(left, value) as SonicWeavePrimitive])
   );
 }
+
+export function ternaryBroadcast(
+  this: ExpressionVisitor,
+  left: SonicWeavePrimitive | SonicWeavePrimitive[],
+  middle: SonicWeavePrimitive | SonicWeavePrimitive[],
+  right: SonicWeavePrimitive | SonicWeavePrimitive[],
+  fn: (
+    x: SonicWeavePrimitive,
+    y: SonicWeavePrimitive,
+    z: SonicWeavePrimitive
+  ) => SonicWeaveValue
+) {
+  if (Array.isArray(left)) {
+    this.spendGas(left.length);
+    if (Array.isArray(middle)) {
+      if (Array.isArray(right)) {
+        if (left.length !== middle.length || middle.length !== right.length) {
+          throw new Error(
+            `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and ${right.length}.`
+          );
+        }
+        return left.map((l, i) =>
+          fn(l, middle[i], right[i])
+        ) as SonicWeaveValue;
+      }
+      if (left.length !== middle.length) {
+        throw new Error(
+          `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and *.`
+        );
+      }
+      return left.map((l, i) => fn(l, middle[i], right)) as SonicWeaveValue;
+    }
+    if (Array.isArray(right)) {
+      if (left.length !== right.length) {
+        throw new Error(
+          `Unable to broadcast arrays together with lengths *, ${left.length} and ${right.length}.`
+        );
+      }
+      return left.map((l, i) => fn(l, middle, right[i])) as SonicWeaveValue;
+    }
+    return left.map(l => fn(l, middle, right)) as SonicWeaveValue;
+  }
+  if (Array.isArray(middle)) {
+    this.spendGas(middle.length);
+    if (Array.isArray(right)) {
+      if (middle.length !== right.length) {
+        throw new Error(
+          `Unable to broadcast arrays together with lengths ${middle.length}, * and ${right.length}.`
+        );
+      }
+      return middle.map((m, i) => fn(left, m, right[i])) as SonicWeaveValue;
+    }
+    return middle.map(m => fn(left, m, right)) as SonicWeaveValue;
+  }
+  if (Array.isArray(right)) {
+    this.spendGas(right.length);
+    return right.map(r => fn(left, middle, r)) as SonicWeaveValue;
+  }
+  return fn(left, middle, right);
+}

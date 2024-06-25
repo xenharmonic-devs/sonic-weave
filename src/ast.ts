@@ -343,6 +343,15 @@ export type DownExpression = {
   operand: Expression;
 };
 
+export type RangeRelation = {
+  type: 'RangeRelation';
+  left: Expression;
+  leftOperator: '<' | '<=' | '>' | '>=';
+  middle: Expression;
+  rightOperator: '<' | '<=' | '>' | '>=';
+  right: Expression;
+};
+
 export type BinaryExpression = {
   type: 'BinaryExpression';
   operator: BinaryOperator;
@@ -459,6 +468,7 @@ export type Expression =
   | UnaryExpression
   | UpdateExpression
   | DownExpression
+  | RangeRelation
   | BinaryExpression
   | CallExpression
   | ArrowFunction

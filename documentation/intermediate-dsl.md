@@ -582,6 +582,8 @@ All boolean operators vectorize over arrays. `[1, 2] == [1, 3]` evaluates to `[t
 
 Absolute quantities are converted to relative before comparison so `440 Hz > 1` evaluates to `true` if `1 = 432Hz` was declared as the unison frequency. This conversion has no impact on the relative ordering between absolute quantities `1 ms > 440 Hz` always evaluates to `true` because `1 ms` represents `1000 Hz` as a frequency.
 
+Comparisons can be used to check if a value falls within a range e.g. `2 <= PI < 3` evaluates to `false` while `4 >= PI > 3` evaluates to `true`.
+
 #### Arithmetic
 | Name                   | Linear         | Result   | Logarithmic      | Result     |
 | ---------------------- | -------------- | -------- | ---------------- | ---------- |
