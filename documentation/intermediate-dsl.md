@@ -3,6 +3,84 @@ This document describes the SonicWeave domain-specific language in detail.
 
 Make sure to read [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md) documentation to get a feel for the language first.
 
+# Table of Contents
+1. [Basic operation](#basic-operation): Current scale `$`
+    1. [Pushing](#pushing)
+    2. [Unrolling](#unrolling)
+    3. [Coloring](#coloring)
+        1. [Inline colors](#inline-colors)
+    4. [Scale title](#scale-title)
+    5. [Inline labels](#inline-labels)
+    6. [Implicit mapping](#implicit-mapping)
+    7. [Vectorized functions](#vectorized-functions)
+    8. [Popped scale](#popped-scale): `£`
+    9. [Implicit tempering](#implicit-tempering)
+    10. [Record unrolling](#record-unrolling)
+    11. [Boolean conversion](#boolean-conversion)
+2. [Variables](#variables): `const`, `let`
+    1. [Destructuring](#destructuring)
+    2. [Rest parameter](#rest-parameter)
+    3. [Reassignment operator](#reassignment-operator)
+3. [Statements / line endings](#statements--line-endings)
+4. [Type system](#type-system)
+5. [Interval domains](#interval-domains)
+6. [Interval echelons](#interval-echelons)
+    1. [Operations on absolute intervals](#operations-on-absolute-intervals)
+7. [Interval types](#interval-types)
+    1. [Numeric separators](#numeric-separators)
+    2. [Formatting](#formatting)
+8. [Operators](#operators)
+    1. [Unary operators](#unary-operators)
+        1. [Vectorized unary operators](#vectorized-unary-operators)
+    2. [Binary operators](#binary-operators)
+        1. [Fallback](#fallback): `lest`
+        2. [Coalescing](#coalescing): `and`, `or`, `al`
+        3. [Array operators](#array-operators): `of`, `in`, `tns`
+        4. [Matrix operators](#matrix-operators): `vdot`, `mdot`
+        5. [Vectorized logical](#vectorized-logical): `vand`, `vor`
+        6. [Boolean](#boolean): `==`, `<>`, `>`, `<`, etc.
+        7. [Arithmetic](#arithmetic): `+`, `-`, `*`, `/`, `^`
+        8. [Rounding](#rounding): `to`, `by`
+        9. [Modulo](#modulo): `mod`, `modc`, `rd`, `rdc`
+        10. [Extrema](#extrema): `min`, `max`
+        11. [Extended arithmetic](#extended-arithmetic): `/^`, `/_`
+        12. [N of EDO](#n-of-edo): `\`, `ed`
+        13. [Dot product and tempering](#dot-product-and-tempering): `dot`, `tmpr`
+        14. [Vector broadcasting](#vector-broadcasting)
+        15. [Universal operation and preference](#universal-operation-and-preference)
+9. [Arrays](#arrays)
+    1. [Literals](#literals)
+    2. [Ranges](#ranges)
+    3. [Harmonic segments](#harmonic-segments)
+        1. [Subharmonic segments](#subharmonic-segments)
+    4. [Enumerated chords](#enumerated-chords)
+        1. [Reflected enumerations](#reflected-enumerations)
+        2. [Mixed enumerations](#mixed-enumerations)
+    5. [Array access](#array-access)
+        1. [Nullish access](#nullish-access)
+        2. [Using an array of indices](#using-an-array-of-indices)
+        3. [Using an array of booleans](#using-an-array-of-booleans)
+    6. [Slices](#slices)
+10. [Records](#records)
+    1. [Record access](#record-access)
+11. [Metric prefixes](#metric-prefixes)
+12. [Numeric frequency flavor](#numeric-frequency-flavor)
+13. [S-expressions](#s-expressions)
+14. [Pythagorean notation revisited](#pythagorean-notation-revisited)
+15. [Neutral Pythagorean](#neutral-pythagorean)
+    1. [Semisharps and semiflats](#semisharps-and-semiflats)
+    2. [Mids](#mids)
+    3. [Neutral FJS](#neutral-fjs)
+16. [Up/lift declaration](#uplift-declaration)
+17. [MOS declaration](#mos-declaration)
+    1. [MOS declaration syntax](#mos-declaration-syntax)
+    2. [Diamond-mos notation](#diamond-mos-notation)
+    3. [Auto-MOS](#auto-mos)
+    4. [TAMNAMS relative intervals](#tamnams-relative-intervals)
+        1. [Exceptions for nL ns](#exception-for-nl-ns)
+18. [Next steps](#next-steps)
+    1. [Advanced DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/advanced-dsl.md)
+
 ## Basic operation
 SonicWeave is intended for designing musical scales so a fundamental concept is the current scale (accessible through `$`). It is an ordered array of intervals.
 
@@ -505,7 +583,7 @@ niente al print('This executes as well')
 
 The `al` operator is the same as `??` in JavaScript. It's main use is to provide default values for uninitialized variables. The musical inspiration is to read `foo al bar` as *"foo in the style of bar"*.
 
-#### Array
+#### Array operators
 | Name             | Operator  |
 | ---------------- | --------- |
 | Strict inclusion | `of`      |
@@ -543,15 +621,35 @@ Beware that the product is domain-aware! Most of the time you want all possible 
 ]
 ```
 
-#### Matrix
+#### Matrix operators
 | Name                  | Operator |
 | --------------------- | -------- |
 | Vector dot product    | `vdot`   |
 | Matrix multiplication | `mdot`   |
 
-Vector dot product reduces two arrays into a single interval. The domain ignoring `u ~vdot v` always evaluates to a linear scalar.
+Vector dot product reduces two arrays into a single interval e.g. `[1, 2] vdot [3, 4]` evaluates to `11`. The domain ignoring `u ~vdot v` always evaluates to a linear scalar.
 
 Matrix multiplication performs `vdot` between rows and columns of two arrays of arrays according to the usual mathematical definition.
+```ocaml
+[
+  [1, 2, 3],
+  [4, 5, 6],
+] mdot [
+  [7, 8],
+  [9, 10],
+  [11, 12],
+]
+(** Result **
+ * [
+ *   [58, 64],
+ *   [139, 154],
+ * ]
+ *)
+```
+
+Product between a matrix and a vector can be achieved by broadcasting `vdot` over an array of vectors e.g. `[[1, 2], [3, 4]] vdot [5, 6]` evaluates to `[17, 39]`.
+
+`vdot` commutes which means the broadcasting rules don't agree with mathematical convention if the arguments are swapped. Use `transpose()` on the matrix if you need the product between a vector and matrix.
 
 #### Vectorized logical
 | Name                   | Operator |
@@ -876,7 +974,7 @@ For example the neutral third above `C4` is `Ed4`.
 ### Mids
 Another way to conceptualize *neutralness* is to investigate the diatonic scale. Not counting the octave, it has exactly two sizes per interval class. The midpoint between the narrower and wider sixths `n6` agrees with the concept of centralness w.r.t. diminished and augmented, but the midpoint between the narrow and wide fourths `(P4 + a4) / 2` is lopsided at `sa4`. SonicWeave still accepts it as the neutral fourth `n4` or *mid fourth* from [ups-and-downs](https://en.xen.wiki/w/Ups_and_downs_notation). The midpoint between the narrow and wide fifths `(d5 + P5)/2` or `sd5` has the alias `n5`. The mids are octave complements of each other `n5 == P8 - n4`. There is no mid unison or mid octave.
 
-#### Neutral FJS
+### Neutral FJS
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation originally applied to neutral sounding primes such as 11, 13, 29, 31 etc. In SonicWeave you must be explicit about the comma set you wish to use in order to spell `11/9` as `n3^11n` or `27/22` as `n3_11n`.
 
 The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
@@ -992,7 +1090,7 @@ The accidental `&` (read "am") raises pitch by `L - s` while its opposite `@` (r
 
 The accidental `e` (read "semiam") raises pitch by a half *am* while `a` (read "semiat") corresponingly lowest pitch by a half *at*.
 
-#### Auto-MOS
+### Auto-MOS
 The easiest way to generate Diamond-mos notation for one equave is to call the `automos()` helper.
 ```ocaml
 "Specific mode (Anti-phrygian) of specific hardness of octave-equivalent Antidiatonic"

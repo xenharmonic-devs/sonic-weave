@@ -426,12 +426,19 @@ describe('SonicWeave vector broadcasting', () => {
     expect(x).toBe(23);
   });
 
-  it('has vector dot product (reduction of 1 level)', () => {
+  it('has vector dot product (matrix and vector)', () => {
     const vec = sw1D`[[1, 2], [3, 4]] vdot [5, 6]`;
     expect(vec).toEqual([17, 39]);
+  });
 
+  it('has vector dot product (reduction of 1 level)', () => {
     const vec2 = sw1D`[[1, 2], [3, 4]] vdot [[5, 6], [7, 8]]`;
     expect(vec2).toEqual([17, 53]);
+  });
+
+  it('has matrix dot product (row-vector and matrix)', () => {
+    const vec = sw2D`[[5, 6]] mdot [[1, 2], [3, 4]]`;
+    expect(vec).toEqual([[23, 34]]);
   });
 
   it('has matrix multiplication', () => {

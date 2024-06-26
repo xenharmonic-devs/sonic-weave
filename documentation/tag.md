@@ -1,6 +1,14 @@
 # SonicWeave template tag
 This document describes the `sw` and `swr` tags used for writing SonicWeave inside JavaScript using [tagged template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates).
 
+
+# Table of Contents
+1. [Basic eample](#basic-example)
+2. [Raison d'être](#raison-dêtre)
+3. [The sw tag](#the-sw-tag)
+4. [The swr tag](#the-swr-tag)
+5. [The sw$ and sw$r tags](#the-sw-and-swr-tags)
+
 ## Basic example
 ```ts
 import {sw} from 'sonic-weave';

@@ -108,8 +108,8 @@ Obtain the docstring of the given riff.
 ### entries(*record*)
 Obtain an array of `[key, value]` pairs of the record.
 
-### errorTE(*val*, *weights*)
-Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given.
+### errorTE(*val*, *weights*, *unnormalized = false*)
+Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given. Unnormalized values are slightly faster to compute and are in the linear domain instead of (logarithmic) cents.
 
 ### every(*array = $$*, *test*)
 Tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value. It doesn't modify the array. If no array is provided it defaults to the current scale. If no test is provided it defaults to truthiness.
@@ -241,7 +241,7 @@ Return the label of the interval.
 Obtain the smallest (linear) interval that shares both arguments as multiplicative factors. Applies to the current scale if not arguments are given.
 
 ### length(*scale = $$*)
-Return the number of intervals in the scale.
+Return the number of intervals in the scale, the length of a string or the size of a basis.
 
 ### linear(*interval*)
 Convert interval to linear representation. Formatting information of logarithmic quantities is lost.
@@ -275,6 +275,9 @@ Calculate a subset of equally tempered degrees with maximum variety two per scal
 
 ### nedji(*interval*, *preferredNumerator*, *preferredDenominator*, *preferredEquaveNumerator*, *preferredEquaveDenominator*)
 Convert interval to N-steps-of-Equally-Divided-interval-of-Just-Intonation.
+
+### nextGPV(*val*, *weights*)
+Obtain the next generalized patent val in the sequence.
 
 ### nthPrime(*interval*)
 Obtain the nth odd prime or prime 2 if n = 0.
@@ -413,6 +416,9 @@ Prepend an interval at the beginning of the current/given scale.
 
 ### valFromPrimeArray(*primeExponents*, *basis*)
 Convert an array of prime mapping entries to a val.
+
+### vstr(*value*)
+Obtain a string representation of a primitive value (w/o color or label). Vectorizes over arrays.
 
 ### warn(*...args*)
 Print the arguments to the console with "warning" emphasis.
@@ -700,6 +706,9 @@ Obtain a copy of the popped/given scale with only the given degrees kept. Omitti
 
 ### sum(*terms = $$*)
 Calculate the (linear) sum of the terms or the current scale.
+
+### supportingGPVs(*initialVal*, *commas*, *count = 5*, *weights = niente*, *maxIter = 1000*)
+Obtain generalized patent vals in the same sequence as the initial val that make the given commas vanish.
 
 ### tanh(*x*)
 Calculate the hyperbolic tangent of x.

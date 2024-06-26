@@ -373,9 +373,9 @@ describe('SonicWeave standard library', () => {
 
   it('can combine two vals to approach the JIP (Wilson metric)', () => {
     const eighty = evaluateExpression(
-      'tune2(12@.5, 22@.5, 3, [log(2)/2, log(3)/3, log(5)/5])'
+      'tune2(12@.5, 22@.5, 2, [log(2)/2, log(3)/3, log(5)/5])'
     ) as Val;
-    expect(eighty.value.toIntegerMonzo()).toEqual([80, 127, 186]);
+    expect(eighty.value.toIntegerMonzo()).toEqual([126, 200, 293]);
   });
 
   it('can combine three vals to approach the JIP', () => {
@@ -387,7 +387,7 @@ describe('SonicWeave standard library', () => {
     const val = evaluateExpression(
       'tune4(5@.11, 17@.11, 19@.11, 31@.11)'
     ) as Val;
-    expect(val.value.toIntegerMonzo()).toEqual([72, 114, 167, 202, 249]);
+    expect(val.value.toIntegerMonzo()).toEqual([94, 149, 218, 264, 325]);
   });
 
   // Remember that unison (0.0 c) is implicit in SonicWeave
@@ -1686,5 +1686,38 @@ describe('SonicWeave standard library', () => {
       '35/18',
       '2',
     ]);
+  });
+
+  it('discovers GPVs supporting meantone', () => {
+    const seq = evaluateExpression(
+      'str(warts(supportingGPVs(5@2.3.5, S9, 12)))'
+    );
+    expect(seq).toBe(
+      '[5@2.3.5, 7@2.3.5, 8cc@2.3.5, 9c@2.3.5, 10c@2.3.5, 12@2.3.5, 13ccc@2.3.5, 14c@2.3.5, 15cc@2.3.5, 16cc@2.3.5, 17c@2.3.5, 19@2.3.5]'
+    );
+  });
+
+  it('discovers GPVs supporting lemba', () => {
+    const seq = evaluateExpression(
+      'str(warts(supportingGPVs(1@2.3.5.7, [50/49, 525/512])))'
+    );
+    expect(seq).toBe(
+      '[6b@2.3.5.7, 10@2.3.5.7, 16@2.3.5.7, 20@2.3.5.7, 26@2.3.5.7]'
+    );
+  });
+
+  it("doesn't move from 31p when tuned with 5p", () => {
+    const p31 = evaluateExpression('str(tune2(31@.5, 5@.5))');
+    expect(p31).toBe('<31 49 72]');
+  });
+
+  it('moves from 31p when tuned with 5p if given enough time', () => {
+    const p31 = evaluateExpression('str(tune2(31@.5, 5@.5, 3))');
+    expect(p31).toBe('<191 302 444]');
+  });
+
+  it('tunes close to CTE meantone if given enough time', () => {
+    const scale = expand('cents(3/2 tmpr tune2(5@.5, 7@.5, 7), 4)');
+    expect(scale).toEqual(['697.2143']);
   });
 });

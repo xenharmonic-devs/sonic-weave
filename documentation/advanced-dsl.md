@@ -1,6 +1,64 @@
 # SonicWeave DSL (advanced)
 This document describes programming in the SonicWeave domain-specific language.
 
+# Table of Contents
+1. [Record broadcasting](#record-broadcasting)
+2. [Tiers](#tiers)
+3. [Deleting container contents](#deleting-container-contents)
+4. [Blocks](#blocks)
+    1. [Block expressions](#block-expressions)
+        1. [Block expression return value](#block-expression-return-value)
+    2. [Parent scale](#parent-scale)
+    3. [Popped parent scale](#popped-parent-scale)
+5. [Defer](#defer)
+6. [While](#while)
+7. [For...of](#forof)
+8. [For...in](#forin)
+9. [Break](#break)
+10. [Continue](#continue)
+11. [While..else and for..else](#whileelse-and-forofelse)
+    1. [Array comprehensions](#array-comprehensions)
+        1. [If clause](#if-clause)
+12. [If...else](#ifelse)
+13. [Ternary expressions](#ternary-expressions)
+    1. [Vectorizing where...else](#vectorizing-whereelse)
+14. [Function declaration](#function-declaration)
+    1. [Calling functions](#calling-functions)
+    2. [Stdlib conventions](#stdlib-conventions)
+    3. [Lambda expressions](#lambda-expressions)
+15. [Throwing](#throwing)
+16. [Exception handling](#exception-handling)
+17. [Implicit mapping](#implicit-mapping)
+18. [Stdlib](#stdlib)
+    1. [Constants](#constants)
+    2. [Built-in functions](#built-in-functions)
+    3. [Prelude functions](#prelude-functions)
+    4. [Highlights](#highlights)
+19. [Issues with the decimal separator](#issues-with-the-decimal-separator)
+    1. [Dot cents](#dot-cents)
+    2. [Comma decimals](#comma-decimals)
+    3. [Recommendations](#recommendations)
+20. [Fractional just intonation subgroups](#fractional-just-intonation-subgroups)
+21. [Universal monzos](#universal-monzos)
+22. [The interordinal semioctave](#the-interordinal-semioctave)
+    1. [Interordinal intervals](#interordinal-intervals)
+    2. [Absolute semioctave notation](#absolute-semioctave-notation)
+        1. [Alternative semioctave notation](#alternative-semioctave-notation)
+    3. [Splitting the fourth](#splitting-the-fourth)
+        1. [Nicknames](#nicknames)
+23. [Quarter-augmented Pythagorean notation](#quarter-augmented-pythagorean-notation)
+    1. [Further splits](#further-splits)
+    2. [Extra comma flavors](#extra-comma-flavors)
+    3. [Non-standard pitch declaration](#non-standard-pitch-declaration)
+24. [Implicit intrinsic calls](#implicit-intrinsic-calls)
+25. [Obscure types](#obscure-types)
+26. [Obscure operations](#obscure-operations)
+27. [Future work](#future-work)
+28. [Next steps](#next-steps)
+    1. [Examples](https://github.com/xenharmonic-devs/sonic-weave/tree/main/examples)
+    2. [Technical documentation](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md)
+    3. [Tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md)
+
 ## Record broadcasting
 Records behave like arrays in that operations are broadcast over their values e.g. `#{a: 1, b: 2, c:3} * 5` evaluates to
 ```ocaml
@@ -211,7 +269,7 @@ Once declared, functions can be called: `subharmonics(4, 8)` evaluates to `[8/7,
 
 while `pythagoras(4)` evaluates to `[9/8, 81/64, 3/2, 27/16, 2]`. The missing `down` argument defaulted to `0`.
 
-#### Stblib conventions
+### Stdlib conventions
 You may have noticed that we passed an argument to `sort` in the body of `fn pythagoras`. We could've achieved the same with.
 ```ocaml
 fn pythagoras(up, down = 0) {
@@ -306,7 +364,7 @@ The expression `1,2` for `6/5` is problematic when you consider the rest of the 
 ### Recommendations
 To avoid ambiguity use explicit cents i.e. `100.0c` or explicit scientific notation i.e. `1.2e0` or just `1.2e`.
 
-## Fractional Just Intonation Subgroups
+## Fractional just intonation subgroups
 By default monzos are vectors of prime exponents and vals are maps of primes, but sometimes you may wish to use other rational numbers as the basis.
 
 Let's take a look at [Barbados temperament](https://en.xen.wiki/w/The_Archipelago#Barbados). We can treat `13/5` like a prime alongside `2` and `3` and map it to `7\5`. The syntax is `5@2.3.13/5` or `<5 8 7]@2.3.13/5`. Now `<5 8 7]@2.3.13/5 dot 15/13` evaluates to 1 step, exactly half of the 2 steps that an approximate `4/3` spans, as desired.
@@ -513,117 +571,7 @@ Intrinsic behavior may be evoked explicitly by simply calling a value e.g. `3/2(
 Some expressions like `440Hz` or `440 Hz` appear similar to intrinsic calls and would correspond to `440 × (1 Hz)` but `600.0 Hz` is actually `600.0e × (1 Hz)`.
 It's legal to declare `let Hz = 'whatever'`, but the grammar prevents the `Hz` variable from invoking intrinsic behavior of integer literals from the right.
 
-## Advanced tempering
-While vals are technically powerful enough to describe any pure-octaves tuning to sufficient precision, it can be challenging to discover them from first principles.
-
-### Tempering out a comma
-[Tenney-Euclidean tuning](https://en.xen.wiki/w/Tenney-Euclidean_tuning) is a commonly used scheme for adjusting intervals in such a way that some of them coincide. This can help tame the complexity of pure just intonation. It is desirable to make these tiny adjustments with minimal damage.
-
-To make two intervals such as `9/8` and `10/9` coincide we *temper out* their geometric difference `81/80` using the `TE` helper.
-```ocaml
-(* Generate Pythagorean major scale *)
-rank2(3/2, 5, 1)
-
-(* Temper out the syntonic comma 81/80 *)
-TE(9/8 ÷ 10/9)
-```
-
-Now the `81/64` major thirds sounds more like `5/4` and the major chord resembles `4:5:6`. Compared to just intonation the scale maintains the nice property that there are only two step sizes.
-
-The downside is that the scale is now expressed in terms of real cents and all structural information such as the stack of pure fifths has been lost.
-
-#### Maintaining pure octaves
-TE optimal tunings damage all primes including the octave which is often undesirable.
-
-To destretch the octave after the fact use the stretching operator `~^` alongside the size-comparison operator `~/_`. The expression `2 ~/_ $[-1]` tells you how much wider the octave is compared to the last interval in the scale (the current equave).
-
-```ocaml
-"POTE meantone[7]"
-rank2(3/2, 5, 1)
-TE(81/80)
-
-(* Destretch octaves *)
-£ ~^ (2 ~/_ £[-1])
-```
-
-##### CTE
-[Constrained tunings](https://en.xen.wiki/w/Constrained_tuning) have more finesse when it comes to maintaining the size of important intervals like the octave. While SonicWeave doesn't support CTE exactly, you can get close enough by assigning a large weight to the octave.
-
-```ocaml
-"Near-CTE meantone[7]"
-rank2(3/2, 5, 1)
-(* Temper out the syntonic comma while making octaves 1000 times more important than anything else. *)
-TE(81/80, 1000)
-```
-
-#### Tempering out multiple commas
-Multiple commas can be tempered out by passing in an array to `TE`. Multiple primes can be weighted by passing in an array as the second argument.
-
-```ocaml
-"Unimarv[19] with a focus on near-pure octaves and undecimal harmony"
-
-(* Unimarv[19] 5-limit transversal *)
-25/24
-16/15
-9/8
-75/64
-6/5
-5/4
-32/25
-4/3
-45/32
-64/45
-3/2
-25/16
-8/5
-5/3
-128/75
-16/9
-15/8
-48/25
-2/1
-
-(* Temper out the marvel comma and the keenanisma *)
-TE(
-  [225/224, 385/384],
-  (* Give 1000 times more weight to octaves and 10 times more weight to prime 11. *)
-  [1000, 1, 1, 1, 10],
-)
-```
-
-### Combining multiple vals
-Linear combinations of vals share the same temperament. In the 11-limit unimarv can also be expressed as the 19 & 22 temperament. In SonicWeave we must be explicit about the subgroup `@2.3.5.7.11` or `@.11` for short and pass the vals as arguments to `TE`.
-
-```ocaml
-"Marveldene but using unimarv for no reason"
-
-(* Generate duodene *)
-eulerGenus(675)
-
-(* TE unimarv 19 & 22 *)
-TE([19@.11, 22@.11])
-```
-
-It is strongly advised to use an explicit subgroup when combining vals in `TE`. Depending on the runtime the ambient subgroup might contain tens of primes, most of little interest, only wasting compute and hurting the low prime accuracy of the tuning.
-
-#### Subgroup weights
-Because vals always come with a subgroup basis the weights are associated with it instead of the actual primes when combining vals.
-```ocaml
-"Barbados[5]"
-15/13
-4/3
-3/2
-26/15
-2/1
-(** Importance weights:
- * 2/1: 200%
- * 3/1: 100%
- * 13/5: 300%
- *)
-TE([5@2.3.13/5, 9@2.3.13/5], [2, 1, 3])
-```
-
-### Obscure types
+## Obscure types
 | Type              | Literal    | Meaning                                                    |
 | ----------------- | ---------- | ---------------------------------------------------------- |
 | Infinity          | `inf`      | Linear relative infinity                                   |
@@ -634,7 +582,7 @@ TE([5@2.3.13/5, 9@2.3.13/5], [2, 1, 3])
 | Basis             | `@√2.√3`   | Basis of a fractional just intonation subgroup             |
 | Template argument | `¥0`, `¥1` | Arguments passed to the `sw\`${arg0} ${arg1}\`` tag in JS  |
 
-### Obscure operations
+## Obscure operations
 | Name                      | Linear       | Result   | Logarithmic      | Result     |
 | ------------------------- | ------------ | -------- | ---------------- | ---------- |
 | Harmonic/lens addition    | `3 /+ 5`     | `15/8`   | _N/A_            |            |
@@ -663,4 +611,4 @@ Although the real *raison d'être* is to complete the [Triangle of Power](https:
 The syntax could be extended to cover movement in time i.e. to become a full textual music notation vis-à-vis Xenpaper.
 
 ## Next steps
-Check out the [examples](https://github.com/xenharmonic-devs/sonic-weave/tree/main/examples) and [technical documentation](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md).
+Check out the [examples](https://github.com/xenharmonic-devs/sonic-weave/tree/main/examples) and [technical documentation](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md). Also make sure you've read up on [tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md) to make TE and CTE optimized tunings.

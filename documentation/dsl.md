@@ -1,6 +1,31 @@
 # SonicWeave DSL
 This document describes the SonicWeave domain-specific language for manipulating musical frequencies, ratios and equal temperaments.
 
+# Table of Contents
+1. [Basic example](#basic-example): Ratios
+    1. [Absolute pitch notation](#absolute-pitch-notation)
+    2. [Cents](#cents)
+    3. [Equal temperaments](#equal-temperaments)
+    4. [Relative pitch notation](#relative-pitch-notation)
+2. [Domains](#domains): Linear vs. logarithmic
+    1. [Breaking changes compared to Scale Workshop 2](#breaking-change-compared-to-scale-workshop-2)
+3. [Adding colors to notes](#adding-colors-to-notes)
+4. [Code comments](#code-comments)
+5. [Accidentals](#accidentals)
+    1. [Double accidentals](#double-accidentals)
+6. [Relative Pythagorean notation](#relative-pythagorean-notation)
+    1. [Pythagorean absolute notation](#pythagorean-absolute-notation)
+7. [FJS inflections](#fjs-inflections)
+8. [Enumerated chord](#enumerated-chords)
+    1. [Harmonic segments](#harmonic-segments)
+    2. [Reflected enumerations](#reflected-enumerations)
+9. [Scale title](#scale-title)
+10. [Ups and downs notation](#ups-and-downs-notation)
+    1. [Lifts and drops](#lifts-and-drops)
+11. [Helper functions](#helper-functions)
+12. [Next steps](#next-steps)
+    1. [Intermediate DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/intermediate-dsl.md)
+
 ## Basic example
 
 SonicWeave is related to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor of Scale Workshop 2. It is intended for constructing microtonal scales that repeat at the octave (or some other period).

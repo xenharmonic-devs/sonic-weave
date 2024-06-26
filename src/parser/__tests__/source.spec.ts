@@ -2207,4 +2207,41 @@ describe('SonicWeave parser', () => {
     }`);
     expect(scale).toEqual(['323.28', '646.56', '969.84', '1199.66']);
   });
+
+  it('can label a whole scale with its strings', () => {
+    const scale = expand(`
+      9/8
+      4/3
+      3/2
+      9/5
+      2/1
+      vstr($)
+      12@
+    `);
+    expect(scale).toEqual([
+      '2\\12 "9/8"',
+      '5\\12 "4/3"',
+      '7\\12 "3/2"',
+      '10\\12 "9/5"',
+      '12\\12 "2/1"',
+    ]);
+  });
+
+  it('tempers using 6@3/2.8/7', () => {
+    const scale = expand(`
+      8/7
+      3/2
+      6@3/2.8/7
+    `);
+    expect(scale).toEqual(['2\\6<3/2>', '6\\6<3/2>']);
+  });
+
+  it('tempers using r6q@8/7.3/2', () => {
+    const scale = expand(`
+      8/7
+      3/2
+      r6q@8/7.3/2
+    `);
+    expect(scale).toEqual(['1\\6<3/2>', '6\\6<3/2>']);
+  });
 });
