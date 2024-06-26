@@ -10,7 +10,7 @@ import {
   WartsLiteral,
 } from './expression';
 import {NEGATIVE_ONE, ONE, ZERO} from './utils';
-import {ValBasis} from './interval';
+import {Val, ValBasis} from './interval';
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const SECOND_MONZO = new TimeMonzo(ONE, []);
@@ -174,25 +174,6 @@ function patentVal(divisions: number, subgroup: TimeMonzo[]) {
   return scaledLogs.map(Math.round);
 }
 
-/**
- * Convert an array of components to a val in a subgroup of the given basis.
- * @param val Components of the val.
- * @param basis Basis of the val.
- */
-export function valToTimeMonzo(val: (number | Fraction)[], basis: ValBasis) {
-  // Build the cologarithmic vector adjusting dual basis weights as necessary.
-  let result = new TimeMonzo(ZERO, Array(basis.numberOfComponents).fill(ZERO));
-  for (let i = 0; i < basis.value.length; ++i) {
-    const missingWeight = ONE.sub(basis.value[i].dot(result));
-    result = result.mul(
-      basis.dual[i].pow(
-        missingWeight.mul(val[i]).div(basis.value[i].dot(basis.dual[i]))
-      )
-    ) as TimeMonzo;
-  }
-  return result;
-}
-
 function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
   for (let i = 0; i < subgroup.length; ++i) {
     if (subgroup[i].equals(equave)) {
@@ -203,10 +184,7 @@ function shiftEquave(equave: TimeMonzo, subgroup: TimeMonzo[]) {
   throw new Error('Equave outside subgroup.');
 }
 
-export function wartsToVal(
-  node: WartsLiteral,
-  basis?: ValBasis
-): [TimeMonzo, ValBasis] {
+export function wartsToVal(node: WartsLiteral, basis?: ValBasis): Val {
   let subgroup: TimeMonzo[];
   let nonPrimes: TimeMonzo[];
   if (Array.isArray(node.basis)) {
@@ -253,16 +231,17 @@ export function wartsToVal(
     }
   }
 
+  const node_ = basis ? undefined : node;
   // Commit shifted equave
   basis = new ValBasis(subgroup);
 
-  return [valToTimeMonzo(val, basis), basis];
+  return Val.fromBasisMap(val, basis, node_);
 }
 
 export function sparseOffsetToVal(
   node: SparseOffsetVal,
   basis?: ValBasis
-): [TimeMonzo, ValBasis] {
+): Val {
   let subgroup: TimeMonzo[];
   if (Array.isArray(node.basis)) {
     ({subgroup} = parseValSubgroup(node.basis));
@@ -302,9 +281,10 @@ export function sparseOffsetToVal(
       throw new Error('Tweak outside subgroup.');
     }
   }
+  const node_ = basis ? undefined : node;
   // Commit shifted equave
   basis = new ValBasis(subgroup);
-  return [valToTimeMonzo(val, basis), basis];
+  return Val.fromBasisMap(val, basis, node_);
 }
 
 export function valToWarts(

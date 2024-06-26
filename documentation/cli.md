@@ -1,6 +1,14 @@
 # SonicWeave CLI
 This document describes the command-line interface of the sonic-weave package.
 
+# Table of Contents
+1. [REPL](#repl)
+    1. [Input](#input)
+    2. [Interval calculator](#interval-calculator)
+2. [Conversion to other formats](#conversion-to-other-formats)
+    1. [Scala](#scala)
+    2. [SonicWeave Interchange format](#sonicweave-interchange-format)
+
 ## REPL
 The read-eval-print-loop is engaged by running `npx sonic-weave` if you have the package installed as a dependency or simply `sonic-weave` if installed globally.
 
@@ -77,6 +85,9 @@ P4
 A perfect fourth.
 
 ## Conversion to other formats
+Scales written in SonicWeave can be expanded and converted to other formats.
+
+### Scala
 You can convert a scale written in SonicWeave to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) by passing the filename as an argument to `sonic-weave`.
 ```bash
 $ npx sonic-weave examples/harm8.sw

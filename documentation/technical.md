@@ -1,6 +1,29 @@
 # SonicWeave - Technical overview
 This documentation describes the SonicWeave DSL as it relates to other programming languages.
 
+# Table of Contents
+1. [Purpose](#purpose)
+    1. [Other pitfals](#other-pitfals)
+2. [Type system](#type-system)
+3. [Operator precedence](#operator-precedence)
+4. [Control flow](#control-flow)
+    1. [For..of](#forof)
+    2. [For..in](#forin)
+    3. [While](#while)
+    4. [Break, continue](#break-continue)
+    5. [For/while...else](#forwhileelse)
+5. [Functions](#functions)
+6. [Exceptions](#exceptions)
+7. [Conditional execution](#conditional-execution)
+8. [Deferred execution](#deferred-execution)
+9. [Interval subtypes](#interval-subtypes)
+10. [Domains](#domains)
+11. [Echelons](#echelons)
+12. [Ranges of values](#ranges-of-values)
+13. [List of used characters](#list-of-used-characters)
+14. [Next steps](#next-steps)
+    1. [prelude](https://github.com/xenharmonic-devs/sonic-weave/blob/main/src/stdlib/prelude.ts)
+
 ## Purpose
 SonicWeave is designed for notating microtonal scales as an extension of Scala .scl syntax. Programming is secondary so you'll have to dodge around reserved patterns such as `C4` which look like identifiers but correspond to musical literals.
 

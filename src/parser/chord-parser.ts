@@ -74,9 +74,9 @@ export function parseVals(
       const node = ast.expression;
       let val: TimeMonzo;
       if (node.type === 'WartsLiteral') {
-        [val] = wartsToVal(node);
+        val = wartsToVal(node).value;
       } else if (node.type === 'SparseOffsetVal') {
-        [val] = sparseOffsetToVal(node);
+        val = sparseOffsetToVal(node).value;
       }
       result.push(basis.map(e => val.dot(e).valueOf()));
     }

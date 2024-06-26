@@ -1,6 +1,19 @@
 # SonicWeave npm package
 This document describes the `sonic-weave` npm package.
 
+# Table of Contents
+1. [Type reference](#type-reference)
+2. [Value types](#value-types)
+    1. [Radical values](#radical-values)
+    2. [Real values](#real-values)
+    3. [Full examples](#full-examples)
+3. [Interval type](#interval-type)
+4. [Val basis type](#val-basis-type)
+5. [Val type](#val-type)
+6. [Embedding SonicWeave](#embedding-sonicweave)
+    1. [Parsing](#parsing)
+    2. [Execution](#execution)
+
 ## Type reference
 The auto-generated TypeScript documentation is hosted on the project [Github pages](https://xenharmonic-devs.github.io/sonic-weave/).
 
@@ -89,14 +102,24 @@ The properties of `Interval` are as follows:
 - `.label: string` the label of the interval
 - `.trackingIds: Set<number>` a set of identifiers used to track the order of intervals during e.g. octave reduction and sorting
 
+## Basis type
+Basis of a fractional just intonation subgroup like 2.3.13/5 use the [ValBasis](https://xenharmonic-devs.github.io/sonic-weave/classes/ValBasis.html)
+
+The properties of `ValBasis` are as follows:
+
+- `.value: TimeMonzo[]` the basis elements
+- `.ortho: TimeMonzo[]` the unnormalized Gram-Schmidt basis elements
+- `.dual: TimeMonzo[]` geometric duals of the basis elements
+- `.node: ValBasisLiteral | undefined` a virtual AST node used for string representation
+
 ## Val type
 The cologarithmic domain housing equal temperament mappings uses the [Val](https://xenharmonic-devs.github.io/sonic-weave/classes/Val.html) class.
 
 The properties of `Val` are as follows:
 
-- `.value: TimeMonzo` the mapping entries as `.value.primeExponents`
-- `.equave: TimeMonzo` the equave of the equal temperament
-- `.node: IntervalLiteral | undefined` as virtual AST node used for string representation
+- `.value: TimeMonzo` the mapping entries as `.value.primeExponents` (in standard prime basis)
+- `.basis: ValBasis` the basis of the subgroup this val is a mapping of. `.basis.equave` is the interval of equivalence this val is an equal temperament of.
+- `.node: CoIntervalLiteral | undefined` a virtual AST node used for string representation
 
 ## Embedding SonicWeave
 Scale Workshop 3 embeds the `sonic-weave` package in order to execute source code written in SonicWeave. Here's how to do it in your application.

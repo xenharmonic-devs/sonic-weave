@@ -1439,14 +1439,23 @@ export class ValBasis {
     }
   }
 
+  /**
+   * Number of basis elements / number of dimensions
+   */
   get size() {
     return this.value.length;
   }
 
+  /**
+   * Prime limit of the basis as a 0-based ordinal.
+   */
   get numberOfComponents() {
     return this.value[0].numberOfComponents;
   }
 
+  /**
+   * Basis elements that are not true prime numbers.
+   */
   get nonPrimes(): TimeMonzo[] {
     const result: TimeMonzo[] = [];
     for (const monzo of this.value) {
@@ -1461,6 +1470,11 @@ export class ValBasis {
     return result;
   }
 
+  /**
+   * Perform Lenstra-Lenstra-Lovász basis reduction.
+   * @param weighting Weighting to use when judging basis angles and lengths.
+   * @returns A reduced {@link ValBasis} instance.
+   */
   lll(weighting: 'none' | 'tenney') {
     for (const element of this.value) {
       if (!element.isScalar()) {
@@ -1560,12 +1574,12 @@ export class ValBasis {
   standardFix(map: TuningMap): TuningMap {
     let result = PRIME_CENTS.slice(0, this.numberOfComponents);
     const basis = this.value.map(m => m.toMonzo());
-    const dual = this.dual.map(m => m.toMonzo());
+    const ortho = this.ortho.map(m => m.toMonzo());
     for (let i = 0; i < basis.length; ++i) {
       const cents = dot(basis[i], result);
       result = add(
         result,
-        scale(dual[i], (map[i] - cents) / dot(basis[i], dual[i]))
+        scale(ortho[i], (map[i] - cents) / dot(basis[i], ortho[i]))
       );
     }
     return result;
@@ -1675,13 +1689,46 @@ export class Val {
    * Construct a val from an array of mapping entries representing equal divisions of an equave.
    * @param primeExponentMap Val components.
    * @param basis Basis of the subgroup. Defaults to the primes.
+   * @param node Node in the abstract syntax tree used for string representation.
    * @returns A cologarithmic mapping vector.
    */
-  static fromArray(primeExponentMap: FractionValue[], basis?: ValBasis) {
+  static fromArray(
+    primeExponentMap: FractionValue[],
+    basis?: ValBasis,
+    node?: CoIntervalLiteral
+  ) {
     if (!basis) {
       basis = new ValBasis(primeExponentMap.length);
     }
-    return new Val(TimeMonzo.fromArray(primeExponentMap), basis);
+    return new Val(TimeMonzo.fromArray(primeExponentMap), basis, node);
+  }
+
+  /**
+   * Convert an array of components in a subgroup basis to a val in the standard basis.
+   * @param basisExponentMap Components of the val.
+   * @param basis Basis of the val.
+   * @param node Node in the abstract syntax tree used for string representation.
+   */
+  static fromBasisMap(
+    basisExponentMap: FractionValue[],
+    basis: ValBasis,
+    node?: CoIntervalLiteral
+  ) {
+    let result = new TimeMonzo(
+      ZERO,
+      Array(basis.numberOfComponents).fill(ZERO)
+    );
+    for (let i = 0; i < basis.value.length; ++i) {
+      const mapped = result.dot(basis.value[i]);
+      const diff = mapped.sub(basisExponentMap[i]);
+      result = result.div(
+        basis.ortho[i].pow(diff.div(basis.value[i].dot(basis.ortho[i])))
+      ) as TimeMonzo;
+    }
+    if (!(result instanceof TimeMonzo)) {
+      throw new Error('Val construction failed.');
+    }
+    return new Val(result, basis, node);
   }
 
   /**
@@ -1716,20 +1763,14 @@ export class Val {
   }
 
   /**
-   * A meaningless operation.
-   * @returns A new val obtained by pretending its value represents a logarithmic quantity.
+   * Normalize the leading coefficient to be positive.
+   * @returns A new val with a positive division of its equave.
    */
   abs() {
-    return new Val(this.value.pitchAbs(), this.basis);
-  }
-
-  /**
-   * Throws an error.
-   */
-  pitchAbs(): Val {
-    throw new Error(
-      'Logarithmic extension of the already-cologarithmic domain not implemented.'
-    );
+    if (this.divisions.s < 0) {
+      return new Val(this.value.inverse(), this.basis);
+    }
+    return new Val(this.value.clone(), this.basis);
   }
 
   /**
@@ -1850,20 +1891,66 @@ export class Val {
   }
 
   /**
-   * Compute the weighted squared error against the just intonation point.
+   * Compute the root mean squared error against the just intonation point.
    * @param weights Additional weights to apply on top of Tenney weights.
+   * @param unnormalized Return the unnormalized squared error instead.
    * @returns The TE error.
    */
-  errorTE(weights: number[]) {
+  errorTE(weights: number[], unnormalized = false) {
     const jip = this.basis.value.map(m => m.totalCents());
     const divisions = this.divisions.valueOf();
     if (!divisions) {
-      return Infinity;
+      const map = this.basis.value.map(m => this.value.dot(m).valueOf());
+      if (map.some(Boolean)) {
+        return Infinity;
+      }
+      const result = dotPrecise(weights, weights);
+      if (unnormalized) {
+        return result;
+      }
+      return Math.sqrt(result / this.basis.numberOfComponents) * jip[0];
     }
     const n = jip[0] / this.divisions.valueOf();
     const map = this.basis.value.map(m => this.value.dot(m).valueOf() * n);
     const diff = sub(weights, applyWeights(unapplyWeights(map, jip), weights));
-    return dotPrecise(diff, diff);
+    const result = dotPrecise(diff, diff);
+    if (unnormalized) {
+      return result;
+    }
+    return Math.sqrt(result / this.basis.numberOfComponents) * jip[0];
+  }
+
+  /**
+   * Obtain the next val in the basis' generalized patent val sequence or approach it if this val is off-JIP.
+   * @param weights Additional weights to apply on top of Tenney weights.
+   * @returns The val at unit distance that comes after this one (non-projective metric).
+   */
+  nextGPV(weights: number[]) {
+    const jip = this.basis.value.map(m => m.totalCents());
+    const fmap = this.basis.value.map(m => this.value.dot(m));
+    if (!this.divisions.n) {
+      fmap[0] = fmap[0].add(ONE);
+      return Val.fromBasisMap(fmap, this.basis);
+    }
+    const map = fmap.map(f => f.valueOf());
+    let leastError = Infinity;
+    let idx = -1;
+    for (let i = 0; i < this.basis.size; ++i) {
+      const m = [...map];
+      m[i] += 1;
+      const n = jip[0] / m[0];
+      const diff = sub(
+        weights,
+        applyWeights(unapplyWeights(scale(m, n), jip), weights)
+      );
+      const error = dotPrecise(diff, diff);
+      if (error < leastError) {
+        leastError = error;
+        idx = i;
+      }
+    }
+    fmap[idx] = fmap[idx].add(ONE);
+    return Val.fromBasisMap(fmap, this.basis);
   }
 
   /**

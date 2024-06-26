@@ -336,26 +336,34 @@ riff enumerate(array = $$) {
 riff tune2(a, b, numIter = 1, weights = niente) {
   "Find a combination of two vals that is closer to just intonation.";
 
-  let error = (v => errorTE(v, weights));
+  let error = (v => errorTE(v, weights, true));
   if (isFunction(weights)) {
     error = weights;
   }
 
   numIter = real(numIter) + 1r;
   while (--numIter) {
-    const x = 2 * a - b;
-    const y = a + b;
-    const z = 2 * b - a;
+    const combos = [
+      a,
+      b,
+      a + b,
+      2*a + b,
+      2*b + a,
 
-    [a, b] = sort([a, b, x, y, z], (u, v) => error(u) - error(v));
+      abs (a - b),
+      abs (2*a - b),
+      abs (2*b - a),
+    ];
+
+    [a, b] = sort(combos, (u, v) => error(u) ~- error(v));
   }
-  return a;
+  return abs a;
 }
 
 riff tune3(a, b, c, numIter = 1, weights = niente) {
   "Find a combination of three vals that is closer to just intonation.";
 
-  let error = (v => errorTE(v, weights));
+  let error = (v => errorTE(v, weights, true));
   if (isFunction(weights)) {
     error = weights;
   }
@@ -363,33 +371,39 @@ riff tune3(a, b, c, numIter = 1, weights = niente) {
   numIter = real(numIter) + 1r;
   while (--numIter) {
     const combos = [
+      (* Corners *)
       a,
       b,
       c,
+
+      (* Edge midpoints *)
       a + b,
       a + c,
       b + c,
-      2 * a - b,
-      2 * a - c,
-      2 * b - a,
-      2 * b - c,
-      2 * c - a,
-      2 * c - b,
+
+      (* Midpoint *)
       a + b + c,
-      a + b - c,
-      a + c - b,
-      b + c - a,
+
+      (* Corner extensions *)
+      2 * a + b + c,
+      2 * b + a + c,
+      2 * c + a + b,
+
+      (* Edge extensions *)
+      2 * (a + b) + c,
+      2 * (a + c) + b,
+      2 * (b + c) + a,
     ];
 
-    [a, b, c] = sort(combos, (u, v) => error(u) - error(v));
+    [a, b, c] = sort(combos, (u, v) => error(u) ~- error(v));
   }
-  return a;
+  return abs a;
 }
 
 riff tune4(a, b, c, d, numIter = 1, weights = niente) {
   "Find a combination of four vals that is closer to just intonation.";
 
-  let error = (v => errorTE(v, weights));
+  let error = (v => errorTE(v, weights, true));
   if (isFunction(weights)) {
     error = weights;
   }
@@ -397,11 +411,13 @@ riff tune4(a, b, c, d, numIter = 1, weights = niente) {
   numIter = real(numIter) + 1r;
   while (--numIter) {
     const combos = [
+      (* Corners *)
       a,
       b,
       c,
       d,
 
+      (* Edge midpoints *)
       a + b,
       a + c,
       a + d,
@@ -409,57 +425,59 @@ riff tune4(a, b, c, d, numIter = 1, weights = niente) {
       b + d,
       c + d,
 
-      2 * a - b,
-      2 * a - c,
-      2 * a - d,
-      2 * b - a,
-      2 * b - c,
-      2 * b - d,
-      2 * c - a,
-      2 * c - b,
-      2 * c - d,
-      2 * d - a,
-      2 * d - b,
-      2 * d - c,
-
-      3 * a - b - c,
-      3 * a - b - d,
-      3 * a - c - d,
-      3 * b - a - c,
-      3 * b - a - d,
-      3 * b - c - d,
-      3 * c - a - b,
-      3 * c - a - d,
-      3 * c - b - d,
-      3 * d - a - b,
-      3 * d - a - c,
-      3 * d - b - c,
-
+      (* Face midpoints *)
       a + b + c,
       a + b + d,
       a + c + d,
       b + c + d,
 
-      a + b - c,
-      a + b - d,
-      a + c - b,
-      a + c - d,
-      a + d - b,
-      a + d - c,
-      b + c - a,
-      b + c - d,
-      c + d - a,
-      c + d - b,
-
+      (* Midpoint *)
       a + b + c + d,
-      a - b + c + d,
-      a + b - c + d,
-      a + b + c - d,
+
+      (* Corner extensions *)
+      2 * a + b + c + d,
+      2 * b + a + c + d,
+      2 * c + a + b + d,
+      2 * d + a + b + c,
+
+      (* Edge extensions *)
+      2 * (a + b) + c + d,
+      2 * (a + c) + b + d,
+      2 * (a + d) + b + c,
+      2 * (b + c) + a + b,
+      2 * (b + d) + a + c,
+      2 * (c + d) + a + b,
+
+      (* Face extensions *)
+      2 * (a + b + c) + d,
+      2 * (a + b + d) + c,
+      2 * (a + c + d) + b,
+      2 * (b + c + d) + a,
     ];
 
-    [a, b, c, d] = sort(combos, (u, v) => error(u) - error(v));
+    [a, b, c, d] = sort(combos, (u, v) => error(u) ~- error(v));
   }
-  return a;
+  return abs a;
+}
+
+riff supportingGPVs(initialVal, commas, count = 5, weights = niente, maxIter = 1000) {
+  "Obtain generalized patent vals in the same sequence as the initial val that make the given commas vanish.";
+  if (not isArray(commas)) {
+    commas = [commas];
+  }
+  const result = [];
+  let iter = 0;
+  while (length(result) < count and ++iter <= maxIter) {
+    let valid = true;
+    for (const comma of commas) {
+      if (initialVal dot comma <> 0)
+        break;
+    } else {
+      push(initialVal, result);
+    }
+    initialVal = nextGPV(initialVal);
+  }
+  return result;
 }
 
 riff colorsOf(scale = $$) {

@@ -1716,34 +1716,59 @@ TE.__doc__ =
   'Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.';
 TE.__node__ = builtinNode(TE);
 
+function valWeights(weights: SonicWeaveValue, size: number) {
+  const ws: number[] = [];
+  if (weights instanceof Interval) {
+    ws.push(weights.valueOf());
+  } else if (weights) {
+    if (!Array.isArray(weights)) {
+      throw new Error('Weights must be an array if given.');
+    }
+    ws.push(...weights.map(i => upcastBool(i).valueOf()));
+  }
+  while (ws.length < size) {
+    ws.push(1);
+  }
+  return ws;
+}
+
 // Optimize by pre-calculating stuff that gets re-used during tuning.
 function errorTE(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
-  weights: SonicWeaveValue
+  weights: SonicWeaveValue,
+  unnormalized = false
 ): SonicWeaveValue {
   if (val instanceof Val) {
-    const ws: number[] = [];
-    if (weights instanceof Interval) {
-      ws.push(weights.valueOf());
-    } else if (weights) {
-      if (!Array.isArray(weights)) {
-        throw new Error('Weights must be an array if given.');
-      }
-      ws.push(...weights.map(i => upcastBool(i).valueOf()));
-    }
-    while (ws.length < val.basis.size) {
-      ws.push(1);
-    }
+    const ws = valWeights(weights, val.basis.size);
     this.spendGas(ws.length);
-    return Interval.fromValue(val.errorTE(ws));
+    unnormalized = sonicTruth(unnormalized);
+    if (unnormalized) {
+      return Interval.fromValue(val.errorTE(ws, unnormalized));
+    }
+    return new Interval(TimeReal.fromCents(val.errorTE(ws)), 'logarithmic');
   }
   const e = errorTE.bind(this);
   return unaryBroadcast.bind(this)(val, v => e(v, weights));
 }
 errorTE.__doc__ =
-  'Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given.';
+  'Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given. Unnormalized values are slightly faster to compute and are in the linear domain instead of (logarithmic) cents.';
 errorTE.__node__ = builtinNode(errorTE);
+
+function nextGPV(
+  this: ExpressionVisitor,
+  val: SonicWeaveValue,
+  weights: SonicWeaveValue
+): SonicWeaveValue {
+  if (val instanceof Val) {
+    const ws = valWeights(weights, val.basis.size);
+    return val.nextGPV(ws);
+  }
+  const n = nextGPV.bind(this);
+  return unaryBroadcast.bind(this)(val, v => n(v, weights));
+}
+nextGPV.__doc__ = 'Obtain the next generalized patent val in the sequence.';
+nextGPV.__node__ = builtinNode(nextGPV);
 
 function tenneyHeight(
   this: ExpressionVisitor,
@@ -2557,11 +2582,18 @@ function concat(
 concat.__doc__ = 'Combine two or more arrays/strings.';
 concat.__node__ = builtinNode(concat);
 
-function length(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
+function length(
+  this: ExpressionVisitor,
+  scale?: SonicWeavePrimitive[] | ValBasis
+) {
+  if (scale instanceof ValBasis) {
+    return fromInteger(scale.size);
+  }
   scale ??= this.currentScale;
   return fromInteger(scale.length);
 }
-length.__doc__ = 'Return the number of intervals in the scale.';
+length.__doc__ =
+  'Return the number of intervals in the scale, the length of a string or the size of a basis.';
 length.__node__ = builtinNode(length, PARENT_SCALE);
 
 function map(
@@ -2759,6 +2791,19 @@ function str(this: ExpressionVisitor, value: SonicWeaveValue) {
 str.__doc__ =
   'Obtain a string representation of the value (w/o color or label).';
 str.__node__ = builtinNode(str);
+
+function vstr(
+  this: ExpressionVisitor,
+  value: SonicWeaveValue
+): SonicWeaveValue {
+  if (isArrayOrRecord(value)) {
+    return unaryBroadcast.bind(this)(value, vstr.bind(this));
+  }
+  return pubStr.bind(this)(value);
+}
+vstr.__doc__ =
+  'Obtain a string representation of a primitive value (w/o color or label). Vectorizes over arrays.';
+vstr.__node__ = builtinNode(vstr);
 
 function print(this: ExpressionVisitor, ...args: any[]) {
   const s = repr.bind(this);
@@ -2978,6 +3023,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   PrimeMapping,
   TE,
   errorTE,
+  nextGPV,
   tenneyHeight,
   wilsonHeight,
   respell,
@@ -2994,8 +3040,9 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   det,
   hasConstantStructure: hasConstantStructure_,
   stepString: stepString_,
-  str,
   repr,
+  str,
+  vstr,
   slice,
   zip,
   zipLongest,

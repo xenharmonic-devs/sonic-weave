@@ -66,7 +66,6 @@ import {
   parseSubgroup,
   parseValSubgroup,
   sparseOffsetToVal,
-  valToTimeMonzo,
   wartsToVal,
 } from '../warts';
 import {RootContext} from '../context';
@@ -787,8 +786,7 @@ export class ExpressionVisitor {
           `The identifier ${node.basis.id} does not refer to a basis.`
         );
       }
-      const value = valToTimeMonzo(val, basis);
-      return new Val(value, basis);
+      return Val.fromBasisMap(val, basis);
     } else if (node.basis.length) {
       const {subgroup} = parseValSubgroup(node.basis, val.length);
       if (val.length !== subgroup.length) {
@@ -796,8 +794,7 @@ export class ExpressionVisitor {
       }
       this.spendGas(subgroup.length ** 2);
       const basis = new ValBasis(subgroup);
-      const value = valToTimeMonzo(val, basis);
-      return new Val(value, basis, node);
+      return Val.fromBasisMap(val, basis, node);
     } else {
       const value = new TimeMonzo(ZERO, val as Fraction[]);
       const basis = new ValBasis(val.length);
@@ -822,14 +819,12 @@ export class ExpressionVisitor {
   protected visitWartsLiteral(node: WartsLiteral) {
     if (Array.isArray(node.basis)) {
       this.spendGas((node.basis.length || getNumberOfComponents()) ** 2);
-      const [val, basis] = wartsToVal(node);
-      return new Val(val, basis, node);
+      return wartsToVal(node);
     }
-    const basis_ = this.visit(node.basis);
-    if (basis_ instanceof ValBasis) {
-      this.spendGas(basis_.size ** 2);
-      const [val, basis] = wartsToVal(node, basis_);
-      return new Val(val, basis);
+    const basis = this.visit(node.basis);
+    if (basis instanceof ValBasis) {
+      this.spendGas(basis.size ** 2);
+      return wartsToVal(node, basis);
     }
     throw new Error(
       `The identifier ${node.basis.id} does not refer to a basis.`
@@ -839,14 +834,12 @@ export class ExpressionVisitor {
   protected visitSparseOffsetVal(node: SparseOffsetVal) {
     if (Array.isArray(node.basis)) {
       this.spendGas((node.basis.length || getNumberOfComponents()) ** 2);
-      const [val, basis] = sparseOffsetToVal(node);
-      return new Val(val, basis, node);
+      return sparseOffsetToVal(node);
     }
-    const basis_ = this.visit(node.basis);
-    if (basis_ instanceof ValBasis) {
-      this.spendGas(basis_.size ** 2);
-      const [val, basis] = sparseOffsetToVal(node, basis_);
-      return new Val(val, basis);
+    const basis = this.visit(node.basis);
+    if (basis instanceof ValBasis) {
+      this.spendGas(basis.size ** 2);
+      return sparseOffsetToVal(node, basis);
     }
     throw new Error(
       `The identifier ${node.basis.id} does not refer to a basis.`
@@ -1147,8 +1140,6 @@ export class ExpressionVisitor {
           return operand.inverse();
         case 'abs':
           return operand.abs();
-        case 'labs':
-          return operand.pitchAbs();
         case '√':
           return operand.sqrt();
       }
@@ -1170,6 +1161,8 @@ export class ExpressionVisitor {
         case '\\':
         case 'drop':
           return operand.drop(this.rootContext);
+        case 'labs':
+          return operand.pitchAbs();
       }
       operator satisfies 'not';
       // The runtime shouldn't let you get here.

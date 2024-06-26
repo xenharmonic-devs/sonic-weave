@@ -2,6 +2,14 @@
 
 These inflections always go in the direction of the arrow so `6/5` ~ `m3^5h` instead of `m3_5` as in plain FJS.
 
+# Table of Contents
+1. [Helmholtz-Ellis 2020 + Richie's extension](#helmholtz-ellis-2020--richies-extension)
+2. [Syntonic rastmic subchroma notation](#syntonic-rastmic-subchroma-notation)
+3. [HEWM-53](#hewm-53)
+4. [Semifourth bridges](#semifourth-bridges)
+5. [Tone-splitter bridges](#tone-splitter-bridges)
+6. [Lumi's irrational bridges](#lumis-irrational-bridges)
+
 ## Helmholtz-Ellis 2020 + Richie's extension
 
 Updated 2020 version by Marc Sabat and Thomas Nicholson as defined on [XenWiki](https://en.xen.wiki/w/Helmholtz-Ellis_notation) including [Richie's extension](https://en.xen.wiki/w/Richie%27s_HEJI_extensions).

@@ -492,10 +492,10 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can measure the quality of vals', () => {
     const prettyGood = evaluate('errorTE(12@.5)') as Interval;
-    expect(prettyGood.valueOf()).toBeCloseTo(0, 4);
+    expect(prettyGood.totalCents()).toBeCloseTo(3.476825868549166);
 
     const great = evaluate('errorTE(53@.5)') as Interval;
-    expect(great.valueOf()).toBeCloseTo(0, 6);
+    expect(great.totalCents()).toBeCloseTo(0.35099473056221553);
   });
 
   it('can strip colors and labels to get a plain string representation', () => {
@@ -2667,5 +2667,28 @@ describe('SonicWeave expression evaluator', () => {
   it('has pythonic ternary comparison (greater than)', () => {
     const sure = evaluate('5 >= 5 > 4');
     expect(sure).toBe(true);
+  });
+
+  it('measures the zero val to be quite bad indeed', () => {
+    const error = evaluate('errorTE(0@)') as Interval;
+    expect(error.totalCents()).toBe(1200);
+  });
+
+  it('measures the 1@ val to be fairly bad', () => {
+    const error = evaluate('errorTE(1@)') as Interval;
+    expect(error.totalCents()).toBeCloseTo(145.13);
+  });
+
+  it('generates the GPV sequence for 5-limit', () => {
+    const seq = evaluate(`
+      const result = [1@2.3.5];
+      for (let i of [0..110]) {
+        push(warts(nextGPV(result[-1])), result);
+      }
+      str(result);
+    `) as string;
+    expect(seq.replace(/@2.3.5/g, '')).toBe(
+      '[1, 1c, 2bbccc, 2ccc, 2c, 2, 2b, 3bccc, 3bc, 3c, 3, 3cc, 4bbcc, 4cc, 4, 4c, 4bc, 5bccc, 5bc, 5c, 5, 5cc, 6bbbc, 6bc, 6b, 6, 6cc, 7bbcc, 7cc, 7, 7c, 7bc, 8bccc, 8bc, 8c, 8, 8cc, 9bbc, 9c, 9, 9b, 9bcc, 10bcc, 10cc, 10, 10c, 10ccc, 11bbc, 11c, 11, 11b, 11bcc, 12bbc, 12c, 12, 12cc, 12bcc, 13bcc, 13b, 13, 13c, 13ccc, 14bbc, 14c, 14, 14b, 14bcc, 15bc, 15c, 15, 15cc, 15bbcc, 16cc, 16, 16b, 16bc, 17bcc, 17b, 17, 17c, 17ccc, 17bbccc, 18bc, 18b, 18, 18cc, 19bbcc, 19cc, 19, 19c, 19bc, 20bcc, 20b, 20, 20c, 20ccc, 21bbc, 21c, 21, 21b, 21bcc, 22bcc, 22cc, 22, 22c, 22bbc, 23cc, 23, 23c, 23bc, 23bccc, 24bbc]'
+    );
   });
 });

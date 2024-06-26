@@ -1,5 +1,24 @@
-# SonicWeave - Technical overview
+# SonicWeave Interchange
 This documentation describes the .swi interchange format for transferring microtonal scales between programs
+
+# Table of Contents
+1. [Comments](#comments)
+2. [Empty lines](#empty-lines)
+3. [Strings](#strings)
+4. [CSS colors](#css-colors)
+5. [Scale title](#scale-title)
+6. [Unison frequency](#unison-frequency)
+7. [Intervals](#intervals)
+    1. [Relative intervals](#relative-intervals)
+        1. [23-limit monzos](#23-limit-monzos)
+        2. [Higher primes](#higher-primes)
+        3. [Non-primes](#non-primes)
+        4. [Real values](#real-values)
+    2. [Absolute pitches](#absolute-pitches)
+        1. [Real absolute pitches](#real-absolute-pitches)
+    3. [Edosteps](#edosteps)
+    4. [Not-a-number](#not-a-number)
+8. [Example](#example)
 
 ## Comments
 Comments work as in OCaml. Everything between a pair of `(*` and  `*)` is ignored. Comments can be nested
