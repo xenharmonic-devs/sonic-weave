@@ -80,7 +80,12 @@ import {
 } from './public';
 import {scaleMonzos} from '../diamond-mos';
 import {valToSparseOffset, valToWarts} from '../warts';
-import {TuningMap, combineTuningMaps, vanishCommas} from '../temper';
+import {
+  TuningMap,
+  combineTuningMaps,
+  intCombineTuningMaps,
+  vanishCommas,
+} from '../temper';
 const {version: VERSION} = require('../../package.json');
 
 // === Library ===
@@ -1770,6 +1775,55 @@ function nextGPV(
 nextGPV.__doc__ = 'Obtain the next generalized patent val in the sequence.';
 nextGPV.__node__ = builtinNode(nextGPV);
 
+function tune(
+  this: ExpressionVisitor,
+  vals: SonicWeaveValue,
+  searchRadius: SonicWeaveValue,
+  weights: SonicWeaveValue
+) {
+  if (!Array.isArray(vals)) {
+    throw new Error('An array of vals is required.');
+  }
+  if (!vals.length) {
+    throw new Error('At least one val is required.');
+  }
+  for (const val of vals) {
+    if (!(val instanceof Val)) {
+      throw new Error('An array of vals is required.');
+    }
+  }
+  const vs = vals as Val[];
+  const basis = vs[0].basis;
+  for (const val of vs.slice(1)) {
+    if (!val.basis.equals(basis)) {
+      throw new Error('Vals bases must agree in tuning.');
+    }
+  }
+  const radius =
+    searchRadius === undefined ? 1 : upcastBool(searchRadius).toInteger();
+  this.spendGas((2 * radius + 1) ** vals.length);
+  const jip = basis.value.map(m => m.totalCents());
+  const ws = valWeights(weights, basis.size);
+  const wvals = vs.map(val =>
+    applyWeights(
+      unapplyWeights(
+        basis.value.map(m => m.dot(val.value).valueOf()),
+        jip
+      ),
+      ws
+    )
+  );
+  const coeffs = intCombineTuningMaps(ws, wvals, radius);
+  let result = vs[0].mul(fromInteger(coeffs[0]));
+  for (let i = 1; i < coeffs.length; ++i) {
+    result = result.add(vs[i].mul(fromInteger(coeffs[i])));
+  }
+  return result.abs();
+}
+tune.__doc__ =
+  'Attempt to combine the given vals into a more Tenney-Euclid optimal val. Weights are applied multiplicatively on top of Tenney weights of the subgroup basis.';
+tune.__node__ = builtinNode(tune);
+
 function tenneyHeight(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -3080,6 +3134,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   TE,
   errorTE,
   nextGPV,
+  tune,
   tenneyHeight,
   wilsonHeight,
   respell,

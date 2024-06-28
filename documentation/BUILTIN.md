@@ -411,6 +411,9 @@ Transpose a matrix. For modal transposition see rotate().
 ### trunc(*interval*)
 Truncate value towards zero to the nearest integer.
 
+### tune(*vals*, *searchRadius*, *weights*)
+Attempt to combine the given vals into a more Tenney-Euclid optimal val. Weights are applied multiplicatively on top of Tenney weights of the subgroup basis.
+
 ### unshift(*interval*, *scale = $$*)
 Prepend an interval at the beginning of the current/given scale.
 
@@ -727,15 +730,6 @@ Obtain a copy of the current/given scale quantized to subharmonics of the given 
 
 ### trap(*message*)
 Produce a function that fails with the given message when called.
-
-### tune2(*a*, *b*, *numIter = 1*, *weights = niente*)
-Find a combination of two vals that is closer to just intonation.
-
-### tune3(*a*, *b*, *c*, *numIter = 1*, *weights = niente*)
-Find a combination of three vals that is closer to just intonation.
-
-### tune4(*a*, *b*, *c*, *d*, *numIter = 1*, *weights = niente*)
-Find a combination of four vals that is closer to just intonation.
 
 ### u(*scale = ££*)
 Obtain a undertonal reflection of the popped/given overtonal scale.

@@ -2703,4 +2703,41 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(fraction).toBe('11/9');
   });
+
+  it('can combine two vals to approach the JIP', () => {
+    const thirtyOne = evaluate('tune([12@.5, 19@.5])') as Val;
+    expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
+  });
+
+  it('can combine two vals to approach the JIP (Wilson metric)', () => {
+    const eighty = evaluate(
+      'tune([12@.5, 22@.5], 5, [1 % 2, 3 /_ 2 % 3, 5 /_ 2 % 5])'
+    ) as Val;
+    expect(eighty.value.toIntegerMonzo()).toEqual([126, 200, 293]);
+  });
+
+  it('can combine three vals to approach the JIP', () => {
+    const fourtyOne = evaluate('tune([5@.7, 17@.7, 19@.7])') as Val;
+    expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
+  });
+
+  it('can combine four vals to approach the JIP', () => {
+    const val = evaluate('tune([5@.11, 17@.11, 19@.11, 31@.11])') as Val;
+    expect(val.value.toIntegerMonzo()).toEqual([72, 114, 167, 202, 249]);
+  });
+
+  it("doesn't move from 31p when tuned with 5p", () => {
+    const p31 = evaluate('str(tune([31@.5, 5@.5]))');
+    expect(p31).toBe('<31 49 72]');
+  });
+
+  it('moves from 31p when tuned with 5p if given a large enough radius', () => {
+    const p31 = evaluateExpression('str(tune([31@.5, 5@.5], 6))');
+    expect(p31).toBe('<191 302 444]');
+  });
+
+  it('tunes close to CTE meantone if given a large enough radius', () => {
+    const cents = evaluate('str(cents(3/2 tmpr tune([5@.5, 7@.5], 200), 4))');
+    expect(cents).toEqual('697.2143');
+  });
 });
