@@ -267,11 +267,10 @@ const S = @2.7.11
 ### errorTE
 In order to compare the quality of vals w.r.t. just intonation SonicWeave provides the `errorTE` helper that measures [RMS TE error](https://en.xen.wiki/w/Tenney-Euclidean_temperament_measures#TE_error) in cents. Providing explicit subgroups is highly recommended so that irrelevant higher primes do not interfere with the measure.
 
-### tune2
-The helper `tune2` takes two vals and tries to find a combination that's closer to just intonation, effectively performing constrained Tenney-Euclidean optimization (CTE). E.g. `tune2(12@.5, 19@.5)` finds 31p. Given more iterations `tune2(5@.5, 7@.5, 7)` finds an equal temperament in the thousands that's virtually indistinguishable from the true meantone CTE tuning.
+### tune
+The helper `tune` takes an array of vals and tries to find a combination that's closer to just intonation, effectively performing constrained Tenney-Euclidean optimization (CTE). E.g. `tune([12@.5, 19@.5])` finds 31p. Given a large search radius `tune2(5@.5, 7@.5, 200)` finds an equal temperament in the thousands that's virtually indistinguishable from the true meantone CTE tuning.
 
-### tune3 and tune4
-The helpers `tune3` and `tune4` do the same but try combinations of 3 or 4 vals instead. Assuming the vals are linearly independent the process corresponds to rank-3 and rank-4 CTE optimization.
+With more than two linearly independent vals the process corresponds to higher rank CTE optimization.
 
 ### Discovering vals
 Every just intonation subgroup has a generalized patent val sequence that dances around approximations to the just intonation point i.e. the perfectly pure tuning.

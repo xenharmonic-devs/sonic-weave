@@ -6,7 +6,7 @@ import {
   getSourceVisitor,
   parseAST,
 } from '../../parser';
-import {Interval, Val} from '../../interval';
+import {Interval} from '../../interval';
 import {builtinNode, track} from '../../stdlib';
 import {Fraction} from 'xen-dev-utils';
 
@@ -364,30 +364,6 @@ describe('SonicWeave standard library', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe(
       '2001\\20750;14007\\83000;22011\\83000;106053\\332000;138069\\332000;162081\\332000;194097\\332000;226113\\332000;122061\\166000;282141\\332000;6003\\6640;2001\\2000'
     );
-  });
-
-  it('can combine two vals to approach the JIP', () => {
-    const thirtyOne = evaluateExpression('tune2(12@.5, 19@.5)') as Val;
-    expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
-  });
-
-  it('can combine two vals to approach the JIP (Wilson metric)', () => {
-    const eighty = evaluateExpression(
-      'tune2(12@.5, 22@.5, 2, [log(2)/2, log(3)/3, log(5)/5])'
-    ) as Val;
-    expect(eighty.value.toIntegerMonzo()).toEqual([126, 200, 293]);
-  });
-
-  it('can combine three vals to approach the JIP', () => {
-    const fourtyOne = evaluateExpression('tune3(5@.7, 17@.7, 19@.7)') as Val;
-    expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
-  });
-
-  it('can combine four vals to approach the JIP', () => {
-    const val = evaluateExpression(
-      'tune4(5@.11, 17@.11, 19@.11, 31@.11)'
-    ) as Val;
-    expect(val.value.toIntegerMonzo()).toEqual([94, 149, 218, 264, 325]);
   });
 
   // Remember that unison (0.0 c) is implicit in SonicWeave
@@ -1704,20 +1680,5 @@ describe('SonicWeave standard library', () => {
     expect(seq).toBe(
       '[6b@2.3.5.7, 10@2.3.5.7, 16@2.3.5.7, 20@2.3.5.7, 26@2.3.5.7]'
     );
-  });
-
-  it("doesn't move from 31p when tuned with 5p", () => {
-    const p31 = evaluateExpression('str(tune2(31@.5, 5@.5))');
-    expect(p31).toBe('<31 49 72]');
-  });
-
-  it('moves from 31p when tuned with 5p if given enough time', () => {
-    const p31 = evaluateExpression('str(tune2(31@.5, 5@.5, 3))');
-    expect(p31).toBe('<191 302 444]');
-  });
-
-  it('tunes close to CTE meantone if given enough time', () => {
-    const scale = expand('cents(3/2 tmpr tune2(5@.5, 7@.5, 7), 4)');
-    expect(scale).toEqual(['697.2143']);
   });
 });
