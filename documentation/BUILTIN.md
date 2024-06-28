@@ -330,8 +330,8 @@ Map a riff over the given/current scale replacing the contents.
 ### repr(*value*)
 Obtain a string representation of the value (with color and label).
 
-### respell(*commaBasis*)
-Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. (Creates a respelling function.)
+### respell(*commaBasis*, *searchRadius*)
+Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. Search radius (default 1) is an integer for discovering harder-to-find simplifications. (Creates a respelling function.)
 
 ### reverse(*scale = ££*)
 Obtain a copy of the popped/given scale in reversed order.

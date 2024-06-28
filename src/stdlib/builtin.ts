@@ -45,7 +45,7 @@ import {
   fractionToVectorComponent,
   integerToVectorComponent,
 } from '../expression';
-import {TWO, ZERO} from '../utils';
+import {ONE, TWO, ZERO} from '../utils';
 import {stepString, stepSignature as wordsStepSignature} from '../words';
 import {hasConstantStructure} from '../tools';
 import {
@@ -1806,28 +1806,74 @@ function _repspell(
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     const tenney = pubTenney.bind(this);
     let result = upcastBool(interval);
-    let height = tenney(result);
-    let improved = true;
-    while (improved) {
-      improved = false;
+    let exponent = ONE;
+    if (!result.value.isFractional()) {
+      if (result.value instanceof TimeReal) {
+        return result;
+      }
+      try {
+        const et = result.value.toEqualTemperament();
+        result = new Interval(
+          TimeMonzo.fromFraction(et.equave),
+          result.domain,
+          result.steps,
+          undefined,
+          result
+        );
+        exponent = et.fractionOfEquave;
+      } catch {
+        /* empty */
+      }
+    }
+    let height = tenney(result).valueOf();
+    let improvement: Interval | undefined = result;
+    while (improvement) {
+      result = improvement;
+      improvement = undefined;
       for (const comma of commas) {
         this.spendGas();
-        const candidate = new Interval(result.value.mul(comma), result.domain);
-        const candidateHeight = tenney(candidate);
-        if (candidateHeight.compare(height) < 0) {
-          improved = true;
-          result = candidate;
+        const candidate = new Interval(
+          result.value.mul(comma),
+          result.domain,
+          result.steps,
+          undefined,
+          result
+        );
+        let candidateHeight = tenney(candidate).valueOf();
+        if (
+          !exponent.isUnity() &&
+          candidate.value.pow(exponent).isFractional()
+        ) {
+          // Favor elimination of radicals
+          // The bonus is much larger in size than Math.log(Number.MAX_VALUE)
+          candidateHeight -= 10000;
+        }
+        if (candidateHeight < height) {
+          improvement = candidate;
           height = candidateHeight;
         }
       }
     }
-    return result;
+    if (exponent.isUnity()) {
+      return result;
+    }
+    return new Interval(
+      result.value.pow(exponent),
+      result.domain,
+      result.steps,
+      undefined,
+      result
+    );
   }
   const r = _repspell.bind(this);
   return unaryBroadcast.bind(this)(interval, i => r(i, commas));
 }
 
-function respell(this: ExpressionVisitor, commaBasis: SonicWeaveValue) {
+function respell(
+  this: ExpressionVisitor,
+  commaBasis: SonicWeaveValue,
+  searchRadius: SonicWeaveValue
+) {
   if (commaBasis instanceof Interval) {
     commaBasis = [commaBasis];
   }
@@ -1844,13 +1890,23 @@ function respell(this: ExpressionVisitor, commaBasis: SonicWeaveValue) {
   for (const comma of commaBasis.value) {
     commas.push(comma.inverse());
   }
+  if (searchRadius !== undefined) {
+    const radius = upcastBool(searchRadius).toInteger();
+    const cs = [...commas];
+    for (let k = 2; k <= radius; ++k) {
+      for (const combo of xduKCombinations(cs, k)) {
+        const comma = combo.reduce((a, b) => a.mul(b) as TimeMonzo);
+        commas.push(comma);
+      }
+    }
+  }
   const mapper = (i: SonicWeaveValue) => r(i, commas);
   mapper.__doc__ = 'Respeller';
   mapper.__node__ = builtinNode(mapper);
   return mapper;
 }
 respell.__doc__ =
-  'Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. (Creates a respelling function.)';
+  'Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. Search radius (default 1) is an integer for discovering harder-to-find simplifications. (Creates a respelling function.)';
 respell.__node__ = builtinNode(respell);
 
 function gcd(

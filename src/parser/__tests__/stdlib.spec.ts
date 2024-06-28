@@ -1660,12 +1660,12 @@ describe('SonicWeave standard library', () => {
 
   it('Unimarvs double duodene', () => {
     const scale = expand(
-      'eulerGenus(675*7, 9);respell([225/224, 385/384]);organize()'
+      'eulerGenus(675*7, 9);respell([225/224, 385/384], 2);organize()'
     );
     expect(scale).toEqual([
       '45/44',
       '25/24',
-      '35/32',
+      '12/11',
       '10/9',
       '7/6',
       '40/33',
@@ -1674,7 +1674,7 @@ describe('SonicWeave standard library', () => {
       '4/3',
       '15/11',
       '25/18',
-      '35/24',
+      '16/11',
       '3/2',
       '14/9',
       '18/11',

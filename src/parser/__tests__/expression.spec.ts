@@ -2691,4 +2691,16 @@ describe('SonicWeave expression evaluator', () => {
       '[1, 1c, 2bbccc, 2ccc, 2c, 2, 2b, 3bccc, 3bc, 3c, 3, 3cc, 4bbcc, 4cc, 4, 4c, 4bc, 5bccc, 5bc, 5c, 5, 5cc, 6bbbc, 6bc, 6b, 6, 6cc, 7bbcc, 7cc, 7, 7c, 7bc, 8bccc, 8bc, 8c, 8, 8cc, 9bbc, 9c, 9, 9b, 9bcc, 10bcc, 10cc, 10, 10c, 10ccc, 11bbc, 11c, 11, 11b, 11bcc, 12bbc, 12c, 12, 12cc, 12bcc, 13bcc, 13b, 13, 13c, 13ccc, 14bbc, 14c, 14, 14b, 14bcc, 15bc, 15c, 15, 15cc, 15bbcc, 16cc, 16, 16b, 16bc, 17bcc, 17b, 17, 17c, 17ccc, 17bbccc, 18bc, 18b, 18, 18cc, 19bbcc, 19cc, 19, 19c, 19bc, 20bcc, 20b, 20, 20c, 20ccc, 21bbc, 21c, 21, 21b, 21bcc, 22bcc, 22cc, 22, 22c, 22bbc, 23cc, 23, 23c, 23bc, 23bccc, 24bbc]'
     );
   });
+
+  it('can respell square roots away (single comma)', () => {
+    const {fraction} = parseSingle('respell(2048/2025)(2 /^ 2)');
+    expect(fraction).toBe('45/32');
+  });
+
+  it('can respell square roots away (multiple commas)', () => {
+    const {fraction} = parseSingle(
+      'respell([64/63, 78/77, 144/143], 3)(3/2 /^ 2)'
+    );
+    expect(fraction).toBe('11/9');
+  });
 });

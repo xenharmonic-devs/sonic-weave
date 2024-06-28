@@ -196,6 +196,8 @@ which gives us something more manageable:
 ```
 which we could temper by tagging a `72@` at the end.
 
+Sometimes the simplest spelling is hard to find. You can increase the search radius by passing an integer larger than `1` as the second argument to `respell`.
+
 ## Vals in detail
 If you look inside a val such as `12@` by doing `print(simplify(12@))` or `warn(simplify(12@))` inside Scale Workshop, you get `<12 19 28 34 42 44 49 51 54]` or
 ```ocaml
