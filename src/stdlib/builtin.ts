@@ -233,7 +233,7 @@ function lll(
   if (!(basis instanceof ValBasis)) {
     throw new Error('A basis is required.');
   }
-  this.spendGas(basis.numberOfComponents * basis.size ** 5);
+  this.spendGas(0.3 * basis.numberOfComponents * basis.size ** 2);
   return basis.lll(weighting);
 }
 lll.__doc__ = 'Perform Lensta-Lenstra-Lovász basis reduction.';
@@ -1746,7 +1746,7 @@ function errorTE(
 ): SonicWeaveValue {
   if (val instanceof Val) {
     const ws = valWeights(weights, val.basis.size);
-    this.spendGas(ws.length);
+    this.spendGas(5 * ws.length);
     unnormalized = sonicTruth(unnormalized);
     if (unnormalized) {
       return Interval.fromValue(val.errorTE(ws, unnormalized));
@@ -1801,7 +1801,9 @@ function tune(
   }
   const radius =
     searchRadius === undefined ? 1 : upcastBool(searchRadius).toInteger();
-  this.spendGas((2 * radius + 1) ** vals.length);
+  this.spendGas(
+    0.25 * basis.numberOfComponents * (2 * radius + 1) ** vals.length
+  );
   const jip = basis.value.map(m => m.totalCents());
   const ws = valWeights(weights, basis.size);
   const wvals = vs.map(val =>
@@ -1937,7 +1939,7 @@ function respell(
   if (!(commaBasis instanceof ValBasis)) {
     throw new Error('A basis is required.');
   }
-  this.spendGas(commaBasis.numberOfComponents * commaBasis.size ** 5);
+  this.spendGas(0.3 * commaBasis.numberOfComponents * commaBasis.size ** 2);
   commaBasis = commaBasis.lll('tenney');
   const r = _repspell.bind(this);
   const commas = [...commaBasis.value];

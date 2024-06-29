@@ -1,4 +1,4 @@
-import {Interval, Color, Val} from '../interval';
+import {Interval, Color, Val, ValBasis} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {
   SonicWeaveValue,
@@ -1036,6 +1036,8 @@ export class StatementVisitor {
       this.rootContext.title = value;
     } else if (typeof value === 'boolean') {
       scale.push(upcastBool(value));
+    } else if (value instanceof ValBasis) {
+      throw new Error('Bases have no action associated with them.');
     } else if (typeof value === 'object') {
       const entries = Object.entries(value);
       for (const [key, subValue] of entries) {
