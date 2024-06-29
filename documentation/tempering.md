@@ -15,7 +15,7 @@ This document describes the art and science of tempering from the perspective of
     3. [Sparse offset vals](#sparse-offset-vals)
     4. [Named basis](#named-basis)
     5. [errorTE](#errorte)
-    6. [tune2](#tune2)
+    6. [tune](#tune)
     7. [tune3 and tune4](#tune3-and-tune4)
     8. [Discovering vals](#discovering-vals)
 3. [Advanced tempering](#advanced-tempering)
@@ -196,7 +196,7 @@ which gives us something more manageable:
 ```
 which we could temper by tagging a `72@` at the end.
 
-Sometimes the simplest spelling is hard to find. You can increase the search radius by passing an integer larger than `1` as the second argument to `respell`.
+Sometimes the simplest spelling is hard to find. You can increase the search radius by passing an integer larger than `1` as the second argument to `respell`. E.g. above `60/49` could be further simplified to `49/40` by using `respell([225/224, 1029/1024], 2)`.
 
 ## Vals in detail
 If you look inside a val such as `12@` by doing `print(simplify(12@))` or `warn(simplify(12@))` inside Scale Workshop, you get `<12 19 28 34 42 44 49 51 54]` or
@@ -243,7 +243,7 @@ The first basis element defines the equave of the equal temperament. E.g. the ma
 If the basis contains non-primes they're referred using letters from `q` onwards in order of appearance e.g. the second-most accurate mapping for 8/7 in 6 equal divisions of 3/2 is notated `r6q@8/7.3/2`.
 
 ### Sparse offset vals
-Warts are relatively easy for a computer to calculate, but put a cognitive load on a human who needs to remember which way the primes are tuned to figure out if the wart points in the wider or narrower direction.
+Warts are relatively easy for a computer to calculate, but introduce a cognitive load when you need remember which way the primes are tuned to figure out if the wart points in the wider or narrower direction.
 
 [SOV shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notation) makes the direction and the affected prime explicit. `SOV(17c@)` is `17[^5]@` making it clear that the mapping for prime 5 is made wider. (Conversely `v` indicates a narrower mapping.)
 
@@ -268,7 +268,7 @@ const S = @2.7.11
 In order to compare the quality of vals w.r.t. just intonation SonicWeave provides the `errorTE` helper that measures [RMS TE error](https://en.xen.wiki/w/Tenney-Euclidean_temperament_measures#TE_error) in cents. Providing explicit subgroups is highly recommended so that irrelevant higher primes do not interfere with the measure.
 
 ### tune
-The helper `tune` takes an array of vals and tries to find a combination that's closer to just intonation, effectively performing constrained Tenney-Euclidean optimization (CTE). E.g. `tune([12@.5, 19@.5])` finds 31p. Given a large search radius `tune2(5@.5, 7@.5, 200)` finds an equal temperament in the thousands that's virtually indistinguishable from the true meantone CTE tuning.
+The helper `tune` takes an array of vals and tries to find a combination that's closer to just intonation, effectively performing constrained Tenney-Euclidean optimization (CTE). E.g. `tune([12@.5, 19@.5])` finds 31p. Given a large search radius `tune([5@.5, 7@.5], 200)` finds an equal temperament in the thousands that's virtually indistinguishable from the true meantone CTE tuning.
 
 With more than two linearly independent vals the process corresponds to higher rank CTE optimization.
 
