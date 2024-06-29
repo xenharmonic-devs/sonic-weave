@@ -2244,4 +2244,14 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toEqual(['1\\6<3/2>', '6\\6<3/2>']);
   });
+
+  it('spells a spiral segment of minor seconds cleanly', () => {
+    const scale = expand('C4 + m2 * [1..5]');
+    expect(scale).toEqual(['D♭4', 'E𝄫4', 'F𝄫4', 'G♭𝄫4', 'A𝄫𝄫4']);
+  });
+
+  it('spells stacked augmented unisons cleanly', () => {
+    const scale = expand('C4 + Aug1 * [1..4]');
+    expect(scale).toEqual(['C♯4', 'C𝄪4', 'C♯𝄪4', 'C𝄪𝄪4']);
+  });
 });

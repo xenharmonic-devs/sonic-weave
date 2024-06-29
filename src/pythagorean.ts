@@ -583,14 +583,11 @@ const SEMIOCTAVE_NOMINALS: Nominal[] = ['η', 'α', 'β', 'γ', 'δ', 'ε', 'ζ'
 
 const ACCIDENTAL_BY_OFFSET = new Map<string, SplitAccidental>();
 const BASE_OFFSETS: [Fraction, Accidental][] = [];
-for (const accidental of ['♮', '♯', '♭', '𝄪', '𝄫', '‡', 'd'] as Accidental[]) {
+for (const accidental of ['♯', '♭', '‡', 'd'] as Accidental[]) {
   const [_, threes] = ACCIDENTAL_VECTORS.get(accidental)!;
   const offset = new Fraction(threes).div(SEVEN);
   ACCIDENTAL_BY_OFFSET.set(offset.toFraction(), {fraction: '', accidental});
-  // No need to split doubled accidentals.
-  if (accidental !== '𝄪' && accidental !== '𝄫') {
-    BASE_OFFSETS.push([offset, accidental]);
-  }
+  BASE_OFFSETS.push([offset, accidental]);
 }
 
 for (const [offset, accidental] of BASE_OFFSETS) {
@@ -632,11 +629,11 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   }
 
   const accidentals: SplitAccidental[] = [];
-  while (offCenter.compare(NEGATIVE_TWO) < 0) {
+  while (offCenter.compare(NEGATIVE_TWO) <= 0) {
     accidentals.push({fraction: '', accidental: '𝄫'});
     offCenter = offCenter.add(TWO);
   }
-  while (offCenter.compare(TWO) > 0) {
+  while (offCenter.compare(TWO) >= 0) {
     accidentals.push({fraction: '', accidental: '𝄪'});
     offCenter = offCenter.sub(TWO);
   }
@@ -648,12 +645,16 @@ export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
     offCenter = offCenter.sub(ONE);
   }
 
-  const key = offCenter.toFraction();
-  if (!ACCIDENTAL_BY_OFFSET.has(key)) {
-    // All that work for nothing...
-    return undefined;
+  if (offCenter.n) {
+    const key = offCenter.toFraction();
+    if (!ACCIDENTAL_BY_OFFSET.has(key)) {
+      // All that work for nothing...
+      return undefined;
+    }
+    accidentals.unshift(ACCIDENTAL_BY_OFFSET.get(key)!);
+  } else if (!accidentals.length) {
+    accidentals.unshift({fraction: '', accidental: '♮'});
   }
-  accidentals.unshift(ACCIDENTAL_BY_OFFSET.get(key)!);
 
   return {
     type: 'AbsolutePitch',
