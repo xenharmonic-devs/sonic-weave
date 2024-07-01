@@ -2151,7 +2151,7 @@ describe('SonicWeave parser', () => {
       5/3
       15/8
       2
-      TE([12@, 19@])
+      Temperament([12@, 19@])
       cents(£, 3)
     `);
     expect(scale).toEqual([
@@ -2167,16 +2167,16 @@ describe('SonicWeave parser', () => {
 
   it('tempers barbados to near-CTE', () => {
     const scale = expand(
-      'sort(15/13^[-2..2] rdc 2);TE([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)'
+      'sort(15/13^[-2..2] rdc 2);Temperament([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)'
     );
-    expect(scale).toEqual(['248.7', '497.4', '702.596', '951.296', '1199.996']);
+    expect(scale).toEqual(['248.965', '497.93', '702.07', '951.035', '1200.']);
   });
 
   it('generates TE marveldene', () => {
     const scale = expand(`
       3^[0..3] tns 5^[0..2]
       sort(£ rdc 2)
-      TE([225/224])
+      commaList(225/224)
       cents(£, 3)
     `);
     expect(scale).toEqual([
@@ -2202,7 +2202,7 @@ describe('SonicWeave parser', () => {
       7/4
       2/1
       const S = @2.7.11
-      TE([11@S, 26@S])
+      Temperament([11@S, 26@S])
       cents(£, 3)
     }`);
     expect(scale).toEqual(['323.28', '646.56', '969.84', '1199.66']);

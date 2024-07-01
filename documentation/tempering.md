@@ -19,12 +19,18 @@ This document describes the art and science of tempering from the perspective of
     7. [tune3 and tune4](#tune3-and-tune4)
     8. [Discovering vals](#discovering-vals)
 3. [Advanced tempering](#advanced-tempering)
-    1. [Tempering out a comma](#tempering-out-a-comma)
-    2. [Maintaining pure octaves](#maintaining-pure-octaves)
-    3. [CTE](#cte)
-    4. [Tempering out multiple commas](#tempering-out-multiple-commas)
-    5. [Combining multiple cvals](#combining-multiple-vals)
-    6. [Subgroup weights](#subgroup-weights)
+    1. [Higher rank temperaments](#higher-rank-temperaments)
+    2. [Tempering out a comma](#tempering-out-a-comma)
+    3. [Maintaining pure octaves](#maintaining-pure-octaves)
+    4. [CTE](#cte)
+    5. [Explicit prime limit](#explicit-prime-limit)
+    6. [Tempering out multiple commas](#tempering-out-multiple-commas)
+    7. [Combining multiple cvals](#combining-multiple-vals)
+    8. [Subgroup weights](#subgroup-weights)
+    9. [Mapping generators](#mapping-generators)
+    10. [Tempered generators](#tempered-generators)
+    11. [Respelling using temperaments](#respelling-using-temperaments)
+    12. [Testing temperament equality](#testing-temperament-equality)
 1. [Technical details](#technical-details)
     1. [Prime count vectors](#prime-count-vectors)
         1. [Monzo dot product](#monzo-dot-product)
@@ -284,6 +290,36 @@ Multiple commas may be given in an array e.g. `supportingGPVs(19@.7, [225/224, 2
 ## Advanced tempering
 Vals are technically powerful enough to describe any pure-octaves tuning to sufficient precision, but it's nice to have a tuning scheme that can stretch octaves too in order to get even closer to just intonation while still supporting a given temperament.
 
+### Higher rank temperaments
+The `Temperament` type combines of multiple vals into a specific optimal tuning. The syntax is:
+```ocaml
+Temperament(
+  [
+    valA,
+    valB,
+    valC,
+  ] @subgroupBasis,
+  subgroupWeights,
+  pureOctavesFlag
+)
+```
+where the weights and the boolean flag for normalizing octaves are optional. The resulting temperament only retains features shared by all of the equal temperaments passed in, giving it more wiggle room to be tuned closer to just intonation.
+
+We can also approach tempering from the other direction by doing progressive damage to the pure tuning by equating commas with unison. The syntax is:
+```ocaml
+commaList(
+  [
+    commaA,
+    commaB,
+  ],
+  @subgroupBasis,
+  subgroupWeights,
+  pureOctavesFlag,
+  fullPrimeLimitFlag
+)
+```
+where all the arguments after the array of commas are optional. If no subgroup is given, a minimal prime subgroup is inferred based on the commas. If the full prime limit flag is `true`, a `niente` basis is inferred to be the maximum prime limit of the list.
+
 ### Tempering out a comma
 [Tenney-Euclidean tuning](https://en.xen.wiki/w/Tenney-Euclidean_tuning) is a commonly used scheme for adjusting intervals in such a way that some of them coincide. This can help tame the complexity of pure just intonation. It is desirable to make these tiny adjustments with minimal damage.
 
@@ -300,32 +336,38 @@ Now the `81/64` major thirds sounds more like `5/4` and the major chord resemble
 
 The downside is that the scale is now expressed in terms of real cents and all structural information such as the stack of pure fifths has been lost.
 
-### Maintaining pure octaves
-TE optimal tunings damage all primes including the octave which is often undesirable.
+Here `TE(81/80)` is equivalent to `commaList([81/80])` because the syntonic comma features all 3 primes of the 5-limit, but in general `TE` always uses the full prime limit.
 
-To destretch the octave after the fact use the stretching operator `~^` alongside the size-comparison operator `~/_`. The expression `2 ~/_ $[-1]` tells you how much wider the octave is compared to the last interval in the scale (the current equave).
+
+### Maintaining pure octaves
+TE optimal tunings damage all primes including the octave which is often undesirable. The naïve solution is to stretch the tuning so that octaves are 1200 cents again.
 
 ```ocaml
 "POTE meantone[7]"
 rank2(3/2, 5, 1)
-TE(81/80)
-
-(* Destretch octaves *)
-£ ~^ (2 ~/_ £[-1])
+POTE(81/80)
 ```
 
 ### CTE
-[Constrained tunings](https://en.xen.wiki/w/Constrained_tuning) have more finesse when it comes to maintaining the size of important intervals like the octave. While SonicWeave doesn't support CTE exactly, you can get close enough by assigning a large weight to the octave.
+[Constrained tunings](https://en.xen.wiki/w/Constrained_tuning) have more finesse when it comes to maintaining the size of important intervals like the octave. While strictly speaking SonicWeave doesn't support CTE exactly it gets close enough by assigning a large weight to the octave.
 
 ```ocaml
 "Near-CTE meantone[7]"
 rank2(3/2, 5, 1)
-(* Temper out the syntonic comma while making octaves 1000 times more important than anything else. *)
-TE(81/80, 1000)
+(* Temper out the syntonic comma while making octaves 5000 times more important than anything else. *)
+CTE(81/80)
+```
+
+### Explicit prime limit
+The prime limit of the [limma](https://en.xen.wiki/w/256/243) is 3, but usually [blackwood](https://en.xen.wiki/w/Limmic_temperaments#5-limit_.28blackwood.29) is thought of as a 5-limit temperament. This cannot be inferred from the comma so it must be explicitly specified.
+```ocaml
+"TE blackwood[10]"
+rank2(5, 5, 0, 1\5, 5)
+TE(256/243, 5)
 ```
 
 ### Tempering out multiple commas
-Multiple commas can be tempered out by passing in an array to `TE`. Multiple primes can be weighted by passing in an array as the second argument.
+Multiple commas can be tempered out by passing in an array to `commaList`. Multiple primes can be weighted by passing in an array as the third argument.
 
 ```ocaml
 "Unimarv[19] with a focus on near-pure octaves and undecimal harmony"
@@ -351,9 +393,11 @@ Multiple commas can be tempered out by passing in an array to `TE`. Multiple pri
 48/25
 2/1
 
-(* Temper out the marvel comma and the keenanisma *)
-TE(
+commaList(
+  (* Temper out the marvel comma and the keenanisma *)
   [225/224, 385/384],
+  (* Explicit 11-limit *),
+  @.11,
   (* Give 1000 times more weight to octaves and 10 times more weight to prime 11. *)
   [1000, 1, 1, 1, 10],
 )
@@ -390,6 +434,122 @@ Because vals always come with a subgroup basis the weights are associated with i
  *)
 TE([5@2.3.13/5, 9@2.3.13/5], [2, 1, 3])
 ```
+
+### Mapping generators
+Temperaments are stored in a canonical form where the mapping is in [Hermite normal form](https://en.wikipedia.org/wiki/Hermite_normal_form) but rows that result in descending mapping generators are sign-flipped to tune the generators positive.
+
+The mapping generator basis can be accessed using the `mappingBasis` helper and subsequently used to denote monzos in that basis e.g.
+```ocaml
+(* Convert final result to cents. *)
+defer cents(£, 3)
+
+(* Create TE sengic temperament and schedule the scale to be tempered using it. *)
+const sengic = commaList(686/675)
+defer sengic
+
+(* Obtain the canonical mapping generators and re-interprete monzos in this basis. *)
+const M = mappingBasis(sengic)
+defer @M
+
+(* These are all @2.3.15/14 *)
+[0 0 1>
+[0 0 2>
+[0 0 3>
+[2 -1 0>
+[-1 1 0>
+[1 0 -3>
+[1 0 -2>
+[1 0 -1>
+[1 0 0>
+```
+
+Expands out to
+```ocaml
+const sengic = Temperament(
+  [
+    ⟨1 0 2 1],
+    ⟨0 1 0 1],
+    ⟨0 0 3 2],
+  ]
+)
+const M = @2.3.15/14
+129.798
+259.597
+389.395
+495.746
+704.013
+810.364
+940.162
+1069.961
+1199.759
+```
+
+### Tempered generators
+If you don't care about the preimage, you can obtain the tempered generators directly.
+```ocaml
+(* Create temperament and obtain necessary data. *)
+const augmented = Temperament([12@.5, 27@.5])
+const [period, generator] = generatorsOf(augmented)
+const numPeriods = periodsOf(augmented)
+cons [up, down] = [2 * numPeriods, numPeriods]
+
+(* Generate TE optimized scale directly. *)
+rank2(generator, up, down, period, numPeriods)
+cents(£, 3)
+```
+Resulting in:
+```ocaml
+93.133
+212.751
+305.885
+399.018
+492.151
+611.769
+704.902
+798.035
+891.168
+1010.787
+1103.92
+1197.053
+```
+
+### Respelling using temperaments
+Passing a temperament to `respell` can be a handy way of generating preimages of equal temperaments.
+```ocaml
+(* Generate 13-tone equal scale. *)
+tet(13)
+
+(* Convert everything to just intonation according to the rank-1 13p@2.9.11 temperament. *)
+respell(Temperament(13p@2.9.11))
+
+(* Convert to linear domain. *)
+fraction
+```
+
+This is the result:
+```ocaml
+128/121
+9/8
+144/121
+11/9
+128/99
+11/8
+16/11
+99/64
+18/11
+121/72
+16/9
+121/64
+2/1
+```
+
+### Testing temperament equality
+You can test if two temperaments are the same using `==`. E.g.
+```ocaml
+(* Check if miracle from vals is the same as miracle from S-expressions. *)
+Temperament([10@.7, 21@.7]) == commaList([S15, S7-S8])
+```
+evaluates to `true`.
 
 # Technical details
 This section describes intervals as *monzos* i.e. prime count vectors and their co-vectors known as *vals*. It also describes how implicit tempering works under the hood.

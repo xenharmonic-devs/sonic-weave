@@ -1,12 +1,8 @@
 /**
  * Exported builtins without vectorization complications.
  */
-import {
-  Fraction,
-  tenneyHeight as xduTenney,
-  wilsonHeight as xduWilson,
-} from 'xen-dev-utils';
-import {Color, Interval, Val, ValBasis} from '../interval';
+import {Fraction, wilsonHeight as xduWilson} from 'xen-dev-utils';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
 import {type ExpressionVisitor} from '../parser/expression';
 import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
@@ -212,14 +208,10 @@ export function tenneyHeight(
   this: ExpressionVisitor,
   interval: Interval | boolean
 ): Interval {
-  const monzo = relative.bind(this)(upcastBool(interval)).value;
-  if (monzo instanceof TimeReal) {
-    return new Interval(TimeReal.fromValue(Infinity), 'linear');
-  }
-  const height =
-    xduTenney(monzo.residual) +
-    xduTenney(monzo.primeExponents.map(pe => pe.valueOf()));
-  return new Interval(TimeReal.fromValue(height), 'linear');
+  return new Interval(
+    TimeReal.fromValue(upcastBool(interval).value.tenneyHeight()),
+    'linear'
+  );
 }
 
 /**
@@ -318,7 +310,8 @@ function repr_(
   if (
     value instanceof Color ||
     value instanceof Val ||
-    value instanceof ValBasis
+    value instanceof ValBasis ||
+    value instanceof Temperament
   ) {
     return value.toString();
   }

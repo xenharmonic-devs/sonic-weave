@@ -1223,7 +1223,7 @@ UpsAndDowns 'up-and-down'
   }
 
 MonzoLiteral
-  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ [>⟩] basis: ('@' @SubgroupBasis)? {
+  = upsAndDowns: UpsAndDowns '[' _ components: VectorComponents _ [>⟩] basis: ('@' @((!BasisElement @Identifier) / SubgroupBasis))? {
     return {
       ...upsAndDowns,
       type: 'MonzoLiteral',
@@ -1235,7 +1235,7 @@ MonzoLiteral
 WartBasis = (Fraction / '')|.., '.'|
 
 ValBasisLiteral
-  = '@' basis: ValBasis {
+  = '@' basis: ((!ValBasisElement @Identifier) / ValBasis) {
     return {
       type: 'ValBasisLiteral',
       basis,

@@ -1,5 +1,5 @@
 import {Fraction} from 'xen-dev-utils';
-import {Color, Interval, Val} from '../interval';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
 import {TimeMonzo} from '../monzo';
 import {parse} from './sonic-weave-ast';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
@@ -188,7 +188,9 @@ function convert(value: any): SonicWeaveValue {
       if (
         value instanceof Interval ||
         value instanceof Val ||
-        value instanceof Color
+        value instanceof Color ||
+        value instanceof ValBasis ||
+        value instanceof Temperament
       ) {
         return value;
       } else if (value instanceof Fraction) {

@@ -5,7 +5,7 @@ import {
   type Parameter,
   Expression,
 } from '../ast';
-import {Color, Interval, Val, ValBasis} from '../interval';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {type ExpressionVisitor} from '../parser/expression';
 import {ZERO} from '../utils';
@@ -26,6 +26,7 @@ export type SonicWeavePrimitive =
   | Interval
   | Val
   | ValBasis
+  | Temperament
   | Color
   | string
   | undefined
@@ -181,7 +182,8 @@ export function isArrayOrRecord(container: SonicWeaveValue) {
     container instanceof Interval ||
     container instanceof Color ||
     container instanceof Val ||
-    container instanceof ValBasis
+    container instanceof ValBasis ||
+    container instanceof Temperament
   );
 }
 
@@ -249,7 +251,8 @@ export function binaryBroadcast(
         right instanceof Color ||
         right instanceof Interval ||
         right instanceof Val ||
-        right instanceof ValBasis
+        right instanceof ValBasis ||
+        right instanceof Temperament
       )
     ) {
       right satisfies Record<string, SonicWeavePrimitive>;
@@ -264,7 +267,8 @@ export function binaryBroadcast(
       left instanceof Color ||
       left instanceof Interval ||
       left instanceof Val ||
-      left instanceof ValBasis
+      left instanceof ValBasis ||
+      left instanceof Temperament
     )
   ) {
     left satisfies Record<string, SonicWeavePrimitive>;
@@ -278,7 +282,8 @@ export function binaryBroadcast(
         right instanceof Color ||
         right instanceof Interval ||
         right instanceof Val ||
-        right instanceof ValBasis
+        right instanceof ValBasis ||
+        right instanceof Temperament
       )
     ) {
       right satisfies Record<string, SonicWeavePrimitive>;
@@ -314,7 +319,8 @@ export function binaryBroadcast(
     right instanceof Color ||
     right instanceof Interval ||
     right instanceof Val ||
-    right instanceof ValBasis
+    right instanceof ValBasis ||
+    right instanceof Temperament
   ) {
     throw new Error('Invalid container broadcast.');
   }

@@ -50,11 +50,12 @@ This document describes programming in the SonicWeave domain-specific language.
     1. [Further splits](#further-splits)
     2. [Extra comma flavors](#extra-comma-flavors)
     3. [Non-standard pitch declaration](#non-standard-pitch-declaration)
-24. [Implicit intrinsic calls](#implicit-intrinsic-calls)
-25. [Obscure types](#obscure-types)
-26. [Obscure operations](#obscure-operations)
-27. [Future work](#future-work)
-28. [Next steps](#next-steps)
+24. [Rebasing](#rebasing)
+25. [Implicit intrinsic calls](#implicit-intrinsic-calls)
+26. [Obscure types](#obscure-types)
+27. [Obscure operations](#obscure-operations)
+28. [Future work](#future-work)
+29. [Next steps](#next-steps)
     1. [Examples](https://github.com/xenharmonic-devs/sonic-weave/tree/main/examples)
     2. [Technical documentation](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md)
     3. [Tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md)
@@ -551,18 +552,37 @@ Pitch can be declared as a period of oscillation, but it's coearced to Hz to pre
 
 E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 
+## Rebasing
+Repeating the basis of a subgroup monzo can be avoided using the rebasing action associated with the basis type.
+
+```ocaml
+(* Labels reflect the final result. *)
+[0 1>  "10/9"
+[0 2>  "100/81"
+[0 3>  "1000/729"
+[1 -3> "729/500"
+[1 -2> "81/50"
+[1 -1> "9/5"
+[1>    "2/1"
+
+(* Project intervals from the standard prime basis to powers of 2/1 and 10/9. *)
+@2.10/9
+```
+
+The limitation is that non-radical reals like `PI` are not supported in basis primitives.
 ## Implicit intrinsic calls
 Associating two values like `3/2 "fif"` invokes intrinsic behavior between the interval `3/2` and the string `"fif"` resulting in an interval with the value 3/2 and the label "fif".
 
 Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been depracated.
-| left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Function      |
-| ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- |
-| **Niente**   | ?             | ?             | ?             | bleach         | ?              | `right(left)` |
-| **String**   | ?             | concatenate   | ?             | label          | ?              | `right(left)` |
-| **Color**    | ?             | ?             | ?             | paint          | ?              | `right(left)` |
-| **Interval** | bleach        | label         | paint         | ?!             | ?!             | `right(left)` |
-| **Val**      | ?             | ?             | ?             | ?!             | ?              | `right(left)` |
-| **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` |
+| left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Basis         | Function      |
+| ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | ------------- |
+| **Niente**   | ?             | ?             | ?             | bleach         | ?              | ?             | `right(left)` |
+| **String**   | ?             | concatenate   | ?             | label          | ?              | ?             | `right(left)` |
+| **Color**    | ?             | ?             | ?             | paint          | ?              | ?             | `right(left)` |
+| **Interval** | bleach        | label         | paint         | ?!             | ?!             | rebase        | `right(left)` |
+| **Val**      | ?             | ?             | ?             | ?!             | ?              | rebase        | `right(left)` |
+| **Basis**    | ?             | ?             | ?             | rebase         | rebase         | ?             | `right(left)` |
+| **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` | `left(right)` |
 
 Intrinsic behavior vectorizes and broadcasts like other binary operations.
 
@@ -580,7 +600,8 @@ It's legal to declare `let Hz = 'whatever'`, but the grammar prevents the `Hz` v
 | Jorp              | `€`        | Geometric inverse of `c` i.e. `€` is equal to `<1200]`     |
 | Pilcrowspoob      | `¶`        | Geometric inverse of `logarithmic(1Hz)`                    |
 | Basis             | `@√2.√3`   | Basis of a fractional just intonation subgroup             |
-| Template argument | `¥0`, `¥1` | Arguments passed to the `sw\`${arg0} ${arg1}\`` tag in JS  |
+| Temperament       | ...        | Higher rank temperament                                    |
+| Template argument | `¥0`, `¥1` | Arguments passed to the `sw` tag in JS                     |
 
 ## Obscure operations
 | Name                      | Linear       | Result   | Logarithmic      | Result     |

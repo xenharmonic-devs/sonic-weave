@@ -16,6 +16,7 @@ import {
   primeFactorize,
   modc,
   FractionalMonzo,
+  LOG_PRIMES,
 } from 'xen-dev-utils';
 
 import {
@@ -418,6 +419,14 @@ export class TimeReal {
       return new TimeMonzo(ZERO, []);
     }
     return new TimeReal(this.timeExponent * exponent, this.value ** exponent);
+  }
+
+  /** @hidden */
+  tenneyHeight() {
+    if (this.value < 0) {
+      return NaN;
+    }
+    return Infinity;
   }
 
   /** @hidden */
@@ -2378,6 +2387,24 @@ export class TimeMonzo {
   }
 
   /**
+   * Calculate the Tenney height of this time monzo ignoring units of time.
+   * @returns The natural logarithm of the Benedetti height
+   */
+  tenneyHeight() {
+    if (this.residual.s < 0) {
+      return NaN;
+    }
+    if (this.residual.s === 0) {
+      return Infinity;
+    }
+    let result = Math.log(this.residual.n) + Math.log(this.residual.d);
+    for (let i = 0; i < this.primeExponents.length; ++i) {
+      result += Math.abs(this.primeExponents[i].valueOf()) * LOG_PRIMES[i];
+    }
+    return result;
+  }
+
+  /**
    * Convert a relative time monzo to a real number representing a ratio of frequencies.
    * Convert an absolute time monzo to the scalar of its time unit.
    * @returns A real number.
@@ -2579,7 +2606,9 @@ export class TimeMonzo {
       result.set(key, new Fraction(value));
     }
     for (let i = 0; i < this.primeExponents.length; ++i) {
-      result.set(PRIMES[i], this.primeExponents[i]);
+      if (this.primeExponents[i].n) {
+        result.set(PRIMES[i], this.primeExponents[i]);
+      }
     }
     return result;
   }

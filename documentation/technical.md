@@ -46,6 +46,7 @@ Values in SonicWeave fall into these categories
 | Interval | `7/5`                    | There are many kinds of intervals with their own operator semantics. |
 | Val      | `12@`                    | Used to convert scales in just intonation to equal temperaments.     |
 | Basis    | `@`, `basis(cbrt(2), 9)` | Fractional just intonation subgroup basis for vals.             |
+| Temperament | ...                   | Higher rank temperament |
 | Array    | `[5/4, P5, 9\9]`         | Musical scales are represented using arrays of intervals.            |
 | Record   | `#{fif: 3/2, "p/e": 2}`  | Associative data indexed by strings.                                 |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase.                  |
@@ -157,6 +158,10 @@ To defer execution to the end of the current block prefix the statement with `de
 | Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute* | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System). |
 | Diamond-mos  | `J&4`, `M@3`            | Logarithmic   | Absolute* | Absolute counterpart to TAMNAMS. Requires `MOS` declaration. |
 | S-expression | `S8`, `S5..8`           | Logarithmic   | Relative  | Additive spelling of [square superparticulars](https://en.xen.wiki/w/Square_superparticular). |
+
+## Co-inverval subtypes
+| Type         | Examples                | Domain        | Echelon   | Notes |
+| ------------ | ----------------------- | ------------- | --------- | ----- |
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative  | Used to temper scales. |
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 | SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notationn) for vals. |

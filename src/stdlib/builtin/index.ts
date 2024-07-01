@@ -4,11 +4,9 @@ import {
   isPrime as xduIsPrime,
   primes as xduPrimes,
   approximateRadical,
-  BIG_INT_PRIMES,
   fareySequence as xduFareySequence,
   fareyInterior as xduFareyInterior,
   hasMarginConstantStructure,
-  primeLimit,
   PRIMES,
   primeFactorize,
   nthPrime as xduNthPrime,
@@ -19,21 +17,18 @@ import {
   fractionalDet,
   mmod,
   FractionalMonzo,
-  unapplyWeights,
-  applyWeights,
-  valueToCents,
   binomial,
 } from 'xen-dev-utils';
-import {Color, Interval, Val, ValBasis} from '../interval';
+import {Color, Interval, Temperament, Val, ValBasis} from '../../interval';
 import {
   TimeMonzo,
   TimeReal,
   getNumberOfComponents,
   setNumberOfComponents,
-} from '../monzo';
-import {type ExpressionVisitor} from '../parser';
+} from '../../monzo';
+import {type ExpressionVisitor} from '../../parser';
 import {MosOptions, mos, nthNominal} from 'moment-of-symmetry';
-import {Expression, expressionToString} from '../ast';
+import {Expression, expressionToString} from '../../ast';
 import {
   BasisElement,
   FJSFlavor,
@@ -44,10 +39,10 @@ import {
   formatAbsoluteFJS,
   fractionToVectorComponent,
   integerToVectorComponent,
-} from '../expression';
-import {ONE, TWO, ZERO} from '../utils';
-import {stepString, stepSignature as wordsStepSignature} from '../words';
-import {hasConstantStructure} from '../tools';
+} from '../../expression';
+import {TWO, ZERO} from '../../utils';
+import {stepString, stepSignature as wordsStepSignature} from '../../words';
+import {hasConstantStructure} from '../../tools';
 import {
   SonicWeaveFunction,
   SonicWeavePrimitive,
@@ -60,7 +55,7 @@ import {
   sonicTruth,
   unaryBroadcast,
   upcastBool,
-} from './runtime';
+} from './../runtime';
 import {
   simplify as pubSimplify,
   bleach as pubBleach,
@@ -77,16 +72,11 @@ import {
   centsColor as pubCentsColor,
   factorColor as pubFactorColor,
   compare,
-} from './public';
-import {scaleMonzos} from '../diamond-mos';
-import {valToSparseOffset, valToWarts} from '../warts';
-import {
-  TuningMap,
-  combineTuningMaps,
-  intCombineTuningMaps,
-  vanishCommas,
-} from '../temper';
-const {version: VERSION} = require('../../package.json');
+} from './../public';
+import {scaleMonzos} from '../../diamond-mos';
+import {MATH_BUILTINS} from './math';
+import {TEMPER_BUILTINS} from './temper';
+const {version: VERSION} = require('../../../package.json');
 
 // === Library ===
 
@@ -101,95 +91,6 @@ const PARENT_SCALE: Record<string, Expression> = {
     id: '$$',
   },
 };
-
-// == Constants
-const E = new Interval(TimeReal.fromValue(Math.E), 'linear');
-const LN10 = new Interval(TimeReal.fromValue(Math.LN10), 'linear');
-const LN2 = new Interval(TimeReal.fromValue(Math.LN2), 'linear');
-const LOG10E = new Interval(TimeReal.fromValue(Math.LOG10E), 'linear');
-const LOG2E = new Interval(TimeReal.fromValue(Math.LOG2E), 'linear');
-const PI = new Interval(TimeReal.fromValue(Math.PI), 'linear');
-const SQRT1_2 = new Interval(TimeMonzo.fromEqualTemperament('-1/2'), 'linear');
-const SQRT2 = new Interval(TimeMonzo.fromEqualTemperament('1/2'), 'linear');
-const TAU = new Interval(TimeReal.fromValue(2 * Math.PI), 'linear');
-
-// == Real-valued Math wrappers ==
-const MATH_WRAPPERS: Record<string, SonicWeaveFunction> = {};
-const MATH_KEYS: (keyof Math)[] = [
-  'acos',
-  'asin',
-  'atan',
-  'clz32',
-  'cos',
-  'expm1',
-  'fround',
-  'imul',
-  'log1p',
-  'sin',
-  'tan',
-];
-// There's no way to produce logarithmic quantities using logdivision.
-// The log-associated functions get the same treatment as their stdlib counterparts.
-const LOGS: (keyof Math)[] = ['acos', 'asin', 'atan', 'clz32', 'log1p'];
-
-for (const name of MATH_KEYS) {
-  const fn = Math[name] as (x: number) => number;
-  // eslint-disable-next-line no-inner-declarations
-  function wrapper(
-    this: ExpressionVisitor,
-    x: SonicWeaveValue
-  ): SonicWeaveValue {
-    requireParameters({x});
-    if (typeof x === 'boolean' || x instanceof Interval) {
-      x = upcastBool(x);
-      return new Interval(
-        TimeReal.fromValue(fn(x.valueOf())),
-        LOGS.includes(name) ? 'linear' : x.domain,
-        0,
-        undefined,
-        x
-      );
-    }
-    const w = wrapper.bind(this);
-    return unaryBroadcast.bind(this)(x, w);
-  }
-  Object.defineProperty(wrapper, 'name', {value: name, enumerable: false});
-  wrapper.__doc__ = `Calculate ${String(name)} x.`;
-  wrapper.__node__ = builtinNode(wrapper);
-  MATH_WRAPPERS[name as string] = wrapper;
-}
-
-function atan2(
-  this: ExpressionVisitor,
-  y: SonicWeaveValue,
-  x: SonicWeaveValue
-): SonicWeaveValue {
-  if (isArrayOrRecord(y) || isArrayOrRecord(x)) {
-    return binaryBroadcast.bind(this)(y, x, atan2.bind(this));
-  }
-  y = upcastBool(y);
-  x = upcastBool(x);
-  return new Interval(
-    TimeReal.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
-    'linear'
-  );
-}
-atan2.__doc__ =
-  'Calculate atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.';
-atan2.__node__ = builtinNode(atan2);
-
-// Equivalent to atan2 but with swapped arguments.
-// Rationale is that atanXY(x, y) = log(x + i * y), x and y now coordinates.
-function atanXY(
-  this: ExpressionVisitor,
-  x: SonicWeaveValue,
-  y: SonicWeaveValue
-) {
-  return atan2.bind(this)(y, x);
-}
-atanXY.__doc__ =
-  'Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.';
-atanXY.__node__ = builtinNode(atanXY);
 
 // == First-party wrappers ==
 function numComponents(value?: SonicWeaveValue) {
@@ -1028,6 +929,33 @@ function isInterval(value: SonicWeaveValue) {
 isInterval.__doc__ = 'Return `true` if the value is an interval.';
 isInterval.__node__ = builtinNode(isInterval);
 
+function isVal(value: SonicWeaveValue) {
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
+  return value instanceof Val;
+}
+isVal.__doc__ = 'Return `true` if the value is a val.';
+isVal.__node__ = builtinNode(isVal);
+
+function isBasis(value: SonicWeaveValue) {
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
+  return value instanceof ValBasis;
+}
+isBasis.__doc__ = 'Return `true` if the value is a basis.';
+isBasis.__node__ = builtinNode(isBasis);
+
+function isTemperament(value: SonicWeaveValue) {
+  if (arguments.length < 1) {
+    throw new Error("Parameter 'value' is required.");
+  }
+  return value instanceof Temperament;
+}
+isTemperament.__doc__ = 'Return `true` if the value is a temperament.';
+isTemperament.__node__ = builtinNode(isTemperament);
+
 function isColor(value: SonicWeaveValue) {
   if (arguments.length < 1) {
     throw new Error("Parameter 'value' is required.");
@@ -1288,29 +1216,6 @@ function clear(this: ExpressionVisitor, scale?: Interval[]) {
 clear.__doc__ = 'Remove the contents of the current/given scale.';
 clear.__node__ = builtinNode(clear, PARENT_SCALE);
 
-function tail(
-  this: ExpressionVisitor,
-  interval: SonicWeaveValue,
-  index: Interval
-): SonicWeaveValue {
-  requireParameters({interval, index});
-  if (interval instanceof Interval || typeof interval === 'boolean') {
-    interval = upcastBool(interval);
-    return new Interval(
-      interval.value.tail(index.toInteger()),
-      interval.domain,
-      interval.steps,
-      undefined,
-      interval
-    );
-  }
-  const t = tail.bind(this);
-  return unaryBroadcast.bind(this)(interval, i => t(i, index));
-}
-tail.__doc__ =
-  'Return the higher prime tail of an interval starting from the given index. Prime 2 has index 0.';
-tail.__node__ = builtinNode(tail);
-
 function colorOf(
   this: ExpressionVisitor,
   interval: SonicWeaveValue
@@ -1344,86 +1249,6 @@ function labelOf(
 }
 labelOf.__doc__ = 'Return the label of the interval.';
 labelOf.__node__ = builtinNode(labelOf);
-
-function complexityOf(
-  this: ExpressionVisitor,
-  interval: SonicWeaveValue,
-  countZeros = false
-): SonicWeaveValue {
-  if (isArrayOrRecord(interval)) {
-    const c = complexityOf.bind(this);
-    return unaryBroadcast.bind(this)(interval, i => c(i, countZeros));
-  }
-  let pe: Fraction[];
-  if (interval instanceof Val) {
-    if (countZeros) {
-      return fromInteger(interval.value.numberOfComponents);
-    }
-    if (!interval.value.residual.isUnity()) {
-      throw new Error('Non-standard val encountered.');
-    }
-    pe = interval.value.primeExponents;
-  } else {
-    const monzo = upcastBool(interval).value;
-    if (monzo instanceof TimeReal) {
-      return new Interval(new TimeReal(0, Infinity), 'linear');
-    }
-    if (!monzo.residual.isUnity()) {
-      const result = primeLimit(monzo.residual, true);
-      if (Number.isInteger(result)) {
-        return fromInteger(result);
-      }
-      return new Interval(new TimeReal(0, result), 'linear');
-    }
-    if (countZeros) {
-      return fromInteger(monzo.numberOfComponents);
-    }
-    pe = monzo.primeExponents;
-  }
-  for (let i = pe.length - 1; i >= 0; --i) {
-    if (pe[i].n) {
-      return fromInteger(i + 1);
-    }
-  }
-  return fromInteger(0);
-}
-complexityOf.__doc__ =
-  'Compute the prime limit ordinal of an interval or val. 1/1 has a complexity of 0, 2/1 has complexity 1, 3/1 has complexity 2, 5/1 has complexity 3, etc.. If `countZeros` is true, measure the complexity of the internal representation instead.';
-complexityOf.__node__ = builtinNode(complexityOf);
-
-function basisOf(
-  this: ExpressionVisitor,
-  val: SonicWeaveValue
-): SonicWeaveValue {
-  if (isArrayOrRecord(val)) {
-    const e = basisOf.bind(this);
-    return unaryBroadcast.bind(this)(val, e);
-  }
-  if (val instanceof Val) {
-    return val.basis;
-  }
-  throw new Error('A val is required.');
-}
-basisOf.__doc__ = 'Return the basis of the val.';
-basisOf.__node__ = builtinNode(basisOf);
-
-function withBasis(
-  this: ExpressionVisitor,
-  val: SonicWeaveValue,
-  basis: ValBasis
-): SonicWeaveValue {
-  requireParameters({val, basis});
-  if (isArrayOrRecord(val)) {
-    const w = withBasis.bind(this);
-    return unaryBroadcast.bind(this)(val, v => w(v, basis));
-  }
-  if (val instanceof Val) {
-    return new Val(val.value.clone(), basis);
-  }
-  throw new Error('A val is required.');
-}
-withBasis.__doc__ = 'Change the basis of the val.';
-withBasis.__node__ = builtinNode(withBasis);
 
 function JIP(
   this: ExpressionVisitor,
@@ -1464,92 +1289,7 @@ function real(
 real.__doc__ = 'Convert interval to a linear real value.';
 real.__node__ = builtinNode(real);
 
-function warts(this: ExpressionVisitor, val: SonicWeaveValue): SonicWeaveValue {
-  requireParameters({val});
-  if (val instanceof Val) {
-    if (val.node?.type === 'WartsLiteral') {
-      return val;
-    }
-    const basis = val.basis.toWartBasis();
-    const node = valToWarts(val.value, basis);
-    return new Val(val.value, val.basis, node);
-  }
-  return unaryBroadcast.bind(this)(val, warts.bind(this));
-}
-warts.__doc__ = 'Format a val using warts shorthand notation.';
-warts.__node__ = builtinNode(warts);
-
-function SOV(this: ExpressionVisitor, val: SonicWeaveValue): SonicWeaveValue {
-  requireParameters({val});
-  if (val instanceof Val) {
-    if (val.node?.type === 'SparseOffsetVal') {
-      return val;
-    }
-    const basis = val.basis.toWartBasis();
-    const node = valToSparseOffset(val.value, basis);
-    return new Val(val.value, val.basis, node);
-  }
-  return unaryBroadcast.bind(this)(val, SOV.bind(this));
-}
-SOV.__doc__ = 'Format a val using Sparse Offset Val notation.';
-SOV.__node__ = builtinNode(SOV);
-
-function PrimeMapping(
-  this: ExpressionVisitor,
-  ...newPrimes: (Interval | undefined)[]
-) {
-  const rel = pubRelative.bind(this);
-  const np = newPrimes.map((p, i) =>
-    p ? rel(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
-  );
-
-  function mapper(
-    this: ExpressionVisitor,
-    interval: SonicWeaveValue
-  ): SonicWeaveValue {
-    if (isArrayOrRecord(interval)) {
-      const m = mapper.bind(this);
-      return unaryBroadcast.bind(this)(interval, m);
-    }
-    interval = upcastBool(interval);
-    const monzo = pubRelative.bind(this)(interval).value;
-    if (monzo instanceof TimeReal) {
-      return new Interval(
-        monzo,
-        'logarithmic',
-        0,
-        monzo.asCentsLiteral(),
-        interval
-      );
-    }
-    monzo.numberOfComponents = np.length;
-    let mapped: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], monzo.residual);
-    while (mapped.primeExponents.length < np.length) {
-      mapped.primeExponents.push(ZERO);
-    }
-    for (let i = 0; i < np.length; ++i) {
-      mapped = mapped.mul(np[i].pow(monzo.primeExponents[i]));
-    }
-    let node = mapped.asCentsLiteral();
-    if (!node) {
-      mapped = TimeReal.fromCents(mapped.totalCents());
-      node = mapped.asCentsLiteral();
-    }
-    return new Interval(mapped, 'logarithmic', 0, node, interval);
-  }
-  const r = repr.bind(this);
-  Object.defineProperty(mapper, 'name', {
-    value: `PrimeMapping(${newPrimes.map(r).join(', ')})`,
-    enumerable: false,
-  });
-  mapper.__doc__ = 'Prime re-mapper.';
-  mapper.__node__ = builtinNode(mapper);
-  return mapper;
-}
-PrimeMapping.__doc__ =
-  'Construct a prime mapping for tempering intervals to specified cents. Remaining primes are left untempered.';
-PrimeMapping.__node__ = builtinNode(PrimeMapping);
-
+/*
 function valsTE(this: ExpressionVisitor, vals: Val[], weights: number[]) {
   const basis = vals[0].basis;
   for (const val of vals) {
@@ -1720,111 +1460,7 @@ function TE(
 TE.__doc__ =
   'Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.';
 TE.__node__ = builtinNode(TE);
-
-function valWeights(weights: SonicWeaveValue, size: number) {
-  const ws: number[] = [];
-  if (weights instanceof Interval) {
-    ws.push(weights.valueOf());
-  } else if (weights) {
-    if (!Array.isArray(weights)) {
-      throw new Error('Weights must be an array if given.');
-    }
-    ws.push(...weights.map(i => upcastBool(i).valueOf()));
-  }
-  while (ws.length < size) {
-    ws.push(1);
-  }
-  return ws;
-}
-
-// Optimize by pre-calculating stuff that gets re-used during tuning.
-function errorTE(
-  this: ExpressionVisitor,
-  val: SonicWeaveValue,
-  weights: SonicWeaveValue,
-  unnormalized = false
-): SonicWeaveValue {
-  if (val instanceof Val) {
-    const ws = valWeights(weights, val.basis.size);
-    this.spendGas(5 * ws.length);
-    unnormalized = sonicTruth(unnormalized);
-    if (unnormalized) {
-      return Interval.fromValue(val.errorTE(ws, unnormalized));
-    }
-    return new Interval(TimeReal.fromCents(val.errorTE(ws)), 'logarithmic');
-  }
-  const e = errorTE.bind(this);
-  return unaryBroadcast.bind(this)(val, v => e(v, weights));
-}
-errorTE.__doc__ =
-  'Calculate Tenney-Euclid error w.r.t the vals basis. Weights are applied multiplicatively on top of Tenney weights if given. Unnormalized values are slightly faster to compute and are in the linear domain instead of (logarithmic) cents.';
-errorTE.__node__ = builtinNode(errorTE);
-
-function nextGPV(
-  this: ExpressionVisitor,
-  val: SonicWeaveValue,
-  weights: SonicWeaveValue
-): SonicWeaveValue {
-  if (val instanceof Val) {
-    const ws = valWeights(weights, val.basis.size);
-    return val.nextGPV(ws);
-  }
-  const n = nextGPV.bind(this);
-  return unaryBroadcast.bind(this)(val, v => n(v, weights));
-}
-nextGPV.__doc__ = 'Obtain the next generalized patent val in the sequence.';
-nextGPV.__node__ = builtinNode(nextGPV);
-
-function tune(
-  this: ExpressionVisitor,
-  vals: SonicWeaveValue,
-  searchRadius: SonicWeaveValue,
-  weights: SonicWeaveValue
-) {
-  if (!Array.isArray(vals)) {
-    throw new Error('An array of vals is required.');
-  }
-  if (!vals.length) {
-    throw new Error('At least one val is required.');
-  }
-  for (const val of vals) {
-    if (!(val instanceof Val)) {
-      throw new Error('An array of vals is required.');
-    }
-  }
-  const vs = vals as Val[];
-  const basis = vs[0].basis;
-  for (const val of vs.slice(1)) {
-    if (!val.basis.equals(basis)) {
-      throw new Error('Vals bases must agree in tuning.');
-    }
-  }
-  const radius =
-    searchRadius === undefined ? 1 : upcastBool(searchRadius).toInteger();
-  this.spendGas(
-    0.25 * basis.numberOfComponents * (2 * radius + 1) ** vals.length
-  );
-  const jip = basis.value.map(m => m.totalCents());
-  const ws = valWeights(weights, basis.size);
-  const wvals = vs.map(val =>
-    applyWeights(
-      unapplyWeights(
-        basis.value.map(m => m.dot(val.value).valueOf()),
-        jip
-      ),
-      ws
-    )
-  );
-  const coeffs = intCombineTuningMaps(ws, wvals, radius);
-  let result = vs[0].mul(fromInteger(coeffs[0]));
-  for (let i = 1; i < coeffs.length; ++i) {
-    result = result.add(vs[i].mul(fromInteger(coeffs[i])));
-  }
-  return result.abs();
-}
-tune.__doc__ =
-  'Attempt to combine the given vals into a more Tenney-Euclid optimal val. Weights are applied multiplicatively on top of Tenney weights of the subgroup basis.';
-tune.__node__ = builtinNode(tune);
+*/
 
 function tenneyHeight(
   this: ExpressionVisitor,
@@ -1853,117 +1489,6 @@ function wilsonHeight(
 wilsonHeight.__doc__ =
   'Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition..';
 wilsonHeight.__node__ = builtinNode(wilsonHeight);
-
-function _repspell(
-  this: ExpressionVisitor,
-  interval: SonicWeaveValue,
-  commas: TimeMonzo[]
-): SonicWeaveValue {
-  if (typeof interval === 'boolean' || interval instanceof Interval) {
-    const tenney = pubTenney.bind(this);
-    let result = upcastBool(interval);
-    let exponent = ONE;
-    if (!result.value.isFractional()) {
-      if (result.value instanceof TimeReal) {
-        return result;
-      }
-      try {
-        const et = result.value.toEqualTemperament();
-        result = new Interval(
-          TimeMonzo.fromFraction(et.equave),
-          result.domain,
-          result.steps,
-          undefined,
-          result
-        );
-        exponent = et.fractionOfEquave;
-      } catch {
-        /* empty */
-      }
-    }
-    let height = tenney(result).valueOf();
-    let improvement: Interval | undefined = result;
-    while (improvement) {
-      result = improvement;
-      improvement = undefined;
-      for (const comma of commas) {
-        this.spendGas();
-        const candidate = new Interval(
-          result.value.mul(comma),
-          result.domain,
-          result.steps,
-          undefined,
-          result
-        );
-        let candidateHeight = tenney(candidate).valueOf();
-        if (
-          !exponent.isUnity() &&
-          candidate.value.pow(exponent).isFractional()
-        ) {
-          // Favor elimination of radicals
-          // The bonus is much larger in size than Math.log(Number.MAX_VALUE)
-          candidateHeight -= 10000;
-        }
-        if (candidateHeight < height) {
-          improvement = candidate;
-          height = candidateHeight;
-        }
-      }
-    }
-    if (exponent.isUnity()) {
-      return result;
-    }
-    return new Interval(
-      result.value.pow(exponent),
-      result.domain,
-      result.steps,
-      undefined,
-      result
-    );
-  }
-  const r = _repspell.bind(this);
-  return unaryBroadcast.bind(this)(interval, i => r(i, commas));
-}
-
-function respell(
-  this: ExpressionVisitor,
-  commaBasis: SonicWeaveValue,
-  searchRadius: SonicWeaveValue
-) {
-  if (commaBasis instanceof Interval) {
-    commaBasis = [commaBasis];
-  }
-  if (Array.isArray(commaBasis)) {
-    commaBasis = basis.bind(this)(...commaBasis);
-  }
-  if (!(commaBasis instanceof ValBasis)) {
-    throw new Error('A basis is required.');
-  }
-  this.spendGas(0.3 * commaBasis.numberOfComponents * commaBasis.size ** 2);
-  commaBasis = commaBasis.lll('tenney');
-  const r = _repspell.bind(this);
-  const commas = [...commaBasis.value];
-  for (const comma of commaBasis.value) {
-    commas.push(comma.inverse());
-  }
-  if (searchRadius !== undefined) {
-    const radius = upcastBool(searchRadius).toInteger();
-    const cs = [...commas];
-    for (let k = 2; k <= radius; ++k) {
-      for (const combo of xduKCombinations(cs, k)) {
-        const comma = combo.reduce((a, b) => a.mul(b) as TimeMonzo);
-        commas.push(comma);
-      }
-    }
-  }
-  const mapper = (i: SonicWeaveValue) => r(i, commas);
-  mapper.__doc__ = 'Respeller';
-  mapper.__node__ = builtinNode(mapper);
-  return mapper;
-}
-respell.__doc__ =
-  'Respell i.e. simplify fractions in the the current scale treating intervals separated by the given commas as the same. Search radius (default 1) is an integer for discovering harder-to-find simplifications. (Creates a respelling function.)';
-respell.__node__ = builtinNode(respell);
 
 function gcd(
   this: ExpressionVisitor,
@@ -2098,27 +1623,6 @@ function valFromPrimeArray(
 valFromPrimeArray.__doc__ =
   'Convert an array of prime mapping entries to a val.';
 valFromPrimeArray.__node__ = builtinNode(valFromPrimeArray);
-
-function basis(this: ExpressionVisitor, ...intervals: SonicWeaveValue[]) {
-  const subgroup: TimeMonzo[] = [];
-  for (let interval of intervals) {
-    interval = upcastBool(interval);
-    if (interval.value instanceof TimeReal) {
-      throw new Error('Can only create basis from radicals.');
-    }
-    subgroup.push(interval.value);
-  }
-  return new ValBasis(subgroup);
-}
-basis.__doc__ = 'Construct a subgroup basis from intervals.';
-basis.__node__ = builtinNode(basis);
-
-function basisToArray(this: ExpressionVisitor, basis: ValBasis) {
-  return basis.value.map(monzo => new Interval(monzo, 'linear'));
-}
-basisToArray.__doc__ =
-  'Convert a subgroup basis to an array of basis elements.';
-basisToArray.__node__ = builtinNode(basisToArray);
 
 function transpose(this: ExpressionVisitor, matrix: SonicWeaveValue[][]) {
   if (!Array.isArray(matrix)) {
@@ -3045,19 +2549,8 @@ factorColor.__node__ = builtinNode(factorColor);
  * Ambient builtin constants and functions that are always present in SonicWeave DSL.
  */
 export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
-  ...MATH_WRAPPERS,
-  atan2,
-  atanXY,
-  // Constants
-  E,
-  LN10,
-  LN2,
-  LOG10E,
-  LOG2E,
-  PI,
-  SQRT1_2,
-  SQRT2,
-  TAU,
+  ...MATH_BUILTINS,
+  ...TEMPER_BUILTINS,
   VERSION,
   // First-party wrappers
   numComponents,
@@ -3094,11 +2587,15 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   primeMonzo,
   // Type detection
   isInterval,
+  isVal,
+  isBasis,
+  isTemperament,
   isColor,
   isString,
   isBoolean,
   isFunction,
   isArray,
+  // Domain & echelon detection
   isAbsolute,
   isRelative,
   isLinear,
@@ -3122,32 +2619,18 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   trackingIds,
   flatten,
   clear,
-  tail,
   colorOf,
   labelOf,
-  complexityOf,
-  basisOf,
-  withBasis,
   JIP,
   real,
-  warts,
-  SOV,
-  PrimeMapping,
-  TE,
-  errorTE,
-  nextGPV,
-  tune,
   tenneyHeight,
   wilsonHeight,
-  respell,
   gcd,
   lcm,
   compare: builtinCompare,
   toPrimeArray,
   monzoFromPrimeArray,
   valFromPrimeArray,
-  basis,
-  basisToArray,
   transpose,
   inv,
   det,
