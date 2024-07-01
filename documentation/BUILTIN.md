@@ -37,7 +37,7 @@ If the current scale is empty, generate absolute Diamond-mos notation based on t
 Construct a subgroup basis from intervals.
 
 ### basisOf(*val*)
-Return the basis of the val.
+Return the basis of a val or a temperament.
 
 ### basisToArray(*basis*)
 Convert a subgroup basis to an array of basis elements.
@@ -71,6 +71,12 @@ Obtain a non-negative integer that is the Unicode code point value of the charac
 
 ### colorOf(*interval*)
 Return the color of the interval.
+
+### commaBasis(*temperament*)
+Obtain the comma basis (null space) of a temperament.
+
+### commaList(*commas*, *basisOrLimit*, *weights*, *pureEquaves*, *fullPrimeLimit*)
+Construct a Temperament instance from an array of commas. Optional weights are applied multiplicatively on top of Tenney weights. Optionally equaves are normalized to pure. Optionally the full prime limit is assumed based on the commas.
 
 ### compare(*x*, *y*)
 Compare two values. Result is -1 if x < y, +1 if x > y and 0 if the arguments are equal.
@@ -156,6 +162,9 @@ Calculate fround x.
 ### gcd(*x*, *y*)
 Obtain the largest (linear) multiplicative factor shared the two arguments or by all intervals or the current scale if no arguments are given.
 
+### generatorsOf(*temperament*)
+Obtain the generators of a temperament with period first. See `mappingBasis` for the untempered mapping generators.
+
 ### hasConstantStructure(*scale = $$*)
 Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).
 
@@ -185,6 +194,9 @@ Return `true` if the interval belongs to the absolute echelon.
 
 ### isArray(*value*)
 Return `true` if the value is an array.
+
+### isBasis(*value*)
+Return `true` if the value is a basis.
 
 ### isBoolean(*value*)
 Return `true` if the value is a boolean.
@@ -222,6 +234,12 @@ Return `true` if the interval belongs to the relative echelon.
 ### isString(*value*)
 Return `true` if the value is a string.
 
+### isTemperament(*value*)
+Return `true` if the value is a temperament.
+
+### isVal(*value*)
+Return `true` if the value is a val.
+
 ### JIP(*interval*)
 The Just Intonation Point. Converts intervals to real cents.
 
@@ -258,6 +276,9 @@ Convert interval to logarithmic representation. Formatting information of linear
 ### map(*mapper*, *scale = $$*)
 Map a riff over the given/current scale producing a new scale.
 
+### mappingBasis(*temperament*)
+Obtain the mapping generators (preimage) of a temperament with period first. See `generatorsOf` for the tempered generators.
+
 ### maximum(*...args*)
 Obtain the argument with the maximum value.
 
@@ -284,6 +305,9 @@ Obtain the nth odd prime or prime 2 if n = 0.
 
 ### numComponents(*value*)
 Get/set the number of prime exponents to support in monzos. Also sets the length of vals.
+
+### periodsOf(*temperament*)
+Obtain the number of periods per equave in a temperament.
 
 ### pop(*scale = $$*, *index*)
 Remove and return the last interval in the current/given scale. Optionally an index to pop may be given.
@@ -387,8 +411,8 @@ Return the higher prime tail of an interval starting from the given index. Prime
 ### tan(*x*)
 Calculate tan x.
 
-### TE(*valsOrCommas*, *weights*)
-Calculate Tenney-Euclid optimal PrimeMapping by combining the given vals or tempering out the given commas. Weights are applied multiplicatively on top of Tenney weights. Use a single large value for CTE. For vals the weights apply to the subgroup basis. A minimal prime subgroup is inferred from the commas, but the weights are for the primes in order if given.
+### Temperament(*vals*, *weights*, *pureEquaves*)
+Construct a Temperament instance from an array of vals. Optional weights are applied multiplicatively on top of Tenney weights. Optionally equaves are normalized to pure.
 
 ### templateArg(*index*)
 Access the nth template argument when using the `sw` tag inside JavaScript.
@@ -509,6 +533,9 @@ Generate a combination product set from the given factors and combination size.
 ### csgs(*generators*, *ordinal = 1*, *period = 2*, *numPeriods = 1*, *maxSize = 100*)
 Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
 
+### CTE(*valsOrCommas*, *primeLimit = niente*)
+Create a constrained (nearly) Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given.
+
 ### cumprod(*array*)
 Calculate the cumulative products of the factors in the array i.e. logarithmic cumulative sums.
 
@@ -623,6 +650,9 @@ Obtain a copy of the popped/given scale reduced by its last interval, sorted and
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.  The size hints are used to get the correct period reduction when generating a preimage.
 
+### POTE(*valsOrCommas*, *primeLimit = niente*)
+Create a naïve pure-equaves tuning by normalizing the Tenney-Euclid optimal temperament based on an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given.
+
 ### pow(*x*, *y*)
 Calculate x to the power of y.
 
@@ -715,6 +745,9 @@ Obtain generalized patent vals in the same sequence as the initial val that make
 
 ### tanh(*x*)
 Calculate the hyperbolic tangent of x.
+
+### TE(*valsOrCommas*, *basis = niente*)
+Create a Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a different basis or a prime limit may be given.
 
 ### tet(*divisions*, *equave = 2*)
 Generate an equal temperament with the given number of divisions of the given equave/octave.

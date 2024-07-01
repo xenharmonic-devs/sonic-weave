@@ -11,3 +11,7 @@ rank2(generator, up, down);
 (* https://en.xen.wiki/w/4L_3s#Note_names *)
 (* Diamond-MOS labels based on the symmetric mode *)
 ["K", "L", "M", "N", "O", "P", "J"]
+
+(* P.S. You could also obtain the generator like this:
+ * const generator = generatorsOf(POTE(65536/65219, @2.7.11))[1]
+*)

@@ -2669,29 +2669,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(sure).toBe(true);
   });
 
-  it('measures the zero val to be quite bad indeed', () => {
-    const error = evaluate('errorTE(0@)') as Interval;
-    expect(error.totalCents()).toBe(1200);
-  });
-
-  it('measures the 1@ val to be fairly bad', () => {
-    const error = evaluate('errorTE(1@)') as Interval;
-    expect(error.totalCents()).toBeCloseTo(145.13);
-  });
-
-  it('generates the GPV sequence for 5-limit', () => {
-    const seq = evaluate(`
-      const result = [1@2.3.5];
-      for (let i of [0..110]) {
-        push(warts(nextGPV(result[-1])), result);
-      }
-      str(result);
-    `) as string;
-    expect(seq.replace(/@2.3.5/g, '')).toBe(
-      '[1, 1c, 2bbccc, 2ccc, 2c, 2, 2b, 3bccc, 3bc, 3c, 3, 3cc, 4bbcc, 4cc, 4, 4c, 4bc, 5bccc, 5bc, 5c, 5, 5cc, 6bbbc, 6bc, 6b, 6, 6cc, 7bbcc, 7cc, 7, 7c, 7bc, 8bccc, 8bc, 8c, 8, 8cc, 9bbc, 9c, 9, 9b, 9bcc, 10bcc, 10cc, 10, 10c, 10ccc, 11bbc, 11c, 11, 11b, 11bcc, 12bbc, 12c, 12, 12cc, 12bcc, 13bcc, 13b, 13, 13c, 13ccc, 14bbc, 14c, 14, 14b, 14bcc, 15bc, 15c, 15, 15cc, 15bbcc, 16cc, 16, 16b, 16bc, 17bcc, 17b, 17, 17c, 17ccc, 17bbccc, 18bc, 18b, 18, 18cc, 19bbcc, 19cc, 19, 19c, 19bc, 20bcc, 20b, 20, 20c, 20ccc, 21bbc, 21c, 21, 21b, 21bcc, 22bcc, 22cc, 22, 22c, 22bbc, 23cc, 23, 23c, 23bc, 23bccc, 24bbc]'
-    );
-  });
-
   it('can respell square roots away (single comma)', () => {
     const {fraction} = parseSingle('respell(2048/2025)(2 /^ 2)');
     expect(fraction).toBe('45/32');
@@ -2702,42 +2679,5 @@ describe('SonicWeave expression evaluator', () => {
       'respell([64/63, 78/77, 144/143], 3)(3/2 /^ 2)'
     );
     expect(fraction).toBe('11/9');
-  });
-
-  it('can combine two vals to approach the JIP', () => {
-    const thirtyOne = evaluate('tune([12@.5, 19@.5])') as Val;
-    expect(thirtyOne.value.toIntegerMonzo()).toEqual([31, 49, 72]);
-  });
-
-  it('can combine two vals to approach the JIP (Wilson metric)', () => {
-    const eighty = evaluate(
-      'tune([12@.5, 22@.5], 5, [1 % 2, 3 /_ 2 % 3, 5 /_ 2 % 5])'
-    ) as Val;
-    expect(eighty.value.toIntegerMonzo()).toEqual([126, 200, 293]);
-  });
-
-  it('can combine three vals to approach the JIP', () => {
-    const fourtyOne = evaluate('tune([5@.7, 17@.7, 19@.7])') as Val;
-    expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
-  });
-
-  it('can combine four vals to approach the JIP', () => {
-    const val = evaluate('tune([5@.11, 17@.11, 19@.11, 31@.11])') as Val;
-    expect(val.value.toIntegerMonzo()).toEqual([72, 114, 167, 202, 249]);
-  });
-
-  it("doesn't move from 31p when tuned with 5p", () => {
-    const p31 = evaluate('str(tune([31@.5, 5@.5]))');
-    expect(p31).toBe('<31 49 72]');
-  });
-
-  it('moves from 31p when tuned with 5p if given a large enough radius', () => {
-    const p31 = evaluateExpression('str(tune([31@.5, 5@.5], 6))');
-    expect(p31).toBe('<191 302 444]');
-  });
-
-  it('tunes close to CTE meantone if given a large enough radius', () => {
-    const cents = evaluate('str(cents(3/2 tmpr tune([5@.5, 7@.5], 200), 4))');
-    expect(cents).toEqual('697.2143');
   });
 });

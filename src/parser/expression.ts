@@ -31,6 +31,7 @@ import {
   Val,
   IntervalDomain,
   ValBasis,
+  Temperament,
 } from '../interval';
 import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo';
 import {
@@ -116,7 +117,8 @@ export function arrayRecordOrString(
     value instanceof Interval ||
     value instanceof Val ||
     value instanceof Color ||
-    value instanceof ValBasis
+    value instanceof ValBasis ||
+    value instanceof Temperament
   ) {
     throw new Error(message);
   }
@@ -127,6 +129,9 @@ export function containerToArray(
   container: SonicWeaveValue,
   kind: IterationKind
 ) {
+  if (container instanceof ValBasis) {
+    return container.toArray();
+  }
   container = arrayRecordOrString(
     container,
     'Can only iterate over arrays, records or strings.'
@@ -432,9 +437,18 @@ export class ExpressionVisitor {
   }
 
   protected visitValBasisLiteral(node: ValBasisLiteral) {
-    const {subgroup} = parseValSubgroup(node.basis);
-    this.spendGas(subgroup.length ** 2);
-    return new ValBasis(subgroup, node);
+    if (Array.isArray(node.basis)) {
+      const {subgroup} = parseValSubgroup(node.basis);
+      this.spendGas(subgroup.length ** 2);
+      return new ValBasis(subgroup, node);
+    }
+    const value = this.visit(node.basis);
+    if (value instanceof ValBasis) {
+      return value;
+    }
+    throw new Error(
+      `The identifier ${node.basis.id} does not refer to a basis.`
+    );
   }
 
   protected visitBlockExpression(node: BlockExpression) {
@@ -575,6 +589,7 @@ export class ExpressionVisitor {
           spread instanceof Val ||
           spread instanceof Color ||
           spread instanceof ValBasis ||
+          spread instanceof Temperament ||
           Array.isArray(spread)
         ) {
           throw new Error('Spread argument must be a record.');
@@ -729,7 +744,15 @@ export class ExpressionVisitor {
     const exponents = node.components.map(this.visitComponent);
     let value: TimeMonzo | TimeReal;
     let steps = ZERO;
-    if (node.basis.length) {
+    if (!Array.isArray(node.basis)) {
+      const basis = this.visit(node.basis);
+      if (!(basis instanceof ValBasis)) {
+        throw new Error(
+          `The identifier ${node.basis.id} does not refer to a basis.`
+        );
+      }
+      value = basis.dot(exponents);
+    } else if (node.basis.length) {
       const {subgroup} = parseSubgroup(node.basis, exponents.length);
       if (exponents.length > subgroup.length) {
         throw new Error('Too many monzo components for given subgroup.');
@@ -768,6 +791,10 @@ export class ExpressionVisitor {
     if (node.ups || node.lifts) {
       // Uplift already throws if context is missing.
       this.rootContext!.fragiles.push(result);
+    }
+    // Prune named basis
+    if (!Array.isArray(node.basis)) {
+      result.node = undefined;
     }
     return result;
   }
@@ -1170,6 +1197,7 @@ export class ExpressionVisitor {
     } else if (
       operand instanceof ValBasis ||
       operand instanceof Color ||
+      operand instanceof Temperament ||
       typeof operand === 'string' ||
       typeof operand === 'function' ||
       operand === undefined
@@ -1567,6 +1595,13 @@ export class ExpressionVisitor {
               );
             }
           case 'tmpr':
+            if (node.preferLeft) {
+              const value = (temper.bind(this)(right, left) as Interval).value;
+              const node = intervalValueAs(value, left.node);
+              return new Interval(value, left.domain, 0, node, left);
+            } else if (node.preferRight) {
+              throw new Error('Cannot prefer the val operand when tempering.');
+            }
             return temper.bind(this)(right, left);
         }
         throw new Error(
@@ -1578,6 +1613,41 @@ export class ExpressionVisitor {
         }
         throw new Error(
           `Operator '${operator}' not implemented between intervals and strings.`
+        );
+      } else if (right instanceof Temperament) {
+        if (operator === 'tmpr') {
+          const value = right.temper(left.value);
+          if (node.preferLeft) {
+            return new Interval(
+              value,
+              left.domain,
+              left.steps,
+              intervalValueAs(value, left.node),
+              left
+            );
+          } else if (node.preferRight) {
+            throw new Error(
+              'Cannot prefer the temperament operand when tempering.'
+            );
+          }
+          return new Interval(
+            value,
+            'logarithmic',
+            left.steps,
+            undefined,
+            left
+          );
+        } else if (operator === 'dot' || operator === '·') {
+          if (node.preferLeft || node.preferRight) {
+            return right.dot(left);
+          } else {
+            throw new Error(
+              'Dot product between a temperament and an interval must be in the correct order.'
+            );
+          }
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between intervals and temperaments.`
         );
       }
     } else if (left instanceof Val) {
@@ -1617,6 +1687,13 @@ export class ExpressionVisitor {
           case 'dot':
             return left.dot(right);
           case 'tmpr':
+            if (node.preferRight) {
+              const value = (temper.bind(this)(left, right) as Interval).value;
+              const node = intervalValueAs(value, right.node);
+              return new Interval(value, right.domain, 0, node, right);
+            } else if (node.preferLeft) {
+              throw new Error('Cannot prefer the val operand when tempering.');
+            }
             return temper.bind(this)(left, right);
         }
         throw new Error(
@@ -1649,6 +1726,45 @@ export class ExpressionVisitor {
         } else if (operator === '~=') {
           return left.equals(right);
         }
+      }
+    } else if (left instanceof Temperament) {
+      if (right instanceof Temperament) {
+        if (operator === '==') {
+          return left.strictEquals(right);
+        } else if (operator === '<>') {
+          return !left.strictEquals(right);
+        } else if (operator === '~=') {
+          return left.equals(right);
+        }
+      } else if (right instanceof Interval) {
+        if (operator === 'tmpr') {
+          const value = left.temper(right.value);
+          if (node.preferRight) {
+            return new Interval(
+              value,
+              right.domain,
+              right.steps,
+              intervalValueAs(value, right.node),
+              right
+            );
+          } else if (node.preferLeft) {
+            throw new Error(
+              'Cannot prefer the temperament operand when tempering.'
+            );
+          }
+          return new Interval(
+            value,
+            'logarithmic',
+            right.steps,
+            undefined,
+            right
+          );
+        } else if (operator === 'dot' || operator === '·') {
+          return left.dot(right);
+        }
+        throw new Error(
+          `Operator '${operator}' not implemented between temperaments and intervals.`
+        );
       }
     }
     switch (operator) {
@@ -1698,10 +1814,24 @@ export class ExpressionVisitor {
     } else if (left instanceof Color) {
       return this.intrinsicColorCall(left, right);
     } else if (left instanceof ValBasis) {
-      throw new Error('Basis has no intrinsic behavior.');
+      return this.intrinsicValBasisCall(left, right);
+    } else if (left instanceof Temperament) {
+      throw new Error('Temperaments have no intrinsic behavior.');
     }
     const ic = this.implicitCall.bind(this);
     return binaryBroadcast.bind(this)(left, right, ic);
+  }
+
+  protected intrinsicValBasisCall(
+    callee: ValBasis,
+    caller: SonicWeaveValue
+  ): SonicWeaveValue {
+    if (typeof caller === 'boolean' || caller instanceof Interval) {
+      caller = upcastBool(caller);
+      return callee.intrinsicCall(caller);
+    }
+    const ic = this.intrinsicValBasisCall.bind(this);
+    return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
   }
 
   protected intrinsicStringCall(
@@ -1765,6 +1895,8 @@ export class ExpressionVisitor {
       callee = callee.shallowClone();
       callee.color = caller;
       return callee;
+    } else if (caller instanceof ValBasis) {
+      return caller.intrinsicCall(callee);
     }
     const ic = this.intrinsicIntervalCall.bind(this);
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
@@ -1776,6 +1908,8 @@ export class ExpressionVisitor {
   ): SonicWeaveValue {
     if (typeof caller === 'boolean' || caller instanceof Interval) {
       throw new Error('Undefined intrinsic call.');
+    } else if (caller instanceof ValBasis) {
+      return caller.intrinsicCall(callee);
     }
     const ic = this.intrinsicValCall.bind(this);
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
@@ -1895,6 +2029,9 @@ export class ExpressionVisitor {
       operator === '~of' ||
       operator === 'not ~of'
     ) {
+      if (right instanceof ValBasis) {
+        right = right.toArray();
+      }
       right = arrayRecordOrString(
         right,
         `Target of '${operator}' must be an array, record or a string.`
@@ -1922,6 +2059,9 @@ export class ExpressionVisitor {
       operator === '~in' ||
       operator === 'not ~in'
     ) {
+      if (right instanceof ValBasis) {
+        right = right.toArray();
+      }
       right = arrayRecordOrString(
         right,
         `Target of '${operator}' must be an array, record or a string.`

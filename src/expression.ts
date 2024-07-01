@@ -83,7 +83,7 @@ export type Identifier = {
 
 export type ValBasisLiteral = {
   type: 'ValBasisLiteral';
-  basis: ValBasisElement[];
+  basis: ValBasisElement[] | Identifier;
 };
 
 export type IntegerLiteral = {
@@ -247,7 +247,7 @@ export type MonzoLiteral = {
   components: VectorComponent[];
   ups: number;
   lifts: number;
-  basis: BasisElement[];
+  basis: BasisElement[] | Identifier;
 };
 
 export type ValLiteral = {
@@ -1029,6 +1029,9 @@ function formatSparseOffsetVal(literal: SparseOffsetVal) {
 }
 
 function formatMonzo(literal: MonzoLiteral) {
+  if (!Array.isArray(literal.basis)) {
+    throw new Error('Unexpected unpruned identifier.');
+  }
   let result = `${formatUps(literal)}[${formatComponents(literal.components)}>`;
   if (literal.basis.length) {
     result += `@${formatSubgroupBasis(literal.basis)}`;

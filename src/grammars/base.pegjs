@@ -242,8 +242,8 @@ SecondToken   = @'s'   !IdentifierPart
 
 ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
 
-BasisElement = ValBasisElement / RealCentToken / 'r¢' / 'inf' / '1°' / DegreeToken / ''
+BasisElement = ValBasisElement / RealCentToken / 'r¢' / 'inf' / '1°' / DegreeToken
 
 ValBasis = (ValBasisElement / '')|.., '.'|
 
-SubgroupBasis = BasisElement|.., '.'|
+SubgroupBasis = (BasisElement / '')|.., '.'|

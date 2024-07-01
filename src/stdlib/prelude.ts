@@ -374,6 +374,40 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
   return edColor;
 }
 
+riff TE(valsOrCommas, basis=niente) {
+  "Create a Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a different basis or a prime limit may be given."
+  if (not isArray(valsOrCommas)) {
+    valsOrCommas = [valsOrCommas];
+  }
+  if (isVal(valsOrCommas[0])) {
+    return Temperament(valsOrCommas);
+  }
+  return commaList(valsOrCommas, basis, niente, false, true);
+}
+
+riff CTE(valsOrCommas, primeLimit=niente) {
+  "Create a constrained (nearly) Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given."
+  if (not isArray(valsOrCommas)) {
+    valsOrCommas = [valsOrCommas];
+  }
+  const EQUAVE_WEIGHT = 5000;
+  if (isVal(valsOrCommas[0])) {
+    return Temperament(valsOrCommas, EQUAVE_WEIGHT, true);
+  }
+  return commaList(valsOrCommas, primeLimit, EQUAVE_WEIGHT, true, true);
+}
+
+riff POTE(valsOrCommas, primeLimit=niente) {
+  "Create a naïve pure-equaves tuning by normalizing the Tenney-Euclid optimal temperament based on an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given."
+  if (not isArray(valsOrCommas)) {
+    valsOrCommas = [valsOrCommas];
+  }
+  if (isVal(valsOrCommas[0])) {
+    return Temperament(valsOrCommas, niente, true);
+  }
+  return commaList(valsOrCommas, primeLimit, niente, true, true);
+}
+
 (** Scale generation **)
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
