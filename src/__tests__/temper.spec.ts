@@ -2,6 +2,8 @@ import {describe, expect, it} from 'vitest';
 import {
   TuningMap,
   combineTuningMaps,
+  generatorsFromCommas,
+  generatorsFromVals,
   intCombineTuningMaps,
   vanishCommas,
 } from '../temper';
@@ -107,5 +109,33 @@ describe('Comma vanisher', () => {
       '1897.2144',
       '2788.8572',
     ]);
+  });
+});
+
+describe('Generators from commas', () => {
+  it('obtains the generators of meantone', () => {
+    const syntonic = [-4, 4, -1];
+    const [octave, twelfth] = generatorsFromCommas([syntonic]);
+    expect(octave).toEqual([1, 0, 0]);
+    expect(twelfth).toEqual([0, 1, 0]);
+  });
+});
+
+describe('Generators from vals', () => {
+  it('obtains the generators of meantone', () => {
+    const p5 = [5, 8, 12];
+    const p12 = [12, 19, 28];
+    const [octave, twelfth] = generatorsFromVals([p5, p12]);
+    expect(octave).toEqual([1, 0, 0]);
+    expect(twelfth).toEqual([0, 1, 0]);
+  });
+
+  // Doesn't work (yet?)
+  it.skip('obtains the generators of meantone (contorsion)', () => {
+    const p5 = [5, 8, 12];
+    const p7 = [7, 11, 16];
+    const p12 = [12, 19, 28];
+    const gens = generatorsFromVals([p12, p5, p7]);
+    console.log(gens);
   });
 });

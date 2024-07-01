@@ -1,4 +1,4 @@
-import {Interval, Color, Val, ValBasis} from '../interval';
+import {Interval, Color, Val, ValBasis, Temperament} from '../interval';
 import {TimeMonzo, TimeReal} from '../monzo';
 import {
   SonicWeaveValue,
@@ -665,10 +665,18 @@ export class StatementVisitor {
     mutable: boolean,
     value?: SonicWeaveValue
   ) {
-    if (arguments.length < 4 && parameters.defaultValue) {
-      value = subVisitor.visit(parameters.defaultValue);
+    if (arguments.length < 4) {
+      if (parameters.defaultValue !== null) {
+        value = subVisitor.visit(parameters.defaultValue);
+      } else if (parameters.type === 'Parameter' && !mutable) {
+        throw new Error('Missing declared value.');
+      }
     }
     if (parameters.type === 'Parameters') {
+      // TODO: Do this everywhere.
+      if (value instanceof ValBasis) {
+        value = value.toArray();
+      }
       if (!Array.isArray(value)) {
         for (let i = 0; i < parameters.parameters.length; ++i) {
           this.declareVariable(subVisitor, parameters.parameters[i], mutable);
@@ -1038,6 +1046,17 @@ export class StatementVisitor {
       scale.push(upcastBool(value));
     } else if (value instanceof ValBasis) {
       throw new Error('Bases have no action associated with them.');
+    } else if (value instanceof Temperament) {
+      this.spendGas(scale.length);
+      const tempered: Interval[] = [];
+      for (const interval of scale) {
+        const monzo = value.temper(interval.value);
+        tempered.push(
+          new Interval(monzo, 'logarithmic', 0, undefined, interval)
+        );
+      }
+      scale.length = 0;
+      scale.push(...tempered);
     } else if (typeof value === 'object') {
       const entries = Object.entries(value);
       for (const [key, subValue] of entries) {

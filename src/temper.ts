@@ -1,10 +1,17 @@
 import {
   Monzo,
   add,
+  canonical,
+  cokernel,
   gcd,
   inv,
+  kernel,
+  lenstraLenstraLovasz,
   matmul,
   norm,
+  preimage,
+  pruneZeroRows,
+  respell,
   scale,
   sub,
   transpose,
@@ -90,4 +97,21 @@ export function intCombineTuningMaps(
     combine([i]);
   }
   return result;
+}
+
+export function generatorsFromCommas(commas: Monzo[]) {
+  commas = lenstraLenstraLovasz(commas).basis;
+  pruneZeroRows(commas);
+  const canonicalMap = cokernel(transpose(commas));
+  const generators = transpose(preimage(canonicalMap));
+  return generators.map(gen => respell(gen, commas));
+}
+
+export function generatorsFromVals(vals: Monzo[]) {
+  const canonicalMap = canonical(vals);
+  pruneZeroRows(canonicalMap);
+  let commas = transpose(kernel(canonicalMap));
+  commas = lenstraLenstraLovasz(commas).basis;
+  const generators = transpose(preimage(canonicalMap));
+  return generators.map(gen => respell(gen, commas));
 }

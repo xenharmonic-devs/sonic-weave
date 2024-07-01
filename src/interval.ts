@@ -46,21 +46,32 @@ import {
   Fraction,
   FractionValue,
   FractionalMonzo,
+  GramResult,
   LOG_PRIMES,
+  Monzo,
   PRIMES,
   PRIME_CENTS,
   add,
   applyWeights,
+  cokernel,
+  defactoredHnf,
   dot,
   dotPrecise,
+  fractionalDot,
   fractionalLenstraLenstraLovasz,
+  gram,
+  hnf,
+  kernel,
   lenstraLenstraLovasz,
+  preimage,
   primeLimit,
+  pruneZeroRows,
   scale,
   sub,
+  transpose,
   unapplyWeights,
 } from 'xen-dev-utils';
-import {TuningMap} from './temper';
+import {TuningMap, combineTuningMaps} from './temper';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
@@ -1371,6 +1382,8 @@ export class ValBasis {
   ortho: TimeMonzo[];
   dual: TimeMonzo[];
   node?: ValBasisLiteral;
+  tenneyValue_?: number[][];
+  tenneyGram_?: GramResult;
 
   /**
    * Construct a basis for a fractional just intonation subgroup.
@@ -1470,6 +1483,26 @@ export class ValBasis {
     return result;
   }
 
+  get tenneyValue(): number[][] {
+    if (this.tenneyValue_ === undefined) {
+      this.tenneyValue_ = this.value.map(m =>
+        applyWeights(m.toMonzo(), LOG_PRIMES)
+      );
+    }
+    return this.tenneyValue_;
+  }
+
+  get tenneyGram(): GramResult {
+    if (this.tenneyGram_ === undefined) {
+      this.tenneyGram_ = gram(this.tenneyValue);
+    }
+    return this.tenneyGram_;
+  }
+
+  toArray() {
+    return this.value.map(m => new Interval(m, 'linear'));
+  }
+
   /**
    * Perform Lenstra-Lenstra-Lovász basis reduction.
    * @param weighting Weighting to use when judging basis angles and lengths.
@@ -1496,7 +1529,7 @@ export class ValBasis {
     }
     let basis: number[][] = this.value.map(m => m.toMonzo());
     if (weighting === 'tenney') {
-      basis = basis.map(pe => applyWeights(pe, LOG_PRIMES));
+      basis = this.tenneyValue;
     }
     const lll = lenstraLenstraLovasz(basis);
     if (weighting === 'tenney') {
@@ -1509,6 +1542,36 @@ export class ValBasis {
           pe.map(c => new Fraction(Math.round(c)))
         ).pitchAbs()
       )
+    );
+  }
+
+  /**
+   * Respell an interval to a simpler comma-equivalent one using a variant of Babai's nearest plane algorithm for approximate CVP.
+   * @param monzo The rational interval to reduce.
+   * @returns The reduced interval.
+   */
+  respell(monzo: TimeMonzo, weighting: 'none' | 'tenney') {
+    if (weighting === 'none') {
+      for (let i = this.size - 1; i >= 0; --i) {
+        const mu = this.dual[i].dot(monzo);
+        monzo = monzo.div(this.value[i].pow(mu.round())) as TimeMonzo;
+        if (monzo instanceof TimeReal) {
+          throw new Error('Respelling failed.');
+        }
+      }
+      return monzo;
+    }
+    let v = applyWeights(monzo.toMonzo(), LOG_PRIMES);
+    const basis = this.tenneyValue;
+    const dual = this.tenneyGram.dual;
+    for (let i = this.size - 1; i >= 0; --i) {
+      const mu = dot(dual[i], v);
+      v = sub(v, scale(basis[i], Math.round(mu)));
+    }
+    v = unapplyWeights(v, LOG_PRIMES).map(Math.round);
+    return new TimeMonzo(
+      ZERO,
+      v.map(pe => new Fraction(pe))
     );
   }
 
@@ -1581,6 +1644,52 @@ export class ValBasis {
         result,
         scale(ortho[i], (map[i] - cents) / dot(basis[i], ortho[i]))
       );
+    }
+    return result;
+  }
+
+  toSubgroupMonzo(monzo: TimeMonzo): Monzo {
+    const result: Monzo = [];
+    for (let i = 0; i < this.size; ++i) {
+      const c = this.dual[i].dot(monzo);
+      if (c.d !== 1) {
+        throw new Error('Monzo is fractional inside subgroup.');
+      }
+      result.push(c.valueOf());
+      monzo = monzo.div(this.ortho[i].pow(c)) as TimeMonzo;
+      if (monzo instanceof TimeReal) {
+        throw new Error('Subgroup conversion failed.');
+      }
+    }
+    if (!(monzo.isScalar() && monzo.isUnity())) {
+      throw new Error('Monzo outside subgroup.');
+    }
+    return result;
+  }
+
+  toSmonzoAndResidual(monzo: TimeMonzo): [FractionalMonzo, TimeMonzo] {
+    const smonzo: FractionalMonzo = [];
+    for (let i = 0; i < this.size; ++i) {
+      const c = this.dual[i].dot(monzo);
+      smonzo.push(c);
+      monzo = monzo.div(this.ortho[i].pow(c)) as TimeMonzo;
+      if (monzo instanceof TimeReal) {
+        throw new Error('Subgroup conversion failed.');
+      }
+    }
+    return [smonzo, monzo];
+  }
+
+  dot(subgroupMonzo: Monzo): TimeMonzo {
+    if (!subgroupMonzo.length) {
+      return new TimeMonzo(ZERO, []);
+    }
+    let result = this.value[0].pow(subgroupMonzo[0]);
+    for (let i = 1; i < subgroupMonzo.length; ++i) {
+      result = result.mul(this.value[i].pow(subgroupMonzo[i]));
+    }
+    if (result instanceof TimeReal) {
+      throw new Error('Smonzo conversion failed.');
     }
     return result;
   }
@@ -1745,6 +1854,10 @@ export class Val {
     return this.value.dot(this.equave);
   }
 
+  get sval(): number[] {
+    return this.basis.value.map(m => this.value.dot(m).valueOf());
+  }
+
   /**
    * The additive inverse of this val.
    * @returns The negative of this val.
@@ -1900,8 +2013,8 @@ export class Val {
     const jip = this.basis.value.map(m => m.totalCents());
     const divisions = this.divisions.valueOf();
     if (!divisions) {
-      const map = this.basis.value.map(m => this.value.dot(m).valueOf());
-      if (map.some(Boolean)) {
+      const sval = this.sval;
+      if (sval.some(Boolean)) {
         return Infinity;
       }
       const result = dotPrecise(weights, weights);
@@ -1911,8 +2024,8 @@ export class Val {
       return Math.sqrt(result / this.basis.numberOfComponents) * jip[0];
     }
     const n = jip[0] / this.divisions.valueOf();
-    const map = this.basis.value.map(m => this.value.dot(m).valueOf() * n);
-    const diff = sub(weights, applyWeights(unapplyWeights(map, jip), weights));
+    const sval = this.sval.map(x => x * n);
+    const diff = sub(weights, applyWeights(unapplyWeights(sval, jip), weights));
     const result = dotPrecise(diff, diff);
     if (unnormalized) {
       return result;
@@ -1966,6 +2079,216 @@ export class Val {
       return `withBasis(${result}, ${this.basis.toString()})`;
     }
     return result;
+  }
+}
+
+export class Temperament {
+  canonicalMapping: number[][];
+  basis: ValBasis;
+  weights: number[];
+  pureEquaves: boolean;
+  commaBasis: ValBasis;
+  preimage: ValBasis;
+  private subgroupMapping_?: number[];
+
+  constructor(
+    mapping: number[][],
+    basis?: ValBasis,
+    weights?: number[],
+    pureEquaves = false
+  ) {
+    if (!basis) {
+      basis = new ValBasis(mapping[0].length);
+    }
+    this.basis = basis;
+
+    // Remove contorsion
+    this.canonicalMapping = defactoredHnf(mapping);
+
+    if (weights === undefined) {
+      weights = [];
+    } else {
+      weights = [...weights];
+    }
+    while (weights.length < basis.size) {
+      weights.push(1);
+    }
+    while (weights.length > basis.size) {
+      weights.pop();
+    }
+    this.weights = weights;
+    this.pureEquaves = pureEquaves;
+
+    // Compute comma basis
+    const scommas = transpose(kernel(this.canonicalMapping));
+    this.commaBasis = new ValBasis(scommas.map(c => basis.dot(c))).lll(
+      'tenney'
+    );
+
+    // Compute mapping generators
+    const sgens = transpose(preimage(this.canonicalMapping));
+    const gens = sgens.map(g => basis.dot(g));
+    this.preimage = new ValBasis(
+      gens.map(g => this.commaBasis.respell(g, 'tenney'))
+    );
+
+    // Make mapping generators positive
+    const pi = this.preimage.value;
+    for (let i = 0; i < pi.length; ++i) {
+      if (pi[i].totalCents() < 0) {
+        pi[i] = pi[i].inverse();
+        this.canonicalMapping[i] = this.canonicalMapping[i].map(c => -c);
+      }
+    }
+  }
+
+  static fromVals(
+    vals: Val[],
+    weights?: number[],
+    pureEquaves = false
+  ): Temperament {
+    if (!vals.length) {
+      throw new Error(
+        'At least one val is required when constructing a temperament.'
+      );
+    }
+    const basis = vals[0].basis;
+    for (const val of vals.slice(1)) {
+      if (!val.basis.equals(basis)) {
+        throw new Error('Bases must match when constructing a temperament.');
+      }
+    }
+    let svals = vals.map(val => val.sval);
+    svals = hnf(svals);
+
+    // Remove rank deficiency
+    pruneZeroRows(svals);
+
+    return new Temperament(svals, basis, weights, pureEquaves);
+  }
+
+  static fromCommas(
+    commas: TimeMonzo[],
+    basis?: ValBasis,
+    weights?: number[],
+    pureEquaves = false,
+    fullPrimeLimit = false
+  ) {
+    let smonzos: Monzo[] = [];
+    if (basis) {
+      smonzos.push(...commas.map(basis.toSubgroupMonzo.bind(basis)));
+    } else {
+      for (const comma of commas) {
+        if (!(comma.isScalar() && comma.isFractional())) {
+          throw new Error('Only relative rational commas supported.');
+        }
+      }
+      const factorizations = commas.map(comma => comma.factorize());
+      const primes = new Set<number>();
+      for (const fs of factorizations) {
+        for (const prime of fs.keys()) {
+          if (prime === 0) {
+            throw new Error('Zero cannot be tempered out.');
+          }
+          if (prime < 0) {
+            throw new Error('Negative values cannot be tempered out.');
+          }
+          primes.add(prime);
+        }
+      }
+      let subgroup = Array.from(primes);
+      subgroup.sort((a, b) => a - b);
+      if (fullPrimeLimit) {
+        const limit = PRIMES.indexOf(subgroup.pop()!) + 1;
+        subgroup = PRIMES.slice(0, limit);
+      }
+      basis = new ValBasis(subgroup.map(p => TimeMonzo.fromFraction(p)));
+      for (const fs of factorizations) {
+        smonzos.push(subgroup.map(p => (fs.get(p) ?? 0).valueOf()));
+      }
+    }
+    smonzos = hnf(smonzos);
+
+    // Remove redundant commas
+    pruneZeroRows(smonzos);
+
+    return new Temperament(
+      cokernel(transpose(smonzos)),
+      basis,
+      weights,
+      pureEquaves
+    );
+  }
+
+  get subgroupMapping(): number[] {
+    if (this.subgroupMapping_ === undefined) {
+      const jip = this.basis.value.map(m => m.totalCents());
+      const weights: number[] = [];
+      for (let i = 0; i < this.basis.size; ++i) {
+        weights.push(this.weights[i] / this.basis.value[i].tenneyHeight());
+      }
+      const mapping = combineTuningMaps(
+        applyWeights(jip, weights),
+        this.canonicalMapping.map(m => applyWeights(m, weights))
+      );
+      this.subgroupMapping_ = unapplyWeights(mapping, weights);
+      if (this.pureEquaves) {
+        const n = jip[0] / this.subgroupMapping_[0];
+        this.subgroupMapping_ = this.subgroupMapping_.map(m => m * n);
+      }
+    }
+    return this.subgroupMapping_;
+  }
+
+  respell(monzo: TimeMonzo): TimeMonzo {
+    const [smonzo, residual] = this.basis.toSmonzoAndResidual(monzo);
+    monzo = new TimeMonzo(ZERO, []);
+    const gens = this.preimage.value;
+    for (let i = 0; i < gens.length; ++i) {
+      monzo = monzo.mul(
+        gens[i].pow(fractionalDot(this.canonicalMapping[i], smonzo))
+      ) as TimeMonzo;
+    }
+    const result = this.commaBasis.respell(monzo, 'tenney').mul(residual);
+    if (result instanceof TimeReal) {
+      throw new Error('Respelling failed.');
+    }
+    return result;
+  }
+
+  temper(monzo: TimeMonzo | TimeReal): TimeReal {
+    if (monzo instanceof TimeReal) {
+      return monzo;
+    }
+    const [smonzo, residual] = this.basis.toSmonzoAndResidual(monzo);
+    return TimeReal.fromCents(
+      dot(
+        smonzo.map(f => f.valueOf()),
+        this.subgroupMapping
+      )
+    ).mul(residual);
+  }
+
+  toString() {
+    let result = 'Temperament([';
+    result += this.canonicalMapping
+      .map(m => '⟨' + m.join(' ') + ']')
+      .join(', ');
+    result += ']';
+    if (!this.basis.isStandard(true)) {
+      result += ` ${this.basis}`;
+    }
+    if (this.weights.every(w => w === 1)) {
+      if (this.pureEquaves) {
+        result += ', niente, true';
+      }
+    } else {
+      result += ', [' + this.weights.map(w => `${w}r`).join(', ') + ']';
+      if (this.pureEquaves) {
+        result += ', true';
+      }
+    }
+    return result + ')';
   }
 }
 

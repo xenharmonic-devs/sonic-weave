@@ -1681,4 +1681,59 @@ describe('SonicWeave standard library', () => {
       '[6b@2.3.5.7, 10@2.3.5.7, 16@2.3.5.7, 20@2.3.5.7, 26@2.3.5.7]'
     );
   });
+
+  it('makes standard POTE blackwood', () => {
+    const scale = expand(`{
+      const blackwood = POTE(256/243, 5);
+      const [period, gen] = generatorsOf(blackwood);
+      const numPeriods = periodsOf(blackwood);
+      rank2(gen, numPeriods, 0, period, numPeriods);
+      cents(£, 3);
+    }`);
+    expect(scale).toEqual([
+      '159.594',
+      '240.',
+      '399.594',
+      '480.',
+      '639.594',
+      '720.',
+      '879.594',
+      '960.',
+      '1119.594',
+      '1200.',
+    ]);
+  });
+
+  it('makes standard CTE augmented', () => {
+    const scale = expand(`{
+      const augmented = CTE(128/125);
+      const [period, gen] = generatorsOf(augmented);
+      const numPeriods = periodsOf(augmented);
+      rank2(gen, numPeriods, numPeriods, period, numPeriods);
+      cents(£, 3);
+    }`);
+    expect(scale).toEqual([
+      '98.045',
+      '301.955',
+      '400.',
+      '498.045',
+      '701.955',
+      '800.',
+      '898.045',
+      '1101.955',
+      '1200.',
+    ]);
+  });
+
+  it('makes standard TE mirkwai', () => {
+    const scale = expand(`{
+      const mirkwai = TE(16875/16807)
+      const [period, gen1, gen2] = mappingBasis(mirkwai)
+      gen1;gen2;period
+      vstr($)
+      mirkwai
+      cents(£, 3)
+    }`);
+    expect(scale).toEqual(['1901.783 "3"', '583.905 "7/5"', '1200. "2"']);
+  });
 });

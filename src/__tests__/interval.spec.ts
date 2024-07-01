@@ -1,6 +1,12 @@
 import {describe, it, expect} from 'vitest';
 import {TimeMonzo, TimeReal} from '../monzo';
-import {Interval, ValBasis, intervalValueAs} from '../interval';
+import {
+  Interval,
+  Temperament,
+  Val,
+  ValBasis,
+  intervalValueAs,
+} from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
 import {dot} from 'xen-dev-utils';
@@ -234,5 +240,55 @@ describe('(Val) subgroup basis', () => {
     expect(dot(basis.value[0].toIntegerMonzo(), fixed)).toBeCloseTo(700);
     expect(dot(basis.value[1].toIntegerMonzo(), fixed)).toBeCloseTo(200);
     expect(dot(basis.value[2].toIntegerMonzo(), fixed)).toBeCloseTo(600);
+  });
+});
+
+describe('Temperament', () => {
+  it('constructs septimal magic from commas', () => {
+    const temperament = Temperament.fromCommas([
+      TimeMonzo.fromFraction('225/224'),
+      TimeMonzo.fromFraction('245/243'),
+    ]);
+    expect(temperament.canonicalMapping).toEqual([
+      [1, 0, 2, -1],
+      [0, 5, 1, 12],
+    ]);
+  });
+
+  it('constructs septimal magic from vals', () => {
+    const temperament = Temperament.fromVals([
+      Val.fromArray([19, 30, 44, 53]),
+      Val.fromArray([22, 35, 51, 62]),
+    ]);
+    expect(temperament.canonicalMapping).toEqual([
+      [1, 0, 2, -1],
+      [0, 5, 1, 12],
+    ]);
+  });
+
+  it('obtains the commas of septimal magic', () => {
+    const temperament = new Temperament([
+      [1, 0, 2, -1],
+      [0, 5, 1, 12],
+    ]);
+    expect(temperament.commaBasis.toString()).toBe('@225/224.245/243');
+  });
+
+  it('obtains the generators of septimal magic', () => {
+    const temperament = new Temperament([
+      [1, 0, 2, -1],
+      [0, 5, 1, 12],
+    ]);
+    expect(temperament.preimage.toString()).toBe('@2.5/4');
+  });
+
+  it('respells square roots away', () => {
+    const temperament = Temperament.fromCommas([
+      TimeMonzo.fromFraction('65536/65219'),
+    ]);
+    expect(temperament.basis.toString()).toBe('@2.7.11');
+    const sharpMinorThird = TimeMonzo.fromEqualTemperament('1/2', '16/11');
+    const respelled = temperament.respell(sharpMinorThird);
+    expect(respelled.toString()).toBe('77/64');
   });
 });

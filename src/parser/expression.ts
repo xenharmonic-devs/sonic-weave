@@ -31,6 +31,7 @@ import {
   Val,
   IntervalDomain,
   ValBasis,
+  Temperament,
 } from '../interval';
 import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo';
 import {
@@ -116,7 +117,8 @@ export function arrayRecordOrString(
     value instanceof Interval ||
     value instanceof Val ||
     value instanceof Color ||
-    value instanceof ValBasis
+    value instanceof ValBasis ||
+    value instanceof Temperament
   ) {
     throw new Error(message);
   }
@@ -1170,6 +1172,7 @@ export class ExpressionVisitor {
     } else if (
       operand instanceof ValBasis ||
       operand instanceof Color ||
+      operand instanceof Temperament ||
       typeof operand === 'string' ||
       typeof operand === 'function' ||
       operand === undefined
