@@ -1369,4 +1369,8 @@ describe('Negative tests', () => {
   it('rejects unclosed comments', () => {
     expect(() => parse('(* comment )')).toThrow();
   });
+
+  it('rejects 01', () => {
+    expect(() => parse('01')).toThrow();
+  });
 });

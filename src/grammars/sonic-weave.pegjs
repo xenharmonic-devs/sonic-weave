@@ -1188,6 +1188,9 @@ NumericLiteral
         flavor,
       }
     }
+    if (fractional.length) {
+      error('Invalid numeric literal.');
+    }
     return {
       type: 'IntegerLiteral',
       value: whole,
