@@ -79,4 +79,9 @@ describe('Parenthesis counter', () => {
     const counts = parse('[1 2>@2..');
     expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
   });
+
+  it('parses ([1])', () => {
+    const counts = parse('([1])');
+    expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
+  });
 });

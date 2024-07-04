@@ -22,7 +22,15 @@ Expression
   / MonzoLiteral
   / Array
   / ValLiteral
+  / ParenthesizedExpression
   / Other
+
+ParenthesizedExpression = '(' _ Expression _ closed: ')'? {
+  if (closed) {
+    return empty;
+  }
+  return {parens: 1, squares: 0, curlies: 0};
+}
 
 RangeOrSlice
   = '[' _ Expression _ '..' _ '<'? _ Expression _ closed: ']'? {
@@ -54,7 +62,17 @@ ValLiteral
     return empty;
   }
 
-Other = (!WhiteSpace !LineTerminatorSequence !Comment !']' SourceCharacter)+ {
+Other = _ fragments: OtherFragment|1.., _| _ {
+  const result = {parens: 0, squares: 0, curlies: 0};
+  for (const counts of fragments) {
+    result.parens += counts.parens;
+    result.squares += counts.squares;
+    result.curlies += counts.curlies;
+  }
+  return result;
+}
+
+OtherFragment = (!WhiteSpace !LineTerminatorSequence !Comment !'"' !"'" !'[' !']' !'(' !')' SourceCharacter)+ {
   const t = text();
   const parens = (t.match(/\(/g) ?? []).length - (t.match(/\)/g) ?? []).length;
   const squares = (t.match(/\[/g) ?? []).length - (t.match(/\]/g) ?? []).length;
