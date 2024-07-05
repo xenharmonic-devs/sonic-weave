@@ -2685,4 +2685,12 @@ describe('SonicWeave expression evaluator', () => {
     const str = evaluate('A4 = 440z;str(A4 *~ a1)');
     expect(str).toBe('[1 -8 7 1 0 1>@Hz.2..');
   });
+
+  it('has sanity limits on Pythagorean conversion', () => {
+    expect(() => evaluate('FJS([-1000 1000>)')).toThrow();
+  });
+
+  it('has sanity limits on FJS conversion', () => {
+    expect(() => evaluate('FJS([0 -2000 500>)')).toThrow();
+  });
 });

@@ -17,8 +17,10 @@ import {
   getLumisComma,
   getSyntonicRastmic,
 } from './extra-commas';
+import {ZERO} from './utils';
 
-const ZERO = new Fraction(0);
+// Maximum exponent of a higher prime when converting to FJS.
+const MAX_EXPONENT = Object.freeze(new Fraction(100));
 
 // Classic radius of tolerance.
 const RADIUS_OF_TOLERANCE = valueToCents(65 / 63);
@@ -346,6 +348,9 @@ export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
   const subscripts: FJSInflection[] = [];
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
+    if (pe[i].abs().compare(MAX_EXPONENT) > 0) {
+      return undefined;
+    }
     let sup = superscripts;
     let sub = subscripts;
     if (swaps[i]) {
@@ -400,7 +405,11 @@ export function asFJS(monzo: TimeMonzo, flavor: FJSFlavor): FJS | undefined {
       return undefined;
     }
   }
-  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
+  const breakdown = uninflect(monzo, flavor);
+  if (!breakdown) {
+    return undefined;
+  }
+  const {pythagoreanMonzo, superscripts, subscripts} = breakdown;
   const pythagorean = monzoToNode(pythagoreanMonzo);
   if (!pythagorean) {
     return undefined;
@@ -428,7 +437,11 @@ export function asAbsoluteFJS(
       return undefined;
     }
   }
-  const {pythagoreanMonzo, superscripts, subscripts} = uninflect(monzo, flavor);
+  const breakdown = uninflect(monzo, flavor);
+  if (!breakdown) {
+    return undefined;
+  }
+  const {pythagoreanMonzo, superscripts, subscripts} = breakdown;
   const pitch = absoluteToNode(pythagoreanMonzo);
   if (!pitch) {
     return undefined;
