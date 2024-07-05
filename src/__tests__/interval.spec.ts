@@ -291,4 +291,63 @@ describe('Temperament', () => {
     const respelled = temperament.respell(sharpMinorThird);
     expect(respelled.toString()).toBe('77/64');
   });
+
+  it('construct 5-limit JI (vals)', () => {
+    const ji5 = Temperament.fromVals([
+      Val.fromArray([2, 3, 5]),
+      Val.fromArray([3, 5, 7]),
+      Val.fromArray([4, 6, 9]),
+    ]);
+    expect(ji5.canonicalMapping).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  it('construct 5-limit JI (commas)', () => {
+    const ji5 = Temperament.fromCommas([], new ValBasis(3));
+    expect(ji5.canonicalMapping).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  it('rejects the trivial temperament (vals)', () => {
+    expect(() => Temperament.fromVals([Val.fromArray([0, 0, 0])])).toThrow(
+      'Constructing the trivial temperament is not supported.'
+    );
+  });
+
+  it('rejects the trivial temperament (commas)', () => {
+    expect(() =>
+      Temperament.fromCommas([
+        TimeMonzo.fromFraction('9/8'),
+        TimeMonzo.fromFraction('256/243'),
+      ])
+    ).toThrow('Constructing the trivial temperament is not supported.');
+  });
+
+  it('canonizes mirkwai to positive preimage', () => {
+    const mirkwai = Temperament.fromCommas(
+      [TimeMonzo.fromFraction('16875/16807')],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
+    expect(mirkwai.canonicalMapping).toEqual([
+      [1, 0, 0, 0],
+      [0, 1, 3, 3],
+      [-0, -0, -5, -4],
+    ]);
+    expect(mirkwai.preimage.toString()).toEqual('@2.3.7/5');
+    expect(mirkwai.generators.map(g => g.toFixed(3))).toEqual([
+      '1200.000',
+      '1901.783',
+      '583.905',
+    ]);
+  });
 });

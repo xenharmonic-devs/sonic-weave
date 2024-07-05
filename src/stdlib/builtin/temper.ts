@@ -272,8 +272,8 @@ function generatorsOf(
   if (!(temperament instanceof Temperament)) {
     throw new Error('A temperament is required.');
   }
-  return temperament.preimage.value.map(
-    gen => new Interval(temperament.temper(gen), 'logarithmic')
+  return temperament.generators.map(
+    cents => new Interval(TimeReal.fromCents(cents), 'logarithmic')
   );
 }
 generatorsOf.__doc__ =
@@ -287,7 +287,7 @@ function periodsOf(this: ExpressionVisitor, temperament: SonicWeaveValue) {
   if (!(temperament instanceof Temperament)) {
     throw new Error('A temperament is required.');
   }
-  return fromInteger(temperament.canonicalMapping[0][0]);
+  return fromInteger(temperament.numberOfPeriods);
 }
 periodsOf.__doc__ = 'Obtain the number of periods per equave in a temperament.';
 periodsOf.__node__ = builtinNode(periodsOf);

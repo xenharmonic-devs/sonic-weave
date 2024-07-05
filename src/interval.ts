@@ -59,6 +59,7 @@ import {
   defactoredHnf,
   dot,
   dotPrecise,
+  eye,
   fractionalDot,
   fractionalLenstraLenstraLovasz,
   gram,
@@ -1399,11 +1400,11 @@ const ZOMBIE = new Interval(TWO, 'logarithmic');
  */
 export class ValBasis {
   value: TimeMonzo[];
-  ortho: TimeMonzo[];
-  dual: TimeMonzo[];
   node?: ValBasisLiteral;
-  tenneyValue_?: number[][];
-  tenneyGram_?: GramResult;
+  private ortho_?: TimeMonzo[];
+  private dual_?: TimeMonzo[];
+  private tenneyValue_?: number[][];
+  private tenneyGram_?: GramResult;
 
   /**
    * Construct a basis for a fractional just intonation subgroup.
@@ -1417,8 +1418,8 @@ export class ValBasis {
       this.value = PRIMES.slice(0, numberOfComponents).map(p =>
         TimeMonzo.fromFraction(p, numberOfComponents)
       );
-      this.ortho = this.value;
-      this.dual = this.value;
+      this.ortho_ = this.value;
+      this.dual_ = this.value;
       return;
     }
     basis = [...basis];
@@ -1443,7 +1444,7 @@ export class ValBasis {
     }
 
     if (isNaN(numberOfComponents)) {
-      throw new Error('Unable to determine val prime limit.');
+      throw new Error('Unable to determine val basis prime limit.');
     }
 
     for (let i = 0; i < basis.length; ++i) {
@@ -1453,23 +1454,6 @@ export class ValBasis {
       }
     }
     this.value = basis;
-
-    // Perform Gram process
-    this.ortho = [...this.value];
-    this.dual = [];
-
-    for (let i = 0; i < this.ortho.length; ++i) {
-      for (let j = 0; j < i; ++j) {
-        const oi = this.ortho[i].div(
-          this.ortho[j].pow(this.dual[j].dot(this.ortho[i]))
-        );
-        if (oi instanceof TimeReal) {
-          throw new Error('Basis orthoginalization failed.');
-        }
-        this.ortho[i] = oi;
-      }
-      this.dual.push(this.ortho[i].geometricInverse());
-    }
   }
 
   /**
@@ -1578,6 +1562,47 @@ export class ValBasis {
     const subgroup = Array.from(primes);
     subgroup.sort((a, b) => a - b);
     return new ValBasis(subgroup.map(p => TimeMonzo.fromFraction(p)));
+  }
+
+  /**
+   * The unnormalized Gram-Schmidt orthogonalized basis.
+   */
+  get ortho(): TimeMonzo[] {
+    if (this.ortho_ === undefined) {
+      this.performGramProcess();
+    }
+    return this.ortho_!;
+  }
+
+  /**
+   * The geometric duals of the unnormalized Gram-Schmidt orthogonalized basis.
+   */
+  get dual(): TimeMonzo[] {
+    if (this.dual_ === undefined) {
+      this.performGramProcess();
+    }
+    return this.dual_!;
+  }
+
+  private performGramProcess() {
+    if (this.ortho_ !== undefined) {
+      return;
+    }
+    this.ortho_ = [...this.value];
+    this.dual_ = [];
+
+    for (let i = 0; i < this.ortho_.length; ++i) {
+      for (let j = 0; j < i; ++j) {
+        const oi = this.ortho_[i].div(
+          this.ortho_[j].pow(this.dual_[j].dot(this.ortho_[i]))
+        );
+        if (oi instanceof TimeReal) {
+          throw new Error('Basis orthoginalization failed.');
+        }
+        this.ortho_[i] = oi;
+      }
+      this.dual_.push(this.ortho_[i].geometricInverse());
+    }
   }
 
   /**
@@ -2227,6 +2252,7 @@ export class Temperament {
   pureEquaves: boolean;
   metric: FormalPrimeMetric;
   commaBasis: ValBasis;
+  sgens: number[][];
   preimage: ValBasis;
   private subgroupMapping_?: number[];
 
@@ -2244,6 +2270,9 @@ export class Temperament {
     pureEquaves = false,
     metric: FormalPrimeMetric = 'subgroup'
   ) {
+    if (!mapping.length) {
+      throw new Error('Constructing the trivial temperament is not supported.');
+    }
     if (!basis) {
       basis = new ValBasis(mapping[0].length);
     }
@@ -2274,8 +2303,8 @@ export class Temperament {
     );
 
     // Compute mapping generators
-    const sgens = transpose(preimage(this.canonicalMapping));
-    const gens = sgens.map(g => basis!.dot(g));
+    this.sgens = transpose(preimage(this.canonicalMapping));
+    const gens = this.sgens.map(g => basis!.dot(g));
     this.preimage = new ValBasis(
       gens.map(g => this.commaBasis.respell(g, 'tenney'))
     );
@@ -2284,7 +2313,8 @@ export class Temperament {
     const pi = this.preimage.value;
     for (let i = 0; i < pi.length; ++i) {
       if (pi[i].totalCents() < 0) {
-        pi[i] = pi[i].inverse();
+        pi[i] = pi[i].inverse(); // Technically legal because the ortho basis hasn't been computed yet.
+        this.sgens[i] = this.sgens[i].map(c => -c);
         this.canonicalMapping[i] = this.canonicalMapping[i].map(c => -c);
       }
     }
@@ -2347,6 +2377,20 @@ export class Temperament {
     metric: FormalPrimeMetric = 'subgroup',
     fullPrimeLimit = false
   ) {
+    if (!commas.length) {
+      if (basis === undefined) {
+        throw new Error(
+          'An explicit subgroup is required with an empty comma list.'
+        );
+      }
+      return new Temperament(
+        eye(basis.size),
+        basis,
+        weights,
+        pureEquaves,
+        metric
+      );
+    }
     // Use bigints to avoid overflow in intermediate results.
     let smonzos: bigint[][] = [];
     if (basis) {
@@ -2443,6 +2487,28 @@ export class Temperament {
       this.subgroupMapping_ = this.subgroupMapping_.map(m => m * n);
     }
     return this.subgroupMapping_;
+  }
+
+  /**
+   * Obtain the number of independent generators of this temperament.
+   */
+  get rank() {
+    return this.canonicalMapping.length;
+  }
+
+  /**
+   * Obtain the generators of this temperament in cents.
+   * @returns An array of cents values.
+   */
+  get generators(): number[] {
+    return this.sgens.map(g => dotPrecise(this.subgroupMapping, g));
+  }
+
+  /**
+   * Obtain the number of periods per first basis element (octave or equave).
+   */
+  get numberOfPeriods(): number {
+    return this.canonicalMapping[0][0];
   }
 
   /**
