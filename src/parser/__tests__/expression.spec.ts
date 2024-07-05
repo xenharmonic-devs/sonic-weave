@@ -2680,4 +2680,9 @@ describe('SonicWeave expression evaluator', () => {
     );
     expect(fraction).toBe('11/9');
   });
+
+  it("doesn't aspire relative when the value is absolute", () => {
+    const str = evaluate('A4 = 440z;str(A4 *~ a1)');
+    expect(str).toBe('[1 -8 7 1 0 1>@Hz.2..');
+  });
 });

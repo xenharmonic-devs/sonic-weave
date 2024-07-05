@@ -391,6 +391,9 @@ export function asFJS(monzo: TimeMonzo, flavor: FJSFlavor): FJS | undefined {
   if (monzo.residual.s !== 1) {
     return undefined;
   }
+  if (!monzo.isScalar()) {
+    return undefined;
+  }
   const pe = monzo.primeExponents;
   for (let i = 2; i < pe.length; ++i) {
     if (pe[i].d > 1) {
