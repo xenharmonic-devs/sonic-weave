@@ -365,7 +365,7 @@ describe('SonicWeave vector broadcasting', () => {
     expect(Object.keys(rec)).toHaveLength(2);
   });
 
-  it.each(['atan2', 'atanXY', 'gcd', 'lcm'])(
+  it.each(['atan2', 'atanXY', 'gcd', 'lcm', 'S'])(
     'broadcasts binary function %s',
     fn => {
       const z = evaluateExpression(`${fn}(4, 6)`) as Interval;

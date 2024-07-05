@@ -35,6 +35,7 @@ import {
   MonzoLiteral,
   NedjiLiteral,
   RadicalLiteral,
+  SquareSuperparticular,
   VectorComponent,
   formatAbsoluteFJS,
   fractionToVectorComponent,
@@ -918,6 +919,37 @@ function primeMonzo(
 primeMonzo.__doc__ =
   'Convert interval to a prime count vector a.k.a. monzo with all primes listed in the subgroup part.';
 primeMonzo.__node__ = builtinNode(primeMonzo);
+
+function S(
+  this: ExpressionVisitor,
+  start: SonicWeaveValue,
+  end: SonicWeaveValue
+): SonicWeaveValue {
+  if (typeof start === 'boolean' || start instanceof Interval) {
+    if (typeof end === 'boolean' || end instanceof Interval) {
+      start = upcastBool(start);
+      end = upcastBool(end);
+      const node: SquareSuperparticular = {
+        type: 'SquareSuperparticular',
+        start: start.value.toBigInteger(),
+        end: end.value.toBigInteger(),
+      };
+      return this.visit(node);
+    } else if (end === undefined) {
+      start = upcastBool(start);
+      const node: SquareSuperparticular = {
+        type: 'SquareSuperparticular',
+        start: start.value.toBigInteger(),
+        end: null,
+      };
+      return this.visit(node);
+    }
+  }
+  return binaryBroadcast.bind(this)(start, end, S.bind(this));
+}
+S.__doc__ =
+  'Compute (k²)/(k²-1) or a product of a range of such square-superparticulars.';
+S.__node__ = builtinNode(S);
 
 // == Type detection ==
 function isInterval(value: SonicWeaveValue) {
@@ -2585,6 +2617,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   labelAbsoluteFJS,
   monzo: toMonzo,
   primeMonzo,
+  S,
   // Type detection
   isInterval,
   isVal,

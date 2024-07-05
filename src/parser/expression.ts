@@ -471,7 +471,12 @@ export class ExpressionVisitor {
     return this.rootContext.templateArguments[node.index];
   }
 
-  protected visitSquareSuperparticular(node: SquareSuperparticular) {
+  /**
+   * Construct a square-superparticular from an AST node.
+   * @param node AST node defining the S-expression.
+   * @returns The square-superparticular or a product of a range of them as a logarithmic interval.
+   */
+  visitSquareSuperparticular(node: SquareSuperparticular) {
     if (node.end) {
       let numerator = 2n * node.end;
       let denominator = node.end + 1n;

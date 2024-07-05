@@ -372,6 +372,9 @@ RGBA color (Red range 0-255, Green range 0-255, Blue range 0-255, Alpha range 0-
 ### round(*interval*)
 Round value to the nearest integer.
 
+### S(*start*, *end*)
+Compute (k²)/(k²-1) or a product of a range of such square-superparticulars.
+
 ### shift(*scale = $$*)
 Remove and return the first interval in the current/given scale.
 

@@ -2693,4 +2693,10 @@ describe('SonicWeave expression evaluator', () => {
   it('has sanity limits on FJS conversion', () => {
     expect(() => evaluate('FJS([0 -2000 500>)')).toThrow();
   });
+
+  it('has computed S-expressions', () => {
+    const {interval, fraction} = parseSingle('S(5)');
+    expect(interval.domain).toBe('logarithmic');
+    expect(fraction).toBe('25/24');
+  });
 });
