@@ -342,4 +342,50 @@ describe('Features related to tempering', () => {
     );
     expect(nah).toBe(false);
   });
+
+  it('respells porcupine (commas)', () => {
+    const scale = expand(`
+      rank2(10/9, 7, 0, 2/1, 1, 164.1659)
+      respell(250/243)
+    `);
+    expect(scale).toEqual([
+      '10/9',
+      '6/5',
+      '4/3',
+      '36/25',
+      '8/5',
+      '16/9',
+      '48/25',
+      '2/1',
+    ]);
+  });
+
+  it('respells porcupine (temperament)', () => {
+    const scale = expand(`
+      rank2(10/9, 7, 0, 2/1, 1, 164.1659)
+      respell(commaList(250/243))
+    `);
+    expect(scale).toEqual([
+      '10/9',
+      '6/5',
+      '4/3',
+      '36/25',
+      '8/5',
+      '16/9',
+      '48/25',
+      '2/1',
+    ]);
+  });
+
+  it('respells 60/49 to 49/40 using miracle commas', () => {
+    const simple = evaluate('str(respell([225/224, 1029/1024], 2)(60/49))');
+    expect(simple).toBe('49/40');
+  });
+
+  it('respells 60/49 to 49/40 using miracle temperament', () => {
+    const simple = evaluate(
+      'str(respell(commaList([225/224, 1029/1024]), 2)(60/49))'
+    );
+    expect(simple).toBe('49/40');
+  });
 });

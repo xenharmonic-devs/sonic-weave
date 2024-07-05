@@ -547,7 +547,7 @@ function respellWithCommas(
         value,
         interval.domain,
         interval.steps,
-        intervalValueAs(value, interval.node),
+        intervalValueAs(value, interval.node, true),
         interval
       );
     }
@@ -555,7 +555,7 @@ function respellWithCommas(
       value.pow(exponent),
       interval.domain,
       interval.steps,
-      intervalValueAs(value, interval.node),
+      intervalValueAs(value, interval.node, true),
       interval
     );
   }
@@ -583,24 +583,27 @@ function respell(
   }
   if (commaBasis instanceof Temperament) {
     const temperament = commaBasis;
-    // eslint-disable-next-line no-inner-declarations
-    function mapper(interval: SonicWeaveValue) {
-      interval = upcastBool(interval);
-      if (interval.value instanceof TimeReal) {
-        return interval;
+    if (searchRadius === undefined) {
+      // eslint-disable-next-line no-inner-declarations
+      function mapper(interval: SonicWeaveValue) {
+        interval = upcastBool(interval);
+        if (interval.value instanceof TimeReal) {
+          return interval;
+        }
+        const value = temperament.respell(interval.value);
+        return new Interval(
+          value,
+          interval.domain,
+          interval.steps,
+          intervalValueAs(value, interval.node, true),
+          interval
+        );
       }
-      const value = temperament.respell(interval.value);
-      return new Interval(
-        value,
-        interval.domain,
-        interval.steps,
-        intervalValueAs(value, interval.node),
-        interval
-      );
+      mapper.__doc__ = 'Respeller';
+      mapper.__node__ = builtinNode(mapper);
+      return mapper;
     }
-    mapper.__doc__ = 'Respeller';
-    mapper.__node__ = builtinNode(mapper);
-    return mapper;
+    commaBasis = temperament.commaBasis;
   }
   if (!(commaBasis instanceof ValBasis)) {
     throw new Error('A basis is required.');

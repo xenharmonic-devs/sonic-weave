@@ -1749,7 +1749,7 @@ export class ValBasis {
         value,
         other.domain,
         0,
-        intervalValueAs(value, other.node),
+        intervalValueAs(value, other.node, true),
         other
       );
     }
