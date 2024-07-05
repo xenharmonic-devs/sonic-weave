@@ -396,7 +396,7 @@ Multiple commas can be tempered out by passing in an array to `commaList`. Multi
 commaList(
   (* Temper out the marvel comma and the keenanisma *)
   [225/224, 385/384],
-  (* Explicit 11-limit *),
+  (* Explicit 11-limit *)
   @.11,
   (* Give 1000 times more weight to octaves and 10 times more weight to prime 11. *)
   [1000, 1, 1, 1, 10],
@@ -432,7 +432,7 @@ Because vals always come with a subgroup basis the weights are associated with i
  * 3/1: 100%
  * 13/5: 300%
  *)
-TE([5@2.3.13/5, 9@2.3.13/5], [2, 1, 3])
+Temperament([5@2.3.13/5, 9@2.3.13/5], [2, 1, 3])
 ```
 
 ### Mapping generators
@@ -491,7 +491,7 @@ If you don't care about the preimage, you can obtain the tempered generators dir
 const augmented = Temperament([12@.5, 27@.5])
 const [period, generator] = generatorsOf(augmented)
 const numPeriods = periodsOf(augmented)
-cons [up, down] = [2 * numPeriods, numPeriods]
+const [up, down] = [2 * numPeriods, numPeriods]
 
 (* Generate TE optimized scale directly. *)
 rank2(generator, up, down, period, numPeriods)
