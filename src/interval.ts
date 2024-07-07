@@ -66,6 +66,7 @@ import {
   kernel,
   lenstraLenstraLovasz,
   preimage,
+  primeFactorize,
   primeLimit,
   pruneZeroRows,
   scale,
@@ -79,6 +80,17 @@ import {TuningMap, combineTuningMaps} from './temper';
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.
  */
 export type IntervalDomain = 'linear' | 'logarithmic';
+
+/**
+ * How to treat subgroups with non-primes during temperament optimization.
+ *
+ * - 'subgroup': Promote composite/fractional subgroup to a prime subgroup and project result.
+ *
+ * - 'inharmonic': Treat formal primes as prime numbers according to their size.
+ *
+ * - 'Tenney-Pakkanen': Weigh formal primes according to their Tenney-height.
+ */
+export type FormalPrimeMetric = 'subgroup' | 'inharmonic' | 'Tenney-Pakkanen';
 
 /**
  * CSS color value.
@@ -1514,6 +1526,61 @@ export class ValBasis {
   }
 
   /**
+   * Check if this basis is only "pointing" along prime axis.
+   * @returns `true` if all basis elements are powers of primes. `false` otherwise.
+   */
+  isPrimewise(): boolean {
+    for (const element of this.value) {
+      if (element.timeExponent.n) {
+        return false;
+      }
+      let count = 0;
+      for (const pe of element.primeExponents) {
+        if (pe.n) {
+          count++;
+        }
+      }
+      if (count > 1) {
+        return false;
+      }
+      for (const prime of primeFactorize(element.residual).keys()) {
+        if (prime <= 0) {
+          return false;
+        }
+        count++;
+      }
+      if (count !== 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Obtain the minimal prime basis this basis is embedded in.
+   * @returns The super-basis.
+   */
+  superBasis(): ValBasis {
+    const primes = new Set<number>();
+    for (const element of this.value) {
+      if (element.timeExponent.n) {
+        throw new Error('Absolute basis does not have a prime super-basis.');
+      }
+      for (const prime of element.factorize().keys()) {
+        if (prime <= 0) {
+          throw new Error(
+            'Negative or zero basis does not have a prime super-basis.'
+          );
+        }
+        primes.add(prime);
+      }
+    }
+    const subgroup = Array.from(primes);
+    subgroup.sort((a, b) => a - b);
+    return new ValBasis(subgroup.map(p => TimeMonzo.fromFraction(p)));
+  }
+
+  /**
    * Convert this basis to an array of linear intervals.
    * @returns The basis elements as {@link Interval} instances.
    */
@@ -2158,6 +2225,7 @@ export class Temperament {
   basis: ValBasis;
   weights: number[];
   pureEquaves: boolean;
+  metric: FormalPrimeMetric;
   commaBasis: ValBasis;
   preimage: ValBasis;
   private subgroupMapping_?: number[];
@@ -2173,7 +2241,8 @@ export class Temperament {
     mapping: number[][],
     basis?: ValBasis,
     weights?: number[],
-    pureEquaves = false
+    pureEquaves = false,
+    metric: FormalPrimeMetric = 'subgroup'
   ) {
     if (!basis) {
       basis = new ValBasis(mapping[0].length);
@@ -2196,6 +2265,7 @@ export class Temperament {
     }
     this.weights = weights;
     this.pureEquaves = pureEquaves;
+    this.metric = metric;
 
     // Compute comma basis
     const scommas = transpose(kernel(this.canonicalMapping));
@@ -2230,7 +2300,8 @@ export class Temperament {
   static fromVals(
     vals: Val[],
     weights?: number[],
-    pureEquaves = false
+    pureEquaves = false,
+    metric: FormalPrimeMetric = 'subgroup'
   ): Temperament {
     if (!vals.length) {
       throw new Error(
@@ -2254,7 +2325,8 @@ export class Temperament {
       svals.map(row => row.map(Number)),
       basis,
       weights,
-      pureEquaves
+      pureEquaves,
+      metric
     );
   }
 
@@ -2272,6 +2344,7 @@ export class Temperament {
     basis?: ValBasis,
     weights?: number[],
     pureEquaves = false,
+    metric: FormalPrimeMetric = 'subgroup',
     fullPrimeLimit = false
   ) {
     // Use bigints to avoid overflow in intermediate results.
@@ -2317,7 +2390,8 @@ export class Temperament {
       cokernel(transpose(smonzos)).map(row => row.map(Number)),
       basis,
       weights,
-      pureEquaves
+      pureEquaves,
+      metric
     );
   }
 
@@ -2325,21 +2399,48 @@ export class Temperament {
    * Tuning in cents of this temperament's subgroup basis.
    */
   get subgroupMapping(): number[] {
-    if (this.subgroupMapping_ === undefined) {
-      const jip = this.basis.value.map(m => m.totalCents());
-      const weights: number[] = [];
+    if (this.subgroupMapping_ !== undefined) {
+      return this.subgroupMapping_;
+    }
+    if (this.metric === 'subgroup' && !this.basis.isPrimewise()) {
+      const superBasis = this.basis.superBasis();
+      let superWeights = Array(superBasis.size).fill(0);
       for (let i = 0; i < this.basis.size; ++i) {
-        weights.push(this.weights[i] / this.basis.value[i].tenneyHeight());
+        const superMonzo = superBasis.toSubgroupMonzo(this.basis.value[i]);
+        superWeights = add(
+          superWeights,
+          scale(superMonzo, this.weights[i]).map(Math.abs)
+        );
       }
-      const mapping = combineTuningMaps(
-        applyWeights(jip, weights),
-        this.canonicalMapping.map(m => applyWeights(m, weights))
+      const superTemperament = Temperament.fromCommas(
+        this.commaBasis.value,
+        this.basis.superBasis(),
+        superWeights,
+        this.pureEquaves,
+        'inharmonic'
       );
-      this.subgroupMapping_ = unapplyWeights(mapping, weights);
-      if (this.pureEquaves) {
-        const n = jip[0] / this.subgroupMapping_[0];
-        this.subgroupMapping_ = this.subgroupMapping_.map(m => m * n);
-      }
+      this.subgroupMapping_ = this.basis.value.map(m =>
+        superTemperament.temper(m).totalCents()
+      );
+      return this.subgroupMapping_;
+    }
+    const jip = this.basis.value.map(m => m.totalCents());
+    const weights: number[] = [];
+    for (let i = 0; i < this.basis.size; ++i) {
+      const w =
+        this.metric === 'Tenney-Pakkanen'
+          ? this.basis.value[i].tenneyHeight()
+          : this.basis.value[i].totalCents();
+      weights.push(this.weights[i] / w);
+    }
+    const mapping = combineTuningMaps(
+      applyWeights(jip, weights),
+      this.canonicalMapping.map(m => applyWeights(m, weights))
+    );
+    this.subgroupMapping_ = unapplyWeights(mapping, weights);
+    if (this.pureEquaves) {
+      const n = jip[0] / this.subgroupMapping_[0];
+      this.subgroupMapping_ = this.subgroupMapping_.map(m => m * n);
     }
     return this.subgroupMapping_;
   }

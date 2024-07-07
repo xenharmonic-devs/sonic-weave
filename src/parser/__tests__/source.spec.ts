@@ -2169,7 +2169,7 @@ describe('SonicWeave parser', () => {
     const scale = expand(
       'sort(15/13^[-2..2] rdc 2);Temperament([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)'
     );
-    expect(scale).toEqual(['248.965', '497.93', '702.07', '951.035', '1200.']);
+    expect(scale).toEqual(['248.925', '497.85', '702.15', '951.075', '1200.']);
   });
 
   it('generates TE marveldene', () => {

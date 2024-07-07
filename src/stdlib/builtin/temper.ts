@@ -118,6 +118,7 @@ function commaList(
     basisOrLimit,
     ws,
     sonicTruth(pureEquaves),
+    undefined,
     sonicTruth(fullPrimeLimit)
   );
 }
