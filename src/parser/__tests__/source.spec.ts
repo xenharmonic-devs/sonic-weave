@@ -2254,4 +2254,10 @@ describe('SonicWeave parser', () => {
     const scale = expand('C4 + Aug1 * [1..4]');
     expect(scale).toEqual(['C♯4', 'C𝄪4', 'C♯𝄪4', 'C𝄪𝄪4']);
   });
+
+  it('rejects 2 = 1 in a way that makes sense to the user', () => {
+    expect(() => evaluateSource('2 = 1')).toThrow(
+      'Cannot assign relative pitch to relative pitch.'
+    );
+  });
 });

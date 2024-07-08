@@ -965,6 +965,9 @@ export class StatementVisitor {
       }
       relative = right.value;
     } else {
+      if (!right.value.timeExponent.n) {
+        throw new Error('Cannot assign relative pitch to relative pitch.');
+      }
       absolute = right.value;
       relative = left.value;
     }
