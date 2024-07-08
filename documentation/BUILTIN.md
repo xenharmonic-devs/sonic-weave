@@ -672,7 +672,7 @@ Obtain an array of integers from `start` to `stop - 1`. When only a single param
 Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave `2/1` by default).  `up` and `down` must be multiples of `numPeriods`. The size hints are used to get the correct period reduction when generating a preimage.
 
 ### realizeWord(*word*, *sizes*, *equave = niente*)
-Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes. One step size may be omitted and inferred based on the size of the `equave` (default `2`).
+Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes such as `#{L: 9/8, s:256/243}`. One step size may be omitted and inferred based on the size of the `equave` (default `2`).
 
 ### reduce(*scale = ££*)
 Obtain a copy of the popped/given scale reduced by its equave. Issue a warning if the scale was already reduced.
