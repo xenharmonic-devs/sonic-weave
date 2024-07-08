@@ -719,6 +719,9 @@ Calculate the sign of x.
 ### sinh(*x*)
 Calculate the hyperbolic sine of x.
 
+### So(*start*, *end = niente*)
+Compute the geometric difference between successive odd harmonics `(2*start + 1) / (2*start - 1)` and `(2*start + 3) / (2*start + 1)`. If `end` is given, `(2*end + 3) / (2*end + 1)` is used as the endpoint instead.
+
 ### sqrt(*x*)
 Calculate the square root of the input.
 

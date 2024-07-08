@@ -1633,4 +1633,26 @@ describe('SonicWeave standard library', () => {
     const scale = expand('afdoStack([1, 3, 1, 2, 1], 3/2)');
     expect(scale).toEqual(['17/16', '5/4', '21/16', '23/16', '3/2']);
   });
+
+  it.each([
+    [1, '9/5'],
+    [2, '25/21'],
+    [3, '49/45'],
+    [4, '81/77'],
+    [5, '121/117'],
+    [6, '169/165'],
+  ])('computes So(%d)', (n: number, frac: string) => {
+    const Son = evaluateExpression(`So(${n})`);
+    expect(Son?.toString()).toBe(`1\\1<${frac}>`);
+  });
+
+  it('computes So(3, 3)', () => {
+    const So3 = evaluateExpression('So(3, 3)');
+    expect(So3?.toString()).toBe('1\\1<49/45>');
+  });
+
+  it('computes So(3, 5)', () => {
+    const So3_5 = evaluateExpression('So(3, 5)');
+    expect(So3_5?.toString()).toBe('1\\1<77/65>');
+  });
 });

@@ -408,6 +408,13 @@ riff POTE(valsOrCommas, primeLimit=niente) {
   return commaList(valsOrCommas, primeLimit, niente, true, true);
 }
 
+riff So(start, end = niente) {
+  "Compute the geometric difference between successive odd harmonics \`(2*start + 1) / (2*start - 1)\` and \`(2*start + 3) / (2*start + 1)\`. If \`end\` is given, \`(2*end + 3) / (2*end + 1)\` is used as the endpoint instead.";
+  start = int(start);
+  end = start if end == niente else int(end);
+  return logarithmic((2*start + 1)/(2*start - 1) % (2*end + 3)/(2*end + 1));
+}
+
 (** Scale generation **)
 riff tet(divisions, equave = 2) {
   "Generate an equal temperament with the given number of divisions of the given equave/octave.";
