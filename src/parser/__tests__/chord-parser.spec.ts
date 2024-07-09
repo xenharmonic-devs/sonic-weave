@@ -178,6 +178,9 @@ describe('Temperament tools', () => {
       '1898.446',
     ]);
   });
+  it('rejects if the comma is outside the subgroup', () => {
+    expect(() => temperamentFromCommas('99/98', '5', 'TE')).toThrow();
+  });
   it('can figure out a rank-2 for whitewood', () => {
     const whitewood = rank2FromCommas('2187/2048', '', 'POTE');
     expect(whitewood.canonicalMapping).toEqual([
@@ -201,6 +204,11 @@ describe('Temperament tools', () => {
       '240.000',
       '1901.955',
     ]);
+  });
+  it("doesn't modify weights passed in", () => {
+    const ws = [];
+    temperamentFromVals('5 & 7', '', 'CTE', ws);
+    expect(ws).toEqual([]);
   });
   it('can figure out the subgroup for 12 & 24', () => {
     const catler = temperamentFromVals('12 & 24', '', 'TE', [2]);

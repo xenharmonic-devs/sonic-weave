@@ -152,6 +152,7 @@ export function temperamentFromCommas(
     basis = parseBasis(subgroupInput);
   }
   subgroupWeights ??= [];
+  subgroupWeights = [...subgroupWeights];
   if (optimizationScheme === 'CTE') {
     subgroupWeights.shift();
     subgroupWeights.unshift(CTE_EQUAVE_WEIGHT);
@@ -189,6 +190,7 @@ export function rank2FromCommas(
     basis = parseBasis(subgroupInput);
   }
   subgroupWeights ??= [];
+  subgroupWeights = [...subgroupWeights];
   if (optimizationScheme === 'CTE') {
     subgroupWeights.shift();
     subgroupWeights.unshift(CTE_EQUAVE_WEIGHT);
@@ -259,6 +261,7 @@ export function temperamentFromVals(
   subgroupWeights?: number[]
 ) {
   subgroupWeights ??= [];
+  subgroupWeights = [...subgroupWeights];
   if (optimizationScheme === 'CTE') {
     subgroupWeights.shift();
     subgroupWeights.unshift(CTE_EQUAVE_WEIGHT);
