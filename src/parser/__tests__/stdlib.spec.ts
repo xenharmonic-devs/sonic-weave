@@ -1024,7 +1024,7 @@ describe('SonicWeave standard library', () => {
       '7/4',
       '16/9',
       '9/5',
-      '2',
+      '2/1',
     ]);
   });
 
@@ -1046,7 +1046,7 @@ describe('SonicWeave standard library', () => {
       '7/4',
       '9/5',
       '15/8',
-      '2',
+      '2/1',
       '15/7',
       '9/4',
       '7/3',
@@ -1055,7 +1055,7 @@ describe('SonicWeave standard library', () => {
       '18/7',
       '21/8',
       '8/3',
-      '3',
+      '3/1',
     ]);
   });
 

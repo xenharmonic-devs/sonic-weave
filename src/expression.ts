@@ -863,11 +863,6 @@ export function logNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
 }
 
 /** @hidden */
-export function reduceNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
-  return undefined;
-}
-
-/** @hidden */
 export function lensAddNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
   return undefined;
 }

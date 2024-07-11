@@ -1872,7 +1872,7 @@ describe('SonicWeave parser', () => {
       2/1
       sort(%£ rdc pop$[-1])
     `);
-    expect(scale).toEqual(['4/3', '8/5', '2']);
+    expect(scale).toEqual(['4/3', '8/5', '2/1']);
   });
 
   it('can pop the parent scale as a magic variable', () => {
@@ -2259,5 +2259,20 @@ describe('SonicWeave parser', () => {
     expect(() => evaluateSource('2 = 1')).toThrow(
       'Cannot assign relative pitch to relative pitch.'
     );
+  });
+
+  it('respects fractional formatting in rdc (both)', () => {
+    const scale = expand('sort(3/2 ^ [-2..2] rdc 2/1)');
+    expect(scale).toEqual(['9/8', '4/3', '3/2', '16/9', '2/1']);
+  });
+
+  it('respects fractional formatting in rdc (right)', () => {
+    const scale = expand('sort(3 ^ [-2..2] rdc 2/1)');
+    expect(scale).toEqual(['9/8', '4/3', '3/2', '16/9', '2/1']);
+  });
+
+  it('respects fractional formatting in rdc (left)', () => {
+    const scale = expand('sort(3/2 ^ [-2..2] rdc 2)');
+    expect(scale).toEqual(['9/8', '4/3', '3/2', '16/9', '2/1']);
   });
 });

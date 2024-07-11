@@ -19,7 +19,6 @@ import {
   powNodes,
   ipowNodes,
   logNodes,
-  reduceNodes,
   inferFJSFlavor,
   integerToVectorComponent,
   MonzoLiteral,
@@ -989,14 +988,24 @@ export class Interval {
     if (this.steps || other.steps) {
       throw new Error('Steps not supported in reduction.');
     }
-    const node = reduceNodes(this.node, other.node);
-    return new Interval(
-      this.value.reduce(other.value, ceiling),
-      this.domain,
-      0,
-      node,
-      infect(this, other)
-    );
+    // We do reformatting here because reduction is somewhat expensive to repeat.
+    const value = this.value.reduce(other.value, ceiling);
+    let node = undefined;
+    if (other.node?.type === 'FractionLiteral') {
+      if (
+        this.node?.type === 'IntegerLiteral' ||
+        this.node?.type === 'FractionLiteral'
+      ) {
+        node = value.asFractionLiteral();
+      }
+    }
+    if (
+      this.node?.type === 'FractionLiteral' &&
+      other.node?.type === 'IntegerLiteral'
+    ) {
+      node = value.asFractionLiteral();
+    }
+    return new Interval(value, this.domain, 0, node, infect(this, other));
   }
 
   /**
