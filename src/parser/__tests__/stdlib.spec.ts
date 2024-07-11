@@ -1309,11 +1309,11 @@ describe('SonicWeave standard library', () => {
       rotate()
     `);
     expect(sothic).toEqual([
-      '226.97691372951408r¢',
-      '324.3410287295142r¢',
+      '1.140089771804773r',
+      '1.2060453782496754r',
       '11/8',
       '16/11',
-      '875.658970729514r¢',
+      '1.6583123947439107r',
       '121/64',
       '2',
     ]);
@@ -1654,5 +1654,31 @@ describe('SonicWeave standard library', () => {
   it('computes So(3, 5)', () => {
     const So3_5 = evaluateExpression('So(3, 5)');
     expect(So3_5?.toString()).toBe('1\\1<77/65>');
+  });
+
+  it('formats rotated rank2 (linear, log)', () => {
+    const scale = expand('rank2(3/2, 5, 1, 1200.);[..."DEFGABC"];rotate(2)');
+    expect(scale).toEqual([
+      '256/243 "F"',
+      '32/27 "G"',
+      '4/3 "A"',
+      '3/2 "B"',
+      '128/81 "C"',
+      '16/9 "D"',
+      '1200. "E"',
+    ]);
+  });
+
+  it('formats rotated rank2 (log, linear)', () => {
+    const scale = expand('rank2(701.955, 5, 1, 2);[..."DEFGABC"];rotate(-2)');
+    expect(scale).toEqual([
+      '203.91 "B"',
+      '294.135 "C"',
+      '498.045 "D"',
+      '701.955 "E"',
+      '792.18 "F"',
+      '996.09 "G"',
+      '2 "A"',
+    ]);
   });
 });

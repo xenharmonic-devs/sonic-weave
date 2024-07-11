@@ -781,7 +781,7 @@ riff rotate(onto = 1, scale = ££) {
   while (--onto)
     equave *~ shift();
   const root = shift();
-  £ ~% root;
+  £ %~ root colorOf(£) labelOf(£);
   equave colorOf(root) labelOf(root);
 }
 
