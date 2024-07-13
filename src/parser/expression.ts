@@ -1409,13 +1409,13 @@ export class ExpressionVisitor {
             case '^':
               value = left.value.pow(right.value);
               steps = Math.round(left.steps * right.valueOf());
-              simplify = true;
+              simplify = left.domain === 'linear';
               break;
             case '/^':
             case '^/':
               value = left.value.pow(right.value.inverse());
               steps = Math.round(left.steps / right.valueOf());
-              simplify = true;
+              simplify = left.domain === 'linear';
               break;
             case 'mod':
               value = left.value.mmod(right.value);
@@ -1450,6 +1450,7 @@ export class ExpressionVisitor {
               throw new Error('Tempering needs an interval and a val.');
             case 'lest':
             case 'al':
+            case 'al~':
             case 'or':
             case 'and':
             case '==':
@@ -1565,6 +1566,18 @@ export class ExpressionVisitor {
             return left.project(right);
           case 'tmpr':
             throw new Error('Tempering needs an interval and a val.');
+          case 'al~':
+            return new Interval(
+              left.value,
+              right.domain,
+              0,
+              intervalValueAs(
+                left.value,
+                right.node,
+                right.domain === 'linear'
+              ),
+              right
+            );
           case 'lest':
           case 'al':
           case 'or':
@@ -1788,6 +1801,8 @@ export class ExpressionVisitor {
         return (left as any) >= (right as any);
       case '>':
         return (left as any) > (right as any);
+      case 'al~':
+        return (left as any) ?? (right as any);
     }
     throw new Error(`Unsupported binary operation '${operator}'.`);
   }

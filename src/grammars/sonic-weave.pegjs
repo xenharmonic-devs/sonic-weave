@@ -726,7 +726,7 @@ ConditionalExpression
     return result;
   }
 
-CoalescingOperator = AlToken / OrToken / VectorOrToken
+CoalescingOperator = 'al~' / AlToken / OrToken / VectorOrToken
 
 CoalescingExpression
   = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {

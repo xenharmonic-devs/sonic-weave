@@ -530,10 +530,10 @@ Generate a concordance shell i.e. a vertically aligned object reduced to an equa
 ### cosh(*x*)
 Calculate the hyperbolic cosine of x.
 
-### cps(*factors*, *count*, *equave = 2*, *withUnity = false*)
+### cps(*factors*, *count*, *equave = niente*, *withUnity = false*)
 Generate a combination product set from the given factors and combination size.
 
-### csgs(*generators*, *ordinal = 1*, *period = 2*, *numPeriods = 1*, *maxSize = 100*)
+### csgs(*generators*, *ordinal = 1*, *period = niente*, *numPeriods = 1*, *maxSize = 100*)
 Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.
 
 ### CTE(*valsOrCommas*, *primeLimit = niente*)
@@ -569,7 +569,7 @@ Obtain a copy of the popped/given scale quantized to given equal divisions of it
 ### equaveReduce(*scale = ££*)
 Obtain a copy of the popped/given scale reduced by its equave.
 
-### eulerGenus(*guide*, *root = 1*, *equave = 2*)
+### eulerGenus(*guide*, *root = 1*, *equave = niente*)
 Span a lattice from all divisors of the guide-tone rotated to the root-tone.
 
 ### exp(*x*)
@@ -590,7 +590,7 @@ Calculate the geometric differences between the factors.
 ### ground(*scale = ££*)
 Obtain a copy of the popped/given scale that uses the first interval as the implicit unison.
 
-### gs(*generators*, *size*, *period = 2*, *numPeriods = 1*)
+### gs(*generators*, *size*, *period = niente*, *numPeriods = 1*)
 Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.
 
 ### havg(*...terms*)
@@ -638,7 +638,7 @@ Calculate the numerator of x in reduced form.
 ### o(*scale = ££*)
 Obtain a copy of the popped/given scale in the default overtonal interpretation.
 
-### octaplex(*b0*, *b1*, *b2*, *b3*, *equave = 2*, *withUnity = false*)
+### octaplex(*b0*, *b1*, *b2*, *b3*, *equave = niente*, *withUnity = false*)
 Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.
 
 ### oddLimit(*limit*, *equave = 2*)
@@ -650,7 +650,7 @@ Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 ### organize(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = ££*)
 Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
-### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = 2*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
+### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = niente*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
 Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.  The size hints are used to get the correct period reduction when generating a preimage.
 
 ### POTE(*valsOrCommas*, *primeLimit = niente*)
@@ -668,8 +668,8 @@ Obtain a copy of the popped/given scale with random variance added.
 ### range(*start*, *stop = niente*, *step = 1*)
 Obtain an array of integers from `start` to `stop - 1`. When only a single parameter is given `range(0, n)` is returned.
 
-### rank2(*generator*, *up*, *down = 0*, *period = 2*, *numPeriods = 1*, *generatorSizeHint = niente*, *periodSizeHint = niente*)
-Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave `2/1` by default).  `up` and `down` must be multiples of `numPeriods`. The size hints are used to get the correct period reduction when generating a preimage.
+### rank2(*generator*, *up*, *down = 0*, *period = niente*, *numPeriods = 1*, *generatorSizeHint = niente*, *periodSizeHint = niente*)
+Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default).  `up` and `down` must be multiples of `numPeriods`. The size hints are used to get the correct period reduction when generating a preimage.
 
 ### realizeWord(*word*, *sizes*, *equave = niente*)
 Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes such as `#{L: 9/8, s:256/243}`. One step size may be omitted and inferred based on the size of the `equave` (default `2`).
@@ -794,6 +794,6 @@ Get rid of expression results. `void(++i)` increments the value but doesn't push
 ### weilHeight(*x*)
 Calculate the Weil height of the interval. Natural logarithm of the maximum of numerator or denominator.
 
-### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = 2*)
+### wellTemperament(*commaFractions*, *comma = 81/80*, *down = 0*, *generator = 3/2*, *period = niente*)
 Generate a well-temperament by cumulatively modifying the pure fifth `3/2` (or a given generator) by fractions of the syntonic/given comma.
 

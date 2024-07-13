@@ -206,6 +206,7 @@ describe('SonicWeave vector broadcasting', () => {
   it.each([
     'vor',
     'vand',
+    'al~',
     '==',
     '<>',
     '~=',

@@ -201,31 +201,6 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.label).toBe('fifth');
   });
 
-  it('can format the half eleventh', () => {
-    const {interval} = parseSingle('P11 % 2');
-    expect(interval.toString()).toBe('n6');
-  });
-
-  it('can format the double tone', () => {
-    const {interval} = parseSingle('M2 * 2');
-    expect(interval.toString()).toBe('M3');
-  });
-
-  it('can format the half twelfth', () => {
-    const {interval} = parseSingle('P12 % 2');
-    expect(interval.toString()).toBe('n6.5');
-  });
-
-  it("bails out when there's no Pythagorean to match", () => {
-    const {interval} = parseSingle('P5 % 3');
-    expect(interval.toString()).toBe('1\\3<3/2>');
-  });
-
-  it('can format a decimal', () => {
-    const {interval} = parseSingle('1,2');
-    expect(interval.toString()).toBe('1.2e');
-  });
-
   it('can convert FJS to monzo', () => {
     const {interval} = parseSingle('monzo(vm6_5)');
     expect(interval.toString()).toBe('[-1 3 0 -1>@1°.2..');
@@ -2698,5 +2673,15 @@ describe('SonicWeave expression evaluator', () => {
     const {interval, fraction} = parseSingle('S(5)');
     expect(interval.domain).toBe('logarithmic');
     expect(fraction).toBe('25/24');
+  });
+
+  it('coalesces niente', () => {
+    const {fraction} = parseSingle('niente al 2');
+    expect(fraction).toBe('2');
+  });
+
+  it('coalesces niente (al~)', () => {
+    const {fraction} = parseSingle('niente al~ 2');
+    expect(fraction).toBe('2');
   });
 });

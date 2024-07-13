@@ -656,6 +656,7 @@ Product between a matrix and a vector can be achieved by broadcasting `vdot` ove
 | ---------------------- | -------- |
 | Vectorized logical AND | `vand`   |
 | Vectorized logical OR  | `vor`    |
+| Plain formatting       | `al~`    |
 
 Binary operation is vectorized elementwise:
 
@@ -664,6 +665,8 @@ Binary operation is vectorized elementwise:
 `[0, 1] vor [2, 3]` evaluates to `[2, 1]`.
 
 Vectorized versions of logical operators work on plain values too and do not short-circuit. `P8 white vor pop()` is a handy expression to swap out the last interval for a white-colored octave because the `pop()` command executes without further effects.
+
+Plain formatting is a no-operation in terms of the value, but takes on the domain and formatting of the second operand e.g. `2 al~ 7\12` evaluates to `12\12`. There is no `~al` or `~al~` as those would be the same as `al`.
 
 #### Boolean
 | Name                   | Operator |

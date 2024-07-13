@@ -31,6 +31,7 @@ export type UpdateOperator = '++' | '--';
 export type BinaryOperator =
   | 'lest'
   | 'al'
+  | 'al~'
   | 'or'
   | 'vor'
   | 'and'

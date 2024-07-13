@@ -224,22 +224,20 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can merge offset copies', () => {
-    const zarlino = parseSource(
-      'rank2(3/2, 3); mergeOffset(5/4); rotate(4); simplify;'
-    );
+    const zarlino = parseSource('rank2(3/2, 3); mergeOffset(5/4); rotate(4);');
     expect(zarlino).toHaveLength(7);
     expect(zarlino.map(i => i.toString()).join(';')).toBe(
-      '9/8;5/4;4/3;3/2;5/3;15/8;2'
+      '9/8;5/4;4/3;3/2;5/3;15/8;2/1'
     );
   });
 
   it('can merge offset copies with overflow preferences', () => {
     const scale = parseSource(
-      'rank2(3/2, 3); mergeOffset(5/4, "wrap"); rotate(2); simplify;'
+      'rank2(3/2, 3); mergeOffset(5/4, "wrap"); rotate(2);'
     );
     expect(scale).toHaveLength(8);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '10/9;5/4;4/3;3/2;5/3;16/9;15/8;2'
+      '10/9;5/4;4/3;3/2;5/3;16/9;15/8;2/1'
     );
   });
 
@@ -298,20 +296,22 @@ describe('SonicWeave standard library', () => {
   it('can generate alternating generator sequences (diasem #1)', () => {
     const scale = parseSource('csgs([8/7, 7/6]);');
     expect(scale).toHaveLength(4);
-    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;4/3;32/21;2');
+    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;4/3;32/21;2/1');
   });
 
   it('can generate alternating generator sequences (diasem #2)', () => {
     const scale = parseSource('csgs([8/7, 7/6], 2);');
     expect(scale).toHaveLength(5);
-    expect(scale.map(i => i.toString()).join(';')).toBe('8/7;4/3;32/21;16/9;2');
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '8/7;4/3;32/21;16/9;2/1'
+    );
   });
 
   it('can generate generator sequences (diasem #3)', () => {
     const scale = parseSource('csgs([8/7, 7/6], 3);');
     expect(scale).toHaveLength(9);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '64/63;8/7;32/27;4/3;256/189;32/21;128/81;16/9;2'
+      '64/63;8/7;32/27;4/3;256/189;32/21;128/81;16/9;2/1'
     );
   });
 
@@ -323,7 +323,7 @@ describe('SonicWeave standard library', () => {
     const scale = expand(
       'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5)'
     );
-    expect(scale).toEqual(['8/7', '4/3', '32/21', '16/9', '2']);
+    expect(scale).toEqual(['8/7', '4/3', '32/21', '16/9', '2/1']);
   });
 
   it('can generate generator sequences (zil[14])', () => {
@@ -344,7 +344,7 @@ describe('SonicWeave standard library', () => {
       '512/315',
       '16/9',
       '64/35',
-      '2',
+      '2/1',
     ]);
   });
 
@@ -742,13 +742,13 @@ describe('SonicWeave standard library', () => {
       '3/2 white',
       '5/3 black',
       '16/9 white',
-      '2',
+      '2/1 white',
     ]);
   });
 
   it('generates 22 Shruti with the intended colors', () => {
     const scale = expand(
-      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')\nsimplify"
+      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')"
     );
     expect(scale).toEqual([
       '256/243 white',
@@ -772,7 +772,7 @@ describe('SonicWeave standard library', () => {
       '9/5 green',
       '15/8 yellow',
       '243/128 white',
-      '2 gray',
+      '2/1 gray',
     ]);
   });
 
@@ -1335,7 +1335,7 @@ describe('SonicWeave standard library', () => {
 
   it('parses Rage Todi (golfed)', () => {
     const scale = expand(`
-      rank2(3/2 white, 1, 5, 2/1 white)
+      rank2(3/2 white, 1, 5)
       $[[2, 5]] *~= 135/128 black
     `);
     expect(scale).toEqual([
@@ -1679,6 +1679,42 @@ describe('SonicWeave standard library', () => {
       '792.18 "F"',
       '996.09 "G"',
       '2 "A"',
+    ]);
+  });
+
+  it('makes a tempered rank2', () => {
+    const scale = expand('rank2(7\\12, 4)');
+    expect(scale).toEqual(['2\\12', '4\\12', '7\\12', '9\\12', '12\\12']);
+  });
+
+  it('makes an empty CPS', () => {
+    const scale = expand('cps([], 0)');
+    expect(scale).toEqual(['2']);
+  });
+
+  it('makes a tempered CPS', () => {
+    const scale = expand('cps(53@ tmpr [1, 3, 5, 7], 2)');
+    expect(scale).toEqual([
+      '12\\53',
+      '17\\53',
+      '29\\53',
+      '39\\53',
+      '43\\53',
+      '53\\53',
+    ]);
+  });
+
+  it('generates a tempered cube', () => {
+    const scale = expand('parallelotope(41@ tmpr [3, 5, 7])');
+    expect(scale).toEqual([
+      '5\\41',
+      '13\\41',
+      '16\\41',
+      '24\\41',
+      '29\\41',
+      '33\\41',
+      '37\\41',
+      '41\\41',
     ]);
   });
 });

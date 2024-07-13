@@ -462,15 +462,16 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
     return $ \\ divisions ed equave;
 }
 
-riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHint = niente, periodSizeHint = niente) {
-  "Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave \`2/1\` by default).\\
+riff rank2(generator, up, down = 0, period = niente, numPeriods = 1, generatorSizeHint = niente, periodSizeHint = niente) {
+  "Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default).\\
   \`up\` and \`down\` must be multiples of \`numPeriods\`. The size hints are used to get the correct period reduction when generating a preimage.";
   if (up ~mod numPeriods)
     throw "Up must be a multiple of the number of periods.";
   if (down ~mod numPeriods)
     throw "Down must be a multiple of the number of periods.";
-  up ~%= numPeriods
-  down ~%= numPeriods
+  up ~%= numPeriods;
+  down ~%= numPeriods;
+  period al= 2 al~ generator;
   if (generatorSizeHint == niente and periodSizeHint == niente) {
     generator ~^ [-down..-1] ~rd period;
     generator ~^ [1..up] ~rd period;
@@ -491,20 +492,21 @@ riff rank2(generator, up, down = 0, period = 2, numPeriods = 1, generatorSizeHin
   return repeat(numPeriods);
 }
 
-riff cps(factors, count, equave = 2, withUnity = false) {
+riff cps(factors, count, equave = niente, withUnity = false) {
   "Generate a combination product set from the given factors and combination size.";
   for (const combination of kCombinations(factors, count))
     prod(combination);
   sort();
-  if (not withUnity)
+  if ($ and not withUnity)
     ground();
-  equave;
+  equave al (2 al~ $~[0]);
   equaveReduce();
   return sort();
 }
 
-riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, period = 2) {
+riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, period = niente) {
   "Generate a well-temperament by cumulatively modifying the pure fifth \`3/2\` (or a given generator) by fractions of the syntonic/given comma.";
+  period al= 2 al~ generator;
   1;
   generator ~* comma ~^ commaFractions;
   stack();
@@ -513,9 +515,10 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
   period vor pop();
 }
 
-riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHints = niente, equaveSizeHint = niente) {
+riff parallelotope(basis, ups = niente, downs = niente, equave = niente, basisSizeHints = niente, equaveSizeHint = niente) {
   "Span a parallelotope by extending a basis combinatorically. \`ups\` defaults to all ones while \`downs\` defaults to all zeros.\\
   The size hints are used to get the correct period reduction when generating a preimage.";
+  equave al= 2 al~ basis~[0];
   const basis_ = basis[..];
   const ups_ = ups[..] if ups else [];
   const downs_ = downs[..] if downs else [];
@@ -575,11 +578,12 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = 2, basisSizeHin
   [a for [a, b] of sort(scales, (a, b) => compare(a[1], b[1]))];
 }
 
-riff eulerGenus(guide, root = 1, equave = 2) {
+riff eulerGenus(guide, root = 1, equave = niente) {
   "Span a lattice from all divisors of the guide-tone rotated to the root-tone.";
   if (guide ~mod root) {
     throw "Root must divide the guide tone.";
   }
+  equave al= 2 al~ guide;
   while (not (guide ~mod equave))
     guide /= equave;
 
@@ -588,8 +592,9 @@ riff eulerGenus(guide, root = 1, equave = 2) {
   equave vor pop();
 }
 
-riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
+riff octaplex(b0, b1, b2, b3, equave = niente, withUnity = false) {
   "Generate a 4-dimensional octaplex a.k.a. 20-cell from the given basis intervals.";
+  equave al= 2 al~ b0;
   const s1 = [-1, -1, 1, 1];
   const s2 = [-1, 1, -1, 1];
 
@@ -608,8 +613,9 @@ riff octaplex(b0, b1, b2, b3, equave = 2, withUnity = false) {
   return sort();
 }
 
-riff gs(generators, size, period = 2, numPeriods = 1) {
+riff gs(generators, size, period = niente, numPeriods = 1) {
   "Stack a periodic array of generators up to the given size which must be a multiple of the number of periods.";
+  period al= 2 al~ generators~[0];
   size = round(size % numPeriods);
   generators[[0..size-2] mod length(generators)];
   stack();
@@ -619,9 +625,10 @@ riff gs(generators, size, period = 2, numPeriods = 1) {
   return repeat(numPeriods);
 }
 
-riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
+riff csgs(generators, ordinal = 1, period = niente, numPeriods = 1, maxSize = 100) {
   "Generate a constant structure generator sequence. Zero ordinal corresponds to the (trivial) stack of all generators while positive ordinals denote scales with constant structure ordered by increasing size.";
   cumprod(map(simplify, generators));
+  period al= 2 al~ generators~[0];
   let accumulator = $[-1];
   period;
   equaveReduce();
@@ -645,7 +652,7 @@ riff csgs(generators, ordinal = 1, period = 2, numPeriods = 1, maxSize = 100) {
 
 riff vao(denominator, maxNumerator, divisions = 12, tolerance = 5.0, equave = 2) {
   "Generate a vertically aligned object i.e. a subset of the harmonic series that sounds like the given equal temperament (default \`12\`) within the given tolerance (default \`5c\`). Harmonics equated by the \`equave\` (default \`2/1\`) are only included once. The returned segment begins at unison.";
-  const step = equave /^ divisions;
+  const step = equave ~/^ divisions;
   const witnesses = [];
   for (const numerator of [denominator .. maxNumerator]) {
     const candidate = numerator % denominator;
