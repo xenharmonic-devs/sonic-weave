@@ -1010,7 +1010,7 @@ TrueAccessExpression
   }
 
 ArraySlice
-  = head: Primary tail: (_ '[' _ @Expression? @(_ ',' _ @Expression)? _ @RangeDotsPenultimate _ @Expression? _ ']')* {
+  = head: Primary tail: (__ '[' _ @Expression? @(_ ',' _ @Expression)? _ @RangeDotsPenultimate _ @Expression? _ ']')* {
     return tail.reduce( (object, [start, second, penultimate, end]) => {
       return { type: 'ArraySlice', object, start, second, penultimate, end };
     }, head);
