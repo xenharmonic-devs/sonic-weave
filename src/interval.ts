@@ -1574,6 +1574,43 @@ export class ValBasis {
   }
 
   /**
+   * Create a (2*n + 1)^d hypercube.
+   * @param n Radius (max metric).
+   * @param puncture Remove center.
+   */
+  hypercube(n: number, puncture = false) {
+    const result: TimeMonzo[] = [new TimeMonzo(ZERO, [])];
+    for (let j = 0; j < this.size; ++j) {
+      const monzo = this.value[j];
+      const previousResult = [...result];
+      let m: TimeMonzo | undefined;
+      for (let i = 0; i < n; ++i) {
+        if (m === undefined) {
+          m = monzo;
+        } else {
+          m = m.mul(monzo) as TimeMonzo;
+        }
+        for (const existing of previousResult) {
+          let accumulated = existing.mul(m);
+          if (accumulated instanceof TimeReal) {
+            throw new Error('Hyper-cube spanning failed.');
+          }
+          result.push(accumulated);
+          accumulated = existing.div(m);
+          if (accumulated instanceof TimeReal) {
+            throw new Error('Hyper-cube spanning failed.');
+          }
+          result.push(accumulated);
+        }
+      }
+    }
+    if (puncture) {
+      result.shift();
+    }
+    return result;
+  }
+
+  /**
    * The unnormalized Gram-Schmidt orthogonalized basis.
    */
   get ortho(): TimeMonzo[] {

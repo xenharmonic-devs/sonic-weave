@@ -3,7 +3,6 @@ import {
   Fraction,
   PRIMES,
   applyWeights,
-  kCombinations,
   primeLimit,
   unapplyWeights,
 } from 'xen-dev-utils';
@@ -611,21 +610,12 @@ function respell(
   }
   this.spendGas(0.3 * commaBasis.numberOfComponents * commaBasis.size ** 2);
   commaBasis = commaBasis.lll('tenney');
-  const r = respellWithCommas.bind(this);
-  const commas = [...commaBasis.value];
-  for (const comma of commaBasis.value) {
-    commas.push(comma.inverse());
-  }
+  let n = 1;
   if (searchRadius !== undefined) {
-    const radius = upcastBool(searchRadius).toInteger();
-    const cs = [...commas];
-    for (let k = 2; k <= radius; ++k) {
-      for (const combo of kCombinations(cs, k)) {
-        const comma = combo.reduce((a, b) => a.mul(b) as TimeMonzo);
-        commas.push(comma);
-      }
-    }
+    n = upcastBool(searchRadius).toInteger();
   }
+  const commas = commaBasis.hypercube(n, true);
+  const r = respellWithCommas.bind(this);
   const mapper = (i: SonicWeaveValue) => r(i, commas);
   mapper.__doc__ = 'Respeller';
   mapper.__node__ = builtinNode(mapper);

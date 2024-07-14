@@ -388,4 +388,9 @@ describe('Features related to tempering', () => {
     );
     expect(simple).toBe('49/40');
   });
+
+  it('respells with a big radius', () => {
+    const five = evaluate('str(respell([S8, S9], 4)(81/16))');
+    expect(five).toBe('5/1');
+  });
 });
