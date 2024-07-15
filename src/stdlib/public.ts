@@ -352,6 +352,127 @@ export function str(this: ExpressionVisitor, value: SonicWeaveValue) {
 }
 
 /**
+ * Obtain a "best effort" string representation of the value that's below the maximum length (w/o color or label).
+ * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param value Value to represent.
+ * @param maxLength Maximum length of the result.
+ * @returns Short string representation that's below the maximum length if possible.
+ */
+export function lstr(
+  this: ExpressionVisitor,
+  value: SonicWeaveValue,
+  maxLength: number
+) {
+  if (value instanceof Interval) {
+    let result = value.str(this.rootContext);
+    if (result.length <= maxLength) {
+      return result;
+    }
+    if (value.steps) {
+      return value.simpleStr();
+    }
+    const monzo = value.value;
+    result = monzo.toString(value.domain);
+    if (result.length <= maxLength) {
+      return result;
+    }
+    if (monzo instanceof TimeReal) {
+      if (isNaN(monzo.value) || !isFinite(monzo.value)) {
+        return result;
+      }
+      if (value.domain === 'linear') {
+        let suffix = 'r';
+        if (monzo.timeExponent === -1) {
+          suffix = suffix + 'Hz';
+        } else if (monzo.timeExponent === 1) {
+          suffix = suffix + 's';
+        } else if (monzo.timeExponent) {
+          suffix = suffix + 's^*';
+        }
+        for (let i = maxLength - 1; i >= 2; --i) {
+          result = monzo.value.toPrecision(i) + suffix;
+          if (result.length <= maxLength) {
+            return result;
+          }
+        }
+        return monzo.value.toPrecision(1) + suffix;
+      }
+      if (monzo.timeExponent || monzo.value <= 0) {
+        return value.simpleStr();
+      }
+      const cents = monzo.totalCents();
+      const suffix = 'r¢';
+      for (let i = maxLength - 2; i >= 2; --i) {
+        result = cents.toPrecision(i) + suffix;
+        if (result.length <= maxLength) {
+          return result;
+        }
+      }
+      return cents.toPrecision(1) + suffix;
+    }
+    const x = monzo.valueOf();
+    if (value.domain === 'linear') {
+      if (!monzo.timeExponent.n) {
+        for (let i = maxLength - 1; i >= 2; --i) {
+          result = x.toPrecision(i);
+          if (!result.includes('e')) {
+            result += 'e';
+          }
+          if (result.length <= maxLength) {
+            return result;
+          }
+        }
+        result = x.toPrecision(1);
+        if (!result.includes('e')) {
+          result += 'e';
+        }
+        return result;
+      }
+      let suffix = 's^*';
+      const t = monzo.timeExponent.valueOf();
+      if (t === 1) {
+        suffix = 's';
+      } else if (t === -1) {
+        suffix = 'Hz';
+      }
+      for (let i = maxLength - 1; i >= 2; --i) {
+        result = x.toPrecision(i) + suffix;
+        if (result.length <= maxLength) {
+          return result;
+        }
+      }
+      return x.toPrecision(1) + suffix;
+    }
+    if (monzo.timeExponent.n || monzo.residual.s !== 1) {
+      return value.simpleStr();
+    }
+    const cents = monzo.totalCents();
+    result = cents.toString();
+    if (result.includes('e') || !result.includes('.')) {
+      result += '¢';
+    }
+    if (result.length <= maxLength) {
+      return result;
+    }
+    for (let i = maxLength - 1; i >= 2; --i) {
+      result = cents.toPrecision(i);
+      if (result.includes('e') || !result.includes('.')) {
+        result += '¢';
+      }
+      if (result.length <= maxLength) {
+        return result;
+      }
+    }
+    result = cents.toPrecision(1);
+    if (result.includes('e') || !result.includes('.')) {
+      result += '¢';
+    }
+    return result;
+  }
+  return repr_.bind(this)(value);
+}
+
+/**
  * Color based on the size of the interval. Hue wraps around every 1200 cents.
  * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
  * @param interval Interval to measure.

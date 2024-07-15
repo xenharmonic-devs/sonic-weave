@@ -70,6 +70,7 @@ import {
   sortInPlace as pubSortInPlace,
   repr as pubRepr,
   str as pubStr,
+  lstr as pubLstr,
   centsColor as pubCentsColor,
   factorColor as pubFactorColor,
   compare,
@@ -2453,6 +2454,22 @@ vstr.__doc__ =
   'Obtain a string representation of a primitive value (w/o color or label). Vectorizes over arrays.';
 vstr.__node__ = builtinNode(vstr);
 
+function lstr(
+  this: ExpressionVisitor,
+  value: SonicWeaveValue,
+  maxLength: SonicWeaveValue
+): SonicWeaveValue {
+  const m = upcastBool(maxLength).toInteger();
+  if (isArrayOrRecord(value)) {
+    const l = pubLstr.bind(this);
+    return unaryBroadcast.bind(this)(value, v => l(v, m));
+  }
+  return pubLstr.bind(this)(value, m);
+}
+lstr.__doc__ =
+  'Obtain a "best effort" short string representing a primitive value. Vectorizes over arrays.';
+lstr.__node__ = builtinNode(lstr);
+
 function print(this: ExpressionVisitor, ...args: any[]) {
   const s = repr.bind(this);
   console.log(...args.map(a => (typeof a === 'string' ? a : s(a))));
@@ -2672,6 +2689,7 @@ export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
   repr,
   str,
   vstr,
+  lstr,
   slice,
   zip,
   zipLongest,

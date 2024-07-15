@@ -273,6 +273,9 @@ Calculate log1p x.
 ### logarithmic(*interval*)
 Convert interval to logarithmic representation. Formatting information of linear quantities is lost.
 
+### lstr(*value*, *maxLength*)
+Obtain a "best effort" short string representing a primitive value. Vectorizes over arrays.
+
 ### map(*mapper*, *scale = $$*)
 Map a riff over the given/current scale producing a new scale.
 
