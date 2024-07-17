@@ -9,7 +9,7 @@ import {
 } from '../interval';
 import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
-import {dot} from 'xen-dev-utils';
+import {LOG_PRIMES, PRIME_CENTS, dot} from 'xen-dev-utils';
 
 describe('Idempontent formatting', () => {
   it('has stable ratios (common factor)', () => {
@@ -348,6 +348,48 @@ describe('Temperament', () => {
       '1200.000',
       '1901.783',
       '583.905',
+    ]);
+  });
+
+  it('computes TE meantone', () => {
+    const p12 = Val.fromArray([12, 19, 28]);
+    const p19 = Val.fromArray([19, 30, 44]);
+    const meantone = Temperament.fromVals([p12, p19]);
+    const map = meantone.subgroupMapping;
+    expect(Math.abs(dot(map, [-4, 4, -1]))).toBeCloseTo(0, 9);
+    expect(dot(map, [1, 0, 0])).toBeCloseTo(PRIME_CENTS[0], -1);
+    expect(dot(map, [-1, 1, 0])).toBeCloseTo(
+      PRIME_CENTS[1] - PRIME_CENTS[0],
+      -2
+    );
+    expect(dot(map, [0, 0, 1])).toBeCloseTo(PRIME_CENTS[2], -2);
+    expect((((map[1] - map[0]) / map[0]) * 1200).toFixed(3)).toBe('696.239');
+    expect(map.map(c => c.toFixed(3))).toEqual([
+      '1201.397',
+      '1898.446',
+      '2788.196',
+    ]);
+  });
+
+  it('almost computes CTE meantone', () => {
+    const p5 = Val.fromArray([5, 8, 12]);
+    const p7 = Val.fromArray([7, 11, 16]);
+    const weights = LOG_PRIMES.slice(0, 3);
+    weights[0] *= 0.005;
+    const meantone = Temperament.fromVals([p5, p7], [200, 1, 1]);
+    const map = meantone.subgroupMapping;
+    expect(Math.abs(dot(map, [-4, 4, -1]))).toBeCloseTo(0, 7);
+    expect(dot(map, [1, 0, 0])).toBeCloseTo(PRIME_CENTS[0], 4);
+    expect(dot(map, [-1, 1, 0])).toBeCloseTo(
+      PRIME_CENTS[1] - PRIME_CENTS[0],
+      -2
+    );
+    expect(dot(map, [0, 0, 1])).toBeCloseTo(PRIME_CENTS[2], -2);
+    expect((((map[1] - map[0]) / map[0]) * 1200).toFixed(4)).toBe('697.2143');
+    expect(map.map(c => c.toFixed(4))).toEqual([
+      '1200.0000',
+      '1897.2144',
+      '2788.8572',
     ]);
   });
 });

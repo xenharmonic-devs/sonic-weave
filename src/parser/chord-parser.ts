@@ -248,7 +248,7 @@ export function rank2FromCommas(
 /**
  * Obtain a temperament from a list of vals based on user input.
  * Some effort is made to ensure the resulting temperament has rank equal to the number of vals provided.
- * @param commaInput User-provided list of vals.
+ * @param valsInput User-provided list of vals.
  * @param subgroupInput Optional user-provided subgroup basis.
  * @param optimizationScheme Optimization scheme to use.
  * @param subgroupWeights Additional importance weights to apply on top of Tenney weights.
@@ -256,7 +256,7 @@ export function rank2FromCommas(
  */
 export function temperamentFromVals(
   valsInput: string,
-  subgrouInput: string,
+  subgroupInput: string,
   optimizationScheme: OptimizationScheme,
   subgroupWeights?: number[]
 ) {
@@ -268,8 +268,8 @@ export function temperamentFromVals(
   }
   const pureEquaves = optimizationScheme !== 'TE';
 
-  subgrouInput = subgrouInput.trim();
-  if (!subgrouInput) {
+  subgroupInput = subgroupInput.trim();
+  if (!subgroupInput) {
     // It's a well-known fact* that primes above 13 do not exist.
     for (const n of [3, 4, 5, 6]) {
       const basis = new ValBasis(n);
@@ -280,7 +280,7 @@ export function temperamentFromVals(
       }
     }
   }
-  const basis = parseBasis(subgrouInput);
+  const basis = parseBasis(subgroupInput);
   const vals = parseVals(valsInput, basis);
   return Temperament.fromVals(vals, subgroupWeights, pureEquaves);
 }

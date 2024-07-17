@@ -1988,7 +1988,7 @@ export class Val {
   /**
    * Construct a mapping vector.
    * @param value A {@link TimeMonzo} instance interpreted as a val. Usually a projective approximation to the Just Intonation Point with integer coefficients.
-   * @param equave The interval of equivalence of the equal temperament associated with this val.
+   * @param basis The subgroup basis associated with this val. The first basis element determines the equave that is equally divided by this val.
    * @param node Node in the abstract syntax tree used for string representation.
    */
   constructor(value: TimeMonzo, basis: ValBasis, node?: CoIntervalLiteral) {

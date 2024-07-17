@@ -11,8 +11,6 @@ import {
 } from './pythagorean';
 import {ZERO} from './utils';
 
-type Monzo = TimeMonzo | TimeReal;
-
 /**
  * Base degree for a mosstep in a 0-indexed array.
  */
@@ -20,7 +18,7 @@ export type MosDegree = {
   /**
    * The perfect or neutral central interval.
    */
-  center: Monzo;
+  center: TimeMonzo | TimeReal;
   /**
    * Flag to indicate if the degree has minor and major variants.
    */
@@ -28,7 +26,7 @@ export type MosDegree = {
   /**
    * The lopsided neutral variant of a bright or dark generator.
    */
-  mid?: Monzo;
+  mid?: TimeMonzo | TimeReal;
 };
 
 /**
@@ -39,23 +37,23 @@ export type MosConfig = {
   /**
    * Interval of equivalence. The distance between J4 and J5.
    */
-  equave: Monzo;
+  equave: TimeMonzo | TimeReal;
   /**
    * Period of repetition.
    */
-  period: Monzo;
+  period: TimeMonzo | TimeReal;
   /**
    * Current value of the '&' accidental.
    */
-  am: Monzo;
+  am: TimeMonzo | TimeReal;
   /**
    * Current value of the 'e' accidental.
    */
-  semiam: Monzo;
+  semiam: TimeMonzo | TimeReal;
   /**
    * Relative scale from J onwards. Echelon depends on J. Use equave to reach higher octave numbers.
    */
-  scale: Map<string, Monzo>;
+  scale: Map<string, TimeMonzo | TimeReal>;
   /**
    * Intervals for relative notation. Use period to reach larger intervals.
    */
@@ -67,11 +65,11 @@ export type MosConfig = {
   /**
    * Value of the large step.
    */
-  large: Monzo;
+  large: TimeMonzo | TimeReal;
   /**
    * Value of the small step.
    */
-  small: Monzo;
+  small: TimeMonzo | TimeReal;
 };
 
 /**
@@ -137,12 +135,15 @@ export function scaleMonzos(config: MosConfig) {
  * @param config Result of a MOS declaration.
  * @returns A relative time monzo.
  */
-export function mosMonzo(node: MosStep, config: MosConfig): Monzo {
+export function mosMonzo(
+  node: MosStep,
+  config: MosConfig
+): TimeMonzo | TimeReal {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
   const periods = (node.degree - baseDegree) / config.degrees.length;
   const mosDegree = config.degrees[baseDegree];
   const quality = node.quality.quality;
-  let inflection: Monzo = new TimeMonzo(ZERO, []);
+  let inflection: TimeMonzo | TimeReal = new TimeMonzo(ZERO, []);
   if (
     quality === 'a' ||
     quality === 'Â' ||
@@ -237,7 +238,7 @@ function mosInflection(
 export function absoluteMosMonzo(
   node: AbsoluteMosPitch,
   config: MosConfig
-): Monzo {
+): TimeMonzo | TimeReal {
   if (!config.scale.has(node.nominal)) {
     throw new Error(`Nominal ${node.nominal} is unassigned.`);
   }

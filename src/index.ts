@@ -29,3 +29,4 @@ export {
 } from './utils';
 export * from './words';
 export * from './scale-workshop-2-parser';
+export * from './temper';
