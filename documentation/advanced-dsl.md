@@ -576,13 +576,15 @@ Associating two values like `3/2 "fif"` invokes intrinsic behavior between the i
 Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been depracated.
 | left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Basis         | Function      |
 | ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | ------------- |
-| **Niente**   | ?             | ?             | ?             | bleach         | ?              | ?             | `right(left)` |
+| **Niente**   | `niente`      | `niente`      | `niente`      | `niente`       | `niente`       | `niente`      | `niente`      |
 | **String**   | ?             | concatenate   | ?             | label          | ?              | ?             | `right(left)` |
 | **Color**    | ?             | ?             | ?             | paint          | ?              | ?             | `right(left)` |
 | **Interval** | bleach        | label         | paint         | ?!             | ?!             | rebase        | `right(left)` |
 | **Val**      | ?             | ?             | ?             | ?!             | ?              | rebase        | `right(left)` |
 | **Basis**    | ?             | ?             | ?             | rebase         | rebase         | ?             | `right(left)` |
 | **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` | `left(right)` |
+
+The behavior for `niente` is designed so that `niente(++i)` works like `void(++i)` in JavaScript and that `niente 3/2 white "fif"` absorbs everything like a `//` comment would in JS.
 
 Intrinsic behavior vectorizes and broadcasts like other binary operations.
 

@@ -30,7 +30,7 @@ sort()
 
 (* Shift out the 3/3 because the unison should be implicit *)
 (* Voiding is required to avoid pushing the first element on top instead *)
-void(shift())
+niente shift()
 
 (* Add the octave to finish off *)
 2
