@@ -1818,7 +1818,7 @@ export class ExpressionVisitor {
       case 'string':
         return this.intrinsicStringCall(left, right);
       case 'undefined':
-        return this.intrinsicNoneCall(right);
+        return undefined; // Absorb everything from the left
       case 'boolean':
         return this.intrinsicIntervalCall(upcastBool(left), right);
       case 'function':
@@ -1881,16 +1881,6 @@ export class ExpressionVisitor {
     }
     const ic = this.intrinsicColorCall.bind(this);
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));
-  }
-
-  protected intrinsicNoneCall(caller: SonicWeaveValue): SonicWeaveValue {
-    if (typeof caller === 'boolean' || caller instanceof Interval) {
-      caller = upcastBool(caller).shallowClone();
-      caller.color = undefined;
-      return caller;
-    }
-    const n = this.intrinsicNoneCall.bind(this);
-    return unaryBroadcast.bind(this)(caller, n);
   }
 
   protected intrinsicIntervalCall(

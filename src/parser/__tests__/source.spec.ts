@@ -2275,4 +2275,36 @@ describe('SonicWeave parser', () => {
     const scale = expand('sort(3/2 ^ [-2..2] rdc 2)');
     expect(scale).toEqual(['9/8', '4/3', '3/2', '16/9', '2/1']);
   });
+
+  it('has an unpaired comment of sorts', () => {
+    const scale = expand(`
+      9/8 red "tone"
+      niente 5/4 green "blue"
+      3/2 white
+      2/1
+      niente FJS
+    `);
+    expect(scale).toEqual(['9/8 "tone" red', '3/2 white', '2/1']);
+  });
+
+  it('has a void', () => {
+    const scale = expand(`
+      let i = 2
+      ++i
+      niente(++i)
+      ++i
+      2
+    `);
+    expect(scale).toEqual(['let i = 5', '3', '5', '2']);
+  });
+
+  it('has a hard unpaired comment of sorts', () => {
+    const scale = expand(`
+      5
+      3
+      2
+      niente and reduce()
+    `);
+    expect(scale).toEqual(['5', '3', '2']);
+  });
 });

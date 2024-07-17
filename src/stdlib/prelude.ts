@@ -232,11 +232,6 @@ riff ftom(freq) {
   return freq/440Hz /_ 2 * 12 + 69;
 }
 
-riff void() {
-  "Get rid of expression results. \`void(++i)\` increments the value but doesn't push anything onto the scale.";
-  return;
-}
-
 riff sum(terms = $$) {
   "Calculate the (linear) sum of the terms or the current scale.";
   return arrayReduce((total, element) => total +~ element, terms);
@@ -644,7 +639,7 @@ riff csgs(generators, ordinal = 1, period = niente, numPeriods = 1, maxSize = 10
     }
     sortInPlace($$);
     if (hasConstantStructure($$)) {
-      void(--ordinal);
+      niente(--ordinal);
     }
   }
   return repeat(numPeriods);
@@ -870,7 +865,7 @@ riff mergeOffset(offsets, overflow = 'drop', scale = ££) {
 
   unshift(equave ~^ 0);
   const copies = $ tns~ offsets;
-  void(shift());
+  niente shift();
 
   if (overflow == 'drop') {
     remap(copy => copy[copy > 1 vand copy < equave], copies);
@@ -937,15 +932,15 @@ riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, sc
   }
   if (not preserveBoundary) {
     while ($$ and labs~$$[0] <= tolerance)
-      void(shift($$));
+      niente shift($$);
     while ($$ and labs~($$[-1] %~ scale[-1]) <= tolerance)
-      void(pop($$));
+      niente pop($$);
   }
   scale[-1];
   if (length($) <= 1)
     return $;
   while (length($) > 1 and $[-1] ~= $[-2])
-    void(pop($, -2));
+    niente pop($, -2);
 }
 
 riff replace(interval, replacement, scale = ££) {

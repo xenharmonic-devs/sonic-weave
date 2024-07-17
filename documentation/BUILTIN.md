@@ -791,9 +791,6 @@ Generate a vertically aligned object i.e. a subset of the harmonic series that s
 ### vbool(*value*)
 Convert value to a boolean. Vectorizes over arrays.
 
-### void()
-Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale.
-
 ### weilHeight(*x*)
 Calculate the Weil height of the interval. Natural logarithm of the maximum of numerator or denominator.
 

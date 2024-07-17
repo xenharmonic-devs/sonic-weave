@@ -349,10 +349,8 @@ describe('SonicWeave standard library', () => {
   });
 
   it('can access docstrings', () => {
-    const doc = evaluateExpression('doc(void)');
-    expect(doc).toBe(
-      "Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale."
-    );
+    const doc = evaluateExpression('doc(vbool)');
+    expect(doc).toBe('Convert value to a boolean. Vectorizes over arrays.');
   });
 
   it('can generate the marveldene without irrational stretching', () => {
@@ -674,7 +672,7 @@ describe('SonicWeave standard library', () => {
   });
 
   it('pops a specific index', () => {
-    const scale = expand('6::12;void(pop($, 4))');
+    const scale = expand('6::12;niente(pop($, 4))');
     expect(scale).toEqual(['7/6', '8/6', '9/6', '10/6', '12/6']);
   });
 
