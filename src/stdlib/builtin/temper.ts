@@ -542,20 +542,22 @@ function respellWithCommas(
         }
       }
     }
+    const simplify = interval.domain === 'linear';
     if (exponent.isUnity()) {
       return new Interval(
         value,
         interval.domain,
         interval.steps,
-        intervalValueAs(value, interval.node, true),
+        intervalValueAs(value, interval.node, simplify),
         interval
       );
     }
+    value = value.pow(exponent);
     return new Interval(
-      value.pow(exponent),
+      value,
       interval.domain,
       interval.steps,
-      intervalValueAs(value, interval.node, true),
+      intervalValueAs(value, interval.node, simplify),
       interval
     );
   }

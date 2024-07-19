@@ -2275,4 +2275,9 @@ describe('SonicWeave parser', () => {
     const scale = expand('sort(3/2 ^ [-2..2] rdc 2)');
     expect(scale).toEqual(['9/8', '4/3', '3/2', '16/9', '2/1']);
   });
+
+  it('formats (un)respelled logarithmic quantities logarithmically', () => {
+    const scale = expand('[1..5] \\ 5;respell([16/15], 1)');
+    expect(scale).toEqual(['1\\5', '2\\5', '3\\5', '4\\5', '5\\5']);
+  });
 });
