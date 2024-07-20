@@ -28,7 +28,7 @@ This document describes the SonicWeave domain-specific language for manipulating
 
 ## Basic example
 
-SonicWeave is related to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and a successor of Scale Workshop 2. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
+SonicWeave is related to [Scala .scl](https://www.huygens-fokker.org/scala/scl_format.html) and is a successor to the syntax of Scale Workshop 2. It is intended for constructing microtonal scales that repeat at the octave (or some other period).
 
 Let's start with a basic major scale in just intonation:
 ```ocaml
@@ -104,7 +104,7 @@ Using cents up to one decimal of precision our major scale becomes:
 
 Note how the last dot in `1200.` is required. Without it `1200` denotes the frequency ratio between 1 Hz and 1200 Hz, a huge interval!
 
-Decimal ratios are less commonly used in music, but can be as useful as cents for comparing the sizes of intervals. E.g. the frequency ratio of `11/9` is around `1.2222e` while `27/22` is a smidge wider around `1.227272e`. The final `e` differentiates `1.2e` (just minor third) from `1.2` (an unnoticeably small interval, basically a chorus tone near 1/1). The `e` may be followed with a ten's exponent. E.g. `14e-1` is unnecessarily obfuscated notation for `14/10` i.e. `7/5`.
+Decimal ratios are less commonly used in music, but can be as useful as cents for comparing the sizes of intervals. E.g. the frequency ratio of `11/9` is around `1.2222e` while `27/22` is a smidge wider around `1.227272e`. The final `e` differentiates `1.2e` (just minor third) from `1.2` (an unnoticeably small interval; basically a chorus tone near 1/1). The `e` may be followed with a ten's exponent. E.g. `14e-1` is unnecessarily obfuscated notation for `14/10` i.e. `7/5`.
 
 ### Equal temperaments
 
@@ -237,7 +237,7 @@ Colors may be specified using
 
 ## Code comments
 
-Anything between a pair `(*` and `*)` is ignored. Unlike C or JavaScript comments are nestable.
+Anything between a pair `(*` and `*)` is ignored. Unlike in C or JavaScript comments are nestable.
 
 ```ocaml
 1 = 432 Hz  (* Good vibes only... Wait what are you doing?! *)
@@ -321,7 +321,7 @@ G4    (* 391.365Hz |  694.737 | 1.494 *)
 C5    (* 524.000Hz | 1200.000 | 2.000 *)
 ```
 
-I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning or even sharper systems.
+I've switched around C# and Db because now the effect of the sharp is much more mellow. It's only worth `1\19` or around `63.158 c` here. Systems where the fifth is flatter than in 12ed2 are often nicer to notate and perform because the sharps and flats are close to the corresponding natural pitches and don't cross over like they do in Pythagorean tuning (or even sharper systems like 17-tone equal temperament).
 
 ### Double accidentals
 
@@ -402,9 +402,9 @@ Under the hood SonicWeave computes a value for `C4` based on your pitch declarat
 
 ## FJS inflections
 
-The Pythagorean part of FJS notation is powerful enough to represent any multiple of powers of two and powers of three, be the powers negative or positive.
+The Pythagorean part of FJS notation is powerful enough to represent any multiple of powers of two and powers of three, be the exponents negative or positive.
 
-Each higher prime number is associated with a comma which is chosen based on simplicity and the prime being in the numerator (i.e. otonality) rather than direction of the inflection. We already saw the `^5` inflection earlier when we re-spelled our just intonation fractions using absolute FJS. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. The (logarithmic) `M6^5` is the same as (linear) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`. You can also use a vee, which looks like a downwards-pointing caret, so `m3v5` is the same `logarithmic(6/5)`.
+Each higher prime number is associated with a comma which is chosen based on simplicity and the prime being in the numerator (i.e. otonality) rather than direction of the inflection. We already saw the `^5` inflection earlier when we re-spelled our just intonation fractions using absolute FJS. The comma for `5` is `80/81` so `M6^5` is lower in pitch than plain `M6`. A (logarithmic) `M6^5` is the same as (linear) `27/16 * 80/81` or `5/3`. To go in the opposite direction use a subscript (underscore) e.g. `m3_5` corresponds to `6/5`. You can also use a vee, which looks like a downwards-pointing caret, so `m3v5` is the same `logarithmic(6/5)`.
 
 The inflections stack so `m2v5v5` represents `256/243 * 81/80 * 81/80` or `27/25`. Other spellings understood by the parser are `m2_5,5` and `m2v25`.
 
@@ -537,7 +537,7 @@ The primes span a vast musical universe to explore so just intonation can get ve
 
 Equal temperaments simplify this complexity to a finite collection of distinct pitches within an octave and many of them offer passable approximations to most of the consonances we care about as musicians.
 
-[https://en.xen.wiki/w/Ups_and_downs_notation](https://en.xen.wiki/w/Ups_and_downs_notation) is designed for working with equal temperaments a.k.a. edos. By default the up inflection (`^`) indicates a positive pitch shift by one edostep while the down inflection (`v`) indicates a negative pitch shift. The conversion from abstract steps to concrete pitch happens during tempering.
+[Ups and downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) is designed for working with equal temperaments a.k.a. edos. By default the up inflection (`^`) indicates a positive pitch shift by one edostep while the down inflection (`v`) indicates a negative pitch shift. The conversion from abstract steps to concrete pitch happens during tempering.
 
 Let's demonstrate with an approximation of the 5-limit major scale in 22edo:
 
@@ -555,7 +555,7 @@ C5
 22@
 ```
 
-Normally `E4` would temper to `8\22` but using the down inflection we made it a more mellow `7\22`.
+Normally `E4` would temper to `8\22` but we made it a more mellow `7\22` using the down inflection (`v`).
 
 ### Lifts and drops
 
@@ -657,7 +657,7 @@ The result is the same as if we had entered:
 The `reduce` helper allows us to be imprecise with octaves. The above spelled sloppily is:
 
 ```ocaml
-defer reduce
+defer reduce()
 1 = 440 Hz
 
 9

@@ -33,7 +33,7 @@ tet(10)
 
 The major scale in Pythagorean tuning i.e. 3-limit just intonation.
 ```ocaml
-sorted(3^[-1..5] rdc 2)
+sort(3^[-1..5] rdc 2)
 ```
 
 Scale title, colors and labels.
@@ -44,7 +44,7 @@ Scale title, colors and labels.
 6/5 green "Minor 3rd"
 3/2 white "Perfect 5th"
 8/5 green "Minor 6th"
-2   gray  "Root (Octave)"
+2   gray  "Root & Octave"
 ```
 
 ## Additional resources
