@@ -129,4 +129,9 @@ describe('Short label formatting', () => {
     const three = evaluateExpression('lstr([3/2/^2, nan, -inf * 1z], 9)');
     expect(three).toEqual(['3/2^1/2', 'nan', '-inf * 1Hz']);
   });
+
+  it('formats F𝄱4 as is', () => {
+    const FsharpSyndown = evaluateExpression('str(F𝄱4)');
+    expect(FsharpSyndown).toBe('F𝄱4');
+  });
 });

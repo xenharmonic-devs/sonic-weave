@@ -1565,7 +1565,7 @@ MosStepLiteral
     }
 
 AccidentalSign
-  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / [x♯#‡t♮_d♭b&ea@]
+  = '𝄪' / '𝄫' / '𝄲' / '𝄳' / '𝄬' / '𝄭' / '𝄮' / '𝄯' / '𝄰' / '𝄱' / [x♯#‡t♮_d♭b&ea@]
 
 Accidental 'accidental'
   = fraction: VulgarFraction accidental: AccidentalSign  {

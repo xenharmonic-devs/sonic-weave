@@ -50,12 +50,13 @@ This document describes programming in the SonicWeave domain-specific language.
     1. [Further splits](#further-splits)
     2. [Extra comma flavors](#extra-comma-flavors)
     3. [Non-standard pitch declaration](#non-standard-pitch-declaration)
-24. [Rebasing](#rebasing)
-25. [Implicit intrinsic calls](#implicit-intrinsic-calls)
-26. [Obscure types](#obscure-types)
-27. [Obscure operations](#obscure-operations)
-28. [Future work](#future-work)
-29. [Next steps](#next-steps)
+24. [Syntonic accidentals](#syntonic-accidentals)
+25. [Rebasing](#rebasing)
+26. [Implicit intrinsic calls](#implicit-intrinsic-calls)
+27. [Obscure types](#obscure-types)
+28. [Obscure operations](#obscure-operations)
+29. [Future work](#future-work)
+30. [Next steps](#next-steps)
     1. [Examples](https://github.com/xenharmonic-devs/sonic-weave/tree/main/examples)
     2. [Technical documentation](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md)
     3. [Tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md)
@@ -541,6 +542,18 @@ You may encounter them when splitting Pythagorean intervals like the *third-majo
 You can even make interordinals like the *eighth-diminished sesquith* `⅛d1½` by splitting the fifth eight ways `P5 / 8`.
 
 Absolute notation works too `C4 + M6 / 5` happens to be *D fifth-flat four* `D⅕♭4`.
+
+## Syntonic accidentals
+Basic accidentals with a single syntonic (81/80) arrow are supported.
+
+| Accidental | Monzo         | Size in cents |
+| ---------- | ------------- | ------------- |
+| `𝄮`        | `[-4 4 -1>`   | `+21.506`     |
+| `𝄯`        | `[4 -4 1>`    | `-21.506`     |
+| `𝄱`        | `[-7 3 1>`    | `+92.179`     |
+| `𝄬`        | `[7 -3 -1>`   | `-92.179`     |
+| `𝄰`        | `[-15 11 -1>` | `+135.191`    |
+| `𝄭`        | `[15 -11 1>`  | `-135.191`    |
 
 ### Extra comma flavors
 Extra commas include extended Helmholtz-Ellis inflections and additional bridges from above irrationals to just intonation.

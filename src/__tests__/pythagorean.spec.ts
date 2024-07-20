@@ -174,6 +174,17 @@ describe('Absolute Pythagorean interval construction from parts', () => {
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
   });
+
+  it('constructs syntonic E6', () => {
+    const node: AbsolutePitch = {
+      type: 'AbsolutePitch',
+      nominal: 'E',
+      accidentals: [{fraction: '', accidental: '𝄯'}],
+      octave: 6,
+    };
+    const monzo = absoluteMonzo(node);
+    expect(monzo.toBigInteger()).toBe(5n);
+  });
 });
 
 describe('Monzo -> node converter', () => {

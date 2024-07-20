@@ -13,6 +13,8 @@ import {
   ZERO,
 } from './utils';
 
+// Pythagorean + syntonic arrows
+
 // Maximum deviation from a central interval measured in sharps.
 const MAX_OFFSET = Object.freeze(new Fraction(100));
 
@@ -178,7 +180,13 @@ export type Accidental =
   | '_'
   | 'd'
   | '♭'
-  | 'b';
+  | 'b'
+  | '𝄬'
+  | '𝄭'
+  | '𝄮'
+  | '𝄯'
+  | '𝄰'
+  | '𝄱';
 
 /**
  * Musical accidental representing some (possibly split) powers of primes 2 and 3, possibly fractional.
@@ -199,6 +207,7 @@ export type AbsolutePitch = {
 };
 
 type PythInflection = [Fraction, Fraction];
+type PtolInflection = [Fraction, Fraction, Fraction];
 
 const q = F(1, 4);
 const Q = F(3, 4);
@@ -300,27 +309,34 @@ const NOMINAL_VECTORS = new Map<Nominal, PythInflection>([
 ]);
 
 /** @hidden */
-export const ACCIDENTAL_VECTORS = new Map<Accidental, PythInflection>([
-  ['♮', [ZERO, ZERO]],
-  ['_', [ZERO, ZERO]],
+export const ACCIDENTAL_VECTORS = new Map<Accidental, PtolInflection>([
+  ['♮', [ZERO, ZERO, ZERO]],
+  ['_', [ZERO, ZERO, ZERO]],
 
-  ['♯', [F(-11, 1), SEVEN]],
-  ['#', [F(-11, 1), SEVEN]],
+  ['♯', [NEGATIVE_ELEVEN, SEVEN, ZERO]],
+  ['#', [NEGATIVE_ELEVEN, SEVEN, ZERO]],
 
-  ['♭', [ELEVEN, F(-7, 1)]],
-  ['b', [ELEVEN, F(-7, 1)]],
+  ['♭', [ELEVEN, F(-7, 1), ZERO]],
+  ['b', [ELEVEN, F(-7, 1), ZERO]],
 
-  ['𝄪', [F(-22, 1), FOURTEEN]],
-  ['x', [F(-22, 1), FOURTEEN]],
+  ['𝄪', [F(-22, 1), FOURTEEN, ZERO]],
+  ['x', [F(-22, 1), FOURTEEN, ZERO]],
 
-  ['𝄫', [F(22, 1), F(-14, 1)]],
+  ['𝄫', [F(22, 1), F(-14, 1), ZERO]],
 
-  ['𝄲', [F(-11, 2), SEMISEVEN]],
-  ['‡', [F(-11, 2), SEMISEVEN]],
-  ['t', [F(-11, 2), SEMISEVEN]],
+  ['𝄲', [F(-11, 2), SEMISEVEN, ZERO]],
+  ['‡', [F(-11, 2), SEMISEVEN, ZERO]],
+  ['t', [F(-11, 2), SEMISEVEN, ZERO]],
 
-  ['𝄳', [SEMIELEVEN, F(-7, 2)]],
-  ['d', [SEMIELEVEN, F(-7, 2)]],
+  ['𝄳', [SEMIELEVEN, F(-7, 2), ZERO]],
+  ['d', [SEMIELEVEN, F(-7, 2), ZERO]],
+
+  ['𝄬', [SEVEN, NEGATIVE_THREE, NEGATIVE_ONE]],
+  ['𝄭', [F(15, 1), NEGATIVE_ELEVEN, ONE]],
+  ['𝄮', [F(-4, 1), FOUR, NEGATIVE_ONE]],
+  ['𝄯', [FOUR, F(-4, 1), ONE]],
+  ['𝄰', [F(-15, 1), ELEVEN, NEGATIVE_ONE]],
+  ['𝄱', [NEGATIVE_SEVEN, THREE, ONE]],
 ]);
 
 /** @hidden */
@@ -459,6 +475,7 @@ export function absoluteMonzo(node: AbsolutePitch) {
     const modification = ACCIDENTAL_VECTORS.get(accidental.accidental)!;
     vector[0] = vector[0].add(modification[0].mul(fraction));
     vector[1] = vector[1].add(modification[1].mul(fraction));
+    vector[2] = (vector[2] ?? ZERO).add(modification[2].mul(fraction));
   }
   vector[0] = vector[0].add(node.octave - 4);
   // These will be dressed up as frequencies later.

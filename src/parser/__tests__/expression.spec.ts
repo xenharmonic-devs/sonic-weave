@@ -2684,4 +2684,9 @@ describe('SonicWeave expression evaluator', () => {
     const {fraction} = parseSingle('niente al~ 2');
     expect(fraction).toBe('2');
   });
+
+  it('has SMP spelling for 9/5', () => {
+    const {fraction} = parseSingle('C4 = 1;B𝄬4');
+    expect(fraction).toBe('9/5');
+  });
 });
