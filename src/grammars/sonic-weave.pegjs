@@ -73,6 +73,7 @@
     'debugger',
     'default',
     'immutable',
+    'is',
     'match',
     'yield',
   ]);
