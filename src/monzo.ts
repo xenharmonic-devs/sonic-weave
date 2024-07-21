@@ -337,6 +337,9 @@ export class TimeReal {
    * @returns The time real unchanged or negated if negative originally.
    */
   abs() {
+    if (this.timeExponent) {
+      throw new Error('Absolute value is undefined in the absolute echelon.');
+    }
     return new TimeReal(this.timeExponent, Math.abs(this.value));
   }
 
@@ -345,6 +348,11 @@ export class TimeReal {
    * @returns The time real unchanged or inverted if less than one originally.
    */
   pitchAbs() {
+    if (this.timeExponent) {
+      throw new Error(
+        'Geometric absolute value is undefined in the absolute echelon.'
+      );
+    }
     const value = Math.abs(this.value);
     if (value < 1) {
       return new TimeReal(this.timeExponent, 1 / value);
@@ -2241,6 +2249,9 @@ export class TimeMonzo {
    * @returns The time monzo unchanged or negated if negative originally.
    */
   abs() {
+    if (this.timeExponent.n) {
+      throw new Error('Absolute value is undefined in the absolute echelon.');
+    }
     if (this.residual.s < 0) {
       return this.neg();
     }
@@ -2252,6 +2263,11 @@ export class TimeMonzo {
    * @returns The time monzo unchanged or inverted if less than one originally.
    */
   pitchAbs() {
+    if (this.timeExponent.n) {
+      throw new Error(
+        'Geometric absolute value is undefined in the absolute echelon.'
+      );
+    }
     const result = this.clone();
     if (!result.residual.n) {
       return result;

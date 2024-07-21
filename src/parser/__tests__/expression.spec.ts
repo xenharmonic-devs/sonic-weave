@@ -2689,4 +2689,8 @@ describe('SonicWeave expression evaluator', () => {
     const {fraction} = parseSingle('C4 = 1;B𝄬4');
     expect(fraction).toBe('9/5');
   });
+
+  it('throws if you try to take the absolute value of a frequency', () => {
+    expect(() => evaluate('abs 432 Hz')).toThrow();
+  });
 });
