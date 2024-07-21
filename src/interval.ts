@@ -1938,6 +1938,9 @@ export class ValBasis {
     if (this.node) {
       return literalToString(this.node);
     }
+    if (!this.size) {
+      return 'basis()';
+    }
     const node = {
       type: 'ValBasisLiteral',
       basis: [] as any[],

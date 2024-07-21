@@ -2693,4 +2693,16 @@ describe('SonicWeave expression evaluator', () => {
   it('throws if you try to take the absolute value of a frequency', () => {
     expect(() => evaluate('abs 432 Hz')).toThrow();
   });
+
+  it('treats the empty object as falsy', () => {
+    expect(evaluate('bool(#{})')).toBe(false);
+  });
+
+  it('treats the empty basis as falsy', () => {
+    expect(evaluate('bool(basis())')).toBe(false);
+  });
+
+  it('treats 0p as truthy', () => {
+    expect(evaluate('bool(0@)')).toBe(true);
+  });
 });

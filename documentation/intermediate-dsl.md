@@ -27,8 +27,9 @@ Make sure to read [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/bl
 6. [Interval echelons](#interval-echelons)
     1. [Operations on absolute intervals](#operations-on-absolute-intervals)
 7. [Interval types](#interval-types)
-    1. [Numeric separators](#numeric-separators)
-    2. [Formatting](#formatting)
+    1. [Co-interval types](#co-interval-types)
+    2. [Numeric separators](#numeric-separators)
+    3. [Formatting](#formatting)
 8. [Operators](#operators)
     1. [Unary operators](#unary-operators)
         1. [Vectorized unary operators](#vectorized-unary-operators)
@@ -442,11 +443,15 @@ The normalized frequency is now `cbrt(15000000) Hz` ≈ 246.62 Hz i.e. something
 | Duration     | `1 ms`                  | Linear        | Absolute  | Absolute period of oscillation. |
 | Absolute FJS | `C4`, `Eb_5`            | Logarithmic   | Absolute* | Absolute version of [FJS](https://en.xen.wiki/w/Functional_Just_System). |
 | S-expression | `S8`, `S5..8`           | Logarithmic   | Relative  | Additive spelling of [square superparticulars](https://en.xen.wiki/w/Square_superparticular). |
+
+*) The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
+
+### Co-interval types
+| Type         | Examples                | Domain        | Echelon   | Notes |
+| ------------ | ----------------------- | ------------- | --------- | ----- |
 | Val          | `<12, 19, 28]`          | Cologarithmic | Relative  | Used to temper scales. |
 | Warts        | `17c@`, `29@2.3.13/5`   | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Shorthand_notation) for vals. |
 | SOV          | `17[^5]@`               | Cologarithmic | Relative  | [Shorthand](https://en.xen.wiki/w/Val#Sparse_Offset_Val_notation) for vals. |
-
-*) The echelon of absolute FJS depends on whether or not the reference pitch declaration is relative or absolute.
 
 ### Numeric separators
 It is possible to separate numbers into groups using underscores for readability e.g. `1_000_000` is one million as an integer and `123_201/123_200` is the [chalmerisia](https://en.xen.wiki/w/Chalmersia) as a fraction.
@@ -509,24 +514,25 @@ Operations can be applied to intervals to create new intervals.
 | Geom. inverse  | _N/A_      |             | `%P8`       | `<1 0 0 ...]` |
 | Square root    | `√4`       | `2`         | `√P15`      | `P8`          |
 | Logical NOT    | `not 2`    | `false`     | `not P8`    | `false`       |
+| Vectorized NOT | `vnot 2`   | `false`     | `vnot P8`   | `false`       |
 | Up             | `^2`       | *           | `^P8`       | `P8 + 1°`     |
 | Down           | `v{2}`     | *           | `vP8`       | `P8 - 1°`     |
 | Lift           | `/2`       | *           | `/P8`       | `P8 + 5°`     |
 | Drop           | `\2`       | *           | `\P8`       | `P8 - 5°`     |
 | Increment      | `++i`      | `3`         | _N/A_       |               |
 | Decrement      | `--i`      | `1`         | _N/A_       |               |
-| Absolute value | `abs -2`   | `2`         | `abs(-P8)`  | `P8`          |
+| Absolute value | `abs -2`   | `2`         | `abs P-8`   | `P8`          |
 | Geometric abs  | `labs 1/2` | `2`         | _N/A_       |               |
 
 Square root uses the same operator in both domains because the square of a logarithmic quantity is undefined so there's no ambiguity.
 
-*) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. These operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
+*) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. The degrees added by these operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
 
 The down operator sometimes requires curly brackets due to `v` colliding with the Latin alphabet. Unicode `∨` is available but not recommended because it makes the source code harder to interprete for humans.
 
 Drop `\` can be spelled `drop` to avoid using the backslash inside template literals. Lift `/` may be spelled `lift` for minor grammatical reasons.
 
-Geometric (i.e. logarithmic) absolute value takes the normal absolute value and further inverts the result if it's below 1/1.
+Geometric (i.e. logarithmic) absolute value first takes the normal absolute value and then inverts the result if it's below 1/1.
 
 #### Vectorized unary operators
 
@@ -566,7 +572,7 @@ fraction(PI) lest PI (* Falls back to 3.141592653589793r *)
 | Logical OR         | `0 or 2`      | `2`    |
 | Niente coalescing  | `niente al 2` | `2`    |
 
-Logical operators check for *truthiness*. The falsy values are `false`, `niente`, `0`, `""` and `[]` while everything else is truthy. Note that this means that `0.0` representing zero cents or `1/1` as a linear frequency ratio is truthy.
+Logical operators check for *truthiness*. The falsy values are `false`, `niente`, `0`, `""`, `[]`, `#{}` and `basis()` while everything else is truthy. Note that this means that `0.0` representing zero cents or `1/1` as a linear frequency ratio is truthy. The zero val `0@` is also truthy.
 
 Coalescing operators short-circuit. Execution stops once the value of the expression is known.
 

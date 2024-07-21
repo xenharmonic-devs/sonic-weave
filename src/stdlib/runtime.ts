@@ -87,6 +87,19 @@ export function sonicTruth(test: SonicWeaveValue) {
     return Boolean(test.value.residual.n);
   } else if (Array.isArray(test)) {
     return Boolean(test.length);
+  } else if (test instanceof Val) {
+    // No special treatment for 0@.
+    // We don't return false for 0 cents either.
+    return true;
+  } else if (test instanceof Color) {
+    return true;
+  } else if (test instanceof ValBasis) {
+    return Boolean(test.size);
+  } else if (test instanceof Temperament) {
+    return true;
+  } else if (typeof test === 'object') {
+    test satisfies Record<string, SonicWeavePrimitive>;
+    return Boolean(Object.keys(test).length);
   }
   return Boolean(test);
 }

@@ -70,6 +70,11 @@ describe('SonicWeave formatting semantics', () => {
     const zeroOfFive = evaluate('5\\5 ~^ 0');
     expect(zeroOfFive).toBe('0\\5');
   });
+
+  it('has a verbose format for the empty basis', () => {
+    const basis = evaluate('basis()');
+    expect(basis).toBe('basis()');
+  });
 });
 
 describe('Short label formatting', () => {
