@@ -986,7 +986,7 @@ Another way to conceptualize *neutralness* is to investigate the diatonic scale.
 ### Neutral FJS
 [NFJS](https://en.xen.wiki/w/User:M-yac/Neutral_Intervals_and_the_FJS) notation for just intonation originally applied to neutral sounding primes such as 11, 13, 29, 31 etc. In SonicWeave you must be explicit about the comma set you wish to use in order to spell `11/9` as `n3^11n` or `27/22` as `n3_11n`.
 
-The first few NFJS commas are. To bridge from irrational to rational the commas must be irrational themselves.
+The first few NFJS commas are.
 | Prime  | Comma                   | Monzo                             | Size in cents |
 | ------ | ----------------------- | --------------------------------- | ------------- |
 | `11n`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`                | `-3.570`      |
@@ -994,6 +994,7 @@ The first few NFJS commas are. To bridge from irrational to rational the commas 
 | `29n`  | `sqrt(864/841)`         | `[-5/2 -3/2 0 0 0 0 0 0 0 1>`     | `-23.355`     |
 | `31n`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 0 0 0 0 0 0 0 0 1>`   | `+1.878`      |
 | `37n`  | `sqrt(175232/177147)`   | `[7/2 -11/2 0 0 0 0 0 0 0 0 0 1>` | `-9.408`      |
+To bridge from irrational to rational the commas must be irrational themselves.
 
 In addition to NFJS commas SonicWeave has a neutral bridging comma associated with every prime.
 | Prime  | Comma                   | Monzo                             | Size in cents |
