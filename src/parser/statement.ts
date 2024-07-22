@@ -1028,7 +1028,7 @@ export class StatementVisitor {
     } else if (value instanceof Interval) {
       scale.push(value);
     } else if (value instanceof Val) {
-      this.spendGas(scale.length);
+      this.spendGas(scale.length * value.value.numberOfComponents);
       const mapped = temper.bind(subVisitor)(value, scale) as Interval[];
       scale.length = 0;
       scale.push(...mapped);

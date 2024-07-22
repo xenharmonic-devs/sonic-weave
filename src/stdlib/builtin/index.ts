@@ -122,7 +122,7 @@ stepSignature.__node__ = builtinNode(stepSignature);
 
 function divisors(this: ExpressionVisitor, interval: SonicWeaveValue) {
   const result = upcastBool(interval).value.divisors();
-  this.spendGas(result.length);
+  this.spendGas(result.length * 1.5);
   return result.map(fromInteger);
 }
 divisors.__doc__ = 'Obtain an array of divisors of a natural number.';
@@ -2180,6 +2180,7 @@ function arrayRepeat(
     return [];
   }
   scale ??= this.currentScale;
+  this.spendGas(c * scale.length);
   // XXX: Should these be independent copies?
   return [].concat(...Array(c).fill(scale));
 }

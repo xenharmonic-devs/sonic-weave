@@ -58,7 +58,11 @@ function builtinTemperament(
     }
     ws = weights.map(w => upcastBool(w).valueOf());
   }
-  return Temperament.fromVals(vals as Val[], ws, sonicTruth(pureEquaves));
+  const vs = vals as Val[];
+  if (vs.length) {
+    this.spendGas(vs[0].basis.size * vs.length);
+  }
+  return Temperament.fromVals(vs, ws, sonicTruth(pureEquaves));
 }
 Object.defineProperty(builtinTemperament, 'name', {
   value: 'Temperament',
@@ -111,6 +115,9 @@ function commaList(
     if (!(basisOrLimit instanceof ValBasis)) {
       throw new Error('A basis is required.');
     }
+  }
+  if (cs.length) {
+    this.spendGas(cs[0].numberOfComponents * cs.length);
   }
   return Temperament.fromCommas(
     cs,
@@ -338,6 +345,7 @@ function PrimeMapping(
         interval
       );
     }
+    this.spendGas(np.length);
     monzo.numberOfComponents = np.length;
     let mapped: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], monzo.residual);
     while (mapped.primeExponents.length < np.length) {
@@ -587,11 +595,12 @@ function respell(
     const temperament = commaBasis;
     if (searchRadius === undefined) {
       // eslint-disable-next-line no-inner-declarations
-      function mapper(interval: SonicWeaveValue) {
+      function mapper(this: ExpressionVisitor, interval: SonicWeaveValue) {
         interval = upcastBool(interval);
         if (interval.value instanceof TimeReal) {
           return interval;
         }
+        this.spendGas(temperament.commaBasis.size);
         const value = temperament.respell(interval.value);
         return new Interval(
           value,
@@ -616,6 +625,7 @@ function respell(
   if (searchRadius !== undefined) {
     n = upcastBool(searchRadius).toInteger();
   }
+  this.spendGas((2 * n + 1) ** commaBasis.size);
   const commas = commaBasis.hypercube(n, true);
   const r = respellWithCommas.bind(this);
   const mapper = (i: SonicWeaveValue) => r(i, commas);
