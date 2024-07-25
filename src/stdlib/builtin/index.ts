@@ -33,6 +33,7 @@ import {
   BasisElement,
   FJSFlavor,
   MonzoLiteral,
+  MosStepLiteral,
   NedjiLiteral,
   RadicalLiteral,
   SquareSuperparticular,
@@ -1846,33 +1847,97 @@ keepUnique.__node__ = builtinNode(keepUnique);
 
 function automos(this: ExpressionVisitor) {
   const scale = this.currentScale;
-  if (!this.rootContext?.mosConfig || scale.length) {
+  const context = this.rootContext;
+  if (!context?.mosConfig || scale.length) {
     return;
   }
-  this.spendGas(this.rootContext.mosConfig.scale.size);
-  const J4 = this.rootContext.C4;
-  const monzos = scaleMonzos(this.rootContext.mosConfig).map(m => J4.mul(m));
-  const result = monzos.map(
-    (m, i) =>
-      new Interval(m, 'logarithmic', 0, {
-        type: 'AbsoluteFJS',
-        pitch: {
-          type: 'AbsolutePitch',
-          nominal: nthNominal(mmod(i + 1, monzos.length)),
-          accidentals: [{accidental: '♮', fraction: ''}],
-          octave: i === monzos.length - 1 ? 5 : 4,
+  this.spendGas(context.mosConfig.scale.size);
+  if (
+    context.C4.isUnity() ||
+    (context.unisonFrequency && context.C4.equals(context.unisonFrequency))
+  ) {
+    const J4 = context.C4;
+    const monzos = scaleMonzos(context.mosConfig).map(m => J4.mul(m));
+    const result = monzos.map(
+      (m, i) =>
+        new Interval(m, 'logarithmic', 0, {
+          type: 'AbsoluteFJS',
+          pitch: {
+            type: 'AbsolutePitch',
+            nominal: nthNominal(mmod(i + 1, monzos.length)),
+            accidentals: [{accidental: '♮', fraction: ''}],
+            octave: i === monzos.length - 1 ? 5 : 4,
+          },
+          ups: 0,
+          lifts: 0,
+          superscripts: [],
+          subscripts: [],
+        })
+    );
+    context.fragiles.push(...result);
+    return result;
+  }
+  const monzos = scaleMonzos(context.mosConfig);
+  const result: Interval[] = [];
+  for (let i = 0; i < monzos.length; ++i) {
+    const monzo = monzos[i];
+    const reference = monzo.reduce(context.mosConfig.period);
+    const j = i + 1;
+    const degree =
+      context.mosConfig.degrees[j % context.mosConfig.degrees.length];
+    const node: MosStepLiteral = {
+      type: 'MosStepLiteral',
+      mosStep: {
+        type: 'MosStep',
+        degree: j,
+        quality: {
+          fraction: '',
+          quality: 'P',
         },
-        ups: 0,
-        lifts: 0,
-        superscripts: [],
-        subscripts: [],
-      })
-  );
-  this.rootContext.fragiles.push(...result);
+      },
+      ups: 0,
+      lifts: 0,
+      superscripts: [],
+      subscripts: [],
+    };
+    if (degree.imperfect) {
+      const large = degree.center.mul(context.mosConfig.semiam);
+      if (large.equals(reference)) {
+        node.mosStep.quality.quality = 'Maj';
+        result.push(new Interval(monzo, 'logarithmic', 0, node));
+        continue;
+      }
+      const small = degree.center.div(context.mosConfig.semiam);
+      if (small.equals(reference)) {
+        node.mosStep.quality.quality = 'min';
+        result.push(new Interval(monzo, 'logarithmic', 0, node));
+        continue;
+      }
+    } else {
+      const large = degree.center.mul(context.mosConfig.am);
+      if (large.equals(reference)) {
+        node.mosStep.quality.quality = 'Aug';
+        result.push(new Interval(monzo, 'logarithmic', 0, node));
+        continue;
+      }
+      const small = degree.center.div(context.mosConfig.am);
+      if (small.equals(reference)) {
+        node.mosStep.quality.quality = 'dim';
+        result.push(new Interval(monzo, 'logarithmic', 0, node));
+        continue;
+      }
+    }
+    if (degree.center.equals(reference)) {
+      result.push(new Interval(monzo, 'logarithmic', 0, node));
+      continue;
+    }
+    // User misconfiguration: Scale not MOS
+    result.push(new Interval(monzo, 'logarithmic', 0));
+  }
   return result;
 }
 automos.__doc__ =
-  'If the current scale is empty, generate absolute Diamond-mos notation based on the current config.';
+  'If the current scale is empty, generate absolute Diamond-mos notation based on the current config. Uses relative notation if J4 does not coincide with 1/1.';
 automos.__node__ = builtinNode(automos);
 
 function reverseInPlace(

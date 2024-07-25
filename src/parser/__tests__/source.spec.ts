@@ -2280,4 +2280,46 @@ describe('SonicWeave parser', () => {
     const scale = expand('[1..5] \\ 5;respell([16/15], 1)');
     expect(scale).toEqual(['1\\5', '2\\5', '3\\5', '4\\5', '5\\5']);
   });
+
+  it('gives up on absolute diamond MOS if J4 is not unison (relative)', () => {
+    const scale = expand('A4 = 9\\12;MOS 4L 2s;automos()');
+    expect(scale).toEqual([
+      'MOS {LLsLLs;L=2^1/5;s=2^1/10}',
+      'P1ms',
+      'Aug2ms',
+      'P3ms',
+      'P4ms',
+      'Aug5ms',
+      'P6ms',
+    ]);
+  });
+
+  it('gives up on absolute diamond MOS if J4 is not unison (absolute)', () => {
+    const scale = expand('A4 = 440 Hz;MOS 2L 6s;automos()');
+    expect(scale).toEqual([
+      'MOS {LsssLsss;L=2^1/5;s=2^1/10}',
+      'Aug1ms',
+      'Maj2ms',
+      'P3ms',
+      'P4ms',
+      'Aug5ms',
+      'Maj6ms',
+      'P7ms',
+      'P8ms',
+    ]);
+  });
+
+  it('recreates diatonic with automos if J4 is not unison', () => {
+    const scale = expand('MOS {LLsLLLs;L=9/8};J4=2;automos()');
+    expect(scale).toEqual([
+      'MOS {LLsLLLs;L=9/8;s=256/243}',
+      'Maj1ms',
+      'Maj2ms',
+      'P3ms',
+      'P4ms',
+      'Maj5ms',
+      'Maj6ms',
+      'P7ms',
+    ]);
+  });
 });

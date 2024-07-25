@@ -31,7 +31,7 @@ Calculate atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to li
 Calculate atanXY(x, y) = atan2(y, x) which is the angle between (1, 0) and (x, y), chosen to lie in (−π; π], positive anticlockwise.
 
 ### automos()
-If the current scale is empty, generate absolute Diamond-mos notation based on the current config.
+If the current scale is empty, generate absolute Diamond-mos notation based on the current config. Uses relative notation if J4 does not coincide with 1/1.
 
 ### basis(*...intervals*)
 Construct a subgroup basis from intervals.

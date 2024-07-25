@@ -79,7 +79,7 @@ export type MosStep = {
   type: 'MosStep';
   quality: IntervalQuality;
   augmentations?: AugmentedQuality[];
-  degree: 0;
+  degree: number;
 };
 
 /**
