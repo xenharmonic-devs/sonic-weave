@@ -9,6 +9,9 @@ These inflections always go in the direction of the arrow so `6/5` ~ `m3^5h` ins
 4. [Semifourth bridges](#semifourth-bridges)
 5. [Tone-splitter bridges](#tone-splitter-bridges)
 6. [Lumi's irrational bridges](#lumis-irrational-bridges)
+7. [Neutral bridges revisited](#neutral-bridges-revisited)
+8. [Bridging highlights](#bridging-highlights)
+9. [FJS revisited](#fjs-revisited)
 
 ## Helmholtz-Ellis 2020 + Richie's extension
 
@@ -101,21 +104,26 @@ The neutral FJS master algorithm can be generalized to semiquartals. Semifourths
 | `17q`  | `sqrt(70227/6553)`    | `[-8 5/2 0 0 0 0 1>`           | `+59.843`     |
 | `19q`  | `sqrt(1083/1024)`     | `[-5 1/2 0 0 0 0 0 1>`         | `+48.491`     |
 | `23q`  | `sqrt(14283/16384)`   | `[-7 3/2 0 0 0 0 0 0 1>`       | `-118.793`    |
-| `29n`  | `sqrt(841/768)`       | `[-4 -1/2 0 0 0 0 0 0 0 1>`    | `+78.6`       |
-| `31n`  | `sqrt(233523/262144)` | `[-9 5/2 0 0 0 0 0 0 0 0 1>`   | `-100.077`    |
-| `37n`  | `sqrt(4107/4096)`     | `[-6 1/2 0 0 0 0 0 0 0 0 0 1>` | `+2.322`      |
+| `29q`  | `sqrt(841/768)`       | `[-4 -1/2 1>@2.3.29`           | `+78.6`       |
+| `31q`  | `sqrt(233523/262144)` | `[-9 5/2 1>@2.3.31`            | `-100.077`    |
+| `37q`  | `sqrt(4107/4096)`     | `[-6 1/2 1>@2.3.37`            | `+2.322`      |
 
 ## Tone-splitter bridges
 
 Tone-splitter master algorithm is basically the plain FJS master shifted by a semioctave (with the semiapotome as the radius of tolerance).
 
-| Prime  | Comma             | Monzo                 | Size in cents |
-| ------ | ----------------- | ----------------------| ------------- |
-| `5t`   | `sqrt(2025/2048)` | `[-11/2 2 1>`         | `-9.776`      |
-| `7t`   | `sqrt(441/512)`   | `[-9/2 1 0 1>`        | `-129.219`    |
-| `11t`  | `sqrt(121/128)`   | `[-7/2 0 0 0 1>`      | `-48.682`     |
-| `13t`  | `sqrt(169/162)`   | `[-1/2 -2 0 0 0 1>`   | `+36.618`     |
-| `17t`  | `sqrt(289/288)`   | `[-5/2 -1 0 0 0 0 1>` | `+3.000`      |
+| Prime  | Comma               | Monzo                    | Size in cents |
+| ------ | ------------------- | -------------------------| ------------- |
+| `5t`   | `sqrt(2025/2048)`   | `[-11/2 2 1>`            | `-9.776`      |
+| `7t`   | `sqrt(441/512)`     | `[-9/2 1 0 1>`           | `-129.219`    |
+| `11t`  | `sqrt(121/128)`     | `[-7/2 0 0 0 1>`         | `-48.682`     |
+| `13t`  | `sqrt(169/162)`     | `[-1/2 -2 0 0 0 1>`      | `+36.618`     |
+| `17t`  | `sqrt(289/288)`     | `[-5/2 -1 0 0 0 0 1>`    | `+3.000`      |
+| `19t`  | `sqrt(29241/32768)` | `[-15/2 2 0 0 0 0 0 1>`  | `-98.577`     |
+| `23t`  | `sqrt(529/512)`     | `[-9/2 0 0 0 0 0 0 0 1>` | `+84.823`     |
+| `29t`  | `sqrt(7569/8192)`   | `[-13/2 1 1>@2.3.29`     | `-68.468`     |
+| `31t`  | `sqrt(8649/8192)`   | `[-13/2 1 1>@2.3.31`     | `+46.991`     |
+| `37t`  | `sqrt(1369/1458)`   | `[-1/2 -3 1>@2.3.37`     | `-54.521`     |
 
 ## Lumi's irrational bridges
 
@@ -161,3 +169,59 @@ The semiapotome `2l` is a handy companion of the neutral inflections. It's equiv
 | `n7_5n` | `9/5`      | `n7^5n` | `15/8`    |
 
 If for some reason you find this concept appealing the vocalized names of intervals should follow [Color notation](https://en.xen.wiki/w/Color_notation) but in place of *white* we have *microwave* for the smaller intervals and *x-ray* for the larger ones. So `4/3` is a *'microwave-fourth'*, *'mu-fourth'* or *'µ4'* while `3/2` is an *'x-ray-fifth'*, *'ex-fifth'* or *'x5'*.
+
+## Neutral bridges revisited
+
+Neutral commas are repeat here for your convenience.
+
+| Prime  | Comma                   | Monzo                       | Size in cents |
+| ------ | ----------------------- | ----------------------------| ------------- |
+| `5n`   | `sqrt(25/24)`           | `[-3/2 -1/2 1>`             | `+35.336`     |
+| `7n`   | `sqrt(54/49)`           | `[-1/2 -3/2 0 1>`           | `-84.107`     |
+| `11n`  | `sqrt(242/243)`         | `[1/2 -5/2 0 0 1>`          | `-3.570`      |
+| `13n`  | `sqrt(507/512)`         | `[-9/2 1/2 0 0 0 1>`        | `-8.495`      |
+| `17n`  | `sqrt(8192/7803)`       | `[-13/2 3/2 0 0 0 0 1>`     | `-42.112`     |
+| `19n`  | `sqrt(384/361)`         | `[-7/2 -1/2 0 0 0 0 0 1>`   | `-53.464`     |
+| `23n`  | `sqrt(529/486)`         | `[-1/2 -5/2 0 0 0 0 0 0 1>` | `73.387`      |
+| `29n`  | `sqrt(864/841)`         | `[-5/2 -3/2 1>@2.3.29`      | `-23.355`     |
+| `31n`  | `sqrt(2101707/2097152)` | `[-21/2 7/2 1>@2.3.31`      | `+1.878`      |
+| `37n`  | `sqrt(175232/177147)`   | `[7/2 -11/2 1>@2.3.37`      | `-9.408`      |
+
+## Bridging highlights
+
+[Cole](https://en.xen.wiki/w/User:2%5E67-1) recommends the following set of bridging commas:
+
+| Prime | Comma        | Cents     | Reduced harmonic | Spelling   | Against C4 |
+| ----- | ------------ | --------- | ---------------- | ---------- | ---------- |
+| `5n`  | `√25/24`     | `+35.336` | `5/4`            | `n3^5n`    | `Ed4^5n`   |
+| `7q`  | `√49/48`     | `+17.848` | `7/4`            | `n6.5^7q`  | `εd4^7q`   |
+| `11t` | `√121/128`   | `-48.682` | `11/8`           | `P4.5^11t` | `γ♮4^11t`  |
+| `13n` | `√507/512`   | `-8.495`  | `13/8`           | `n6^13n`   | `Ad4^13n`  |
+| `17t` | `√289/288`   | `+3.000`  | `17/16`          | `P1.5^17t` | `η♮4^17t`  |
+| `19n` | `√361/384`   | `-53.464` | `19/16`          | `n3^19n`   | `Ed4^19n`  |
+| `23t` | `√529/512`   | `+28.274` | `23/16`          | `P4.5^23t` | `γ♮4^23t`  |
+| `29q` | `√841/768`   | `+78.600` | `29/16`          | `n6.5^29q` | `εd4^29q`  |
+| `31f` | `31/32`*     | `-54.964` | `31/16`          | `P8^31f`   | `C5^31f`   |
+| `37q` | `√4107/4096` | `+2.322`  | `37/32`          | `n2.5^37q` | `αd4^37q`  |
+
+These choices are based on [hemipyth](https://en.xen.wiki/w/Hemipyth)[10] 4|4(2). A comma is constructed from nearest note to the harmonic.
+
+*) This means that 31 is not associated with an irrational bridge. The simplest irrational choice would be `√8649/8192` for `31/16` = `P7.5^31t` (`ζ♮4^31t`).
+
+## FJS revisited
+
+Rational commas are repeated here for your convenience.
+
+| Prime       | Comma       | Monzo                  | Size in cents  |
+| ----------- | ----------- | ---------------------- | -------------- |
+| `5`         | `80/81`     | `[4 -4 1>`             | `-21.506`      |
+| `7`         | `63/64`     | `[-6 2 0 1>`           | `-27.264`      |
+| `11`        | `33/32`     | `[-5 1 0 0 1>`         | `+53.273`      |
+| `13`        | `1053/1024` | `[-10 4 0 0 0 1>`      | `+48.348`      |
+| `17`        | `4131/4096` | `[-12 5 0 0 0 0 1>`    | `+14.73`       |
+| `19`        | `513/512`   | `[-9 3 0 0 0 0 0 1>`   | `+3.378`       |
+| `23`        | `736/729`   | `[5 -6 0 0 0 0 0 0 1>` | `+16.544`      |
+| `29`        | `261/256`   | `[-8 2 1>@2.3.29`      | `+33.487`      |
+| `31`, `31f` | `31/32`     | `[-5 0 1>@2.3.31`      | `-54.964`      |
+| `31c`       | `248/243`   | `[3 -5 1>@2.3.31`      | `+35.261`      |
+| `37`        | `37/36`     | `[-2 -2 1>@2.3.37`     | `+47.434`      |
