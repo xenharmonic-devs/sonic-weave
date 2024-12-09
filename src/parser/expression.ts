@@ -568,7 +568,8 @@ export class ExpressionVisitor {
     const result: SonicWeavePrimitive[] = [];
     for (const arg of args) {
       if (arg.spread) {
-        result.push(...(this.visit(arg.expression) as SonicWeavePrimitive[]));
+        const array = containerToArray(this.visit(arg.expression), 'of');
+        result.push(...array);
       } else {
         result.push(this.visit(arg.expression) as SonicWeavePrimitive);
       }
