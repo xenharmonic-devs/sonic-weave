@@ -83,7 +83,7 @@ Equality/inclusion operators are non-associative. Two cannot be used in a row. C
 | `max`, `min`                                     | Maximum, minimum                                                        |
 | `x:y::z`, `/x::y:x`                              | Chord enumeration, reflected chord enumeration                          |
 | `to`, `by`                                       | Linear rounding, logarithmic rounding                                   |
-| `==`, `<>`, `~=`, `<=`, `>=`, `<`, `>`, `of`, `not of`, `~of`, `not ~of`, `in`, `not in`, `~in`, `not ~in` | Strict equality, size equality, comparisons, strict/non-strict value inclusion, strict/non-strict index/key inclusion** |
+| `==`, `<>`, `~=`, `~<>`, `<=`, `>=`, `<`, `>`, `of`, `not of`, `~of`, `not ~of`, `in`, `not in`, `~in`, `not ~in` | Strict equality, size equality, comparisons, strict/non-strict value inclusion, strict/non-strict index/key inclusion** |
 | `not x`, `vnot x`                                | Boolean not, vector not                                                 |
 | `and`, `vand`                                    | Boolean and, vector and                                                 |
 | `or`, `vor`, `al`, `al~`                         | Boolean or, vector or, niente coalescing, plain formatting              |

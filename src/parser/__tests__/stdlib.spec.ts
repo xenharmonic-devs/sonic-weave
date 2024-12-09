@@ -844,6 +844,11 @@ describe('SonicWeave standard library', () => {
     ]);
   });
 
+  it('equalizes (rounds) a 12-tet scale', () => {
+    const scale = expand('4\\12;7\\12;12\\12;equalize(5)');
+    expect(scale).toEqual(['2\\5', '3\\5', '5\\5']);
+  });
+
   it('has reasonable formatting for geometric differences', () => {
     const scale = expand('geodiff(4:5:6:7)');
     expect(scale).toEqual(['5/4', '6/5', '7/6']);
@@ -1232,6 +1237,34 @@ describe('SonicWeave standard library', () => {
     expect(octave).toEqual(['2']);
     const threeWholeTones = expand('realizeWord("LLL", #{L: 9/8})');
     expect(threeWholeTones).toEqual(['9/8', '81/64', '729/512']);
+  });
+
+  it('uses soft checks for the equave in `realizeWord`', () => {
+    const scale = expand(`
+      let [L_, M_, s_] = [9, 8, 7];
+      let edo = (L_ + M_ + s_) * 4;
+      realizeWord("LMsLsMLsMLsM",
+        #{L: L_\\ edo, M: M_\\ edo, s: s_\\edo}, 2)
+    `);
+
+    expect(scale).toEqual([
+      'let L_ = 9',
+      'let M_ = 8',
+      'let s_ = 7',
+      'let edo = 96',
+      '9\\96',
+      '17\\96',
+      '24\\96',
+      '33\\96',
+      '40\\96',
+      '48\\96',
+      '57\\96',
+      '64\\96',
+      '72\\96',
+      '81\\96',
+      '88\\96',
+      '96\\96',
+    ]);
   });
 
   // XXX: This only works because reduce is in PRELUDE_VOLATILES

@@ -729,7 +729,7 @@ riff realizeWord(word, sizes, equave = niente) {
     for (const [letter, count] of entries(signature)) {
       total = total *~ sizes[letter] ~^ count;
     }
-    if (total <> equave) {
+    if (total ~<> equave) {
       throw "Given sizes must be compatible with an explicit equave.";
     }
   }
@@ -856,7 +856,7 @@ riff equalize(divisions, scale = ££) {
   "Obtain a copy of the popped/given scale quantized to given equal divisions of its equave.";
   scale;
   let step = 1 \\ divisions;
-  if ($[-1] <> 2)
+  if ($[-1] ~<> 2)
     step ed= $[-1];
   return $ by~ step colorOf($) labelOf($);
 }
