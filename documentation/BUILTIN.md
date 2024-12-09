@@ -73,7 +73,7 @@ Obtain a non-negative integer that is the Unicode code point value of the charac
 Return the color of the interval.
 
 ### commaBasis(*temperament*)
-Obtain the comma basis (null space) of a temperament.
+Obtain the comma basis (null space) of a temperament or a val.
 
 ### commaList(*commas*, *basisOrLimit*, *weights*, *pureEquaves*, *fullPrimeLimit*)
 Construct a Temperament instance from an array of commas. Optional weights are applied multiplicatively on top of Tenney weights. Optionally equaves are normalized to pure. Optionally the full prime limit is assumed based on the commas.
@@ -280,7 +280,7 @@ Obtain a "best effort" short string representing a primitive value. Vectorizes o
 Map a riff over the given/current scale producing a new scale.
 
 ### mappingBasis(*temperament*)
-Obtain the mapping generators (preimage) of a temperament with period first. See `generatorsOf` for the tempered generators.
+Obtain the mapping generators (preimage) of a temperament or a val with period first. See `generatorsOf` for the tempered generators.
 
 ### maximum(*...args*)
 Obtain the argument with the maximum value.

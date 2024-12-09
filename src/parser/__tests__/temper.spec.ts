@@ -329,6 +329,20 @@ describe('Features related to tempering', () => {
     expect(scale).toEqual(['1901.783 "3"', '583.905 "7/5"', '1200. "2"']);
   });
 
+  it('obtains the period of a single val', () => {
+    const scale = expand(`{
+      const [period] = mappingBasis(11@.5)
+      period str(period)
+      11@
+    }`);
+    expect(scale).toEqual(['1\\11 "16/15"']);
+  });
+
+  it('breaks a val into its comma basis', () => {
+    const scale = expand('[...commaBasis(11@.5)]');
+    expect(scale).toEqual(['144/125', '135/128']);
+  });
+
   it('knows miracle is miracle', () => {
     const yup = evaluate(
       'Temperament([10@.7, 21@.7]) == commaList([S15, S7-S8])'

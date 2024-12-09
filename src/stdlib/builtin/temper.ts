@@ -299,22 +299,29 @@ periodsOf.__doc__ = 'Obtain the number of periods per equave in a temperament.';
 periodsOf.__node__ = builtinNode(periodsOf);
 
 function mappingBasis(this: ExpressionVisitor, temperament: SonicWeaveValue) {
+  if (temperament instanceof Val) {
+    temperament = builtinTemperament.bind(this)(temperament);
+  }
   if (!(temperament instanceof Temperament)) {
     throw new Error('A temperament is required.');
   }
   return temperament.preimage;
 }
 mappingBasis.__doc__ =
-  'Obtain the mapping generators (preimage) of a temperament with period first. See `generatorsOf` for the tempered generators.';
+  'Obtain the mapping generators (preimage) of a temperament or a val with period first. See `generatorsOf` for the tempered generators.';
 mappingBasis.__node__ = builtinNode(mappingBasis);
 
 function commaBasis(this: ExpressionVisitor, temperament: SonicWeaveValue) {
+  if (temperament instanceof Val) {
+    temperament = builtinTemperament.bind(this)(temperament);
+  }
   if (!(temperament instanceof Temperament)) {
     throw new Error('A temperament is required.');
   }
   return temperament.commaBasis;
 }
-commaBasis.__doc__ = 'Obtain the comma basis (null space) of a temperament.';
+commaBasis.__doc__ =
+  'Obtain the comma basis (null space) of a temperament or a val.';
 commaBasis.__node__ = builtinNode(commaBasis);
 
 function PrimeMapping(
