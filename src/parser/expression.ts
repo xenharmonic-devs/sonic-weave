@@ -1456,6 +1456,7 @@ export class ExpressionVisitor {
             case '==':
             case '<>':
             case '~=':
+            case '~<>':
             case '<=':
             case '>=':
             case '<':
@@ -1508,6 +1509,8 @@ export class ExpressionVisitor {
             return !left.strictEquals(right);
           case '~=':
             return left.equals(right);
+          case '~<>':
+            return !left.equals(right);
           case '<=':
             return compare.bind(this)(left, right) <= 0;
           case '>=':
@@ -1677,6 +1680,8 @@ export class ExpressionVisitor {
             return !left.strictEquals(right);
           case '~=':
             return left.equals(right);
+          case '~<>':
+            return !left.equals(right);
           case '+':
             return left.add(right);
           case '-':
@@ -1743,6 +1748,8 @@ export class ExpressionVisitor {
           return !left.strictEquals(right);
         } else if (operator === '~=') {
           return left.equals(right);
+        } else if (operator === '~<>') {
+          return !left.equals(right);
         }
       }
     } else if (left instanceof Temperament) {
@@ -1753,6 +1760,8 @@ export class ExpressionVisitor {
           return !left.strictEquals(right);
         } else if (operator === '~=') {
           return left.equals(right);
+        } else if (operator === '~<>') {
+          return !left.equals(right);
         }
       } else if (right instanceof Interval) {
         if (operator === 'tmpr') {
@@ -1793,6 +1802,9 @@ export class ExpressionVisitor {
       case '~=':
         // eslint-disable-next-line eqeqeq
         return left == right;
+      case '~<>':
+        // eslint-disable-next-line eqeqeq
+        return left != right;
       case '<=':
         return (left as any) <= (right as any);
       case '<':

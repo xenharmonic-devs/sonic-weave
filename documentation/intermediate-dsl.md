@@ -680,6 +680,7 @@ Plain formatting is a no-operation in terms of the value, but takes on the domai
 | Strict equality        | `==`     |
 | Strict inequality      | `<>`     |
 | Size equality          | `~=`     |
+| Size inequality        | `~<>`    |
 | Greater than           | `>`      |
 | Greater than or equal  | `>=`     |
 | Less than              | `<`      |

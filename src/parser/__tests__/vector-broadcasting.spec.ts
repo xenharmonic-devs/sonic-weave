@@ -210,6 +210,7 @@ describe('SonicWeave vector broadcasting', () => {
     '==',
     '<>',
     '~=',
+    '~<>',
     '<=',
     '>=',
     '<',

@@ -39,6 +39,7 @@ export type BinaryOperator =
   | '=='
   | '<>'
   | '~='
+  | '~<>'
   | '<='
   | '>='
   | '<'
