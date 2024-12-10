@@ -414,11 +414,11 @@ export class ExpressionVisitor {
       case 'StepLiteral':
         return this.visitStepLiteral(node);
       case 'RadicalLiteral':
-        throw new Error('Unexpected radical literal');
+        throw new Error('Unexpected radical literal.');
       case 'AspiringFJS':
-        throw new Error('Unexpected aspiring FJS');
+        throw new Error('Unexpected aspiring FJS.');
       case 'AspiringAbsoluteFJS':
-        throw new Error('Unexpected aspiring absolute FJS');
+        throw new Error('Unexpected aspiring absolute FJS.');
       case 'ArrayComprehension':
         return this.visitArrayComprehension(node);
       case 'SquareSuperparticular':
@@ -627,7 +627,7 @@ export class ExpressionVisitor {
       return operand.map(x => d(x, count)) as Interval[];
     }
     return upcastBool(operand).down(this.rootContext, count);
-    throw new Error('Can only apply down arrows to intervals and vals');
+    throw new Error('Can only apply down arrows to intervals and vals.');
   }
 
   protected visitDownExpression(node: DownExpression) {
@@ -1446,7 +1446,7 @@ export class ExpressionVisitor {
               break;
             case '\\':
             case 'sof':
-              throw new Error('Preference not supported with backslahes');
+              throw new Error('Preference not supported with backslashes.');
             case 'tmpr':
               throw new Error('Tempering needs an interval and a val.');
             case 'lest':

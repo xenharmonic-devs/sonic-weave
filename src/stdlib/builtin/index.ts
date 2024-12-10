@@ -715,7 +715,7 @@ function validateFlavor(flavor: string): FJSFlavor {
     flavor !== 'q' &&
     flavor !== 't'
   ) {
-    throw new Error(`Unrecognized FJS flavor '${flavor}`);
+    throw new Error(`Unrecognized FJS flavor '${flavor}'.`);
   }
   return flavor;
 }
@@ -2026,7 +2026,7 @@ push.__node__ = builtinNode(push, PARENT_SCALE);
 function shift(this: ExpressionVisitor, scale?: SonicWeavePrimitive[]) {
   scale ??= this.currentScale;
   if (!scale.length) {
-    throw new Error('Shift from an empty scale');
+    throw new Error('Shift from an empty scale.');
   }
   return scale.shift()!;
 }

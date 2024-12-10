@@ -18,7 +18,7 @@ function evaluate(source: string) {
   }
   const finalStatement = program.body[program.body.length - 1];
   if (finalStatement.type !== 'ExpressionStatement') {
-    throw new Error(`Expected expression. Got ${finalStatement.type}`);
+    throw new Error(`Expected expression. Got ${finalStatement.type}.`);
   }
   const subVisitor = visitor.createExpressionVisitor();
   const result = subVisitor.visit(finalStatement.expression);

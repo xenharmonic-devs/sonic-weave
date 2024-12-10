@@ -94,7 +94,7 @@ function myacNeutralMaster(primeCents: number) {
     }
     pythagoras += FIFTH;
   }
-  throw new Error('Unable to locate NFJS region');
+  throw new Error('Unable to locate NFJS region.');
 }
 
 // Neutral bridging comma master algorithm by frostburn
@@ -206,7 +206,7 @@ export function getFormalComma(index: number) {
   while (index >= formalCommas.length) {
     const iterand = commaIterator.next();
     if (iterand.done) {
-      throw new Error('Out of primes');
+      throw new Error('Out of primes.');
     }
     formalCommas.push(iterand.value);
   }
@@ -217,7 +217,7 @@ export function getFloraComma(index: number) {
   while (index >= floraCommas.length) {
     const iterand = floraIterator.next();
     if (iterand.done) {
-      throw new Error('Out of primes');
+      throw new Error('Out of primes.');
     }
     floraCommas.push(iterand.value);
   }
@@ -228,7 +228,7 @@ export function getNeutralComma(index: number) {
   while (index >= neutralCommas.length) {
     const iterand = neutralIterator.next();
     if (iterand.done) {
-      throw new Error('Out of primes');
+      throw new Error('Out of primes.');
     }
     neutralCommas.push(iterand.value);
   }
@@ -239,7 +239,7 @@ export function getSemiquartalComma(index: number) {
   while (index >= semiquartalCommas.length) {
     const iterand = semiquartalIterator.next();
     if (iterand.done) {
-      throw new Error('Out of primes');
+      throw new Error('Out of primes.');
     }
     semiquartalCommas.push(iterand.value);
   }
@@ -250,7 +250,7 @@ export function getToneSplitterComma(index: number) {
   while (index >= toneSplitterCommas.length) {
     const iterand = toneSplitterIterator.next();
     if (iterand.done) {
-      throw new Error('Out of primes');
+      throw new Error('Out of primes.');
     }
     toneSplitterCommas.push(iterand.value);
   }

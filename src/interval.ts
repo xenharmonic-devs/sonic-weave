@@ -551,7 +551,7 @@ export class Interval {
    */
   sub(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in subtraction');
+      throw new Error('Domains must match in subtraction.');
     }
     if (this.domain === 'linear' && (this.steps || other.steps)) {
       throw new Error('Linear subtraction of steps is not allowed.');
@@ -637,7 +637,7 @@ export class Interval {
    */
   lensSub(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in harmonic subtraction');
+      throw new Error('Domains must match in harmonic subtraction.');
     }
     if (this.steps || other.steps) {
       throw new Error('Steps not supported in harmonic subtraction.');
@@ -682,7 +682,7 @@ export class Interval {
    */
   roundTo(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in rounding');
+      throw new Error('Domains must match in rounding.');
     }
     if (this.steps || other.steps) {
       throw new Error('Steps not supported in rounding.');
@@ -715,7 +715,7 @@ export class Interval {
    */
   mmod(other: Interval, ceiling = false) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in modulo');
+      throw new Error('Domains must match in modulo.');
     }
     if (this.steps || other.steps) {
       throw new Error('Steps not supported in modulo.');
@@ -748,14 +748,14 @@ export class Interval {
   pitchRoundTo(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(
-        'Exponential rounding not implemented in logarithmic domain'
+        'Exponential rounding not implemented in logarithmic domain.'
       );
     }
     if (this.steps || other.steps) {
       throw new Error('Steps not supported in pitch rounding.');
     }
     if (!other.value.isScalar()) {
-      throw new Error('Only scalar exponential rounding implemented');
+      throw new Error('Only scalar exponential rounding implemented.');
     }
     const node = pitchRoundToNodes(this.node, other.node);
     return new Interval(
@@ -776,7 +776,7 @@ export class Interval {
   mul(other: Val): Val;
   mul(other: Interval | Val) {
     if (this.domain !== 'linear' && other.domain !== 'linear') {
-      throw new Error('At least one domain must be linear in multiplication');
+      throw new Error('At least one domain must be linear in multiplication.');
     }
     if (other.domain === 'cologarithmic') {
       return other.mul(this);
@@ -809,7 +809,7 @@ export class Interval {
     const zombie = infect(this, other);
     if (other.domain === 'logarithmic') {
       if (this.domain !== 'logarithmic') {
-        throw new Error('Domains must match in non-scalar division');
+        throw new Error('Domains must match in non-scalar division.');
       }
       // Log throws an error if this won't work.
       const steps = this.steps / (other.steps || 1);
@@ -1643,7 +1643,7 @@ export class ValBasis {
           this.ortho_[j].pow(this.dual_[j].dot(this.ortho_[i]))
         );
         if (oi instanceof TimeReal) {
-          throw new Error('Basis orthoginalization failed.');
+          throw new Error('Basis orthogonalization failed.');
         }
         this.ortho_[i] = oi;
       }
@@ -1923,7 +1923,7 @@ export class ValBasis {
           denominator: d === 1 ? null : d,
         });
       } else {
-        throw new Error('Basis is imcompatible with warts and SOV.');
+        throw new Error('Basis is incompatible with warts and SOV.');
       }
     }
     // TODO: Trim if primes

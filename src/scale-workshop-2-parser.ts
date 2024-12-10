@@ -150,7 +150,7 @@ export function parseScaleWorkshop2Line(
   const ast = parseAst(input);
   if (!universalMinus && ast.type === 'UnaryExpression') {
     if (ast.operand.type !== 'CentsLiteral') {
-      throw new Error('Univeral minus violation');
+      throw new Error('Universal minus violation.');
     }
   }
   if (
@@ -158,7 +158,7 @@ export function parseScaleWorkshop2Line(
     (ast.type === 'PlainLiteral' ||
       (ast.type === 'UnaryExpression' && ast.operand.type === 'PlainLiteral'))
   ) {
-    throw new Error('Bare numbers not allowed');
+    throw new Error('Bare numbers not allowed.');
   }
   numberOfComponents ??= getNumberOfComponents();
   return evaluateAst(ast, numberOfComponents);

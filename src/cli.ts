@@ -118,17 +118,17 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
 
     if (counts.curlies < 0) {
       currentCmd = '';
-      cb(new Error('Unmatched closing curly bracket'), undefined);
+      cb(new Error('Unmatched closing curly bracket.'), undefined);
       return;
     }
     if (counts.squares < 0) {
       currentCmd = '';
-      cb(new Error('Unmatched closing square bracket'), undefined);
+      cb(new Error('Unmatched closing square bracket.'), undefined);
       return;
     }
     if (counts.parens < 0) {
       currentCmd = '';
-      cb(new Error('Unmatched closing parenthesis'), undefined);
+      cb(new Error('Unmatched closing parenthesis.'), undefined);
       return;
     }
     if (counts.parens || counts.squares || counts.curlies) {
@@ -147,7 +147,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
       for (const statement of program.body.slice(0, -1)) {
         const interrupt = visitor.visit(statement);
         if (interrupt) {
-          throw new Error('Illegal statement');
+          throw new Error('Illegal statement.');
         }
       }
       const finalStatement = program.body[program.body.length - 1];
@@ -159,7 +159,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
       } else {
         const interrupt = visitor.visit(finalStatement);
         if (interrupt) {
-          throw new Error('Illegal statement');
+          throw new Error('Illegal statement.');
         }
         cb(null, null);
       }

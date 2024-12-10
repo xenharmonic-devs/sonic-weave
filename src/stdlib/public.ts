@@ -185,7 +185,7 @@ export function relative(
   }
   if (this.rootContext?.unisonFrequency === undefined) {
     throw new Error(
-      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz'
+      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz.'
     );
   }
   const absolut = absolute.bind(this)(interval);

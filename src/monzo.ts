@@ -440,7 +440,7 @@ export class TimeReal {
   /** @hidden */
   lpow(other: TimeMonzo) {
     if (this.timeExponent) {
-      throw new Error('Cannot rais to a non-scalar power.');
+      throw new Error('Cannot raise to a non-scalar power.');
     }
     return new TimeReal(
       other.timeExponent.valueOf() * this.value,
@@ -1203,7 +1203,7 @@ export class TimeMonzo {
     );
     const intResidual = Number(residual);
     if (Math.abs(intResidual) > Number.MAX_SAFE_INTEGER) {
-      throw new Error('Residual exceeds safe limit');
+      throw new Error('Residual exceeds safe limit.');
     }
     return new TimeMonzo(
       ZERO,
@@ -1225,7 +1225,7 @@ export class TimeMonzo {
     numberOfComponents?: number
   ) {
     if (denominator === 0n) {
-      throw new Error('Division by zero');
+      throw new Error('Division by zero.');
     }
     numberOfComponents ??= NUMBER_OF_COMPONENTS;
     const [positiveVector, numeratorResidual] = toMonzoAndResidual(

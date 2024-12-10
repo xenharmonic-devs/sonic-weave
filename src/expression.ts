@@ -1111,7 +1111,7 @@ export function literalToString(
       return '@' + formatSubgroupBasis(literal.basis);
     default:
       literal satisfies AspiringFJS | AspiringAbsoluteFJS;
-      throw new Error(`Cannot format ${literal.type}`);
+      throw new Error(`Cannot format ${literal.type}.`);
   }
 }
 
