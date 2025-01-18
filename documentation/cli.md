@@ -121,7 +121,7 @@ Enneatonic 5L 4s subset of 313edo used in Sevish's track Desert Island Rain
  498.402556 Perfect 4th
  701.597444 Perfect 5th
  747.603834
- 950.798722 Otave-complemented split 4th
+ 950.798722 Octave-complemented split 4th
  996.805112 Doubled 4th
  2 Octave
 ```

@@ -127,7 +127,7 @@ A4 = 440 Hz = 9\12
 
 The expression `440 Hz = 9\12` implicitly sets the reference frequency for 1/1 at around `261.626 Hz`. For now the `A4 = 440 Hz` part is just for show.
 
-To get a taste of the powerful tempering features in SonicWeave we'll spell our scale using (absolute) FJS but add `12@` at the end to tell the runtime to interprete everything in 12-TET.
+To get a taste of the powerful tempering features in SonicWeave we'll spell our scale using (absolute) FJS but add `12@` at the end to tell the runtime to interpret everything in 12-TET.
 
 ```ocaml
 A4 = 440 Hz = 9\12
@@ -196,7 +196,7 @@ Relative FJS intervals can be especially confusing because they represent fracti
 
 For the most part you cannot combine intervals across domains so `9/8 + M2` is not a valid operation. Use tildes (`~`) to always operate as if in the linear domain (meaning that, for example, `+` and `*` will always work as in maths). E.g. `9/8 ~* M2` is a valid expression and evaluates to `81/64` while `9/8 *~ M2` evaluates to `M3`. The direction of the "wing" determines which domain and formatting to prefer.
 
-Conversely the minus operator `-` represent divisions of the underlying values in the logarithmic domain and the usual kind of subraction in the linear domain e.g. `1.2e - 0.1e` equals `1.1e` owing to decimal ratios inhabiting the linear domain.
+Conversely the minus operator `-` represent divisions of the underlying values in the logarithmic domain and the usual kind of subtraction in the linear domain e.g. `1.2e - 0.1e` equals `1.1e` owing to decimal ratios inhabiting the linear domain.
 
 ### Breaking change compared to Scale Workshop 2
 
@@ -226,7 +226,7 @@ Let's spell out all the notes of 12-tone equal temperament with labels and the u
 12\12 "C"       white
 ```
 
-Now a tool like Scale Workshop can show you the colors so that you can differentiatiate notes with accidentals from notes without.
+Now a tool like Scale Workshop can show you the colors so that you can differentiate notes with accidentals from notes without.
 
 Colors may be specified using
 - [Keywords](https://www.w3.org/wiki/CSS/Properties/color/keywords) like `red`, `white` or `black`

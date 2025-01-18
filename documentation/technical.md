@@ -3,7 +3,7 @@ This documentation describes the SonicWeave DSL as it relates to other programmi
 
 # Table of Contents
 1. [Purpose](#purpose)
-    1. [Other pitfals](#other-pitfals)
+    1. [Other pitfalls](#other-pitfalls)
 2. [Type system](#type-system)
 3. [Operator precedence](#operator-precedence)
 4. [Control flow](#control-flow)
@@ -27,7 +27,7 @@ This documentation describes the SonicWeave DSL as it relates to other programmi
 ## Purpose
 SonicWeave is designed for notating microtonal scales as an extension of Scala .scl syntax. Programming is secondary so you'll have to dodge around reserved patterns such as `C4` which look like identifiers but correspond to musical literals.
 
-### Other pitfals
+### Other pitfalls
 Fraction slash `/` binds stronger than exponentiation. Use `÷` or `%` if you need division that follows [PEMDAS](https://en.wikipedia.org/wiki/Order_of_operations).
 
 The exponent is required in decimal literals. `1.23e0` instead of `1.23` which is instead interpreted a musical interval 1.23 cents wide.

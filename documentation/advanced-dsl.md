@@ -21,7 +21,7 @@ This document describes programming in the SonicWeave domain-specific language.
         1. [If clause](#if-clause)
 12. [If...else](#ifelse)
 13. [Ternary expressions](#ternary-expressions)
-    1. [Vectorizing where...else](#vectorizing-whereelse)
+    1. [Vectorized where...else](#vectorizing-whereelse)
 14. [Function declaration](#function-declaration)
     1. [Calling functions](#calling-functions)
     2. [Stdlib conventions](#stdlib-conventions)
@@ -153,7 +153,7 @@ assert(x == 4.5e);
 Defer is useful for pushing implicit tempering and general housekeeping to the top of the source instead of having to dangle everything at the end while editing the scale.
 
 ## While
-"While" loops repeat a statement until the test becames *falsy* e.g.
+"While" loops repeat a statement until the test becomes *falsy* e.g.
 ```ocaml
 let i = 5
 while (--i) {
@@ -245,8 +245,8 @@ if (3/2 > 700.) {
 ### Ternary expressions
 Conditional expressions look similar but work inline e.g. `3 if true else 5` evaluates to `3` while `3 if false else 5` evaluates to `5`.
 
-#### Vectorizing where...else
-Ternary expressions short-circuit i.e. only the test expression and the chosen result are ever evaluated. The vectorizing/broadcasting variant evaluates everything but works on arrays: `[1, 2] where [true false] else 10` evaluates to `[1, 10]`.
+#### Vectorized where...else
+Ternary expressions short-circuit i.e. only the test expression and the chosen result are ever evaluated. The vectorized/broadcasting variant evaluates everything but works on arrays: `[1, 2] where [true false] else 10` evaluates to `[1, 10]`.
 
 ## Function declaration
 Functions are declared using the `riff` keyword followed by the name of the function followed by the parameters of the function.
@@ -255,7 +255,7 @@ riff subharmonics(start, end) {
   return /end::start
 }
 ```
-Above the `return` statement is suprefluous. We could've left it out and let the result unroll out of the block.
+Above the `return` statement is superfluous. We could've left it out and let the result unroll out of the block.
 
 Default values for function parameters may be given using `param = value` syntax.
 
@@ -288,7 +288,7 @@ Some functions like `sort` and `reverse` have in-place variants (`sortInPlace` a
 Functions can be defined inline using the arrow (`=>`). e.g. `const subharmonics = ((start, end) => retrovert(start::end))`.
 
 ## Throwing
-To interupt execution you can throw a string message.
+To interrupt execution you can throw a string message.
 ```ocaml
 throw "Something wrong here!"
 ```
@@ -317,7 +317,7 @@ sort()
 ```
 This first results in `$ = [3, 5, 7, 11, 13, 17]` which gets reduced to `$ = [3/2, 5/4, 7/4, 11/8, 13/8, 17/16]`. Adding the octave and sorting gives the final result `$ = [17/16, 5/4, 11/8, 3/2, 13/8, 7/4, 2]`.
 
-Or the same with a oneliner `sort(primes(17) rdc 2)` demonstrating the utility of broadcasting and *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
+Or the same with a one-liner `sort(primes(17) rdc 2)` demonstrating the utility of broadcasting and *ceiling reduction* in a context where the unison is implicit and coincides with repeated octaves.
 
 ## Stdlib
 SonicWeave comes with batteries included.
@@ -410,7 +410,7 @@ Adding or subtracting a period from an interval doesn't change its quality so we
 | Neutral sixth-and-a-halfth   | `n6.5`, `P12 / 2`  | `sqrt(3)`         | `950.978`     |
 | Perfect seventh-and-a-halfth | `P7.5`, `m14 / 2`  | `sqrt(32/9)`      | `1098.045`    |
 
-Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precission (and neither does the chromatic semitone `a1`). The the perfect sesquith `P1½` is the true semiwholetone `M2 / 2`.
+Technically the term _semitone_ is a misnomer because the diatonic semitone `m2` doesn't split the tone `M2` in half with mathematical precision (and neither does the chromatic semitone `a1`). The the perfect sesquith `P1½` is the true semiwholetone `M2 / 2`.
 
 The central intervals can be semiaugmented to reach other intervals in the √2.√3 subgroup e.g. `m6 / 2` = `(M6 + d1) / 2` = `n3½ + ½d1` = `m3.5` ~ `sqrt(128/81)`.
 
@@ -500,7 +500,7 @@ D♮4 "Octave-reduced doubled 5th"
 F♮4 "Perfect 4th"
 G♮4 "Perfect 5th"
 δd4
-εd4 "Otave-complemented split 4th"
+εd4 "Octave-complemented split 4th"
 B♭4 "Doubled 4th"
 C♮5 "Octave"
 ```
@@ -561,7 +561,7 @@ Extra commas include extended Helmholtz-Ellis inflections and additional bridges
 See [commas.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md).
 
 ### Non-standard pitch declaration
-Pitch can be declared as a period of oscillation, but it's coearced to Hz to preserve the meaning of relative notation as ratios of frequencies.
+Pitch can be declared as a period of oscillation, but it's coerced to Hz to preserve the meaning of relative notation as ratios of frequencies.
 
 E.g. `C4 = 10ms` has the same effect as `C4 = 100 Hz`.
 
@@ -586,7 +586,7 @@ The limitation is that non-radical reals like `PI` are not supported in basis pr
 ## Implicit intrinsic calls
 Associating two values like `3/2 "fif"` invokes intrinsic behavior between the interval `3/2` and the string `"fif"` resulting in an interval with the value 3/2 and the label "fif".
 
-Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been depracated.
+Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been deprecated.
 | left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Basis         | Function      |
 | ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | ------------- |
 | **Niente**   | ?             | ?             | ?             | bleach         | ?              | ?             | `right(left)` |

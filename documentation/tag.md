@@ -3,7 +3,7 @@ This document describes the `sw` and `swr` tags used for writing SonicWeave insi
 
 
 # Table of Contents
-1. [Basic eample](#basic-example)
+1. [Basic example](#basic-example)
 2. [Raison d'être](#raison-dêtre)
 3. [The sw tag](#the-sw-tag)
 4. [The swr tag](#the-swr-tag)
@@ -21,7 +21,7 @@ console.log(myOctave.totalCents());  // 1200
 ```
 
 ## Raison d'être
-Constructing intervals using the [JavaScript API](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/package.md) is somewhat tedious so you can use [SonicWeave DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md) instead when writing JS scripts for generating and analysing microtonal scales.
+Constructing intervals using the [JavaScript API](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/package.md) is somewhat tedious so you can use [SonicWeave DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md) instead when writing JS scripts for generating and analyzing microtonal scales.
 
 ## The sw tag
 The `sw` tag evaluates escapes such as `\n` for a newline inside the tag:
