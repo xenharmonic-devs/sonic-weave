@@ -682,10 +682,15 @@ function cents(
   const converted = pubRelative.bind(this)(upcastBool(interval));
   if (fractionDigits !== undefined) {
     const denominator = 10 ** fractionDigits.toInteger();
-    const numerator = Math.round(converted.totalCents() * denominator);
-    converted.value = new TimeMonzo(ZERO, [
-      new Fraction(numerator, denominator * 1200),
-    ]);
+    try {
+      const numerator = Math.round(converted.totalCents() * denominator);
+      converted.value = new TimeMonzo(ZERO, [
+        new Fraction(numerator, denominator * 1200),
+      ]);
+    } catch {
+      const value = TimeReal.fromCents(converted.totalCents());
+      return new Interval(value, 'logarithmic', 0, value.asCentsLiteral());
+    }
   }
   const node = converted.value.asCentsLiteral();
   if (node) {

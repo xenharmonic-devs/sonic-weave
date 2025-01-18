@@ -2705,4 +2705,16 @@ describe('SonicWeave expression evaluator', () => {
   it('treats 0p as truthy', () => {
     expect(evaluate('bool(0@)')).toBe(true);
   });
+
+  it('converts to exact cents with 12 fraction digits', () => {
+    const {value} = parseSingle('cents(3/2, 12)');
+    expect(
+      value.primeExponents[0].equals('701955000865387/1200000000000000')
+    ).toBe(true);
+  });
+
+  it('converts to real cents when 13 fraction digits is attempted', () => {
+    const interval = evaluateExpression('cents(3/2, 13)');
+    expect(interval!.toString()).toBe('701.9550008653874r¢');
+  });
 });
