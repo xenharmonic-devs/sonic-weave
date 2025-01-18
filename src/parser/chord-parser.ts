@@ -75,7 +75,7 @@ export function parseBasis(input: string): ValBasis {
 
 /**
  * Parse a list of vals separated by '|', '&', ':', ';', ',' or whitespace.
- * @param input User input in a context that expects a sequance of vals.
+ * @param input User input in a context that expects a sequence of vals.
  * @param basis Dot-separated subgroup basis or the prime limit parsed by {@link parseBasis}.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @returns An array of number arrays representing vals in the subgroup basis.
@@ -96,7 +96,7 @@ export function parseVals(
         throw new Error('Explicit subgroups not supported.');
       }
       const val = evaluateExpression(part, includePrelude) as Val;
-      // Just re-interprete in the subgroup's basis.
+      // Just re-interpret in the subgroup's basis.
       result.push(Val.fromBasisMap(val.sval, basis));
     } else {
       // Add a dummy named subgroup to make the warts parser do the right thing.

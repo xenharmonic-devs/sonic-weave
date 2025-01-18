@@ -1044,8 +1044,8 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it("has Lumi's bridging commas (memes)", () => {
-    const ohno = parseSingle('sm2^0l');
-    expect(ohno.value.toFraction().toFraction()).toBe('15/14');
+    const ohNo = parseSingle('sm2^0l');
+    expect(ohNo.value.toFraction().toFraction()).toBe('15/14');
   });
 
   it('has syntonic rastmic subchroma notation (relative artodemisharp)', () => {
@@ -1770,7 +1770,7 @@ describe('SonicWeave expression evaluator', () => {
     expect(fraction).toBe('1024/729');
   });
 
-  it('has a porkupine inflection', () => {
+  it('has a porcupine inflection', () => {
     const {fraction} = parseSingle('⅓m3_6l');
     expect(fraction).toBe('6/5');
   });
@@ -1799,7 +1799,7 @@ describe('SonicWeave expression evaluator', () => {
     expect(rootLift[1].valueOf()).toBe(1.5);
   });
 
-  it('can longtail monzo components starting from a prime', () => {
+  it('can long-tail monzo components starting from a prime', () => {
     const tooMuch = parseSingle('[1 -2 3 -4 5 -6 7 -8 9>@31..');
     const pe = tooMuch.value.primeExponents.map(e => e.toFraction());
     expect(pe).toEqual([
@@ -2420,7 +2420,7 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.isAbsolute()).toBe(true);
   });
 
-  it('coarces too accurate nedji to real', () => {
+  it('coerces too accurate nedji to real', () => {
     const interval = evaluate(
       '1000000000000000\\9007199254740997<3>'
     ) as Interval;

@@ -5,7 +5,7 @@ import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
 import {RootContext} from '../context';
 import {CSS_COLOR_CONTEXT} from '../css-colors';
 
-// NOTE: Most of these are not comparitive benchmarks.
+// NOTE: Most of these are not comparative benchmarks.
 // Mainly useful for making sure tweaks to the parser won't destroy all performance.
 beforeAll(() => {
   getSourceVisitor();

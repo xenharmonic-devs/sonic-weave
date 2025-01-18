@@ -921,7 +921,7 @@ ChainableUnaryOperator
   = '^' / '∧' / '\u2228' / '/' / LiftToken / '\\' / DropToken
 
 // The precedence between exponentiation and fractions is a bit uneasy.
-// Uniform unary operators make a seccond appearance here to be valid right operands for exponentiation and fractions.
+// Uniform unary operators make a second appearance here to be valid right operands for exponentiation and fractions.
 UnaryExpression
   = operator: UniformUnaryOperator uniform: '~'? operand: ImplicitCallExpression {
     return UnaryExpression(operator, operand, !!uniform);

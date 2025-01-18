@@ -889,7 +889,7 @@ riff mergeOffset(offsets, overflow = 'drop', scale = ££) {
 }
 
 riff stretch(amount, scale = ££) {
-  "Obtain a copy of the popped/given scale streched by the given amount. A value of \`1\` corresponds to no change.";
+  "Obtain a copy of the popped/given scale stretched by the given amount. A value of \`1\` corresponds to no change.";
   return scale ~^ amount;
 }
 
@@ -949,7 +949,7 @@ riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, sc
 }
 
 riff replace(interval, replacement, scale = ££) {
-  "Obtain a copy of the popped/given scale with occurences of \`interval\` replaced by \`replacement\`.";
+  "Obtain a copy of the popped/given scale with occurrences of \`interval\` replaced by \`replacement\`.";
   for (const existing of scale) {
     if (existing == interval) {
       replacement;
@@ -960,7 +960,7 @@ riff replace(interval, replacement, scale = ££) {
 }
 
 riff replaceStep(step, replacement, scale = ££) {
-  "Obtain a copy of the popped/given scale with relative occurences of \`step\` replaced by \`replacement\`.";
+  "Obtain a copy of the popped/given scale with relative occurrences of \`step\` replaced by \`replacement\`.";
   unstack(scale);
   replace(step, replacement);
   return stack();

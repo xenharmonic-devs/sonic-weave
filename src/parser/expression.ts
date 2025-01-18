@@ -459,7 +459,7 @@ export class ExpressionVisitor {
     if (interrupt?.type === 'ReturnStatement') {
       return interrupt.value;
     } else if (interrupt) {
-      throw new Error('Illegal interupt.');
+      throw new Error('Illegal interrupt.');
     }
     return subVisitor.currentScale;
   }

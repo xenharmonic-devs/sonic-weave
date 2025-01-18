@@ -209,7 +209,7 @@ export class TimeReal {
 
   /**
    * Create a real-valued frequency.
-   * @param frequency Frequency of a musical note measuder in hertz.
+   * @param frequency Frequency of a musical note measured in hertz.
    * @returns Frequency value in the absolute echelon.
    */
   static fromFrequency(frequency: number) {
@@ -503,7 +503,7 @@ export class TimeReal {
   }
 
   /**
-   * Subrtact another time real from this one in linear space.
+   * Subtract another time real from this one in linear space.
    * @param other Another time real.
    * @returns The linear difference of the time reals.
    */
@@ -1783,7 +1783,7 @@ export class TimeMonzo {
   }
 
   /**
-   * Subrtact another time monzo from this one in linear space.
+   * Subtract another time monzo from this one in linear space.
    * @param other Another time monzo.
    * @returns The linear difference of the time monzos.
    */
@@ -2125,8 +2125,8 @@ export class TimeMonzo {
           }
         }
       }
-      const respow = other.residual.pow(solution);
-      if (!respow || respow.compare(this.residual)) {
+      const residualPow = other.residual.pow(solution);
+      if (!residualPow || residualPow.compare(this.residual)) {
         throw new Error("Logarithm doesn't exist.");
       }
       return solution;
@@ -2381,7 +2381,7 @@ export class TimeMonzo {
 
   /**
    * Convert a relative time monzo to cents.
-   * Conert an absosulte time monzo to the size in cents of the scalar of its time unit.
+   * Covert an absolute time monzo to the size in cents of the scalar of its time unit.
    * @param ignoreSign Compute the size of the absolute value.
    * @returns Size of the time monzo in cents.
    */
@@ -2610,7 +2610,7 @@ export class TimeMonzo {
   }
 
   /**
-   * Factorize the time monzo into a Map instace with prime numbers as keys and their multiplicity as values.
+   * Factorize the time monzo into a Map instance with prime numbers as keys and their multiplicity as values.
    * @returns A sparse monzo.
    */
   factorize() {

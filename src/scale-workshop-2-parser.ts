@@ -136,7 +136,7 @@ function parseCents(sw2Node: SW2CentsLiteral, numberOfComponents: number) {
  * Parse a string to the {@link Interval} it represents.
  * @param input A string to parse.
  * @param numberOfComponents Number of components to use for the {@link Interval} instance's {@link TimeMonzo} prime exponent part.
- * @param admitBareNumbers Interprete bare numbers as n/1 ratios instead of throwing an error.
+ * @param admitBareNumbers Interpret bare numbers as n/1 ratios instead of throwing an error.
  * @param universalMinus Allow unary minus operator in front of every line type.
  * @returns {@link Interval} instance constructed from the input string.
  * @throws An error if the input cannot be interpreted as an interval.

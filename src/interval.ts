@@ -1162,7 +1162,7 @@ export class Interval {
       node = this.value.asMonzoLiteral();
     }
     if (!Array.isArray(node.basis)) {
-      throw new Error('Unexpexted unpruned basis.');
+      throw new Error('Unexpected unpruned basis.');
     }
     if (
       interchange &&
@@ -1172,7 +1172,7 @@ export class Interval {
     ) {
       node = this.value.asInterchangeLiteral()!;
       if (!Array.isArray(node.basis)) {
-        throw new Error('Unexpexted unpruned basis.');
+        throw new Error('Unexpected unpruned basis.');
       }
     }
     if (this.steps) {
@@ -1786,7 +1786,7 @@ export class ValBasis {
   }
 
   /**
-   * Fix a map in this basis to the stadard basis.
+   * Fix a map in this basis to the standard basis.
    * @param map Tuning map of this basis' elements to cents.
    * @returns Tuning map of primes to cents.
    */
@@ -1869,7 +1869,7 @@ export class ValBasis {
   /**
    * Rebase intervals from the standard basis to this basis.
    * Rebase vals from a foreign subgroup basis to this basis.
-   * @param other {@link Interval} or {@link Val} to reinterprete.
+   * @param other {@link Interval} or {@link Val} to reinterpret.
    * @return The rebased value.
    */
   intrinsicCall(other: Interval): Interval;
@@ -1980,7 +1980,7 @@ export class ValBasis {
 }
 
 /**
- * A mappping vector commonly used to convert intervals in just intonation to steps of an equal temperament.
+ * A mapping vector commonly used to convert intervals in just intonation to steps of an equal temperament.
  */
 export class Val {
   value: TimeMonzo;
@@ -2370,7 +2370,7 @@ export class Temperament {
   }
 
   /**
-   * Constuct a temperament that retains the properties shared by all of the given vals.
+   * Construct a temperament that retains the properties shared by all of the given vals.
    * @param vals Vals to mix into a more optimal combination. The number of vals decides the rank of the temperament.
    * @param weights Additional weights on top of Tenney weights to tweak what is considered optimal.
    * @param pureEquaves Boolean flag to force the tuning of the first basis element to remain pure.
@@ -2410,7 +2410,7 @@ export class Temperament {
   }
 
   /**
-   * Constuct a temperament that tempers out the given commas.
+   * Construct a temperament that tempers out the given commas.
    * @param commas Commas to temper out. The number of commas decides the co-rank of the temperament.
    * @param basis Optional basis. Leave undefined to automatically infer from commas.
    * @param weights Additional weights on top of Tenney weights to tweak what is considered optimal.
@@ -2601,7 +2601,7 @@ export class Temperament {
 
   /**
    * Produce an array of generator coefficients.
-   * @param other A value to interprete.
+   * @param other A value to interpret.
    * @returns An array representing the number of generators adding up to the value.
    */
   dot(other: Interval): Interval[] {

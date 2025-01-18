@@ -16,7 +16,7 @@ describe('Line parser', () => {
     expect(() => parseLine('42')).toThrow();
   });
 
-  it('parses negative fractions and interpretes them as inverses', () => {
+  it('parses negative fractions and interprets them as inverses', () => {
     const result = parseLine('-1/2');
     expect(
       result.equals(

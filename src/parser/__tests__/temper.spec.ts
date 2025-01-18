@@ -61,8 +61,8 @@ describe('Features related to tempering', () => {
   });
 
   it('can combine three vals to approach the JIP', () => {
-    const fourtyOne = evaluate('tune([5@.7, 17@.7, 19@.7])') as Val;
-    expect(fourtyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
+    const fortyOne = evaluate('tune([5@.7, 17@.7, 19@.7])') as Val;
+    expect(fortyOne.value.toIntegerMonzo()).toEqual([41, 65, 95, 115]);
   });
 
   it('can combine four vals to approach the JIP', () => {
