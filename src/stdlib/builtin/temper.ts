@@ -475,7 +475,7 @@ function tune(
   );
   const jip = basis.value.map(m => m.totalCents());
   const ws = valWeights(weights, basis.size);
-  const wvals = vs.map(val =>
+  const weightedVals = vs.map(val =>
     applyWeights(
       unapplyWeights(
         basis.value.map(m => m.dot(val.value).valueOf()),
@@ -484,7 +484,7 @@ function tune(
       ws
     )
   );
-  const coeffs = intCombineTuningMaps(ws, wvals, radius);
+  const coeffs = intCombineTuningMaps(ws, weightedVals, radius);
   let result = vs[0].mul(fromInteger(coeffs[0]));
   for (let i = 1; i < coeffs.length; ++i) {
     result = result.add(vs[i].mul(fromInteger(coeffs[i])));

@@ -21,12 +21,12 @@ describe('SonicWeave template tag', () => {
   });
 
   it('evaluates an array of numbers passed in', () => {
-    const nums: number[] = [];
+    const numbers: number[] = [];
     for (let i = 0; i < 10 * Math.random(); ++i) {
-      nums.push(Math.floor(Math.random() * 100));
+      numbers.push(Math.floor(Math.random() * 100));
     }
-    const value = sw`${nums}` as Interval[];
-    expect(value.map(i => i.toInteger())).toEqual(nums);
+    const value = sw`${numbers}` as Interval[];
+    expect(value.map(i => i.toInteger())).toEqual(numbers);
   });
 
   it('evaluates PI passed in', () => {
@@ -125,12 +125,12 @@ describe('SonicWeave raw template tag', () => {
   });
 
   it('evaluates an array of numbers passed in', () => {
-    const nums: number[] = [];
+    const numbers: number[] = [];
     for (let i = 0; i < 10 * Math.random(); ++i) {
-      nums.push(Math.floor(Math.random() * 100));
+      numbers.push(Math.floor(Math.random() * 100));
     }
-    const value = swr`${nums}` as Interval[];
-    expect(value.map(i => i.toInteger())).toEqual(nums);
+    const value = swr`${numbers}` as Interval[];
+    expect(value.map(i => i.toInteger())).toEqual(numbers);
   });
 
   it('evaluates PI passed in', () => {

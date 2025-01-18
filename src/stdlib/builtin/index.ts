@@ -140,7 +140,7 @@ function lll(
   this.spendGas(0.3 * basis.numberOfComponents * basis.size ** 2);
   return basis.lll(weighting);
 }
-lll.__doc__ = 'Perform Lensta-Lenstra-Lovász basis reduction.';
+lll.__doc__ = 'Perform Lenstra-Lenstra-Lovász basis reduction.';
 lll.__node__ = builtinNode(lll);
 
 // == Third-party wrappers ==
@@ -570,8 +570,8 @@ radical.__node__ = builtinNode(radical);
  * @param interval Interval to convert.
  * @param preferredNumerator Preferred number of steps.
  * @param preferredDenominator Preferred number of steps per equave.
- * @param preferredEquaveNumerator Prefferred numerator of the equave.
- * @param preferredEquaveDenominator Prefferred denominator of the equave.
+ * @param preferredEquaveNumerator Preferred numerator of the equave.
+ * @param preferredEquaveDenominator Preferred denominator of the equave.
  * @returns The interval converted to relative NEDJI in the logarithmic domain.
  */
 function nedji(
@@ -1589,7 +1589,7 @@ function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
   const monzos = scale.map(i => rel(i).value);
   for (const monzo of monzos) {
     if (monzo instanceof TimeReal) {
-      // XXX: Margin CS is not realiable with zero margin, but whatever.
+      // XXX: Margin CS is not reliable with zero margin, but whatever.
       return hasMarginConstantStructure(
         monzos.map(m => m.totalCents()),
         0

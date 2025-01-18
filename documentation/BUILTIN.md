@@ -265,7 +265,7 @@ Return the number of intervals in the scale, the length of a string or the size 
 Convert interval to linear representation. Formatting information of logarithmic quantities is lost.
 
 ### lll(*basis*, *weighting = "tenney"*)
-Perform Lensta-Lenstra-Lovász basis reduction.
+Perform Lenstra-Lenstra-Lovász basis reduction.
 
 ### log1p(*x*)
 Calculate log1p x.
@@ -699,10 +699,10 @@ Repeat the popped/given intervals as-is without accumulating equaves.
 Repeat the popped/given scale shifted linearly each time.
 
 ### replace(*interval*, *replacement*, *scale = ££*)
-Obtain a copy of the popped/given scale with occurences of `interval` replaced by `replacement`.
+Obtain a copy of the popped/given scale with occurrences of `interval` replaced by `replacement`.
 
 ### replaceStep(*step*, *replacement*, *scale = ££*)
-Obtain a copy of the popped/given scale with relative occurences of `step` replaced by `replacement`.
+Obtain a copy of the popped/given scale with relative occurrences of `step` replaced by `replacement`.
 
 ### retrovert(*scale = ££*)
 Obtain an retroverted copy of the popped/given scale (negative harmony i.e. reflect and transpose).
@@ -738,7 +738,7 @@ Cumulatively sum the numbers of the popped/given array.
 Stack the popped/given inflections along with the guide generator into a periodic sequence of steps.
 
 ### stretch(*amount*, *scale = ££*)
-Obtain a copy of the popped/given scale streched by the given amount. A value of `1` corresponds to no change.
+Obtain a copy of the popped/given scale stretched by the given amount. A value of `1` corresponds to no change.
 
 ### subharmonics(*start*, *end*)
 Generate a subharmonic segment including the given start and end points.

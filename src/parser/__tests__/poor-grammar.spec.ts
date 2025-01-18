@@ -37,7 +37,7 @@ describe('Angle brackets vs. comparisons', () => {
     expect(no).toBe(false);
   });
 
-  it.fails('features the obstinence of (1°2 < 3) > 4', () => {
+  it.fails('features the obstinacy of (1°2 < 3) > 4', () => {
     const no = evaluate('1\\2<3 >4');
     expect(no).toBe(false);
   });

@@ -18,7 +18,7 @@ const {version} = require('../package.json');
 /**
  * Convert a program in the SonicWeave DSL to the Scala .scl format.
  * @param source Source code for a SonicWeave program.
- * @returns A string convorming to the [Scala format](https://www.huygens-fokker.org/scala/scl_format.html).
+ * @returns A string conforming to the [Scala format](https://www.huygens-fokker.org/scala/scl_format.html).
  */
 export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);

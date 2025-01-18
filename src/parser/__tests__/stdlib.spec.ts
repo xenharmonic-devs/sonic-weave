@@ -879,7 +879,7 @@ describe('SonicWeave standard library', () => {
     expect(D4).toBe('D♮4^73h');
   });
 
-  it('can replace all occurences of a relative step with others', () => {
+  it('can replace all occurrences of a relative step with others', () => {
     const splitCPS = expand(
       'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33])'
     );
@@ -1382,7 +1382,7 @@ describe('SonicWeave standard library', () => {
     ]);
   });
 
-  it('has vectorizing vbool', () => {
+  it('has vectorized vbool', () => {
     const duckDuckGooseDuck = evaluateExpression('vbool(["", 0, 12, niente])');
     expect(duckDuckGooseDuck).toEqual([false, false, true, false]);
   });
@@ -1650,10 +1650,10 @@ describe('SonicWeave standard library', () => {
     const scale = expand('afdo(5, 3)');
     expect(scale).toEqual(['7/5', '9/5', '11/5', '13/5', '3']);
     // Verify that it's an arithmetic progression
-    const fracs = scale.map(f => new Fraction(f));
-    fracs.unshift(new Fraction(1));
-    for (let i = 0; i < fracs.length - 1; ++i) {
-      expect(fracs[i + 1].sub(fracs[i]).equals('2/5')).toBe(true);
+    const fractions = scale.map(f => new Fraction(f));
+    fractions.unshift(new Fraction(1));
+    for (let i = 0; i < fractions.length - 1; ++i) {
+      expect(fractions[i + 1].sub(fractions[i]).equals('2/5')).toBe(true);
     }
   });
 

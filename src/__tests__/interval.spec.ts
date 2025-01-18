@@ -11,7 +11,7 @@ import {FractionLiteral, NedjiLiteral} from '../expression';
 import {sw} from '../parser';
 import {LOG_PRIMES, PRIME_CENTS, dot} from 'xen-dev-utils';
 
-describe('Idempontent formatting', () => {
+describe('Idempotent formatting', () => {
   it('has stable ratios (common factor)', () => {
     const sixOverFour = TimeMonzo.fromFraction('6/4', 2);
     const node = intervalValueAs(sixOverFour, {

@@ -1292,8 +1292,8 @@ describe('SonicWeave parser', () => {
       (* Manual conversion *)
       absolute
     `);
-    const freqs = scale.map(i => i.valueOf());
-    expect(freqs).toEqual([320, 384, 512, 640, 792, 880]);
+    const frequencies = scale.map(i => i.valueOf());
+    expect(frequencies).toEqual([320, 384, 512, 640, 792, 880]);
   });
 
   it('technically supports partial application', () => {
@@ -1537,7 +1537,7 @@ describe('SonicWeave parser', () => {
     ]);
   });
 
-  it('generates the basic bright mode by defalt', () => {
+  it('generates the basic bright mode by default', () => {
     const scale = expand(`
       MOS 3L 2s
       K4

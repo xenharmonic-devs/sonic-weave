@@ -779,7 +779,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     ]);
   });
 
-  it('supports multiple subcripts on AbsoluteFJS', () => {
+  it('supports multiple subscripts on AbsoluteFJS', () => {
     const ast = parseSingle('Fb4_5_5');
     expect(ast.expression.subscripts).toEqual([
       [5, ''],

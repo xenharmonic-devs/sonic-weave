@@ -50,7 +50,7 @@ export function getGlobalVisitor(
 
     const visitor = SOURCE_VISITOR_WITH_PRELUDE.clone();
 
-    // Volatiles are expected to interact with extra builins.
+    // Volatiles are expected to interact with extra builtins.
     for (const statement of VOLATILES.body) {
       visitor.visit(statement);
     }

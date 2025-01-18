@@ -188,9 +188,9 @@ export function relative(
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz.'
     );
   }
-  const absolut = absolute.bind(this)(interval);
+  const absolute_ = absolute.bind(this)(interval);
   return new Interval(
-    absolut.value.div(this.rootContext.unisonFrequency),
+    absolute_.value.div(this.rootContext.unisonFrequency),
     interval.domain,
     interval.steps,
     undefined,

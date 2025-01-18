@@ -288,7 +288,7 @@ describe('Extended monzo with time', () => {
     expect(octave.equals(2)).toBeTruthy();
   });
 
-  it('can be ambiquous in terms of total size compared to reals', () => {
+  it('can be ambiguous in terms of total size compared to reals', () => {
     const octaveJI = new TimeMonzo(new Fraction(0), [new Fraction(1)]);
     const octaveReal = new TimeReal(0, 2);
     expect(octaveJI.strictEquals(octaveReal)).toBeFalsy();

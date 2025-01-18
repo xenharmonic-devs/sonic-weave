@@ -25,7 +25,7 @@ const MAX_EXPONENT = Object.freeze(new Fraction(100));
 // Classic radius of tolerance.
 const RADIUS_OF_TOLERANCE = valueToCents(65 / 63);
 
-// Using a half-sharp + epsilon as the radius of tolerace closes the gap between minor and major.
+// Using a half-sharp + epsilon as the radius of tolerance closes the gap between minor and major.
 // https://en.xen.wiki/w/User:FloraC/Critique_on_Functional_Just_System
 const SEMIAPOTOME = 0.5 * valueToCents(2187 / 2048) + 1e-6;
 

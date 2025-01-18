@@ -56,7 +56,7 @@ export type MetricPrefix =
   | 'q';
 
 /**
- * Optain the ten's exponent associated with the given prefix.
+ * Obtain the ten's exponent associated with the given prefix.
  * @param prefix Prefix to find exponent for.
  * @returns The ten's exponent associated with the prefix.
  */
@@ -134,7 +134,7 @@ export type BinaryPrefix =
   | 'Qi';
 
 /**
- * Optain the exponent of 1024 associated with the given prefix.
+ * Obtain the exponent of 1024 associated with the given prefix.
  * @param prefix Prefix to find exponent for.
  * @returns The exponent of 1024 associated with the prefix.
  */
