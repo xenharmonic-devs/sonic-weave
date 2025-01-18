@@ -664,7 +664,7 @@ Product between a matrix and a vector can be achieved by broadcasting `vdot` ove
 | Vectorized logical OR  | `vor`    |
 | Plain formatting       | `al~`    |
 
-Binary operation is vectorized elementwise:
+Binary operation is vectorized element-wise:
 
 `[0, 1] vand [2, 3]` evaluates to `[0, 3]`.
 
@@ -726,7 +726,7 @@ The logarithmic rounding operator (`by`) measures closeness geometrically `dista
 
 The non-ceiling a.k.a floor variants of modulo behave as they commonly do in mathematics where `x mod x` evaluates to `0` while the ceiling variants are more useful in a musical context.
 
-Just as the clockface starts from 12 `12 modc 12` evaluates to `12`. The fact that `P1 modc P8` evaluates to `P8` and that the unison is implicit in SonicWeave environments like Scale Workshop means that the major pentatonic scale becomes a simple oneliner `sort([-1..3] * P5 modc P8)` evaluating to:
+Just as the clock face starts from 12 `12 modc 12` evaluates to `12`. The fact that `P1 modc P8` evaluates to `P8` and that the unison is implicit in SonicWeave environments like Scale Workshop means that the major pentatonic scale becomes a simple one-liner `sort([-1..3] * P5 modc P8)` evaluating to:
 ```ocaml
 M2
 P4
@@ -788,7 +788,7 @@ The dot product is meaningful only between a val and an interval and the operand
 
 Beware that the dot product between cologarithmic quantities is unweighted. The value of `5@ ~dot 7@` depends on the default number of components in the runtime. When restricted to a prime limit like 5 here the result is well-defined `5@.5 ~dot 7@.5` is the same as `<5 8 12] ~· <7 11 16]` and evaluates to `5*7 + 8*11 + 12*16` or `315`.
 
-Explicit tempering is basically the dot product multipled with one step of the equal temperament associated with the val if we ignore the [technicalities](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md).
+Explicit tempering is basically the dot product multiplied with one step of the equal temperament associated with the val if we ignore the [technicalities](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md).
 
 The zero val `<0 0 0]`, `0@` or `0[]@` stands in for the trivial rank-0 temperament that maps everything to the unison 1/1.
 
@@ -1099,7 +1099,7 @@ J_5 (* 13\13 *)
 
 The accidental `&` (read "am") raises pitch by `L - s` while its opposite `@` (read "at") correspondingly lowers pitch by the same amount.
 
-The accidental `e` (read "semiam") raises pitch by a half *am* while `a` (read "semiat") corresponingly lowest pitch by a half *at*.
+The accidental `e` (read "semiam") raises pitch by a half *am* while `a` (read "semiat") correspondingly lowest pitch by a half *at*.
 
 ### Auto-MOS
 The easiest way to generate Diamond-mos notation for one equave is to call the `automos()` helper.

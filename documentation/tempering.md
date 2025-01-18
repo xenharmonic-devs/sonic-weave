@@ -70,7 +70,7 @@ An alternative to `i => i str(i)` is `vstr($)` which produces an array of string
 Now we can more easily remember that `7\12` corresponds to `3/2` in this temperament when playing the scale in a tool like Scale Workshop.
 
 ### Rank-2 temperaments
-Rank-2 temperaments have two independent intervals that completely define everything available in a specific tuning that supports the temperament. Xenharmonic Wiki lists many such temperamentes. For example the details for [meantone](https://en.xen.wiki/w/Meantone_family#Meantone) tell us that the intervals for a CTE tuning are ~2 = 1\1, ~3/2 = 697.2143, in other words `2/1` spanning a whole octave `1\1` and `3/2` that's tuned a little flat of pure. We also learn that `81` is a suitable equal temperament from the associated optimal ET sequence.
+Rank-2 temperaments have two independent intervals that completely define everything available in a specific tuning that supports the temperament. Xenharmonic Wiki lists many such temperaments. For example the details for [meantone](https://en.xen.wiki/w/Meantone_family#Meantone) tell us that the intervals for a CTE tuning are ~2 = 1\1, ~3/2 = 697.2143, in other words `2/1` spanning a whole octave `1\1` and `3/2` that's tuned a little flat of pure. We also learn that `81` is a suitable equal temperament from the associated optimal ET sequence.
 
 We can generate a preimage using the `rank2` helper function and temper to 81-tone equal.
 ```ocaml
@@ -227,7 +227,7 @@ Defines a co-vector `v` such that `v dot (1 Hz)` evaluates to `2`, `v dot 9/7` e
 
 All vals have an implicit `1` as the `1°`'s component and this cannot be changed.
 
-Basis elements such as `0`, `-1` or `inf` don't map one-to-one so the dot product is undefined and thus these are not legal val basis elements even though with monzos they're prefectly reasonable. `rc` is also an illegal basis element due to real numbers being too dense to separate into unique prime factors.
+Basis elements such as `0`, `-1` or `inf` don't map one-to-one so the dot product is undefined and thus these are not legal val basis elements even though with monzos they're perfectly reasonable. `rc` is also an illegal basis element due to real numbers being too dense to separate into unique prime factors.
 
 ### Warts shorthand notation
 A val like `12@` is written in [Warts shorthand](https://en.xen.wiki/w/Val#Shorthand_notation). It could be written as `12p@` too to underline the fact that it's the patent val i.e. all prime harmonics are mapped to their closest approximations within the equal temperament.
@@ -447,7 +447,7 @@ defer cents(£, 3)
 const sengic = commaList(686/675)
 defer sengic
 
-(* Obtain the canonical mapping generators and re-interprete monzos in this basis. *)
+(* Obtain the canonical mapping generators and re-interpret monzos in this basis. *)
 const M = mappingBasis(sengic)
 defer @M
 
@@ -582,10 +582,10 @@ By default co-vectors are associated with the octave so the basis of the co-loga
 if spelled out in full.
 
 ### Val-monzo dot product
-The dot product between a val and a monzo is straighforward enough: `<12 19 28] dot [-3 1 1>` evaluates to `12*(-3) + 19*1 + 28*1` or `11` in total.
+The dot product between a val and a monzo is straightforward enough: `<12 19 28] dot [-3 1 1>` evaluates to `12*(-3) + 19*1 + 28*1` or `11` in total.
 
 ### Tempering operator
-The association with an equave is important in tempering to know which equal temperament we're targetting. The `tmpr` operator infers the number of divisions from `val dot basisOf(val)[0]`. It's also more graceful with a higher prime tail and leaves it alone.
+The association with an equave is important in tempering to know which equal temperament we're targeting. The `tmpr` operator infers the number of divisions from `val dot basisOf(val)[0]`. It's also more graceful with a higher prime tail and leaves it alone.
 
 The operation `v tmpr m` is equivalent to:
 ```ocaml

@@ -16,6 +16,6 @@ D♮4 "Octave-reduced doubled 5th"
 F♮4 "Perfect 4th"
 G♮4 "Perfect 5th"
 δd4
-εd4 "Otave-complemented split 4th"
+εd4 "Octave-complemented split 4th"
 B♭4 "Doubled 4th"
 C♮5 "Octave"
