@@ -50,7 +50,7 @@
     "test": "vitest",
     "prebench": "npm run compile",
     "bench": "vitest bench",
-    "doc": "typedoc src/index.ts . --name sonic-weave",
+    "doc": "typedoc src/index.ts .",
     "preautodoc": "npm run precompile && tsc -p tsconfig-autodoc.json",
     "autodoc": "node .temp/scripts/builtin-docs.js > documentation/BUILTIN.md",
     "preinspect-grammar": "npm run compile-sonic-weave-parser",
@@ -62,7 +62,7 @@
     "@types/node": "20.8.2",
     "gts": "^5.3.1",
     "peggy": "^4.2.0",
-    "typedoc": "^0.25.13",
+    "typedoc": "^0.27.6",
     "typescript": "~5.2.0",
     "vitest": "^1.6.0"
   },

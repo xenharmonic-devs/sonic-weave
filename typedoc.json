@@ -1,0 +1,17 @@
+{
+  "name": "sonic-weave",
+  "highlightLanguages": [
+    "bash",
+    "console",
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "jsonc",
+    "json5",
+    "ocaml",
+    "yaml",
+    "tsx",
+    "typescript"
+  ]
+}
