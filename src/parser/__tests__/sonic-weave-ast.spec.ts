@@ -1227,6 +1227,63 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
       },
     });
   });
+
+  it('parses addition of Greek variables with numeric literals', () => {
+    const ast = parseSingle('6*phi+4');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '+',
+        left: {
+          type: 'BinaryExpression',
+          operator: '*',
+          left: {type: 'IntegerLiteral', value: 6n},
+          right: {type: 'Identifier', id: 'phi'},
+          preferLeft: false,
+          preferRight: false,
+        },
+        right: {type: 'IntegerLiteral', value: 4n},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('requires dummy accidentals with negative octaves (success)', () => {
+    const ast = parseSingle('C_-2');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        ups: 0,
+        lifts: 0,
+        type: 'AbsoluteFJS',
+        pitch: {
+          type: 'AbsolutePitch',
+          nominal: 'C',
+          accidentals: [{fraction: '', accidental: '_'}],
+          octave: -2,
+        },
+        superscripts: [],
+        subscripts: [],
+      },
+    });
+  });
+
+  it('requires dummy accidentals with negative octaves (failure/binary op)', () => {
+    const ast = parseSingle('C-2');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '-',
+        left: {type: 'Identifier', id: 'C'},
+        right: {type: 'IntegerLiteral', value: 2n},
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
 });
 
 describe('Automatic semicolon insertion', () => {

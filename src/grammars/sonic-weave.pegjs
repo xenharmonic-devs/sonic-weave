@@ -1605,8 +1605,23 @@ PitchNominal 'pitch nominal'
   / 'psi'
   / 'ome'
 
-// Some pitches like M3 or S9 are inaccessible due to other rules and require accidentals to disambiguate.
-// Absurd nominals like SQRT#4 also require accidentals to disambiguate.
+AbsolutePitchTail
+  = accidentals: Accidental+ octave: SignedBasicInteger {
+    return {
+      accidentals,
+      octave,
+    };
+  }
+  / octave: BasicInteger {
+    return {
+      accidentals: [],
+      octave,
+    };
+  }
+
+// Signed octaves require accidentals to disambiguate.
+// Some pitches like M3 or S9 are inaccessible due to other rules and also require accidentals to disambiguate.
+// Same goes for absurd nominals like SQRT#4.
 AbsolutePitch
   = nominal: $[J-Z]|2..| accidentals: Accidental+ octave: SignedBasicInteger {
     return {
@@ -1616,7 +1631,8 @@ AbsolutePitch
       octave,
     };
   }
-  / nominal: PitchNominal accidentals: Accidental* octave: SignedBasicInteger {
+  / nominal: PitchNominal tail: AbsolutePitchTail {
+    const {accidentals, octave} = tail;
     return {
       type: 'AbsolutePitch',
       nominal,
