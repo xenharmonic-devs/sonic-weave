@@ -314,7 +314,7 @@ The Basic Latin block is listed in full. Other blocks only where used.
 | U+0079         | y     | Identifiers |
 | U+007A         | z     | Frequency literals, identifiers |
 | U+007B         | {     | Block start, record start |
-| U+007C         | |     | MOS UDP separator |
+| U+007C         | \|    | MOS UDP separator |
 | U+007D         | }     | Block end, record end |
 | U+007E         | ~     | Universal operator preference wing |
 | U+007F         | *DEL* | *N/A* |
