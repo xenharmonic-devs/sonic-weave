@@ -50,6 +50,28 @@ Scale title, colors and labels.
 ## Additional resources
 * [Xenharmonic Wiki](https://en.xen.wiki/)
 
+## Development and Project Setup
+
+Install project.
+```sh
+npm install
+```
+
+### Run Unit Tests with [Vitest](https://vitest.dev/)
+
+```sh
+npm test
+```
+
+### Run the CLI
+
+```sh
+npx sonic-weave
+```
+
+To exit, type `.exit` or press Ctrl-C twice.
+
+
 ## Special thanks
 * Arsenii A. - Co-developer / Language feedback
 * Inthar - Co-developer / Language feedback
