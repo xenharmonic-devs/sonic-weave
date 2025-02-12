@@ -51,7 +51,7 @@ Scale title, colors and labels.
 * [Xenharmonic Wiki](https://en.xen.wiki/)
 
 ## Special thanks
-* Arseniiv A. - Co-developer / Language feedback
+* Arsenii A. - Co-developer / Language feedback
 * Inthar - Co-developer / Language feedback
 * Akselai - Quality assurance
 * Godtone - Notation adviser / Language feedback
