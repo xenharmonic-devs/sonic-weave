@@ -977,4 +977,23 @@ riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false,
   if (tolerance <> niente)
     coalesce(tolerance, action, preserveBoundary);
 }
+
+riff isoharmonic(parts, interval=2) {
+  "Generate an isoharmonic chord of \`parts\` steps that divide an \`interval\` equally in linear domain. Usable as a scale."
+  if (not isInt(parts) or parts <= 0) {
+    throw "Number of parts should be a positive integer."
+  }
+  if (not isInterval(interval) or not isRelative(interval)) {
+    throw "Interval should be a relative interval."
+  }
+  return [1 +~ (interval ~- 1) ~* (k / parts) for k of [1..parts]]
+  (* Equivalent code which effectively rescales an octave isoharmonic chord: *)
+  (* return 1 +~ (interval ~- 1) ~* ((parts::2*parts) - 1) *)
+}
+
+riff isorescale(equave, scale=££) {
+  "Obtain a copy of the popped/given scale rescaled linearly to have another the given \`equave\`. Preserves isoharmonic relations."
+  const stretch = (equave -~ 1) / (scale[-1] -~ 1)
+  return 1 +~ stretch *~ (scale ~- 1)
+}
 `;

@@ -1750,4 +1750,24 @@ describe('SonicWeave standard library', () => {
       '41\\41',
     ]);
   });
+
+  it('generates an isoharmonic chord spanning a linear interval', () => {
+    const scale = expand('isoharmonic(6,5/3)');
+    expect(scale).toEqual(['10/9', '11/9', '4/3', '13/9', '14/9', '5/3']);
+  });
+
+  it('generates an isoharmonic chord spanning a logarithmic interval', () => {
+    const scale = expand('isoharmonic(4,M2^5)');
+    expect(scale).toEqual(['P1^37', 'm2^19', 'm2^13', 'M2^5']);
+  });
+
+  it('conserves isoharmonicity when linearly rescaling', () => {
+    const scale = expand('5:6:7:9:11:13;isorescale(17)');
+    expect(scale).toEqual(['3/1', '5/1', '9/1', '13/1', '17/1']);
+  });
+
+  it('conserves flavor when linearly rescaling', () => {
+    const scale = expand('9/8;m3_5;500c;P5;isorescale(5/2)');
+    expect(scale).toEqual(['11/8', 'm6_5', '1203.907796530604r¢', 'M10^5']);
+  });
 });
