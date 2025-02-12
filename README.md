@@ -73,7 +73,7 @@ To exit, type `.exit` or press Ctrl-C twice.
 
 
 ## Special thanks
-* Arsenii A. - Co-developer / Language feedback
+* Arsenii 0.5° - Co-developer / Language feedback
 * Inthar - Co-developer / Language feedback
 * Akselai - Quality assurance
 * Godtone - Notation adviser / Language feedback
