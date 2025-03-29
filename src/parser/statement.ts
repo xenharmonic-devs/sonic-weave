@@ -224,7 +224,7 @@ export class StatementVisitor {
       base += '\n';
     }
     const variableLines: string[] = [];
-    const r = repr.bind(this.createExpressionVisitor());
+    const r = repr.bind(this.rootContext);
     for (const key of this.mutables.keys()) {
       if (key === '$' || key === '$$') {
         continue;
@@ -888,7 +888,7 @@ export class StatementVisitor {
   }
 
   protected freezeScale() {
-    const a = absolute.bind(this.createExpressionVisitor());
+    const a = absolute.bind(this.rootContext);
     const scale = this.currentScale;
     const frozen = scale.map(i => a(i));
     scale.length = 0;
@@ -1029,7 +1029,7 @@ export class StatementVisitor {
       scale.push(value);
     } else if (value instanceof Val) {
       this.spendGas(scale.length * value.value.numberOfComponents);
-      const mapped = temper.bind(subVisitor)(value, scale) as Interval[];
+      const mapped = temper.bind(this.rootContext)(value, scale) as Interval[];
       scale.length = 0;
       scale.push(...mapped);
     } else if (Array.isArray(value)) {

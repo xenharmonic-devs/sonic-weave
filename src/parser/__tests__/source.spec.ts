@@ -633,7 +633,7 @@ describe('SonicWeave parser', () => {
     for (const statement of userAst.body) {
       visitor.visit(statement);
     }
-    const r = relative.bind(visitor);
+    const r = relative.bind(visitor.rootContext);
     (visitor.get('$') as Interval[]).sort((a, b) => r(a).compare(r(b)));
     expect(visitor.expand(defaults)).toBe(
       [

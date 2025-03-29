@@ -30,7 +30,7 @@ import {
   CoIntervalLiteral,
   WartBasisElement,
 } from './expression';
-import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
+import {TimeMonzo, TimeReal, getNumberOfComponents, reviveMonzo} from './monzo';
 import {asAbsoluteFJS, asFJS} from './fjs';
 import {type RootContext} from './context';
 import {
@@ -301,14 +301,8 @@ export class Interval {
       value !== null &&
       value.type === 'Interval'
     ) {
-      let monzo: TimeMonzo | TimeReal;
-      if (value.v.type === 'TimeMonzo') {
-        monzo = TimeMonzo.reviver('value', value.v);
-      } else {
-        monzo = TimeReal.reviver('value', value.v);
-      }
       const result = new Interval(
-        monzo,
+        reviveMonzo(value.v),
         value.d ? 'logarithmic' : 'linear',
         value.s,
         intervalLiteralFromJSON(value.n)

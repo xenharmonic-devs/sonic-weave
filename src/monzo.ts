@@ -3018,3 +3018,19 @@ export class TimeMonzo {
     return literalToString(this.asValLiteral());
   }
 }
+
+/**
+ * Revive a serialized object produced by {@link TimeReal.toJSON} or {@link TimeMonzo.toJSON}.
+ * @param data Serialized JSON object.
+ * @returns Deserialized {@link TimeReal} or {@link TimeMonzo}.
+ */
+export function reviveMonzo(
+  data: ReturnType<TimeReal['toJSON']> | ReturnType<TimeMonzo['toJSON']>
+): TimeReal | TimeMonzo {
+  if (data.type === 'TimeReal') {
+    return TimeReal.reviver('value', data);
+  } else if (data.type === 'TimeMonzo') {
+    return TimeMonzo.reviver('value', data);
+  }
+  throw new Error(`Unrecognized monzo type '${data.type}'`);
+}

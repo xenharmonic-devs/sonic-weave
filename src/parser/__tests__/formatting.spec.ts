@@ -22,7 +22,7 @@ function evaluate(source: string) {
   }
   const subVisitor = visitor.createExpressionVisitor();
   const result = subVisitor.visit(finalStatement.expression);
-  return repr.bind(subVisitor)(result);
+  return repr.bind(subVisitor.rootContext)(result);
 }
 
 describe('SonicWeave formatting semantics', () => {

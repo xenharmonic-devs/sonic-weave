@@ -2,7 +2,7 @@ import {SonicWeaveValue} from './stdlib';
 import {Interval} from './interval';
 import {TimeMonzo} from './monzo';
 import {ZERO} from './utils';
-import {MosConfig} from './diamond-mos';
+import {MosConfig, mosConfigToJSON, reviveMosConfig} from './diamond-mos';
 
 /**
  * Root context of a SonicWeave runtime containing the scale title, root pitch, value of the 'up' inflection etc.
@@ -51,6 +51,63 @@ export class RootContext {
     this.fragiles = [];
     this.trackingIndex = 0;
     this.templateArguments = [];
+  }
+
+  /**
+   * Serialize the context to a JSON compatible object.
+   *
+   * WARNING: Template arguments or "fragile" dependencies are not serialized.
+   * A revived context is mainly intended to make `stdlib.public` functions work without full source code re-evaluation.
+   *
+   * @returns The serialized object with property `type` set to `'RootContext'`.
+   */
+  toJSON() {
+    return {
+      type: 'RootContext',
+      title: this.title,
+      unisonFrequency: this.unisonFrequency
+        ? this.unisonFrequency.toJSON()
+        : null,
+      C4: this.C4.toJSON(),
+      up: this.up.toJSON(),
+      lift: this.lift.toJSON(),
+      gas: this.gas,
+      trackingIndex: this.trackingIndex,
+      mosConfig: mosConfigToJSON(this.mosConfig),
+    };
+  }
+
+  /**
+   * Revive a {@link RootContext} instance produced by `RootContext.toJSON()`. Return everything else as is.
+   *
+   * Intended usage:
+   * ```ts
+   * const data = JSON.parse(serializedData, RootContext.reviver);
+   * ```
+   *
+   * @param key Property name.
+   * @param value Property value.
+   * @returns Deserialized {@link RootContext} instance or other data without modifications.
+   */
+  static reviver(key: string, value: any) {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      value.type === 'RootContext'
+    ) {
+      const result = new RootContext(value.gas);
+      result.title = value.title;
+      result.unisonFrequency =
+        TimeMonzo.reviver('unisonFrequency', value.unisonFrequency) ??
+        undefined;
+      result.C4 = TimeMonzo.reviver('C4', value.C4);
+      result.up = Interval.reviver('up', value.up);
+      result.lift = Interval.reviver('lift', value.lift);
+      result.trackingIndex = value.trackingIndex;
+      result.mosConfig = reviveMosConfig(value.mosConfig);
+      return result;
+    }
+    return value;
   }
 
   /**
