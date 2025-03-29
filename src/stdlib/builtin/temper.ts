@@ -328,7 +328,7 @@ function PrimeMapping(
   this: ExpressionVisitor,
   ...newPrimes: (Interval | undefined)[]
 ) {
-  const rel = pubRelative.bind(this);
+  const rel = pubRelative.bind(this.rootContext);
   const np = newPrimes.map((p, i) =>
     p ? rel(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
   );
@@ -342,7 +342,7 @@ function PrimeMapping(
       return unaryBroadcast.bind(this)(interval, m);
     }
     interval = upcastBool(interval);
-    const monzo = pubRelative.bind(this)(interval).value;
+    const monzo = pubRelative.bind(this.rootContext)(interval).value;
     if (monzo instanceof TimeReal) {
       return new Interval(
         monzo,
@@ -368,7 +368,7 @@ function PrimeMapping(
     }
     return new Interval(mapped, 'logarithmic', 0, node, interval);
   }
-  const r = repr.bind(this);
+  const r = repr.bind(this.rootContext);
   Object.defineProperty(mapper, 'name', {
     value: `PrimeMapping(${newPrimes.map(r).join(', ')})`,
     enumerable: false,

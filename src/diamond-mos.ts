@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {mmod} from 'xen-dev-utils';
-import {TimeMonzo, TimeReal} from './monzo';
+import {reviveMonzo, TimeMonzo, TimeReal} from './monzo';
 import {
   ACCIDENTAL_VECTORS,
   Accidental,
@@ -71,6 +71,82 @@ export type MosConfig = {
    */
   small: TimeMonzo | TimeReal;
 };
+
+function mosDegreeToJSON(mosDegree: MosDegree) {
+  return {
+    type: 'MosDegree',
+    center: mosDegree.center.toJSON(),
+    imperfect: mosDegree.imperfect,
+    mid: mosDegree.mid ? mosDegree.mid.toJSON() : null,
+  };
+}
+
+function reviveMosDegree(data: ReturnType<typeof mosDegreeToJSON>): MosDegree {
+  return {
+    center: reviveMonzo(data.center),
+    imperfect: data.imperfect,
+    mid: data.mid ? reviveMonzo(data.mid) : undefined,
+  };
+}
+
+/**
+ * Serialize a {@link MosConfig} to a JSON compatible object.
+ * @param config MOS configuration to serialize.
+ * @returns The serialized object.
+ */
+export function mosConfigToJSON(config?: MosConfig) {
+  if (!config) {
+    return null;
+  }
+  const scale: Record<
+    string,
+    ReturnType<TimeMonzo['toJSON']> | ReturnType<TimeReal['toJSON']>
+  > = {};
+  for (const [key, monzo] of config.scale) {
+    scale[key] = monzo.toJSON();
+  }
+
+  return {
+    type: 'MosConfig',
+    equave: config.equave.toJSON(),
+    period: config.period.toJSON(),
+    am: config.am.toJSON(),
+    semiam: config.semiam.toJSON(),
+    scale,
+    degrees: config.degrees.map(mosDegreeToJSON),
+    pattern: config.pattern,
+    large: config.large.toJSON(),
+    small: config.small.toJSON(),
+  };
+}
+
+/**
+ * Revive a serialized object produced by {@link mosConfigToJSON}.
+ * @param data Serialized JSON object.
+ * @returns Deserialized {@link MosConfig}.
+ */
+export function reviveMosConfig(
+  data: ReturnType<typeof mosConfigToJSON>
+): MosConfig | undefined {
+  if (!data) {
+    return undefined;
+  }
+  const scale = new Map<string, TimeReal | TimeMonzo>();
+  for (const [key, value] of Object.entries(data.scale)) {
+    scale.set(key, reviveMonzo(value));
+  }
+  return {
+    equave: reviveMonzo(data.equave),
+    period: reviveMonzo(data.period),
+    am: reviveMonzo(data.am),
+    semiam: reviveMonzo(data.semiam),
+    scale,
+    degrees: data.degrees.map(reviveMosDegree),
+    pattern: data.pattern,
+    large: reviveMonzo(data.large),
+    small: reviveMonzo(data.small),
+  };
+}
 
 /**
  * Generic 0-indexed mosstep.

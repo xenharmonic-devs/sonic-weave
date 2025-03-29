@@ -29,7 +29,7 @@ export function toScalaScl(source: string) {
   const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);
   lines.push('!');
-  const rel = relative.bind(visitor as unknown as ExpressionVisitor);
+  const rel = relative.bind(visitor.rootContext);
   for (const interval of scale) {
     if (interval.color) {
       keyColors.push(interval.color.value);
@@ -180,7 +180,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   start({
     prompt,
     eval: evaluateStatement,
-    writer: repr.bind(visitor.createExpressionVisitor()),
+    writer: repr.bind(visitor.rootContext),
     terminal: true,
     completer: () => [],
   });

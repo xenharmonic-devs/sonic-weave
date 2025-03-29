@@ -667,7 +667,7 @@ export class ExpressionVisitor {
 
   protected visitRangeRelation(node: RangeRelation) {
     const tbc = ternaryBroadcast.bind(this);
-    const c = compare.bind(this);
+    const c = compare.bind(this.rootContext);
     const lop = node.leftOperator;
     const rop = node.rightOperator;
     function rr(
@@ -1376,11 +1376,15 @@ export class ExpressionVisitor {
               break;
             case 'max':
               value =
-                compare.bind(this)(left, right) >= 0 ? left.value : right.value;
+                compare.bind(this.rootContext)(left, right) >= 0
+                  ? left.value
+                  : right.value;
               break;
             case 'min':
               value =
-                compare.bind(this)(left, right) <= 0 ? left.value : right.value;
+                compare.bind(this.rootContext)(left, right) <= 0
+                  ? left.value
+                  : right.value;
               break;
             case 'to':
               value = left.value.roundTo(right.value);
@@ -1513,13 +1517,13 @@ export class ExpressionVisitor {
           case '~<>':
             return !left.equals(right);
           case '<=':
-            return compare.bind(this)(left, right) <= 0;
+            return compare.bind(this.rootContext)(left, right) <= 0;
           case '>=':
-            return compare.bind(this)(left, right) >= 0;
+            return compare.bind(this.rootContext)(left, right) >= 0;
           case '<':
-            return compare.bind(this)(left, right) < 0;
+            return compare.bind(this.rootContext)(left, right) < 0;
           case '>':
-            return compare.bind(this)(left, right) > 0;
+            return compare.bind(this.rootContext)(left, right) > 0;
           case '+':
             return left.add(right);
           case '-':
@@ -1553,9 +1557,13 @@ export class ExpressionVisitor {
           case 'rdc':
             return left.reduce(right, true);
           case 'max':
-            return compare.bind(this)(left, right) >= 0 ? left : right;
+            return compare.bind(this.rootContext)(left, right) >= 0
+              ? left
+              : right;
           case 'min':
-            return compare.bind(this)(left, right) <= 0 ? left : right;
+            return compare.bind(this.rootContext)(left, right) <= 0
+              ? left
+              : right;
           case 'to':
             return left.roundTo(right);
           case 'by':
@@ -1618,13 +1626,15 @@ export class ExpressionVisitor {
             }
           case 'tmpr':
             if (node.preferLeft) {
-              const value = (temper.bind(this)(right, left) as Interval).value;
+              const value = (
+                temper.bind(this.rootContext)(right, left) as Interval
+              ).value;
               const node = intervalValueAs(value, left.node);
               return new Interval(value, left.domain, 0, node, left);
             } else if (node.preferRight) {
               throw new Error('Cannot prefer the val operand when tempering.');
             }
-            return temper.bind(this)(right, left);
+            return temper.bind(this.rootContext)(right, left);
         }
         throw new Error(
           `Operator '${operator}' not implemented between intervals and vals.`
@@ -1712,13 +1722,15 @@ export class ExpressionVisitor {
             return left.dot(right);
           case 'tmpr':
             if (node.preferRight) {
-              const value = (temper.bind(this)(left, right) as Interval).value;
+              const value = (
+                temper.bind(this.rootContext)(left, right) as Interval
+              ).value;
               const node = intervalValueAs(value, right.node);
               return new Interval(value, right.domain, 0, node, right);
             } else if (node.preferLeft) {
               throw new Error('Cannot prefer the val operand when tempering.');
             }
-            return temper.bind(this)(left, right);
+            return temper.bind(this.rootContext)(left, right);
         }
         throw new Error(
           `Operator '${operator}' not implemented between vals and intervals.`

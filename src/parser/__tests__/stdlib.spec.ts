@@ -1093,7 +1093,7 @@ describe('SonicWeave standard library', () => {
       view.length = 0;
       const scale = this.currentScale;
       for (let i = 0; i < scale.length; ++i) {
-        scale[i] = track.bind(this)(scale[i]);
+        scale[i] = track.bind(this.rootContext)(scale[i]);
       }
       for (const interval of scale) {
         view.push(interval.value.toIntegerMonzo(true));

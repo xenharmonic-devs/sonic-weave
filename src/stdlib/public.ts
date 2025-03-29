@@ -1,5 +1,5 @@
 /**
- * Exported builtins without vectorization complications.
+ * Exported builtins without complications related to expression visitors or vectorization.
  */
 import {Fraction, wilsonHeight as xduWilson} from 'xen-dev-utils';
 import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
@@ -7,16 +7,17 @@ import {type ExpressionVisitor} from '../parser/expression';
 import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils';
 import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
 import {TimeMonzo, TimeReal} from '../monzo';
+import {type RootContext} from '../context';
 
 /**
  * Compare two primitive values.
- * @param this {@link ExpressionVisitor} providing context for comparing across echelons.
+ * @param this {@link RootContext} for comparing across echelons.
  * @param a Left value.
  * @param b Right value.
  * @returns A negative number if a is less than b, a positive number if a is greater than b, zero if equal.
  */
 export function compare(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   a: SonicWeavePrimitive,
   b: SonicWeavePrimitive
 ): number {
@@ -133,12 +134,12 @@ export function logarithmic(this: any, interval: Interval | boolean): Interval {
 
 /**
  * Convert interval to absolute representation. Normalized to a frequency.
- * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param this {@link RootContext} for unison frequency.
  * @param interval Interval to convert.
  * @returns The interval as a frequency in its respective domain.
  */
 export function absolute(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   interval: Interval | boolean
 ): Interval {
   interval = upcastBool(interval);
@@ -155,13 +156,13 @@ export function absolute(
       interval
     );
   }
-  if (this.rootContext?.unisonFrequency === undefined) {
+  if (this?.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz.'
     );
   }
   return new Interval(
-    interval.value.mul(this.rootContext.unisonFrequency),
+    interval.value.mul(this.unisonFrequency),
     interval.domain,
     interval.steps,
     undefined,
@@ -171,26 +172,26 @@ export function absolute(
 
 /**
  * Convert interval to relative representation. Normalized to a frequency ratio.
- * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param this {@link RootContext} for unison frequency.
  * @param interval Interval to convert.
  * @returns The interval as a frequency ratio in its respective domain.
  */
 export function relative(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   interval: Interval | boolean
 ): Interval {
   interval = upcastBool(interval);
   if (interval.isRelative()) {
     return interval.shallowClone();
   }
-  if (this.rootContext?.unisonFrequency === undefined) {
+  if (this?.unisonFrequency === undefined) {
     throw new Error(
       'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz.'
     );
   }
   const absolute_ = absolute.bind(this)(interval);
   return new Interval(
-    absolute_.value.div(this.rootContext.unisonFrequency),
+    absolute_.value.div(this.unisonFrequency),
     interval.domain,
     interval.steps,
     undefined,
@@ -200,28 +201,30 @@ export function relative(
 
 /**
  * Calculate the Tenney height of the interval. Natural logarithm of numerator times denominator.
- * @param this {@link ExpressionVisitor} instance providing context for the height of absolute intervals.
+ * @param this {@link RootContext} for the height of absolute intervals.
  * @param interval Interval to measure.
  * @returns Relative linear interval representing the Tenney height.
  */
 export function tenneyHeight(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   interval: Interval | boolean
 ): Interval {
   return new Interval(
-    TimeReal.fromValue(upcastBool(interval).value.tenneyHeight()),
+    TimeReal.fromValue(
+      relative.bind(this)(upcastBool(interval)).value.tenneyHeight()
+    ),
     'linear'
   );
 }
 
 /**
  * Calculate the Wilson height of the interval. Sum of prime absolute factors with repetition.
- * @param this {@link ExpressionVisitor} instance providing context for the height of absolute intervals.
+ * @param this {@link RootContext} for the height of absolute intervals.
  * @param interval Interval to measure.
  * @returns Relative linear interval representing the Wilson height.
  */
 export function wilsonHeight(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   interval: Interval | boolean
 ): Interval {
   const monzo = relative.bind(this)(upcastBool(interval)).value;
@@ -243,16 +246,16 @@ export function wilsonHeight(
 
 /**
  * Attach a tracking ID to the interval.
- * @param this {@link ExpressionVisitor} instance providing context for the next tracking ID.
+ * @param this {@link RootContext} for the next tracking ID.
  * @param interval Interval to track.
  * @returns A copy of the interval that can be tracked e.g. for changes in scale order.
  */
-export function track(this: ExpressionVisitor, interval: Interval) {
-  if (!this.rootContext) {
+export function track(this: RootContext | undefined, interval: Interval) {
+  if (!this) {
     throw new Error('Root context required for tracking.');
   }
   const result = interval.shallowClone();
-  result.trackingIds.add(this.rootContext.nextTrackingId());
+  result.trackingIds.add(this.nextTrackingId());
   return result;
 }
 
@@ -272,7 +275,7 @@ export function sortInPlace(
     throw new Error('Only arrays can be sorted.');
   }
   if (compareFn === undefined) {
-    scale.sort(compare.bind(this));
+    scale.sort(compare.bind(this.rootContext));
   } else {
     scale.sort((a, b) =>
       (compareFn.bind(this)(a, b) as Interval).value.valueOf()
@@ -281,7 +284,7 @@ export function sortInPlace(
 }
 
 function repr_(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   value: SonicWeaveValue | null,
   depth = 2
 ): string {
@@ -292,7 +295,7 @@ function repr_(
     return 'niente';
   }
   if (value instanceof Interval) {
-    return value.toString(this.rootContext);
+    return value.toString(this);
   }
   if (Array.isArray(value)) {
     if (depth < 0) {
@@ -330,41 +333,41 @@ function repr_(
 
 /**
  * Obtain a string representation of the value (with color and label).
- * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
  * @returns String that evaluates to the value.
  */
-export function repr(this: ExpressionVisitor, value: SonicWeaveValue) {
+export function repr(this: RootContext | undefined, value: SonicWeaveValue) {
   return repr_.bind(this)(value);
 }
 
 /**
  * Obtain a string representation of the value (w/o color or label).
- * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
  * @returns String that evaluates to the value.
  */
-export function str(this: ExpressionVisitor, value: SonicWeaveValue) {
+export function str(this: RootContext | undefined, value: SonicWeaveValue) {
   if (value instanceof Interval) {
-    return value.str(this.rootContext);
+    return value.str(this);
   }
   return repr_.bind(this)(value);
 }
 
 /**
  * Obtain a "best effort" string representation of the value that's below the maximum length (w/o color or label).
- * @param this {@link ExpressionVisitor} instance providing context for ups-and-downs etc.
+ * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
  * @param maxLength Maximum length of the result.
  * @returns Short string representation that's below the maximum length if possible.
  */
 export function lstr(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   value: SonicWeaveValue,
   maxLength: number
 ) {
   if (value instanceof Interval) {
-    let result = value.str(this.rootContext);
+    let result = value.str(this);
     if (result.length <= maxLength) {
       return result;
     }
@@ -474,11 +477,11 @@ export function lstr(
 
 /**
  * Color based on the size of the interval. Hue wraps around every 1200 cents.
- * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param this {@link RootContext} for unison frequency.
  * @param interval Interval to measure.
  * @returns Color corresponding to the size of the interval.
  */
-export function centsColor(this: ExpressionVisitor, interval: Interval) {
+export function centsColor(this: RootContext | undefined, interval: Interval) {
   const octaves = relative.bind(this)(interval).totalCents() / 1200;
   const h = octaves * 360;
   const s = Math.tanh(1 - octaves * 0.5) * 50 + 50;
@@ -529,7 +532,7 @@ function tanh255(x: number) {
  * @param interval Interval to factor.
  * @returns RBG color combination that reflects the factors of the interval.
  */
-export function factorColor(this: ExpressionVisitor, interval: Interval) {
+export function factorColor(this: RootContext | undefined, interval: Interval) {
   interval = relative.bind(this)(interval);
   let r = 0;
   let g = 0;
@@ -549,13 +552,13 @@ export function factorColor(this: ExpressionVisitor, interval: Interval) {
 
 /**
  * Temper an interval using a val i.e. map exponents of prime factors to steps on an equal temperament.
- * @param this {@link ExpressionVisitor} instance providing the context for unison frequency.
+ * @param this {@link RootContext} for unison frequency.
  * @param interval Interval to map to equal steps.
  * @param val Val to map by.
  * @returns The interval tempered to equal steps of the val's equave.
  */
 export function temper(
-  this: ExpressionVisitor,
+  this: RootContext | undefined,
   val: Val,
   interval: Interval | Interval[]
 ): typeof interval {
