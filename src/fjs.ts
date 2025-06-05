@@ -379,7 +379,7 @@ export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
       }
     }
   } catch (e) {
-    /* empty */
+    return undefined;
   }
   const pythagoreanMonzo = monzo.div(getInflection(superscripts, subscripts));
   if (pythagoreanMonzo instanceof TimeReal) {

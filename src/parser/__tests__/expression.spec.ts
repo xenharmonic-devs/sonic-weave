@@ -2717,4 +2717,16 @@ describe('SonicWeave expression evaluator', () => {
     const interval = evaluateExpression('cents(3/2, 13)');
     expect(interval!.toString()).toBe('701.9550008653874r¢');
   });
+
+  // The prime limit is too high for this to succeed.
+  it.fails('converts 10657/8748 to FJS', () => {
+    const interval = evaluateExpression('FJS(10657/8748)');
+    console.log(interval!.toString());
+  });
+
+  // This one runs out of primes.
+  it.fails('represents a-92^10657', () => {
+    const interval = evaluateExpression('a-92^10657');
+    console.log(interval!.toString());
+  });
 });
