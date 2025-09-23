@@ -605,6 +605,12 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 ### hypot(*...args*)
 Calculate the square root of the sum of squares of the arguments.
 
+### isodifferential(*parts*, *interval = 2*)
+Generate an isodifferential chord of `parts` steps that divide an `interval` equally in linear domain. Usable as a scale.
+
+### isorescale(*equave*, *scale = ££*)
+Obtain a copy of the popped/given scale rescaled linearly to have another `equave`. Preserves isodifferential relations.
+
 ### keys(*record*)
 Obtain an array of keys of the record.
 

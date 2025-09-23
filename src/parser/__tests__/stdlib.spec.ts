@@ -1751,17 +1751,17 @@ describe('SonicWeave standard library', () => {
     ]);
   });
 
-  it('generates an isoharmonic chord spanning a linear interval', () => {
-    const scale = expand('isoharmonic(6,5/3)');
+  it('generates an isodifferential chord spanning a linear interval', () => {
+    const scale = expand('isodifferential(6,5/3)');
     expect(scale).toEqual(['10/9', '11/9', '4/3', '13/9', '14/9', '5/3']);
   });
 
-  it('generates an isoharmonic chord spanning a logarithmic interval', () => {
-    const scale = expand('isoharmonic(4,M2^5)');
+  it('generates an isodifferential chord spanning a logarithmic interval', () => {
+    const scale = expand('isodifferential(4,M2^5)');
     expect(scale).toEqual(['P1^37', 'm2^19', 'm2^13', 'M2^5']);
   });
 
-  it('conserves isoharmonicity when linearly rescaling', () => {
+  it('conserves isodifferentiality when linearly rescaling', () => {
     const scale = expand('5:6:7:9:11:13;isorescale(17)');
     expect(scale).toEqual(['3/1', '5/1', '9/1', '13/1', '17/1']);
   });
