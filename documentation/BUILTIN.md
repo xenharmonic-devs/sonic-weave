@@ -611,6 +611,9 @@ Generate an isodifferential chord of `parts` steps that divide an `interval` equ
 ### isorescale(*equave*, *scale = ££*)
 Obtain a copy of the popped/given scale rescaled linearly to have another `equave`. Preserves isodifferential relations.
 
+### isostretch(*amount*, *scale = ££*)
+Obtain a copy of the popped/given scale stretched linearly by `amount`. Preserves isodifferential relations.
+
 ### keys(*record*)
 Obtain an array of keys of the record.
 
