@@ -1750,4 +1750,87 @@ describe('SonicWeave standard library', () => {
       '41\\41',
     ]);
   });
+
+  it('generates an isodifferential chord spanning a linear interval', () => {
+    const scale = expand('isodifferential(6,5/3)');
+    expect(scale).toEqual(['10/9', '11/9', '4/3', '13/9', '14/9', '5/3']);
+  });
+
+  it('generates an isodifferential chord spanning a logarithmic interval', () => {
+    const scale = expand('isodifferential(4,M2^5)');
+    expect(scale).toEqual(['P1^37', 'm2^19', 'm2^13', 'M2^5']);
+  });
+
+  it('generates an isodifferential chord of a single interval', () => {
+    const scale = expand('isodifferential(1,M7)');
+    expect(scale).toEqual(['M7']);
+  });
+
+  it('throws an error if you call isodifferential with non-integer parts', () => {
+    expect(() => parseSource('isodifferential(P5,7/5)')).toThrow(
+      'Number of parts should be a positive integer.'
+    );
+  });
+
+  it('throws an error if you call isodifferential with nonpositive parts', () => {
+    expect(() => parseSource('isodifferential(-1,7/5)')).toThrow(
+      'Number of parts should be a positive integer.'
+    );
+  });
+
+  it('throws an error if you call isodifferential with a non-interval', () => {
+    expect(() => parseSource('isodifferential(7,"impostor")')).toThrow(
+      'Interval should be a relative interval.'
+    );
+  });
+
+  it('throws an error if you call isodifferential with an absolute interval', () => {
+    expect(() => parseSource('isodifferential(4,432 Hz)')).toThrow(
+      'Interval should be a relative interval.'
+    );
+  });
+
+  it('conserves isodifferentiality when linearly stretching', () => {
+    const scale = expand('3:4:7:8:10;isostretch(3/2)');
+    expect(scale).toEqual(['3/2', '3/1', '7/2', '9/2']);
+  });
+
+  it('conserves flavor when linearly stretching', () => {
+    const scale = expand('9/8;m3_5;500c;P5;isostretch(3)');
+    expect(scale).toEqual(['11/8', 'm6_5', '1203.907796530604r¢', 'M10^5']);
+  });
+
+  it('throws an error if you call isostretch with a non-interval as amount', () => {
+    expect(() => parseSource('isostretch("impostor",[])')).toThrow(
+      'Stretch amount should be a relative interval.'
+    );
+  });
+
+  it('throws an error if you call isostretch with an absolute interval as amount', () => {
+    expect(() => parseSource('isostretch(432 Hz,[])')).toThrow(
+      'Stretch amount should be a relative interval.'
+    );
+  });
+
+  it('conserves isodifferentiality when linearly rescaling', () => {
+    const scale = expand('5:6:7:9:11:13;isorescale(17)');
+    expect(scale).toEqual(['3/1', '5/1', '9/1', '13/1', '17/1']);
+  });
+
+  it('conserves flavor when linearly rescaling', () => {
+    const scale = expand('9/8;m3_5;500c;P5;isorescale(5/2)');
+    expect(scale).toEqual(['11/8', 'm6_5', '1203.907796530604r¢', 'M10^5']);
+  });
+
+  it('throws an error if you call isorescale with a non-interval as equave', () => {
+    expect(() => parseSource('isorescale("impostor",[2])')).toThrow(
+      'Equave should be a relative interval.'
+    );
+  });
+
+  it('throws an error if you call isorescale with an absolute interval as equave', () => {
+    expect(() => parseSource('isorescale(432 Hz,[2])')).toThrow(
+      'Equave should be a relative interval.'
+    );
+  });
 });

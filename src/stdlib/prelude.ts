@@ -977,4 +977,32 @@ riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false,
   if (tolerance <> niente)
     coalesce(tolerance, action, preserveBoundary);
 }
+
+riff isostretch(amount, scale=££) {
+  "Obtain a copy of the popped/given scale stretched linearly by \`amount\`. Preserves isodifferential relations."
+  if (not isInterval(amount) or not isRelative(amount)) {
+    throw "Stretch amount should be a relative interval."
+  }
+  return 1 +~ amount *~ (scale ~- 1)
+}
+
+riff isorescale(equave, scale=££) {
+  "Obtain a copy of the popped/given scale rescaled linearly to have another \`equave\`. Preserves isodifferential relations."
+  if (not isInterval(equave) or not isRelative(equave)) {
+    throw "Equave should be a relative interval."
+  }
+  const stretch = (equave -~ 1) / (scale[-1] -~ 1)
+  return isostretch(stretch, scale)
+}
+
+riff isodifferential(parts, interval=2) {
+  "Generate an isodifferential chord of \`parts\` steps that divide an \`interval\` equally in linear domain. Usable as a scale."
+  if (not isInt(parts) or parts <= 0) {
+    throw "Number of parts should be a positive integer."
+  }
+  if (not isInterval(interval) or not isRelative(interval)) {
+    throw "Interval should be a relative interval."
+  }
+  return isorescale(interval, parts::2*parts) al~ interval
+}
 `;
