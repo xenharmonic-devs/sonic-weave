@@ -6,7 +6,6 @@ function evaluate(source: string) {
   return evaluateExpression(source, false);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseSource(source: string) {
   const visitor = evaluateSource(source);
   return visitor.get('$') as Interval[];
@@ -18,7 +17,6 @@ function parseSingle(source: string) {
   return value as Interval;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function expand(source: string) {
   const visitor = evaluateSource(source);
   return visitor.expand(visitor.rootContext!).split('\n');
@@ -44,7 +42,7 @@ describe('Features related to tempering', () => {
       str(result);
     `) as string;
     expect(seq.replace(/@2.3.5/g, '')).toBe(
-      '[1, 1c, 2bbccc, 2ccc, 2c, 2, 2b, 3bccc, 3bc, 3c, 3, 3cc, 4bbcc, 4cc, 4, 4c, 4bc, 5bccc, 5bc, 5c, 5, 5cc, 6bbbc, 6bc, 6b, 6, 6cc, 7bbcc, 7cc, 7, 7c, 7bc, 8bccc, 8bc, 8c, 8, 8cc, 9bbc, 9c, 9, 9b, 9bcc, 10bcc, 10cc, 10, 10c, 10ccc, 11bbc, 11c, 11, 11b, 11bcc, 12bbc, 12c, 12, 12cc, 12bcc, 13bcc, 13b, 13, 13c, 13ccc, 14bbc, 14c, 14, 14b, 14bcc, 15bc, 15c, 15, 15cc, 15bbcc, 16cc, 16, 16b, 16bc, 17bcc, 17b, 17, 17c, 17ccc, 17bbccc, 18bc, 18b, 18, 18cc, 19bbcc, 19cc, 19, 19c, 19bc, 20bcc, 20b, 20, 20c, 20ccc, 21bbc, 21c, 21, 21b, 21bcc, 22bcc, 22cc, 22, 22c, 22bbc, 23cc, 23, 23c, 23bc, 23bccc, 24bbc]'
+      '[1, 1c, 2bbccc, 2ccc, 2c, 2, 2b, 3bccc, 3bc, 3c, 3, 3cc, 4bbcc, 4cc, 4, 4c, 4bc, 5bccc, 5bc, 5c, 5, 5cc, 6bbbc, 6bc, 6b, 6, 6cc, 7bbcc, 7cc, 7, 7c, 7bc, 8bccc, 8bc, 8c, 8, 8cc, 9bbc, 9c, 9, 9b, 9bcc, 10bcc, 10cc, 10, 10c, 10ccc, 11bbc, 11c, 11, 11b, 11bcc, 12bbc, 12c, 12, 12cc, 12bcc, 13bcc, 13b, 13, 13c, 13ccc, 14bbc, 14c, 14, 14b, 14bcc, 15bc, 15c, 15, 15cc, 15bbcc, 16cc, 16, 16b, 16bc, 17bcc, 17b, 17, 17c, 17ccc, 17bbccc, 18bc, 18b, 18, 18cc, 19bbcc, 19cc, 19, 19c, 19bc, 20bcc, 20b, 20, 20c, 20ccc, 21bbc, 21c, 21, 21b, 21bcc, 22bcc, 22cc, 22, 22c, 22bbc, 23cc, 23, 23c, 23bc, 23bccc, 24bbc]',
     );
   });
 
@@ -55,7 +53,7 @@ describe('Features related to tempering', () => {
 
   it('can combine two vals to approach the JIP (Wilson metric)', () => {
     const eighty = evaluate(
-      'tune([12@.5, 22@.5], 5, [1 % 2, 3 /_ 2 % 3, 5 /_ 2 % 5])'
+      'tune([12@.5, 22@.5], 5, [1 % 2, 3 /_ 2 % 3, 5 /_ 2 % 5])',
     ) as Val;
     expect(eighty.value.toIntegerMonzo()).toEqual([126, 200, 293]);
   });
@@ -92,7 +90,7 @@ describe('Features related to tempering', () => {
 
   it('support the tempering operator with temperaments (right)', () => {
     const cents = evaluate(
-      'str(cents(Temperament([12@, 19@] @.5) tmpr 3/2, 4))'
+      'str(cents(Temperament([12@, 19@] @.5) tmpr 3/2, 4))',
     );
     expect(cents).toEqual('697.0491');
   });
@@ -228,7 +226,7 @@ describe('Features related to tempering', () => {
 
   it('Unimarvs double duodene', () => {
     const scale = expand(
-      'eulerGenus(675*7, 9);respell([225/224, 385/384], 2);organize()'
+      'eulerGenus(675*7, 9);respell([225/224, 385/384], 2);organize()',
     );
     expect(scale).toEqual([
       '45/44',
@@ -258,19 +256,19 @@ describe('Features related to tempering', () => {
 
   it('discovers GPVs supporting meantone', () => {
     const seq = evaluateExpression(
-      'str(warts(supportingGPVs(5@2.3.5, S9, 12)))'
+      'str(warts(supportingGPVs(5@2.3.5, S9, 12)))',
     );
     expect(seq).toBe(
-      '[5@2.3.5, 7@2.3.5, 8cc@2.3.5, 9c@2.3.5, 10c@2.3.5, 12@2.3.5, 13ccc@2.3.5, 14c@2.3.5, 15cc@2.3.5, 16cc@2.3.5, 17c@2.3.5, 19@2.3.5]'
+      '[5@2.3.5, 7@2.3.5, 8cc@2.3.5, 9c@2.3.5, 10c@2.3.5, 12@2.3.5, 13ccc@2.3.5, 14c@2.3.5, 15cc@2.3.5, 16cc@2.3.5, 17c@2.3.5, 19@2.3.5]',
     );
   });
 
   it('discovers GPVs supporting lemba', () => {
     const seq = evaluateExpression(
-      'str(warts(supportingGPVs(1@2.3.5.7, [50/49, 525/512])))'
+      'str(warts(supportingGPVs(1@2.3.5.7, [50/49, 525/512])))',
     );
     expect(seq).toBe(
-      '[6b@2.3.5.7, 10@2.3.5.7, 16@2.3.5.7, 20@2.3.5.7, 26@2.3.5.7]'
+      '[6b@2.3.5.7, 10@2.3.5.7, 16@2.3.5.7, 20@2.3.5.7, 26@2.3.5.7]',
     );
   });
 
@@ -345,14 +343,14 @@ describe('Features related to tempering', () => {
 
   it('knows miracle is miracle', () => {
     const yup = evaluate(
-      'Temperament([10@.7, 21@.7]) == commaList([S15, S7-S8])'
+      'Temperament([10@.7, 21@.7]) == commaList([S15, S7-S8])',
     );
     expect(yup).toBe(true);
   });
 
   it('knows miracle is not rodan', () => {
     const nah = evaluate(
-      'Temperament([10@.7, 21@.7]) == commaList([245/243, 1029/1024])'
+      'Temperament([10@.7, 21@.7]) == commaList([245/243, 1029/1024])',
     );
     expect(nah).toBe(false);
   });
@@ -398,7 +396,7 @@ describe('Features related to tempering', () => {
 
   it('respells 60/49 to 49/40 using miracle temperament', () => {
     const simple = evaluate(
-      'str(respell(commaList([225/224, 1029/1024]), 2)(60/49))'
+      'str(respell(commaList([225/224, 1029/1024]), 2)(60/49))',
     );
     expect(simple).toBe('49/40');
   });

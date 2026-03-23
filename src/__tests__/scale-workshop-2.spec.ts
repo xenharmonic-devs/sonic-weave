@@ -22,9 +22,9 @@ describe('Line parser', () => {
       result.equals(
         new Interval(
           TimeMonzo.fromFraction(new Fraction(2), DEFAULT_NUMBER_OF_COMPONENTS),
-          'linear'
-        )
-      )
+          'linear',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -34,8 +34,8 @@ describe('Line parser', () => {
         '-1/2',
         DEFAULT_NUMBER_OF_COMPONENTS,
         undefined,
-        false
-      )
+        false,
+      ),
     ).toThrow();
   });
 
@@ -44,18 +44,18 @@ describe('Line parser', () => {
       '3/2',
       DEFAULT_NUMBER_OF_COMPONENTS,
       undefined,
-      false
+      false,
     );
     expect(
       result.equals(
         new Interval(
           TimeMonzo.fromFraction(
             new Fraction(3, 2),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'linear'
-        )
-      )
+          'linear',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -64,7 +64,7 @@ describe('Line parser', () => {
       '-1.23',
       DEFAULT_NUMBER_OF_COMPONENTS,
       undefined,
-      false
+      false,
     );
     expect(result.totalCents()).toBeCloseTo(-1.23);
   });
@@ -81,11 +81,11 @@ describe('Line parser', () => {
           TimeMonzo.fromEqualTemperament(
             new Fraction(-2, 5),
             new Fraction(2),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -97,11 +97,11 @@ describe('Line parser', () => {
           TimeMonzo.fromEqualTemperament(
             new Fraction(2, 5),
             new Fraction(1, 2),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -113,11 +113,11 @@ describe('Line parser', () => {
           TimeMonzo.fromEqualTemperament(
             new Fraction(5, 11),
             new Fraction(7, 3),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -129,11 +129,11 @@ describe('Line parser', () => {
           TimeMonzo.fromEqualTemperament(
             new Fraction(-7, 13),
             new Fraction(5),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -143,9 +143,9 @@ describe('Line parser', () => {
       result.equals(
         new Interval(
           TimeMonzo.fromEqualTemperament(0, 2, DEFAULT_NUMBER_OF_COMPONENTS),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -157,8 +157,8 @@ describe('Line parser', () => {
     }
     expect(
       result.equals(
-        new Interval(new TimeMonzo(new Fraction(0), components), 'logarithmic')
-      )
+        new Interval(new TimeMonzo(new Fraction(0), components), 'logarithmic'),
+      ),
     ).toBeTruthy();
   });
 
@@ -169,11 +169,11 @@ describe('Line parser', () => {
         new Interval(
           TimeMonzo.fromFraction(
             new Fraction(3, 2),
-            DEFAULT_NUMBER_OF_COMPONENTS
+            DEFAULT_NUMBER_OF_COMPONENTS,
           ),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -185,9 +185,9 @@ describe('Line parser', () => {
       result.equals(
         new Interval(
           new TimeMonzo(new Fraction(0), vector, new Fraction(103, 101)),
-          'logarithmic'
-        )
-      )
+          'logarithmic',
+        ),
+      ),
     ).toBeTruthy();
   });
 
@@ -195,7 +195,7 @@ describe('Line parser', () => {
     const ratio = parseScaleWorkshop2Line(
       '3',
       DEFAULT_NUMBER_OF_COMPONENTS,
-      true
+      true,
     );
     expect(ratio.valueOf()).toBe(3);
   });

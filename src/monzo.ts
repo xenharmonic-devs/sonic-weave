@@ -350,7 +350,7 @@ export class TimeReal {
   pitchAbs() {
     if (this.timeExponent) {
       throw new Error(
-        'Geometric absolute value is undefined in the absolute echelon.'
+        'Geometric absolute value is undefined in the absolute echelon.',
       );
     }
     const value = Math.abs(this.value);
@@ -444,7 +444,7 @@ export class TimeReal {
     }
     return new TimeReal(
       other.timeExponent.valueOf() * this.value,
-      other.valueOf() ** this.value
+      other.valueOf() ** this.value,
     );
   }
 
@@ -458,12 +458,12 @@ export class TimeReal {
       if (other instanceof TimeMonzo || other instanceof TimeReal) {
         if (other.timeExponent.valueOf() === 0) {
           throw new Error(
-            'Cannot take a scalar logarithm of a value with time units.'
+            'Cannot take a scalar logarithm of a value with time units.',
           );
         }
       } else {
         throw new Error(
-          'Cannot take a scalar logarithm of a value with time units.'
+          'Cannot take a scalar logarithm of a value with time units.',
         );
       }
       const solution = this.timeExponent / other.timeExponent.valueOf();
@@ -542,7 +542,7 @@ export class TimeReal {
       const o = other.valueOf();
       return new TimeReal(
         this.timeExponent,
-        (this.value * o) / (this.value + o)
+        (this.value * o) / (this.value + o),
       );
     }
     return new TimeReal(this.timeExponent, 0);
@@ -561,7 +561,7 @@ export class TimeReal {
       const o = other.valueOf();
       return new TimeReal(
         this.timeExponent,
-        (this.value * o) / (o - this.value)
+        (this.value * o) / (o - this.value),
       );
     }
     return new TimeReal(this.timeExponent, 0);
@@ -576,7 +576,7 @@ export class TimeReal {
       const o = other.valueOf();
       return new TimeReal(
         this.timeExponent,
-        (this.value * o) / (this.value - o)
+        (this.value * o) / (this.value - o),
       );
     }
     return new TimeReal(this.timeExponent, 0);
@@ -590,7 +590,7 @@ export class TimeReal {
   mul(other: TimeMonzo | TimeReal) {
     return new TimeReal(
       this.timeExponent + other.timeExponent.valueOf(),
-      this.value * other.valueOf()
+      this.value * other.valueOf(),
     );
   }
 
@@ -602,7 +602,7 @@ export class TimeReal {
   div(other: TimeMonzo | TimeReal) {
     return new TimeReal(
       this.timeExponent - other.timeExponent.valueOf(),
-      this.value / other.valueOf()
+      this.value / other.valueOf(),
     );
   }
 
@@ -610,7 +610,7 @@ export class TimeReal {
   ldiv(other: TimeMonzo | TimeReal) {
     return new TimeReal(
       other.timeExponent.valueOf() - this.timeExponent,
-      other.valueOf() / this.value
+      other.valueOf() / this.value,
     );
   }
 
@@ -663,7 +663,7 @@ export class TimeReal {
     if (ceiling) {
       return new TimeReal(
         this.timeExponent,
-        mmod(other.valueOf(), this.value) || this.value
+        mmod(other.valueOf(), this.value) || this.value,
       );
     }
     return new TimeReal(this.timeExponent, mmod(other.valueOf(), this.value));
@@ -688,7 +688,7 @@ export class TimeReal {
     }
     return new TimeReal(
       this.timeExponent + multiplier.timeExponent,
-      this.value * multiplier.value
+      this.value * multiplier.value,
     );
   }
 
@@ -741,7 +741,7 @@ export class TimeReal {
     }
     const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
       cents,
-      'r'
+      'r',
     );
     return {
       type: 'CentsLiteral',
@@ -773,7 +773,7 @@ export class TimeReal {
         basis.push('Hz');
         const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
           -this.timeExponent,
-          'r'
+          'r',
         );
         components.push({
           sign,
@@ -791,7 +791,7 @@ export class TimeReal {
         basis.push('s');
         const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
           this.timeExponent,
-          'r'
+          'r',
         );
         components.push({
           sign,
@@ -818,7 +818,7 @@ export class TimeReal {
     basis.push('rc');
     const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
       this.totalCents(true),
-      'r'
+      'r',
     );
     components.push({
       sign,
@@ -848,7 +848,7 @@ export class TimeReal {
       return 's';
     } else {
       return `s^${literalToString(
-        numberToDecimalLiteral(this.timeExponent, 'r')
+        numberToDecimalLiteral(this.timeExponent, 'r'),
       )}`;
     }
   }
@@ -1009,7 +1009,7 @@ export class TimeReal {
   /** @hidden */
   toIntegerMonzo(): number[] {
     throw new Error(
-      'Cannot convert irrational value to a monzo with integer components.'
+      'Cannot convert irrational value to a monzo with integer components.',
     );
   }
 
@@ -1033,7 +1033,7 @@ export class TimeReal {
     // To satisfy the multiplicative identity we return 1 here and (this * other) in lcm.
     return new TimeReal(
       Math.min(this.timeExponent, other.timeExponent.valueOf()),
-      1
+      1,
     );
   }
 
@@ -1041,7 +1041,7 @@ export class TimeReal {
   lcm(other: TimeMonzo | TimeReal) {
     return new TimeReal(
       Math.max(this.timeExponent, other.timeExponent.valueOf()),
-      this.value * other.valueOf()
+      this.value * other.valueOf(),
     );
   }
 
@@ -1105,7 +1105,7 @@ export class TimeMonzo {
   constructor(
     timeExponent: Fraction,
     primeExponents: FractionalMonzo,
-    residual?: Fraction
+    residual?: Fraction,
   ) {
     if (residual === undefined) {
       residual = new Fraction(1);
@@ -1129,12 +1129,12 @@ export class TimeMonzo {
   static fromFraction(fraction: FractionValue, numberOfComponents?: number) {
     const [vector, residual] = toMonzoAndResidual(
       fraction,
-      numberOfComponents ?? NUMBER_OF_COMPONENTS
+      numberOfComponents ?? NUMBER_OF_COMPONENTS,
     );
     return new TimeMonzo(
       new Fraction(0),
       vector.map(c => new Fraction(c)),
-      residual
+      residual,
     );
   }
 
@@ -1148,7 +1148,7 @@ export class TimeMonzo {
   static fromEqualTemperament(
     fractionOfEquave: FractionValue,
     equave?: FractionValue,
-    numberOfComponents?: number
+    numberOfComponents?: number,
   ) {
     if (equave === undefined) {
       equave = TWO;
@@ -1156,21 +1156,21 @@ export class TimeMonzo {
     if (numberOfComponents === undefined) {
       numberOfComponents = Math.max(
         primeLimit(equave, true),
-        NUMBER_OF_COMPONENTS
+        NUMBER_OF_COMPONENTS,
       );
     } else if (primeLimit(equave, true) > numberOfComponents) {
       throw new Error(`Not enough components to represent equave ${equave}.`);
     }
     const [equaveVector, residual] = toMonzoAndResidual(
       equave,
-      numberOfComponents
+      numberOfComponents,
     );
     if (!residual.isUnity()) {
       throw new Error('Unable to convert equave to monzo.');
     }
     const fractionOfEquave_ = new Fraction(fractionOfEquave);
     const vector = equaveVector.map(component =>
-      fractionOfEquave_.mul(component)
+      fractionOfEquave_.mul(component),
     );
     return new TimeMonzo(new Fraction(0), vector);
   }
@@ -1183,7 +1183,7 @@ export class TimeMonzo {
    */
   static fromFractionalFrequency(
     frequency: FractionValue,
-    numberOfComponents?: number
+    numberOfComponents?: number,
   ) {
     const result = TimeMonzo.fromFraction(frequency, numberOfComponents);
     result.timeExponent = new Fraction(-1);
@@ -1199,7 +1199,7 @@ export class TimeMonzo {
   static fromBigInt(value: bigint, numberOfComponents?: number) {
     const [vector, residual] = toMonzoAndResidual(
       value,
-      numberOfComponents ?? NUMBER_OF_COMPONENTS
+      numberOfComponents ?? NUMBER_OF_COMPONENTS,
     );
     const intResidual = Number(residual);
     if (Math.abs(intResidual) > Number.MAX_SAFE_INTEGER) {
@@ -1208,7 +1208,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       ZERO,
       vector.map(c => new Fraction(c)),
-      new Fraction(intResidual)
+      new Fraction(intResidual),
     );
   }
 
@@ -1222,7 +1222,7 @@ export class TimeMonzo {
   static fromBigNumeratorDenominator(
     numerator: bigint,
     denominator: bigint,
-    numberOfComponents?: number
+    numberOfComponents?: number,
   ) {
     if (denominator === 0n) {
       throw new Error('Division by zero.');
@@ -1230,21 +1230,21 @@ export class TimeMonzo {
     numberOfComponents ??= NUMBER_OF_COMPONENTS;
     const [positiveVector, numeratorResidual] = toMonzoAndResidual(
       numerator,
-      numberOfComponents
+      numberOfComponents,
     );
     const [negativeVector, denominatorResidual] = toMonzoAndResidual(
       denominator,
-      numberOfComponents
+      numberOfComponents,
     );
     const commonFactor = gcd(numeratorResidual, denominatorResidual);
     const residual = new Fraction(
       Number(numeratorResidual / commonFactor),
-      Number(denominatorResidual / commonFactor)
+      Number(denominatorResidual / commonFactor),
     );
     return new TimeMonzo(
       ZERO,
       positiveVector.map((p, i) => new Fraction(p - negativeVector[i])),
-      residual
+      residual,
     );
   }
 
@@ -1255,7 +1255,7 @@ export class TimeMonzo {
    */
   static fromFractionalCents(
     cents: FractionValue,
-    numberOfComponents?: number
+    numberOfComponents?: number,
   ) {
     numberOfComponents ??= NUMBER_OF_COMPONENTS;
     if (numberOfComponents < 1) {
@@ -1276,7 +1276,7 @@ export class TimeMonzo {
   static fromArray(monzo: FractionValue[]) {
     return new TimeMonzo(
       new Fraction(0),
-      monzo.map(component => new Fraction(component))
+      monzo.map(component => new Fraction(component)),
     );
   }
 
@@ -1344,11 +1344,11 @@ export class TimeMonzo {
     if (this.primeExponents.length < value) {
       const [residualMonzo, newResidual] = toMonzoAndResidual(
         this.residual,
-        value
+        value,
       );
       while (this.primeExponents.length < value) {
         this.primeExponents.push(
-          new Fraction(residualMonzo[this.primeExponents.length])
+          new Fraction(residualMonzo[this.primeExponents.length]),
         );
       }
       this.residual = newResidual;
@@ -1387,7 +1387,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       this.timeExponent.clone(),
       vector,
-      this.residual.clone()
+      this.residual.clone(),
     );
   }
 
@@ -1487,7 +1487,7 @@ export class TimeMonzo {
   toEqualTemperament(preferPositive = false): EqualTemperament {
     if (!this.residual.isUnity()) {
       throw new Error(
-        'Unable to convert non-representable fraction to equal temperament.'
+        'Unable to convert non-representable fraction to equal temperament.',
       );
     }
     if (this.primeExponents.length === 0) {
@@ -1575,7 +1575,7 @@ export class TimeMonzo {
   toMonzo(trim?: boolean): number[] {
     if (!this.residual.isUnity()) {
       throw new Error(
-        'Cannot convert time monzo with residual to an array of numbers.'
+        'Cannot convert time monzo with residual to an array of numbers.',
       );
     }
     const result: number[] = [];
@@ -1744,7 +1744,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       this.timeExponent.mul(HALF),
       this.primeExponents.map(e => e.mul(HALF)),
-      residual
+      residual,
     );
   }
 
@@ -1765,20 +1765,20 @@ export class TimeMonzo {
     }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(
-        `Cannot add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
+        `Cannot add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`,
       );
     }
     if (this.isFractional() && other.isFractional()) {
       const result = TimeMonzo.fromFraction(
         this.toFraction().add(other.toFraction()),
-        Math.max(this.numberOfComponents, other.numberOfComponents)
+        Math.max(this.numberOfComponents, other.numberOfComponents),
       );
       result.timeExponent = this.timeExponent.clone();
       return result;
     }
     return new TimeReal(
       this.timeExponent.valueOf(),
-      this.valueOf() + other.valueOf()
+      this.valueOf() + other.valueOf(),
     );
   }
 
@@ -1799,20 +1799,20 @@ export class TimeMonzo {
     }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
+        `Cannot subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`,
       );
     }
     if (this.isFractional() && other.isFractional()) {
       const result = TimeMonzo.fromFraction(
         this.toFraction().sub(other.toFraction()),
-        Math.max(this.numberOfComponents, other.numberOfComponents)
+        Math.max(this.numberOfComponents, other.numberOfComponents),
       );
       result.timeExponent = this.timeExponent.clone();
       return result;
     }
     return new TimeReal(
       this.timeExponent.valueOf(),
-      this.valueOf() - other.valueOf()
+      this.valueOf() - other.valueOf(),
     );
   }
 
@@ -1827,13 +1827,13 @@ export class TimeMonzo {
     }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot lens add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
+        `Cannot lens add time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`,
       );
     }
     if (this.isFractional() && other.isFractional()) {
       const result = TimeMonzo.fromFraction(
         this.toFraction().lensAdd(other.toFraction()),
-        Math.max(this.numberOfComponents, other.numberOfComponents)
+        Math.max(this.numberOfComponents, other.numberOfComponents),
       );
       result.timeExponent = this.timeExponent.clone();
       return result;
@@ -1858,13 +1858,13 @@ export class TimeMonzo {
     }
     if (this.timeExponent.compare(other.timeExponent)) {
       throw new Error(
-        `Cannot lens subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`
+        `Cannot lens subtract time monzos with disparate units. Have s^${this.timeExponent.toFraction()} + s^${other.timeExponent.toFraction()}.`,
       );
     }
     if (this.isFractional() && other.isFractional()) {
       const result = TimeMonzo.fromFraction(
         this.toFraction().lensSub(other.toFraction()),
-        Math.max(this.numberOfComponents, other.numberOfComponents)
+        Math.max(this.numberOfComponents, other.numberOfComponents),
       );
       result.timeExponent = this.timeExponent.clone();
       return result;
@@ -1901,7 +1901,7 @@ export class TimeMonzo {
       } catch {
         return new TimeReal(
           this.timeExponent.valueOf() + other.timeExponent.valueOf(),
-          this.valueOf() * other.valueOf()
+          this.valueOf() * other.valueOf(),
         );
       }
     }
@@ -1910,12 +1910,12 @@ export class TimeMonzo {
       return new TimeMonzo(
         this.timeExponent.add(other.timeExponent),
         vector,
-        residual
+        residual,
       );
     } catch {
       return new TimeReal(
         this.timeExponent.valueOf() + other.timeExponent.valueOf(),
-        this.valueOf() * other.valueOf()
+        this.valueOf() * other.valueOf(),
       );
     }
   }
@@ -1950,7 +1950,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       min(this.timeExponent, other.timeExponent),
       vector,
-      residual
+      residual,
     );
   }
 
@@ -1978,7 +1978,7 @@ export class TimeMonzo {
     return new TimeMonzo(
       max(this.timeExponent, other.timeExponent),
       vector,
-      residual
+      residual,
     );
   }
 
@@ -2010,7 +2010,7 @@ export class TimeMonzo {
       } catch {
         return new TimeReal(
           self.timeExponent.valueOf() - other.timeExponent.valueOf(),
-          self.valueOf() / other.valueOf()
+          self.valueOf() / other.valueOf(),
         );
       }
     }
@@ -2019,12 +2019,12 @@ export class TimeMonzo {
       return new TimeMonzo(
         self.timeExponent.sub(other.timeExponent),
         vector,
-        residual
+        residual,
       );
     } catch {
       return new TimeReal(
         this.timeExponent.valueOf() - other.timeExponent.valueOf(),
-        this.valueOf() / other.valueOf()
+        this.valueOf() / other.valueOf(),
       );
     }
   }
@@ -2048,7 +2048,7 @@ export class TimeMonzo {
         const exponent = (other as TimeMonzo & Fraction).valueOf();
         return new TimeReal(
           this.timeExponent.valueOf() * exponent,
-          this.valueOf() ** exponent
+          this.valueOf() ** exponent,
         );
       }
     }
@@ -2056,7 +2056,7 @@ export class TimeMonzo {
       const scalar = new Fraction(other);
       try {
         const vector = this.primeExponents.map(component =>
-          component.mul(scalar)
+          component.mul(scalar),
         );
         const residual: Fraction | null | undefined = this.residual.pow(scalar);
         if (residual !== null) {
@@ -2068,13 +2068,13 @@ export class TimeMonzo {
       const exponent = scalar.valueOf();
       return new TimeReal(
         this.timeExponent.valueOf() * exponent,
-        this.valueOf() ** exponent
+        this.valueOf() ** exponent,
       );
     } catch (e) {
       if (typeof other === 'number') {
         return new TimeReal(
           this.timeExponent.valueOf() * other,
-          this.valueOf() ** other
+          this.valueOf() ** other,
         );
       }
       throw e;
@@ -2094,12 +2094,12 @@ export class TimeMonzo {
       if (other instanceof TimeMonzo) {
         if (other.timeExponent.n === 0) {
           throw new Error(
-            'Cannot take a scalar logarithm of a value with time units.'
+            'Cannot take a scalar logarithm of a value with time units.',
           );
         }
       } else {
         throw new Error(
-          'Cannot take a scalar logarithm of a value with time units.'
+          'Cannot take a scalar logarithm of a value with time units.',
         );
       }
       const solution = this.timeExponent.div(other.timeExponent);
@@ -2152,7 +2152,7 @@ export class TimeMonzo {
         } else if (solution !== undefined) {
           if (
             !self.primeExponents[i].equals(
-              other.primeExponents[i].mul(solution)
+              other.primeExponents[i].mul(solution),
             )
           ) {
             return self.totalCents() / other.totalCents();
@@ -2207,7 +2207,7 @@ export class TimeMonzo {
       let result = this.timeExponent.mul(other.timeExponent);
       for (let i = 0; i < this.primeExponents.length; ++i) {
         result = result.add(
-          this.primeExponents[i].mul(other.primeExponents[i])
+          this.primeExponents[i].mul(other.primeExponents[i]),
         );
       }
       return result;
@@ -2265,7 +2265,7 @@ export class TimeMonzo {
   pitchAbs() {
     if (this.timeExponent.n) {
       throw new Error(
-        'Geometric absolute value is undefined in the absolute echelon.'
+        'Geometric absolute value is undefined in the absolute echelon.',
       );
     }
     const result = this.clone();
@@ -2295,13 +2295,13 @@ export class TimeMonzo {
     }
     if (!this.timeExponent.equals(other.timeExponent)) {
       throw new Error(
-        `Cannot mod time monzos with disparate units. Have s^${this.timeExponent.toFraction()} mod s^${other.timeExponent.toFraction()}.`
+        `Cannot mod time monzos with disparate units. Have s^${this.timeExponent.toFraction()} mod s^${other.timeExponent.toFraction()}.`,
       );
     }
     if (this.isFractional() && other.isFractional()) {
       const result = TimeMonzo.fromFraction(
         this.toFraction().mmod(other.toFraction()),
-        Math.max(this.numberOfComponents, other.numberOfComponents)
+        Math.max(this.numberOfComponents, other.numberOfComponents),
       );
       if (ceiling && !result.residual.n) {
         return other.clone();
@@ -2343,7 +2343,7 @@ export class TimeMonzo {
     }
     return new TimeReal(
       this.timeExponent.valueOf() + multiplier.timeExponent,
-      this.valueOf() * multiplier.value
+      this.valueOf() * multiplier.value,
     );
   }
 
@@ -2498,7 +2498,7 @@ export class TimeMonzo {
     const numerator = Math.round(this.valueOf() * denominator);
     return TimeMonzo.fromFraction(
       new Fraction(numerator, denominator),
-      this.numberOfComponents
+      this.numberOfComponents,
     );
   }
 
@@ -2511,7 +2511,7 @@ export class TimeMonzo {
     const denominator = Math.round(numerator / this.valueOf());
     return TimeMonzo.fromFraction(
       new Fraction(numerator, denominator),
-      this.numberOfComponents
+      this.numberOfComponents,
     );
   }
 
@@ -2681,7 +2681,7 @@ export class TimeMonzo {
       if (isDecimal(cents)) {
         const {sign, whole, fractional, exponent} = numberToDecimalLiteral(
           cents,
-          'e'
+          'e',
         );
         return {
           type: 'CentsLiteral',
@@ -2870,7 +2870,7 @@ export class TimeMonzo {
     if (this.timeExponent.n) {
       basis.push('Hz');
       components.push(
-        fractionToVectorComponent(this.timeExponent.inverse().neg())
+        fractionToVectorComponent(this.timeExponent.inverse().neg()),
       );
     }
     if (this.residual.s < 0) {
@@ -3025,7 +3025,7 @@ export class TimeMonzo {
  * @returns Deserialized {@link TimeReal} or {@link TimeMonzo}.
  */
 export function reviveMonzo(
-  data: ReturnType<TimeReal['toJSON']> | ReturnType<TimeMonzo['toJSON']>
+  data: ReturnType<TimeReal['toJSON']> | ReturnType<TimeMonzo['toJSON']>,
 ): TimeReal | TimeMonzo {
   if (data.type === 'TimeReal') {
     return TimeReal.reviver('value', data);

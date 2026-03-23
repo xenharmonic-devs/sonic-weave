@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {mmod} from 'xen-dev-utils';
 import {reviveMonzo, TimeMonzo, TimeReal} from './monzo';
 import {
@@ -126,7 +125,7 @@ export function mosConfigToJSON(config?: MosConfig) {
  * @returns Deserialized {@link MosConfig}.
  */
 export function reviveMosConfig(
-  data: ReturnType<typeof mosConfigToJSON>
+  data: ReturnType<typeof mosConfigToJSON>,
 ): MosConfig | undefined {
   if (!data) {
     return undefined;
@@ -198,7 +197,7 @@ export function scaleMonzos(config: MosConfig) {
       ? -1
       : a[0].length > b[0].length
         ? 1
-        : a[0].localeCompare(b[0])
+        : a[0].localeCompare(b[0]),
   );
   const monzos = entries.map(entry => entry[1]);
   monzos.push(monzos.shift()!.mul(config.equave));
@@ -213,7 +212,7 @@ export function scaleMonzos(config: MosConfig) {
  */
 export function mosMonzo(
   node: MosStep,
-  config: MosConfig
+  config: MosConfig,
 ): TimeMonzo | TimeReal {
   const baseDegree = mmod(Math.abs(node.degree), config.degrees.length);
   const periods = (node.degree - baseDegree) / config.degrees.length;
@@ -262,7 +261,7 @@ export function mosMonzo(
     }
     if (quality === 'P') {
       throw new Error(
-        `The mosstep ${baseDegree} does not have a perfect variant.`
+        `The mosstep ${baseDegree} does not have a perfect variant.`,
       );
     }
   } else if (quality === 'n' || quality === 'neu') {
@@ -278,7 +277,7 @@ export function mosMonzo(
     quality === 'min'
   ) {
     throw new Error(
-      `The mosstep ${baseDegree} does not have minor or major variants.`
+      `The mosstep ${baseDegree} does not have minor or major variants.`,
     );
   }
   return mosDegree.center.mul(inflection).mul(config.period.pow(periods));
@@ -286,7 +285,7 @@ export function mosMonzo(
 
 function mosInflection(
   accidental: MosAccidental | Accidental,
-  config: MosConfig
+  config: MosConfig,
 ) {
   switch (accidental) {
     case '&':
@@ -313,7 +312,7 @@ function mosInflection(
  */
 export function absoluteMosMonzo(
   node: AbsoluteMosPitch,
-  config: MosConfig
+  config: MosConfig,
 ): TimeMonzo | TimeReal {
   if (!config.scale.has(node.nominal)) {
     throw new Error(`Nominal ${node.nominal} is unassigned.`);

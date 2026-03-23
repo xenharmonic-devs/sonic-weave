@@ -19,7 +19,7 @@ import {type RootContext} from '../context';
 export function compare(
   this: RootContext | undefined,
   a: SonicWeavePrimitive,
-  b: SonicWeavePrimitive
+  b: SonicWeavePrimitive,
 ): number {
   if (typeof a === 'string') {
     if (typeof b !== 'string') {
@@ -73,7 +73,7 @@ export function simplify(interval: Val | Interval | boolean): typeof interval {
       interval.domain,
       interval.steps,
       undefined,
-      interval
+      interval,
     );
   }
   throw new Error('An interval, val or boolean is required.');
@@ -90,7 +90,7 @@ export function bleach(interval: Interval | boolean): Interval {
     interval.value.clone(),
     interval.domain,
     interval.steps,
-    interval.node
+    interval.node,
   );
 }
 
@@ -109,7 +109,7 @@ export function linear(interval: Interval | boolean): Interval {
     'linear',
     interval.steps,
     undefined,
-    interval
+    interval,
   );
 }
 
@@ -128,7 +128,7 @@ export function logarithmic(this: any, interval: Interval | boolean): Interval {
     'logarithmic',
     interval.steps,
     undefined,
-    interval
+    interval,
   );
 }
 
@@ -140,7 +140,7 @@ export function logarithmic(this: any, interval: Interval | boolean): Interval {
  */
 export function absolute(
   this: RootContext | undefined,
-  interval: Interval | boolean
+  interval: Interval | boolean,
 ): Interval {
   interval = upcastBool(interval);
   if (interval.isAbsolute()) {
@@ -153,12 +153,12 @@ export function absolute(
       interval.domain,
       interval.steps,
       undefined,
-      interval
+      interval,
     );
   }
   if (this?.unisonFrequency === undefined) {
     throw new Error(
-      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz.'
+      'Reference frequency must be set for relative -> absolute conversion. Try 1/1 = 440 Hz.',
     );
   }
   return new Interval(
@@ -166,7 +166,7 @@ export function absolute(
     interval.domain,
     interval.steps,
     undefined,
-    interval
+    interval,
   );
 }
 
@@ -178,7 +178,7 @@ export function absolute(
  */
 export function relative(
   this: RootContext | undefined,
-  interval: Interval | boolean
+  interval: Interval | boolean,
 ): Interval {
   interval = upcastBool(interval);
   if (interval.isRelative()) {
@@ -186,7 +186,7 @@ export function relative(
   }
   if (this?.unisonFrequency === undefined) {
     throw new Error(
-      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz.'
+      'Reference frequency must be set for absolute -> relative conversion. Try 1/1 = 440 Hz.',
     );
   }
   const absolute_ = absolute.bind(this)(interval);
@@ -195,7 +195,7 @@ export function relative(
     interval.domain,
     interval.steps,
     undefined,
-    interval
+    interval,
   );
 }
 
@@ -207,13 +207,13 @@ export function relative(
  */
 export function tenneyHeight(
   this: RootContext | undefined,
-  interval: Interval | boolean
+  interval: Interval | boolean,
 ): Interval {
   return new Interval(
     TimeReal.fromValue(
-      relative.bind(this)(upcastBool(interval)).value.tenneyHeight()
+      relative.bind(this)(upcastBool(interval)).value.tenneyHeight(),
     ),
-    'linear'
+    'linear',
   );
 }
 
@@ -225,7 +225,7 @@ export function tenneyHeight(
  */
 export function wilsonHeight(
   this: RootContext | undefined,
-  interval: Interval | boolean
+  interval: Interval | boolean,
 ): Interval {
   const monzo = relative.bind(this)(upcastBool(interval)).value;
   if (monzo instanceof TimeReal) {
@@ -265,10 +265,11 @@ export function track(this: RootContext | undefined, interval: Interval) {
  * @param scale Musical scale to sort (defaults to context scale).
  * @param compareFn SonicWeave riff for comparing elements.
  */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export function sortInPlace(
   this: ExpressionVisitor,
   scale?: Interval[],
-  compareFn?: Function
+  compareFn?: Function,
 ) {
   scale ??= this.currentScale;
   if (!Array.isArray(scale)) {
@@ -278,7 +279,7 @@ export function sortInPlace(
     scale.sort(compare.bind(this.rootContext));
   } else {
     scale.sort((a, b) =>
-      (compareFn.bind(this)(a, b) as Interval).value.valueOf()
+      (compareFn.bind(this)(a, b) as Interval).value.valueOf(),
     );
   }
 }
@@ -286,7 +287,7 @@ export function sortInPlace(
 function repr_(
   this: RootContext | undefined,
   value: SonicWeaveValue | null,
-  depth = 2
+  depth = 2,
 ): string {
   if (value === null) {
     return '';
@@ -364,7 +365,7 @@ export function str(this: RootContext | undefined, value: SonicWeaveValue) {
 export function lstr(
   this: RootContext | undefined,
   value: SonicWeaveValue,
-  maxLength: number
+  maxLength: number,
 ) {
   if (value instanceof Interval) {
     let result = value.str(this);
@@ -560,7 +561,7 @@ export function factorColor(this: RootContext | undefined, interval: Interval) {
 export function temper(
   this: RootContext | undefined,
   val: Val,
-  interval: Interval | Interval[]
+  interval: Interval | Interval[],
 ): typeof interval {
   const divisions = val.divisions;
   let step: Interval;
@@ -585,7 +586,7 @@ export function temper(
           denominator: divisions.n,
           equaveNumerator,
           equaveDenominator,
-        }
+        },
       );
     } catch {
       step = new Interval(val.equave.pow(divisions.inverse()), 'logarithmic');
@@ -601,7 +602,7 @@ export function temper(
       const d = i.dot(val);
       if (!divisions.n && d.valueOf()) {
         throw new Error(
-          'Non-unitary tempering by zero divisions of an equave.'
+          'Non-unitary tempering by zero divisions of an equave.',
         );
       }
       const result = d.mul(step);

@@ -83,7 +83,7 @@ export function parseBasis(input: string): ValBasis {
 export function parseVals(
   input: string,
   basis: ValBasis,
-  includePrelude = true
+  includePrelude = true,
 ): Val[] {
   const parts: string[] = parse(input) as any;
   const result: Val[] = [];
@@ -136,7 +136,7 @@ export function temperamentFromCommas(
   commaInput: string,
   subgroupInput: string,
   optimizationScheme: OptimizationScheme,
-  subgroupWeights?: number[]
+  subgroupWeights?: number[],
 ) {
   const chord = parseChord(commaInput);
   const commas: TimeMonzo[] = [];
@@ -173,7 +173,7 @@ export function rank2FromCommas(
   commaInput: string,
   subgroupInput: string,
   optimizationScheme: OptimizationScheme,
-  subgroupWeights?: number[]
+  subgroupWeights?: number[],
 ) {
   // Try same construction as above.
   const chord = parseChord(commaInput);
@@ -200,7 +200,7 @@ export function rank2FromCommas(
     commas,
     basis,
     subgroupWeights,
-    pureEquaves
+    pureEquaves,
   );
   // Check if result is as intended.
   if (result.rank === 2) {
@@ -209,7 +209,7 @@ export function rank2FromCommas(
   // Explicit subgroup given. Complain about the mistake.
   if (subgroupInput) {
     throw new Error(
-      "Given commas don't define a rank-2 temperament in the subgroup."
+      "Given commas don't define a rank-2 temperament in the subgroup.",
     );
   }
   if (result.rank > 2) {
@@ -258,7 +258,7 @@ export function temperamentFromVals(
   valsInput: string,
   subgroupInput: string,
   optimizationScheme: OptimizationScheme,
-  subgroupWeights?: number[]
+  subgroupWeights?: number[],
 ) {
   subgroupWeights ??= [];
   subgroupWeights = [...subgroupWeights];

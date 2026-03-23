@@ -34,7 +34,7 @@ let VOLATILES: Program | null = null;
  */
 export function getGlobalVisitor(
   includePrelude = true,
-  extraBuiltins?: Record<string, SonicWeaveValue>
+  extraBuiltins?: Record<string, SonicWeaveValue>,
 ) {
   extraBuiltins ??= {};
   const rootContext = new RootContext();
@@ -107,7 +107,7 @@ export function getGlobalVisitor(
  */
 export function getSourceVisitor(
   includePrelude = true,
-  extraBuiltins?: Record<string, SonicWeaveValue>
+  extraBuiltins?: Record<string, SonicWeaveValue>,
 ) {
   const globalVisitor = getGlobalVisitor(includePrelude, extraBuiltins);
   const visitor = new StatementVisitor(globalVisitor);
@@ -125,7 +125,7 @@ export function getSourceVisitor(
 export function evaluateSource(
   source: string,
   includePrelude = true,
-  extraBuiltins?: Record<string, SonicWeaveValue>
+  extraBuiltins?: Record<string, SonicWeaveValue>,
 ) {
   const visitor = getSourceVisitor(includePrelude, extraBuiltins);
 
@@ -145,7 +145,7 @@ export function evaluateSource(
 export function evaluateExpression(
   source: string,
   includePrelude = true,
-  extraBuiltins?: Record<string, SonicWeaveValue>
+  extraBuiltins?: Record<string, SonicWeaveValue>,
 ): SonicWeaveValue {
   const visitor = getSourceVisitor(includePrelude, extraBuiltins);
   const program = parseAST(source);
@@ -157,7 +157,7 @@ export function evaluateExpression(
   }
   if (visitor.deferred.length) {
     throw new Error(
-      'Deferred actions not allowed when evaluating expressions.'
+      'Deferred actions not allowed when evaluating expressions.',
     );
   }
   const finalStatement = program.body[program.body.length - 1];
@@ -222,7 +222,7 @@ export function createTag(
   expression = true,
   includePrelude = true,
   extraBuiltins?: Record<string, SonicWeaveValue>,
-  escapeStrings = false
+  escapeStrings = false,
 ) {
   function tag(strings: TemplateStringsArray, ...args: any[]) {
     const fragments = escapeStrings ? strings : strings.raw;
@@ -245,7 +245,7 @@ export function createTag(
       }
       if (visitor.deferred.length) {
         throw new Error(
-          'Deferred actions not allowed when evaluating tagged templates.'
+          'Deferred actions not allowed when evaluating tagged templates.',
         );
       }
       const finalStatement = program.body[program.body.length - 1];

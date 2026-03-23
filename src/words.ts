@@ -147,7 +147,7 @@ export function rotate(str: string, offset: number): string {
  */
 export function getStepVector(
   word: string,
-  intervalClass?: number
+  intervalClass?: number,
 ): StepVector {
   intervalClass ??= word.length;
   if (word.length === 0) {
@@ -156,13 +156,13 @@ export function getStepVector(
   } else if (intervalClass % word.length === 0) {
     return scalarMult(
       stepSignature(word),
-      Math.floor(intervalClass / word.length)
+      Math.floor(intervalClass / word.length),
     );
   } else {
     // Initialize `result` to a prefix with `intervalClass / word.length` letters
     const result = scalarMult(
       stepSignature(word),
-      Math.floor(intervalClass / word.length)
+      Math.floor(intervalClass / word.length),
     );
     const slice = String(word).slice(0, intervalClass % word.length);
     // Do it the intuitive way:

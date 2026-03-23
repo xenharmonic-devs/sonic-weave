@@ -5,6 +5,7 @@ beforeAll(() => {
   getSourceVisitor();
 });
 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 describe('Counter incrementing', () => {
   bench('Rational', () => {
     sw`

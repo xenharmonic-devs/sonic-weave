@@ -271,7 +271,7 @@ export const setUnion =
  * @param property The `String` name or `Symbol` of the property to test.
  * @returns `true` if the specified object has directly defined the specified property. Otherwise `false`
  */
-export function hasOwn(object: Object, property: PropertyKey) {
+export function hasOwn(object: object, property: PropertyKey) {
   if ('hasOwn' in Object) {
     return (Object as any).hasOwn(object, property);
   }

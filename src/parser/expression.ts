@@ -107,7 +107,7 @@ export type VisitorContext = Map<string, SonicWeaveValue>;
 
 export function arrayRecordOrString(
   value: SonicWeaveValue,
-  message = 'Array, record or string expected.'
+  message = 'Array, record or string expected.',
 ) {
   if (typeof value === 'string') {
     return value;
@@ -127,14 +127,14 @@ export function arrayRecordOrString(
 
 export function containerToArray(
   container: SonicWeaveValue,
-  kind: IterationKind
+  kind: IterationKind,
 ) {
   if (container instanceof ValBasis) {
     return container.toArray();
   }
   container = arrayRecordOrString(
     container,
-    'Can only iterate over arrays, records or strings.'
+    'Can only iterate over arrays, records or strings.',
   );
   if (typeof container === 'string') {
     container = [...container];
@@ -187,7 +187,7 @@ const HERTZ_MONZO = new TimeMonzo(NEGATIVE_ONE, []);
 
 function typesCompatible(
   a: IntervalLiteral | undefined,
-  b: IntervalLiteral | undefined
+  b: IntervalLiteral | undefined,
 ) {
   if (a?.type === b?.type) {
     return true;
@@ -206,7 +206,7 @@ function resolvePreference(
   left: Interval,
   right: Interval,
   node: BinaryExpression,
-  simplify: boolean
+  simplify: boolean,
 ) {
   if (node.preferLeft && node.preferRight) {
     let domain = left.domain;
@@ -225,7 +225,7 @@ function resolvePreference(
       left.domain,
       0,
       intervalValueAs(value, left.node, simplify),
-      left
+      left,
     );
   }
   return new Interval(
@@ -233,7 +233,7 @@ function resolvePreference(
     right.domain,
     0,
     intervalValueAs(value, right.node, simplify),
-    right
+    right,
   );
 }
 
@@ -447,7 +447,7 @@ export class ExpressionVisitor {
       return value;
     }
     throw new Error(
-      `The identifier ${node.basis.id} does not refer to a basis.`
+      `The identifier ${node.basis.id} does not refer to a basis.`,
     );
   }
 
@@ -488,7 +488,7 @@ export class ExpressionVisitor {
         TimeMonzo.fromBigNumeratorDenominator(numerator, denominator),
         'logarithmic',
         0,
-        node
+        node,
       );
     }
     const s = node.start * node.start;
@@ -496,7 +496,7 @@ export class ExpressionVisitor {
       TimeMonzo.fromBigNumeratorDenominator(s, s - 1n),
       'logarithmic',
       0,
-      node
+      node,
     );
   }
 
@@ -535,7 +535,7 @@ export class ExpressionVisitor {
   protected comprehend(
     node: ArrayComprehension,
     result: SonicWeavePrimitive[],
-    index: number
+    index: number,
   ) {
     if (index >= node.comprehensions.length) {
       if (node.test && !sonicTruth(this.visit(node.test))) {
@@ -547,7 +547,7 @@ export class ExpressionVisitor {
     const comprehension = node.comprehensions[index];
     const array = containerToArray(
       this.visit(comprehension.container),
-      comprehension.kind
+      comprehension.kind,
     );
     const element = comprehension.element;
     for (const value of array) {
@@ -583,7 +583,7 @@ export class ExpressionVisitor {
   }
 
   protected visitRecordLiteral(
-    node: RecordLiteral
+    node: RecordLiteral,
   ): Record<string, SonicWeavePrimitive> {
     const result: Record<string, SonicWeavePrimitive> = {};
     for (const [key, value] of node.properties) {
@@ -617,7 +617,7 @@ export class ExpressionVisitor {
 
   protected down(
     operand: SonicWeaveValue,
-    count: number
+    count: number,
   ): Interval | Interval[] {
     if (!this.rootContext) {
       throw new Error('Root context required for down.');
@@ -647,7 +647,7 @@ export class ExpressionVisitor {
     function where(
       test: SonicWeavePrimitive | SonicWeavePrimitive[],
       consequent: SonicWeavePrimitive | SonicWeavePrimitive[],
-      alternate: SonicWeavePrimitive | SonicWeavePrimitive[]
+      alternate: SonicWeavePrimitive | SonicWeavePrimitive[],
     ) {
       if (
         Array.isArray(test) ||
@@ -661,7 +661,7 @@ export class ExpressionVisitor {
     return where(
       this.visit(node.test) as any,
       this.visit(node.consequent) as any,
-      this.visit(node.alternate) as any
+      this.visit(node.alternate) as any,
     );
   }
 
@@ -673,7 +673,7 @@ export class ExpressionVisitor {
     function rr(
       left: SonicWeavePrimitive | SonicWeavePrimitive[],
       middle: SonicWeavePrimitive | SonicWeavePrimitive[],
-      right: SonicWeavePrimitive | SonicWeavePrimitive[]
+      right: SonicWeavePrimitive | SonicWeavePrimitive[],
     ) {
       if (
         Array.isArray(left) ||
@@ -707,7 +707,7 @@ export class ExpressionVisitor {
     return rr(
       this.visit(node.left) as any,
       this.visit(node.middle) as any,
-      this.visit(node.right) as any
+      this.visit(node.right) as any,
     );
   }
 
@@ -729,7 +729,7 @@ export class ExpressionVisitor {
 
   protected upLift(
     value: TimeMonzo | TimeReal,
-    node: MonzoLiteral | FJS | AbsoluteFJS | MosStepLiteral
+    node: MonzoLiteral | FJS | AbsoluteFJS | MosStepLiteral,
   ) {
     if (!this.rootContext) {
       throw new Error('Root context required for uplift.');
@@ -742,7 +742,7 @@ export class ExpressionVisitor {
       'logarithmic',
       this.rootContext.up.steps * node.ups +
         this.rootContext.lift.steps * node.lifts,
-      node
+      node,
     );
   }
 
@@ -754,7 +754,7 @@ export class ExpressionVisitor {
       const basis = this.visit(node.basis);
       if (!(basis instanceof ValBasis)) {
         throw new Error(
-          `The identifier ${node.basis.id} does not refer to a basis.`
+          `The identifier ${node.basis.id} does not refer to a basis.`,
         );
       }
       value = basis.dot(exponents);
@@ -816,7 +816,7 @@ export class ExpressionVisitor {
       const basis = this.visit(node.basis);
       if (!(basis instanceof ValBasis)) {
         throw new Error(
-          `The identifier ${node.basis.id} does not refer to a basis.`
+          `The identifier ${node.basis.id} does not refer to a basis.`,
         );
       }
       return Val.fromBasisMap(val, basis);
@@ -837,7 +837,7 @@ export class ExpressionVisitor {
 
   protected project(
     octaves: boolean | Interval | (Interval | boolean)[],
-    base: Interval
+    base: Interval,
   ): Interval | Interval[] {
     if (typeof octaves === 'boolean') {
       octaves = upcastBool(octaves);
@@ -860,7 +860,7 @@ export class ExpressionVisitor {
       return wartsToVal(node, basis);
     }
     throw new Error(
-      `The identifier ${node.basis.id} does not refer to a basis.`
+      `The identifier ${node.basis.id} does not refer to a basis.`,
     );
   }
 
@@ -875,7 +875,7 @@ export class ExpressionVisitor {
       return sparseOffsetToVal(node, basis);
     }
     throw new Error(
-      `The identifier ${node.basis.id} does not refer to a basis.`
+      `The identifier ${node.basis.id} does not refer to a basis.`,
     );
   }
 
@@ -883,7 +883,7 @@ export class ExpressionVisitor {
     const monzo = inflect(
       pythagoreanMonzo(node.pythagorean),
       node.superscripts,
-      node.subscripts
+      node.subscripts,
     );
     const result = this.upLift(monzo, node);
     this.rootContext!.fragiles.push(result);
@@ -901,7 +901,7 @@ export class ExpressionVisitor {
       }
       relativeToC4 = absoluteMosMonzo(
         node.pitch as AbsoluteMosPitch,
-        this.rootContext.mosConfig
+        this.rootContext.mosConfig,
       );
     } else {
       relativeToC4 = absoluteMonzo(node.pitch as AbsolutePitch);
@@ -912,7 +912,7 @@ export class ExpressionVisitor {
       this.rootContext!.C4.mul(upLifted.value),
       'logarithmic',
       upLifted.steps,
-      node
+      node,
     );
     this.rootContext.fragiles.push(result);
     return result;
@@ -928,7 +928,7 @@ export class ExpressionVisitor {
     const monzo = inflect(
       mosMonzo(node.mosStep, this.rootContext.mosConfig),
       node.superscripts,
-      node.subscripts
+      node.subscripts,
     );
     const result = this.upLift(monzo, node);
     this.rootContext!.fragiles.push(result);
@@ -953,7 +953,7 @@ export class ExpressionVisitor {
     }
     const object = arrayRecordOrString(
       object_,
-      'Can only access bases, arrays, records or strings.'
+      'Can only access bases, arrays, records or strings.',
     );
     if (!Array.isArray(object) && typeof object !== 'string') {
       const key = this.visit(node.key);
@@ -976,7 +976,7 @@ export class ExpressionVisitor {
         const idx = index[i];
         if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
           throw new Error(
-            'Only booleans and intervals can be used as indices.'
+            'Only booleans and intervals can be used as indices.',
           );
         }
         if (idx === true) {
@@ -1119,7 +1119,7 @@ export class ExpressionVisitor {
 
   protected unaryOperate(
     operand: SonicWeaveValue,
-    node: UnaryExpression
+    node: UnaryExpression,
   ): SonicWeaveValue {
     const operator = node.operator;
     if (typeof operand === 'boolean') {
@@ -1230,7 +1230,7 @@ export class ExpressionVisitor {
 
   protected updateArgument(
     argument: SonicWeaveValue,
-    operator: UpdateOperator
+    operator: UpdateOperator,
   ): Interval | Interval[] {
     if (Array.isArray(argument)) {
       const u = this.updateArgument.bind(this);
@@ -1240,19 +1240,19 @@ export class ExpressionVisitor {
       argument = upcastBool(argument);
       if (argument.domain !== 'linear') {
         throw new Error(
-          'Only linear quantities may be incremented or decremented.'
+          'Only linear quantities may be incremented or decremented.',
         );
       }
       if (argument.value instanceof TimeReal && !argument.value.timeExponent) {
         if (operator === '++') {
           return new Interval(
             TimeReal.fromValue(argument.value.value + 1),
-            'linear'
+            'linear',
           );
         }
         return new Interval(
           TimeReal.fromValue(argument.value.value - 1),
-          'linear'
+          'linear',
         );
       }
       if (operator === '++') {
@@ -1272,7 +1272,7 @@ export class ExpressionVisitor {
       const key = this.visit(node.argument.key);
       const object = arrayRecordOrString(
         this.visit(node.argument.object),
-        'Only array elements or record values may be incremented or decremented.'
+        'Only array elements or record values may be incremented or decremented.',
       );
       if (typeof object === 'string') {
         throw new Error('Strings are immutable.');
@@ -1293,7 +1293,7 @@ export class ExpressionVisitor {
       }
     } else {
       throw new Error(
-        'Only identifiers, array elements or record values may be incremented or decremented.'
+        'Only identifiers, array elements or record values may be incremented or decremented.',
       );
     }
     return newValue;
@@ -1302,7 +1302,7 @@ export class ExpressionVisitor {
   protected tensor(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
-    node: BinaryExpression
+    node: BinaryExpression,
   ): Interval | Interval[] {
     if (typeof left === 'boolean') {
       left = upcastBool(left);
@@ -1326,7 +1326,7 @@ export class ExpressionVisitor {
             left,
             right,
             node,
-            left.domain === 'linear' && right.domain === 'linear'
+            left.domain === 'linear' && right.domain === 'linear',
           );
         }
         return left.mul(right) as Interval;
@@ -1341,12 +1341,12 @@ export class ExpressionVisitor {
   protected binaryOperate(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
-    node: BinaryExpression
+    node: BinaryExpression,
   ): SonicWeaveValue {
     if (isArrayOrRecord(left) || isArrayOrRecord(right)) {
       const binOp = this.binaryOperate.bind(this);
       return binaryBroadcast.bind(this)(left, right, (l, r) =>
-        binOp(l, r, node)
+        binOp(l, r, node),
       );
     }
     const operator = node.operator;
@@ -1482,12 +1482,12 @@ export class ExpressionVisitor {
               throw new Error(
                 `${node.preferLeft ? '~' : ''}${node.operator}${
                   node.preferRight ? '~' : ''
-                } unimplemented.`
+                } unimplemented.`,
               );
             default:
               operator satisfies never;
               throw new Error(
-                `Unexpected code flow with operator ${operator}.`
+                `Unexpected code flow with operator ${operator}.`,
               );
           }
           const result = resolvePreference(value, left, right, node, simplify);
@@ -1586,9 +1586,9 @@ export class ExpressionVisitor {
               intervalValueAs(
                 left.value,
                 right.node,
-                right.domain === 'linear'
+                right.domain === 'linear',
               ),
-              right
+              right,
             );
           case 'lest':
           case 'al':
@@ -1621,7 +1621,7 @@ export class ExpressionVisitor {
               return left.dot(right);
             } else {
               throw new Error(
-                'Dot product between a val and an interval must be in the correct order.'
+                'Dot product between a val and an interval must be in the correct order.',
               );
             }
           case 'tmpr':
@@ -1637,14 +1637,14 @@ export class ExpressionVisitor {
             return temper.bind(this.rootContext)(right, left);
         }
         throw new Error(
-          `Operator '${operator}' not implemented between intervals and vals.`
+          `Operator '${operator}' not implemented between intervals and vals.`,
         );
       } else if (typeof right === 'string') {
         if (operator === '*' || operator === '×') {
           return right.repeat(left.toInteger());
         }
         throw new Error(
-          `Operator '${operator}' not implemented between intervals and strings.`
+          `Operator '${operator}' not implemented between intervals and strings.`,
         );
       } else if (right instanceof Temperament) {
         if (operator === 'tmpr') {
@@ -1655,11 +1655,11 @@ export class ExpressionVisitor {
               left.domain,
               left.steps,
               intervalValueAs(value, left.node),
-              left
+              left,
             );
           } else if (node.preferRight) {
             throw new Error(
-              'Cannot prefer the temperament operand when tempering.'
+              'Cannot prefer the temperament operand when tempering.',
             );
           }
           return new Interval(
@@ -1667,19 +1667,19 @@ export class ExpressionVisitor {
             'logarithmic',
             left.steps,
             undefined,
-            left
+            left,
           );
         } else if (operator === 'dot' || operator === '·') {
           if (node.preferLeft || node.preferRight) {
             return right.dot(left);
           } else {
             throw new Error(
-              'Dot product between a temperament and an interval must be in the correct order.'
+              'Dot product between a temperament and an interval must be in the correct order.',
             );
           }
         }
         throw new Error(
-          `Operator '${operator}' not implemented between intervals and temperaments.`
+          `Operator '${operator}' not implemented between intervals and temperaments.`,
         );
       }
     } else if (left instanceof Val) {
@@ -1733,7 +1733,7 @@ export class ExpressionVisitor {
             return temper.bind(this.rootContext)(left, right);
         }
         throw new Error(
-          `Operator '${operator}' not implemented between vals and intervals.`
+          `Operator '${operator}' not implemented between vals and intervals.`,
         );
       }
     } else if (typeof left === 'string') {
@@ -1742,7 +1742,7 @@ export class ExpressionVisitor {
           return left.repeat(right.toInteger());
         }
         throw new Error(
-          `Operator '${operator}' not implemented between strings and intervals.`
+          `Operator '${operator}' not implemented between strings and intervals.`,
         );
       }
     } else if (left instanceof Color) {
@@ -1785,11 +1785,11 @@ export class ExpressionVisitor {
               right.domain,
               right.steps,
               intervalValueAs(value, right.node),
-              right
+              right,
             );
           } else if (node.preferLeft) {
             throw new Error(
-              'Cannot prefer the temperament operand when tempering.'
+              'Cannot prefer the temperament operand when tempering.',
             );
           }
           return new Interval(
@@ -1797,13 +1797,13 @@ export class ExpressionVisitor {
             'logarithmic',
             right.steps,
             undefined,
-            right
+            right,
           );
         } else if (operator === 'dot' || operator === '·') {
           return left.dot(right);
         }
         throw new Error(
-          `Operator '${operator}' not implemented between temperaments and intervals.`
+          `Operator '${operator}' not implemented between temperaments and intervals.`,
         );
       }
     }
@@ -1869,7 +1869,7 @@ export class ExpressionVisitor {
 
   protected intrinsicValBasisCall(
     callee: ValBasis,
-    caller: SonicWeaveValue
+    caller: SonicWeaveValue,
   ): SonicWeaveValue {
     if (typeof caller === 'boolean' || caller instanceof Interval) {
       caller = upcastBool(caller);
@@ -1881,7 +1881,7 @@ export class ExpressionVisitor {
 
   protected intrinsicStringCall(
     callee: string,
-    caller: SonicWeaveValue
+    caller: SonicWeaveValue,
   ): SonicWeaveValue {
     if (typeof caller === 'string') {
       return callee + caller;
@@ -1897,7 +1897,7 @@ export class ExpressionVisitor {
 
   protected intrinsicColorCall(
     callee: Color,
-    caller: SonicWeaveValue
+    caller: SonicWeaveValue,
   ): SonicWeaveValue {
     if (typeof caller === 'boolean' || caller instanceof Interval) {
       caller = upcastBool(caller).shallowClone();
@@ -1920,7 +1920,7 @@ export class ExpressionVisitor {
 
   protected intrinsicIntervalCall(
     callee: Interval,
-    caller: SonicWeaveValue
+    caller: SonicWeaveValue,
   ): SonicWeaveValue {
     switch (typeof caller) {
       case 'string':
@@ -1949,7 +1949,7 @@ export class ExpressionVisitor {
 
   protected intrinsicValCall(
     callee: Val,
-    caller: SonicWeaveValue
+    caller: SonicWeaveValue,
   ): SonicWeaveValue {
     if (typeof caller === 'boolean' || caller instanceof Interval) {
       throw new Error('Undefined intrinsic call.');
@@ -1963,7 +1963,7 @@ export class ExpressionVisitor {
   protected vectorDot(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
-    node: BinaryExpression
+    node: BinaryExpression,
   ): SonicWeaveValue {
     if (!Array.isArray(left) || !Array.isArray(right)) {
       throw new Error('Operands must be arrays in vdot.');
@@ -1994,7 +1994,7 @@ export class ExpressionVisitor {
     }
     if (!left.length) {
       throw new Error(
-        'The domain of the empty vdot without preference is ambiguous.'
+        'The domain of the empty vdot without preference is ambiguous.',
       );
     }
     return left
@@ -2005,7 +2005,7 @@ export class ExpressionVisitor {
   protected matrixDot(
     left: SonicWeaveValue,
     right: SonicWeaveValue,
-    node: BinaryExpression
+    node: BinaryExpression,
   ) {
     if (!Array.isArray(left) || !Array.isArray(right)) {
       throw new Error('Operands must be arrays of arrays in mdot.');
@@ -2079,7 +2079,7 @@ export class ExpressionVisitor {
       }
       right = arrayRecordOrString(
         right,
-        `Target of '${operator}' must be an array, record or a string.`
+        `Target of '${operator}' must be an array, record or a string.`,
       );
       if (typeof right === 'string') {
         right = [...right];
@@ -2109,7 +2109,7 @@ export class ExpressionVisitor {
       }
       right = arrayRecordOrString(
         right,
-        `Target of '${operator}' must be an array, record or a string.`
+        `Target of '${operator}' must be an array, record or a string.`,
       );
       if (Array.isArray(right) || typeof right === 'string') {
         if (!(left instanceof Interval && left.value.isIntegral())) {
@@ -2192,8 +2192,8 @@ export class ExpressionVisitor {
     if (node.flavor === 'r') {
       const value = TimeReal.fromValue(
         parseFloat(
-          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`
-        )
+          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`,
+        ),
       );
       return new Interval(value, 'linear', 0, node);
     }
@@ -2212,7 +2212,7 @@ export class ExpressionVisitor {
     try {
       const value = TimeMonzo.fromBigNumeratorDenominator(
         numerator,
-        denominator
+        denominator,
       );
       if (node.flavor === 'z') {
         value.timeExponent = NEGATIVE_ONE;
@@ -2221,8 +2221,8 @@ export class ExpressionVisitor {
     } catch {
       const value = TimeReal.fromValue(
         parseFloat(
-          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`
-        )
+          `${node.sign}${node.whole}.${node.fractional}e${node.exponent ?? '0'}`,
+        ),
       );
       if (node.flavor === 'z') {
         value.timeExponent = -1;
@@ -2265,12 +2265,12 @@ export class ExpressionVisitor {
     try {
       const value = TimeMonzo.fromBigNumeratorDenominator(
         node.numerator,
-        node.denominator
+        node.denominator,
       );
       return new Interval(value, 'linear', 0, node);
     } catch {
       const value = TimeReal.fromValue(
-        Number(node.numerator) / Number(node.denominator)
+        Number(node.numerator) / Number(node.denominator),
       );
       return new Interval(value, 'linear');
     }
@@ -2285,8 +2285,8 @@ export class ExpressionVisitor {
           fractionOfEquave,
           new Fraction(
             node.equaveNumerator,
-            node.equaveDenominator ?? undefined
-          )
+            node.equaveDenominator ?? undefined,
+          ),
         );
       } else {
         value = TimeMonzo.fromEqualTemperament(fractionOfEquave);
@@ -2295,7 +2295,7 @@ export class ExpressionVisitor {
     } catch {
       const base = (node.equaveNumerator ?? 2) / (node.equaveDenominator ?? 1);
       const value = TimeReal.fromValue(
-        base ** (node.numerator / node.denominator)
+        base ** (node.numerator / node.denominator),
       );
       return new Interval(value, 'logarithmic');
     }
@@ -2305,11 +2305,11 @@ export class ExpressionVisitor {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
       value = KIBI_MONZO.pow(
-        binaryExponent(node.prefix as BinaryPrefix)
+        binaryExponent(node.prefix as BinaryPrefix),
       ) as TimeMonzo;
     } else {
       value = TEN_MONZO.pow(
-        metricExponent(node.prefix as MetricPrefix)
+        metricExponent(node.prefix as MetricPrefix),
       ) as TimeMonzo;
     }
     value.timeExponent = NEGATIVE_ONE;
@@ -2320,11 +2320,11 @@ export class ExpressionVisitor {
     let value: TimeMonzo;
     if (node.prefix.endsWith('i')) {
       value = KIBI_MONZO.pow(
-        binaryExponent(node.prefix as BinaryPrefix)
+        binaryExponent(node.prefix as BinaryPrefix),
       ) as TimeMonzo;
     } else {
       value = TEN_MONZO.pow(
-        metricExponent(node.prefix as MetricPrefix)
+        metricExponent(node.prefix as MetricPrefix),
       ) as TimeMonzo;
     }
     value.timeExponent = ONE;
@@ -2370,13 +2370,13 @@ export class ExpressionVisitor {
         result.push(
           node.mirror
             ? intervals[i].ldiv(rootInterval)
-            : intervals[i].div(rootInterval)
+            : intervals[i].div(rootInterval),
         );
       } else if (typesCompatible(intervals[i].node, rootInterval.node)) {
         result.push(
           node.mirror
             ? intervals[i].lsub(rootInterval)
-            : intervals[i].sub(rootInterval)
+            : intervals[i].sub(rootInterval),
         );
       } else {
         const steps = intervals[i].steps - rootInterval.steps;
@@ -2386,8 +2386,8 @@ export class ExpressionVisitor {
             domains[i],
             node.mirror ? -steps : steps,
             undefined,
-            infect(intervals[i], rootInterval)
-          )
+            infect(intervals[i], rootInterval),
+          ),
         );
       }
     }
@@ -2442,7 +2442,7 @@ export class ExpressionVisitor {
 
   protected visitHarmonicSegment(
     node: HarmonicSegment,
-    enumeral = false
+    enumeral = false,
   ): Interval[] {
     let root = this.visit(node.root);
     let end = this.visit(node.end);

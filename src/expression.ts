@@ -323,7 +323,7 @@ export function validateNode(node?: IntervalLiteral) {
  */
 export function inferFJSFlavor(
   a: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS,
-  b?: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS
+  b?: FJS | AspiringFJS | AbsoluteFJS | AspiringAbsoluteFJS,
 ): FJSFlavor {
   let result: FJSFlavor | undefined = undefined;
   if (a.type === 'FJS' || a.type === 'AbsoluteFJS') {
@@ -365,7 +365,7 @@ export function inferFJSFlavor(
  * @hidden
  */
 export function uniformInvertNode(
-  node?: IntervalLiteral
+  node?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!node) {
     return undefined;
@@ -509,7 +509,7 @@ export function absNode(node?: IntervalLiteral): IntervalLiteral | undefined {
 
 /** @hidden */
 export function pitchAbsNode(
-  node?: IntervalLiteral
+  node?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!node) {
     return undefined;
@@ -569,7 +569,7 @@ export function sqrtNode(node?: IntervalLiteral): IntervalLiteral | undefined {
 
 function aspireNodes(
   a: IntervalLiteral,
-  b: IntervalLiteral
+  b: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (a.type === 'AbsoluteFJS' || a.type === 'AspiringAbsoluteFJS') {
     if (b.type === 'FJS' || b.type === 'AspiringFJS') {
@@ -597,7 +597,7 @@ function aspireNodes(
 /** @hidden */
 export function addNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -639,7 +639,7 @@ export function addNodes(
 /** @hidden */
 export function subNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -673,7 +673,7 @@ export function subNodes(
 /** @hidden */
 export function modNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -690,7 +690,7 @@ export function modNodes(
 /** @hidden */
 export function roundToNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -707,7 +707,7 @@ export function roundToNodes(
 /** @hidden */
 export function divNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -725,7 +725,7 @@ export function divNodes(
 /** @hidden */
 export function mulNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -783,7 +783,7 @@ export function mulNodes(
 /** @hidden */
 export function projectNodes(
   octaves?: IntervalLiteral,
-  base?: IntervalLiteral
+  base?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!octaves || !base) {
     return undefined;
@@ -808,7 +808,7 @@ export function projectNodes(
 /** @hidden */
 export function powNodes(
   a?: IntervalLiteral,
-  b?: IntervalLiteral
+  b?: IntervalLiteral,
 ): IntervalLiteral | undefined {
   if (!a || !b) {
     return undefined;
@@ -919,7 +919,7 @@ function formatMosStepLiteral(literal: MosStepLiteral) {
   const q = ms.quality;
   const aa = (ms.augmentations ?? []).join('');
   return `${base}${q.fraction}${q.quality}${aa}${ms.degree}ms${tailFJS(
-    literal
+    literal,
   )}`;
 }
 
@@ -1058,7 +1058,7 @@ function formatSquareSuperparticular(literal: SquareSuperparticular) {
  * @returns Text representation of the literal.
  */
 export function literalToString(
-  literal: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral
+  literal: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral,
 ) {
   switch (literal.type) {
     case 'NedjiLiteral':
@@ -1089,7 +1089,7 @@ export function literalToString(
       return formatAbsoluteFJS(literal);
     case 'WartsLiteral':
       return `${literal.equave}${literal.divisions}${literal.warts.join(
-        ''
+        '',
       )}@${formatSubgroupBasis(literal.basis)}`;
     case 'SparseOffsetVal':
       return formatSparseOffsetVal(literal);
@@ -1123,7 +1123,7 @@ export function literalToString(
  */
 export function numberToDecimalLiteral(
   num: number | Fraction,
-  flavor: NumericFlavor
+  flavor: NumericFlavor,
 ): DecimalLiteral {
   let [wholeStr, fractional] = num.toString().split('.');
   let sign: Sign = '';
@@ -1171,7 +1171,7 @@ export function integerToVectorComponent(num: number): VectorComponent {
 }
 
 export function literalToJSON(
-  literal?: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral
+  literal?: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral,
 ): any {
   if (!literal) {
     return undefined;
@@ -1242,7 +1242,7 @@ export function literalToJSON(
 }
 
 export function intervalLiteralFromJSON(
-  object: any
+  object: any,
 ): IntervalLiteral | undefined {
   if (object === undefined) {
     return undefined;

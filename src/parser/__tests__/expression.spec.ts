@@ -145,7 +145,7 @@ describe('SonicWeave expression evaluator', () => {
     expect(Array.isArray(scale)).toBe(true);
     expect(scale).toHaveLength(5);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '5;4;3;2;1'
+      '5;4;3;2;1',
     );
   });
 
@@ -338,10 +338,10 @@ describe('SonicWeave expression evaluator', () => {
         'logarithmic',
       ]) {
         const value = evaluate(
-          `A4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`
+          `A4 = 440 Hz = 27/16; ${conversion}(${tier}(3.141592653589793r${hz}${tolerance}))`,
         ) as Interval;
         const iterated = evaluate(
-          `A4 = 440 Hz = 27/16; ${value.toString()}`
+          `A4 = 440 Hz = 27/16; ${value.toString()}`,
         ) as Interval;
         expect(iterated.domain).toBe(value.domain);
         expect(iterated.valueOf()).toBeCloseTo(value.valueOf());
@@ -351,7 +351,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a string representation for an absurd absolute quantity', () => {
     const value = evaluate(
-      'A4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))'
+      'A4 = 440Hz = 27/16; absolute(fraction(3.141592653589793r, -0.1))',
     ) as Interval;
     const iterated = evaluate(value.toString()) as Interval;
     expect(iterated.domain).toBe(value.domain);
@@ -361,7 +361,7 @@ describe('SonicWeave expression evaluator', () => {
   it('can access builtin docs', () => {
     const doc = evaluate('doc(primes)');
     expect(doc).toBe(
-      'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.'
+      'Obtain an array of prime numbers such that start <= p <= end. Or p <= start if end is omitted.',
     );
   });
 
@@ -770,7 +770,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('clears colors using niente', () => {
     const {interval} = parseSingle('1,5 lime "my fifth" niente');
-    expect(interval.color).toBeUndefined;
+    expect(interval.color).toBeUndefined();
     expect(interval.label).toBe('my fifth');
   });
 
@@ -838,7 +838,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has flat multiple array comprehensions', () => {
     const uncutDiamond = evaluate(
-      '[str(p % q) for p of [1..5] for q of [1..5]]'
+      '[str(p % q) for p of [1..5] for q of [1..5]]',
     );
     expect(uncutDiamond).toEqual([
       '1/1',
@@ -897,7 +897,7 @@ describe('SonicWeave expression evaluator', () => {
       '7/2',
     ]);
     expect(
-      fiveGPV.value.dot(TimeMonzo.fromFraction('15/13')).toFraction()
+      fiveGPV.value.dot(TimeMonzo.fromFraction('15/13')).toFraction(),
     ).toBe('1');
   });
 
@@ -918,10 +918,10 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has rank-3 tensoring', () => {
     const block = evaluate(
-      '([1/1, 3/2]⊗[5/4, 2/1])⊗[7/4, 2/1]'
+      '([1/1, 3/2]⊗[5/4, 2/1])⊗[7/4, 2/1]',
     ) as unknown as Interval[][][];
     expect(
-      block.map(mat => mat.map(row => row.map(i => i.toString())))
+      block.map(mat => mat.map(row => row.map(i => i.toString()))),
     ).toEqual([
       [
         ['35/16', '5/2'],
@@ -983,17 +983,17 @@ describe('SonicWeave expression evaluator', () => {
   it('formats non-standard simplified vals', () => {
     const orphanBohlenPierce = evaluate('simplify(b13@)') as Val;
     expect(orphanBohlenPierce.toString()).toBe(
-      'withBasis(<8 13 19 23 28 30 34 35 37], @3.2.5.7.11.13.17.19.23)'
+      'withBasis(<8 13 19 23 28 30 34 35 37], @3.2.5.7.11.13.17.19.23)',
     );
   });
 
   it('parses non-standard vals', () => {
     const orphanBohlenPierce = evaluate(
-      'withBasis(<8 13 19 23], @3.2.5..)'
+      'withBasis(<8 13 19 23], @3.2.5..)',
     ) as Val;
     expect(orphanBohlenPierce.equave.toString()).toBe('3');
     expect(
-      orphanBohlenPierce.value.primeExponents.map(pe => pe.toFraction())
+      orphanBohlenPierce.value.primeExponents.map(pe => pe.toFraction()),
     ).toEqual(['8', '13', '19', '23']);
   });
 
@@ -1128,7 +1128,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has nested destructuring in array comprehensions', () => {
     const sums = evaluate(
-      '[str(foo + bar + baz) for [foo, [bar, baz]] of [[1, [2, 3]], [4, [5, 6]]]]'
+      '[str(foo + bar + baz) for [foo, [bar, baz]] of [[1, [2, 3]], [4, [5, 6]]]]',
     );
     expect(sums).toEqual(['6', '15']);
   });
@@ -1318,7 +1318,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can slice assign nientes', () => {
     const nothings = evaluate(
-      'const arr = [1, 2, 3, 4]; arr[0,2..] = [niente, niente]; map(str, arr)'
+      'const arr = [1, 2, 3, 4]; arr[0,2..] = [niente, niente]; map(str, arr)',
     );
     expect(nothings).toEqual(['niente', '2', 'niente', '4']);
   });
@@ -1360,7 +1360,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('labels up-E-semiflat-super-11-neutral', () => {
     const {interval} = parseSingle(
-      'C4 = 1;labelAbsoluteFJS(11/9 * linear(1°), "n")'
+      'C4 = 1;labelAbsoluteFJS(11/9 * linear(1°), "n")',
     );
     expect(interval.label).toBe('^Ed^11n');
     expect(interval.color?.value).toBe('black');
@@ -1368,7 +1368,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('breaks constructed absolute FJS', () => {
     const {interval} = parseSingle(
-      'F4 = 1;const g = absoluteFJS(9/8);C4 = 1;g str(g)'
+      'F4 = 1;const g = absoluteFJS(9/8);C4 = 1;g str(g)',
     );
     expect(interval.value.toFraction().toFraction()).toBe('9/8');
     expect(interval.label).toBe('D♮4');
@@ -1381,7 +1381,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can flatten a nested array', () => {
     const arr = evaluate(
-      'flatten([["a", ["b", "c"]], ["d", ["e", "f"]], "g"])'
+      'flatten([["a", ["b", "c"]], ["d", ["e", "f"]], "g"])',
     );
     expect(arr).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
   });
@@ -1449,7 +1449,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has inline analogue of try..catch (left success)', () => {
     const {interval} = parseSingle(
-      'fraction([1>) lest fraction([-1 1>) lest [-1 1>'
+      'fraction([1>) lest fraction([-1 1>) lest [-1 1>',
     );
     expect(interval.toString()).toBe('2/1');
   });
@@ -1462,27 +1462,27 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has an inline analogue of try..catch (ternary fail.fail.fail)', () => {
     expect(() =>
-      evaluate('fraction(E) lest fraction(PI) lest fraction(LN2)')
+      evaluate('fraction(E) lest fraction(PI) lest fraction(LN2)'),
     ).toThrow('Input is irrational and no tolerance given.');
   });
 
   it('has an inline analogue of try..catch (ternary fail.fail.success)', () => {
     const {fraction} = parseSingle(
-      'fraction(E) lest fraction(PI) lest fraction(LN2, 10.)'
+      'fraction(E) lest fraction(PI) lest fraction(LN2, 10.)',
     );
     expect(fraction).toBe('9/13');
   });
 
   it('has an inline analogue of try..catch (ternary fail.success.no-eval)', () => {
     const {fraction} = parseSingle(
-      'fraction(E) lest fraction(PI, 10.) lest fraction(LN2)'
+      'fraction(E) lest fraction(PI, 10.) lest fraction(LN2)',
     );
     expect(fraction).toBe('22/7');
   });
 
   it('has an inline analogue of try..catch (ternary success.no-eval.no-eval)', () => {
     const {fraction} = parseSingle(
-      'fraction(E, 10.) lest fraction(PI, 10.) lest fraction(LN2)'
+      'fraction(E, 10.) lest fraction(PI, 10.) lest fraction(LN2)',
     );
     expect(fraction).toBe('19/7');
   });
@@ -1514,7 +1514,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it("throws if you don't pass arguments to int", () => {
     expect(() => parseSingle('int()')).toThrow(
-      "Parameter 'interval' is required."
+      "Parameter 'interval' is required.",
     );
   });
 
@@ -1531,7 +1531,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can calculate the step string for Lydian', () => {
     const pattern = evaluate(
-      '9/8;81/64;729/512;3/2;27/16;243/128;2/1;stepString()'
+      '9/8;81/64;729/512;3/2;27/16;243/128;2/1;stepString()',
     );
     expect(pattern).toBe('LLLsLLs');
   });
@@ -1564,7 +1564,7 @@ describe('SonicWeave expression evaluator', () => {
   it('uses fillers in step strings when it runs out of letters (positive)', () => {
     const pattern = evaluate('53::106;stepString()');
     expect(pattern).toBe(
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy??'
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy??',
     );
   });
 
@@ -1591,10 +1591,10 @@ describe('SonicWeave expression evaluator', () => {
   it('parses the eighth fifth', () => {
     const quarterMinorSesquith = parseSingle('⅛d1.5');
     expect(quarterMinorSesquith.value.primeExponents[0].toFraction()).toBe(
-      '-1/8'
+      '-1/8',
     );
     expect(quarterMinorSesquith.value.primeExponents[1].toFraction()).toBe(
-      '1/8'
+      '1/8',
     );
   });
 
@@ -1661,7 +1661,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can re-assign record values', () => {
     const record = evaluate(
-      'const rec = #{foo: 1, bar: 2};rec["bar"] *= 3; rec'
+      'const rec = #{foo: 1, bar: 2};rec["bar"] *= 3; rec',
     ) as Record<string, Interval>;
     expect(record['foo'].toString()).toBe('1');
     expect(record['bar'].toString()).toBe('6');
@@ -1731,7 +1731,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a tightly binding fractional slash operator', () => {
     const tritonus = parseSingle(
-      'const Diabolus = 7; const unus = 1; const musica = 5; const duo = 2; Diabolus/musica ^ duo/unus'
+      'const Diabolus = 7; const unus = 1; const musica = 5; const duo = 2; Diabolus/musica ^ duo/unus',
     );
     expect(tritonus.value.toFraction().toFraction()).toBe('49/25');
   });
@@ -1859,7 +1859,7 @@ describe('SonicWeave expression evaluator', () => {
     const val = evaluate('4@3/2.10/9') as Val;
     expect(val.divisions.toFraction()).toBe('4');
     expect(val.value.dot(TimeMonzo.fromFraction('10/9')).toFraction()).toBe(
-      '1'
+      '1',
     );
   });
 
@@ -1870,7 +1870,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has insane units', () => {
     const miksiTeitSen = evaluate(
-      '1 = 440Hz; relative([10000>@Hz)'
+      '1 = 440Hz; relative([10000>@Hz)',
     ) as Interval;
     expect(miksiTeitSen.toString()).toBe('-1\\1<440>');
   });
@@ -2035,7 +2035,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('reject literal increment', () => {
     expect(() => evaluate('++1')).toThrow(
-      'Only identifiers, array elements or record values may be incremented or decremented.'
+      'Only identifiers, array elements or record values may be incremented or decremented.',
     );
   });
 
@@ -2082,14 +2082,14 @@ describe('SonicWeave expression evaluator', () => {
 
   it('supports complex exponents', () => {
     const {interval} = parseSingle(
-      '2^(19019/12000) \'Guybrush "3L 3s" Threewood\''
+      '2^(19019/12000) \'Guybrush "3L 3s" Threewood\'',
     );
     expect(interval.totalCents()).toBe(1901.9);
   });
 
   it('no longer has implicit elementwise product', () => {
     expect(() => evaluate('[2, 3] [5, 7]')).toThrow(
-      'Undefined intrinsic call.'
+      'Undefined intrinsic call.',
     );
   });
 
@@ -2199,13 +2199,13 @@ describe('SonicWeave expression evaluator', () => {
 
   it('has a broadcasting ternary operator (broadcasting failure)', () => {
     expect(() => evaluate('[2] where [true, false] else [4, 5, 6]')).toThrow(
-      'Unable to broadcast arrays together with lengths 1, 2 and 3.'
+      'Unable to broadcast arrays together with lengths 1, 2 and 3.',
     );
   });
 
   it('has a broadcasting ternary operator (broadcasting failure *)', () => {
     expect(() => evaluate('2 where [true, false] else [4, 5, 6]')).toThrow(
-      'Unable to broadcast arrays together with lengths *, 2 and 3.'
+      'Unable to broadcast arrays together with lengths *, 2 and 3.',
     );
   });
 
@@ -2228,11 +2228,11 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert 1073741821/1073741820 to a prime monzo', () => {
     const {interval, fraction} = parseSingle(
-      'primeMonzo(1073741821/1073741820)'
+      'primeMonzo(1073741821/1073741820)',
     );
     expect(fraction).toBe('1073741821/1073741820');
     expect(interval.toString()).toBe(
-      '[-2 -1 -1 1 -1 -1 -1 -1 1>@2.3.5.23.29.43.113.127.46684427'
+      '[-2 -1 -1 1 -1 -1 -1 -1 1>@2.3.5.23.29.43.113.127.46684427',
     );
     expect(interval.domain).toBe('logarithmic');
   });
@@ -2244,7 +2244,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can convert [-4, 4, -1] to a monzo', () => {
     const {interval, fraction} = parseSingle(
-      'monzoFromPrimeArray([-4, 4, -1])'
+      'monzoFromPrimeArray([-4, 4, -1])',
     );
     expect(fraction).toBe('81/80');
     expect(interval.toString()).toBe('[-4 4 -1>');
@@ -2262,7 +2262,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('rejects defer at root scope', () => {
     expect(() => evaluate('defer 2;3')).toThrow(
-      'Deferred actions not allowed when evaluating expressions.'
+      'Deferred actions not allowed when evaluating expressions.',
     );
   });
 
@@ -2274,7 +2274,7 @@ describe('SonicWeave expression evaluator', () => {
   it('has irrational ranges', () => {
     const soReal = evaluate('[E,PI..4] str');
     expect(soReal).toEqual(
-      '[2.718281828459045r, 3.141592653589793r, 3.564903478720541r, 3.988214303851289r]'
+      '[2.718281828459045r, 3.141592653589793r, 3.564903478720541r, 3.988214303851289r]',
     );
   });
 
@@ -2327,7 +2327,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('evokes intrinsic behavior between PI and E', () => {
     expect(() => evaluateExpression('PI(E)')).toThrow(
-      'Undefined intrinsic call.'
+      'Undefined intrinsic call.',
     );
   });
 
@@ -2422,7 +2422,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('coerces too accurate nedji to real', () => {
     const interval = evaluate(
-      '1000000000000000\\9007199254740997<3>'
+      '1000000000000000\\9007199254740997<3>',
     ) as Interval;
     expect(interval.value).toBeInstanceOf(TimeReal);
     expect(interval.valueOf()).toBeCloseTo(1.12972);
@@ -2573,7 +2573,7 @@ describe('SonicWeave expression evaluator', () => {
       ])
     `) as unknown as Interval[][];
     expect(
-      inverse.map(row => row.map(i => i.toFraction().toFraction()))
+      inverse.map(row => row.map(i => i.toFraction().toFraction())),
     ).toEqual([
       ['31/94', '-7/47', '1/94'],
       ['-1/47', '5/47', '3/47'],
@@ -2583,7 +2583,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can invert a real matrix', () => {
     const inverse = evaluate(
-      'inv([[PI, 1\\2], [-E, √5 - √3]])'
+      'inv([[PI, 1\\2], [-E, √5 - √3]])',
     ) as unknown as Interval[][];
     expect(inverse.map(row => row.map(i => i.valueOf().toFixed(4)))).toEqual([
       ['0.0929', '-0.2606'],
@@ -2624,7 +2624,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('respells 531441/262144 using [81/80, 128/125, 135/128]', () => {
     const {fraction} = parseSingle(
-      'respell([81/80, 128/125, 135/128])(531441/262144)'
+      'respell([81/80, 128/125, 135/128])(531441/262144)',
     );
     expect(fraction).toBe('1');
   });
@@ -2651,7 +2651,7 @@ describe('SonicWeave expression evaluator', () => {
 
   it('can respell square roots away (multiple commas)', () => {
     const {fraction} = parseSingle(
-      'respell([64/63, 78/77, 144/143], 3)(3/2 /^ 2)'
+      'respell([64/63, 78/77, 144/143], 3)(3/2 /^ 2)',
     );
     expect(fraction).toBe('11/9');
   });
@@ -2709,7 +2709,7 @@ describe('SonicWeave expression evaluator', () => {
   it('converts to exact cents with 12 fraction digits', () => {
     const {value} = parseSingle('cents(3/2, 12)');
     expect(
-      value.primeExponents[0].equals('701955000865387/1200000000000000')
+      value.primeExponents[0].equals('701955000865387/1200000000000000'),
     ).toBe(true);
   });
 

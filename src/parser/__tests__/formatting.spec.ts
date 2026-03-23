@@ -13,7 +13,7 @@ function evaluate(source: string) {
   }
   if (visitor.deferred.length) {
     throw new Error(
-      'Deferred actions not allowed when evaluating expressions.'
+      'Deferred actions not allowed when evaluating expressions.',
     );
   }
   const finalStatement = program.body[program.body.length - 1];
@@ -100,7 +100,7 @@ describe('Short label formatting', () => {
 
   it('turns long Hz into shorter Hz', () => {
     const freq = evaluateExpression(
-      'C4 = 263z;lstr(linear(C4 + Aug1 * 20), 9)'
+      'C4 = 263z;lstr(linear(C4 + Aug1 * 20), 9)',
     );
     expect(freq).toBe('977.985Hz');
   });

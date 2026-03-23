@@ -99,7 +99,7 @@ function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {
   const value = TimeMonzo.fromBigNumeratorDenominator(
     numerator,
     denominator,
-    numberOfComponents
+    numberOfComponents,
   );
   return new Interval(value, 'linear', 0, node);
 }
@@ -145,7 +145,7 @@ export function parseScaleWorkshop2Line(
   input: string,
   numberOfComponents?: number,
   admitBareNumbers = false,
-  universalMinus = true
+  universalMinus = true,
 ): Interval {
   const ast = parseAst(input);
   if (!universalMinus && ast.type === 'UnaryExpression') {
@@ -174,7 +174,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         {
           type: 'IntegerLiteral',
           value: ast.value,
-        }
+        },
       );
     case 'CentsLiteral':
       return parseCents(ast, numberOfComponents);
@@ -185,7 +185,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         TimeMonzo.fromBigNumeratorDenominator(
           ast.numerator,
           ast.denominator,
-          numberOfComponents
+          numberOfComponents,
         ),
         'linear',
         0,
@@ -193,7 +193,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
           type: 'FractionLiteral',
           numerator: ast.numerator,
           denominator: ast.denominator,
-        }
+        },
       );
   }
   if (ast.type === 'EdjiFraction') {
@@ -218,11 +218,11 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
       TimeMonzo.fromEqualTemperament(
         fractionOfEquave,
         equave,
-        numberOfComponents
+        numberOfComponents,
       ),
       'logarithmic',
       0,
-      node
+      node,
     );
   } else if (ast.type === 'Monzo') {
     const components = ast.components.map(c => new Fraction(c));
@@ -245,17 +245,17 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
         TimeReal.fromCents(
           dot(
             PRIME_CENTS,
-            components.map(f => f.valueOf())
+            components.map(f => f.valueOf()),
           ) +
             cents +
-            valueToCents(residual.valueOf())
+            valueToCents(residual.valueOf()),
         ),
-        'logarithmic'
+        'logarithmic',
       );
     } else {
       return new Interval(
         new TimeMonzo(ZERO, components, residual),
-        'logarithmic'
+        'logarithmic',
       );
     }
   } else if (ast.type === 'UnaryExpression') {
@@ -265,7 +265,7 @@ function evaluateAst(ast: Expression, numberOfComponents: number): Interval {
       operand.domain,
       0,
       uniformInvertNode(operand.node),
-      operand
+      operand,
     );
   }
   const left = evaluateAst(ast.left, numberOfComponents);

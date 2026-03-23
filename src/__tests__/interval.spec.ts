@@ -67,7 +67,7 @@ describe('Interchange format', () => {
   it('switches to subgroup monzos for 29-limit', () => {
     const interval = new Interval(
       TimeMonzo.fromFraction('29/16', 20),
-      'logarithmic'
+      'logarithmic',
     );
     interval.node = interval.asMonzoLiteral(true);
     expect(interval.toString()).toBe('[-4 1>@2.29');
@@ -76,7 +76,7 @@ describe('Interchange format', () => {
   it('uses explicit basis with the absolute echelon', () => {
     const interval = new Interval(
       TimeMonzo.fromFractionalFrequency(440),
-      'linear'
+      'linear',
     );
     interval.node = interval.asMonzoLiteral(true);
     expect(interval.toString()).toBe('[1 3 1 1>@Hz.2.5.11');
@@ -86,7 +86,7 @@ describe('Interchange format', () => {
     const interval = new Interval(
       TimeMonzo.fromFraction('5/3'),
       'logarithmic',
-      -3
+      -3,
     );
     interval.node = interval.asMonzoLiteral(true);
     expect(interval.toString()).toBe('[-3 -1 1>@1°.3.5');
@@ -218,7 +218,7 @@ describe('(Val) subgroup basis', () => {
       TimeMonzo.fromArray([1, 2, 6]),
     ]);
     expect(
-      basis.ortho.map(m => m.primeExponents.map(c => c.toFraction()))
+      basis.ortho.map(m => m.primeExponents.map(c => c.toFraction())),
     ).toEqual([
       ['1', '-1', '3'],
       ['-5/11', '16/11', '7/11'],
@@ -316,7 +316,7 @@ describe('Temperament', () => {
 
   it('rejects the trivial temperament (vals)', () => {
     expect(() => Temperament.fromVals([Val.fromArray([0, 0, 0])])).toThrow(
-      'Constructing the trivial temperament is not supported.'
+      'Constructing the trivial temperament is not supported.',
     );
   });
 
@@ -325,7 +325,7 @@ describe('Temperament', () => {
       Temperament.fromCommas([
         TimeMonzo.fromFraction('9/8'),
         TimeMonzo.fromFraction('256/243'),
-      ])
+      ]),
     ).toThrow('Constructing the trivial temperament is not supported.');
   });
 
@@ -336,7 +336,7 @@ describe('Temperament', () => {
       undefined,
       undefined,
       undefined,
-      true
+      true,
     );
     expect(mirkwai.canonicalMapping).toEqual([
       [1, 0, 0, 0],
@@ -360,7 +360,7 @@ describe('Temperament', () => {
     expect(dot(map, [1, 0, 0])).toBeCloseTo(PRIME_CENTS[0], -1);
     expect(dot(map, [-1, 1, 0])).toBeCloseTo(
       PRIME_CENTS[1] - PRIME_CENTS[0],
-      -2
+      -2,
     );
     expect(dot(map, [0, 0, 1])).toBeCloseTo(PRIME_CENTS[2], -2);
     expect((((map[1] - map[0]) / map[0]) * 1200).toFixed(3)).toBe('696.239');
@@ -382,7 +382,7 @@ describe('Temperament', () => {
     expect(dot(map, [1, 0, 0])).toBeCloseTo(PRIME_CENTS[0], 4);
     expect(dot(map, [-1, 1, 0])).toBeCloseTo(
       PRIME_CENTS[1] - PRIME_CENTS[0],
-      -2
+      -2,
     );
     expect(dot(map, [0, 0, 1])).toBeCloseTo(PRIME_CENTS[2], -2);
     expect((((map[1] - map[0]) / map[0]) * 1200).toFixed(4)).toBe('697.2143');

@@ -68,7 +68,7 @@ export function toSonicWeaveInterchange(source: string) {
   lines.push('');
   if (context.unisonFrequency) {
     const unisonFrequency = literalToString(
-      context.unisonFrequency.asInterchangeLiteral()
+      context.unisonFrequency.asInterchangeLiteral(),
     );
     lines.push(`1 = ${unisonFrequency}`);
     lines.push('');
@@ -100,7 +100,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
     evalCmd: string,
     context: Context,
     file: string,
-    cb: (err: Error | null, result: any) => void
+    cb: (err: Error | null, result: any) => void,
   ) {
     currentCmd += evalCmd;
 

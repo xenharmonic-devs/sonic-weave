@@ -50,7 +50,7 @@ describe('SonicWeave parser', () => {
   it('can call built-in functions', () => {
     const scale = parseSource('7;1;2;TAU;1\\2;sort();');
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1;1\\2;2;6.283185307179586r;7'
+      '1;1\\2;2;6.283185307179586r;7',
     );
   });
 
@@ -71,7 +71,7 @@ describe('SonicWeave parser', () => {
       equave; (* The default action is to push onto the current scale *)
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '8/7;4/3;8/5;2;8/3;4;8'
+      '8/7;4/3;8/5;2;8/3;4;8',
     );
   });
 
@@ -97,6 +97,7 @@ describe('SonicWeave parser', () => {
     expect(scale.map(i => i.toString()).join(';')).toBe('5/4;6/4;7/4;8/4');
   });
 
+  /* eslint-disable @typescript-eslint/no-unsafe-function-type */
   it('can declare functions', () => {
     const ast = parseAST('riff plusOne (x) { x ~+ 1; }');
     const visitor = new StatementVisitor();
@@ -107,7 +108,7 @@ describe('SonicWeave parser', () => {
     expect(
       (visitor.get('plusOne') as Function)
         .bind(visitor.createExpressionVisitor())(two)[0]
-        .value.toBigInteger()
+        .value.toBigInteger(),
     ).toBe(3n);
   });
 
@@ -164,7 +165,7 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1;2;3;4;5;15;14;13;12;11'
+      '1;2;3;4;5;15;14;13;12;11',
     );
   });
 
@@ -211,7 +212,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('C0=1/1;D0;E0;F0;G0;A0;B0;C1;');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
-      '9/8;81/64;4/3;3/2;27/16;243/128;2'
+      '9/8;81/64;4/3;3/2;27/16;243/128;2',
     );
   });
 
@@ -219,7 +220,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('γ0=1/1;δ0;ε0;ζ0;η1;α1;β1;γ1;');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.value.toFraction().toFraction()).join(';')).toBe(
-      '9/8;81/64;4/3;3/2;27/16;243/128;2'
+      '9/8;81/64;4/3;3/2;27/16;243/128;2',
     );
   });
 
@@ -251,7 +252,7 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(12);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\12;2\\12;3\\12;4\\12;5\\12;6\\12;7\\12;8\\12;9\\12;10\\12;11\\12;12\\12'
+      '1\\12;2\\12;3\\12;4\\12;5\\12;6\\12;7\\12;8\\12;9\\12;10\\12;11\\12;12\\12',
     );
   });
 
@@ -271,7 +272,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('C0=1/1;^C0;η0;vD0;D0;22@;');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\22;2\\22;3\\22;4\\22'
+      '1\\22;2\\22;3\\22;4\\22',
     );
   });
 
@@ -279,7 +280,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('^=a4-P8/2;C0=1/1;^C0;η0;vD0;D0;22@;');
     expect(scale).toHaveLength(4);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\22;2\\22;3\\22;4\\22'
+      '1\\22;2\\22;3\\22;4\\22',
     );
   });
 
@@ -310,7 +311,7 @@ describe('SonicWeave parser', () => {
       cents;
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '91.52832958332323r¢;196.08999826922548r¢;294.1349974038386r¢;392.1799965384506r¢;498.0449991346128r¢;590.876662628194r¢;698.0449991346126r¢;792.1799965384507r¢;894.1349974038386r¢;996.0899982692256r¢;1090.224995673063r¢;1200.'
+      '91.52832958332323r¢;196.08999826922548r¢;294.1349974038386r¢;392.1799965384506r¢;498.0449991346128r¢;590.876662628194r¢;698.0449991346126r¢;792.1799965384507r¢;894.1349974038386r¢;996.0899982692256r¢;1090.224995673063r¢;1200.',
     );
   });
 
@@ -371,11 +372,11 @@ describe('SonicWeave parser', () => {
 
   it('does polyoffsets as tensor products', () => {
     const scale = parseSource(
-      '2:3:4; $ tns (4:5:7); i => i rd 2; sort(); shift() * 2;'
+      '2:3:4; $ tns (4:5:7); i => i rd 2; sort(); shift() * 2;',
     );
     expect(scale).toHaveLength(6);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '5/4;21/16;3/2;7/4;15/8;2'
+      '5/4;21/16;3/2;7/4;15/8;2',
     );
   });
 
@@ -407,8 +408,8 @@ describe('SonicWeave parser', () => {
     `);
     expect(
       (scale as Interval[]).map(i =>
-        i.value.toEqualTemperament().fractionOfEquave.mul(19).valueOf()
-      )
+        i.value.toEqualTemperament().fractionOfEquave.mul(19).valueOf(),
+      ),
     ).toEqual([...Array(20).keys()].slice(1));
   });
 
@@ -423,7 +424,7 @@ describe('SonicWeave parser', () => {
     expect(
       (scale as Interval[])
         .map(i => i.value.toFraction().toFraction())
-        .join(';')
+        .join(';'),
     ).toBe('9/8;3/2;2');
   });
 
@@ -437,7 +438,7 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(4);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '0;1;0;1'
+      '0;1;0;1',
     );
   });
 
@@ -450,7 +451,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('primes(3, 22)');
     expect(scale).toHaveLength(7);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '3;5;7;11;13;17;19'
+      '3;5;7;11;13;17;19',
     );
   });
 
@@ -469,14 +470,14 @@ describe('SonicWeave parser', () => {
     `);
     expect(scale).toHaveLength(4);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '1;4;7;10'
+      '1;4;7;10',
     );
   });
 
   it('can average absolute pitches', () => {
     const visitor = evaluateSource(
       'C4 = 261 Hz; absoluteFJS((B4 + Bb4) % 2)',
-      false
+      false,
     );
     const beeSemiflat = visitor.get('$')![0];
     expect(beeSemiflat.toString(visitor.rootContext)).toBe('Bd4');
@@ -539,14 +540,14 @@ describe('SonicWeave parser', () => {
       5\\5<3>
     `);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '1\\5<3>;2\\5<3>;5\\5<3>'
+      '1\\5<3>;2\\5<3>;5\\5<3>',
     );
   });
 
   it('can expand basic scales', () => {
     const visitor = evaluateSource('5::10', false);
     expect(visitor.expand(visitor.rootContext!)).toBe(
-      '6/5\n7/5\n8/5\n9/5\n10/5'
+      '6/5\n7/5\n8/5\n9/5\n10/5',
     );
   });
 
@@ -558,7 +559,7 @@ describe('SonicWeave parser', () => {
   it('can expand customized scales', () => {
     const visitor = evaluateSource(
       'A4 = 440 Hz = 1/1;^D4;A4 = 432 Hz;^ = 2°;const syn=81/80;vD4~*syn;3;$[-1]=5;',
-      false
+      false,
     );
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
       [
@@ -569,52 +570,52 @@ describe('SonicWeave parser', () => {
         '[1 1 4 -1 1 0 1>@1°.Hz.2..',
         'vD♮4_5',
         '5',
-      ].join('\n')
+      ].join('\n'),
     );
   });
 
   it('can expand colored scales', () => {
     const visitor = evaluateSource(
       '4::8;$[1] = $[1] black; $[2] = $[2] "seventh"',
-      false
+      false,
     );
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      '5/4\n6/4 black\n7/4 "seventh"\n8/4'
+      '5/4\n6/4 black\n7/4 "seventh"\n8/4',
     );
   });
 
   it('can expand riffs', () => {
     const visitor = evaluateSource('riff foo (bar) {bar + 3};foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      'riff foo (bar) {bar + 3}\n4'
+      'riff foo (bar) {bar + 3}\n4',
     );
   });
 
   it('can expand fns', () => {
     const visitor = evaluateSource('fn foo(bar){bar + 3};foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      'fn foo(bar){bar + 3}\n4'
+      'fn foo(bar){bar + 3}\n4',
     );
   });
 
   it('can expand arrow functions', () => {
     const visitor = evaluateSource('const foo = bar => bar + 2;foo(1)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      'const foo = bar => bar + 2\n3'
+      'const foo = bar => bar + 2\n3',
     );
   });
 
   it('can expend variables that start with "riff"', () => {
     const visitor = evaluateSource('const riffy = 42', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      'const riffy = 42\n'
+      'const riffy = 42\n',
     );
   });
 
   it('can expand renamed builtins', () => {
     const visitor = evaluateSource('let foo = gcd;foo(6, 8)', false);
     expect(visitor.expand(getSourceVisitor(false).rootContext!)).toBe(
-      'let foo = gcd\n2'
+      'let foo = gcd\n2',
     );
   });
 
@@ -645,7 +646,7 @@ describe('SonicWeave parser', () => {
         '2',
         '3',
         '7',
-      ].join('\n')
+      ].join('\n'),
     );
   });
 
@@ -662,7 +663,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('/10::5');
     expect(scale).toHaveLength(5);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '10/9;10/8;10/7;10/6;10/5'
+      '10/9;10/8;10/7;10/6;10/5',
     );
   });
 
@@ -670,7 +671,7 @@ describe('SonicWeave parser', () => {
     const scale = parseSource('/8:7:6:5:4');
     expect(scale).toHaveLength(4);
     expect((scale as Interval[]).map(i => i.toString()).join(';')).toBe(
-      '8/7;8/6;8/5;8/4'
+      '8/7;8/6;8/5;8/4',
     );
   });
 
@@ -754,7 +755,7 @@ describe('SonicWeave parser', () => {
     }
     {
       const a = 2;
-      // eslint-disable-next-line no-inner-declarations
+
       function bar() {
         return a;
       }
@@ -820,7 +821,7 @@ describe('SonicWeave parser', () => {
 
   it('maps higher primes to real cents', () => {
     const scale = expand(
-      '11/8;3/2;7/4;2/1;PrimeMapping(1200., 1901.955, 1.5e*PI, 2.5e*E)'
+      '11/8;3/2;7/4;2/1;PrimeMapping(1200., 1901.955, 1.5e*PI, 2.5e*E)',
     );
     expect(scale).toEqual([
       '551.317942364757r¢',
@@ -1193,7 +1194,7 @@ describe('SonicWeave parser', () => {
 
   it('has inline labels for ordered scales using records', () => {
     const scale = expand(
-      '3/1 "pre-existing";#{third: 6/5, "The Octave": 2/1, fif: 3/2}'
+      '3/1 "pre-existing";#{third: 6/5, "The Octave": 2/1, fif: 3/2}',
     );
     expect(scale).toEqual([
       '3/1 "pre-existing"',
@@ -1205,7 +1206,7 @@ describe('SonicWeave parser', () => {
 
   it('throws an error if you try to call simplify without arguments', () => {
     expect(() => parseSource('simplify()')).toThrow(
-      "Parameter 'interval' is required."
+      "Parameter 'interval' is required.",
     );
   });
 
@@ -1216,7 +1217,7 @@ describe('SonicWeave parser', () => {
 
   it('throws an error if you use sort as a mapper', () => {
     expect(() => parseSource('2/1;3/2;sort')).toThrow(
-      'Only arrays can be sorted.'
+      'Only arrays can be sorted.',
     );
   });
 
@@ -1391,7 +1392,7 @@ describe('SonicWeave parser', () => {
 
   it('could golf ablin', () => {
     const scale = expand(
-      '1=6z;{const ablin = i => i linear absolute;3::6;ablin}'
+      '1=6z;{const ablin = i => i linear absolute;3::6;ablin}',
     );
     expect(scale).toEqual(['8 Hz', '10 Hz', '12 Hz']);
   });
@@ -1420,7 +1421,7 @@ describe('SonicWeave parser', () => {
         throw 'Defer did not execute!';
       }
     `,
-      false
+      false,
     );
   });
 
@@ -1436,7 +1437,7 @@ describe('SonicWeave parser', () => {
         throw 'Deferred statements executed in the wrong order!';
       }
     `,
-      false
+      false,
     );
   });
 
@@ -1449,26 +1450,26 @@ describe('SonicWeave parser', () => {
             i / (i - 1);
           }
         `,
-        false
-      )
+        false,
+      ),
     ).toThrow('Illegal BreakStatement inside a deferred block.');
   });
 
   it('rejects unassigned absolute pitches (ASCII)', () => {
     expect(() => evaluateSource('fsi#4', false)).toThrow(
-      'Nominal fsi is unassigned.'
+      'Nominal fsi is unassigned.',
     );
   });
 
   it('rejects unassigned absolute pitches (unicode)', () => {
     expect(() => evaluateSource('ς♭2', false)).toThrow(
-      'Nominal ς is unassigned.'
+      'Nominal ς is unassigned.',
     );
   });
 
   it('rejects unassigned accidentals', () => {
     expect(() => evaluateSource('Ce4', false)).toThrow(
-      'Accidental e is unassigned.'
+      'Accidental e is unassigned.',
     );
   });
 
@@ -1523,7 +1524,9 @@ describe('SonicWeave parser', () => {
       map(str)
     `);
     expect(
-      scale.map(i => i.value.toEqualTemperament().fractionOfEquave.toFraction())
+      scale.map(i =>
+        i.value.toEqualTemperament().fractionOfEquave.toFraction(),
+      ),
     ).toEqual(['3/20', '3/10', '7/20', '1/2', '13/20', '4/5', '17/20', '1']);
     expect(scale.map(i => i.label)).toEqual([
       'P1ms',
@@ -1988,7 +1991,7 @@ describe('SonicWeave parser', () => {
 
   it("doesn't throw for out-of-bounds nullish delete", () => {
     expect(() => parseSource('del [1, 2]~[3]')).not.toThrow(
-      'Index out of range.'
+      'Index out of range.',
     );
   });
 
@@ -2082,7 +2085,7 @@ describe('SonicWeave parser', () => {
         3/2
         27/16
         2
-      }`)
+      }`),
     );
   });
 
@@ -2128,7 +2131,7 @@ describe('SonicWeave parser', () => {
 
   it("tells the user to reflect on their life's choices when using the 0c val", () => {
     expect(() => expand('3/2;5/3;2/1;0[^5]@')).toThrow(
-      'Non-unitary tempering by zero divisions of an equave.'
+      'Non-unitary tempering by zero divisions of an equave.',
     );
   });
 
@@ -2167,7 +2170,7 @@ describe('SonicWeave parser', () => {
 
   it('tempers barbados to near-CTE', () => {
     const scale = expand(
-      'sort(15/13^[-2..2] rdc 2);Temperament([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)'
+      'sort(15/13^[-2..2] rdc 2);Temperament([5@2.3.13/5, 9@2.3.13/5], 9001);cents(£, 3)',
     );
     expect(scale).toEqual(['248.925', '497.85', '702.15', '951.075', '1200.']);
   });
@@ -2257,7 +2260,7 @@ describe('SonicWeave parser', () => {
 
   it('rejects 2 = 1 in a way that makes sense to the user', () => {
     expect(() => evaluateSource('2 = 1')).toThrow(
-      'Cannot assign relative pitch to relative pitch.'
+      'Cannot assign relative pitch to relative pitch.',
     );
   });
 

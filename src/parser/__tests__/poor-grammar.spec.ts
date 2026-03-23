@@ -16,7 +16,7 @@ describe('Angle brackets vs. comparisons', () => {
     () => {
       const no = evaluate('1 \\2<3>4');
       expect(no).toBe(false);
-    }
+    },
   );
 
   it.fails(
@@ -24,7 +24,7 @@ describe('Angle brackets vs. comparisons', () => {
     () => {
       const no = evaluate('1\\ 2<3>4');
       expect(no).toBe(false);
-    }
+    },
   );
 
   it.fails('features the return of (1°2 < 3) > 4', () => {

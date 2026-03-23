@@ -13,6 +13,7 @@ import {ZERO} from '../utils';
 /**
  * Function that can be called inside the SonicWeave runtime.
  */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export interface SonicWeaveFunction extends Function {
   __doc__: string | undefined;
   __node__: FunctionDeclaration | ArrowFunction | ExportFunctionStatement;
@@ -117,9 +118,10 @@ export function linearOne() {
  * @param builtin Function to extract node information from.
  * @returns Virtual {@link FunctionDeclaration} to be attached to `builtin.__node__`.
  */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export function builtinNode(
   builtin: Function,
-  defaults?: Record<string, Expression>
+  defaults?: Record<string, Expression>,
 ): FunctionDeclaration {
   const parameters: Parameter[] = builtin
     .toString()
@@ -210,7 +212,7 @@ export function isArrayOrRecord(container: SonicWeaveValue) {
 export function unaryBroadcast(
   this: ExpressionVisitor,
   container: SonicWeaveValue,
-  fn: (x: SonicWeavePrimitive) => SonicWeaveValue
+  fn: (x: SonicWeavePrimitive) => SonicWeaveValue,
 ) {
   if (Array.isArray(container)) {
     this.spendGas(container.length);
@@ -230,7 +232,7 @@ export function unaryBroadcast(
   const entries = Object.entries(container);
   this.spendGas(entries.length);
   return Object.fromEntries(
-    entries.map(([key, value]) => [key, fn(value)])
+    entries.map(([key, value]) => [key, fn(value)]),
   ) as Record<string, SonicWeavePrimitive>;
 }
 
@@ -246,13 +248,13 @@ export function binaryBroadcast(
   this: ExpressionVisitor,
   left: SonicWeaveValue,
   right: SonicWeaveValue,
-  fn: (x: SonicWeavePrimitive, y: SonicWeavePrimitive) => SonicWeaveValue
+  fn: (x: SonicWeavePrimitive, y: SonicWeavePrimitive) => SonicWeaveValue,
 ): SonicWeaveValue {
   if (Array.isArray(left)) {
     if (Array.isArray(right)) {
       if (left.length !== right.length) {
         throw new Error(
-          `Unable to broadcast arrays together with lengths ${left.length} and ${right.length}.`
+          `Unable to broadcast arrays together with lengths ${left.length} and ${right.length}.`,
         );
       }
       this.spendGas(left.length);
@@ -320,7 +322,7 @@ export function binaryBroadcast(
       entries.map(([key, value]) => [
         key,
         fn(value, right) as SonicWeavePrimitive,
-      ])
+      ]),
     );
   }
   if (Array.isArray(right)) {
@@ -341,7 +343,10 @@ export function binaryBroadcast(
   const entries = Object.entries(right);
   this.spendGas(entries.length);
   return Object.fromEntries(
-    entries.map(([key, value]) => [key, fn(left, value) as SonicWeavePrimitive])
+    entries.map(([key, value]) => [
+      key,
+      fn(left, value) as SonicWeavePrimitive,
+    ]),
   );
 }
 
@@ -353,8 +358,8 @@ export function ternaryBroadcast(
   fn: (
     x: SonicWeavePrimitive,
     y: SonicWeavePrimitive,
-    z: SonicWeavePrimitive
-  ) => SonicWeaveValue
+    z: SonicWeavePrimitive,
+  ) => SonicWeaveValue,
 ) {
   if (Array.isArray(left)) {
     this.spendGas(left.length);
@@ -362,16 +367,16 @@ export function ternaryBroadcast(
       if (Array.isArray(right)) {
         if (left.length !== middle.length || middle.length !== right.length) {
           throw new Error(
-            `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and ${right.length}.`
+            `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and ${right.length}.`,
           );
         }
         return left.map((l, i) =>
-          fn(l, middle[i], right[i])
+          fn(l, middle[i], right[i]),
         ) as SonicWeaveValue;
       }
       if (left.length !== middle.length) {
         throw new Error(
-          `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and *.`
+          `Unable to broadcast arrays together with lengths ${middle.length}, ${left.length} and *.`,
         );
       }
       return left.map((l, i) => fn(l, middle[i], right)) as SonicWeaveValue;
@@ -379,7 +384,7 @@ export function ternaryBroadcast(
     if (Array.isArray(right)) {
       if (left.length !== right.length) {
         throw new Error(
-          `Unable to broadcast arrays together with lengths *, ${left.length} and ${right.length}.`
+          `Unable to broadcast arrays together with lengths *, ${left.length} and ${right.length}.`,
         );
       }
       return left.map((l, i) => fn(l, middle, right[i])) as SonicWeaveValue;
@@ -391,7 +396,7 @@ export function ternaryBroadcast(
     if (Array.isArray(right)) {
       if (middle.length !== right.length) {
         throw new Error(
-          `Unable to broadcast arrays together with lengths ${middle.length}, * and ${right.length}.`
+          `Unable to broadcast arrays together with lengths ${middle.length}, * and ${right.length}.`,
         );
       }
       return middle.map((m, i) => fn(left, m, right[i])) as SonicWeaveValue;

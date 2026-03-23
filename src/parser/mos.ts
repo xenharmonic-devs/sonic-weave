@@ -74,7 +74,7 @@ export class Tardigrade {
             TimeMonzo.fromFraction(countL)
               .mul(this.hardness)
               .add(TimeMonzo.fromFraction(countS))
-              .inverse()
+              .inverse(),
           );
           large = small.pow(this.hardness);
         }
@@ -96,7 +96,7 @@ export class Tardigrade {
             large = this.large;
           } else if (this.small) {
             throw new Error(
-              'Small step may not be given with infinite hardness.'
+              'Small step may not be given with infinite hardness.',
             );
           } else {
             // Assume octave
@@ -116,7 +116,7 @@ export class Tardigrade {
               TimeMonzo.fromFraction(countL)
                 .mul(this.hardness)
                 .add(TimeMonzo.fromFraction(countS))
-                .inverse()
+                .inverse(),
             );
             large = small.pow(this.hardness);
           }
@@ -196,7 +196,7 @@ export class Tardigrade {
 
   visitRationalEquave(node: RationalEquave) {
     return TimeMonzo.fromFraction(
-      new Fraction(node.numerator, node.denominator)
+      new Fraction(node.numerator, node.denominator),
     );
   }
 
@@ -247,7 +247,7 @@ export class Tardigrade {
       | HardnessDeclaration
       | LargeDeclaration
       | SmallDeclaration
-      | EquaveDeclaration
+      | EquaveDeclaration,
   ) {
     const value = this.subVisitor.visit(node.value);
     if (!(value instanceof Interval)) {
