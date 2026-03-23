@@ -24,7 +24,7 @@ function logResult(source) {
 }
 
 console.log(
-  'Iterating over all printable ASCII character to see which are accepted by the parser.'
+  'Iterating over all printable ASCII character to see which are accepted by the parser.',
 );
 
 const ASCII = ['\t', '\n', '\r'];
