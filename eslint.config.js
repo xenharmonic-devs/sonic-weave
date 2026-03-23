@@ -10,12 +10,20 @@ module.exports = [
       'src/parser/sonic-weave-chord.js',
       'src/scale-workshop-2-ast.js',
       'src/parser/paren-counter.js',
-      // TODO: Figure out correct lint config for .js files
-      'bin/sonic-weave.js',
-      'scripts/calibrate-gas.js',
-      'scripts/inspect-random-programs.js',
-      'scripts/inspect-printable-ascii.js',
     ],
+  },
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'commonjs',
+      globals: {
+        console: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
   },
   {
     files: ['**/*.ts'],

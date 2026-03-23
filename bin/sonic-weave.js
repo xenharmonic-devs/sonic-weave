@@ -11,12 +11,12 @@ const {toScalaScl, toSonicWeaveInterchange, repl} = require('../dist');
 program
   .name('sonic-weave')
   .description(
-    'CLI for the SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments'
+    'CLI for the SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments',
   )
   .version(version)
   .argument(
     '[file]',
-    'File containing source code for a musical scale written in SonicWeave'
+    'File containing source code for a musical scale written in SonicWeave',
   )
   .option('-f, --format <format>', 'output format', 'scl');
 
