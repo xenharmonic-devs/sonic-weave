@@ -789,7 +789,7 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
 
   it('has try..catch', () => {
     const ast = parseSingle(
-      'try { throw "Stop trying to hit me, hit me!" } catch { "I know what you\'re trying to do..." }'
+      'try { throw "Stop trying to hit me, hit me!" } catch { "I know what you\'re trying to do..." }',
     );
     expect(ast).toEqual({
       type: 'TryStatement',

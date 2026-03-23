@@ -132,7 +132,7 @@ divisors.__node__ = builtinNode(divisors);
 function lll(
   this: ExpressionVisitor,
   basis: SonicWeaveValue,
-  weighting: 'none' | 'tenney' = 'tenney'
+  weighting: 'none' | 'tenney' = 'tenney',
 ) {
   if (!(basis instanceof ValBasis)) {
     throw new Error('A basis is required.');
@@ -147,7 +147,7 @@ lll.__node__ = builtinNode(lll);
 function kCombinations(
   this: ExpressionVisitor,
   set: any[],
-  k: SonicWeaveValue
+  k: SonicWeaveValue,
 ) {
   requireParameters({set});
   k = upcastBool(k);
@@ -173,7 +173,7 @@ isPrime.__node__ = builtinNode(isPrime);
 
 function nthPrime(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -192,7 +192,7 @@ nthPrime.__node__ = builtinNode(nthPrime);
 function primes(
   this: ExpressionVisitor,
   start: SonicWeaveValue,
-  end?: Interval
+  end?: Interval,
 ) {
   const s = upcastBool(start).valueOf();
   if (end) {
@@ -211,7 +211,7 @@ primes.__node__ = builtinNode(primes);
 function primeRange(
   this: ExpressionVisitor,
   start: SonicWeaveValue,
-  end?: Interval
+  end?: Interval,
 ) {
   const s = upcastBool(start).toInteger();
   if (end) {
@@ -233,7 +233,7 @@ function mosSubset(
   sizeOfLargeStep?: Interval,
   sizeOfSmallStep?: Interval,
   up?: Interval,
-  down?: Interval
+  down?: Interval,
 ) {
   const numL = upcastBool(numberOfLargeSteps).toInteger();
   const numS = upcastBool(numberOfSmallSteps).toInteger();
@@ -259,7 +259,7 @@ mosSubset.__node__ = builtinNode(mosSubset);
 
 function fareySequence(
   this: ExpressionVisitor,
-  maxDenominator: SonicWeaveValue
+  maxDenominator: SonicWeaveValue,
 ) {
   const md = upcastBool(maxDenominator).toInteger();
   this.spendGas(md * md);
@@ -276,7 +276,7 @@ fareySequence.__node__ = builtinNode(fareySequence);
 
 function fareyInterior(
   this: ExpressionVisitor,
-  maxDenominator: SonicWeaveValue
+  maxDenominator: SonicWeaveValue,
 ) {
   const md = upcastBool(maxDenominator).toInteger();
   this.spendGas(md * md);
@@ -295,7 +295,7 @@ fareyInterior.__node__ = builtinNode(fareyInterior);
 
 function simplify(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -309,7 +309,7 @@ simplify.__node__ = builtinNode(simplify);
 
 function bleach(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -322,7 +322,7 @@ bleach.__node__ = builtinNode(bleach);
 
 function linear(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -336,7 +336,7 @@ linear.__node__ = builtinNode(linear);
 
 function logarithmic(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -350,7 +350,7 @@ logarithmic.__node__ = builtinNode(logarithmic);
 
 function absolute(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -364,7 +364,7 @@ absolute.__node__ = builtinNode(absolute);
 
 function relative(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -388,7 +388,7 @@ bool.__node__ = builtinNode(bool);
 // Coercion: None.
 function int(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'string') {
@@ -408,7 +408,7 @@ int.__node__ = builtinNode(int);
 function decimal(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  fractionDigits?: Interval
+  fractionDigits?: Interval,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const d = decimal.bind(this);
@@ -422,7 +422,7 @@ function decimal(
     const denominator = 10 ** fractionDigits.toInteger();
     const numerator = Math.round(converted.value.valueOf() * denominator);
     converted.value = TimeMonzo.fromFraction(
-      new Fraction(numerator, denominator)
+      new Fraction(numerator, denominator),
     );
   }
   converted.node = converted.value.asDecimalLiteral();
@@ -438,12 +438,12 @@ function fraction(
   interval: SonicWeaveValue,
   tolerance?: Interval,
   preferredNumerator?: Interval,
-  preferredDenominator?: Interval
+  preferredDenominator?: Interval,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const f = fraction.bind(this);
     return unaryBroadcast.bind(this)(interval, i =>
-      f(i, tolerance, preferredNumerator, preferredDenominator)
+      f(i, tolerance, preferredNumerator, preferredDenominator),
     );
   }
   if (typeof interval === 'string') {
@@ -464,7 +464,7 @@ function fraction(
     value = converted.value.clone();
   } else {
     const frac = new Fraction(converted.value.valueOf()).simplifyRelative(
-      upcastBool(tolerance).totalCents()
+      upcastBool(tolerance).totalCents(),
     );
     value = TimeMonzo.fromFraction(frac);
   }
@@ -492,7 +492,7 @@ function radical(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
   maxIndex?: Interval,
-  maxHeight?: Interval
+  maxHeight?: Interval,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const r = radical.bind(this);
@@ -513,7 +513,7 @@ function radical(
           'linear',
           0,
           node,
-          converted
+          converted,
         );
       }
       throw new Error('Failed to convert to a radical.');
@@ -523,22 +523,22 @@ function radical(
         'linear',
         0,
         node,
-        converted
+        converted,
       );
     }
   } else if (maxIdx === undefined) {
     throw new Error(
-      'Input is not equally tempered and no maximum index given.'
+      'Input is not equally tempered and no maximum index given.',
     );
   }
   const maxH = maxHeight ? upcastBool(maxHeight).toInteger() : 50000;
   const {index, radicand} = approximateRadical(
     converted.value.valueOf(),
     maxIdx,
-    maxH
+    maxH,
   );
   const value = TimeMonzo.fromFraction(radicand).pow(
-    new Fraction(index).inverse()
+    new Fraction(index).inverse(),
   );
   const node = value.asRadicalLiteral();
   if (node) {
@@ -547,7 +547,7 @@ function radical(
     const frac = approximateRadical(
       converted.value.valueOf(),
       1,
-      maxH
+      maxH,
     ).radicand;
     const rational = TimeMonzo.fromFraction(frac);
     return new Interval(
@@ -555,7 +555,7 @@ function radical(
       'linear',
       0,
       rational.asFractionLiteral(),
-      converted
+      converted,
     );
   }
 }
@@ -580,7 +580,7 @@ function nedji(
   preferredNumerator?: Interval,
   preferredDenominator?: Interval,
   preferredEquaveNumerator?: Interval,
-  preferredEquaveDenominator?: Interval
+  preferredEquaveDenominator?: Interval,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const n = nedji.bind(this);
@@ -590,8 +590,8 @@ function nedji(
         preferredEquaveNumerator,
         preferredDenominator,
         preferredEquaveNumerator,
-        preferredEquaveDenominator
-      )
+        preferredEquaveDenominator,
+      ),
     );
   }
   if (typeof interval === 'string') {
@@ -601,7 +601,7 @@ function nedji(
     }
     const monzo = TimeMonzo.fromEqualTemperament(
       fraction.replace('\\', '/'),
-      equave
+      equave,
     );
     interval = new Interval(monzo, 'logarithmic');
   }
@@ -669,7 +669,7 @@ nedji.__node__ = builtinNode(nedji);
 function cents(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  fractionDigits?: Interval
+  fractionDigits?: Interval,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const c = cents.bind(this);
@@ -729,7 +729,7 @@ function validateFlavor(flavor: string): FJSFlavor {
 function absoluteFJS(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  flavor = ''
+  flavor = '',
 ): SonicWeaveValue {
   if (!this.rootContext) {
     throw new Error('Root context required for absolute FJS.');
@@ -760,7 +760,7 @@ function absoluteFJS(
     return result;
   }
   throw new Error(
-    `Conversion failed. Try absoluteFJS(fraction(x, 1e-4), '${flavor}') to approximate.`
+    `Conversion failed. Try absoluteFJS(fraction(x, 1e-4), '${flavor}') to approximate.`,
   );
 }
 absoluteFJS.__doc__ = 'Convert interval to absolute FJS.';
@@ -770,7 +770,7 @@ absoluteFJS.__node__ = builtinNode(absoluteFJS);
 function FJS(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  flavor = ''
+  flavor = '',
 ): SonicWeaveValue {
   if (!this.rootContext) {
     throw new Error('Root context required for FJS.');
@@ -794,7 +794,7 @@ function FJS(
     return result;
   }
   throw new Error(
-    `Conversion failed. Try FJS(fraction(x, 1e-4), '${flavor}') to approximate.`
+    `Conversion failed. Try FJS(fraction(x, 1e-4), '${flavor}') to approximate.`,
   );
 }
 FJS.__doc__ = 'Convert interval to (relative) FJS.';
@@ -804,7 +804,7 @@ FJS.__node__ = builtinNode(FJS);
 function labelAbsoluteFJS(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  flavor = ''
+  flavor = '',
 ): SonicWeaveValue {
   if (!this.rootContext) {
     throw new Error('Root context required for FJS.');
@@ -849,7 +849,7 @@ labelAbsoluteFJS.__node__ = builtinNode(labelAbsoluteFJS);
 // Coercion: None.
 function toMonzo(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const m = toMonzo.bind(this);
@@ -867,7 +867,7 @@ function toMonzo(
     'logarithmic',
     interval.steps,
     interval.asMonzoLiteral(),
-    interval
+    interval,
   );
 }
 Object.defineProperty(toMonzo, 'name', {value: 'monzo', enumerable: false});
@@ -877,7 +877,7 @@ toMonzo.__node__ = builtinNode(toMonzo);
 // Coercion: None.
 function primeMonzo(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = upcastBool(interval);
@@ -887,7 +887,7 @@ function primeMonzo(
     const monzo = interval.value;
     if (monzo instanceof TimeReal) {
       throw new Error(
-        'Irrational intervals cannot be converted to prime monzos.'
+        'Irrational intervals cannot be converted to prime monzos.',
       );
     }
     if (!monzo.isScalar()) {
@@ -930,7 +930,7 @@ primeMonzo.__node__ = builtinNode(primeMonzo);
 function S(
   this: ExpressionVisitor,
   start: SonicWeaveValue,
-  end: SonicWeaveValue
+  end: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof start === 'boolean' || start instanceof Interval) {
     if (typeof end === 'boolean' || end instanceof Interval) {
@@ -1043,7 +1043,7 @@ isArray.__node__ = builtinNode(isArray);
 
 function isAbsolute(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1060,7 +1060,7 @@ isAbsolute.__node__ = builtinNode(isAbsolute);
 
 function isRelative(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1080,7 +1080,7 @@ isRelative.__node__ = builtinNode(isRelative);
 
 function isLinear(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1100,7 +1100,7 @@ isLinear.__node__ = builtinNode(isLinear);
 
 function isLogarithmic(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1257,7 +1257,7 @@ clear.__node__ = builtinNode(clear, PARENT_SCALE);
 
 function colorOf(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1274,7 +1274,7 @@ colorOf.__node__ = builtinNode(colorOf);
 
 function labelOf(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (isArrayOrRecord(interval)) {
@@ -1291,7 +1291,7 @@ labelOf.__node__ = builtinNode(labelOf);
 
 function JIP(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     return unaryBroadcast.bind(this)(interval, JIP.bind(this));
@@ -1312,7 +1312,7 @@ JIP.__node__ = builtinNode(JIP);
 
 function real(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (interval === true) {
@@ -1330,7 +1330,7 @@ real.__node__ = builtinNode(real);
 
 function tenneyHeight(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -1344,7 +1344,7 @@ tenneyHeight.__node__ = builtinNode(tenneyHeight);
 
 function wilsonHeight(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -1359,7 +1359,7 @@ wilsonHeight.__node__ = builtinNode(wilsonHeight);
 function gcd(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
-  y: SonicWeaveValue
+  y: SonicWeaveValue,
 ): SonicWeaveValue {
   if (x === undefined && y === undefined) {
     let result: TimeMonzo | TimeReal = new TimeMonzo(ZERO, [], ZERO);
@@ -1380,7 +1380,7 @@ gcd.__node__ = builtinNode(gcd);
 function lcm(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
-  y: SonicWeaveValue
+  y: SonicWeaveValue,
 ): SonicWeaveValue {
   if (x === undefined && y === undefined) {
     const intervals = this.currentScale;
@@ -1406,7 +1406,7 @@ lcm.__node__ = builtinNode(lcm);
 function builtinCompare(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
-  y: SonicWeaveValue
+  y: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(x) || isArrayOrRecord(y)) {
     return binaryBroadcast.bind(this)(x, y, builtinCompare.bind(this));
@@ -1429,7 +1429,7 @@ builtinCompare.__node__ = builtinNode(builtinCompare);
 
 function toPrimeArray(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   requireParameters({interval});
   if (typeof interval === 'boolean' || interval instanceof Interval) {
@@ -1455,14 +1455,14 @@ toPrimeArray.__node__ = builtinNode(toPrimeArray);
 
 function monzoFromPrimeArray(
   this: ExpressionVisitor,
-  primeExponents: Interval[]
+  primeExponents: Interval[],
 ) {
   if (!Array.isArray(primeExponents)) {
     throw new Error('An array is required.');
   }
   const value = new TimeMonzo(
     ZERO,
-    primeExponents.map(i => upcastBool(i).toFraction())
+    primeExponents.map(i => upcastBool(i).toFraction()),
   );
   return new Interval(value, 'logarithmic', 0, value.asMonzoLiteral());
 }
@@ -1472,14 +1472,14 @@ monzoFromPrimeArray.__node__ = builtinNode(monzoFromPrimeArray);
 function valFromPrimeArray(
   this: ExpressionVisitor,
   primeExponents: Interval[],
-  basis?: ValBasis
+  basis?: ValBasis,
 ) {
   if (!Array.isArray(primeExponents)) {
     throw new Error('An array is required.');
   }
   const value = new TimeMonzo(
     ZERO,
-    primeExponents.map(i => upcastBool(i).toFraction())
+    primeExponents.map(i => upcastBool(i).toFraction()),
   );
   if (basis === undefined) {
     basis = new ValBasis(primeExponents.length);
@@ -1526,7 +1526,7 @@ function collectMatrix(matrix: SonicWeaveValue[][]) {
       const interval = upcastBool(component);
       if (!interval.isRelative()) {
         throw new Error(
-          'Matrix methods are only implemented in the relative echelon.'
+          'Matrix methods are only implemented in the relative echelon.',
         );
       }
       try {
@@ -1592,7 +1592,7 @@ function hasConstantStructure_(this: ExpressionVisitor, scale?: Interval[]) {
       // XXX: Margin CS is not reliable with zero margin, but whatever.
       return hasMarginConstantStructure(
         monzos.map(m => m.totalCents()),
-        0
+        0,
       );
     }
   }
@@ -1606,7 +1606,7 @@ hasConstantStructure_.__doc__ =
   'Returns `true` if the current/given scale has constant structure (i.e. every scale degree is unambiguous).';
 hasConstantStructure_.__node__ = builtinNode(
   hasConstantStructure_,
-  PARENT_SCALE
+  PARENT_SCALE,
 );
 
 function stepString_(this: ExpressionVisitor, scale?: Interval[]) {
@@ -1627,12 +1627,12 @@ stepString_.__node__ = builtinNode(stepString_, PARENT_SCALE);
 function slice(
   array: string | SonicWeavePrimitive[],
   indexStart: Interval,
-  indexEnd?: Interval
+  indexEnd?: Interval,
 ) {
   requireParameters({array, indexStart});
   return array.slice(
     indexStart.toInteger(),
-    indexEnd === undefined ? undefined : indexEnd?.toInteger()
+    indexEnd === undefined ? undefined : indexEnd?.toInteger(),
   );
 }
 slice.__doc__ =
@@ -1696,7 +1696,7 @@ randomCents.__node__ = builtinNode(randomCents);
 
 function floor(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = pubRelative.bind(this.rootContext)(upcastBool(interval));
@@ -1710,7 +1710,7 @@ floor.__node__ = builtinNode(floor);
 
 function round(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = pubRelative.bind(this.rootContext)(upcastBool(interval));
@@ -1724,7 +1724,7 @@ round.__node__ = builtinNode(round);
 
 function trunc(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = pubRelative.bind(this.rootContext)(upcastBool(interval));
@@ -1738,7 +1738,7 @@ trunc.__node__ = builtinNode(trunc);
 
 function ceil(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = pubRelative.bind(this.rootContext)(upcastBool(interval));
@@ -1785,7 +1785,7 @@ maximum.__node__ = builtinNode(maximum);
 function sortInPlace(
   this: ExpressionVisitor,
   scale?: SonicWeaveValue,
-  compareFn?: SonicWeaveFunction
+  compareFn?: SonicWeaveFunction,
 ) {
   // XXX: The implementation works for strings, we just cheat the types here.
   pubSortInPlace.bind(this)(scale as Interval[], compareFn);
@@ -1802,7 +1802,7 @@ sortInPlace.__node__ = builtinNode(sortInPlace, PARENT_SCALE);
 function sort(
   this: ExpressionVisitor,
   scale?: SonicWeavePrimitive[],
-  compareFn?: SonicWeaveFunction
+  compareFn?: SonicWeaveFunction,
 ) {
   // Remember that built-ins don't have full scope construction so this is the parent scale.
   scale ??= this.popScale(false);
@@ -1877,7 +1877,7 @@ function automos(this: ExpressionVisitor) {
           lifts: 0,
           superscripts: [],
           subscripts: [],
-        })
+        }),
     );
     context.fragiles.push(...result);
     return result;
@@ -1947,7 +1947,7 @@ automos.__node__ = builtinNode(automos);
 
 function reverseInPlace(
   this: ExpressionVisitor,
-  scale?: SonicWeavePrimitive[]
+  scale?: SonicWeavePrimitive[],
 ) {
   scale ??= this.currentScale;
   scale.reverse();
@@ -1967,7 +1967,7 @@ reverse.__node__ = builtinNode(reverse);
 function pop(
   this: ExpressionVisitor,
   scale?: SonicWeavePrimitive[],
-  index?: Interval
+  index?: Interval,
 ) {
   scale ??= this.currentScale;
   if (!scale.length) {
@@ -2002,7 +2002,7 @@ function push(
   this: ExpressionVisitor,
   interval: SonicWeavePrimitive,
   scale?: SonicWeavePrimitive[],
-  index?: Interval
+  index?: Interval,
 ) {
   requireParameters({interval});
   scale ??= this.currentScale;
@@ -2042,7 +2042,7 @@ shift.__node__ = builtinNode(shift, PARENT_SCALE);
 function unshift(
   this: ExpressionVisitor,
   interval: SonicWeavePrimitive,
-  scale?: SonicWeavePrimitive[]
+  scale?: SonicWeavePrimitive[],
 ) {
   requireParameters({interval});
   scale ??= this.currentScale;
@@ -2055,7 +2055,7 @@ unshift.__node__ = builtinNode(unshift, PARENT_SCALE);
 function insert(
   this: ExpressionVisitor,
   interval: SonicWeavePrimitive,
-  scale?: SonicWeavePrimitive[]
+  scale?: SonicWeavePrimitive[],
 ) {
   requireParameters({interval});
   scale ??= this.currentScale;
@@ -2075,7 +2075,7 @@ insert.__node__ = builtinNode(insert, PARENT_SCALE);
 function dislodge(
   this: ExpressionVisitor,
   element: SonicWeavePrimitive,
-  scale?: SonicWeavePrimitive[]
+  scale?: SonicWeavePrimitive[],
 ) {
   requireParameters({element});
   scale ??= this.currentScale;
@@ -2120,7 +2120,7 @@ function concat(
   requireParameters({first});
   if (typeof first === 'string') {
     return first.concat(
-      ...rest.map(r => (typeof r === 'string' ? r : repr.bind(this)(r)))
+      ...rest.map(r => (typeof r === 'string' ? r : repr.bind(this)(r))),
     );
   }
   return first.concat(...rest);
@@ -2130,7 +2130,7 @@ concat.__node__ = builtinNode(concat);
 
 function length(
   this: ExpressionVisitor,
-  scale?: SonicWeavePrimitive[] | ValBasis
+  scale?: SonicWeavePrimitive[] | ValBasis,
 ) {
   if (scale instanceof ValBasis) {
     return fromInteger(scale.size);
@@ -2145,13 +2145,13 @@ length.__node__ = builtinNode(length, PARENT_SCALE);
 function map(
   this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
-  scale?: any[]
+  scale?: any[],
 ) {
   requireParameters({mapper});
   mapper = mapper.bind(this);
   scale ??= this.currentScale;
   return scale.map((value, index, arr) =>
-    mapper(value, fromInteger(index), arr)
+    mapper(value, fromInteger(index), arr),
   );
 }
 map.__doc__ = 'Map a riff over the given/current scale producing a new scale.';
@@ -2160,7 +2160,7 @@ map.__node__ = builtinNode(map, PARENT_SCALE);
 function remap(
   this: ExpressionVisitor,
   mapper: (value: any, index: Interval, array: any[]) => unknown,
-  scale?: any[]
+  scale?: any[],
 ) {
   requireParameters({mapper});
   scale ??= this.currentScale;
@@ -2175,13 +2175,13 @@ remap.__node__ = builtinNode(remap, PARENT_SCALE);
 function filter(
   this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
-  scale?: any[]
+  scale?: any[],
 ) {
   requireParameters({tester});
   tester = tester.bind(this);
   scale ??= this.currentScale;
   return scale.filter((value, index, arr) =>
-    sonicTruth(tester(value, fromInteger(index), arr))
+    sonicTruth(tester(value, fromInteger(index), arr)),
   );
 }
 filter.__doc__ =
@@ -2191,7 +2191,7 @@ filter.__node__ = builtinNode(filter, PARENT_SCALE);
 function distill(
   this: ExpressionVisitor,
   tester: (value: any, index: Interval, array: any[]) => SonicWeaveValue,
-  scale?: any[]
+  scale?: any[],
 ) {
   requireParameters({tester});
   scale ??= this.currentScale;
@@ -2209,10 +2209,10 @@ function arrayReduce(
     previousValue: any,
     currentValue: any,
     currentIndex: Interval,
-    array: any[]
+    array: any[],
   ) => any,
   scale?: any[],
-  initialValue?: any
+  initialValue?: any,
 ) {
   requireParameters({reducer});
   if (!(typeof reducer === 'function')) {
@@ -2224,11 +2224,11 @@ function arrayReduce(
     return scale.reduce(
       (value, currentValue, currentIndex, arr) =>
         reducer(value, currentValue, fromInteger(currentIndex), arr),
-      initialValue
+      initialValue,
     );
   } else {
     return scale.reduce((value, currentValue, currentIndex, arr) =>
-      reducer(value, currentValue, fromInteger(currentIndex), arr)
+      reducer(value, currentValue, fromInteger(currentIndex), arr),
     );
   }
 }
@@ -2239,7 +2239,7 @@ arrayReduce.__node__ = builtinNode(arrayReduce, PARENT_SCALE);
 function arrayRepeat(
   this: ExpressionVisitor,
   count: Interval,
-  scale?: any[] | string
+  scale?: any[] | string,
 ) {
   requireParameters({count});
   const c = count.toInteger();
@@ -2260,7 +2260,7 @@ arrayRepeat.__node__ = builtinNode(arrayRepeat, PARENT_SCALE);
 function some(
   this: ExpressionVisitor,
   array?: any[],
-  test?: (value: any, index: Interval, array: any[]) => unknown
+  test?: (value: any, index: Interval, array: any[]) => unknown,
 ) {
   if (!array) {
     array = this.currentScale;
@@ -2278,7 +2278,7 @@ some.__node__ = builtinNode(some, PARENT_SCALE);
 function every(
   this: ExpressionVisitor,
   array?: any[],
-  test?: (value: any, index: Interval, array: any[]) => unknown
+  test?: (value: any, index: Interval, array: any[]) => unknown,
 ) {
   if (!array) {
     array = this.currentScale;
@@ -2341,7 +2341,7 @@ str.__node__ = builtinNode(str);
 
 function vstr(
   this: ExpressionVisitor,
-  value: SonicWeaveValue
+  value: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(value)) {
     return unaryBroadcast.bind(this)(value, vstr.bind(this));
@@ -2355,7 +2355,7 @@ vstr.__node__ = builtinNode(vstr);
 function lstr(
   this: ExpressionVisitor,
   value: SonicWeaveValue,
-  maxLength: SonicWeaveValue
+  maxLength: SonicWeaveValue,
 ): SonicWeaveValue {
   const m = upcastBool(maxLength).toInteger();
   if (isArrayOrRecord(value)) {
@@ -2406,7 +2406,7 @@ function help(riff: SonicWeaveFunction) {
       p.type === 'Parameter'
         ? p.id
         : '[...]' +
-          (p.defaultValue ? ' = ' + expressionToString(p.defaultValue) : '')
+          (p.defaultValue ? ' = ' + expressionToString(p.defaultValue) : ''),
     );
     if (params.rest) {
       names.push('...' + params.rest.id);
@@ -2435,7 +2435,7 @@ rgb.__node__ = builtinNode(rgb);
 function rgba(red: Interval, green: Interval, blue: Interval, alpha: Interval) {
   requireParameters({red, green, blue, alpha});
   return new Color(
-    `rgba(${cc(red)} ${cc(green)} ${cc(blue)} / ${cc(alpha, 5)})`
+    `rgba(${cc(red)} ${cc(green)} ${cc(blue)} / ${cc(alpha, 5)})`,
   );
 }
 rgba.__doc__ =
@@ -2454,11 +2454,11 @@ function hsla(
   hue: Interval,
   saturation: Interval,
   lightness: Interval,
-  alpha: Interval
+  alpha: Interval,
 ) {
   requireParameters({hue, saturation, lightness, alpha});
   return new Color(
-    `hsla(${cc(hue)}deg ${cc(saturation)}% ${cc(lightness)}% / ${cc(alpha, 5)})`
+    `hsla(${cc(hue)}deg ${cc(saturation)}% ${cc(lightness)}% / ${cc(alpha, 5)})`,
   );
 }
 hsla.__doc__ =
@@ -2467,7 +2467,7 @@ hsla.__node__ = builtinNode(hsla);
 
 function centsColor(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): Color | Color[] {
   if (Array.isArray(interval)) {
     this.spendGas(interval.length);
@@ -2481,7 +2481,7 @@ centsColor.__node__ = builtinNode(centsColor);
 
 export function factorColor(
   this: ExpressionVisitor,
-  interval: SonicWeaveValue
+  interval: SonicWeaveValue,
 ): Color | Color[] {
   if (Array.isArray(interval)) {
     this.spendGas(interval.length);

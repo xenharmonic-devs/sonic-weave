@@ -16,7 +16,7 @@ describe('Constant structure checker', () => {
       hasConstantStructure([
         TimeMonzo.fromFraction(1),
         TimeMonzo.fromFraction(2),
-      ])
+      ]),
     ).toBe(false);
   });
 
@@ -25,7 +25,7 @@ describe('Constant structure checker', () => {
       hasConstantStructure([
         TimeMonzo.fromFraction(2),
         TimeMonzo.fromFraction(2),
-      ])
+      ]),
     ).toBe(false);
   });
 });
@@ -38,8 +38,8 @@ describe('Subtension calculator', () => {
         ({monzo, subtensions}) => [
           monzo.toFraction().toFraction(),
           Array.from(subtensions).sort(),
-        ]
-      )
+        ],
+      ),
     );
     expect(subtenders).toEqual({
       '2': [8],

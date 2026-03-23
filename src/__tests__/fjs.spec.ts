@@ -47,7 +47,7 @@ describe('Formal comma calculator', () => {
   ])('Has a comma for prime %s', (prime, comma) => {
     const fraction = getFormalComma(PRIMES.indexOf(prime)).toFraction();
     expect(fraction.equals(comma), `${fraction.toFraction()} != ${comma}`).toBe(
-      true
+      true,
     );
   });
 });
@@ -80,7 +80,7 @@ describe('FloraC comma calculator', () => {
   ])('Has a comma for prime %s', (prime, comma) => {
     const fraction = getFloraComma(PRIMES.indexOf(prime)).toFraction();
     expect(fraction.equals(comma), `${fraction.toFraction()} != ${comma}`).toBe(
-      true
+      true,
     );
   });
 
@@ -91,7 +91,7 @@ describe('FloraC comma calculator', () => {
       }
       expect(
         getFormalComma(i).equals(getFloraComma(i)),
-        `Disagreement for prime #${i} = ${PRIMES[i]}`
+        `Disagreement for prime #${i} = ${PRIMES[i]}`,
       ).toBe(true);
     }
   });
@@ -125,7 +125,7 @@ describe('Neutral comma calculator', () => {
     const comma = getNeutralComma(PRIMES.indexOf(prime));
     expect(
       comma.pow(2).toFraction().equals(square),
-      `${comma.pow(2).toFraction().toFraction()} != ${square}`
+      `${comma.pow(2).toFraction().toFraction()} != ${square}`,
     ).toBe(true);
   });
 });
@@ -147,7 +147,7 @@ describe('Semiquartal comma calculator', () => {
       .pow(2)
       .toFraction();
     expect(comma.equals(square), `${comma.toFraction()} != ${square}`).toBe(
-      true
+      true,
     );
   });
 });
@@ -169,7 +169,7 @@ describe('Tone-splitter comma calculator', () => {
       .pow(2)
       .toFraction();
     expect(comma.equals(square), `${comma.toFraction()} != ${square}`).toBe(
-      true
+      true,
     );
   });
 });
@@ -242,10 +242,10 @@ describe('FJS interval inflector', () => {
       const interval = inflect(
         monzo,
         superscripts as FJSInflection[],
-        subscripts as FJSInflection[]
+        subscripts as FJSInflection[],
       );
       expect(interval.toFraction().equals(fraction)).toBe(true);
-    }
+    },
   );
 });
 
@@ -272,9 +272,9 @@ describe('Absolute FJS pitch inflector', () => {
       const interval = inflect(
         monzo,
         superscripts as unknown as FJSInflection[],
-        subscripts
+        subscripts,
       );
       expect(interval.toFraction().equals(fraction)).toBe(true);
-    }
+    },
   );
 });

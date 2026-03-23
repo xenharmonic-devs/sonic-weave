@@ -44,10 +44,10 @@ const LOGS: (keyof Math)[] = ['acos', 'asin', 'atan', 'clz32', 'log1p'];
 
 for (const name of MATH_KEYS) {
   const fn = Math[name] as (x: number) => number;
-  // eslint-disable-next-line no-inner-declarations
+
   function wrapper(
     this: ExpressionVisitor,
-    x: SonicWeaveValue
+    x: SonicWeaveValue,
   ): SonicWeaveValue {
     requireParameters({x});
     if (typeof x === 'boolean' || x instanceof Interval) {
@@ -57,7 +57,7 @@ for (const name of MATH_KEYS) {
         LOGS.includes(name) ? 'linear' : x.domain,
         0,
         undefined,
-        x
+        x,
       );
     }
     const w = wrapper.bind(this);
@@ -72,7 +72,7 @@ for (const name of MATH_KEYS) {
 function atan2(
   this: ExpressionVisitor,
   y: SonicWeaveValue,
-  x: SonicWeaveValue
+  x: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(y) || isArrayOrRecord(x)) {
     return binaryBroadcast.bind(this)(y, x, atan2.bind(this));
@@ -81,7 +81,7 @@ function atan2(
   x = upcastBool(x);
   return new Interval(
     TimeReal.fromValue(Math.atan2(y.valueOf(), x.valueOf())),
-    'linear'
+    'linear',
   );
 }
 atan2.__doc__ =
@@ -93,7 +93,7 @@ atan2.__node__ = builtinNode(atan2);
 function atanXY(
   this: ExpressionVisitor,
   x: SonicWeaveValue,
-  y: SonicWeaveValue
+  y: SonicWeaveValue,
 ) {
   return atan2.bind(this)(y, x);
 }

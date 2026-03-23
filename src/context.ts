@@ -225,7 +225,7 @@ export class RootContext {
     }
     if (this.mosConfig) {
       lines.push(
-        `MOS {${this.mosConfig.pattern};L=${this.mosConfig.large};s=${this.mosConfig.small}}`
+        `MOS {${this.mosConfig.pattern};L=${this.mosConfig.large};s=${this.mosConfig.small}}`,
       );
     }
     return lines.join('\n');

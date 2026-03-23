@@ -45,7 +45,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('tet(6);');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\6;2\\6;3\\6;4\\6;5\\6;6\\6'
+      '1\\6;2\\6;3\\6;4\\6;5\\6;6\\6',
     );
   });
 
@@ -53,7 +53,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('tet(3,3);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '1\\3<3>;2\\3<3>;3\\3<3>'
+      '1\\3<3>;2\\3<3>;3\\3<3>',
     );
   });
 
@@ -61,7 +61,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('mos(5, 2, niente, niente, 5);');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'
+      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12',
     );
   });
 
@@ -75,7 +75,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('rank2(707.048, 4, 4, 600.0, 2);');
     expect(scale).toHaveLength(10);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.'
+      '107.048;214.096;385.904;492.952;600.0;707.048;814.096;985.904;1092.952;1200.',
     );
   });
 
@@ -93,11 +93,11 @@ describe('SonicWeave standard library', () => {
 
   it('generates well-temperaments', () => {
     const werckmeister3 = parseSource(
-      'wellTemperament([0, 0, 0, -1/4, -1/4, -1/4, 0, 0, -1/4, 0, 0], 81/80, 3);cents;'
+      'wellTemperament([0, 0, 0, -1/4, -1/4, -1/4, 0, 0, -1/4, 0, 0], 81/80, 3);cents;',
     );
     expect(werckmeister3).toHaveLength(12);
     expect(werckmeister3.map(i => i.toString()).join(';')).toBe(
-      '92.17871646099634r¢;193.1568569324175r¢;294.1349974038386r¢;391.6902862640137r¢;498.0449991346128r¢;590.2237155956096r¢;696.5784284662086r¢;794.1337173263842r¢;889.7352853986264r¢;996.0899982692256r¢;1093.645287129401r¢;1200.'
+      '92.17871646099634r¢;193.1568569324175r¢;294.1349974038386r¢;391.6902862640137r¢;498.0449991346128r¢;590.2237155956096r¢;696.5784284662086r¢;794.1337173263842r¢;889.7352853986264r¢;996.0899982692256r¢;1093.645287129401r¢;1200.',
     );
   });
 
@@ -105,7 +105,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('parallelotope([3, 5, 7]);');
     expect(scale).toHaveLength(8);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '35/32;5/4;21/16;3/2;105/64;7/4;15/8;2'
+      '35/32;5/4;21/16;3/2;105/64;7/4;15/8;2',
     );
   });
 
@@ -113,7 +113,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('eulerGenus(45);');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '9/8;5/4;45/32;3/2;15/8;2'
+      '9/8;5/4;45/32;3/2;15/8;2',
     );
   });
 
@@ -137,7 +137,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('tet(12);subset(cumsum([0, 2, 2, 1, 2, 2, 2]));');
     expect(scale).toHaveLength(7);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12'
+      '2\\12;4\\12;5\\12;7\\12;9\\12;11\\12;12\\12',
     );
   });
 
@@ -150,7 +150,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('3;5;7;11;13;2;reduce();');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '3/2;5/4;7/4;11/8;13/8;2'
+      '3/2;5/4;7/4;11/8;13/8;2',
     );
   });
 
@@ -203,7 +203,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('1\\3 "alice";2\\3 green;3\\3;toHarmonics(16);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '(20/16 "alice");(25/16 green);32/16'
+      '(20/16 "alice");(25/16 green);32/16',
     );
   });
 
@@ -211,7 +211,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('1\\3 "bob";2\\3 green;3\\3;toSubharmonics(16);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '(16/13 "bob");(16/10 green);16/8'
+      '(16/13 "bob");(16/10 green);16/8',
     );
   });
 
@@ -219,7 +219,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('4/3 "charlie";5/3 red;6/3;equalize(7);');
     expect(scale).toHaveLength(3);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '(3\\7 "charlie");(5\\7 red);7\\7'
+      '(3\\7 "charlie");(5\\7 red);7\\7',
     );
   });
 
@@ -227,17 +227,17 @@ describe('SonicWeave standard library', () => {
     const zarlino = parseSource('rank2(3/2, 3); mergeOffset(5/4); rotate(4);');
     expect(zarlino).toHaveLength(7);
     expect(zarlino.map(i => i.toString()).join(';')).toBe(
-      '9/8;5/4;4/3;3/2;5/3;15/8;2/1'
+      '9/8;5/4;4/3;3/2;5/3;15/8;2/1',
     );
   });
 
   it('can merge offset copies with overflow preferences', () => {
     const scale = parseSource(
-      'rank2(3/2, 3); mergeOffset(5/4, "wrap"); rotate(2);'
+      'rank2(3/2, 3); mergeOffset(5/4, "wrap"); rotate(2);',
     );
     expect(scale).toHaveLength(8);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '10/9;5/4;4/3;3/2;5/3;16/9;15/8;2/1'
+      '10/9;5/4;4/3;3/2;5/3;16/9;15/8;2/1',
     );
   });
 
@@ -254,17 +254,17 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('2:3:4; mergeOffset(4:5:7, "wrap"); simplify');
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '5/4;21/16;3/2;7/4;15/8;2'
+      '5/4;21/16;3/2;7/4;15/8;2',
     );
   });
 
   it('modifies the equave when merging an offset with "keep"', () => {
     const scale = parseSource(
-      '4/3;3/2;2/1; mergeOffset(11/8, "keep"); simplify'
+      '4/3;3/2;2/1; mergeOffset(11/8, "keep"); simplify',
     );
     expect(scale).toHaveLength(6);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '4/3;11/8;3/2;11/6;2;33/16'
+      '4/3;11/8;3/2;11/6;2;33/16',
     );
   });
 
@@ -303,7 +303,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('csgs([8/7, 7/6], 2);');
     expect(scale).toHaveLength(5);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '8/7;4/3;32/21;16/9;2/1'
+      '8/7;4/3;32/21;16/9;2/1',
     );
   });
 
@@ -311,7 +311,7 @@ describe('SonicWeave standard library', () => {
     const scale = parseSource('csgs([8/7, 7/6], 3);');
     expect(scale).toHaveLength(9);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '64/63;8/7;32/27;4/3;256/189;32/21;128/81;16/9;2/1'
+      '64/63;8/7;32/27;4/3;256/189;32/21;128/81;16/9;2/1',
     );
   });
 
@@ -321,14 +321,14 @@ describe('SonicWeave standard library', () => {
 
   it('can generate generator sequences (zil[5])', () => {
     const scale = expand(
-      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5)'
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 5)',
     );
     expect(scale).toEqual(['8/7', '4/3', '32/21', '16/9', '2/1']);
   });
 
   it('can generate generator sequences (zil[14])', () => {
     const scale = expand(
-      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 14)'
+      'gs([8/7, 7/6, 8/7, 7/6, 8/7, 7/6, 8/7, 189/160, 8/7, 7/6], 14)',
     );
     expect(scale).toEqual([
       '64/63',
@@ -351,7 +351,7 @@ describe('SonicWeave standard library', () => {
   it('can access docstrings', () => {
     const doc = evaluateExpression('doc(void)');
     expect(doc).toBe(
-      "Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale."
+      "Get rid of expression results. `void(++i)` increments the value but doesn't push anything onto the scale.",
     );
   });
 
@@ -362,7 +362,7 @@ describe('SonicWeave standard library', () => {
       stretch(10005e-4)
     `);
     expect(scale.map(i => i.toString()).join(';')).toBe(
-      '2001\\20750;14007\\83000;22011\\83000;106053\\332000;138069\\332000;162081\\332000;194097\\332000;226113\\332000;122061\\166000;282141\\332000;6003\\6640;2001\\2000'
+      '2001\\20750;14007\\83000;22011\\83000;106053\\332000;138069\\332000;162081\\332000;194097\\332000;226113\\332000;122061\\166000;282141\\332000;6003\\6640;2001\\2000',
     );
   });
 
@@ -460,12 +460,12 @@ describe('SonicWeave standard library', () => {
   it('has a constant structure calculator', () => {
     // 6\12 is ambiguous as a fourth and a fifth
     const no = evaluateExpression(
-      'hasConstantStructure(mos(5, 2))'
+      'hasConstantStructure(mos(5, 2))',
     ) as Interval;
     expect(no.toString()).toBe('false');
     // Augmented fourth and diminished fifth are distinct in 19 edo
     const yes = evaluateExpression(
-      'hasConstantStructure(mos(5, 2, 3, 2))'
+      'hasConstantStructure(mos(5, 2, 3, 2))',
     ) as Interval;
     expect(yes.toString()).toBe('true');
   });
@@ -497,7 +497,7 @@ describe('SonicWeave standard library', () => {
 
   it('can reduce Raga Bhairavi to a comma recipe (inline)', () => {
     const scale = expand(
-      'unstackPeriodic(unstack([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]))'
+      'unstackPeriodic(unstack([16/15, 9/8, 6/5, 27/20, 3/2, 8/5, 9/5, 2/1]))',
     );
     expect(scale).toEqual([
       '24/25',
@@ -513,7 +513,7 @@ describe('SonicWeave standard library', () => {
 
   it('can reduce Raga Bhairavi to a comma recipe (verbs)', () => {
     const scale = expand(
-      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unstackPeriodic()'
+      '16/15;9/8;6/5;27/20;3/2;8/5;9/5;2/1;unstack();unstackPeriodic()',
     );
     expect(scale).toEqual([
       '24/25',
@@ -629,7 +629,7 @@ describe('SonicWeave standard library', () => {
 
   it('spans a lattice in cents', () => {
     const scale = expand(
-      'parallelotope([123.4, 567.9], [2, 1], [1, 0], 1200.)'
+      'parallelotope([123.4, 567.9], [2, 1], [1, 0], 1200.)',
     );
     expect(scale).toEqual([
       '123.4',
@@ -680,7 +680,7 @@ describe('SonicWeave standard library', () => {
 
   it('preserves labels when rotating', () => {
     const scale = parseSource(
-      '5/4 yellow "third";3/2 white "fifth";2/1 rgba(255, 255, 255, 0.5e) "octave";rotate()'
+      '5/4 yellow "third";3/2 white "fifth";2/1 rgba(255, 255, 255, 0.5e) "octave";rotate()',
     );
     expect(scale).toHaveLength(3);
     expect(scale[0].valueOf()).toBeCloseTo(6 / 5);
@@ -688,7 +688,7 @@ describe('SonicWeave standard library', () => {
     expect(scale[0].label).toBe('fifth');
     expect(scale[1].valueOf()).toBeCloseTo(8 / 5);
     expect(scale[1].color?.value).toBe(
-      'rgba(255.000 255.000 255.000 / 0.50000)'
+      'rgba(255.000 255.000 255.000 / 0.50000)',
     );
     expect(scale[1].label).toBe('octave');
     expect(scale[2].valueOf()).toBeCloseTo(2);
@@ -748,7 +748,7 @@ describe('SonicWeave standard library', () => {
 
   it('generates 22 Shruti with the intended colors', () => {
     const scale = expand(
-      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')"
+      "rank2(3/2 white, 4, 0, 2/1 gray)\nmergeOffset([10/9 yellow, 16/15 green, 256/243 white, 9/8 white], 'wrap')",
     );
     expect(scale).toEqual([
       '256/243 white',
@@ -881,7 +881,7 @@ describe('SonicWeave standard library', () => {
 
   it('can replace all occurrences of a relative step with others', () => {
     const splitCPS = expand(
-      'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33])'
+      'cps([1, 3, 5, 7], 2);replaceStep(7/6, [11/10, 35/33])',
     );
     expect(splitCPS).toEqual([
       '11/10',
@@ -897,14 +897,14 @@ describe('SonicWeave standard library', () => {
 
   it('can detect domains (linear)', () => {
     const scale = expand(
-      '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i'
+      '10/8;12/10;7/6;stack();i => simplify(i) if isLinear(i) else i',
     );
     expect(scale).toEqual(['5/4', '3/2', '7/4']);
   });
 
   it('can detect domains (logarithmic)', () => {
     const scale = expand(
-      '1\\12;3\\12;5\\12;stack();i => i if isLogarithmic(i) else simplify(i)'
+      '1\\12;3\\12;5\\12;stack();i => i if isLogarithmic(i) else simplify(i)',
     );
     expect(scale).toEqual(['1\\12', '4\\12', '9\\12']);
   });
@@ -1115,7 +1115,7 @@ describe('SonicWeave standard library', () => {
       sort()
     `,
       true,
-      {latticeView}
+      {latticeView},
     );
     expect(view).toEqual([[1], [-1, 1], [-3, 2], [-2, 0, 1], [-3, 1, 1]]);
     expect(visitor.currentScale.map(i => i.toString())).toEqual([
@@ -1126,13 +1126,13 @@ describe('SonicWeave standard library', () => {
       '2',
     ]);
     expect(visitor.currentScale.map(i => Array.from(i.trackingIds)[0])).toEqual(
-      [3, 4, 2, 5, 1]
+      [3, 4, 2, 5, 1],
     );
   });
 
   it("throws if you don't pass arguments to sanitize", () => {
     expect(() => parseSingle('sanitize()')).toThrow(
-      "Parameter 'interval' is required."
+      "Parameter 'interval' is required.",
     );
   });
 
@@ -1152,7 +1152,7 @@ describe('SonicWeave standard library', () => {
 
   it('can organize a scale by coalescing near-duplicates', () => {
     const scale = expand(
-      '4;[1, 3, 9] tns [1, 5, 25] tns [1, 7];2;organize(8.0)'
+      '4;[1, 3, 9] tns [1, 5, 25] tns [1, 7];2;organize(8.0)',
     );
     expect(scale).toEqual([
       '525/512',
@@ -1183,7 +1183,7 @@ describe('SonicWeave standard library', () => {
 
   it('can get the values of a record', () => {
     const keys = evaluateExpression(
-      'values(#{foo: "a", bar: "b"})'
+      'values(#{foo: "a", bar: "b"})',
     ) as string[];
     keys.sort();
     expect(keys).toEqual(['a', 'b']);
@@ -1217,7 +1217,7 @@ describe('SonicWeave standard library', () => {
 
   it('gracefully handles extra step sizes in the record', () => {
     const scale = expand(
-      'realizeWord("LLsLLLs", #{L: 9/8, m: 16/15, s: 256/243, c: 81/80})'
+      'realizeWord("LLsLLLs", #{L: 9/8, m: 16/15, s: 256/243, c: 81/80})',
     );
     expect(scale).toEqual([
       '9/8',
@@ -1277,13 +1277,13 @@ describe('SonicWeave standard library', () => {
     warn.__node__ = builtinNode(warn);
     evaluateSource('6/4;6/3;reduce()', true, {warn});
     expect(capturedWarning).toBe(
-      "The scale was already reduced by its equave. Did you mean 'simplify'?"
+      "The scale was already reduced by its equave. Did you mean 'simplify'?",
     );
   });
 
   it('throws an error if you use reduce as a mapper', () => {
     expect(() => parseSource('3/2;4/2;reduce')).toThrow(
-      'Can only access bases, arrays, records or strings.'
+      'Can only access bases, arrays, records or strings.',
     );
   });
 
@@ -1307,7 +1307,7 @@ describe('SonicWeave standard library', () => {
 
   it('preserves schisminas if asked to', () => {
     const scale = expand(
-      "4096/4095;3/2;4095/2048;2/1;coalesce(3.5, 'simplest', true)"
+      "4096/4095;3/2;4095/2048;2/1;coalesce(3.5, 'simplest', true)",
     );
     expect(scale).toEqual(['4096/4095', '3/2', '4095/2048', '2/1']);
   });
@@ -1398,7 +1398,7 @@ describe('SonicWeave standard library', () => {
 
   it('has a broadcasting domain extractor (trap)', () => {
     expect(() => evaluateExpression('domainOf([2, "fif"]) 1')).toThrow(
-      'An interval is required.'
+      'An interval is required.',
     );
   });
 
@@ -1565,7 +1565,7 @@ describe('SonicWeave standard library', () => {
 
   it('has sensible parallelotope coloring (without size hints)', () => {
     const scale = expand(
-      'parallelotope([3 red, 5 green], [2, 3], niente, 2 blue)'
+      'parallelotope([3 red, 5 green], [2, 3], niente, 2 blue)',
     );
     expect(scale).toEqual([
       '1125/1024 red',
@@ -1768,25 +1768,25 @@ describe('SonicWeave standard library', () => {
 
   it('throws an error if you call isodifferential with non-integer parts', () => {
     expect(() => parseSource('isodifferential(P5,7/5)')).toThrow(
-      'Number of parts should be a positive integer.'
+      'Number of parts should be a positive integer.',
     );
   });
 
   it('throws an error if you call isodifferential with nonpositive parts', () => {
     expect(() => parseSource('isodifferential(-1,7/5)')).toThrow(
-      'Number of parts should be a positive integer.'
+      'Number of parts should be a positive integer.',
     );
   });
 
   it('throws an error if you call isodifferential with a non-interval', () => {
     expect(() => parseSource('isodifferential(7,"impostor")')).toThrow(
-      'Interval should be a relative interval.'
+      'Interval should be a relative interval.',
     );
   });
 
   it('throws an error if you call isodifferential with an absolute interval', () => {
     expect(() => parseSource('isodifferential(4,432 Hz)')).toThrow(
-      'Interval should be a relative interval.'
+      'Interval should be a relative interval.',
     );
   });
 
@@ -1802,13 +1802,13 @@ describe('SonicWeave standard library', () => {
 
   it('throws an error if you call isostretch with a non-interval as amount', () => {
     expect(() => parseSource('isostretch("impostor",[])')).toThrow(
-      'Stretch amount should be a relative interval.'
+      'Stretch amount should be a relative interval.',
     );
   });
 
   it('throws an error if you call isostretch with an absolute interval as amount', () => {
     expect(() => parseSource('isostretch(432 Hz,[])')).toThrow(
-      'Stretch amount should be a relative interval.'
+      'Stretch amount should be a relative interval.',
     );
   });
 
@@ -1824,13 +1824,13 @@ describe('SonicWeave standard library', () => {
 
   it('throws an error if you call isorescale with a non-interval as equave', () => {
     expect(() => parseSource('isorescale("impostor",[2])')).toThrow(
-      'Equave should be a relative interval.'
+      'Equave should be a relative interval.',
     );
   });
 
   it('throws an error if you call isorescale with an absolute interval as equave', () => {
     expect(() => parseSource('isorescale(432 Hz,[2])')).toThrow(
-      'Equave should be a relative interval.'
+      'Equave should be a relative interval.',
     );
   });
 });

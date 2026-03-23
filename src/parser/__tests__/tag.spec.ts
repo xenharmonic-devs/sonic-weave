@@ -97,7 +97,7 @@ describe('SonicWeave template tag', () => {
 
   it('rejects defer at root scope', () => {
     expect(() => sw`defer 2;3`).toThrow(
-      'Deferred actions not allowed when evaluating tagged templates.'
+      'Deferred actions not allowed when evaluating tagged templates.',
     );
   });
 

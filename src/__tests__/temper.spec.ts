@@ -23,7 +23,7 @@ describe('Comma vanisher', () => {
     const syntonic = [-4, 4, -1];
     const meantone = vanishCommas(
       [1, 1, 1],
-      [applyWeights(syntonic, LOG_PRIMES)]
+      [applyWeights(syntonic, LOG_PRIMES)],
     );
     const map = applyWeights(meantone, LOG_PRIMES);
     expect(Math.abs(dot(map, [-4, 4, -1]))).toBeCloseTo(0, 9);

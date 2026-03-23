@@ -232,8 +232,10 @@ export type ExportConstantStatement = {
   parameter: Parameter;
 };
 
-export interface ExportFunctionStatement
-  extends Omit<FunctionDeclaration, 'type'> {
+export interface ExportFunctionStatement extends Omit<
+  FunctionDeclaration,
+  'type'
+> {
   type: 'ExportFunctionStatement';
 }
 

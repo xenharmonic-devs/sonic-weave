@@ -137,11 +137,11 @@ describe('Pythagorean interval construction from parts', () => {
     const monzo = pythagoreanMonzo(node);
     expect(
       monzo.primeExponents[0].equals(twos),
-      `${monzo.primeExponents[0].valueOf()} != ${twos}`
+      `${monzo.primeExponents[0].valueOf()} != ${twos}`,
     ).toBe(true);
     expect(
       monzo.primeExponents[1].equals(threes),
-      `${monzo.primeExponents[1].valueOf()} != ${threes}`
+      `${monzo.primeExponents[1].valueOf()} != ${threes}`,
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
   });
@@ -166,11 +166,11 @@ describe('Absolute Pythagorean interval construction from parts', () => {
     const monzo = absoluteMonzo(node);
     expect(
       monzo.primeExponents[0].equals(twos),
-      `${monzo.primeExponents[0].valueOf()} != ${twos}`
+      `${monzo.primeExponents[0].valueOf()} != ${twos}`,
     ).toBe(true);
     expect(
       monzo.primeExponents[1].equals(threes),
-      `${monzo.primeExponents[1].valueOf()} != ${threes}`
+      `${monzo.primeExponents[1].valueOf()} != ${threes}`,
     ).toBe(true);
     expect(monzo.residual.equals(1)).toBe(true);
   });
@@ -323,7 +323,7 @@ describe('Absolute monzo -> node converter', () => {
 
   it('converts C⅓#4', () => {
     const node = absoluteToNode(
-      TimeMonzo.fromEqualTemperament('1/3', '2187/2048')
+      TimeMonzo.fromEqualTemperament('1/3', '2187/2048'),
     );
     expect(node).toEqual({
       accidentals: [

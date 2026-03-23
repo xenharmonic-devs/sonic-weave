@@ -19,7 +19,7 @@ describe('Chord input parser', () => {
       expect(result).toHaveLength(3);
       expect(result[0].node?.type).toBe('IntegerLiteral');
       expect(result.map(i => i.toString())).toEqual(['1', '2', '3']);
-    }
+    },
   );
   it('parses comma-separated monzos', () => {
     const result = parseChord('[-4 4 -1>, [0, 1/2>,[0,-1,1>');
@@ -59,7 +59,7 @@ describe('Chord input parser', () => {
     const result = parseChord('[5, -1>@3/2.7');
     const value = result[0].value as TimeMonzo;
     expect(value.primeExponents.slice(0, 4).map(pe => pe.toFraction())).toEqual(
-      ['-5', '5', '0', '-1']
+      ['-5', '5', '0', '-1'],
     );
   });
 

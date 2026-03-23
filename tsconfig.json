@@ -1,6 +1,9 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "incremental": false,
     "rootDir": "./src",
     "outDir": "dist",
     "allowJs": true,
@@ -9,8 +12,16 @@
       "es2020"
     ],
     "target": "es2020",
+    "moduleResolution": "node",
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "src/index.ts"
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/__benchmarks__/**"
   ]
 }

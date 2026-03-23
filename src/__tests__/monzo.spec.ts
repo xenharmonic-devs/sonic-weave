@@ -172,7 +172,7 @@ describe('Extended monzo with time', () => {
     monzoIntervals.sort((a, b) => a.compare(b));
     intervals.forEach((f, i) => {
       expect(
-        monzoIntervals[i].strictEquals(TimeMonzo.fromFraction(f, 3))
+        monzoIntervals[i].strictEquals(TimeMonzo.fromFraction(f, 3)),
       ).toBeTruthy();
     });
   });
@@ -221,41 +221,41 @@ describe('Extended monzo with time', () => {
     const majorSecond = TimeMonzo.fromEqualTemperament(
       new Fraction(2, 12),
       new Fraction(2),
-      2
+      2,
     );
     const justMajorSecond = majorSecond.approximateHarmonic(8);
     expect(
-      justMajorSecond.toFraction().equals(new Fraction(9, 8))
+      justMajorSecond.toFraction().equals(new Fraction(9, 8)),
     ).toBeTruthy();
   });
   it('can be approximated by a subharmonic', () => {
     const subfifth = TimeMonzo.fromEqualTemperament(
       new Fraction(6, 11),
       new Fraction(2),
-      5
+      5,
     );
     const undecimalSubfifth = subfifth.approximateSubharmonic(16);
     expect(
-      undecimalSubfifth.toFraction().equals(new Fraction(16, 11))
+      undecimalSubfifth.toFraction().equals(new Fraction(16, 11)),
     ).toBeTruthy();
   });
   it('can be approximated by its convergents', () => {
     const tritone = TimeMonzo.fromEqualTemperament(
       new Fraction(1, 2),
       new Fraction(2),
-      1
+      1,
     );
     expect(
-      tritone.getConvergent(0).toFraction().equals(new Fraction(1))
+      tritone.getConvergent(0).toFraction().equals(new Fraction(1)),
     ).toBeTruthy();
     expect(
-      tritone.getConvergent(1).toFraction().equals(new Fraction(3, 2))
+      tritone.getConvergent(1).toFraction().equals(new Fraction(3, 2)),
     ).toBeTruthy();
     expect(
-      tritone.getConvergent(2).toFraction().equals(new Fraction(7, 5))
+      tritone.getConvergent(2).toFraction().equals(new Fraction(7, 5)),
     ).toBeTruthy();
     expect(
-      tritone.getConvergent(3).toFraction().equals(new Fraction(17, 12))
+      tritone.getConvergent(3).toFraction().equals(new Fraction(17, 12)),
     ).toBeTruthy();
   });
 
@@ -330,7 +330,7 @@ describe('Extended monzo with time', () => {
         new Fraction(0),
         new Fraction(-5, 3),
       ],
-      new Fraction(-31, 23)
+      new Fraction(-31, 23),
     );
     expect(value.toString()).toBe('2^2*3^3/2*7^-5/3*-31/23*(1s)^1/2');
   });
@@ -339,7 +339,7 @@ describe('Extended monzo with time', () => {
     const value = new TimeMonzo(
       new Fraction(-3, 2),
       [new Fraction(3, 2), new Fraction(-5, 3)],
-      new Fraction(31, 23)
+      new Fraction(31, 23),
     );
     expect(value.toString('logarithmic')).toBe('[-3/2 1 3/2 -5/3>@s.31/23.2..');
   });
@@ -348,11 +348,11 @@ describe('Extended monzo with time', () => {
     const value = new TimeMonzo(
       new Fraction(-3, 2),
       [new Fraction(3, 2), new Fraction(-5, 3)],
-      new Fraction(31, 23)
+      new Fraction(31, 23),
     );
     // It should be impossible to produce this value for a val, but the expression should be meaningful.
     expect(value.toString('cologarithmic')).toBe(
-      '<-3/2 1 3/2 -5/3]@s.31/23.2..'
+      '<-3/2 1 3/2 -5/3]@s.31/23.2..',
     );
   });
 
@@ -428,14 +428,14 @@ describe('Extended monzo with time', () => {
 
   it('can calculate the dot product between syntonic and porcupine commas (prime exponents)', () => {
     const neg27 = TimeMonzo.fromFraction('81/80').dot(
-      TimeMonzo.fromFraction('250/243')
+      TimeMonzo.fromFraction('250/243'),
     );
     expect(neg27.toFraction()).toBe('-27');
   });
 
   it('can calculate the dot product between syntonic and porcupine commas (residuals)', () => {
     const neg27 = new TimeMonzo(new Fraction(0), [], new Fraction('81/80')).dot(
-      new TimeMonzo(new Fraction(0), [], new Fraction('250/243'))
+      new TimeMonzo(new Fraction(0), [], new Fraction('250/243')),
     );
     expect(neg27.toFraction()).toBe('-27');
   });
@@ -444,9 +444,13 @@ describe('Extended monzo with time', () => {
     const neg27 = new TimeMonzo(
       new Fraction(0),
       [new Fraction(-4)],
-      new Fraction('81/5')
+      new Fraction('81/5'),
     ).dot(
-      new TimeMonzo(new Fraction(0), [new Fraction(1)], new Fraction('125/243'))
+      new TimeMonzo(
+        new Fraction(0),
+        [new Fraction(1)],
+        new Fraction('125/243'),
+      ),
     );
     expect(neg27.toFraction()).toBe('-27');
   });
@@ -466,7 +470,7 @@ describe('JSON serialization', () => {
     ];
     const serialized = JSON.stringify(data);
     expect(serialized).toBe(
-      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","t":-1,"v":777},3.5,{"type":"TimeMonzo","t":{"n":0,"d":1},"p":[-4,1,4,1,-1,1,0,1,0,1,0,1,0,1,0,1,0,1],"r":{"n":1,"d":1}},null,{"type":"TimeReal","t":0,"v":"nan"},{"type":"TimeReal","t":1,"v":"inf"}]'
+      '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","t":-1,"v":777},3.5,{"type":"TimeMonzo","t":{"n":0,"d":1},"p":[-4,1,4,1,-1,1,0,1,0,1,0,1,0,1,0,1,0,1],"r":{"n":1,"d":1}},null,{"type":"TimeReal","t":0,"v":"nan"},{"type":"TimeReal","t":1,"v":"inf"}]',
     );
   });
 
@@ -476,7 +480,7 @@ describe('JSON serialization', () => {
     function reviver(key: string, value: any) {
       return TimeMonzo.reviver(
         key,
-        TimeReal.reviver(key, Fraction.reviver(key, value))
+        TimeReal.reviver(key, Fraction.reviver(key, value)),
       );
     }
     const data = JSON.parse(serialized, reviver);

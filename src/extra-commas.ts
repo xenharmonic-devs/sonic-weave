@@ -95,7 +95,7 @@ const SYNTONIC_RASTMIC_MAP = new Map<string, TimeMonzo>();
 for (const [key, value] of Object.entries(SYNTONIC_RASTMIC)) {
   const monzo = new TimeMonzo(
     ZERO,
-    value.map(f => new Fraction(f))
+    value.map(f => new Fraction(f)),
   );
   monzo.numberOfComponents = getNumberOfComponents();
   SYNTONIC_RASTMIC_MAP.set(key, monzo);
@@ -116,7 +116,7 @@ const LUMIS_MAP = new Map<string, TimeMonzo>();
 for (const [key, value] of Object.entries(LUMIS_COMMAS)) {
   const monzo = new TimeMonzo(
     ZERO,
-    value.map(f => new Fraction(f))
+    value.map(f => new Fraction(f)),
   );
   monzo.numberOfComponents = getNumberOfComponents();
   LUMIS_MAP.set(key, monzo);

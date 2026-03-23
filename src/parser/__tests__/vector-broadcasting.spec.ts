@@ -55,26 +55,26 @@ function swRec(
     Object.entries(result).map(([key, value]) => [
       key,
       (value as any).valueOf(),
-    ])
+    ]),
   ) as Record<string, number>;
 }
 
 describe('SonicWeave vector broadcasting', () => {
   it('refuses to mix arrays with records', () => {
     expect(() => sw`[1, 2] #{a: 3, b: 4}`).toThrow(
-      'Unable to broadcast an array and record together.'
+      'Unable to broadcast an array and record together.',
     );
   });
 
   it('refuses to mix arrays of different lengths together', () => {
     expect(() => sw`[1, 2] [3, 4, 5]`).toThrow(
-      'Unable to broadcast arrays together with lengths 2 and 3.'
+      'Unable to broadcast arrays together with lengths 2 and 3.',
     );
   });
 
   it('refuses to mix disparate records together', () => {
     expect(() => sw`#{a: 1} #{b: 'label for b'}`).toThrow(
-      'Unable broadcast records together on key b.'
+      'Unable broadcast records together on key b.',
     );
   });
 
@@ -178,7 +178,7 @@ describe('SonicWeave vector broadcasting', () => {
     }
 
     const mat = evaluateExpression(
-      `${op}[[4, -1/2], [1, 1]]`
+      `${op}[[4, -1/2], [1, 1]]`,
     ) as unknown as Interval[][];
     expect(mat).toHaveLength(2);
     expect(mat[0]).toHaveLength(2);
@@ -191,7 +191,7 @@ describe('SonicWeave vector broadcasting', () => {
     }
 
     const rec = evaluateExpression(
-      `${op}#{four: 4, "negative half": -1/2}`
+      `${op}#{four: 4, "negative half": -1/2}`,
     ) as Record<string, Interval>;
     expect(Object.keys(rec)).toHaveLength(2);
     if (op === 'vnot ') {
@@ -247,13 +247,13 @@ describe('SonicWeave vector broadcasting', () => {
     const negHalfOpPi = evaluateExpression(`(-1/2) ${op} PI`);
 
     const mat = evaluateExpression(
-      `[[5, 1], [1, -1/2]] ${op} [2, PI]`
+      `[[5, 1], [1, -1/2]] ${op} [2, PI]`,
     ) as unknown as SonicWeavePrimitive[][];
     expect(mat).toHaveLength(2);
     expect(mat[0]).toHaveLength(2);
 
     const rec = evaluateExpression(
-      `#{a: 5, b: -1/2} ${op} #{a: 2, b: PI}`
+      `#{a: 5, b: -1/2} ${op} #{a: 2, b: PI}`,
     ) as Record<string, SonicWeavePrimitive>;
     expect(Object.keys(rec)).toHaveLength(2);
 
@@ -356,13 +356,13 @@ describe('SonicWeave vector broadcasting', () => {
     }
 
     const mat = evaluateExpression(
-      `1=440z;${fn}([[3, -1/3], [1, 1]])`
+      `1=440z;${fn}([[3, -1/3], [1, 1]])`,
     ) as unknown as Interval[][];
     expect(mat).toHaveLength(2);
     expect(mat[0]).toHaveLength(2);
 
     const rec = evaluateExpression(
-      `1=440z;${fn} #{a: 3, "negative third": -1/3}`
+      `1=440z;${fn} #{a: 3, "negative third": -1/3}`,
     ) as Record<string, Interval>;
     expect(Object.keys(rec)).toHaveLength(2);
   });
@@ -380,7 +380,7 @@ describe('SonicWeave vector broadcasting', () => {
       expect(vecL[0].strictEquals(z)).toBe(true);
       expect(vecR[0].strictEquals(z)).toBe(true);
       expect(vecLR[0].strictEquals(z)).toBe(true);
-    }
+    },
   );
 
   it('has a broadcasting sign', () => {

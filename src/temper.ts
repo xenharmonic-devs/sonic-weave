@@ -49,7 +49,7 @@ export function vanishCommas(jip: TuningMap, commas: Monzo[]): TuningMap {
 export function intCombineTuningMaps(
   jip: TuningMap,
   vals: Monzo[],
-  searchRadius: number
+  searchRadius: number,
 ): number[] {
   if (!vals.length) {
     return [];

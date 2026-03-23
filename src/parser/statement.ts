@@ -74,7 +74,7 @@ export class Interrupt {
    */
   constructor(
     node: ReturnStatement | BreakStatement | ContinueStatement,
-    value?: SonicWeaveValue
+    value?: SonicWeaveValue,
   ) {
     this.node = node;
     this.value = value;
@@ -258,7 +258,7 @@ export class StatementVisitor {
     }
     const scale = this.currentScale;
     const scaleLines = scale.map(interval =>
-      interval.toString(this.rootContext)
+      interval.toString(this.rootContext),
     );
     for (let i = 0; i < scaleLines.length; ++i) {
       if (scaleLines[i].startsWith('(') && scaleLines[i].endsWith(')')) {
@@ -359,7 +359,7 @@ export class StatementVisitor {
           const idx = index[i];
           if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
             throw new Error(
-              'Only booleans and intervals can be used as indices.'
+              'Only booleans and intervals can be used as indices.',
             );
           }
           if (idx === true) {
@@ -663,7 +663,7 @@ export class StatementVisitor {
     subVisitor: ExpressionVisitor,
     parameters: Parameter | Parameters_,
     mutable: boolean,
-    value?: SonicWeaveValue
+    value?: SonicWeaveValue,
   ) {
     if (arguments.length < 4) {
       if (parameters.defaultValue !== null) {
@@ -687,7 +687,7 @@ export class StatementVisitor {
               subVisitor,
               parameters.parameters[i],
               mutable,
-              value[i]
+              value[i],
             );
           } else {
             this.declareVariable(subVisitor, parameters.parameters[i], mutable);
@@ -698,7 +698,7 @@ export class StatementVisitor {
             subVisitor,
             parameters.rest,
             mutable,
-            value.slice(parameters.parameters.length)
+            value.slice(parameters.parameters.length),
           );
         }
       }
@@ -749,7 +749,7 @@ export class StatementVisitor {
         throw new Error('Slice assignment with a non-array.');
       }
       const object = subVisitor.visit(
-        node.name.object
+        node.name.object,
       ) as (SonicWeavePrimitive | null)[];
       if (!Array.isArray(object)) {
         throw new Error('Array slice on non-array.');
@@ -802,7 +802,7 @@ export class StatementVisitor {
           object.length,
           ...object
             .filter(x => x !== undefined)
-            .map(x => (x === null ? undefined : x) as unknown as Interval)
+            .map(x => (x === null ? undefined : x) as unknown as Interval),
         );
         return undefined;
       } else if (step < 0) {
@@ -824,7 +824,7 @@ export class StatementVisitor {
           object.length,
           ...object
             .filter(x => x !== undefined)
-            .map(x => (x === null ? undefined : x) as unknown as Interval)
+            .map(x => (x === null ? undefined : x) as unknown as Interval),
         );
         return undefined;
       }
@@ -832,7 +832,7 @@ export class StatementVisitor {
     } else if (node.name.type === 'AccessExpression') {
       const object = arrayRecordOrString(
         subVisitor.visit(node.name.object),
-        'Can only assign elements of arrays or records.'
+        'Can only assign elements of arrays or records.',
       );
       if (typeof object === 'string') {
         throw new Error('Strings are immutable.');
@@ -848,7 +848,7 @@ export class StatementVisitor {
             const idx = index[i];
             if (!(typeof idx === 'boolean' || idx instanceof Interval)) {
               throw new Error(
-                'Only booleans and intervals can be used as indices.'
+                'Only booleans and intervals can be used as indices.',
               );
             }
             if (idx === true) {
@@ -926,7 +926,7 @@ export class StatementVisitor {
       // Coerce absolute reference to Hz
       if (this.rootContext.C4.timeExponent.n) {
         this.rootContext.C4 = this.rootContext.C4.pow(
-          this.rootContext.C4.timeExponent.inverse().neg()
+          this.rootContext.C4.timeExponent.inverse().neg(),
         ) as TimeMonzo;
       }
 
@@ -939,7 +939,7 @@ export class StatementVisitor {
           this.freezeScale();
           const absolute = value.value;
           this.rootContext.unisonFrequency = absolute.pow(
-            absolute.timeExponent.inverse().neg()
+            absolute.timeExponent.inverse().neg(),
           ) as TimeMonzo;
         }
         return undefined;
@@ -1065,8 +1065,8 @@ export class StatementVisitor {
             'logarithmic',
             interval.steps,
             undefined,
-            interval
-          )
+            interval,
+          ),
         );
       }
       scale.length = 0;
@@ -1121,7 +1121,7 @@ export class StatementVisitor {
         result[i].label = value;
       } else {
         throw new Error(
-          'A pushed array element must be color, string, niente or interval.'
+          'A pushed array element must be color, string, niente or interval.',
         );
       }
     }
@@ -1157,7 +1157,7 @@ export class StatementVisitor {
       const badInterrupt = this.visit(this.deferred.pop()!);
       if (badInterrupt) {
         throw new Error(
-          `Illegal ${badInterrupt.type} inside a deferred block.`
+          `Illegal ${badInterrupt.type} inside a deferred block.`,
         );
       }
     }
@@ -1202,7 +1202,7 @@ export class StatementVisitor {
     subVisitor: ExpressionVisitor,
     element: Parameter | Parameters_,
     mutable: boolean,
-    value?: SonicWeaveValue
+    value?: SonicWeaveValue,
   ) {
     if (arguments.length < 5 && element.defaultValue) {
       value = subVisitor.visit(element.defaultValue);
@@ -1218,14 +1218,14 @@ export class StatementVisitor {
             subVisitor,
             element.parameters[i],
             mutable,
-            value[i]
+            value[i],
           );
         } else {
           this.declareLoopElement(
             loopVisitor,
             subVisitor,
             element.parameters[i],
-            mutable
+            mutable,
           );
         }
       }
@@ -1235,7 +1235,7 @@ export class StatementVisitor {
           subVisitor,
           element.rest,
           mutable,
-          value.slice(element.parameters.length)
+          value.slice(element.parameters.length),
         );
       }
     } else {
@@ -1262,7 +1262,7 @@ export class StatementVisitor {
         loopSubVisitor,
         node.element,
         node.mutable,
-        value
+        value,
       );
       const interrupt = loopVisitor.visit(node.body);
       if (interrupt?.type === 'ReturnStatement') {
@@ -1296,7 +1296,7 @@ export class StatementVisitor {
         handlerVisitor.mutables.delete('$'); // Collapse scope
         handlerVisitor.immutables.set(
           node.handler.parameter.id,
-          e as SonicWeaveValue
+          e as SonicWeaveValue,
         );
         const interrupt = handlerVisitor.visit(node.handler.body);
         if (interrupt) {
@@ -1332,7 +1332,7 @@ export class StatementVisitor {
   }
 
   protected realizeFunction(
-    node: FunctionDeclaration | ExportFunctionStatement
+    node: FunctionDeclaration | ExportFunctionStatement,
   ) {
     // Extract docstring
     node = {...node};

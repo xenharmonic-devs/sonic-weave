@@ -23,7 +23,7 @@ export const STEP_ELEMENT = Symbol();
 function wartToBasisElement(
   wart: string,
   subgroup: TimeMonzo[],
-  nonPrimes: TimeMonzo[]
+  nonPrimes: TimeMonzo[],
 ) {
   if (!wart) {
     return subgroup[0];
@@ -110,7 +110,7 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
       }
     } else {
       let monzo = TimeMonzo.fromFraction(
-        new Fraction(element.numerator, element.denominator ?? undefined)
+        new Fraction(element.numerator, element.denominator ?? undefined),
       );
       if (element.radical) {
         const sqrt = monzo.sqrt();
@@ -148,7 +148,7 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
 
 export function parseValSubgroup(
   basis: ValBasisElement[],
-  targetSize?: number
+  targetSize?: number,
 ): {subgroup: TimeMonzo[]; nonPrimes: TimeMonzo[]} {
   return parseSubgroup(basis, targetSize) as {
     subgroup: TimeMonzo[];
@@ -160,12 +160,12 @@ function patentVal(divisions: number, subgroup: TimeMonzo[]) {
   for (const element of subgroup) {
     if (element.timeExponent.n) {
       throw new Error(
-        'Vals cannot be constructed from absolute basis elements.'
+        'Vals cannot be constructed from absolute basis elements.',
       );
     }
     if (element.residual.s !== 1) {
       throw new Error(
-        'Vals cannot be constructed from non-positive basis elements.'
+        'Vals cannot be constructed from non-positive basis elements.',
       );
     }
   }
@@ -240,7 +240,7 @@ export function wartsToVal(node: WartsLiteral, basis?: ValBasis): Val {
 
 export function sparseOffsetToVal(
   node: SparseOffsetVal,
-  basis?: ValBasis
+  basis?: ValBasis,
 ): Val {
   let subgroup: TimeMonzo[];
   if (Array.isArray(node.basis)) {
@@ -254,7 +254,7 @@ export function sparseOffsetToVal(
   let equave = TWO_MONZO;
   if (node.equave) {
     equave = TimeMonzo.fromFraction(
-      new Fraction(node.equave.numerator, node.equave.denominator ?? 1)
+      new Fraction(node.equave.numerator, node.equave.denominator ?? 1),
     );
     if (node.equave.radical) {
       const splitEquave = equave.sqrt();
@@ -268,7 +268,7 @@ export function sparseOffsetToVal(
   const val = patentVal(node.divisions, subgroup);
   for (const tweak of node.tweaks) {
     const tweakMonzo = TimeMonzo.fromFraction(
-      new Fraction(tweak.element.numerator, tweak.element.denominator ?? 1)
+      new Fraction(tweak.element.numerator, tweak.element.denominator ?? 1),
     );
     let found = false;
     for (let i = 0; i < subgroup.length; ++i) {
@@ -289,7 +289,7 @@ export function sparseOffsetToVal(
 
 export function valToWarts(
   monzo: TimeMonzo,
-  basis: WartBasisElement[]
+  basis: WartBasisElement[],
 ): WartsLiteral {
   const {subgroup, nonPrimes} = parseValSubgroup(basis);
   const components = subgroup.map(m => m.dot(monzo).valueOf());
@@ -328,14 +328,14 @@ export function valToWarts(
 
 export function valToSparseOffset(
   monzo: TimeMonzo,
-  basis: WartBasisElement[]
+  basis: WartBasisElement[],
 ): SparseOffsetVal {
   const {subgroup} = parseValSubgroup(basis);
   const components = subgroup.map(m => m.dot(monzo).valueOf());
   const divisions = components[0].valueOf();
   if (!Number.isInteger(divisions)) {
     throw new Error(
-      'Fractional divisions cannot be formatted as Sparse Offset Vals.'
+      'Fractional divisions cannot be formatted as Sparse Offset Vals.',
     );
   }
   const tweaks: PatentTweak[] = [];

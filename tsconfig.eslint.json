@@ -1,22 +1,20 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "composite": false,
-    "declaration": true,
-    "incremental": false,
-    "rootDir": "./",
-    "outDir": ".temp",
     "allowJs": true,
     "allowUnreachableCode": true,
     "lib": [
       "es2020"
     ],
     "target": "es2020",
-    "resolveJsonModule": true
+    "moduleResolution": "node",
+    "types": [
+      "node"
+    ],
+    "noEmit": true
   },
   "include": [
-    "./package.json",
-    "scripts/builtin-docs.ts",
-    "scr/**/*.ts"
+    "scripts/**/*.ts",
+    "src/**/*.ts"
   ]
 }

@@ -126,7 +126,7 @@ function logLinMul(
   logarithmic: Interval,
   linear: Interval,
   node?: IntervalLiteral,
-  zombie?: Interval
+  zombie?: Interval,
 ) {
   if (linear.steps) {
     throw new Error('Cannot multiply with a stepful scalar.');
@@ -145,7 +145,7 @@ function logLinMul(
       logarithmic.domain,
       steps,
       node,
-      zombie
+      zombie,
     );
   }
   const value = logarithmic.value.pow(linear.value);
@@ -217,7 +217,7 @@ export class Interval {
     domain: IntervalDomain,
     steps = 0,
     node?: IntervalLiteral,
-    convert?: Interval
+    convert?: Interval,
   ) {
     validateNode(node);
     this.value = value;
@@ -250,7 +250,7 @@ export class Interval {
       'linear',
       0,
       {type: 'IntegerLiteral', value},
-      convert
+      convert,
     );
   }
 
@@ -268,7 +268,7 @@ export class Interval {
       'linear',
       0,
       {type: 'FractionLiteral', numerator, denominator},
-      convert
+      convert,
     );
   }
 
@@ -305,7 +305,7 @@ export class Interval {
         reviveMonzo(value.v),
         value.d ? 'logarithmic' : 'linear',
         value.s,
-        intervalLiteralFromJSON(value.n)
+        intervalLiteralFromJSON(value.n),
       );
       result.label = value.l;
       result.color = value.c && new Color(value.c);
@@ -350,7 +350,7 @@ export class Interval {
       this.domain,
       this.steps,
       {...this.node} as IntervalLiteral,
-      this
+      this,
     );
   }
 
@@ -397,7 +397,7 @@ export class Interval {
         this.domain,
         this.steps, // Iffy, but not wrong.
         node,
-        this
+        this,
       );
     }
     return new Interval(
@@ -405,7 +405,7 @@ export class Interval {
       this.domain,
       -this.steps,
       node,
-      this
+      this,
     );
   }
 
@@ -421,7 +421,7 @@ export class Interval {
         this.domain,
         -this.steps,
         node,
-        this
+        this,
       );
     }
     if (this.value instanceof TimeReal) {
@@ -431,7 +431,7 @@ export class Interval {
     return new Val(
       this.value.geometricInverse(),
       new ValBasis([this.value.clone()]),
-      undefined
+      undefined,
     );
   }
 
@@ -457,7 +457,7 @@ export class Interval {
   pitchAbs() {
     if (this.domain === 'logarithmic') {
       throw new Error(
-        'Logarithmic absolute value not implemented in the already-logarithmic domain.'
+        'Logarithmic absolute value not implemented in the already-logarithmic domain.',
       );
     }
     if (this.steps) {
@@ -481,7 +481,7 @@ export class Interval {
       this.domain,
       this.steps / 2,
       node,
-      this
+      this,
     );
   }
 
@@ -504,7 +504,7 @@ export class Interval {
       'logarithmic',
       steps.valueOf(),
       node,
-      infect(this, base)
+      infect(this, base),
     );
   }
 
@@ -534,7 +534,7 @@ export class Interval {
       this.domain,
       this.steps + other.steps,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -564,7 +564,7 @@ export class Interval {
       this.domain,
       this.steps - other.steps,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -600,7 +600,7 @@ export class Interval {
         this.domain,
         0,
         node,
-        zombie
+        zombie,
       );
     }
     if (this.value instanceof TimeReal || other.value instanceof TimeReal) {
@@ -644,12 +644,12 @@ export class Interval {
         this.domain,
         0,
         node,
-        zombie
+        zombie,
       );
     }
     if (this.value instanceof TimeReal || other.value instanceof TimeReal) {
       throw new Error(
-        'Irrational logarithmic lens subtraction not implemented.'
+        'Irrational logarithmic lens subtraction not implemented.',
       );
     }
     const magnitude = this.value.dot(this.value);
@@ -689,7 +689,7 @@ export class Interval {
         this.domain,
         0,
         node,
-        zombie
+        zombie,
       );
     }
     return new Interval(
@@ -697,7 +697,7 @@ export class Interval {
       this.domain,
       0,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -722,7 +722,7 @@ export class Interval {
         this.domain,
         0,
         node,
-        zombie
+        zombie,
       );
     }
     return new Interval(
@@ -730,7 +730,7 @@ export class Interval {
       this.domain,
       0,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -742,7 +742,7 @@ export class Interval {
   pitchRoundTo(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(
-        'Exponential rounding not implemented in logarithmic domain.'
+        'Exponential rounding not implemented in logarithmic domain.',
       );
     }
     if (this.steps || other.steps) {
@@ -757,7 +757,7 @@ export class Interval {
       this.domain,
       0,
       node,
-      infect(this, other)
+      infect(this, other),
     );
   }
 
@@ -788,7 +788,7 @@ export class Interval {
       this.domain,
       this.steps + other.steps,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -828,7 +828,7 @@ export class Interval {
       this.domain,
       this.steps - other.steps,
       node,
-      zombie
+      zombie,
     );
   }
 
@@ -869,7 +869,7 @@ export class Interval {
           type: 'IntegerLiteral',
           value,
         },
-        zombie
+        zombie,
       );
     }
     return new Interval(
@@ -881,7 +881,7 @@ export class Interval {
         numerator: BigInt(product.s * product.n),
         denominator: BigInt(product.d),
       },
-      zombie
+      zombie,
     );
   }
 
@@ -910,7 +910,7 @@ export class Interval {
       this.domain,
       steps,
       node,
-      infect(this, other)
+      infect(this, other),
     );
   }
 
@@ -922,7 +922,7 @@ export class Interval {
   ipow(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(
-        'Inverse exponentiation not implemented in logarithmic domain.'
+        'Inverse exponentiation not implemented in logarithmic domain.',
       );
     }
     if (!other.value.isScalar() || other.steps) {
@@ -942,7 +942,7 @@ export class Interval {
       this.domain,
       steps,
       node,
-      infect(this, other)
+      infect(this, other),
     );
   }
 
@@ -954,7 +954,7 @@ export class Interval {
   log(other: Interval) {
     if (this.domain === 'logarithmic' || other.domain === 'logarithmic') {
       throw new Error(
-        'Logarithm not implemented in the (already) logarithmic domain.'
+        'Logarithm not implemented in the (already) logarithmic domain.',
       );
     }
     // Log fails if this won't work.
@@ -965,7 +965,7 @@ export class Interval {
       this.domain,
       steps,
       node,
-      infect(this, other)
+      infect(this, other),
     );
   }
 
@@ -1087,7 +1087,7 @@ export class Interval {
         ({ups, lifts, steps} = countUpsAndLifts(
           this.steps,
           context.up.steps,
-          context.lift.steps
+          context.lift.steps,
         ));
         if (steps) {
           return undefined;
@@ -1119,7 +1119,7 @@ export class Interval {
         ({ups, lifts, steps} = countUpsAndLifts(
           this.steps,
           context.up.steps,
-          context.lift.steps
+          context.lift.steps,
         ));
         if (steps) {
           return undefined;
@@ -1419,7 +1419,7 @@ export class ValBasis {
     if (typeof basis === 'number') {
       const numberOfComponents = basis;
       this.value = PRIMES.slice(0, numberOfComponents).map(p =>
-        TimeMonzo.fromFraction(p, numberOfComponents)
+        TimeMonzo.fromFraction(p, numberOfComponents),
       );
       this.ortho_ = this.value;
       this.dual_ = this.value;
@@ -1435,7 +1435,7 @@ export class ValBasis {
         numberOfComponents = Math.max(
           primeLimit(element.residual.n, true),
           primeLimit(element.residual.d, true),
-          numberOfComponents
+          numberOfComponents,
         );
       } else {
         const pe = [...element.primeExponents];
@@ -1496,7 +1496,7 @@ export class ValBasis {
   get tenneyValue(): number[][] {
     if (this.tenneyValue_ === undefined) {
       this.tenneyValue_ = this.value.map(m =>
-        applyWeights(m.toMonzo(), LOG_PRIMES)
+        applyWeights(m.toMonzo(), LOG_PRIMES),
       );
     }
     return this.tenneyValue_;
@@ -1556,7 +1556,7 @@ export class ValBasis {
       for (const prime of element.factorize().keys()) {
         if (prime <= 0) {
           throw new Error(
-            'Negative or zero basis does not have a prime super-basis.'
+            'Negative or zero basis does not have a prime super-basis.',
           );
         }
         primes.add(prime);
@@ -1634,7 +1634,7 @@ export class ValBasis {
     for (let i = 0; i < this.ortho_.length; ++i) {
       for (let j = 0; j < i; ++j) {
         const oi = this.ortho_[i].div(
-          this.ortho_[j].pow(this.dual_[j].dot(this.ortho_[i]))
+          this.ortho_[j].pow(this.dual_[j].dot(this.ortho_[i])),
         );
         if (oi instanceof TimeReal) {
           throw new Error('Basis orthogonalization failed.');
@@ -1662,7 +1662,7 @@ export class ValBasis {
     for (const element of this.value) {
       if (!element.isScalar()) {
         throw new Error(
-          'LLL reduction is only implemented in the relative echelon.'
+          'LLL reduction is only implemented in the relative echelon.',
         );
       }
     }
@@ -1671,7 +1671,7 @@ export class ValBasis {
         const basis: FractionalMonzo[] = this.value.map(m => m.primeExponents);
         const lll = fractionalLenstraLenstraLovasz(basis);
         return new ValBasis(
-          lll.basis.map(pe => new TimeMonzo(ZERO, pe).pitchAbs())
+          lll.basis.map(pe => new TimeMonzo(ZERO, pe).pitchAbs()),
         );
       } catch {
         /** Fall through */
@@ -1689,9 +1689,9 @@ export class ValBasis {
       lll.basis.map(pe =>
         new TimeMonzo(
           ZERO,
-          pe.map(c => new Fraction(Math.round(c)))
-        ).pitchAbs()
-      )
+          pe.map(c => new Fraction(Math.round(c))),
+        ).pitchAbs(),
+      ),
     );
   }
 
@@ -1721,7 +1721,7 @@ export class ValBasis {
     v = unapplyWeights(v, LOG_PRIMES).map(Math.round);
     return new TimeMonzo(
       ZERO,
-      v.map(pe => new Fraction(pe))
+      v.map(pe => new Fraction(pe)),
     );
   }
 
@@ -1792,7 +1792,7 @@ export class ValBasis {
       const cents = dot(basis[i], result);
       result = add(
         result,
-        scale(ortho[i], (map[i] - cents) / dot(basis[i], ortho[i]))
+        scale(ortho[i], (map[i] - cents) / dot(basis[i], ortho[i])),
       );
     }
     return result;
@@ -1882,7 +1882,7 @@ export class ValBasis {
         other.domain,
         0,
         intervalValueAs(value, other.node, true),
-        other
+        other,
       );
     }
     if (other instanceof Val) {
@@ -2004,7 +2004,7 @@ export class Val {
   static fromArray(
     primeExponentMap: FractionValue[],
     basis?: ValBasis,
-    node?: CoIntervalLiteral
+    node?: CoIntervalLiteral,
   ) {
     if (!basis) {
       basis = new ValBasis(primeExponentMap.length);
@@ -2021,17 +2021,17 @@ export class Val {
   static fromBasisMap(
     basisExponentMap: FractionValue[],
     basis: ValBasis,
-    node?: CoIntervalLiteral
+    node?: CoIntervalLiteral,
   ) {
     let result = new TimeMonzo(
       ZERO,
-      Array(basis.numberOfComponents).fill(ZERO)
+      Array(basis.numberOfComponents).fill(ZERO),
     );
     for (let i = 0; i < basis.value.length; ++i) {
       const mapped = result.dot(basis.value[i]);
       const diff = mapped.sub(basisExponentMap[i]);
       result = result.div(
-        basis.ortho[i].pow(diff.div(basis.value[i].dot(basis.ortho[i])))
+        basis.ortho[i].pow(diff.div(basis.value[i].dot(basis.ortho[i]))),
       ) as TimeMonzo;
     }
     if (!(result instanceof TimeMonzo)) {
@@ -2257,7 +2257,7 @@ export class Val {
       const n = jip[0] / m[0];
       const diff = sub(
         weights,
-        applyWeights(unapplyWeights(scale(m, n), jip), weights)
+        applyWeights(unapplyWeights(scale(m, n), jip), weights),
       );
       const error = dotPrecise(diff, diff);
       if (error < leastError) {
@@ -2311,7 +2311,7 @@ export class Temperament {
     basis?: ValBasis,
     weights?: number[],
     pureEquaves = false,
-    metric: FormalPrimeMetric = 'subgroup'
+    metric: FormalPrimeMetric = 'subgroup',
   ) {
     if (!mapping.length) {
       throw new Error('Constructing the trivial temperament is not supported.');
@@ -2342,14 +2342,14 @@ export class Temperament {
     // Compute comma basis
     const scommas = transpose(kernel(this.canonicalMapping));
     this.commaBasis = new ValBasis(scommas.map(c => basis!.dot(c))).lll(
-      'tenney'
+      'tenney',
     );
 
     // Compute mapping generators
     this.sgens = transpose(preimage(this.canonicalMapping));
     const gens = this.sgens.map(g => basis!.dot(g));
     this.preimage = new ValBasis(
-      gens.map(g => this.commaBasis.respell(g, 'tenney'))
+      gens.map(g => this.commaBasis.respell(g, 'tenney')),
     );
 
     // Make mapping generators positive
@@ -2374,11 +2374,11 @@ export class Temperament {
     vals: Val[],
     weights?: number[],
     pureEquaves = false,
-    metric: FormalPrimeMetric = 'subgroup'
+    metric: FormalPrimeMetric = 'subgroup',
   ): Temperament {
     if (!vals.length) {
       throw new Error(
-        'At least one val is required when constructing a temperament.'
+        'At least one val is required when constructing a temperament.',
       );
     }
     const basis = vals[0].basis;
@@ -2399,7 +2399,7 @@ export class Temperament {
       basis,
       weights,
       pureEquaves,
-      metric
+      metric,
     );
   }
 
@@ -2418,12 +2418,12 @@ export class Temperament {
     weights?: number[],
     pureEquaves = false,
     metric: FormalPrimeMetric = 'subgroup',
-    fullPrimeLimit = false
+    fullPrimeLimit = false,
   ) {
     if (!commas.length) {
       if (basis === undefined) {
         throw new Error(
-          'An explicit subgroup is required with an empty comma list.'
+          'An explicit subgroup is required with an empty comma list.',
         );
       }
       return new Temperament(
@@ -2431,7 +2431,7 @@ export class Temperament {
         basis,
         weights,
         pureEquaves,
-        metric
+        metric,
       );
     }
     // Use bigints to avoid overflow in intermediate results.
@@ -2478,7 +2478,7 @@ export class Temperament {
       basis,
       weights,
       pureEquaves,
-      metric
+      metric,
     );
   }
 
@@ -2496,7 +2496,7 @@ export class Temperament {
         const superMonzo = superBasis.toSubgroupMonzo(this.basis.value[i]);
         superWeights = add(
           superWeights,
-          scale(superMonzo, this.weights[i]).map(Math.abs)
+          scale(superMonzo, this.weights[i]).map(Math.abs),
         );
       }
       const superTemperament = Temperament.fromCommas(
@@ -2504,10 +2504,10 @@ export class Temperament {
         this.basis.superBasis(),
         superWeights,
         this.pureEquaves,
-        'inharmonic'
+        'inharmonic',
       );
       this.subgroupMapping_ = this.basis.value.map(m =>
-        superTemperament.temper(m).totalCents()
+        superTemperament.temper(m).totalCents(),
       );
       return this.subgroupMapping_;
     }
@@ -2522,7 +2522,7 @@ export class Temperament {
     }
     const mapping = combineTuningMaps(
       applyWeights(jip, weights),
-      this.canonicalMapping.map(m => applyWeights(m, weights))
+      this.canonicalMapping.map(m => applyWeights(m, weights)),
     );
     this.subgroupMapping_ = unapplyWeights(mapping, weights);
     if (this.pureEquaves) {
@@ -2565,7 +2565,7 @@ export class Temperament {
     const gens = this.preimage.value;
     for (let i = 0; i < gens.length; ++i) {
       monzo = monzo.mul(
-        gens[i].pow(fractionalDot(this.canonicalMapping[i], smonzo))
+        gens[i].pow(fractionalDot(this.canonicalMapping[i], smonzo)),
       ) as TimeMonzo;
     }
     const result = this.commaBasis.respell(monzo, 'tenney').mul(residual);
@@ -2588,8 +2588,8 @@ export class Temperament {
     return TimeReal.fromCents(
       dot(
         smonzo.map(f => f.valueOf()),
-        this.subgroupMapping
-      )
+        this.subgroupMapping,
+      ),
     ).mul(residual);
   }
 
@@ -2615,7 +2615,7 @@ export class Temperament {
     const jip = this.basis.value.map(m => m.totalCents());
     const diff = sub(
       this.weights,
-      applyWeights(this.weights, unapplyWeights(this.subgroupMapping, jip))
+      applyWeights(this.weights, unapplyWeights(this.subgroupMapping, jip)),
     );
     return Math.sqrt(dotPrecise(diff, diff) / jip.length) * jip[0];
   }
@@ -2707,7 +2707,7 @@ export class Temperament {
 export function intervalValueAs(
   value: TimeMonzo | TimeReal,
   node: IntervalLiteral | undefined,
-  simplify = false
+  simplify = false,
 ): IntervalLiteral | undefined {
   if (!node) {
     return undefined;

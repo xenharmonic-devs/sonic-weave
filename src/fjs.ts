@@ -48,14 +48,14 @@ const OCTAVE = PRIME_CENTS[0];
 
 function masterAlgorithm(
   primeCents: number,
-  radius = RADIUS_OF_TOLERANCE
+  radius = RADIUS_OF_TOLERANCE,
 ): [number, number] {
   let pythagoras = 0;
   let k = 0;
   if (circleDistance(primeCents, pythagoras) < radius) {
     return [k, -k];
   }
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     pythagoras += FIFTH;
     k++;
@@ -102,7 +102,7 @@ function neutralMaster(primeCents: number): [number, number] {
   let pythagoras = 0.5 * FIFTH;
   // XXX: Abuse the fact that negative powers of two are exact in floating point.
   let k = 0.5;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     if (circleDistance(primeCents, pythagoras) < NEUTRAL_BRIDGING_RADIUS) {
       return [k, -k];
@@ -120,7 +120,7 @@ function semiquartalMaster(primeCents: number): [number, number] {
   let pythagoras = 0.5 * FOURTH;
   // XXX: Abuse the fact that negative powers of two are exact in floating point.
   let k = 0.5;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     if (circleDistance(primeCents, pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
       return [-k - 0.5, k];
@@ -138,7 +138,7 @@ function toneSplitterMaster(primeCents: number): [number, number] {
   let pythagoras = 0.5 * OCTAVE;
   // XXX: Abuse the fact that negative powers of two are exact in floating point.
   let k = 0.5;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     if (circleDistance(primeCents, pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
       return [k, 0.5 - k];
@@ -193,7 +193,7 @@ const toneSplitterCommas = [
 const commaIterator = commaGenerator(masterAlgorithm);
 
 const floraIterator = commaGenerator(primeCents =>
-  masterAlgorithm(primeCents, SEMIAPOTOME)
+  masterAlgorithm(primeCents, SEMIAPOTOME),
 );
 
 const neutralIterator = commaGenerator(neutralMaster);
@@ -259,7 +259,7 @@ export function getToneSplitterComma(index: number) {
 
 export function getInflection(
   superscripts: FJSInflection[],
-  subscripts: FJSInflection[]
+  subscripts: FJSInflection[],
 ) {
   let result: TimeMonzo | TimeReal = TimeMonzo.fromFraction(1);
   for (const [s, flavor] of superscripts) {
@@ -329,7 +329,7 @@ export function getInflection(
 export function inflect(
   pythagorean: TimeMonzo | TimeReal,
   superscripts: FJSInflection[],
-  subscripts: FJSInflection[]
+  subscripts: FJSInflection[],
 ) {
   return getInflection(superscripts, subscripts).mul(pythagorean);
 }
@@ -378,7 +378,7 @@ export function uninflect(monzo: TimeMonzo, flavor: FJSFlavor) {
         sub.push([PRIMES[i], flavor]);
       }
     }
-  } catch (e) {
+  } catch {
     return undefined;
   }
   const pythagoreanMonzo = monzo.div(getInflection(superscripts, subscripts));
@@ -426,7 +426,7 @@ export function asFJS(monzo: TimeMonzo, flavor: FJSFlavor): FJS | undefined {
 
 export function asAbsoluteFJS(
   monzo: TimeMonzo,
-  flavor: FJSFlavor
+  flavor: FJSFlavor,
 ): AbsoluteFJS | undefined {
   if (monzo.residual.s !== 1) {
     return undefined;

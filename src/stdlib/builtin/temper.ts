@@ -35,7 +35,7 @@ function builtinTemperament(
   this: ExpressionVisitor,
   vals: SonicWeaveValue,
   weights?: SonicWeaveValue,
-  pureEquaves?: SonicWeaveValue
+  pureEquaves?: SonicWeaveValue,
 ) {
   if (vals instanceof Val) {
     vals = [vals];
@@ -78,7 +78,7 @@ function commaList(
   basisOrLimit: SonicWeaveValue,
   weights: SonicWeaveValue,
   pureEquaves: SonicWeaveValue,
-  fullPrimeLimit: SonicWeaveValue
+  fullPrimeLimit: SonicWeaveValue,
 ) {
   if (commas instanceof Interval) {
     commas = [commas];
@@ -125,7 +125,7 @@ function commaList(
     ws,
     sonicTruth(pureEquaves),
     undefined,
-    sonicTruth(fullPrimeLimit)
+    sonicTruth(fullPrimeLimit),
   );
 }
 commaList.__doc__ =
@@ -135,7 +135,7 @@ commaList.__node__ = builtinNode(commaList);
 function tail(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  index: Interval
+  index: Interval,
 ): SonicWeaveValue {
   requireParameters({interval, index});
   if (interval instanceof Interval || typeof interval === 'boolean') {
@@ -145,7 +145,7 @@ function tail(
       interval.domain,
       interval.steps,
       undefined,
-      interval
+      interval,
     );
   }
   const t = tail.bind(this);
@@ -158,7 +158,7 @@ tail.__node__ = builtinNode(tail);
 function complexityOf(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  countZeros = false
+  countZeros = false,
 ): SonicWeaveValue {
   if (isArrayOrRecord(interval)) {
     const c = complexityOf.bind(this);
@@ -203,7 +203,7 @@ complexityOf.__node__ = builtinNode(complexityOf);
 
 function basisOf(
   this: ExpressionVisitor,
-  val: SonicWeaveValue
+  val: SonicWeaveValue,
 ): SonicWeaveValue {
   if (isArrayOrRecord(val)) {
     const e = basisOf.bind(this);
@@ -220,7 +220,7 @@ basisOf.__node__ = builtinNode(basisOf);
 function withBasis(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
-  basis: ValBasis
+  basis: ValBasis,
 ): SonicWeaveValue {
   requireParameters({val, basis});
   if (isArrayOrRecord(val)) {
@@ -267,7 +267,7 @@ SOV.__node__ = builtinNode(SOV);
 
 function generatorsOf(
   this: ExpressionVisitor,
-  temperament: SonicWeaveValue
+  temperament: SonicWeaveValue,
 ): SonicWeaveValue {
   if (temperament instanceof Val) {
     const divisions = temperament.divisions;
@@ -279,7 +279,7 @@ function generatorsOf(
     throw new Error('A temperament is required.');
   }
   return temperament.generators.map(
-    cents => new Interval(TimeReal.fromCents(cents), 'logarithmic')
+    cents => new Interval(TimeReal.fromCents(cents), 'logarithmic'),
   );
 }
 generatorsOf.__doc__ =
@@ -330,12 +330,12 @@ function PrimeMapping(
 ) {
   const rel = pubRelative.bind(this.rootContext);
   const np = newPrimes.map((p, i) =>
-    p ? rel(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i])
+    p ? rel(p).value : TimeMonzo.fromBigInt(BIG_INT_PRIMES[i]),
   );
 
   function mapper(
     this: ExpressionVisitor,
-    interval: SonicWeaveValue
+    interval: SonicWeaveValue,
   ): SonicWeaveValue {
     if (isArrayOrRecord(interval)) {
       const m = mapper.bind(this);
@@ -349,7 +349,7 @@ function PrimeMapping(
         'logarithmic',
         0,
         monzo.asCentsLiteral(),
-        interval
+        interval,
       );
     }
     this.spendGas(np.length);
@@ -402,7 +402,7 @@ function errorTE(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
   weights: SonicWeaveValue,
-  unnormalized = false
+  unnormalized = false,
 ): SonicWeaveValue {
   if (val instanceof Val) {
     const ws = valWeights(weights, val.basis.size);
@@ -432,7 +432,7 @@ errorTE.__node__ = builtinNode(errorTE);
 function nextGPV(
   this: ExpressionVisitor,
   val: SonicWeaveValue,
-  weights: SonicWeaveValue
+  weights: SonicWeaveValue,
 ): SonicWeaveValue {
   if (val instanceof Val) {
     const ws = valWeights(weights, val.basis.size);
@@ -448,7 +448,7 @@ function tune(
   this: ExpressionVisitor,
   vals: SonicWeaveValue,
   searchRadius: SonicWeaveValue,
-  weights: SonicWeaveValue
+  weights: SonicWeaveValue,
 ) {
   if (!Array.isArray(vals)) {
     throw new Error('An array of vals is required.');
@@ -471,7 +471,7 @@ function tune(
   const radius =
     searchRadius === undefined ? 1 : upcastBool(searchRadius).toInteger();
   this.spendGas(
-    0.25 * basis.numberOfComponents * (2 * radius + 1) ** vals.length
+    0.25 * basis.numberOfComponents * (2 * radius + 1) ** vals.length,
   );
   const jip = basis.value.map(m => m.totalCents());
   const ws = valWeights(weights, basis.size);
@@ -479,10 +479,10 @@ function tune(
     applyWeights(
       unapplyWeights(
         basis.value.map(m => m.dot(val.value).valueOf()),
-        jip
+        jip,
       ),
-      ws
-    )
+      ws,
+    ),
   );
   const coeffs = intCombineTuningMaps(ws, weightedVals, radius);
   let result = vs[0].mul(fromInteger(coeffs[0]));
@@ -519,7 +519,7 @@ basisToArray.__node__ = builtinNode(basisToArray);
 function respellWithCommas(
   this: ExpressionVisitor,
   interval: SonicWeaveValue,
-  commas: TimeMonzo[]
+  commas: TimeMonzo[],
 ): SonicWeaveValue {
   if (typeof interval === 'boolean' || interval instanceof Interval) {
     interval = upcastBool(interval);
@@ -564,7 +564,7 @@ function respellWithCommas(
         interval.domain,
         interval.steps,
         intervalValueAs(value, interval.node, simplify),
-        interval
+        interval,
       );
     }
     value = value.pow(exponent);
@@ -573,7 +573,7 @@ function respellWithCommas(
       interval.domain,
       interval.steps,
       intervalValueAs(value, interval.node, simplify),
-      interval
+      interval,
     );
   }
   const r = respellWithCommas.bind(this);
@@ -583,7 +583,7 @@ function respellWithCommas(
 function respell(
   this: ExpressionVisitor,
   commaBasis: SonicWeaveValue,
-  searchRadius: SonicWeaveValue
+  searchRadius: SonicWeaveValue,
 ) {
   if (commaBasis instanceof Interval || commaBasis instanceof Val) {
     commaBasis = [commaBasis];
@@ -601,7 +601,6 @@ function respell(
   if (commaBasis instanceof Temperament) {
     const temperament = commaBasis;
     if (searchRadius === undefined) {
-      // eslint-disable-next-line no-inner-declarations
       function mapper(this: ExpressionVisitor, interval: SonicWeaveValue) {
         interval = upcastBool(interval);
         if (interval.value instanceof TimeReal) {
@@ -614,7 +613,7 @@ function respell(
           interval.domain,
           interval.steps,
           intervalValueAs(value, interval.node, true),
-          interval
+          interval,
         );
       }
       mapper.__doc__ = 'Respeller';
