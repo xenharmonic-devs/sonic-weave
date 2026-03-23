@@ -31,6 +31,12 @@ describe('Constant structure checker', () => {
 });
 
 describe('Subtension calculator', () => {
+  it('uses 1-indexed span sizes for subtensions', () => {
+    const result = subtensions([TimeMonzo.fromFraction(2)]);
+    expect(result).toHaveLength(1);
+    expect(Array.from(result[0].subtensions)).toEqual([1]);
+  });
+
   it('calculates the structure of Raga Bhairavi', () => {
     const scale = ['16/15', '9/8', '6/5', '27/20', '3/2', '8/5', '9/5', '2'];
     const subtenders = Object.fromEntries(

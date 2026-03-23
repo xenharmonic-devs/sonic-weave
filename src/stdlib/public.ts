@@ -59,6 +59,11 @@ export function compare(
  * @returns The interval without a virtual AST node to bias formatting.
  */
 export function simplify(interval: Interval | boolean): Interval;
+/**
+ * Get rid of val formatting metadata while preserving the same mapping.
+ * @param interval Val to simplify.
+ * @returns A cloned {@link Val} stripped of formatting-only state.
+ */
 export function simplify(interval: Val): Val;
 export function simplify(interval: Val | Interval | boolean): typeof interval {
   if (interval instanceof Val) {
@@ -249,6 +254,7 @@ export function wilsonHeight(
  * @param this {@link RootContext} for the next tracking ID.
  * @param interval Interval to track.
  * @returns A copy of the interval that can be tracked e.g. for changes in scale order.
+ * @throws An error if no root context is available.
  */
 export function track(this: RootContext | undefined, interval: Interval) {
   if (!this) {
@@ -264,6 +270,7 @@ export function track(this: RootContext | undefined, interval: Interval) {
  * @param this {@link ExpressionVisitor} instance providing the current scale and context for comparing across echelons.
  * @param scale Musical scale to sort (defaults to context scale).
  * @param compareFn SonicWeave riff for comparing elements.
+ * @returns Nothing; the provided array is mutated in place.
  */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export function sortInPlace(
@@ -336,7 +343,7 @@ function repr_(
  * Obtain a string representation of the value (with color and label).
  * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
- * @returns String that evaluates to the value.
+ * @returns String representation intended to round-trip through SonicWeave when possible.
  */
 export function repr(this: RootContext | undefined, value: SonicWeaveValue) {
   return repr_.bind(this)(value);
@@ -346,7 +353,7 @@ export function repr(this: RootContext | undefined, value: SonicWeaveValue) {
  * Obtain a string representation of the value (w/o color or label).
  * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
- * @returns String that evaluates to the value.
+ * @returns String representation without cosmetic color or label annotations.
  */
 export function str(this: RootContext | undefined, value: SonicWeaveValue) {
   if (value instanceof Interval) {
@@ -360,7 +367,7 @@ export function str(this: RootContext | undefined, value: SonicWeaveValue) {
  * @param this {@link RootContext} for ups-and-downs etc.
  * @param value Value to represent.
  * @param maxLength Maximum length of the result.
- * @returns Short string representation that's below the maximum length if possible.
+ * @returns Short string representation that's below the maximum length if possible, otherwise the shortest useful fallback.
  */
 export function lstr(
   this: RootContext | undefined,
@@ -530,8 +537,9 @@ function tanh255(x: number) {
 
 /**
  * Color an interval based on its prime factors.
+ * @param this {@link RootContext} for converting absolute intervals to relative ones before factoring.
  * @param interval Interval to factor.
- * @returns RBG color combination that reflects the factors of the interval.
+ * @returns RGB color combination that reflects the interval's prime factors.
  */
 export function factorColor(this: RootContext | undefined, interval: Interval) {
   interval = relative.bind(this)(interval);
@@ -554,9 +562,9 @@ export function factorColor(this: RootContext | undefined, interval: Interval) {
 /**
  * Temper an interval using a val i.e. map exponents of prime factors to steps on an equal temperament.
  * @param this {@link RootContext} for unison frequency.
- * @param interval Interval to map to equal steps.
  * @param val Val to map by.
- * @returns The interval tempered to equal steps of the val's equave.
+ * @param interval Interval or scale to map to equal steps.
+ * @returns The tempered interval, or an array of tempered intervals when an array is provided.
  */
 export function temper(
   this: RootContext | undefined,

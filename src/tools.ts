@@ -3,15 +3,21 @@
 import {TimeMonzo} from './monzo';
 
 /**
- * Result from {@link subtensions} consisting of a relative interval and all of the spans it subtends (a set of 0-indexed interval classes).
+ * Result from {@link subtensions} consisting of a relative interval and all of the span sizes that subtend it.
  */
 export type Subtender = {
+  /**
+   * The relative interval shared by the listed subtensions.
+   */
   monzo: TimeMonzo;
+  /**
+   * All 1-indexed subtensions / span sizes in the scale that realize `monzo`.
+   */
   subtensions: Set<number>;
 };
 
 /**
- * Calculate all subtensions i.e 0-indexed interval classes associated with relative intervals.
+ * Calculate all subtensions i.e. 1-indexed span sizes associated with relative intervals.
  * @param monzos Musical intervals given as relative monzos not including the implicit unison at the start, but including the interval of repetition at the end.
  * @returns An array of subtensions associated with each interval found in the scale.
  */

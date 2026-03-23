@@ -15,7 +15,13 @@ import {ZERO} from '../utils';
  */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export interface SonicWeaveFunction extends Function {
+  /**
+   * Documentation string shown for the builtin, if one was attached.
+   */
   __doc__: string | undefined;
+  /**
+   * AST metadata used for reflection, formatting, and error reporting.
+   */
   __node__: FunctionDeclaration | ArrowFunction | ExportFunctionStatement;
 }
 
@@ -50,7 +56,7 @@ const INT_CACHE = [...Array(100).keys()].map(i => Interval.fromInteger(i));
 /**
  * Convert an integer to an {@link Interval instance}.
  * @param n Integer to convert.
- * @returns Linear interval representing the integer, likely cached.
+ * @returns Linear interval representing the integer, reusing a cached small non-negative integer when possible.
  */
 export function fromInteger(n: number) {
   if (n >= 0 && n < INT_CACHE.length) {
@@ -63,6 +69,7 @@ export function fromInteger(n: number) {
  * Convert boolean value to a 1 or 0.
  * @param b `true` or `false` to convert.
  * @returns Interval literal representing either 1 or 0.
+ * @throws An error if the value is neither a boolean nor an {@link Interval}.
  */
 export function upcastBool(b: SonicWeaveValue) {
   if (b instanceof Interval) {
@@ -107,7 +114,7 @@ export function sonicTruth(test: SonicWeaveValue) {
 
 /**
  * Unity as a linear interval.
- * @returns One.
+ * @returns A linear interval equal to one.
  */
 export function linearOne() {
   return INT_CACHE[1];
@@ -116,6 +123,7 @@ export function linearOne() {
 /**
  * Construct a virtual AST node for a function defined outside of the DSL but callable inside the DSL.
  * @param builtin Function to extract node information from.
+ * @param defaults Optional default AST expressions to associate with parameters by name.
  * @returns Virtual {@link FunctionDeclaration} to be attached to `builtin.__node__`.
  */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
@@ -172,6 +180,8 @@ export function builtinNode(
 /**
  * Throw an error if any of the parameters passed in has an `undefined` value.
  * @param parameters A record of parameters to make mandatory.
+ * @returns Nothing.
+ * @throws An error naming the first missing parameter.
  */
 export function requireParameters(parameters: Record<string, any>) {
   for (const name of Object.keys(parameters)) {
@@ -208,6 +218,7 @@ export function isArrayOrRecord(container: SonicWeaveValue) {
  * @param container Array or record.
  * @param fn Unary function for evaluating subvalues.
  * @returns The function mapped over the values of the container.
+ * @throws An error if `container` is not broadcastable as an array or SonicWeave record.
  */
 export function unaryBroadcast(
   this: ExpressionVisitor,
@@ -242,7 +253,8 @@ export function unaryBroadcast(
  * @param left Array or record. The left operand.
  * @param right Array or record. The right operand.
  * @param fn Binary function for evaluating subvalues.
- * @returns The function mapped over the values of the containers.
+ * @returns The broadcasted result, preserving array/record structure where possible.
+ * @throws An error if the operands cannot be broadcast together.
  */
 export function binaryBroadcast(
   this: ExpressionVisitor,
@@ -350,6 +362,16 @@ export function binaryBroadcast(
   );
 }
 
+/**
+ * Apply ternary array broadcasting rules.
+ * @param this Current evaluation context.
+ * @param left Left operand, optionally an array.
+ * @param middle Middle operand, optionally an array.
+ * @param right Right operand, optionally an array.
+ * @param fn Ternary function for evaluating broadcasted subvalues.
+ * @returns The broadcasted result, or the direct function result if no operand is an array.
+ * @throws An error if array operands have incompatible lengths.
+ */
 export function ternaryBroadcast(
   this: ExpressionVisitor,
   left: SonicWeavePrimitive | SonicWeavePrimitive[],

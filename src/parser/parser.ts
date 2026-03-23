@@ -28,6 +28,7 @@ let VOLATILES: Program | null = null;
 /**
  * Note: Use {@link getSourceVisitor} instead unless you need hack the built-ins for some reason.
  * Obtain a runtime visitor usable as the parent scope of a visitor for the body of a program produced by {@link parseAST}.
+ * The returned visitor is suitable as shared global state; user code normally runs in a child visitor created by {@link getSourceVisitor}.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
  * @returns A SonicWeave statement evaluator containing the built-in global scope.
@@ -103,7 +104,7 @@ export function getGlobalVisitor(
  * Obtain a runtime visitor for the body of a program produced by {@link parseAST}.
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
- * @returns A SonicWeave statement evaluator.
+ * @returns A SonicWeave statement evaluator with the global scope wired in as its parent.
  */
 export function getSourceVisitor(
   includePrelude = true,
@@ -121,6 +122,7 @@ export function getSourceVisitor(
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
  * @returns A SonicWeave statement visitor after evaluating all of the statements in the program.
+ * @throws Any parser or runtime error raised while executing the program.
  */
 export function evaluateSource(
   source: string,
@@ -140,7 +142,7 @@ export function evaluateSource(
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
  * @returns Value of the final expression in the program.
- * @throws An error if the final statement in the program is not an expression.
+ * @throws An error if the final statement in the program is not an expression, if a control-flow interrupt escapes, or if deferred actions are present.
  */
 export function evaluateExpression(
   source: string,
@@ -216,7 +218,7 @@ function convert(value: any): SonicWeaveValue {
  * @param includePrelude Whether or not to include the extended standard library. Passing in `false` results in a faster start-up time.
  * @param extraBuiltins Custom builtins callable inside the SonicWeave program.
  * @param escapeStrings If `true` all escape sequences are evaluated before interpreting the literal as a SonicWeave program.
- * @returns A tag that can be attached to template literals in order to evaluate them.
+ * @returns A template tag that evaluates to either the final SonicWeave expression value or the resulting scale, depending on `expression`.
  */
 export function createTag(
   expression = true,
@@ -265,6 +267,7 @@ export function createTag(
 /**
  * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave expressions.
  * Has raw (unescaped) semantics.
+ * Interpolated JavaScript values are converted into SonicWeave values and injected as template arguments (`¥0`, `¥1`, ...).
  *
  * Example:
  * ```ts
@@ -281,6 +284,7 @@ Object.defineProperty(swr, 'name', {
 /**
  * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave scales.
  * Has raw (unescaped) semantics.
+ * Interpolated JavaScript values are converted into SonicWeave values and injected as template arguments (`¥0`, `¥1`, ...).
  *
  * Example:
  * ```ts
@@ -300,6 +304,7 @@ Object.defineProperty(swr, 'name', {
 /**
  * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave expressions.
  * Evaluates escapes before interpreting the program so e.g. a double backslash means only a single backslash within the program.
+ * Interpolated JavaScript values are converted into SonicWeave values and injected as template arguments (`¥0`, `¥1`, ...).
  *
  * Example:
  * ```ts
@@ -316,6 +321,7 @@ Object.defineProperty(sw, 'name', {
 /**
  * Tag for evaluating [templates literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) as SonicWeave scales.
  * Evaluates escapes before interpreting the program so e.g. a double backslash means only a single backslash within the program.
+ * Interpolated JavaScript values are converted into SonicWeave values and injected as template arguments (`¥0`, `¥1`, ...).
  *
  * Example:
  * ```ts
