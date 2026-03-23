@@ -76,7 +76,13 @@ export type AugmentedQuality = 'd' | 'dim' | 'a' | 'Â' | 'aug' | 'Aug';
  * Interval quality, possibly fractional.
  */
 export type IntervalQuality = {
+  /**
+   * Optional fractional modifier applied to the quality inflection.
+   */
   fraction: VulgarFraction;
+  /**
+   * Base quality name or augmentation/diminution marker.
+   */
   quality:
     | 'm'
     | 'min'
@@ -93,9 +99,21 @@ export type IntervalQuality = {
  * Relative Pythagorean interval.
  */
 export type Pythagorean = {
+  /**
+   * AST discriminator for relative Pythagorean intervals.
+   */
   type: 'Pythagorean';
+  /**
+   * Primary interval quality.
+   */
   quality: IntervalQuality;
+  /**
+   * Additional repeated augmentations or diminutions applied beyond `quality`.
+   */
   augmentations?: AugmentedQuality[];
+  /**
+   * Relative degree information including inversion and octave displacement.
+   */
   degree: Degree;
 };
 
@@ -192,7 +210,13 @@ export type Accidental =
  * Musical accidental representing some (possibly split) powers of primes 2 and 3, possibly fractional.
  */
 export type SplitAccidental = {
+  /**
+   * Fractional multiplier applied to the accidental's pythagorean inflection.
+   */
   fraction: VulgarFraction;
+  /**
+   * Base accidental symbol being applied.
+   */
   accidental: Accidental;
 };
 
@@ -200,9 +224,21 @@ export type SplitAccidental = {
  * Absolute Pythagorean pitch.
  */
 export type AbsolutePitch = {
+  /**
+   * AST discriminator for absolute pitch literals.
+   */
   type: 'AbsolutePitch';
+  /**
+   * Pitch nominal, such as `C` or `α`.
+   */
   nominal: Nominal;
+  /**
+   * Accidentals attached to the nominal.
+   */
   accidentals: SplitAccidental[];
+  /**
+   * Register number, e.g. 4. The sounding frequency depends on the active evaluation context; by convention the default reference is A4 = 440 Hz.
+   */
   octave: number;
 };
 
@@ -379,6 +415,11 @@ const MINOR: PythInflection = [
   Object.freeze(NEGATIVE_SEVEN.div(2)),
 ];
 
+/**
+ * Convert a relative Pythagorean interval node to its monzo representation.
+ * @param node Relative interval node to convert.
+ * @returns A relative {@link TimeMonzo} matching the requested interval quality and degree.
+ */
 export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   const base = node.degree.base;
   let vector: PythInflection;
@@ -462,6 +503,12 @@ export function pythagoreanMonzo(node: Pythagorean): TimeMonzo {
   return result;
 }
 
+/**
+ * Convert an absolute Pythagorean pitch node to its monzo representation.
+ * @param node Absolute pitch node to convert.
+ * @returns A {@link TimeMonzo} rooted at octave 4, suitable for later interpretation as an absolute pitch.
+ * @throws An error if the nominal or any accidental is unassigned.
+ */
 export function absoluteMonzo(node: AbsolutePitch) {
   if (!NOMINAL_VECTORS.has(node.nominal)) {
     throw new Error(`Nominal ${node.nominal} is unassigned.`);
@@ -529,6 +576,11 @@ for (const [vulgar, fraction] of VULGAR_FRACTIONS.entries()) {
   });
 }
 
+/**
+ * Attempt to represent a monzo as a relative Pythagorean interval node.
+ * @param monzo Relative monzo to convert.
+ * @returns A {@link Pythagorean} node if the monzo is representable in this notation, otherwise `undefined`.
+ */
 export function monzoToNode(monzo: TimeMonzo): Pythagorean | undefined {
   let twos = monzo.primeExponents[0];
   let threes = monzo.primeExponents[1];
@@ -620,6 +672,11 @@ for (const [offset, accidental] of BASE_OFFSETS) {
   }
 }
 
+/**
+ * Attempt to represent a monzo as an absolute Pythagorean pitch node.
+ * @param monzo Absolute pitch monzo to convert.
+ * @returns An {@link AbsolutePitch} node if the monzo is representable in this notation, otherwise `undefined`.
+ */
 export function absoluteToNode(monzo: TimeMonzo): AbsolutePitch | undefined {
   const twos = monzo.primeExponents[0];
   const threes = monzo.primeExponents[1];

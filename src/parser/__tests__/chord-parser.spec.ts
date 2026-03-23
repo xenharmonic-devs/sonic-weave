@@ -49,6 +49,11 @@ describe('Chord input parser', () => {
     ]);
   });
 
+  it('ignores non-interval values returned while parsing a chord', () => {
+    const result = parseChord('1, "hello", 2');
+    expect(result.map(i => i.toString())).toEqual(['1', '2']);
+  });
+
   it('has the Konami code', () => {
     const start = parseChord('^^vv/\\/\\[2, 1>');
     const value = start[0].value as TimeMonzo;
@@ -82,6 +87,10 @@ describe('Subgroup basis parser', () => {
   it('creates prime limits', () => {
     const elevenLimit = parseBasis('11');
     expect(elevenLimit?.toString()).toBe('@2.3.5.7.11');
+  });
+
+  it('rejects malformed prime-limit strings with trailing junk', () => {
+    expect(() => parseBasis('11foo')).toThrow();
   });
 
   it('rejects composite limits', () => {

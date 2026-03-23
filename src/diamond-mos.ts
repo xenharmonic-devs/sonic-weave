@@ -151,9 +151,21 @@ export function reviveMosConfig(
  * Generic 0-indexed mosstep.
  */
 export type MosStep = {
+  /**
+   * AST discriminator for generic mosstep literals.
+   */
   type: 'MosStep';
+  /**
+   * TAMNAMS-style quality, including perfect/neutral/major/minor and augmented/diminished variants.
+   */
   quality: IntervalQuality;
+  /**
+   * Additional repeated augmentations or diminutions applied on top of `quality`.
+   */
   augmentations?: AugmentedQuality[];
+  /**
+   * Zero-indexed step number within the MOS, wrapping by the configured degree count.
+   */
   degree: number;
 };
 
@@ -171,7 +183,13 @@ export type MosAccidental = '&' | 'e' | 'a' | '@';
  * Potentially fractional Diamond-mos accidental.
  */
 export type SplitMosAccidental = {
+  /**
+   * Fractional multiplier applied to the accidental's inflection.
+   */
   fraction: VulgarFraction;
+  /**
+   * Accidentals from either Diamond MOS or the pythagorean accidental set.
+   */
   accidental: Accidental | MosAccidental;
 };
 
@@ -179,16 +197,28 @@ export type SplitMosAccidental = {
  * Absolute Diamond-mos pitch.
  */
 export type AbsoluteMosPitch = {
+  /**
+   * AST discriminator for absolute Diamond-mos pitches.
+   */
   type: 'AbsolutePitch';
+  /**
+   * Nominal note name, e.g. `J`.
+   */
   nominal: string;
+  /**
+   * Accidental sequence applied to the nominal.
+   */
   accidentals: SplitMosAccidental[];
+  /**
+   * Scientific-octave-like register number, relative to J4.
+   */
   octave: number;
 };
 
 /**
  * Obtain relative values for one equave-run of the given config of a MOS declaration with implicit unison.
  * @param config Result of a MOS declaration.
- * @returns An array of relative time monzos.
+ * @returns Relative scale degrees ordered by nominal spelling, with the repeated equave appended at the end.
  */
 export function scaleMonzos(config: MosConfig) {
   const entries = Array.from(config.scale);
@@ -209,6 +239,7 @@ export function scaleMonzos(config: MosConfig) {
  * @param node MosStep like P0ms.
  * @param config Result of a MOS declaration.
  * @returns A relative time monzo.
+ * @throws An error if the requested quality is incompatible with the target MOS degree.
  */
 export function mosMonzo(
   node: MosStep,
@@ -309,6 +340,7 @@ function mosInflection(
  * @param node Absolute note like J@5.
  * @param config Result of a MOS declaration.
  * @returns A time monzo relative to J4.
+ * @throws An error if the nominal or any accidental is not assigned by the MOS configuration.
  */
 export function absoluteMosMonzo(
   node: AbsoluteMosPitch,

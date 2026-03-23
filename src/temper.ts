@@ -10,13 +10,19 @@ import {
   transpose,
 } from 'xen-dev-utils';
 
+/**
+ * Real-valued tuning map expressed as a vector of prime or subgroup mappings.
+ *
+ * The coordinates are expected to live in the same weighted/co-weighted space as the
+ * corresponding just intonation point or commas passed to the helper functions below.
+ */
 export type TuningMap = number[];
 
 /**
  * Combine tuning maps to minimize the distance to the JIP.
  * @param jip Just Intonation Point in (co-)weighted coordinates.
  * @param maps Maps to combine in (co-)weighted coordinates.
- * @returns The closest combination of the maps to the JIP in (co-)weighted coordinates.
+ * @returns The least-squares combination of `maps` closest to `jip` in the same coordinate system.
  */
 export function combineTuningMaps(jip: TuningMap, maps: TuningMap[]) {
   // error = |sum_i w_i map_i - jip|^2 = (m - j) · (m  - j)
@@ -30,7 +36,7 @@ export function combineTuningMaps(jip: TuningMap, maps: TuningMap[]) {
  * Obtain the tuning map that minimizes the distance to the JIP while also mapping the commas listed to the zero monzo.
  * @param jip Just Intonation Point in co-weighted coordinates.
  * @param commas Commas to vanish in weighted coordinates.
- * @returns The optimal tuning map in co-weighted coordinates.
+ * @returns The orthogonal projection of `jip` into the null space defined by `commas`.
  */
 export function vanishCommas(jip: TuningMap, commas: Monzo[]): TuningMap {
   const T = transpose(commas);
@@ -43,8 +49,8 @@ export function vanishCommas(jip: TuningMap, commas: Monzo[]): TuningMap {
  * Combine tuning maps to minimize the distance to the JIP.
  * @param jip Just Intonation Point in (co-)weighted coordinates.
  * @param vals Vals to combine in (co-)weighted coordinates.
- * @param searchRadius Width of the search space.
- * @returns Integer coefficients of the linear combination closest to the JIP.
+ * @param searchRadius Width of the integer search space explored in each coefficient dimension.
+ * @returns Integer coefficients of the primitive linear combination closest to the JIP.
  */
 export function intCombineTuningMaps(
   jip: TuningMap,
