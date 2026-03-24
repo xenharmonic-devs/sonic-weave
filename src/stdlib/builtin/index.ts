@@ -1640,6 +1640,9 @@ slice.__doc__ =
 slice.__node__ = builtinNode(slice);
 
 function zip(...args: any[][]) {
+  if (!args.length) {
+    return [];
+  }
   const minLength = Math.min(...args.map(a => a.length));
   const result: any[][] = [];
   for (let i = 0; i < minLength; ++i) {
@@ -1652,6 +1655,9 @@ zip.__doc__ =
 zip.__node__ = builtinNode(zip);
 
 function zipLongest(...args: any[][]) {
+  if (!args.length) {
+    return [];
+  }
   const maxLength = Math.max(...args.map(a => a.length));
   const result: any[][] = [];
   for (let i = 0; i < maxLength; ++i) {

@@ -131,6 +131,9 @@ export function sub(v1: StepVector, v2: StepVector): StepVector {
  * @returns The rotated string.
  */
 export function rotate(str: string, offset: number): string {
+  if (!str.length) {
+    return str;
+  }
   return [...Array(str.length).keys()]
     .map(i => str[mmod(i + offset, str.length)])
     .join('');
@@ -330,6 +333,7 @@ export function stepString(monzos: (TimeMonzo | TimeReal)[]) {
     for (let i = 0; i < uniqueSteps.length; ++i) {
       if (step.strictEquals(uniqueSteps[i])) {
         result += letters[i];
+        break;
       }
     }
   }

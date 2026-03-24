@@ -1072,11 +1072,15 @@ export class StatementVisitor {
       scale.length = 0;
       scale.push(...tempered);
     } else if (typeof value === 'object') {
-      const entries = Object.entries(value);
-      for (const [key, subValue] of entries) {
-        this.handleValue(subVisitor.implicitCall(key, subValue), subVisitor);
+      let numEntries = 0;
+      for (const key in value) {
+        if (!hasOwn(value, key)) {
+          continue;
+        }
+        numEntries++;
+        this.handleValue(subVisitor.implicitCall(key, value[key]), subVisitor);
       }
-      const tail = scale.slice(-entries.length);
+      const tail = scale.slice(-numEntries);
       scale.length = scale.length - tail.length;
       sortInPlace.bind(subVisitor)(tail);
       scale.push(...tail);
