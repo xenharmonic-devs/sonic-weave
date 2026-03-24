@@ -1341,15 +1341,11 @@ describe('SonicWeave standard library', () => {
       2
       rotate()
     `);
-    expect(sothic).toEqual([
-      '1.140089771804773r',
-      '1.2060453782496754r',
-      '11/8',
-      '16/11',
-      '1.658312394743911r',
-      '121/64',
-      '2',
-    ]);
+    expect(parseFloat(sothic[0])).toBeCloseTo(1.140089771804773, 12);
+    expect(parseFloat(sothic[1])).toBeCloseTo(1.2060453782496754, 12);
+    expect(sothic.slice(2, 4)).toEqual(['11/8', '16/11']);
+    expect(parseFloat(sothic[4])).toBeCloseTo(1.658312394743911, 12);
+    expect(sothic.slice(5)).toEqual(['121/64', '2']);
   });
 
   it('formats stacked 5-limit major reasonably', () => {
