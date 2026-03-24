@@ -102,6 +102,9 @@ for (const [key, value] of Object.entries(SYNTONIC_RASTMIC)) {
 }
 
 export function getSyntonicRastmic(id: number) {
+  if (!Number.isSafeInteger(id) || id < 0) {
+    return UNITY;
+  }
   let result = UNITY;
   for (const key of id.toString()) {
     if (SYNTONIC_RASTMIC_MAP.has(key)) {
@@ -123,6 +126,9 @@ for (const [key, value] of Object.entries(LUMIS_COMMAS)) {
 }
 
 export function getLumisComma(id: number) {
+  if (!Number.isSafeInteger(id) || id < 0) {
+    return UNITY;
+  }
   let result = UNITY;
   for (const key of id.toString()) {
     if (LUMIS_MAP.has(key)) {
@@ -150,7 +156,7 @@ for (const [prime, fraction] of Object.entries(HELMHOLTZ_ELLIS)) {
 }
 
 export function getHelmholtzEllis(index: number) {
-  if (index < HELMHOLTZ_ELLIS_ARRAY.length) {
+  if (index >= 0 && index < HELMHOLTZ_ELLIS_ARRAY.length) {
     return HELMHOLTZ_ELLIS_ARRAY[index];
   }
   return UNITY;
@@ -174,7 +180,7 @@ for (const [prime, fraction] of Object.entries(HEWM53)) {
 }
 
 export function getHEWM53(index: number) {
-  if (index < HEWM53_ARRAY.length) {
+  if (index >= 0 && index < HEWM53_ARRAY.length) {
     return HEWM53_ARRAY[index];
   }
   return UNITY;

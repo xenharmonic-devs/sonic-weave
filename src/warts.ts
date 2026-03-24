@@ -80,6 +80,7 @@ export function parseSubgroup(basis: BasisElement[], targetSize?: number) {
       checkSpan();
     } else if (element === 'inf') {
       subgroup.push(INF_MONZO);
+      checkSpan();
     } else if (element === '1°' || element === 'deg') {
       subgroup.push(STEP_ELEMENT);
       checkSpan();
