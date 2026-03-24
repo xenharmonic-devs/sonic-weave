@@ -43,6 +43,7 @@ export function subtensions(monzos: TimeMonzo[]): Subtender[] {
     for (const {monzo, subtensions} of result) {
       if (monzo.strictEquals(scale[i])) {
         subtensions.add(i + 1);
+        break;
       }
     }
     result.push({monzo: scale[i], subtensions: new Set([i + 1])});
@@ -57,6 +58,7 @@ export function subtensions(monzos: TimeMonzo[]): Subtender[] {
         if (width.strictEquals(monzo)) {
           subtensions.add(j);
           unique = false;
+          break;
         }
       }
       if (unique) {
@@ -110,6 +112,7 @@ export function hasConstantStructure(monzos: TimeMonzo[]) {
             return false;
           }
           unique = false;
+          break;
         }
       }
       if (unique) {

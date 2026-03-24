@@ -9,6 +9,7 @@ import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
 import {RootContext} from '../context';
 import {Program} from '../ast';
 import {StatementVisitor} from './statement';
+import {hasOwn} from '../utils';
 
 /**
  * Parse a string of text written in the SonicWeave domain specific language into an abstract syntax tree.
@@ -203,8 +204,10 @@ function convert(value: any): SonicWeaveValue {
         return value.map(convert) as Interval[];
       } else {
         const result: Record<string, SonicWeavePrimitive> = {};
-        for (const [key, subValue] of Object.entries(value)) {
-          result[key] = convert(subValue) as SonicWeavePrimitive;
+        for (const key in value) {
+          if (hasOwn(value, key)) {
+            result[key] = convert(value[key]) as SonicWeavePrimitive;
+          }
         }
         return result;
       }

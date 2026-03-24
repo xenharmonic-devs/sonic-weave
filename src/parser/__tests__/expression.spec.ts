@@ -1573,6 +1573,11 @@ describe('SonicWeave expression evaluator', () => {
     expect(pattern).toBe('ωψχφυτσςρποξνμλκιθηζεδγβα¿¿¿¿¿');
   });
 
+  it('calculates step strings for scales with large variety even if there are duplicates', () => {
+    const pattern = evaluate('18::36;/18::9;sort();stepString()');
+    expect(pattern).toBe('AhBfFcdCgFEiDEzFGedHIfdabcz');
+  });
+
   it('uses w before u in step strings', () => {
     const pattern = evaluate('8::16;stepString()');
     expect(pattern).toBe('BHLMnstw');

@@ -600,8 +600,10 @@ export class ExpressionVisitor {
         ) {
           throw new Error('Spread argument must be a record.');
         }
-        for (const [subKey, subValue] of Object.entries(spread)) {
-          result[subKey] = subValue;
+        for (const subKey in spread) {
+          if (hasOwn(spread, subKey)) {
+            result[subKey] = spread[subKey];
+          }
         }
       } else {
         result[key] = this.visit(value) as SonicWeavePrimitive;
