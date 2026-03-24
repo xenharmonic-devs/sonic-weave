@@ -21,7 +21,7 @@ NonEmptyUnderscoreDigits
 }
 
 PositiveInteger
-  = num:([1-9] UnderscoreDigits) { return BigInt(num.join('')); }
+  = num: ([1-9] UnderscoreDigits) { return BigInt(num.join('')); }
 
 Integer
   = '0' { return 0n; }
@@ -52,10 +52,10 @@ SignedBasicInteger
   = num: $([+-]? ('0' / ([1-9] DecimalDigit*))) { return parseInt(num, 10) }
 
 RGB4
-  = $('#' HexDigit|3|)
+  = $('#' HexDigit |3|)
 
 RGB8
-  = $('#' HexDigit|6|)
+  = $('#' HexDigit |6|)
 
 CSSNumber
   = [+-]? ('0' / ([1-9] DecimalDigit*)) ('.' DecimalDigit*)?
@@ -180,7 +180,8 @@ LineTerminatorSequence 'line terminator'
   / '\r\n'
 
 // Separator, Space
-Zs = c:SourceCharacter &{ return ZS_RE.test(c); }
+Zs
+  = c: SourceCharacter &{ return ZS_RE.test(c); }
 
 SourceCharacter 'any character'
   = SourceCharacterLow
@@ -197,10 +198,10 @@ SourceCharacterHigh
   / [\uDC00-\uDFFF] // Lone second surrogate
 
 ID_Start
-  = c:SourceCharacter &{ return ID_START_RE.test(c); }
+  = c: SourceCharacter &{ return ID_START_RE.test(c); }
 
 ID_Continue
-  = c:SourceCharacter &{ return ID_CONTINUE_RE.test(c); }
+  = c: SourceCharacter &{ return ID_CONTINUE_RE.test(c); }
 
 Comment
   = '(*' ((!('(*' / '*)') SourceCharacter) / Comment)* '*)'
@@ -211,17 +212,17 @@ CommentNoLineTerminator
 // Chord parser needs to know what monzo components look like
 VectorComponent
   = sign: SignPart left: BasicInteger separator: '/' right: DenominatorPart {
-    return {sign, left, separator, right, exponent: null};
+    return { sign, left, separator, right, exponent: null };
   }
   / sign: SignPart left: BasicInteger separator: '.' right: UnderscoreDigits exponent: ExponentPart? {
-    return {sign, left, separator, right, exponent};
+    return { sign, left, separator, right, exponent };
   }
   / sign: SignPart left: BasicInteger exponent: ExponentPart? {
-    return {sign, left, separator: '', right: '', exponent};
+    return { sign, left, separator: '', right: '', exponent };
   }
 
 VectorComponents
-  = VectorComponent|.., _ ','? _|
+  = VectorComponent |.., _ ','? _|
 
 Fraction
   = radical: '√'? numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {
@@ -244,6 +245,8 @@ ValBasisElement = Fraction / SecondToken / HertzToken / LowHertzToken
 
 BasisElement = ValBasisElement / RealCentToken / 'r¢' / 'inf' / '1°' / DegreeToken
 
-ValBasis = (ValBasisElement / '')|.., '.'|
+ValBasis
+  = (ValBasisElement / '') |.., '.'|
 
-SubgroupBasis = (BasisElement / '')|.., '.'|
+SubgroupBasis
+  = (BasisElement / '') |.., '.'|

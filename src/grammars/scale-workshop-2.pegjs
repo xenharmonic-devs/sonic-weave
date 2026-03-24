@@ -2,32 +2,32 @@
   function PlainLiteral(value) {
     return {
       type: 'PlainLiteral',
-      value
-    }
+      value,
+    };
   }
 
   function CentsLiteral(whole, fractional) {
     return {
       type: 'CentsLiteral',
       whole,
-      fractional
-    }
+      fractional,
+    };
   }
 
   function NumericLiteral(whole, fractional) {
     return {
       type: 'NumericLiteral',
       whole,
-      fractional
-    }
+      fractional,
+    };
   }
 
   function FractionLiteral(numerator, denominator) {
-    return  {
+    return {
       type: 'FractionLiteral',
       numerator,
-      denominator
-    }
+      denominator,
+    };
   }
 
   function EdjiFraction(numerator, denominator, equave) {
@@ -35,15 +35,15 @@
       type: 'EdjiFraction',
       numerator,
       denominator,
-      equave
-    }
+      equave,
+    };
   }
 
   function Monzo(components) {
     return {
       type: 'Monzo',
-      components
-    }
+      components,
+    };
   }
 
   function BinaryExpression(operator, left, right) {
@@ -51,19 +51,19 @@
       type: 'BinaryExpression',
       operator,
       left,
-      right
-    }
+      right,
+    };
   }
 
   function UnaryExpression(operator, operand) {
     return {
       type: 'UnaryExpression',
       operator,
-      operand
-    }
+      operand,
+    };
   }
 
-  function operatorReducer (result, element) {
+  function operatorReducer(result, element) {
     const left = result;
     const [op, right] = element;
 
@@ -96,7 +96,7 @@ LineTerminator
 _ = Whitespace*
 
 Expression
-  = head:Term tail:(_ @('+' / '-') _ @Term)* {
+  = head: Term tail: (_ @('+' / '-') _ @Term)* {
       return tail.reduce(operatorReducer, head);
     }
 
@@ -112,37 +112,39 @@ Primary
   / PlainNumber
 
 Integer
-  = num:$('0' / ([1-9] [0-9]*)) { return BigInt(num) }
+  = num: $('0' / ([1-9] [0-9]*)) { return BigInt(num); }
 
 FractionalPart
   = $[0-9]*
 
 SignedInteger
-  = sign:'-'? value:Integer { return sign ? -value : value }
+  = sign: '-'? value: Integer { return sign ? -value : value; }
 
 DotDecimal
-  = whole:Integer? '.' fractional:FractionalPart { return CentsLiteral(whole, fractional) }
+  = whole: Integer? '.' fractional: FractionalPart { return CentsLiteral(whole, fractional); }
 
 CommaDecimal
-  = whole:Integer? ',' fractional:FractionalPart { return NumericLiteral(whole, fractional) }
+  = whole: Integer? ',' fractional: FractionalPart { return NumericLiteral(whole, fractional); }
 
 SlashFraction
-  = numerator:Integer '/' denominator:Integer { return FractionLiteral(numerator, denominator) }
+  = numerator: Integer '/' denominator: Integer { return FractionLiteral(numerator, denominator); }
 
 PlainNumber
-  = value:Integer { return PlainLiteral(value) }
+  = value: Integer { return PlainLiteral(value); }
 
 EquaveExpression
   = '<' _ @(SlashFraction / PlainNumber) _ '>'
 
 BackslashFraction
-  = numerator:Integer? '\\' denominator:SignedInteger equave:EquaveExpression? { return EdjiFraction(numerator, denominator, equave) }
+  = numerator: Integer? '\\' denominator: SignedInteger equave: EquaveExpression? {
+    return EdjiFraction(numerator, denominator, equave);
+  }
 
 Component
   = $([+-]? (SlashFraction / PlainNumber))
 
 Monzo
-  = '[' components:Component|.., _ ','? _| '>' { return Monzo(components) }
+  = '[' components: Component |.., _ ','? _| '>' { return Monzo(components); }
 
 UnaryExpression
-  = operator:'-' operand:Primary { return UnaryExpression(operator, operand) }
+  = operator: '-' operand: Primary { return UnaryExpression(operator, operand); }

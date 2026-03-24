@@ -35,7 +35,7 @@ MosStatement
   / MosBlock
 
 MosBlock
-  = '{' _ expressions: (_ @MosExpression EOS)|1..| _ '}' EOS {
+  = '{' _ expressions: (_ @MosExpression EOS) |1..| _ '}' EOS {
     return expressions;
   }
 
@@ -67,7 +67,7 @@ SmallIntegerPattern
   }
 
 LargeIntegerPattern
-  = pattern: BasicInteger|2.., _ ',' _| equave: (__ ','? __ @RationalEquave?) {
+  = pattern: BasicInteger |2.., _ ',' _| equave: (__ ','? __ @RationalEquave?) {
     return {
       type: 'IntegerPattern',
       pattern,

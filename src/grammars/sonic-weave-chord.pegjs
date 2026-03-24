@@ -2,11 +2,14 @@
 
 // Depends on base.pegjs
 
-Start = _ @(MonzoLiteral / ValLiteral / FunctionCall / ParenthesizedExpression / ArrayExpression / Other)|.., Separator| _ EOF
+Start
+  = _ @(MonzoLiteral / ValLiteral / FunctionCall / ParenthesizedExpression / ArrayExpression / Other) |.., Separator| _ EOF
 
-Separator = _ [|&:;,]? _
+Separator
+  = _ [|&:;,]? _
 
-Prefix = (!WhiteSpace ![<|&:;,] !'[' SourceCharacter)*
+Prefix
+  = (!WhiteSpace ![<|&:;,] !'[' SourceCharacter)*
 
 MonzoLiteral
   = prefix: Prefix '[' _ components: VectorComponents _ [>⟩] basis: ('@' @SubgroupBasis)? {
@@ -33,6 +36,5 @@ ArrayExpression
     return text();
   }
 
-Other = (!WhiteSpace ![|&:;,] SourceCharacter)+ {
-  return text();
-}
+Other
+  = (!WhiteSpace ![|&:;,] SourceCharacter)+ { return text(); }
