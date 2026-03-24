@@ -1,5 +1,5 @@
 # SonicWeave Interchange
-This documentation describes the .swi interchange format for transferring microtonal scales between programs
+This document describes the `.swi` interchange format for transferring microtonal scales between programs.
 
 # Table of Contents
 1. [Comments](#comments)
@@ -21,7 +21,7 @@ This documentation describes the .swi interchange format for transferring microt
 8. [Example](#example)
 
 ## Comments
-Comments work as in OCaml. Everything between a pair of `(*` and  `*)` is ignored. Comments can be nested
+Comments work as in OCaml. Everything between a pair of `(*` and `*)` is ignored. Comments can be nested.
 ```ocaml
 (* single comment *)
 
@@ -39,7 +39,7 @@ Still part of the comment.
 Empty lines and lines containing only whitespace are ignored.
 
 ## Strings
-Strings are JSON encoded. They start and end with `"`. A literal `"` inside a string must be escaped with a backslash, etc..
+Strings are JSON-encoded. They start and end with `"`. A literal `"` inside a string must be escaped with a backslash, and so on.
 
 ## CSS colors
 Valid CSS colors include:
@@ -59,19 +59,19 @@ The first string in the file indicates the title of the scale.
 A scale title is mandatory. Untitled scales must provide an empty string.
 
 ## Unison frequency
-The reference frequency is given with the syntax `1 = expr` where expressions is a valid absolute interval (described below).
+The reference frequency is given with the syntax `1 = expr`, where `expr` is a valid absolute interval (described below).
 ```ocaml
 (* Set reference frequency to 256 Hz *)
 1 = [1 8>@Hz.2
 ```
 
-Unison frequency is an optional field.
+The unison frequency is optional.
 
 ## Intervals
 The label (a JSON encoded string) and the color (a CSS color or the special token `niente` for no color) are mandatory fields given in that order after an interval literal separated by spaces.
 
 ### Relative intervals
-Relative interval are to be interpreted against the reference frequency if it is given.
+Relative intervals are interpreted against the reference frequency if one is given.
 
 #### 23-limit monzos
 Intervals with prime factors below 29 are given as ket-vectors a.k.a. monzos starting with `[` and ending with `>`.
@@ -131,13 +131,13 @@ To support tempering after interchanging data, the special `1°` basis element i
 ```
 
 ### Not-a-number
-The special combination `[1 1>@0.inf` indicates a value that can't be interpreted as an interval.
+The special combination `[1 1>@0.inf` indicates a value that cannot be interpreted as an interval.
 ```ocaml
 [1 1>@0.inf "asin(2)" niente
 ```
 
 ## Example
-See [examples/interchange.sw](https://github.com/xenharmonic-devs/sonic-weave/blob/main/examples/interchange.sw) for various extreme values supported by the original SonicWeave runtime.
+See [examples/interchange.sw](../examples/interchange.sw) for various extreme values supported by the original SonicWeave runtime.
 
 ```ocaml
 (* Created using SonicWeave 0.4.0 *)

@@ -22,7 +22,7 @@ This documentation describes the SonicWeave DSL as it relates to other programmi
 12. [Ranges of values](#ranges-of-values)
 13. [List of used characters](#list-of-used-characters)
 14. [Next steps](#next-steps)
-    1. [prelude](https://github.com/xenharmonic-devs/sonic-weave/blob/main/src/stdlib/prelude.ts)
+    1. [prelude](../src/stdlib/prelude.ts)
 
 ## Purpose
 SonicWeave is designed for notating microtonal scales as an extension of Scala .scl syntax. Programming is secondary so you'll have to dodge around reserved patterns such as `C4` which look like identifiers but correspond to musical literals.
@@ -30,12 +30,12 @@ SonicWeave is designed for notating microtonal scales as an extension of Scala .
 ### Other pitfalls
 Fraction slash `/` binds stronger than exponentiation. Use `÷` or `%` if you need division that follows [PEMDAS](https://en.wikipedia.org/wiki/Order_of_operations).
 
-The exponent is required in decimal literals. `1.23e0` instead of `1.23` which is instead interpreted a musical interval 1.23 cents wide.
+The exponent is required in decimal literals. Write `1.23e0` instead of `1.23`, which would otherwise be interpreted as a musical interval 1.23 cents wide.
 
-The meaning of `*` changes depending on the operands. Use `~*` to mean musical stacking of relative intervals i.e. mathematic multiplication.
+The meaning of `*` changes depending on the operands. Use `~*` to mean musical stacking of relative intervals, i.e. mathematical multiplication.
 
 ## Type system
-Values in SonicWeave fall into these categories
+Values in SonicWeave fall into these categories:
 
 | Type     | Example                  | Notes                                                                |
 | -------- | ------------------------ | -------------------------------------------------------------------- |
@@ -51,9 +51,9 @@ Values in SonicWeave fall into these categories
 | Record   | `#{fif: 3/2, "p/e": 2}`  | Associative data indexed by strings.                                 |
 | Function | `riff plusOne(x) {x+1}`  | _Riff_ is a music term for a short repeated phrase.                  |
 
-Array and record types are recursive i.e. arrays may contain other arrays or records and the values of records can be anything.
+Array and record types are recursive, i.e. arrays may contain other arrays or records, and the values of records can be anything.
 
-SonicWeave does not have classes and there's no `value.property` syntax.
+SonicWeave does not have classes, and there is no `value.property` syntax.
 
 The language is weakly typed and weakly valued. Logdivision is particularly leaky: `16 /_ 8` is rational `4/3` but `16 /_ 3` evaluates to a real (floating point) number. However most expressions that can be expressed as a radical (nth root) are exact.
 
@@ -176,7 +176,7 @@ The cologarithmic domain has the semantics of the co-domain of the logarithmic a
 
 ## Echelons
 
-Anything that can be normalized to a frequency by inverting and negating its time exponent is in the absolute echelon the exponent of the Hertz unit works as a weighting factor in addition. Scalars with a zero time exponent are in the relative echelon with no hidden weights or projection.
+Anything that can be normalized to a frequency by inverting and negating its time exponent is in the absolute echelon. The exponent of the Hertz unit works as a weighting factor in addition. Scalars with a zero time exponent are in the relative echelon, with no hidden weights or projection.
 
 ## Ranges of values
 
