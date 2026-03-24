@@ -1,7 +1,7 @@
 # SonicWeave DSL (intermediate)
 This document describes the SonicWeave domain-specific language in detail.
 
-Make sure to read [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/dsl.md) documentation to get a feel for the language first.
+Make sure to read the [basic DSL guide](dsl.md) first to get a feel for the language.
 
 # Table of Contents
 1. [Basic operation](#basic-operation): Current scale `$`
@@ -80,7 +80,7 @@ Make sure to read [basic DSL](https://github.com/xenharmonic-devs/sonic-weave/bl
     4. [TAMNAMS relative intervals](#tamnams-relative-intervals)
         1. [Exceptions for nL ns](#exception-for-nl-ns)
 18. [Next steps](#next-steps)
-    1. [Advanced DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/advanced-dsl.md)
+    1. [Advanced DSL](advanced-dsl.md)
 
 ## Basic operation
 SonicWeave is intended for designing musical scales so a fundamental concept is the current scale (accessible through `$`). It is an ordered array of intervals.
@@ -123,7 +123,7 @@ Results in a scale equivalent to `$ = [5/4 #008000, 3/2 #008000, 2/1 #FF0000]`.
 ```
 Results in `$ = [5/4 green, 2/1 red]`.
 
-It is up to a user interface to interprete colors. The original intent is to color notes in an on-screen keyboard.
+It is up to a user interface to interpret colors. The original intent is to color notes in an on-screen keyboard.
 
 ### Scale title
 If an expression evaluates to a string it is used as the scale title.
@@ -143,9 +143,9 @@ The title is included in the `.scl` export.
 ```
 Results in the scale `$ = [4/3 'My perfect fourth', 2/1 'octave']`.
 
-Labels are included in the `.scl` export of the [CLI](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/cli.md).
+Labels are included in the `.scl` export of the [CLI](cli.md).
 
-It is up to a user interface to interprete labels. Scale Workshop displays labels in a tuning table next to the scale data and in an on-screen keyboard.
+It is up to a user interface to interpret labels. Scale Workshop displays labels in a tuning table next to the scale data and on an on-screen keyboard.
 
 Scales are intended to repeat from the last interval in the scale (a.k.a. *equave*), so a user interface would use the label of `2/1` for `1/1`, `1/2` or `4/1` too.
 
@@ -205,7 +205,7 @@ Upon encountering a *val* like `12@` the current scale is converted with no effe
 ```
 Results in `$ = [5\12, 7\12, 15/8, 2/1]`, so only the first two intervals were converted to 12-tone equal temperament.
 
-To learn more see [tempering.md](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md) for details.
+To learn more, see [tempering.md](tempering.md).
 
 ### Record unrolling
 When a record is encountered its values are sorted by size and the keys are used for labels.
@@ -528,7 +528,7 @@ Square root uses the same operator in both domains because the square of a logar
 
 *) If you enter `^2` it will renders as `linear([1 1>@1°.2)` (a linearized universal monzo). The operators inspired by [ups-and-downs notation](https://en.xen.wiki/w/Ups_and_downs_notation) are intended to be used with absolute pitches and relative (extended Pythagorean) intervals. The degrees added by these operators have no effect on the value of the operand and are only activated during [tempering](#implicit-tempering).
 
-The down operator sometimes requires curly brackets due to `v` colliding with the Latin alphabet. Unicode `∨` is available but not recommended because it makes the source code harder to interprete for humans.
+The down operator sometimes requires curly brackets because `v` collides with the Latin alphabet. Unicode `∨` is available, but it is not recommended because it makes the source code harder for humans to interpret.
 
 Drop `\` can be spelled `drop` to avoid using the backslash inside template literals. Lift `/` may be spelled `lift` for minor grammatical reasons.
 
@@ -559,7 +559,7 @@ The expression `foo() lest bar()` executes `foo()` and returns the result if it 
 
 In `foo() lest bar() lest baz()` execution proceeds from left to right until an operand evaluates successfully. If all fail, the exception from `baz()` is thrown.
 
-It's the inline version of `try..catch`.
+It is the inline version of `try..catch`.
 ```ocaml
 fraction(P5) lest P5 (* Successfully evaluates to 3/2 *)
 fraction(PI) lest PI (* Falls back to 3.141592653589793r *)
@@ -743,7 +743,7 @@ The broadcasting of `[-1..3] * P5` into `[-P5, 0 * P5, P5, 2 * P5, 3 * P5]` will
 | Minimum                | `2 min 1`      | `1`      | `P8 min P1`      | `P1`       |
 | Maximum                | `2 max 1`      | `2`      | `P8 max P1`      | `P8`       |
 
-`x min y` picks the smaller operand when both are interpreted as a relative intervals against the reference frequency while `x max y` picks the larger.
+`x min y` picks the smaller operand when both are interpreted as relative intervals against the reference frequency, while `x max y` picks the larger.
 
 #### Extended arithmetic
 | Name                   | Linear         | Result   | Logarithmic      | Result     |
@@ -889,7 +889,7 @@ Plain enumerals and harmonic segments may be freely mixed e.g. `8::10:12:14::16`
 Use square brackets to access array elements. Indexing starts from zero. Negative indices count back from the end. `$[-1]` is a handy shorthand for the last element in the current scale.
 
 #### Nullish access
-Accessing an array out of bounds raises an exception. Javascript-like behavior is available using `~[]` e.g. `arr~[777]` evaluates to `niente` if the array doesn't have at least 778 elements.
+Accessing an array out of bounds raises an exception. JavaScript-like behavior is available using `~[]`; for example, `arr~[777]` evaluates to `niente` if the array does not have at least 778 elements.
 
 #### Using an array of indices
 To obtain a subset of an array use an array of indices e.g. `[1, 2, 3, 4][[0, 2]]` evaluates to `[1, 3]`.

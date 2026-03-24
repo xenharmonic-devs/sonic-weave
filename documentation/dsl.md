@@ -1,5 +1,5 @@
 # SonicWeave DSL
-This document describes the SonicWeave domain-specific language for manipulating musical frequencies, ratios and equal temperaments.
+This document introduces the SonicWeave domain-specific language for manipulating musical frequencies, ratios, and equal temperaments.
 
 # Table of Contents
 1. [Basic example](#basic-example): Ratios
@@ -24,7 +24,7 @@ This document describes the SonicWeave domain-specific language for manipulating
     1. [Lifts and drops](#lifts-and-drops)
 11. [Helper functions](#helper-functions)
 12. [Next steps](#next-steps)
-    1. [Intermediate DSL](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/intermediate-dsl.md)
+    1. [Intermediate DSL](intermediate-dsl.md)
 
 ## Basic example
 
@@ -108,9 +108,9 @@ Decimal ratios are less commonly used in music, but can be as useful as cents fo
 
 ### Equal temperaments
 
-In addition to just intonation and cents SonicWeave has notation for equal divisions of the octave like 12-tone equal temperament commonly used around the world.
+In addition to just intonation and cents, SonicWeave has notation for equal divisions of the octave, such as 12-tone equal temperament.
 
-The notation `n \ m` denotes n steps of m-tone equal temperament.
+The notation `n \ m` denotes `n` steps of `m`-tone equal temperament.
 
 Let's update our example and use the common A440 pitch standard:
 ```ocaml
@@ -127,7 +127,7 @@ A4 = 440 Hz = 9\12
 
 The expression `440 Hz = 9\12` implicitly sets the reference frequency for 1/1 at around `261.626 Hz`. For now the `A4 = 440 Hz` part is just for show.
 
-To get a taste of the powerful tempering features in SonicWeave we'll spell our scale using (absolute) FJS but add `12@` at the end to tell the runtime to interpret everything in 12-TET.
+To get a taste of the tempering features in SonicWeave, we can spell the scale using absolute FJS and add `12@` at the end to tell the runtime to interpret everything in 12-TET.
 
 ```ocaml
 A4 = 440 Hz = 9\12
@@ -202,7 +202,7 @@ Conversely the minus operator `-` represent divisions of the underlying values i
 
 Scale Workshop 2 didn't have domains, everything was logarithmic, so `81/64 - 81/80` was valid notation for `5/4`. In SonicWeave this expression must be spelled `(81/64) / (81/80)` or `81/64 ÷ 81/80` using the handy division operator that binds more loosely than the fractional slash (`/`).
 
-Another breaking change is that *comma decimals* are no longer allowed in complex expressions `1,2 + 1,2` equal to `1,44` in Scale Workshop 2 must be spelled `1.2e * 1.2e` in SonicWeave. Users are strongly advised **not** to use comma decimals anymore even if a single `1,2` is still legal syntax for backwards compatibility. The decimal comma is deprecated and will be removed in SonicWeave v2.0.
+Another breaking change is that *comma decimals* are no longer allowed in complex expressions. For example, `1,2 + 1,2`, which evaluated to `1,44` in Scale Workshop 2, must be written as `1.2e * 1.2e` in SonicWeave. Users are strongly advised **not** to use comma decimals anymore even if a single `1,2` is still legal syntax for backwards compatibility. The decimal comma is deprecated and will be removed in SonicWeave v2.0.
 
 ## Adding colors to notes
 
