@@ -143,8 +143,12 @@ BackslashFraction
 Component
   = $([+-]? (SlashFraction / PlainNumber))
 
+ComponentSeparator
+  = _ ',' _
+  / Whitespace+
+
 Monzo
-  = '[' components: Component |.., _ ','? _| '>' { return Monzo(components); }
+  = '[' components: Component |.., ComponentSeparator| '>' { return Monzo(components); }
 
 UnaryExpression
   = operator: '-' operand: Primary { return UnaryExpression(operator, operand); }

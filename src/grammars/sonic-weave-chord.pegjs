@@ -6,7 +6,7 @@ Start
   = _ @(MonzoLiteral / ValLiteral / FunctionCall / ParenthesizedExpression / ArrayExpression / Other) |.., Separator| _ EOF
 
 Separator
-  = _ [|&:;,]? _
+  = (WhiteSpace / LineTerminatorSequence / Comment / [|&:;,])+
 
 Prefix
   = (!WhiteSpace ![<|&:;,] !'[' SourceCharacter)*

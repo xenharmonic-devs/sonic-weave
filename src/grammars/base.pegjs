@@ -221,8 +221,12 @@ VectorComponent
     return { sign, left, separator: '', right: '', exponent };
   }
 
+VectorComponentSeparator
+  = _ ',' _  // Comma-separated
+  / (WhiteSpace / LineTerminatorSequence / Comment)+ // Whitespace-separated
+
 VectorComponents
-  = VectorComponent |.., _ ','? _|
+  = VectorComponent |.., VectorComponentSeparator|
 
 Fraction
   = radical: '√'? numerator: SignedBasicInteger denominator: ('/' @BasicInteger)? {

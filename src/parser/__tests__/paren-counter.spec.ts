@@ -84,4 +84,9 @@ describe('Parenthesis counter', () => {
     const counts = parse('([1])');
     expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
   });
+
+  it('counts nested unclosed parens and squares in mixed statements', () => {
+    const counts = parse('(riff [1, 2');
+    expect(counts).toEqual({parens: 1, squares: 1, curlies: 0});
+  });
 });

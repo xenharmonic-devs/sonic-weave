@@ -76,8 +76,23 @@ Other = _ fragments: OtherFragment|1.., _| _ {
 OtherFragment
   = (!WhiteSpace !LineTerminatorSequence !Comment !'"' !"'" !'[' !']' !'(' !')' SourceCharacter)+ {
   const t = text();
-  const parens = (t.match(/\(/g) ?? []).length - (t.match(/\)/g) ?? []).length;
-  const squares = (t.match(/\[/g) ?? []).length - (t.match(/\]/g) ?? []).length;
-  const curlies = (t.match(/{/g) ?? []).length - (t.match(/}/g) ?? []).length;
+  let parens = 0;
+  let squares = 0;
+  let curlies = 0;
+  for (const c of t) {
+    if (c === '(') {
+      ++parens;
+    } else if (c === ')') {
+      --parens;
+    } else if (c === '[') {
+      ++squares;
+    } else if (c === ']') {
+      --squares;
+    } else if (c === '{') {
+      ++curlies;
+    } else if (c === '}') {
+      --curlies;
+    }
+  }
   return { parens, squares, curlies };
 }
