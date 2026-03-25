@@ -56,7 +56,7 @@ sort(3^[-1..5] rdc 2)
 
 ## Getting started
 
-Install dependencies:
+Install dependencies (requires Node.js 20.0.0 or newer):
 
 ```sh
 npm install

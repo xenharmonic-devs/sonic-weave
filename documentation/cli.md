@@ -2,6 +2,10 @@
 
 This document describes the command-line interface provided by the `sonic-weave` package.
 
+## Requirements
+
+- Node.js 20.0.0 or newer
+
 # Table of Contents
 1. [REPL](#repl)
     1. [Input](#input)
