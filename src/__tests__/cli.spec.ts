@@ -1,4 +1,8 @@
 import {describe, it, expect} from 'vitest';
+import {mkdtempSync, rmSync, writeFileSync} from 'fs';
+import {tmpdir} from 'os';
+import {join, resolve} from 'path';
+import {spawnSync} from 'child_process';
 import {toSonicWeaveInterchange} from '../cli';
 
 describe('Interchange format', () => {
@@ -25,5 +29,45 @@ describe('Interchange format', () => {
   it('has representation for nan Hz (normalizes)', () => {
     const result = toSonicWeaveInterchange('nan * 1 Hz');
     expect(result).toContain('[1 1>@0.inf');
+  });
+});
+
+describe('CLI format option', () => {
+  const cliPath = resolve(__dirname, '../../bin/sonic-weave.js');
+
+  function runCli(format: string) {
+    const tempDir = mkdtempSync(join(tmpdir(), 'sonic-weave-cli-'));
+    const inputPath = join(tempDir, 'input.sw');
+    writeFileSync(inputPath, '3/2');
+
+    try {
+      return spawnSync(
+        process.execPath,
+        [cliPath, inputPath, '--format', format],
+        {
+          encoding: 'utf-8',
+        },
+      );
+    } finally {
+      rmSync(tempDir, {recursive: true, force: true});
+    }
+  }
+
+  it('prints a helpful message and exits non-zero for unsupported format', () => {
+    const result = runCli('bogus');
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('Unrecognized output format bogus');
+  });
+
+  it('exits successfully for scl format', () => {
+    const result = runCli('scl');
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
+  });
+
+  it('exits successfully for swi format', () => {
+    const result = runCli('swi');
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
   });
 });
