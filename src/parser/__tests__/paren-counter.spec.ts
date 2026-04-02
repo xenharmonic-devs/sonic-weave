@@ -89,4 +89,9 @@ describe('Parenthesis counter', () => {
     const counts = parse('(riff [1, 2');
     expect(counts).toEqual({parens: 1, squares: 1, curlies: 0});
   });
+
+  it('supports nested function calls with fractional arguments', () => {
+    const counts = parse('print(str(4/3))');
+    expect(counts).toEqual({parens: 0, squares: 0, curlies: 0});
+  });
 });

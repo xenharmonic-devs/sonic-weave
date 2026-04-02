@@ -26,27 +26,44 @@ Expression
   / Other
 
 ParenthesizedExpression
-  = '(' _ Expression _ closed: ')'? {
-  if (closed) {
-    return empty;
+  = '(' _ content: Expression |.., _| _ closed: ')'? {
+  const result = { parens: 0, squares: 0, curlies: 0 };
+  for (const counts of content) {
+    result.parens += counts.parens;
+    result.squares += counts.squares;
+    result.curlies += counts.curlies;
   }
-  return { parens: 1, squares: 0, curlies: 0 };
+  if (!closed) {
+    result.parens += 1;
+  }
+  return result;
 }
 
 RangeOrSlice
-  = '[' _ Expression _ '..' _ '<'? _ Expression _ closed: ']'? {
-    if (closed) {
-      return empty;
+  = '[' _ lower: Expression _ '..' _ '<'? _ upper: Expression _ closed: ']'? {
+    const result = {
+      parens: lower.parens + upper.parens,
+      squares: lower.squares + upper.squares,
+      curlies: lower.curlies + upper.curlies,
+    };
+    if (!closed) {
+      result.squares += 1;
     }
-    return {parens: 0, squares: 1, curlies: 0};
+    return result;
   }
 
 Array
-  = '[' _ Expression |.., _| _ closed: ']'? {
-    if (closed) {
-      return empty;
+  = '[' _ content: Expression |.., _| _ closed: ']'? {
+    const result = { parens: 0, squares: 0, curlies: 0 };
+    for (const counts of content) {
+      result.parens += counts.parens;
+      result.squares += counts.squares;
+      result.curlies += counts.curlies;
     }
-    return { parens: 0, squares: 1, curlies: 0 };
+    if (!closed) {
+      result.squares += 1;
+    }
+    return result;
   }
 
 StringLiteral
