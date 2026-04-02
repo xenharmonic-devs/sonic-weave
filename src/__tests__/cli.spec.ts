@@ -74,7 +74,33 @@ describe('CLI format option', () => {
 });
 
 describe('CLI REPL error handling', () => {
-  it('recovers after parser errors represented as non-Error objects', () => {
+  it('accepts nested function calls with fractional arguments', () => {
+    let options: ReplOptions | undefined;
+    repl(opts => {
+      options = opts as ReplOptions;
+      return {} as any;
+    });
+
+    const evaluate = options?.eval;
+    expect(evaluate).toBeTypeOf('function');
+
+    const fakeRepl = {
+      setPrompt() {},
+      displayPrompt() {},
+    } as any;
+
+    let err: Error | null = null;
+    let value: unknown;
+    evaluate!.call(fakeRepl, 'print(str(4/3))\n', {} as any, 'repl', (e, v) => {
+      err = e;
+      value = v;
+    });
+
+    expect(err).toBeNull();
+    expect(value).toBeUndefined();
+  });
+
+  it('recovers after parser errors from malformed input', () => {
     let options: ReplOptions | undefined;
     repl(opts => {
       options = opts as ReplOptions;
@@ -92,7 +118,7 @@ describe('CLI REPL error handling', () => {
     let firstErr: Error | null = null;
     evaluate!.call(
       fakeRepl,
-      'print(str(4/3))\n',
+      'print("unterminated)\n',
       {} as any,
       'repl',
       (err: Error | null) => {
