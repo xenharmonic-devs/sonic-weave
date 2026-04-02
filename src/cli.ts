@@ -108,10 +108,15 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
     try {
       counts = parenCounter(currentCmd);
     } catch (e) {
+      currentCmd = '';
       if (e instanceof Error) {
-        cb(e, undefined);
+        if (e.name === 'SyntaxError') {
+          cb(new Error(e.message), undefined);
+        } else {
+          cb(e, undefined);
+        }
       } else {
-        throw e;
+        cb(new Error(repr.bind(visitor.rootContext)(e as any)), undefined);
       }
       return;
     }
@@ -169,11 +174,14 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
         // eslint-disable-next-line no-ex-assign
         e = new Error(e);
       }
-      if (e instanceof Error) {
-        cb(e, undefined);
-      } else {
-        throw e;
+      let err =
+        e instanceof Error
+          ? e
+          : new Error(repr.bind(visitor.rootContext)(e as any));
+      if (err.name === 'SyntaxError') {
+        err = new Error(err.message);
       }
+      cb(err, undefined);
     }
   }
 

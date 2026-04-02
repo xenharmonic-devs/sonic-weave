@@ -326,6 +326,9 @@ function repr_(
   ) {
     return value.toString();
   }
+  if (value instanceof Error) {
+    return value.message || value.name;
+  }
   if (typeof value === 'object') {
     const s = repr_.bind(this);
     return (

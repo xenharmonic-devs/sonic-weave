@@ -3,7 +3,8 @@ import {mkdtempSync, rmSync, writeFileSync} from 'fs';
 import {tmpdir} from 'os';
 import {join, resolve} from 'path';
 import {spawnSync} from 'child_process';
-import {toSonicWeaveInterchange} from '../cli';
+import {toSonicWeaveInterchange, repl} from '../cli';
+import type {ReplOptions} from 'repl';
 
 describe('Interchange format', () => {
   it('uses plain monzos up to 23-limit', () => {
@@ -69,5 +70,44 @@ describe('CLI format option', () => {
     const result = runCli('swi');
     expect(result.status).toBe(0);
     expect(result.stderr).toBe('');
+  });
+});
+
+describe('CLI REPL error handling', () => {
+  it('recovers after parser errors represented as non-Error objects', () => {
+    let options: ReplOptions | undefined;
+    repl(opts => {
+      options = opts as ReplOptions;
+      return {} as any;
+    });
+
+    const evaluate = options?.eval;
+    expect(evaluate).toBeTypeOf('function');
+
+    const fakeRepl = {
+      setPrompt() {},
+      displayPrompt() {},
+    } as any;
+
+    let firstErr: Error | null = null;
+    evaluate!.call(
+      fakeRepl,
+      'print(str(4/3))\n',
+      {} as any,
+      'repl',
+      (err: Error | null) => {
+        firstErr = err;
+      },
+    );
+    expect(firstErr).toBeInstanceOf(Error);
+
+    let secondErr: Error | null = null;
+    let secondValue: unknown;
+    evaluate!.call(fakeRepl, '1\n', {} as any, 'repl', (err, value) => {
+      secondErr = err;
+      secondValue = value;
+    });
+    expect(secondErr).toBeNull();
+    expect(secondValue).toBeDefined();
   });
 });
