@@ -1467,7 +1467,7 @@ ImperfectDegree
   }
 
 SplitPythagorean
-  = quality: AugmentedQuality augmentations: AugmentedToken* degree: (ImperfectDegree / PerfectDegree) {
+  = quality: AugmentedQuality augmentations: (DiminishedToken / AugmentedToken)* degree: (ImperfectDegree / PerfectDegree) {
     return {
       type: 'Pythagorean',
       quality,
@@ -1498,7 +1498,7 @@ SplitPythagorean
   }
 
 MosStep
-  = quality: AugmentedQuality augmentations: AugmentedToken* degree: SignedBasicInteger 'ms' {
+  = quality: AugmentedQuality augmentations: (DiminishedToken / AugmentedToken)* degree: SignedBasicInteger 'ms' {
     return {
       type: 'MosStep',
       quality,
