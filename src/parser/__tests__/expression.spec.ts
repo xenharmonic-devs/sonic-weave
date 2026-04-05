@@ -1770,9 +1770,19 @@ describe('SonicWeave expression evaluator', () => {
     expect(fraction).toBe('729/512');
   });
 
+  it('supports multiple augmentations', () => {
+    const {fraction} = parseSingle('AugAug1');
+    expect(fraction).toBe('4782969/4194304');
+  });
+
   it('has "dim" as an alternative spelling for "d"', () => {
     const {fraction} = parseSingle('dim5');
     expect(fraction).toBe('1024/729');
+  });
+
+  it('supports multiple diminisments', () => {
+    const {fraction} = parseSingle('dimdim12');
+    expect(fraction).toBe('4194304/1594323');
   });
 
   it('has a porcupine inflection', () => {
