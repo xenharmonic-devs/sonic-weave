@@ -1,8 +1,8 @@
-import {SonicWeaveValue} from './stdlib';
-import {Interval} from './interval';
-import {TimeMonzo} from './monzo';
-import {ZERO} from './utils';
-import {MosConfig, mosConfigToJSON, reviveMosConfig} from './diamond-mos';
+import {SonicWeaveValue} from './stdlib/index.js';
+import {Interval} from './interval.js';
+import {TimeMonzo} from './monzo.js';
+import {ZERO} from './utils.js';
+import {MosConfig, mosConfigToJSON, reviveMosConfig} from './diamond-mos.js';
 
 /**
  * Root context of a SonicWeave runtime containing the scale title, root pitch, value of the 'up' inflection etc.

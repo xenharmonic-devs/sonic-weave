@@ -2,12 +2,12 @@
  * Exported builtins without complications related to expression visitors or vectorization.
  */
 import {Fraction, wilsonHeight as xduWilson} from 'xen-dev-utils';
-import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
-import {type ExpressionVisitor} from '../parser/expression';
-import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils';
-import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime';
-import {TimeMonzo, TimeReal} from '../monzo';
-import {type RootContext} from '../context';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
+import {type ExpressionVisitor} from '../parser/expression.js';
+import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils.js';
+import {SonicWeavePrimitive, SonicWeaveValue, upcastBool} from './runtime.js';
+import {TimeMonzo, TimeReal} from '../monzo.js';
+import {type RootContext} from '../context.js';
 
 /**
  * Compare two primitive values.

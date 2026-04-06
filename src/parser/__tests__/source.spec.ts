@@ -5,11 +5,11 @@ import {
   StatementVisitor,
   getSourceVisitor,
   getGlobalVisitor,
-} from '../../parser';
-import {TimeMonzo} from '../../monzo';
-import {Interval} from '../../interval';
-import {RootContext} from '../../context';
-import {relative} from '../../stdlib';
+} from '../../parser/index.js';
+import {TimeMonzo} from '../../monzo.js';
+import {Interval} from '../../interval.js';
+import {RootContext} from '../../context.js';
+import {relative} from '../../stdlib/index.js';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source, false);

@@ -6,7 +6,7 @@ import {
   getSemiquartalComma,
   getToneSplitterComma,
   inflect,
-} from '../fjs';
+} from '../fjs.js';
 import {PRIMES} from 'xen-dev-utils';
 import {
   AbsolutePitch,
@@ -16,8 +16,8 @@ import {
   VulgarFraction,
   absoluteMonzo,
   pythagoreanMonzo,
-} from '../pythagorean';
-import {FJSInflection} from '../expression';
+} from '../pythagorean.js';
+import {FJSInflection} from '../expression.js';
 
 describe('Formal comma calculator', () => {
   it.each([

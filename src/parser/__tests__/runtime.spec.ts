@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {builtinNode} from '../../stdlib';
+import {builtinNode} from '../../stdlib/index.js';
 
 describe('Built-in node constructor', () => {
   it('survives cursed booleans produced by minifiers', () => {

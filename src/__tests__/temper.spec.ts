@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {TuningMap, intCombineTuningMaps, vanishCommas} from '../temper';
+import {TuningMap, intCombineTuningMaps, vanishCommas} from '../temper.js';
 import {LOG_PRIMES, applyWeights, dot, unapplyWeights} from 'xen-dev-utils';
 
 describe('Val combination search', () => {

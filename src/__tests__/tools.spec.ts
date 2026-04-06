@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
-import {hasConstantStructure, subtensions} from '../tools';
-import {TimeMonzo} from '../monzo';
+import {hasConstantStructure, subtensions} from '../tools.js';
+import {TimeMonzo} from '../monzo.js';
 
 describe('Constant structure checker', () => {
   it('accepts the empty scale', () => {

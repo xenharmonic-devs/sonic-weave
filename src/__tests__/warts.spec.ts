@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {parseSubgroup} from '../warts';
+import {parseSubgroup} from '../warts.js';
 
 function prime(numerator: number) {
   return {radical: false, numerator, denominator: null};

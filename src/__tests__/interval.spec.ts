@@ -1,14 +1,14 @@
 import {describe, it, expect} from 'vitest';
-import {TimeMonzo, TimeReal} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo.js';
 import {
   Interval,
   Temperament,
   Val,
   ValBasis,
   intervalValueAs,
-} from '../interval';
-import {FractionLiteral, NedjiLiteral} from '../expression';
-import {sw} from '../parser';
+} from '../interval.js';
+import {FractionLiteral, NedjiLiteral} from '../expression.js';
+import {sw} from '../parser/index.js';
 import {LOG_PRIMES, PRIME_CENTS, dot} from 'xen-dev-utils';
 
 describe('Idempotent formatting', () => {

@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression} from '../parser';
+import {evaluateExpression} from '../parser.js';
 
 function evaluate(source: string) {
   return evaluateExpression(source, false);

@@ -1,6 +1,6 @@
 /** Tools published as part of the package. */
 
-import {TimeMonzo} from './monzo';
+import {TimeMonzo} from './monzo.js';
 
 /**
  * Result from {@link subtensions} consisting of a relative interval and all of the span sizes that subtend it.

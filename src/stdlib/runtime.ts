@@ -4,11 +4,11 @@ import {
   type FunctionDeclaration,
   type Parameter,
   Expression,
-} from '../ast';
-import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
-import {TimeMonzo, TimeReal} from '../monzo';
-import {type ExpressionVisitor} from '../parser/expression';
-import {ZERO} from '../utils';
+} from '../ast.js';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
+import {TimeMonzo, TimeReal} from '../monzo.js';
+import {type ExpressionVisitor} from '../parser/expression.js';
+import {ZERO} from '../utils.js';
 
 /**
  * Function that can be called inside the SonicWeave runtime.

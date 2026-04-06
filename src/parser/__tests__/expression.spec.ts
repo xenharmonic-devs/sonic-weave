@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression} from '..';
-import {Color, Interval, Val} from '../../interval';
-import {TimeMonzo, TimeReal} from '../../monzo';
+import {evaluateExpression} from '../parser.js';
+import {Color, Interval, Val} from '../../interval.js';
+import {TimeMonzo, TimeReal} from '../../monzo.js';
 
 function parseSingle(source: string) {
   const interval = evaluateExpression(source, false);

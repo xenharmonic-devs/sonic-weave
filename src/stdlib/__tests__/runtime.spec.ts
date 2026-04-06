@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {ternaryBroadcast} from '../runtime';
+import {ternaryBroadcast} from '../runtime.js';
 
 type BroadcastContext = {
   gasSpent: number;

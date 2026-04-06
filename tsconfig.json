@@ -12,10 +12,11 @@
       "es2020"
     ],
     "target": "es2020",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "types": [
       "node"
-    ]
+    ],
+    "module": "NodeNext"
   },
   "include": [
     "src/**/*.ts"

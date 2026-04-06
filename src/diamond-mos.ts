@@ -1,5 +1,5 @@
 import {mmod} from 'xen-dev-utils';
-import {reviveMonzo, TimeMonzo, TimeReal} from './monzo';
+import {reviveMonzo, TimeMonzo, TimeReal} from './monzo.js';
 import {
   ACCIDENTAL_VECTORS,
   Accidental,
@@ -7,8 +7,8 @@ import {
   IntervalQuality,
   VULGAR_FRACTIONS,
   VulgarFraction,
-} from './pythagorean';
-import {ZERO} from './utils';
+} from './pythagorean.js';
+import {ZERO} from './utils.js';
 
 /**
  * Base degree for a mosstep in a 0-indexed array.

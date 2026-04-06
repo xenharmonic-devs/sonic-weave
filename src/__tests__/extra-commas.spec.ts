@@ -4,7 +4,7 @@ import {
   getHelmholtzEllis,
   getLumisComma,
   getSyntonicRastmic,
-} from '../extra-commas';
+} from '../extra-commas.js';
 
 describe('extra commas lookup tables', () => {
   it('falls back to unison for negative Helmholtz-Ellis indices', () => {

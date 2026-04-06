@@ -1,5 +1,5 @@
 import {BIG_INT_PRIMES, Fraction, PRIMES} from 'xen-dev-utils';
-import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
+import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo.js';
 import {
   BasisElement,
   BasisFraction,
@@ -8,9 +8,9 @@ import {
   ValBasisElement,
   WartBasisElement,
   WartsLiteral,
-} from './expression';
-import {NEGATIVE_ONE, ONE, ZERO} from './utils';
-import {Val, ValBasis} from './interval';
+} from './expression.js';
+import {NEGATIVE_ONE, ONE, ZERO} from './utils.js';
+import {Val, ValBasis} from './interval.js';
 
 const TWO_MONZO = new TimeMonzo(ZERO, [ONE]);
 const SECOND_MONZO = new TimeMonzo(ONE, []);

@@ -1,5 +1,5 @@
 import {describe, bench, beforeAll} from 'vitest';
-import {getSourceVisitor, sw} from '../parser';
+import {getSourceVisitor, sw} from '../parser/index.js';
 
 beforeAll(() => {
   getSourceVisitor();

@@ -1,19 +1,30 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {relative, repr} from './stdlib';
-import {Interval} from './interval';
+import {relative, repr} from './stdlib/index.js';
+import {Interval} from './interval.js';
 import {
   ExpressionVisitor,
   StatementVisitor,
   evaluateSource,
   getSourceVisitor,
   parseAST,
-} from './parser';
+} from './parser/index.js';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
-import {parse as parenCounter} from './parser/paren-counter';
-import {literalToString} from './expression';
-import {TimeReal} from './monzo';
+import {createRequire} from 'node:module';
+import * as parenCounterParser from './parser/paren-counter.js';
+import {literalToString} from './expression.js';
+import {TimeReal} from './monzo.js';
+const require = createRequire(import.meta.url);
 const {version} = require('../package.json');
+const parenCounter = (
+  parenCounterParser as {
+    parse: (input: string) => {
+      parens: number;
+      squares: number;
+      curlies: number;
+    };
+  }
+).parse;
 
 /**
  * Convert a program in the SonicWeave DSL to the Scala .scl format.

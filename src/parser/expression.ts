@@ -21,7 +21,7 @@ import {
   SquareSuperparticular,
   MosStepLiteral,
   ValBasisLiteral,
-} from '../expression';
+} from '../expression.js';
 import {
   Interval,
   Color,
@@ -32,8 +32,8 @@ import {
   IntervalDomain,
   ValBasis,
   Temperament,
-} from '../interval';
-import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo';
+} from '../interval.js';
+import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo.js';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -48,7 +48,7 @@ import {
   isArrayOrRecord,
   binaryBroadcast,
   ternaryBroadcast,
-} from '../stdlib';
+} from '../stdlib/index.js';
 import {
   metricExponent,
   ZERO,
@@ -59,17 +59,21 @@ import {
   MetricPrefix,
   BinaryPrefix,
   F,
-} from '../utils';
-import {pythagoreanMonzo, absoluteMonzo, AbsolutePitch} from '../pythagorean';
-import {inflect} from '../fjs';
+} from '../utils.js';
+import {
+  pythagoreanMonzo,
+  absoluteMonzo,
+  AbsolutePitch,
+} from '../pythagorean.js';
+import {inflect} from '../fjs.js';
 import {
   STEP_ELEMENT,
   parseSubgroup,
   parseValSubgroup,
   sparseOffsetToVal,
   wartsToVal,
-} from '../warts';
-import {RootContext} from '../context';
+} from '../warts.js';
+import {RootContext} from '../context.js';
 import {
   Argument,
   AccessExpression,
@@ -96,9 +100,9 @@ import {
   UpdateOperator,
   BlockExpression,
   RangeRelation,
-} from '../ast';
-import {type StatementVisitor} from './statement';
-import {AbsoluteMosPitch, absoluteMosMonzo, mosMonzo} from '../diamond-mos';
+} from '../ast.js';
+import {type StatementVisitor} from './statement.js';
+import {AbsoluteMosPitch, absoluteMosMonzo, mosMonzo} from '../diamond-mos.js';
 
 /**
  * Local context within a SonicWeave code block or a function.

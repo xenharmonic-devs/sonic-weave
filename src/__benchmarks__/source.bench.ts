@@ -1,5 +1,5 @@
 import {describe, bench} from 'vitest';
-import {parseAST} from '../parser';
+import {parseAST} from '../parser/index.js';
 
 describe('String parsing', () => {
   bench('one (doubles)', () => {

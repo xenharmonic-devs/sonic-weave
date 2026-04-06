@@ -1,5 +1,5 @@
 import {Fraction, mmod} from 'xen-dev-utils';
-import {TimeMonzo} from './monzo';
+import {TimeMonzo} from './monzo.js';
 import {
   ELEVEN,
   F,
@@ -11,7 +11,7 @@ import {
   THREE,
   TWO,
   ZERO,
-} from './utils';
+} from './utils.js';
 
 // Pythagorean + syntonic arrows
 

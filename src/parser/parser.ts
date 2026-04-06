@@ -1,15 +1,15 @@
 import {Fraction} from 'xen-dev-utils';
-import {Color, Interval, Temperament, Val, ValBasis} from '../interval';
-import {TimeMonzo} from '../monzo';
-import {parse} from './sonic-weave-ast';
-import {CSS_COLOR_CONTEXT} from '../css-colors';
-import {SonicWeaveValue, SonicWeavePrimitive} from '../stdlib';
-import {BUILTIN_CONTEXT} from '../stdlib/builtin';
-import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
-import {RootContext} from '../context';
-import {Program} from '../ast';
-import {StatementVisitor} from './statement';
-import {hasOwn} from '../utils';
+import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
+import {TimeMonzo} from '../monzo.js';
+import * as sonicWeaveAstParser from './sonic-weave-ast.js';
+import {CSS_COLOR_CONTEXT} from '../css-colors.js';
+import {SonicWeaveValue, SonicWeavePrimitive} from '../stdlib/index.js';
+import {BUILTIN_CONTEXT} from '../stdlib/builtin/index.js';
+import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude.js';
+import {RootContext} from '../context.js';
+import {Program} from '../ast.js';
+import {StatementVisitor} from './statement.js';
+import {hasOwn} from '../utils.js';
 
 /**
  * Parse a string of text written in the SonicWeave domain specific language into an abstract syntax tree.
@@ -17,7 +17,9 @@ import {hasOwn} from '../utils';
  * @returns The program as the root node of the AST.
  */
 export function parseAST(source: string): Program {
-  return parse(source);
+  return (sonicWeaveAstParser as {parse: (source: string) => Program}).parse(
+    source,
+  );
 }
 
 // Cached globally on first initialization.

@@ -1,4 +1,4 @@
-import {Color} from './interval';
+import {Color} from './interval.js';
 
 const CSS_COLORS = `aliceblue #F0F8FF
 antiquewhite #FAEBD7

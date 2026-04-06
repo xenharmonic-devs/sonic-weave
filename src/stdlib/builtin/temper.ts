@@ -12,9 +12,9 @@ import {
   Val,
   ValBasis,
   intervalValueAs,
-} from '../../interval';
-import {TimeMonzo, TimeReal} from '../../monzo';
-import {ExpressionVisitor} from '../../parser/expression';
+} from '../../interval.js';
+import {TimeMonzo, TimeReal} from '../../monzo.js';
+import {ExpressionVisitor} from '../../parser/expression.js';
 import {
   SonicWeaveFunction,
   SonicWeaveValue,
@@ -25,11 +25,11 @@ import {
   sonicTruth,
   unaryBroadcast,
   upcastBool,
-} from '../runtime';
-import {repr, relative as pubRelative} from '../public';
-import {ONE, ZERO} from '../../utils';
-import {valToSparseOffset, valToWarts} from '../../warts';
-import {intCombineTuningMaps} from '../../temper';
+} from '../runtime.js';
+import {repr, relative as pubRelative} from '../public.js';
+import {ONE, ZERO} from '../../utils.js';
+import {valToSparseOffset, valToWarts} from '../../warts.js';
+import {intCombineTuningMaps} from '../../temper.js';
 
 function builtinTemperament(
   this: ExpressionVisitor,

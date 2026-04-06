@@ -1,6 +1,6 @@
 import {mmod} from 'xen-dev-utils';
-import {TimeMonzo, TimeReal} from './monzo';
-import {ZERO, hasOwn} from './utils';
+import {TimeMonzo, TimeReal} from './monzo.js';
+import {ZERO, hasOwn} from './utils.js';
 
 /**
  * Step count vector indexed by strings representing distinct step sizes.
