@@ -10,12 +10,10 @@ import {
 } from './parser/index.js';
 import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
-import {createRequire} from 'node:module';
 import * as parenCounterParser from './parser/paren-counter.js';
 import {literalToString} from './expression.js';
 import {TimeReal} from './monzo.js';
-const require = createRequire(import.meta.url);
-const {version} = require('../package.json');
+import packageJson from '../package.json' with {type: 'json'};
 const parenCounter = (
   parenCounterParser as {
     parse: (input: string) => {
@@ -35,7 +33,7 @@ export function toScalaScl(source: string) {
   const visitor = evaluateSource(source);
   const keyColors = [];
   let useColors = false;
-  const lines = [`!Created using SonicWeave ${version}`, '!'];
+  const lines = [`!Created using SonicWeave ${packageJson.version}`, '!'];
   lines.push(visitor.rootContext!.title || 'Untitled tuning');
   const scale = visitor.mutables.get('$') as Interval[];
   lines.push(` ${scale.length}`);
@@ -74,7 +72,7 @@ export function toSonicWeaveInterchange(source: string) {
   if (!context) {
     throw new Error('Missing root context.');
   }
-  const lines = [`(* Created using SonicWeave ${version} *)`, ''];
+  const lines = [`(* Created using SonicWeave ${packageJson.version} *)`, ''];
   lines.push(JSON.stringify(context.title));
   lines.push('');
   if (context.unisonFrequency) {

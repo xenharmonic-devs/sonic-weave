@@ -78,10 +78,8 @@ import {
 } from './../public.js';
 import {scaleMonzos} from '../../diamond-mos.js';
 import {MATH_BUILTINS} from './math.js';
-import {createRequire} from 'node:module';
 import {TEMPER_BUILTINS} from './temper.js';
-const require = createRequire(import.meta.url);
-const {version: VERSION} = require('../../../package.json');
+import packageJson from '../../../package.json' with {type: 'json'};
 
 // === Library ===
 
@@ -2503,10 +2501,13 @@ factorColor.__node__ = builtinNode(factorColor);
 /**
  * Ambient builtin constants and functions that are always present in SonicWeave DSL.
  */
-export const BUILTIN_CONTEXT: Record<string, Interval | SonicWeaveFunction> = {
+export const BUILTIN_CONTEXT: Record<
+  string,
+  Interval | SonicWeaveFunction | string
+> = {
   ...MATH_BUILTINS,
   ...TEMPER_BUILTINS,
-  VERSION,
+  VERSION: packageJson.version,
   // First-party wrappers
   numComponents,
   stepSignature,
