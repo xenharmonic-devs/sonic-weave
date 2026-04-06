@@ -3,18 +3,12 @@
   "compilerOptions": {
     "allowJs": true,
     "allowUnreachableCode": true,
-    "lib": [
-      "es2020"
-    ],
+    "lib": ["es2020"],
     "target": "es2020",
-    "moduleResolution": "node",
-    "types": [
-      "node"
-    ],
-    "noEmit": true
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "noEmit": true,
+    "module": "NodeNext"
   },
-  "include": [
-    "scripts/**/*.ts",
-    "src/**/*.ts"
-  ]
+  "include": ["scripts/**/*.ts", "src/**/*.ts"]
 }

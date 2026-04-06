@@ -6,9 +6,9 @@ import {
   rank2FromCommas,
   temperamentFromCommas,
   temperamentFromVals,
-} from '../chord-parser';
-import {MonzoLiteral} from '../../expression';
-import {TimeMonzo} from '../../monzo';
+} from '../chord-parser.js';
+import {MonzoLiteral} from '../../expression.js';
+import {TimeMonzo} from '../../monzo.js';
 import {modc} from 'xen-dev-utils';
 
 describe('Chord input parser', () => {

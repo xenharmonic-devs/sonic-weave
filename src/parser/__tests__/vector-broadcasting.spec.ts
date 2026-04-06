@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression, sw} from '../parser';
-import {Interval} from '../../interval';
-import {SonicWeavePrimitive} from '../../stdlib';
+import {evaluateExpression, sw} from '../parser.js';
+import {Interval} from '../../interval.js';
+import {SonicWeavePrimitive} from '../../stdlib/index.js';
 
 function sw0D(strings: TemplateStringsArray, ...args: any[]): number {
   const result = sw(strings, ...args);

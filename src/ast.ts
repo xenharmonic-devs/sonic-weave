@@ -4,9 +4,9 @@ import {
   ValBasisLiteral,
   literalToString,
   Identifier,
-} from './expression';
+} from './expression.js';
 
-export {Identifier} from './expression';
+export {Identifier} from './expression.js';
 
 export type UnaryOperator =
   | '+'

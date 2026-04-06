@@ -29,17 +29,22 @@ import {
   ValBasisLiteral,
   CoIntervalLiteral,
   WartBasisElement,
-} from './expression';
-import {TimeMonzo, TimeReal, getNumberOfComponents, reviveMonzo} from './monzo';
-import {asAbsoluteFJS, asFJS} from './fjs';
-import {type RootContext} from './context';
+} from './expression.js';
+import {
+  TimeMonzo,
+  TimeReal,
+  getNumberOfComponents,
+  reviveMonzo,
+} from './monzo.js';
+import {asAbsoluteFJS, asFJS} from './fjs.js';
+import {type RootContext} from './context.js';
 import {
   NUM_INTERCHANGE_COMPONENTS,
   ONE,
   ZERO,
   countUpsAndLifts,
   setUnion,
-} from './utils';
+} from './utils.js';
 import {
   BIG_INT_PRIMES,
   Fraction,
@@ -74,7 +79,7 @@ import {
   transpose,
   unapplyWeights,
 } from 'xen-dev-utils';
-import {TuningMap, combineTuningMaps} from './temper';
+import {TuningMap, combineTuningMaps} from './temper.js';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.

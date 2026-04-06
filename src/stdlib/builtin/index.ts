@@ -19,16 +19,16 @@ import {
   FractionalMonzo,
   binomial,
 } from 'xen-dev-utils';
-import {Color, Interval, Temperament, Val, ValBasis} from '../../interval';
+import {Color, Interval, Temperament, Val, ValBasis} from '../../interval.js';
 import {
   TimeMonzo,
   TimeReal,
   getNumberOfComponents,
   setNumberOfComponents,
-} from '../../monzo';
-import {type ExpressionVisitor} from '../../parser';
+} from '../../monzo.js';
+import {type ExpressionVisitor} from '../../parser/index.js';
 import {MosOptions, mos, nthNominal} from 'moment-of-symmetry';
-import {Expression, expressionToString} from '../../ast';
+import {Expression, expressionToString} from '../../ast.js';
 import {
   BasisElement,
   FJSFlavor,
@@ -41,10 +41,10 @@ import {
   formatAbsoluteFJS,
   fractionToVectorComponent,
   integerToVectorComponent,
-} from '../../expression';
-import {TWO, ZERO} from '../../utils';
-import {stepString, stepSignature as wordsStepSignature} from '../../words';
-import {hasConstantStructure} from '../../tools';
+} from '../../expression.js';
+import {TWO, ZERO} from '../../utils.js';
+import {stepString, stepSignature as wordsStepSignature} from '../../words.js';
+import {hasConstantStructure} from '../../tools.js';
 import {
   SonicWeaveFunction,
   SonicWeavePrimitive,
@@ -57,7 +57,7 @@ import {
   sonicTruth,
   unaryBroadcast,
   upcastBool,
-} from './../runtime';
+} from './../runtime.js';
 import {
   simplify as pubSimplify,
   bleach as pubBleach,
@@ -75,10 +75,12 @@ import {
   centsColor as pubCentsColor,
   factorColor as pubFactorColor,
   compare,
-} from './../public';
-import {scaleMonzos} from '../../diamond-mos';
-import {MATH_BUILTINS} from './math';
-import {TEMPER_BUILTINS} from './temper';
+} from './../public.js';
+import {scaleMonzos} from '../../diamond-mos.js';
+import {MATH_BUILTINS} from './math.js';
+import {createRequire} from 'node:module';
+import {TEMPER_BUILTINS} from './temper.js';
+const require = createRequire(import.meta.url);
 const {version: VERSION} = require('../../../package.json');
 
 // === Library ===

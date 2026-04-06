@@ -1,6 +1,6 @@
-import {Interval} from '../../interval';
-import {TimeMonzo, TimeReal} from '../../monzo';
-import {ExpressionVisitor} from '../../parser/expression';
+import {Interval} from '../../interval.js';
+import {TimeMonzo, TimeReal} from '../../monzo.js';
+import {ExpressionVisitor} from '../../parser/expression.js';
 import {
   SonicWeaveFunction,
   SonicWeaveValue,
@@ -10,7 +10,7 @@ import {
   requireParameters,
   unaryBroadcast,
   upcastBool,
-} from '../runtime';
+} from '../runtime.js';
 
 // == Constants
 const E = new Interval(TimeReal.fromValue(Math.E), 'linear');

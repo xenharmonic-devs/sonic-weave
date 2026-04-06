@@ -9,18 +9,18 @@ import {
   LargeDeclaration,
   SmallDeclaration,
   EquaveDeclaration,
-} from '../ast';
-import {TimeMonzo, TimeReal} from '../monzo';
-import {ExpressionVisitor} from './expression';
+} from '../ast.js';
+import {TimeMonzo, TimeReal} from '../monzo.js';
+import {ExpressionVisitor} from './expression.js';
 import {
   MosMonzo,
   MosOptions,
   generateNotation,
   stepString,
 } from 'moment-of-symmetry';
-import {Interval} from '../interval';
-import {MosConfig, MosDegree} from '../diamond-mos';
-import {ONE, TWO, ZERO} from '../utils';
+import {Interval} from '../interval.js';
+import {MosConfig, MosDegree} from '../diamond-mos.js';
+import {ONE, TWO, ZERO} from '../utils.js';
 
 type Monzo = TimeMonzo | TimeReal;
 

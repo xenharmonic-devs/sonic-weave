@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {Fraction} from 'xen-dev-utils';
 
-import {TimeMonzo, TimeReal} from '../monzo';
+import {TimeMonzo, TimeReal} from '../monzo.js';
 
 describe('Real value with time', () => {
   it('can be constructed from cents', () => {

@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression, getSourceVisitor, parseAST} from '..';
-import {repr} from '../../stdlib';
+import {evaluateExpression, getSourceVisitor, parseAST} from '../parser.js';
+import {repr} from '../../stdlib/index.js';
 
 function evaluate(source: string) {
   const visitor = getSourceVisitor(false);

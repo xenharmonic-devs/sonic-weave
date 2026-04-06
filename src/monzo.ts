@@ -29,7 +29,7 @@ import {
   TWO,
   ZERO,
   validateBigInt,
-} from './utils';
+} from './utils.js';
 import {
   NedjiLiteral,
   FractionLiteral,
@@ -44,7 +44,7 @@ import {
   fractionToVectorComponent,
   literalToString,
   ValLiteral,
-} from './expression';
+} from './expression.js';
 
 /**
  * Interval domain. The operator '+' means addition in the linear domain. In the logarithmic domain '+' correspond to multiplication of the underlying values instead.

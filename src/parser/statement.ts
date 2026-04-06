@@ -1,5 +1,5 @@
-import {Interval, Color, Val, ValBasis, Temperament} from '../interval';
-import {TimeMonzo, TimeReal} from '../monzo';
+import {Interval, Color, Val, ValBasis, Temperament} from '../interval.js';
+import {TimeMonzo, TimeReal} from '../monzo.js';
 import {
   SonicWeaveValue,
   sonicTruth,
@@ -10,8 +10,8 @@ import {
   sortInPlace,
   temper,
   absolute,
-} from '../stdlib';
-import {RootContext} from '../context';
+} from '../stdlib/index.js';
+import {RootContext} from '../context.js';
 import {
   AssignmentStatement,
   BlockStatement,
@@ -44,15 +44,15 @@ import {
   ImportAllStatement,
   MosDeclaration,
   DeleteStatement,
-} from '../ast';
+} from '../ast.js';
 import {
   ExpressionVisitor,
   VisitorContext,
   arrayRecordOrString,
   containerToArray,
-} from './expression';
-import {Tardigrade} from './mos';
-import {hasOwn} from '../utils';
+} from './expression.js';
+import {Tardigrade} from './mos.js';
+import {hasOwn} from '../utils.js';
 
 /**
  * An interrupt representing a return, break or continue statement.

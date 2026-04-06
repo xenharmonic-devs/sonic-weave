@@ -5,9 +5,9 @@ import {
   evaluateSource,
   getSourceVisitor,
   parseAST,
-} from '../../parser';
-import {Interval} from '../../interval';
-import {builtinNode, track} from '../../stdlib';
+} from '../../parser/index.js';
+import {Interval} from '../../interval.js';
+import {builtinNode, track} from '../../stdlib/index.js';
 import {Fraction} from 'xen-dev-utils';
 
 function parseSource(source: string) {

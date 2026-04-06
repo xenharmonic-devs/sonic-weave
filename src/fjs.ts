@@ -6,9 +6,9 @@ import {
   toMonzo,
   valueToCents,
 } from 'xen-dev-utils';
-import {TimeMonzo, TimeReal} from './monzo';
-import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression';
-import {absoluteToNode, monzoToNode} from './pythagorean';
+import {TimeMonzo, TimeReal} from './monzo.js';
+import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression.js';
+import {absoluteToNode, monzoToNode} from './pythagorean.js';
 import {
   HEJI_SWAPS,
   HEWM53_SWAPS,
@@ -16,8 +16,8 @@ import {
   getHelmholtzEllis,
   getLumisComma,
   getSyntonicRastmic,
-} from './extra-commas';
-import {ZERO} from './utils';
+} from './extra-commas.js';
+import {ZERO} from './utils.js';
 
 // Maximum exponent of a higher prime when converting to FJS.
 const MAX_EXPONENT = Object.freeze(new Fraction(100));

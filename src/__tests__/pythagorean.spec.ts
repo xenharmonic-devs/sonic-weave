@@ -9,8 +9,8 @@ import {
   VulgarFraction,
   AugmentedQuality,
   SplitAccidental,
-} from '../pythagorean';
-import {TimeMonzo} from '../monzo';
+} from '../pythagorean.js';
+import {TimeMonzo} from '../monzo.js';
 
 describe('Pythagorean interval construction from parts', () => {
   it.each([

@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
-import {evaluateExpression, evaluateSource} from '../parser';
-import {Interval, Val} from '../../interval';
+import {evaluateExpression, evaluateSource} from '../parser.js';
+import {Interval, Val} from '../../interval.js';
 
 function evaluate(source: string) {
   return evaluateExpression(source, false);

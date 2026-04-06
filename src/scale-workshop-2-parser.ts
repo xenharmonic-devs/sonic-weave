@@ -6,15 +6,15 @@ import {
   gcd,
   valueToCents,
 } from 'xen-dev-utils';
-import {Domain, TimeMonzo, TimeReal, getNumberOfComponents} from './monzo';
-import {parse} from './scale-workshop-2-ast';
-import {Interval} from './interval';
+import {Domain, TimeMonzo, TimeReal, getNumberOfComponents} from './monzo.js';
+import * as scaleWorkshop2Parser from './scale-workshop-2-ast.js';
+import {Interval} from './interval.js';
 import {
   CentsLiteral,
   DecimalLiteral,
   NedjiLiteral,
   uniformInvertNode,
-} from './expression';
+} from './expression.js';
 
 const ZERO = new Fraction(0);
 
@@ -78,7 +78,9 @@ type Expression =
   | BinaryExpression;
 
 function parseAst(input: string): Expression {
-  return parse(input);
+  return (scaleWorkshop2Parser as {parse: (input: string) => Expression}).parse(
+    input,
+  );
 }
 
 function parseDecimal(sw2Node: NumericLiteral, numberOfComponents: number) {

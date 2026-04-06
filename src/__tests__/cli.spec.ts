@@ -3,7 +3,7 @@ import {mkdtempSync, rmSync, writeFileSync} from 'fs';
 import {tmpdir} from 'os';
 import {join, resolve} from 'path';
 import {spawnSync} from 'child_process';
-import {toSonicWeaveInterchange, repl} from '../cli';
+import {toSonicWeaveInterchange, repl} from '../cli.js';
 import type {ReplOptions} from 'repl';
 
 describe('Interchange format', () => {

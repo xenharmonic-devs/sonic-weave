@@ -1,11 +1,11 @@
-export * from './ast';
-export * from './stdlib';
-export * from './parser';
-export * from './cli';
-export * from './context';
-export * from './expression';
-export * from './interval';
-export * from './monzo';
+export * from './ast.js';
+export * from './stdlib/index.js';
+export * from './parser/index.js';
+export * from './cli.js';
+export * from './context.js';
+export * from './expression.js';
+export * from './interval.js';
+export * from './monzo.js';
 export {
   type Degree,
   type AugmentedQuality,
@@ -16,9 +16,9 @@ export {
   type SplitAccidental,
   type Nominal,
   type AbsolutePitch,
-} from './pythagorean';
-export * from './diamond-mos';
-export * from './tools';
+} from './pythagorean.js';
+export * from './diamond-mos.js';
+export * from './tools.js';
 export {
   MetricPrefix,
   metricExponent,
@@ -26,7 +26,7 @@ export {
   binaryExponent,
   setUnion,
   hasOwn,
-} from './utils';
-export * from './words';
-export * from './scale-workshop-2-parser';
-export * from './temper';
+} from './utils.js';
+export * from './words.js';
+export * from './scale-workshop-2-parser.js';
+export * from './temper.js';

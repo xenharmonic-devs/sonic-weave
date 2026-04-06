@@ -5,9 +5,9 @@ import {
   BinaryPrefix,
   MetricPrefix,
   validateBigInt,
-} from './utils';
-import {Pythagorean, AbsolutePitch} from './pythagorean';
-import {AbsoluteMosPitch, MosStep} from './diamond-mos';
+} from './utils.js';
+import {Pythagorean, AbsolutePitch} from './pythagorean.js';
+import {AbsoluteMosPitch, MosStep} from './diamond-mos.js';
 import {Fraction, bigAbs, lcm} from 'xen-dev-utils';
 
 /**

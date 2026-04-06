@@ -1,9 +1,14 @@
 import {describe, bench, beforeAll} from 'vitest';
-import {StatementVisitor, getSourceVisitor, parseAST, sw} from '../parser';
-import {BUILTIN_CONTEXT} from '../stdlib/builtin';
-import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude';
-import {RootContext} from '../context';
-import {CSS_COLOR_CONTEXT} from '../css-colors';
+import {
+  StatementVisitor,
+  getSourceVisitor,
+  parseAST,
+  sw,
+} from '../parser/index.js';
+import {BUILTIN_CONTEXT} from '../stdlib/builtin/index.js';
+import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude.js';
+import {RootContext} from '../context.js';
+import {CSS_COLOR_CONTEXT} from '../css-colors.js';
 
 // NOTE: Most of these are not comparative benchmarks.
 // Mainly useful for making sure tweaks to the parser won't destroy all performance.

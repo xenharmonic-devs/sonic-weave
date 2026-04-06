@@ -1,7 +1,7 @@
 import {stdout} from 'process';
-import {getGlobalVisitor} from '../src/parser';
-import {SonicWeaveFunction} from '../src/stdlib';
-import {expressionToString} from '../src/ast';
+import {getGlobalVisitor} from '../src/parser/index.js';
+import {SonicWeaveFunction} from '../src/stdlib/index.js';
+import {expressionToString} from '../src/ast.js';
 
 const visitor = getGlobalVisitor();
 

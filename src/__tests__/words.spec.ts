@@ -11,7 +11,7 @@ import {
   stepSignature,
   wordArity,
   stepVectorArity,
-} from '../words';
+} from '../words.js';
 
 describe('add()', () => {
   it('does not mutate input', () => {

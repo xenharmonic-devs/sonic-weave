@@ -1,6 +1,6 @@
 import {Fraction, PRIMES} from 'xen-dev-utils';
-import {TimeMonzo, getNumberOfComponents} from './monzo';
-import {ZERO} from './utils';
+import {TimeMonzo, getNumberOfComponents} from './monzo.js';
+import {ZERO} from './utils.js';
 
 // https://en.xen.wiki/w/Syntonic-rastmic_subchroma_notation
 const SYNTONIC_RASTMIC = {

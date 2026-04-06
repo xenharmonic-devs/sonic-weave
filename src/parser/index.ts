@@ -1,4 +1,4 @@
-export * from './chord-parser';
-export {VisitorContext, ExpressionVisitor} from './expression';
-export * from './statement';
-export * from './parser';
+export * from './chord-parser.js';
+export {VisitorContext, ExpressionVisitor} from './expression.js';
+export * from './statement.js';
+export * from './parser.js';

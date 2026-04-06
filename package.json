@@ -4,7 +4,7 @@
   "author": "Lumi Pakkanen",
   "description": "The SonicWeave DSL for manipulating musical frequencies, ratios and equal temperaments",
   "license": "MIT",
-  "main": "dist/index",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xenharmonic-devs/sonic-weave.git"
@@ -36,10 +36,10 @@
   "scripts": {
     "lint": "gts lint",
     "clean": "gts clean",
-    "compile-sw2-parser": "peggy src/grammars/scale-workshop-2.pegjs -o src/scale-workshop-2-ast.js",
-    "compile-chord-parser": "peggy src/grammars/sonic-weave-chord.pegjs src/grammars/base.pegjs -o src/parser/sonic-weave-chord.js",
-    "compile-sonic-weave-parser": "peggy src/grammars/sonic-weave.pegjs src/grammars/mos.pegjs src/grammars/base.pegjs -o src/parser/sonic-weave-ast.js",
-    "compile-paren-counter": "peggy src/grammars/paren-counter.pegjs src/grammars/base.pegjs -o src/parser/paren-counter.js",
+    "compile-sw2-parser": "peggy --format es src/grammars/scale-workshop-2.pegjs -o src/scale-workshop-2-ast.js",
+    "compile-chord-parser": "peggy --format es src/grammars/sonic-weave-chord.pegjs src/grammars/base.pegjs -o src/parser/sonic-weave-chord.js",
+    "compile-sonic-weave-parser": "peggy --format es src/grammars/sonic-weave.pegjs src/grammars/mos.pegjs src/grammars/base.pegjs -o src/parser/sonic-weave-ast.js",
+    "compile-paren-counter": "peggy --format es src/grammars/paren-counter.pegjs src/grammars/base.pegjs -o src/parser/paren-counter.js",
     "compile-parsers": "npm run compile-sonic-weave-parser && npm run compile-chord-parser && npm run compile-sw2-parser && npm run compile-paren-counter",
     "precompile": "npm run compile-parsers",
     "compile": "tsc",
@@ -75,5 +75,13 @@
   },
   "optionalDependencies": {
     "commander": "^12.1.0"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   }
 }
