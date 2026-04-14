@@ -1,4 +1,5 @@
-import {Fraction, PRIMES, gcd} from 'xen-dev-utils';
+import {Fraction, gcd} from 'xen-dev-utils/fraction';
+import {PRIMES} from 'xen-dev-utils/primes';
 import {
   NedjiLiteral,
   IntegerLiteral,

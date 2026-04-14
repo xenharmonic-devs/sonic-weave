@@ -1,11 +1,8 @@
-import {
-  Fraction,
-  PRIMES,
-  PRIME_CENTS,
-  circleDistance,
-  toMonzo,
-  valueToCents,
-} from 'xen-dev-utils';
+import {valueToCents} from 'xen-dev-utils/conversion';
+import {circleDistance} from 'xen-dev-utils/core';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {toMonzo} from 'xen-dev-utils/monzo';
+import {PRIMES, PRIME_CENTS} from 'xen-dev-utils/primes';
 import {TimeMonzo, TimeReal} from './monzo.js';
 import {AbsoluteFJS, FJS, FJSFlavor, FJSInflection} from './expression.js';
 import {absoluteToNode, monzoToNode} from './pythagorean.js';

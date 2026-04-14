@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest';
 import {sw, sw$, sw$r, swr} from '../../parser/index.js';
 import {Color, Interval, Val} from '../../interval.js';
-import {Fraction} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
 
 describe('SonicWeave template tag', () => {
   it('evaluates a single number', () => {

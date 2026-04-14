@@ -1,11 +1,6 @@
-import {
-  BIG_INT_PRIMES,
-  Fraction,
-  PRIMES,
-  applyWeights,
-  primeLimit,
-  unapplyWeights,
-} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {applyWeights, primeLimit, unapplyWeights} from 'xen-dev-utils/monzo';
+import {BIG_INT_PRIMES, PRIMES} from 'xen-dev-utils/primes';
 import {
   Interval,
   Temperament,

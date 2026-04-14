@@ -1,4 +1,4 @@
-import {Fraction} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
 import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
 import {TimeMonzo} from '../monzo.js';
 import * as sonicWeaveAstParser from './sonic-weave-ast.js';

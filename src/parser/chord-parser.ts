@@ -3,7 +3,8 @@ import {evaluateExpression, evaluateSource, parseAST} from './parser.js';
 import {Interval, Temperament, Val, ValBasis} from '../interval.js';
 import {sparseOffsetToVal, wartsToVal} from '../warts.js';
 import {TimeMonzo, TimeReal, getNumberOfComponents} from '../monzo.js';
-import {Fraction, PRIMES} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {PRIMES} from 'xen-dev-utils/primes';
 import {ValBasisElement} from '../expression.js';
 import {StatementVisitor} from './statement.js';
 

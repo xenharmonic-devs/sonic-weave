@@ -1,4 +1,5 @@
-import {BIG_INT_PRIMES, Fraction, PRIMES} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {BIG_INT_PRIMES, PRIMES} from 'xen-dev-utils/primes';
 import {TimeMonzo, TimeReal, getNumberOfComponents} from './monzo.js';
 import {
   BasisElement,

@@ -1,4 +1,4 @@
-import {Fraction, gcd} from 'xen-dev-utils';
+import {Fraction, gcd} from 'xen-dev-utils/fraction';
 import {
   AbstractStepPattern,
   IntegerPattern,
@@ -12,12 +12,8 @@ import {
 } from '../ast.js';
 import {TimeMonzo, TimeReal} from '../monzo.js';
 import {ExpressionVisitor} from './expression.js';
-import {
-  MosMonzo,
-  MosOptions,
-  generateNotation,
-  stepString,
-} from 'moment-of-symmetry';
+import {MosOptions, stepString} from 'moment-of-symmetry/core';
+import {MosMonzo, generateNotation} from 'moment-of-symmetry/notation';
 import {Interval} from '../interval.js';
 import {MosConfig, MosDegree} from '../diamond-mos.js';
 import {ONE, TWO, ZERO} from '../utils.js';
