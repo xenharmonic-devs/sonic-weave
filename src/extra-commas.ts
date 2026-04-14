@@ -3,6 +3,9 @@ import {PRIMES} from 'xen-dev-utils/primes';
 import {TimeMonzo, getNumberOfComponents} from './monzo.js';
 import {ZERO} from './utils.js';
 
+// Internal notation helpers. This module is intentionally not exposed as a
+// standalone package subpath export.
+
 // https://en.xen.wiki/w/Syntonic-rastmic_subchroma_notation
 const SYNTONIC_RASTMIC = {
   // Note: x, t#, #, t, d, b, db and bb are already part of FJS.

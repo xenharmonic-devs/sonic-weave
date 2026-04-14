@@ -82,6 +82,79 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./ast": {
+      "types": "./dist/ast.d.ts",
+      "import": "./dist/ast.js"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    },
+    "./context": {
+      "types": "./dist/context.d.ts",
+      "import": "./dist/context.js"
+    },
+    "./css-colors": {
+      "types": "./dist/css-colors.d.ts",
+      "import": "./dist/css-colors.js"
+    },
+    "./diamond-mos": {
+      "types": "./dist/diamond-mos.d.ts",
+      "import": "./dist/diamond-mos.js"
+    },
+    "./expression": {
+      "types": "./dist/expression.d.ts",
+      "import": "./dist/expression.js"
+    },
+    "./fjs": {
+      "types": "./dist/fjs.d.ts",
+      "import": "./dist/fjs.js"
+    },
+    "./interval": {
+      "types": "./dist/interval.d.ts",
+      "import": "./dist/interval.js"
+    },
+    "./monzo": {
+      "types": "./dist/monzo.d.ts",
+      "import": "./dist/monzo.js"
+    },
+    "./pythagorean": {
+      "types": "./dist/pythagorean.d.ts",
+      "import": "./dist/pythagorean.js"
+    },
+    "./scale-workshop-2-parser": {
+      "types": "./dist/scale-workshop-2-parser.d.ts",
+      "import": "./dist/scale-workshop-2-parser.js"
+    },
+    "./temper": {
+      "types": "./dist/temper.d.ts",
+      "import": "./dist/temper.js"
+    },
+    "./tools": {
+      "types": "./dist/tools.d.ts",
+      "import": "./dist/tools.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js"
+    },
+    "./warts": {
+      "types": "./dist/warts.d.ts",
+      "import": "./dist/warts.js"
+    },
+    "./words": {
+      "types": "./dist/words.d.ts",
+      "import": "./dist/words.js"
+    },
+    "./parser": {
+      "types": "./dist/parser/index.d.ts",
+      "import": "./dist/parser/index.js"
+    },
+    "./stdlib": {
+      "types": "./dist/stdlib/index.d.ts",
+      "import": "./dist/stdlib/index.js"
+    },
+    "./package.json": "./package.json"
   }
 }
