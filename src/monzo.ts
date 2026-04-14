@@ -372,6 +372,20 @@ export class TimeReal {
   }
 
   /**
+   * Normalize an absolute-domain value to Hz.
+   * @returns The corresponding frequency in Hz.
+   */
+  toHertz() {
+    if (!this.timeExponent) {
+      throw new Error('Cannot normalize a scalar value to Hz.');
+    }
+    if (this.timeExponent === -1) {
+      return this.value;
+    }
+    return this.pow(-1 / this.timeExponent).valueOf();
+  }
+
+  /**
    * Check if this time real has the same size as another.
    * @param other Another time real or time monzo.
    * @returns `true` if the inputs are of equal size.
@@ -2435,6 +2449,31 @@ export class TimeMonzo {
       return -centsToValue(this.totalCents(true));
     }
     return centsToValue(this.totalCents());
+  }
+
+  /**
+   * Normalize an absolute-domain value to Hz.
+   * @returns The corresponding frequency in Hz.
+   */
+  toHertz() {
+    if (!this.timeExponent.n) {
+      throw new Error('Cannot normalize a scalar value to Hz.');
+    }
+    if (this.timeExponent.equals(NEGATIVE_ONE)) {
+      if (this.isFractional()) {
+        return this.toFraction().valueOf();
+      }
+      return this.valueOf();
+    }
+    const normalized = this.pow(NEGATIVE_ONE.div(this.timeExponent));
+    if (
+      normalized instanceof TimeMonzo &&
+      normalized.timeExponent.equals(NEGATIVE_ONE) &&
+      normalized.isFractional()
+    ) {
+      return normalized.toFraction().valueOf();
+    }
+    return normalized.valueOf();
   }
 
   /**
