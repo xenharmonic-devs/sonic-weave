@@ -3,7 +3,7 @@ import {mkdtempSync, rmSync, writeFileSync} from 'fs';
 import {tmpdir} from 'os';
 import {join, resolve} from 'path';
 import {spawnSync} from 'child_process';
-import {toSonicWeaveInterchange, repl} from '../cli.js';
+import {toScalaKbm, toSonicWeaveInterchange, repl} from '../cli.js';
 import type {ReplOptions} from 'repl';
 
 describe('Interchange format', () => {
@@ -70,6 +70,43 @@ describe('CLI format option', () => {
     const result = runCli('swi');
     expect(result.status).toBe(0);
     expect(result.stderr).toBe('');
+  });
+
+  it('exits successfully for kbm format', () => {
+    const result = runCli('kbm');
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
+  });
+});
+
+describe('Scala KBM format', () => {
+  it('creates a linear keyboard map for the current scale', () => {
+    const result = toScalaKbm('3/2\n2');
+    expect(result).toContain('\n2\n! First MIDI note number to retune:\n0');
+    expect(result).toContain(
+      '\n69\n! Frequency to tune the above note to:\n440.0\n',
+    );
+    expect(result).toContain('\n2\n! Mapping.\n0\n1\n');
+  });
+
+  it('supports empty scales with a formal octave fallback', () => {
+    const result = toScalaKbm('clear()');
+    expect(result).toContain('\n0\n! First MIDI note number to retune:\n0');
+    expect(result).toContain('\n1\n! Mapping.\n');
+  });
+
+  it('uses root context unison frequency as the kbm reference frequency', () => {
+    const result = toScalaKbm('1/1 = 432 Hz\n3/2\n2');
+    expect(result).toContain(
+      '\n60\n! Frequency to tune the above note to:\n432.0\n',
+    );
+  });
+
+  it('normalizes non-Hz absolute unison values to Hz', () => {
+    const result = toScalaKbm('1/1 = 2 s\n3/2\n2');
+    expect(result).toContain(
+      '\n60\n! Frequency to tune the above note to:\n0.5\n',
+    );
   });
 });
 

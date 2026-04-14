@@ -21,6 +21,11 @@ describe('Real value with time', () => {
     expect(inf.value).toBe(Infinity);
     expect(inf.toString()).toBe('inf');
   });
+
+  it('can normalize absolute values to Hz', () => {
+    const period = new TimeReal(1, 2);
+    expect(period.toHertz()).toBe(0.5);
+  });
 });
 
 describe('Extended monzo with time', () => {
@@ -81,6 +86,13 @@ describe('Extended monzo with time', () => {
   it('can be converted to cents', () => {
     const monzo = new TimeMonzo(new Fraction(0), [new Fraction(1, 2)]);
     expect(monzo.toCents()).toBeCloseTo(600);
+  });
+  it('can normalize absolute values to Hz', () => {
+    const frequency = TimeMonzo.fromFractionalFrequency(432);
+    const period = TimeMonzo.fromFraction(432);
+    period.timeExponent = new Fraction(1);
+    expect(frequency.toHertz()).toBe(432);
+    expect(period.toHertz()).toBeCloseTo(1 / 432);
   });
   it('can be converted to n of edo', () => {
     const monzo = new TimeMonzo(new Fraction(0), [new Fraction(5, 12)]);

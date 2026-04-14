@@ -4,7 +4,12 @@ import {existsSync, readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {start} from 'node:repl';
 import {createRequire} from 'node:module';
-import {toScalaScl, toSonicWeaveInterchange, repl} from '../dist/index.js';
+import {
+  toScalaKbm,
+  toScalaScl,
+  toSonicWeaveInterchange,
+  repl,
+} from '../dist/index.js';
 
 const require = createRequire(import.meta.url);
 const {version} = require('../package.json');
@@ -48,6 +53,8 @@ if (!commander) {
     const data = readFileSync(program.args[0]);
     if (options.format === 'scl') {
       process.stdout.write(toScalaScl(data.toString()));
+    } else if (options.format === 'kbm') {
+      process.stdout.write(toScalaKbm(data.toString()));
     } else if (options.format === 'swi') {
       process.stdout.write(toSonicWeaveInterchange(data.toString()));
     } else {

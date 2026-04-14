@@ -12,7 +12,8 @@ This document describes the command-line interface provided by the `sonic-weave`
     2. [Interval calculator](#interval-calculator)
 2. [Converting files](#converting-files)
     1. [Scala `.scl`](#scala-scl)
-    2. [SonicWeave Interchange `.swi`](#sonicweave-interchange-swi)
+    2. [Scala mapping `.kbm`](#scala-mapping-kbm)
+    3. [SonicWeave Interchange `.swi`](#sonicweave-interchange-swi)
 
 ## REPL
 
@@ -165,6 +166,45 @@ Enneatonic 5L 4s subset of 313edo used in Sevish's track Desert Island Rain
  996.805112 Doubled 4th
  2 Octave
 ```
+
+### Scala mapping `.kbm`
+
+Use `--format kbm` to export a Scala keyboard mapping file (`.kbm`) for the evaluated scale:
+
+```bash
+$ npx sonic-weave examples/harm8.sw --format kbm
+!Created using SonicWeave 0.12.1
+!
+! Size of map. The pattern repeats every so many keys:
+8
+! First MIDI note number to retune:
+0
+! Last MIDI note number to retune:
+127
+! Middle note where the first entry of the mapping is mapped to:
+60
+! Reference note for which frequency is given:
+69
+! Frequency to tune the above note to:
+440.0
+! Scale degree to consider as formal octave (determines difference in pitch between adjacent mapping patterns):
+8
+! Mapping.
+0
+1
+2
+3
+4
+5
+6
+7
+```
+
+The KBM mapping is linear by default (`0, 1, 2, ...`) and has one entry per scale degree in `$`.
+
+If your source sets an explicit unison frequency (for example `1/1 = 432 Hz`), the exporter uses that value as the KBM reference frequency and uses reference MIDI note `60`.
+
+For empty scales, the generated mapping size is `0` and the formal octave falls back to `1`.
 
 ### SonicWeave Interchange `.swi`
 

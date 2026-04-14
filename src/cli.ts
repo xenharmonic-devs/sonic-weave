@@ -66,6 +66,57 @@ export function toScalaScl(source: string) {
   return lines.join('\n');
 }
 
+/**
+ * Convert a program in the SonicWeave DSL to the Scala .kbm format.
+ * @param source Source code for a SonicWeave program.
+ * @returns A string conforming to the [Scala mapping format](https://www.huygens-fokker.org/scala/help.htm#mappings).
+ */
+export function toScalaKbm(source: string) {
+  const visitor = evaluateSource(source);
+  const scale = visitor.mutables.get('$') as Interval[];
+  const formalOctave = scale.length || 1;
+  const context = visitor.rootContext;
+
+  let referenceNote = 69;
+  let referenceFrequency = 440.0;
+  if (context?.unisonFrequency) {
+    referenceNote = 60;
+    referenceFrequency = context.unisonFrequency.toHertz();
+  }
+
+  const frequencyString = Number.isInteger(referenceFrequency)
+    ? referenceFrequency.toFixed(1)
+    : `${referenceFrequency}`;
+
+  const lines = [`!Created using SonicWeave ${packageJson.version}`, '!'];
+  lines.push('! Size of map. The pattern repeats every so many keys:');
+  lines.push(`${scale.length}`);
+  lines.push('! First MIDI note number to retune:');
+  lines.push('0');
+  lines.push('! Last MIDI note number to retune:');
+  lines.push('127');
+  lines.push(
+    '! Middle note where the first entry of the mapping is mapped to:',
+  );
+  lines.push('60');
+  lines.push('! Reference note for which frequency is given:');
+  lines.push(`${referenceNote}`);
+  lines.push('! Frequency to tune the above note to:');
+  lines.push(frequencyString);
+  lines.push(
+    '! Scale degree to consider as formal octave (determines difference in pitch between adjacent mapping patterns):',
+  );
+  lines.push(`${formalOctave}`);
+  lines.push('! Mapping.');
+
+  for (let i = 0; i < scale.length; ++i) {
+    lines.push(`${i}`);
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
 export function toSonicWeaveInterchange(source: string) {
   const visitor = evaluateSource(source);
   const context = visitor.rootContext;
