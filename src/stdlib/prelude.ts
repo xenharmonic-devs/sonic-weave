@@ -375,7 +375,7 @@ riff edColors(divisions = 12, offset = 0, equave = 2) {
 }
 
 riff TE(valsOrCommas, basis=niente) {
-  "Create a Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a different basis or a prime limit may be given."
+  "Create a Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a different basis or a prime limit may be given.";
   if (not isArray(valsOrCommas)) {
     valsOrCommas = [valsOrCommas];
   }
@@ -386,7 +386,7 @@ riff TE(valsOrCommas, basis=niente) {
 }
 
 riff CTE(valsOrCommas, primeLimit=niente) {
-  "Create a constrained (nearly) Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given."
+  "Create a constrained (nearly) Tenney-Euclid optimal temperament from an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given.";
   if (not isArray(valsOrCommas)) {
     valsOrCommas = [valsOrCommas];
   }
@@ -398,7 +398,7 @@ riff CTE(valsOrCommas, primeLimit=niente) {
 }
 
 riff POTE(valsOrCommas, primeLimit=niente) {
-  "Create a naïve pure-equaves tuning by normalizing the Tenney-Euclid optimal temperament based on an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given."
+  "Create a naïve pure-equaves tuning by normalizing the Tenney-Euclid optimal temperament based on an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given.";
   if (not isArray(valsOrCommas)) {
     valsOrCommas = [valsOrCommas];
   }
@@ -543,10 +543,10 @@ riff parallelotope(basis, ups = niente, downs = niente, equave = niente, basisSi
   }
 
   (* It's too hard to keep track of good formatting during tensoring. Simplify non-unison linears. *)
-  const l = isLinear($)
+  const l = isLinear($);
   if (l)
-    l[0] = false
-  $[l] = simplify $[l]
+    l[0] = false;
+  $[l] = simplify $[l];
 
   if (basisSizeHints == niente and equaveSizeHint == niente)
     return sort($ ~rdc equave);
@@ -746,7 +746,7 @@ riff equaveReduce(scale = ££) {
 }
 
 riff revpose(scale = ££) {
-  "Obtain a copy of the popped/given scale that sounds in the opposite direction."
+  "Obtain a copy of the popped/given scale that sounds in the opposite direction.";
   scale;
   const equave = pop();
   £ ~% equave;
@@ -979,30 +979,30 @@ riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false,
 }
 
 riff isostretch(amount, scale=££) {
-  "Obtain a copy of the popped/given scale stretched linearly by \`amount\`. Preserves isodifferential relations."
+  "Obtain a copy of the popped/given scale stretched linearly by \`amount\`. Preserves isodifferential relations.";
   if (not isInterval(amount) or not isRelative(amount)) {
-    throw "Stretch amount should be a relative interval."
+    throw "Stretch amount should be a relative interval.";
   }
-  return 1 +~ amount *~ (scale ~- 1)
+  return 1 +~ amount *~ (scale ~- 1);
 }
 
 riff isorescale(equave, scale=££) {
-  "Obtain a copy of the popped/given scale rescaled linearly to have another \`equave\`. Preserves isodifferential relations."
+  "Obtain a copy of the popped/given scale rescaled linearly to have another \`equave\`. Preserves isodifferential relations.";
   if (not isInterval(equave) or not isRelative(equave)) {
-    throw "Equave should be a relative interval."
+    throw "Equave should be a relative interval.";
   }
-  const stretch = (equave -~ 1) / (scale[-1] -~ 1)
-  return isostretch(stretch, scale)
+  const stretch = (equave -~ 1) / (scale[-1] -~ 1);
+  return isostretch(stretch, scale);
 }
 
 riff isodifferential(parts, interval=2) {
-  "Generate an isodifferential chord of \`parts\` steps that divide an \`interval\` equally in linear domain. Usable as a scale."
+  "Generate an isodifferential chord of \`parts\` steps that divide an \`interval\` equally in linear domain. Usable as a scale.";
   if (not isInt(parts) or parts <= 0) {
-    throw "Number of parts should be a positive integer."
+    throw "Number of parts should be a positive integer.";
   }
   if (not isInterval(interval) or not isRelative(interval)) {
-    throw "Interval should be a relative interval."
+    throw "Interval should be a relative interval.";
   }
-  return isorescale(interval, parts::2*parts) al~ interval
+  return isorescale(interval, parts::2*parts) al~ interval;
 }
 `;
