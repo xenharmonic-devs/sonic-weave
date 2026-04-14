@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {Fraction} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
 
 import {TimeMonzo, TimeReal} from '../monzo.js';
 

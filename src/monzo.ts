@@ -1,23 +1,26 @@
+import {centsToValue, valueToCents} from 'xen-dev-utils/conversion';
+import {monzoToCents} from 'xen-dev-utils/core';
+import {sum} from 'xen-dev-utils';
 import {
-  centsToValue,
   Fraction,
   FractionValue,
   gcd,
   lcm,
+  mmod,
+  modc,
+} from 'xen-dev-utils/fraction';
+import {
   primeLimit,
+  toMonzoAndResidual,
+  primeFactorize,
+  FractionalMonzo,
+} from 'xen-dev-utils/monzo';
+import {
   PRIMES,
   PRIME_CENTS,
-  toMonzoAndResidual,
-  valueToCents,
-  mmod,
   BIG_INT_PRIMES,
-  monzoToCents,
-  sum,
-  primeFactorize,
-  modc,
-  FractionalMonzo,
   LOG_PRIMES,
-} from 'xen-dev-utils';
+} from 'xen-dev-utils/primes';
 
 import {
   ABSURD_EXPONENT,

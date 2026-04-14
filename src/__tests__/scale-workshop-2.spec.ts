@@ -2,7 +2,7 @@ import {describe, it, expect} from 'vitest';
 
 import {parseScaleWorkshop2Line} from '../scale-workshop-2-parser.js';
 import {TimeMonzo} from '../monzo.js';
-import {Fraction} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
 import {Interval} from '../interval.js';
 
 const DEFAULT_NUMBER_OF_COMPONENTS = 25;

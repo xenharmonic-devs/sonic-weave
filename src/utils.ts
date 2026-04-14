@@ -1,6 +1,7 @@
 /** Utilities and constants used internally. */
 
-import {Fraction, PRIMES} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {PRIMES} from 'xen-dev-utils/primes';
 
 export const NUM_INTERCHANGE_COMPONENTS = 9;
 

@@ -8,7 +8,7 @@ import {
 } from '../../parser/index.js';
 import {Interval} from '../../interval.js';
 import {builtinNode, track} from '../../stdlib/index.js';
-import {Fraction} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
 
 function parseSource(source: string) {
   const visitor = evaluateSource(source);

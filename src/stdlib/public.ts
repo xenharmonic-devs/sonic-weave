@@ -1,7 +1,8 @@
 /**
  * Exported builtins without complications related to expression visitors or vectorization.
  */
-import {Fraction, wilsonHeight as xduWilson} from 'xen-dev-utils';
+import {wilsonHeight as xduWilson} from 'xen-dev-utils/core';
+import {Fraction} from 'xen-dev-utils/fraction';
 import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
 import {type ExpressionVisitor} from '../parser/expression.js';
 import {FRACTION_PRIMES, NEGATIVE_ONE, TWO} from '../utils.js';

@@ -1,4 +1,4 @@
-import {Fraction, mmod} from 'xen-dev-utils';
+import {Fraction, mmod} from 'xen-dev-utils/fraction';
 import {TimeMonzo} from './monzo.js';
 import {
   ELEVEN,

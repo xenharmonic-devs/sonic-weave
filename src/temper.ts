@@ -1,14 +1,7 @@
-import {
-  Monzo,
-  add,
-  gcd,
-  inv,
-  matmul,
-  norm,
-  scale,
-  sub,
-  transpose,
-} from 'xen-dev-utils';
+import {inv, matmul, transpose} from 'xen-dev-utils/matrix';
+import {gcd} from 'xen-dev-utils/fraction';
+import {Monzo, add, scale, sub} from 'xen-dev-utils/monzo';
+import {norm} from 'xen-dev-utils/number-array';
 
 /**
  * Real-valued tuning map expressed as a vector of prime or subgroup mappings.

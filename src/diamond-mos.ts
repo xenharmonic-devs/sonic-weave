@@ -1,4 +1,4 @@
-import {mmod} from 'xen-dev-utils';
+import {mmod} from 'xen-dev-utils/fraction';
 import {reviveMonzo, TimeMonzo, TimeReal} from './monzo.js';
 import {
   ACCIDENTAL_VECTORS,

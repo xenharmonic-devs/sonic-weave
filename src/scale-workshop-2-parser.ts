@@ -1,11 +1,7 @@
-import {
-  Fraction,
-  PRIMES,
-  PRIME_CENTS,
-  dot,
-  gcd,
-  valueToCents,
-} from 'xen-dev-utils';
+import {valueToCents} from 'xen-dev-utils/conversion';
+import {Fraction, gcd} from 'xen-dev-utils/fraction';
+import {dot} from 'xen-dev-utils/number-array';
+import {PRIMES, PRIME_CENTS} from 'xen-dev-utils/primes';
 import {Domain, TimeMonzo, TimeReal, getNumberOfComponents} from './monzo.js';
 import * as scaleWorkshop2Parser from './scale-workshop-2-ast.js';
 import {Interval} from './interval.js';

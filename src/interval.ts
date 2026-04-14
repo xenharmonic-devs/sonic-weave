@@ -45,40 +45,42 @@ import {
   countUpsAndLifts,
   setUnion,
 } from './utils.js';
+import {arraysEqual} from 'xen-dev-utils/core';
 import {
-  BIG_INT_PRIMES,
-  Fraction,
-  FractionValue,
-  FractionalMonzo,
   GramResult,
-  LOG_PRIMES,
-  Monzo,
-  PRIMES,
-  PRIME_CENTS,
-  ProtoFractionalMonzo,
-  add,
-  applyWeights,
-  arraysEqual,
   cokernel,
   defactoredHnf,
-  dot,
-  dotPrecise,
   eye,
-  fractionalDot,
   fractionalLenstraLenstraLovasz,
   gram,
   hnf,
   kernel,
   lenstraLenstraLovasz,
   preimage,
+  pruneZeroRows,
+  transpose,
+} from 'xen-dev-utils/matrix';
+import {Fraction, FractionValue} from 'xen-dev-utils/fraction';
+import {
+  BIG_INT_PRIMES,
+  LOG_PRIMES,
+  PRIMES,
+  PRIME_CENTS,
+} from 'xen-dev-utils/primes';
+import {
+  FractionalMonzo,
+  Monzo,
+  ProtoFractionalMonzo,
+  add,
+  applyWeights,
+  fractionalDot,
   primeFactorize,
   primeLimit,
-  pruneZeroRows,
   scale,
   sub,
-  transpose,
   unapplyWeights,
-} from 'xen-dev-utils';
+} from 'xen-dev-utils/monzo';
+import {dot, dotPrecise} from 'xen-dev-utils/number-array';
 import {TuningMap, combineTuningMaps} from './temper.js';
 
 /**

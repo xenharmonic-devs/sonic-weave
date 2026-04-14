@@ -1,24 +1,26 @@
+import {approximateRadical} from 'xen-dev-utils/approximation';
+import {kCombinations as xduKCombinations} from 'xen-dev-utils/combinations';
 import {
-  Fraction,
-  kCombinations as xduKCombinations,
-  isPrime as xduIsPrime,
-  primes as xduPrimes,
-  approximateRadical,
   fareySequence as xduFareySequence,
   fareyInterior as xduFareyInterior,
   hasMarginConstantStructure,
-  PRIMES,
-  primeFactorize,
-  nthPrime as xduNthPrime,
-  primeRange as xduPrimeRange,
+  binomial,
+} from 'xen-dev-utils/core';
+import {
   inv as xduInv,
   fractionalInv,
   det as xduDet,
   fractionalDet,
-  mmod,
-  FractionalMonzo,
-  binomial,
-} from 'xen-dev-utils';
+} from 'xen-dev-utils/matrix';
+import {Fraction, mmod} from 'xen-dev-utils/fraction';
+import {primeFactorize, FractionalMonzo} from 'xen-dev-utils/monzo';
+import {
+  isPrime as xduIsPrime,
+  primes as xduPrimes,
+  PRIMES,
+  nthPrime as xduNthPrime,
+  primeRange as xduPrimeRange,
+} from 'xen-dev-utils/primes';
 import {Color, Interval, Temperament, Val, ValBasis} from '../../interval.js';
 import {
   TimeMonzo,
@@ -27,7 +29,8 @@ import {
   setNumberOfComponents,
 } from '../../monzo.js';
 import {type ExpressionVisitor} from '../../parser/index.js';
-import {MosOptions, mos, nthNominal} from 'moment-of-symmetry';
+import {MosOptions, mos} from 'moment-of-symmetry/core';
+import {nthNominal} from 'moment-of-symmetry/notation';
 import {Expression, expressionToString} from '../../ast.js';
 import {
   BasisElement,

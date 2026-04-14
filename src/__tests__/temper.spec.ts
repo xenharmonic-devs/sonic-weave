@@ -1,6 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {TuningMap, intCombineTuningMaps, vanishCommas} from '../temper.js';
-import {LOG_PRIMES, applyWeights, dot, unapplyWeights} from 'xen-dev-utils';
+import {applyWeights, unapplyWeights} from 'xen-dev-utils/monzo';
+import {dot} from 'xen-dev-utils/number-array';
+import {LOG_PRIMES} from 'xen-dev-utils/primes';
 
 describe('Val combination search', () => {
   it('combines 12p and 19p into 31p', () => {

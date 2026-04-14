@@ -1,4 +1,4 @@
-import {mmod} from 'xen-dev-utils';
+import {mmod} from 'xen-dev-utils/fraction';
 import {TimeMonzo, TimeReal} from './monzo.js';
 import {ZERO, hasOwn} from './utils.js';
 

@@ -8,7 +8,8 @@ import {
 } from './utils.js';
 import {Pythagorean, AbsolutePitch} from './pythagorean.js';
 import {AbsoluteMosPitch, MosStep} from './diamond-mos.js';
-import {Fraction, bigAbs, lcm} from 'xen-dev-utils';
+import {Fraction, lcm} from 'xen-dev-utils/fraction';
+import {bigAbs} from 'xen-dev-utils/monzo';
 
 /**
  * Comma sets for Functional Just System.

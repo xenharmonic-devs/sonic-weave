@@ -9,7 +9,7 @@ import {
 } from '../chord-parser.js';
 import {MonzoLiteral} from '../../expression.js';
 import {TimeMonzo} from '../../monzo.js';
-import {modc} from 'xen-dev-utils';
+import {modc} from 'xen-dev-utils/fraction';
 
 describe('Chord input parser', () => {
   it.each(['1 2 3', '1|2|3', '1&2&3', '1;2;3', '1,2,3', '1:2:3'])(

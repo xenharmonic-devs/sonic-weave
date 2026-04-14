@@ -9,7 +9,8 @@ import {
 } from '../interval.js';
 import {FractionLiteral, NedjiLiteral} from '../expression.js';
 import {sw} from '../parser/index.js';
-import {LOG_PRIMES, PRIME_CENTS, dot} from 'xen-dev-utils';
+import {dot} from 'xen-dev-utils/number-array';
+import {LOG_PRIMES, PRIME_CENTS} from 'xen-dev-utils/primes';
 
 describe('Idempotent formatting', () => {
   it('has stable ratios (common factor)', () => {

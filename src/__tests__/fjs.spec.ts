@@ -7,7 +7,7 @@ import {
   getToneSplitterComma,
   inflect,
 } from '../fjs.js';
-import {PRIMES} from 'xen-dev-utils';
+import {PRIMES} from 'xen-dev-utils/primes';
 import {
   AbsolutePitch,
   Accidental,

@@ -1,4 +1,5 @@
-import {Fraction, PRIMES} from 'xen-dev-utils';
+import {Fraction} from 'xen-dev-utils/fraction';
+import {PRIMES} from 'xen-dev-utils/primes';
 import {TimeMonzo, getNumberOfComponents} from './monzo.js';
 import {ZERO} from './utils.js';
 
