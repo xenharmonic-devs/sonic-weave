@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "moment-of-symmetry": "^0.10.0",
-    "xen-dev-utils": "^0.13.0"
+    "xen-dev-utils": "^0.13.1"
   },
   "engines": {
     "node": ">=20.0.0"

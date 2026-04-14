@@ -1,6 +1,5 @@
 import {centsToValue, valueToCents} from 'xen-dev-utils/conversion';
-import {monzoToCents} from 'xen-dev-utils/core';
-import {sum} from 'xen-dev-utils';
+import {monzoToCents, sum} from 'xen-dev-utils/core';
 import {
   Fraction,
   FractionValue,
