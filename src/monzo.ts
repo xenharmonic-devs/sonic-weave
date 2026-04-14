@@ -1298,12 +1298,12 @@ export class TimeMonzo {
       value !== null &&
       value.type === 'TimeMonzo'
     ) {
-      const timeExponent = Fraction.reviver('t', value.t);
+      const timeExponent = Fraction.reviver('t', value.t) as Fraction;
       const primeExponents: Fraction[] = [];
       for (let i = 0; i < value.p.length; i += 2) {
         primeExponents.push(new Fraction(value.p[i], value.p[i + 1]));
       }
-      const residual = Fraction.reviver('r', value.r);
+      const residual = Fraction.reviver('r', value.r) as Fraction;
       return new TimeMonzo(timeExponent, primeExponents, residual);
     }
     return value;

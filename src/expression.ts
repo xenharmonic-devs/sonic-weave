@@ -1281,8 +1281,8 @@ export function intervalLiteralFromJSON(
     case 'RadicalLiteral':
       return {
         type,
-        argument: Fraction.reviver('argument', object.argument),
-        exponent: Fraction.reviver('exponent', object.exponent),
+        argument: Fraction.reviver('argument', object.argument) as Fraction,
+        exponent: Fraction.reviver('exponent', object.exponent) as Fraction,
       };
     case 'SquareSuperparticular':
       return {
