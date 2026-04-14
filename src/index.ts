@@ -19,14 +19,6 @@ export {
 } from './pythagorean.js';
 export * from './diamond-mos.js';
 export * from './tools.js';
-export {
-  MetricPrefix,
-  metricExponent,
-  BinaryPrefix,
-  binaryExponent,
-  setUnion,
-  hasOwn,
-} from './utils.js';
 export * from './words.js';
 export * from './scale-workshop-2-parser.js';
 export * from './temper.js';

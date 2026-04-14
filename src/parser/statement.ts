@@ -52,7 +52,7 @@ import {
   containerToArray,
 } from './expression.js';
 import {Tardigrade} from './mos.js';
-import {hasOwn} from '../utils.js';
+import {hasOwn} from '../tools.js';
 
 /**
  * An interrupt representing a return, break or continue statement.
