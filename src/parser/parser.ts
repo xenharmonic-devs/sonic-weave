@@ -9,7 +9,7 @@ import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude.js';
 import {RootContext} from '../context.js';
 import {Program} from '../ast.js';
 import {StatementVisitor} from './statement.js';
-import {hasOwn} from '../utils.js';
+import {hasOwn} from '../tools.js';
 
 /**
  * Parse a string of text written in the SonicWeave domain specific language into an abstract syntax tree.

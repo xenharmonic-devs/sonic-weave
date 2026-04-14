@@ -1,6 +1,7 @@
 import {mmod} from 'xen-dev-utils/fraction';
 import {TimeMonzo, TimeReal} from './monzo.js';
-import {ZERO, hasOwn} from './utils.js';
+import {ZERO} from './utils.js';
+import {hasOwn} from './tools.js';
 
 /**
  * Step count vector indexed by strings representing distinct step sizes.

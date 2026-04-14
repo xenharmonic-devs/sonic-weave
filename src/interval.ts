@@ -43,8 +43,8 @@ import {
   ONE,
   ZERO,
   countUpsAndLifts,
-  setUnion,
 } from './utils.js';
+import {setUnion} from './tools.js';
 import {arraysEqual} from 'xen-dev-utils/core';
 import {
   GramResult,
