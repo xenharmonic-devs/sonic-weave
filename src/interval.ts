@@ -1196,7 +1196,7 @@ export class Interval {
           node.basis.push('');
         }
       }
-      node.basis.unshift('1°');
+      node.basis.unshift(interchange ? 'deg' : '1°');
       node.components.unshift(integerToVectorComponent(this.steps));
     }
     return node;

@@ -103,7 +103,7 @@ describe('Interchange format', () => {
       -3,
     );
     interval.node = interval.asMonzoLiteral(true);
-    expect(interval.toString()).toBe('[-3 -1 1>@1°.3.5');
+    expect(interval.toString()).toBe('[-3 -1 1>@deg.3.5');
   });
 
   it('uses increasing non-fractional basis', () => {

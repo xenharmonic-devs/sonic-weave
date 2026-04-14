@@ -65,7 +65,7 @@ The reference frequency is given with the syntax `1 = expr`, where `expr` is a v
 1 = [1 8>@Hz.2
 ```
 
-The unison frequency is optional.
+The unison frequency is optional. If the unison frequency is missing a default should be provided by the runtime consuming `.swi` files. A common default is 261.62 Hz i.e. middle C (MIDI pitch 60) in 12-tone equal temperament (where MIDI pitch 69 is tuned to 440 Hz). Relative intervals are to be interpreted as multiples of the unison frequency i.e. a `[-1 1> "3/2" niente` interval would refer to 392.445 Hz given `1 = [1 -2 4 -2 0 0 0 1 1>@Hz.2.3.5.7.11.13.17.19.23` i.e. 261.62 Hz spelled as a monzo.
 
 ## Intervals
 The label (a JSON encoded string) and the color (a CSS color or the special token `niente` for no color) are mandatory fields given in that order after an interval literal separated by spaces.
@@ -84,6 +84,16 @@ Below the labels indicate the meaning of each monzo:
 [0 10/13> "10 sof 13 ed 3" #0f0
 [1> "P8" white
 ```
+
+##### Linear interpretation
+A 23-limit monzo $\left[e_2, e_3, e_5, \ldots e_23 \right\rangle$ indicates a real number defined by the product
+
+$$\prod_{p \in \mathbb{P}}^{23} p^{e_p}$$.
+
+##### Logarithmic interpretation
+Alternatively a 23-limit monzo can be interpreted as the dot product with the JIP (Just Intonation Point) which is a bra-vector of cents of primes. $JIP = \left\langle 1200., 1901.955..., 2786.314..., 3368.826... , ..., 5428.274... \right]$.
+
+$$cents = \left\langle 1200., 1901.955... | e_2, e_3, ... \right> = \sum_{p \in \mathbb{P}}^{23} 1200 \cdot \ln_2(p) \cdot e_p$$
 
 #### Higher primes
 Prime factors above 23 require an explicit subgroup basis given after `@` separated by periods `.`. Subgroup basis elements must be integers. No check is made to ensure that basis elements are actually prime numbers.
@@ -118,6 +128,14 @@ The special basis element `Hz` indicates frequencies.
 
 A tool such as Scale Workshop normalizes durations (periods of oscillation) to frequencies, but the interchange standard support unnormalized values.
 
+Normalization is performed as
+
+$$x \mapsto x^{1/e_{Hz}}$$
+
+where $e_{Hz}$ is the entry for the `Hz` basis element.
+
+It is recommended that runtimes normalized absolute pitches and divide them by the unison frequency to obtain relative intervals which are easier to repeat as a periodic scale.
+
 #### Real absolute pitches
 The Hz exponent of real frequencies is a floating-point literal.
 ```ocaml
@@ -125,9 +143,9 @@ The Hz exponent of real frequencies is a floating-point literal.
 ```
 
 ### Edosteps
-To support tempering after interchanging data, the special `1°` basis element is used.
+To support tempering after interchanging data, the special `deg` basis element is used.
 ```ocaml
-[5>@1° "/P1" niente
+[5>@deg "/P1" niente
 ```
 
 ### Not-a-number
@@ -135,6 +153,16 @@ The special combination `[1 1>@0.inf` indicates a value that cannot be interpret
 ```ocaml
 [1 1>@0.inf "asin(2)" niente
 ```
+
+The precence of NaNs usually indicates a user error. Runtimes are expected to output silence for lines containing Not-a-number.
+
+### Implicit equave repetition
+The scale repeats at equaves (usually octaves i.e. 2/1 i.e. 1200 cents i.e. 12 semitones). The interval of repetition is the last entry in the scale. Say the equave is `[0 1> "the tritave 3/1" niente` then a scale with unison frequency of 100 Hz would repeat (multiplicatively) at 300 Hz, at 900 Hz, at 2700 Hz, etc. and conversely at 33.33... Hz, 11.11... Hz in the opposite direction.
+
+If the interval of repetition is given as an absolute pitch it should be first normalized to a frequency and divided by the unison frequency. (No normalization necessary if the `Hz` component is already `1`, of course.)
+
+#### Logarithmic interpretation
+The scale repeats additively when measured in cents.
 
 ## Example
 See [examples/interchange.sw](../examples/interchange.sw) for various extreme values supported by the original SonicWeave runtime.
@@ -169,8 +197,8 @@ See [examples/interchange.sw](../examples/interchange.sw) for various extreme va
 [1. 1981.7953553667824>@Hz.rc "pi Hz" niente
 [-1 -2 -2>@Hz.2.5 "" niente
 [1 3 1 1>@Hz.2.5.11 "" niente
-[1 1 2 1>@1°.Hz.3.37 "" niente
-[-5 1 5/2 1 1>@1°.Hz.2.3.37 "" niente
+[1 1 2 1>@deg.Hz.3.37 "" niente
+[-5 1 5/2 1 1>@deg.Hz.2.3.37 "" niente
 [1>@inf "infinity" niente
 [1 1>@-1.inf "negative infinity" niente
 [1 1>@0.inf "not-a-number" niente
