@@ -3,8 +3,8 @@
   "compilerOptions": {
     "allowJs": true,
     "allowUnreachableCode": true,
-    "lib": ["es2020"],
-    "target": "es2020",
+    "lib": ["es2021"],
+    "target": "es2021",
     "moduleResolution": "nodenext",
     "types": ["node"],
     "noEmit": true,

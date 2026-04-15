@@ -9,7 +9,7 @@ UnderscoreDigits
   if (num.endsWith('_')) {
     error('Numeric separators are not allowed at the end of numeric literals.');
   }
-  return num.replace(/_/g, '');
+  return num.replaceAll('_', '');
 }
 
 NonEmptyUnderscoreDigits
@@ -17,7 +17,7 @@ NonEmptyUnderscoreDigits
   if (num.endsWith('_')) {
     error('Numeric separators are not allowed at the end of numeric literals.');
   }
-  return num.replace(/_/g, '');
+  return num.replaceAll('_', '');
 }
 
 PositiveInteger

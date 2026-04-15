@@ -139,7 +139,7 @@ export function builtinNode(
     if (parameter.id.includes('=')) {
       const [idPart, defaultValuePart] = parameter.id.split('=');
       parameter.id = idPart.trim();
-      const defaultValue = defaultValuePart.trim().replace(/'/g, '"');
+      const defaultValue = defaultValuePart.trim().replaceAll("'", '"');
       if (defaultValue.includes('"')) {
         parameter.defaultValue = {
           type: 'StringLiteral',
