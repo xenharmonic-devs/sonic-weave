@@ -3,7 +3,11 @@ import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
 import {TimeMonzo} from '../monzo.js';
 import * as sonicWeaveAstParser from './sonic-weave-ast.js';
 import {CSS_COLOR_CONTEXT} from '../css-colors.js';
-import {SonicWeaveValue, SonicWeavePrimitive} from '../stdlib/index.js';
+import {
+  SonicWeaveValue,
+  SonicWeavePrimitive,
+  SonicWeaveFunction,
+} from '../stdlib/index.js';
 import {BUILTIN_CONTEXT} from '../stdlib/builtin/index.js';
 import {PRELUDE_SOURCE, PRELUDE_VOLATILES} from '../stdlib/prelude.js';
 import {RootContext} from '../context.js';
@@ -173,13 +177,17 @@ export function evaluateExpression(
   return subVisitor.visit(finalStatement.expression);
 }
 
-function convert(value: any): SonicWeaveValue {
+function convert(value: unknown): SonicWeaveValue {
   switch (typeof value) {
     case 'string':
     case 'undefined':
-    case 'function':
     case 'boolean':
       return value;
+    case 'function':
+      if ('__doc__' in value && '__node__' in value) {
+        return value as SonicWeaveFunction;
+      }
+      throw new Error('Template functions must conform to SonicWeaveFunction.');
     case 'number':
       if (Number.isInteger(value)) {
         return Interval.fromInteger(value);
@@ -205,10 +213,11 @@ function convert(value: any): SonicWeaveValue {
       } else if (Array.isArray(value)) {
         return value.map(convert) as Interval[];
       } else {
+        const record = value as Record<string, unknown>;
         const result: Record<string, SonicWeavePrimitive> = {};
-        for (const key in value) {
-          if (hasOwn(value, key)) {
-            result[key] = convert(value[key]) as SonicWeavePrimitive;
+        for (const key in record) {
+          if (hasOwn(record, key)) {
+            result[key] = convert(record[key]) as SonicWeavePrimitive;
           }
         }
         return result;
@@ -231,7 +240,7 @@ export function createTag(
   extraBuiltins?: Record<string, SonicWeaveValue>,
   escapeStrings = false,
 ) {
-  function tag(strings: TemplateStringsArray, ...args: any[]) {
+  function tag(strings: TemplateStringsArray, ...args: unknown[]) {
     const fragments = escapeStrings ? strings : strings.raw;
     const visitor = getSourceVisitor(includePrelude, extraBuiltins);
     if (!visitor.rootContext) {
@@ -299,7 +308,7 @@ Object.defineProperty(swr, 'name', {
  */
 export const sw$r = createTag(false) as (
   strings: TemplateStringsArray,
-  ...args: any[]
+  ...args: unknown[]
 ) => Interval[];
 Object.defineProperty(swr, 'name', {
   value: 'sw$r',
@@ -336,7 +345,7 @@ Object.defineProperty(sw, 'name', {
  */
 export const sw$ = createTag(false, true, undefined, true) as (
   strings: TemplateStringsArray,
-  ...args: any[]
+  ...args: unknown[]
 ) => Interval[];
 Object.defineProperty(swr, 'name', {
   value: 'sw$',

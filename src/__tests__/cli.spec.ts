@@ -115,7 +115,7 @@ describe('CLI REPL error handling', () => {
     let options: ReplOptions | undefined;
     repl(opts => {
       options = opts as ReplOptions;
-      return {} as any;
+      return {} as unknown;
     });
 
     const evaluate = options?.eval;
@@ -124,14 +124,20 @@ describe('CLI REPL error handling', () => {
     const fakeRepl = {
       setPrompt() {},
       displayPrompt() {},
-    } as any;
+    } as unknown;
 
     let err: Error | null = null;
     let value: unknown;
-    evaluate!.call(fakeRepl, 'print(str(4/3))\n', {} as any, 'repl', (e, v) => {
-      err = e;
-      value = v;
-    });
+    evaluate!.call(
+      fakeRepl,
+      'print(str(4/3))\n',
+      {} as unknown,
+      'repl',
+      (e, v) => {
+        err = e;
+        value = v;
+      },
+    );
 
     expect(err).toBeNull();
     expect(value).toBeUndefined();
@@ -141,7 +147,7 @@ describe('CLI REPL error handling', () => {
     let options: ReplOptions | undefined;
     repl(opts => {
       options = opts as ReplOptions;
-      return {} as any;
+      return {} as unknown;
     });
 
     const evaluate = options?.eval;
@@ -150,13 +156,13 @@ describe('CLI REPL error handling', () => {
     const fakeRepl = {
       setPrompt() {},
       displayPrompt() {},
-    } as any;
+    } as unknown;
 
     let firstErr: Error | null = null;
     evaluate!.call(
       fakeRepl,
       'print("unterminated)\n',
-      {} as any,
+      {} as unknown,
       'repl',
       (err: Error | null) => {
         firstErr = err;
@@ -166,7 +172,7 @@ describe('CLI REPL error handling', () => {
 
     let secondErr: Error | null = null;
     let secondValue: unknown;
-    evaluate!.call(fakeRepl, '1\n', {} as any, 'repl', (err, value) => {
+    evaluate!.call(fakeRepl, '1\n', {} as unknown, 'repl', (err, value) => {
       secondErr = err;
       secondValue = value;
     });

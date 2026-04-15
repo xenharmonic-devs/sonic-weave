@@ -124,7 +124,10 @@ export function linear(interval: Interval | boolean): Interval {
  * @param interval Interval to convert.
  * @returns The interval in the logarithmic domain with the underlying value unmodified.
  */
-export function logarithmic(this: any, interval: Interval | boolean): Interval {
+export function logarithmic(
+  this: unknown,
+  interval: Interval | boolean,
+): Interval {
   interval = upcastBool(interval);
   if (interval.domain === 'logarithmic') {
     return interval.shallowClone();

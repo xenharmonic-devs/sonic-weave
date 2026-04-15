@@ -177,7 +177,7 @@ describe('Line parser', () => {
     ).toBeTruthy();
   });
 
-  it('parses composites (any)', () => {
+  it('parses composites (unknown)', () => {
     const result = parseLine('3\\15 + 103/101 + 6.9');
     const vector = Array(DEFAULT_NUMBER_OF_COMPONENTS).fill(new Fraction(0));
     vector[0] = new Fraction(3, 15).add('69/12000');

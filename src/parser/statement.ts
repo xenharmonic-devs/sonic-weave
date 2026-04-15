@@ -1285,43 +1285,39 @@ export class StatementVisitor {
   }
 
   protected visitTryStatement(node: TryStatement) {
+    let pendingInterrupt: Interrupt | undefined;
     try {
       const interrupt = this.visit(node.body);
       if (interrupt) {
-        return interrupt;
+        pendingInterrupt = interrupt;
       }
     } catch (e) {
       if (node.handler && node.handler.parameter) {
-        if (e instanceof Error) {
-          // eslint-disable-next-line no-ex-assign
-          e = e.message;
-        }
+        const thrown = e instanceof Error ? e.message : e;
         const handlerVisitor = new StatementVisitor(this);
         handlerVisitor.mutables.delete('$'); // Collapse scope
         handlerVisitor.immutables.set(
           node.handler.parameter.id,
-          e as SonicWeaveValue,
+          thrown as SonicWeaveValue,
         );
         const interrupt = handlerVisitor.visit(node.handler.body);
         if (interrupt) {
-          return interrupt;
+          pendingInterrupt = interrupt;
         }
       } else if (node.handler) {
         const interrupt = this.visit(node.handler.body);
         if (interrupt) {
-          return interrupt;
-        }
-      }
-    } finally {
-      if (node.finalizer) {
-        const interrupt = this.visit(node.finalizer);
-        if (interrupt) {
-          // eslint-disable-next-line no-unsafe-finally
-          return interrupt;
+          pendingInterrupt = interrupt;
         }
       }
     }
-    return undefined;
+    if (node.finalizer) {
+      const interrupt = this.visit(node.finalizer);
+      if (interrupt) {
+        return interrupt;
+      }
+    }
+    return pendingInterrupt;
   }
 
   protected visitIfStatement(node: IfStatement) {
@@ -1350,7 +1346,6 @@ export class StatementVisitor {
       docstring = node.body[0].expression.value;
       node.body.shift();
     }
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const scopeParent = this;
 
     function realization(this: ExpressionVisitor, ...args: SonicWeaveValue[]) {

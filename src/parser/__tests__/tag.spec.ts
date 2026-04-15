@@ -95,6 +95,17 @@ describe('SonicWeave template tag', () => {
     expect(first).toBe('first');
   });
 
+  it('preserves conforming function template arguments', () => {
+    const fn = (() => true) as (() => boolean) & {
+      __doc__: string;
+      __node__: unknown;
+    };
+    fn.__doc__ = '';
+    fn.__node__ = null;
+    const value = sw`${fn};templateArg(0)`;
+    expect(value).toBe(fn);
+  });
+
   it('rejects defer at root scope', () => {
     expect(() => sw`defer 2;3`).toThrow(
       'Deferred actions not allowed when evaluating tagged templates.',

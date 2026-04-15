@@ -167,7 +167,8 @@ function setUnionPolyfill<T>(a: Set<T>, b: Set<T>) {
  * @returns New set that contains elements of both sets (without duplicates).
  */
 function setUnionNative<T>(a: Set<T>, b: Set<T>): Set<T> {
-  return (a as any).union(b);
+  const setWithUnion = a as Set<T> & {union(other: Set<T>): Set<T>};
+  return setWithUnion.union(b);
 }
 
 export const setUnion =
@@ -181,7 +182,10 @@ export const setUnion =
  */
 export function hasOwn(object: object, property: PropertyKey) {
   if ('hasOwn' in Object) {
-    return (Object as any).hasOwn(object, property);
+    const objectWithHasOwn = Object as typeof Object & {
+      hasOwn(obj: object, prop: PropertyKey): boolean;
+    };
+    return objectWithHasOwn.hasOwn(object, property);
   }
   return Object.prototype.hasOwnProperty.call(object, property);
 }

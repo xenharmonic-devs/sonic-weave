@@ -65,10 +65,9 @@ describe('Prelude AST visiting', () => {
 });
 
 describe('Prelude riffs', () => {
-  /* eslint-disable @typescript-eslint/no-unused-expressions */
   bench('Euler genus (stdlib)', () => {
     for (let n = 5; n < 100; ++n) {
-      sw`eulerGenus(${n})`;
+      void sw`eulerGenus(${n})`;
     }
   });
 

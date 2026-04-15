@@ -489,7 +489,7 @@ describe('JSON serialization', () => {
   it('can deserialize an array of primitives, fractions and monzos', () => {
     const serialized =
       '["Hello, world!",{"n":10,"d":7},{"type":"TimeReal","t":-1,"v":777},3.5,{"type":"TimeMonzo","t":{"n":0,"d":1},"p":[-4,1,4,1,-1,1,0,1,0,1,0,1,0,1,0,1,0,1],"r":{"n":1,"d":1}},null,{"type":"TimeReal","t":0,"v":"nan"},{"type":"TimeReal","t":1,"v":"inf"}]';
-    function reviver(key: string, value: any) {
+    function reviver(key: string, value: unknown) {
       return TimeMonzo.reviver(
         key,
         TimeReal.reviver(key, Fraction.reviver(key, value)),

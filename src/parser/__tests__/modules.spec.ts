@@ -1,12 +1,5 @@
 import {describe, it, expect} from 'vitest';
 import {evaluateSource} from '../../parser/index.js';
-import {Interval} from '../../interval.js';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function parseSource(source: string) {
-  const visitor = evaluateSource(source, false);
-  return visitor.mutables.get('$') as Interval[];
-}
 
 function expand(source: string) {
   const visitor = evaluateSource(source, false);

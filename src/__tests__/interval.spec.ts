@@ -50,6 +50,19 @@ describe('Idempotent formatting', () => {
     expect(node.numerator).toBe(4);
     expect(node.denominator).toBe(12);
   });
+
+  it('has stable signed equal temperament against existing node', () => {
+    const negativeMajorThird = TimeMonzo.fromEqualTemperament('-4/12');
+    const node = intervalValueAs(negativeMajorThird, {
+      type: 'NedjiLiteral',
+      numerator: 4,
+      denominator: 12,
+      equaveNumerator: null,
+      equaveDenominator: null,
+    }) as NedjiLiteral;
+    expect(node.numerator).toBe(-4);
+    expect(node.denominator).toBe(12);
+  });
 });
 
 describe('Interchange format', () => {
@@ -147,7 +160,7 @@ const SERIALIZED =
 
 describe('Interval JSON serialization', () => {
   it('can be serialized alongside other data', () => {
-    const data: any = [
+    const data: unknown = [
       'hello',
       sw`12`,
       12,

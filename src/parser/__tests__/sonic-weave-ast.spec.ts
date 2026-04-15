@@ -2,13 +2,14 @@ import {describe, it, expect} from 'vitest';
 
 import * as sonicWeaveAstParser from '../sonic-weave-ast.js';
 
-const parse = (sonicWeaveAstParser as {parse: (source: string) => any}).parse;
-
 // Debug
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function d(thing: any) {
+function d(thing: unknown) {
   console.dir(thing, {depth: null});
 }
+
+const parse = (sonicWeaveAstParser as {parse: (source: string) => unknown})
+  .parse;
 
 function parseSingle(source: string) {
   return parse(source).body[0];

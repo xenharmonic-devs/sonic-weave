@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {ABSURD_EXPONENT, validateBigInt} from './utils.js';
 import {BinaryPrefix, MetricPrefix} from './tools.js';
 import {Pythagorean, AbsolutePitch} from './pythagorean.js';
@@ -850,27 +848,27 @@ export function powNodes(
 // == Placeholders for future implementation ==
 
 /** @hidden */
-export function ipowNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+export function ipowNodes(_a?: IntervalLiteral, _b?: IntervalLiteral) {
   return undefined;
 }
 
 /** @hidden */
-export function logNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+export function logNodes(_a?: IntervalLiteral, _b?: IntervalLiteral) {
   return undefined;
 }
 
 /** @hidden */
-export function lensAddNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+export function lensAddNodes(_a?: IntervalLiteral, _b?: IntervalLiteral) {
   return undefined;
 }
 
 /** @hidden */
-export function lensSubNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+export function lensSubNodes(_a?: IntervalLiteral, _b?: IntervalLiteral) {
   return undefined;
 }
 
 /** @hidden */
-export function pitchRoundToNodes(a?: IntervalLiteral, b?: IntervalLiteral) {
+export function pitchRoundToNodes(_a?: IntervalLiteral, _b?: IntervalLiteral) {
   return undefined;
 }
 
@@ -1122,11 +1120,11 @@ export function numberToDecimalLiteral(
   num: number | Fraction,
   flavor: NumericFlavor,
 ): DecimalLiteral {
-  let [wholeStr, fractional] = num.toString().split('.');
+  const [wholeStr, fractionalPart] = num.toString().split('.');
   let sign: Sign = '';
   let whole = BigInt(wholeStr);
   let exponent: number | null = null;
-  fractional ??= '';
+  let fractional = fractionalPart ?? '';
   if (whole < 0n) {
     sign = '-';
     whole = -whole;
@@ -1169,7 +1167,7 @@ export function integerToVectorComponent(num: number): VectorComponent {
 
 export function literalToJSON(
   literal?: IntervalLiteral | CoIntervalLiteral | ValBasisLiteral,
-): any {
+): unknown {
   if (!literal) {
     return undefined;
   }
@@ -1239,53 +1237,65 @@ export function literalToJSON(
 }
 
 export function intervalLiteralFromJSON(
-  object: any,
+  object: unknown,
 ): IntervalLiteral | undefined {
   if (object === undefined) {
     return undefined;
   }
-  const type: IntervalLiteral['type'] | 'i' | 'f' | 'c' | 'n' = object.type;
+  if (typeof object !== 'object' || object === null || !('type' in object)) {
+    return undefined;
+  }
+  const serialized = object as Record<string, unknown>;
+  const type = serialized.type as
+    | IntervalLiteral['type']
+    | 'i'
+    | 'f'
+    | 'c'
+    | 'n';
   switch (type) {
     // Decompress most common types
     case 'i':
-      return {type: 'IntegerLiteral', value: BigInt(object.v)};
+      return {type: 'IntegerLiteral', value: BigInt(serialized.v as string)};
     case 'f':
       return {
         type: 'FractionLiteral',
-        numerator: BigInt(object.n),
-        denominator: BigInt(object.d),
+        numerator: BigInt(serialized.n as string),
+        denominator: BigInt(serialized.d as string),
       };
     case 'c':
       return {
         type: 'CentsLiteral',
-        sign: object.s,
-        whole: BigInt(object.w),
-        fractional: object.f,
-        exponent: object.e,
-        real: object.r,
+        sign: serialized.s as Sign,
+        whole: BigInt(serialized.w as string),
+        fractional: serialized.f as string,
+        exponent: serialized.e as number | null,
+        real: serialized.r as boolean,
       };
     case 'n':
       return {
         type: 'NedjiLiteral',
-        numerator: object.n,
-        denominator: object.d,
-        equaveNumerator: object.p,
-        equaveDenominator: object.q,
+        numerator: serialized.n as number,
+        denominator: serialized.d as number,
+        equaveNumerator: serialized.p as number | null,
+        equaveDenominator: serialized.q as number | null,
       };
     // Revive BigInts
     case 'DecimalLiteral':
-      return {...object, whole: BigInt(object.whole)};
+      return {
+        ...(serialized as unknown as DecimalLiteral),
+        whole: BigInt(serialized.whole as string),
+      };
     case 'RadicalLiteral':
       return {
         type,
-        argument: Fraction.reviver('argument', object.argument) as Fraction,
-        exponent: Fraction.reviver('exponent', object.exponent) as Fraction,
+        argument: Fraction.reviver('argument', serialized.argument) as Fraction,
+        exponent: Fraction.reviver('exponent', serialized.exponent) as Fraction,
       };
     case 'SquareSuperparticular':
       return {
         type,
-        start: BigInt(object.start),
-        end: object.end && BigInt(object.end),
+        start: BigInt(serialized.start as string),
+        end: serialized.end ? BigInt(serialized.end as string) : null,
       };
     case 'StepLiteral':
     case 'CentLiteral':
@@ -1299,7 +1309,7 @@ export function intervalLiteralFromJSON(
     case 'HertzLiteral':
     case 'SecondLiteral':
     case 'MonzoLiteral':
-      return object;
+      return serialized as unknown as IntervalLiteral;
     case 'IntegerLiteral':
     case 'FractionLiteral':
     case 'NedjiLiteral':
