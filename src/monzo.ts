@@ -226,17 +226,20 @@ export class TimeReal {
    * const data = JSON.parse(serializedData, TimeReal.reviver);
    * ```
    *
-   * @param key Property name.
+   * @param _key Property name.
    * @param value Property value.
    * @returns Deserialized {@link TimeReal} instance or other data without modifications.
    */
-  static reviver(key: string, value: any) {
+  static reviver(_key: string, value: unknown) {
+    type SerializedTimeReal = {type: 'TimeReal'; t: number; v: number | string};
     if (
       typeof value === 'object' &&
       value !== null &&
+      'type' in value &&
       value.type === 'TimeReal'
     ) {
-      let v: number | string = value.v;
+      const serialized = value as SerializedTimeReal;
+      let v: number | string = serialized.v;
       if (v === 'nan') {
         v = NaN;
       } else if (v === 'inf') {
@@ -244,7 +247,7 @@ export class TimeReal {
       } else if (v === '-inf') {
         v = -Infinity;
       }
-      return new TimeReal(value.t, v as number);
+      return new TimeReal(serialized.t, v as number);
     }
     return value;
   }
@@ -1128,8 +1131,7 @@ export class TimeMonzo {
     }
     if (!residual.n) {
       timeExponent = new Fraction(0);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      primeExponents = primeExponents.map(_ => new Fraction(0));
+      primeExponents = primeExponents.map(() => new Fraction(0));
     }
     this.timeExponent = timeExponent;
     this.primeExponents = primeExponents;
@@ -1304,22 +1306,30 @@ export class TimeMonzo {
    * const data = JSON.parse(serializedData, TimeMonzo.reviver);
    * ```
    *
-   * @param key Property name.
+   * @param _key Property name.
    * @param value Property value.
    * @returns Deserialized {@link TimeMonzo} instance or other data without modifications.
    */
-  static reviver(key: string, value: any) {
+  static reviver(_key: string, value: unknown) {
+    type SerializedTimeMonzo = {
+      type: 'TimeMonzo';
+      t: unknown;
+      p: number[];
+      r: unknown;
+    };
     if (
       typeof value === 'object' &&
       value !== null &&
+      'type' in value &&
       value.type === 'TimeMonzo'
     ) {
-      const timeExponent = Fraction.reviver('t', value.t) as Fraction;
+      const serialized = value as SerializedTimeMonzo;
+      const timeExponent = Fraction.reviver('t', serialized.t) as Fraction;
       const primeExponents: Fraction[] = [];
-      for (let i = 0; i < value.p.length; i += 2) {
-        primeExponents.push(new Fraction(value.p[i], value.p[i + 1]));
+      for (let i = 0; i < serialized.p.length; i += 2) {
+        primeExponents.push(new Fraction(serialized.p[i], serialized.p[i + 1]));
       }
-      const residual = Fraction.reviver('r', value.r) as Fraction;
+      const residual = Fraction.reviver('r', serialized.r) as Fraction;
       return new TimeMonzo(timeExponent, primeExponents, residual);
     }
     return value;
@@ -2658,7 +2668,10 @@ export class TimeMonzo {
     if (this.timeExponent.n) {
       throw new Error('Time exponent prevents factorization over integers.');
     }
-    const result: Map<number, Fraction> = primeFactorize(this.residual) as any;
+    const result = primeFactorize(this.residual) as unknown as Map<
+      number,
+      Fraction
+    >;
     for (const [key, value] of result) {
       result.set(key, new Fraction(value));
     }
@@ -2789,13 +2802,13 @@ export class TimeMonzo {
     if (this.isEqualTemperament()) {
       try {
         const {fractionOfEquave, equave} = this.toEqualTemperament();
-        let {s, n, d} = fractionOfEquave;
-        n *= s;
+        const {s, n, d} = fractionOfEquave;
+        const scaledNumerator = n * s;
         if (!node) {
           if (equave.equals(TWO)) {
             return {
               type: 'NedjiLiteral',
-              numerator: n,
+              numerator: scaledNumerator,
               denominator: d,
               equaveNumerator: null,
               equaveDenominator: null,
@@ -2803,7 +2816,7 @@ export class TimeMonzo {
           } else {
             return {
               type: 'NedjiLiteral',
-              numerator: n,
+              numerator: scaledNumerator,
               denominator: d,
               equaveNumerator: equave.s * equave.n,
               equaveDenominator: equave.d,
@@ -2824,12 +2837,12 @@ export class TimeMonzo {
         if (denominator === node.denominator) {
           return {
             ...node,
-            numerator: (denominator / d) * n,
+            numerator: (denominator / d) * scaledNumerator,
           };
         }
         return {
           ...node,
-          numerator: n,
+          numerator: scaledNumerator,
           denominator: d,
         };
       } catch {
@@ -3069,9 +3082,9 @@ export function reviveMonzo(
   data: ReturnType<TimeReal['toJSON']> | ReturnType<TimeMonzo['toJSON']>,
 ): TimeReal | TimeMonzo {
   if (data.type === 'TimeReal') {
-    return TimeReal.reviver('value', data);
+    return TimeReal.reviver('value', data) as TimeReal;
   } else if (data.type === 'TimeMonzo') {
-    return TimeMonzo.reviver('value', data);
+    return TimeMonzo.reviver('value', data) as TimeMonzo;
   }
   throw new Error(`Unrecognized monzo type '${data.type}'`);
 }

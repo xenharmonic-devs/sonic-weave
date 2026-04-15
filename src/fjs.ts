@@ -35,7 +35,7 @@ const NEUTRAL_BRIDGING_RADIUS = 92.1;
 const SEMIQUARTAL_BRIDGING_RADIUS = 137.2;
 
 // XXX: Not much thought was given to this choice.
-const TONE_SPLITTER_BRIDGING_RADIUS = SEMIAPOTOME;
+const TONE_SPLITTER_BRIDGING_RADIUS = SEMIQUARTAL_BRIDGING_RADIUS;
 
 const FIFTH = PRIME_CENTS[1] - PRIME_CENTS[0];
 
@@ -66,8 +66,7 @@ function masterAlgorithm(
 }
 
 // The original NFJS master algorithm by M-yac
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function myacNeutralMaster(primeCents: number) {
+function _myacNeutralMaster(primeCents: number) {
   let pythagoras = 0;
   if (circleDistance(primeCents, pythagoras) < NFJS_RADIUS) {
     return 0;
@@ -137,10 +136,14 @@ function toneSplitterMaster(primeCents: number): [number, number] {
   let k = 0.5;
 
   while (true) {
-    if (circleDistance(primeCents, pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+    if (
+      circleDistance(primeCents, pythagoras) < TONE_SPLITTER_BRIDGING_RADIUS
+    ) {
       return [k, 0.5 - k];
     }
-    if (circleDistance(primeCents, -pythagoras) < SEMIQUARTAL_BRIDGING_RADIUS) {
+    if (
+      circleDistance(primeCents, -pythagoras) < TONE_SPLITTER_BRIDGING_RADIUS
+    ) {
       return [-k, k - 0.5];
     }
     pythagoras += FIFTH;
@@ -151,7 +154,8 @@ function toneSplitterMaster(primeCents: number): [number, number] {
 function* commaGenerator(master: typeof masterAlgorithm): Generator<TimeMonzo> {
   let i = 2;
   while (i < PRIME_CENTS.length) {
-    let [twos, threes] = master(PRIME_CENTS[i]);
+    const [initialTwos, threes] = master(PRIME_CENTS[i]);
+    let twos = initialTwos;
     let commaCents =
       PRIME_CENTS[i] + twos * PRIME_CENTS[0] + threes * PRIME_CENTS[1];
     while (commaCents > 600) {

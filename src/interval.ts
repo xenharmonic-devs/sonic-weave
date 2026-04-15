@@ -298,25 +298,37 @@ export class Interval {
    * const data = JSON.parse(serializedData, Interval.reviver);
    * ```
    *
-   * @param key Property name.
+   * @param _key Property name.
    * @param value Property value.
    * @returns Deserialized {@link Interval} instance or other data without modifications.
    */
-  static reviver(key: string, value: any) {
+  static reviver(_key: string, value: unknown) {
+    type SerializedInterval = {
+      type: 'Interval';
+      v: unknown;
+      d: number;
+      s: number;
+      n: unknown;
+      l: string;
+      c: string | null;
+      t: number[];
+    };
     if (
       typeof value === 'object' &&
       value !== null &&
+      'type' in value &&
       value.type === 'Interval'
     ) {
+      const serialized = value as SerializedInterval;
       const result = new Interval(
-        reviveMonzo(value.v),
-        value.d ? 'logarithmic' : 'linear',
-        value.s,
-        intervalLiteralFromJSON(value.n),
+        reviveMonzo(serialized.v as Parameters<typeof reviveMonzo>[0]),
+        serialized.d ? 'logarithmic' : 'linear',
+        serialized.s,
+        intervalLiteralFromJSON(serialized.n),
       );
-      result.label = value.l;
-      result.color = value.c && new Color(value.c);
-      result.trackingIds = new Set(value.t);
+      result.label = serialized.l;
+      result.color = serialized.c ? new Color(serialized.c) : undefined;
+      result.trackingIds = new Set(serialized.t);
       return result;
     }
     return value;
@@ -326,7 +338,7 @@ export class Interval {
    * Serialize the time monzo to a JSON compatible object.
    * @returns The serialized object with property `type` set to `'Interval'`.
    */
-  toJSON(): any {
+  toJSON(): unknown {
     return {
       type: 'Interval',
       v: this.value.toJSON(),
@@ -1944,7 +1956,7 @@ export class ValBasis {
     }
     const node = {
       type: 'ValBasisLiteral',
-      basis: [] as any[],
+      basis: [] as unknown[],
     };
     const bail = () => `basis(${this.value.map(m => m.toString()).join(', ')})`;
     for (let monzo of this.value) {

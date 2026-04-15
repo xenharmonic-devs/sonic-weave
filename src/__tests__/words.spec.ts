@@ -183,7 +183,7 @@ describe('getStepVector()', () => {
   it('returns zero vector if empty word is passed', () => {
     expect(getStepVector('', 1000)).toStrictEqual(zeroVector());
   });
-  it('creates a step vector from any 0-based substring of a string', () => {
+  it('creates a step vector from unknown 0-based substring of a string', () => {
     const lydian = 'LLLsLLs';
     const zeroStep = getStepVector(lydian, 0);
     expect(zeroStep).toStrictEqual(zeroVector());

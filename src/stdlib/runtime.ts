@@ -6,9 +6,8 @@ import {
   Expression,
 } from '../ast.js';
 import {Color, Interval, Temperament, Val, ValBasis} from '../interval.js';
-import {TimeMonzo, TimeReal} from '../monzo.js';
+import {TimeReal} from '../monzo.js';
 import {type ExpressionVisitor} from '../parser/expression.js';
-import {ZERO} from '../utils.js';
 
 /**
  * Function that can be called inside the SonicWeave runtime.
@@ -47,9 +46,6 @@ export type SonicWeaveValue =
   | SonicWeavePrimitive
   | SonicWeavePrimitive[]
   | Record<string, SonicWeavePrimitive>;
-
-const ZERO_MONZO = new TimeMonzo(ZERO, [], ZERO);
-const ONE_MONZO = new TimeMonzo(ZERO, []);
 
 const INT_CACHE = [...Array(100).keys()].map(i => Interval.fromInteger(i));
 
@@ -141,9 +137,9 @@ export function builtinNode(
     .map(p => ({type: 'Parameter', id: p, defaultValue: null}));
   for (const parameter of parameters) {
     if (parameter.id.includes('=')) {
-      let [id, defaultValue] = parameter.id.split('=');
-      parameter.id = id.trim();
-      defaultValue = defaultValue.trim().replace(/'/g, '"');
+      const [idPart, defaultValuePart] = parameter.id.split('=');
+      parameter.id = idPart.trim();
+      const defaultValue = defaultValuePart.trim().replace(/'/g, '"');
       if (defaultValue.includes('"')) {
         parameter.defaultValue = {
           type: 'StringLiteral',
@@ -183,7 +179,7 @@ export function builtinNode(
  * @returns Nothing.
  * @throws An error naming the first missing parameter.
  */
-export function requireParameters(parameters: Record<string, any>) {
+export function requireParameters(parameters: Record<string, unknown>) {
   for (const name of Object.keys(parameters)) {
     if (parameters[name] === undefined) {
       throw new Error(`Parameter '${name}' is required.`);

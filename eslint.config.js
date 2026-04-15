@@ -60,23 +60,23 @@ export default [
       },
     },
     rules: {
-      'no-empty': 0,
-      'no-constant-condition': 0,
-      'prefer-const': ['error', {destructuring: 'all'}],
-      'no-restricted-syntax': ['error', 'SequenceExpression'],
-      '@typescript-eslint/no-explicit-any': 0,
-      '@typescript-eslint/ban-ts-comment': 0,
       '@typescript-eslint/no-this-alias': [
         'error',
         {
-          allowedNames: ['self'],
+          allowedNames: ['self', 'scopeParent'],
         },
       ],
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
-          varsIgnorePattern: '_',
-        },
+          'args': 'all',
+          'argsIgnorePattern': '^_',
+          'caughtErrors': 'all',
+          'caughtErrorsIgnorePattern': '^_',
+          'destructuredArrayIgnorePattern': '^_',
+          'varsIgnorePattern': '^_',
+          'ignoreRestSiblings': true
+        }
       ],
     },
   },

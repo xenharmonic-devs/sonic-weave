@@ -19,7 +19,7 @@ describe('ternaryBroadcast', () => {
   it('broadcasts three arrays elementwise', () => {
     const context = createContext();
     const result = ternaryBroadcast.call(
-      context as any,
+      context as unknown,
       ['a', 'b'],
       ['x', 'y'],
       ['1', '2'],
@@ -33,7 +33,7 @@ describe('ternaryBroadcast', () => {
   it('broadcasts a scalar pair over an array operand', () => {
     const context = createContext();
     const result = ternaryBroadcast.call(
-      context as any,
+      context as unknown,
       'L',
       'M',
       ['1', '2'],
@@ -49,7 +49,7 @@ describe('ternaryBroadcast', () => {
 
     expect(() =>
       ternaryBroadcast.call(
-        context as any,
+        context as unknown,
         ['a', 'b'],
         ['x'],
         ['1', '2'],

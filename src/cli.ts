@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {relative, repr} from './stdlib/index.js';
 import {Interval} from './interval.js';
 import {
-  ExpressionVisitor,
   StatementVisitor,
   evaluateSource,
   getSourceVisitor,
@@ -12,7 +10,6 @@ import type {REPLServer, ReplOptions} from 'repl';
 import type {Context} from 'node:vm';
 import * as parenCounterParser from './parser/paren-counter.js';
 import {literalToString} from './expression.js';
-import {TimeReal} from './monzo.js';
 import packageJson from '../package.json' with {type: 'json'};
 const parenCounter = (
   parenCounterParser as {
@@ -154,19 +151,20 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
   const visitor = new StatementVisitor(globalVisitor);
 
   let currentCmd = '';
+  type ParenCounts = {parens: number; squares: number; curlies: number};
 
   function evaluateStatement(
     this: REPLServer,
     evalCmd: string,
-    context: Context,
-    file: string,
-    cb: (err: Error | null, result: any) => void,
+    _context: Context,
+    _file: string,
+    cb: (err: Error | null, result: unknown) => void,
   ) {
     currentCmd += evalCmd;
 
-    let counts: any;
+    let counts: ParenCounts;
     try {
-      counts = parenCounter(currentCmd);
+      counts = parenCounter(currentCmd) as ParenCounts;
     } catch (e) {
       currentCmd = '';
       if (e instanceof Error) {
@@ -176,7 +174,7 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
           cb(e, undefined);
         }
       } else {
-        cb(new Error(repr.bind(visitor.rootContext)(e as any)), undefined);
+        cb(new Error(repr.bind(visitor.rootContext)(e as never)), undefined);
       }
       return;
     }
@@ -230,14 +228,11 @@ export function repl(start: (options?: string | ReplOptions) => REPLServer) {
       }
     } catch (e) {
       currentCmd = '';
-      if (typeof e === 'string') {
-        // eslint-disable-next-line no-ex-assign
-        e = new Error(e);
-      }
+      const thrown = typeof e === 'string' ? new Error(e) : e;
       let err =
-        e instanceof Error
-          ? e
-          : new Error(repr.bind(visitor.rootContext)(e as any));
+        thrown instanceof Error
+          ? thrown
+          : new Error(repr.bind(visitor.rootContext)(thrown as never));
       if (err.name === 'SyntaxError') {
         err = new Error(err.message);
       }

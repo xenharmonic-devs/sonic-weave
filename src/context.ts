@@ -85,26 +85,42 @@ export class RootContext {
    * const data = JSON.parse(serializedData, RootContext.reviver);
    * ```
    *
-   * @param key Property name.
+   * @param _key Property name.
    * @param value Property value.
    * @returns Deserialized {@link RootContext} instance or other data without modifications.
    */
-  static reviver(key: string, value: any) {
+  static reviver(_key: string, value: unknown) {
+    type SerializedRootContext = {
+      type: 'RootContext';
+      gas: number;
+      title: string;
+      unisonFrequency?: unknown;
+      C4: unknown;
+      up: unknown;
+      lift: unknown;
+      trackingIndex: number;
+      mosConfig: unknown;
+    };
     if (
       typeof value === 'object' &&
       value !== null &&
+      'type' in value &&
       value.type === 'RootContext'
     ) {
-      const result = new RootContext(value.gas);
-      result.title = value.title;
+      const serialized = value as SerializedRootContext;
+      const result = new RootContext(serialized.gas);
+      result.title = serialized.title;
       result.unisonFrequency =
-        TimeMonzo.reviver('unisonFrequency', value.unisonFrequency) ??
-        undefined;
-      result.C4 = TimeMonzo.reviver('C4', value.C4);
-      result.up = Interval.reviver('up', value.up);
-      result.lift = Interval.reviver('lift', value.lift);
-      result.trackingIndex = value.trackingIndex;
-      result.mosConfig = reviveMosConfig(value.mosConfig);
+        (TimeMonzo.reviver('unisonFrequency', serialized.unisonFrequency) as
+          | TimeMonzo
+          | undefined) ?? undefined;
+      result.C4 = TimeMonzo.reviver('C4', serialized.C4) as TimeMonzo;
+      result.up = Interval.reviver('up', serialized.up) as Interval;
+      result.lift = Interval.reviver('lift', serialized.lift) as Interval;
+      result.trackingIndex = serialized.trackingIndex;
+      result.mosConfig = reviveMosConfig(
+        serialized.mosConfig as Parameters<typeof reviveMosConfig>[0],
+      );
       return result;
     }
     return value;
