@@ -1,3 +1,5 @@
+// The `replaceAll()` minification hacks are for bundlers like `vite`.
+
 export const PRELUDE_VOLATILES = `
 (* XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn(). *)
 riff reduce(scale = ££) {
@@ -10,7 +12,10 @@ riff reduce(scale = ££) {
   }
   return equaveReduce(scale);
 }
-`;
+`
+  .replaceAll('riff', 'fn')
+  .replaceAll('  ', '')
+  .replaceAll('\n', '');
 
 export const PRELUDE_SOURCE = `
 (** Root context dependents **)
@@ -463,7 +468,7 @@ riff mos(numberOfLargeSteps, numberOfSmallSteps, sizeOfLargeStep = 2, sizeOfSmal
 }
 
 riff rank2(generator, up, down = 0, period = niente, numPeriods = 1, generatorSizeHint = niente, periodSizeHint = niente) {
-  "Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default).\\
+  "Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default). \\
   \`up\` and \`down\` must be multiples of \`numPeriods\`. The size hints are used to get the correct period reduction when generating a preimage.";
   if (up ~mod numPeriods)
     throw "Up must be a multiple of the number of periods.";
@@ -516,7 +521,7 @@ riff wellTemperament(commaFractions, comma = 81/80, down = 0, generator = 3/2, p
 }
 
 riff parallelotope(basis, ups = niente, downs = niente, equave = niente, basisSizeHints = niente, equaveSizeHint = niente) {
-  "Span a parallelotope by extending a basis combinatorically. \`ups\` defaults to all ones while \`downs\` defaults to all zeros.\\
+  "Span a parallelotope by extending a basis combinatorically. \`ups\` defaults to all ones while \`downs\` defaults to all zeros. \\
   The size hints are used to get the correct period reduction when generating a preimage.";
   equave al= 2 al~ basis~[0];
   const basis_ = basis[..];
@@ -905,8 +910,8 @@ riff randomVariance(amount, varyEquave = false, scale = ££) {
 }
 
 riff coalesce(tolerance = 3.5, action = 'simplest', preserveBoundary = false, scale = ££) {
-  "Obtain a copy of the popped/given scale where groups of intervals separated by \`tolerance\` are coalesced into one.\\
-  \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.\\
+  "Obtain a copy of the popped/given scale where groups of intervals separated by \`tolerance\` are coalesced into one. \\
+  \`action\` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'. \\
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   if (not scale)
     return [];
@@ -967,8 +972,8 @@ riff replaceStep(step, replacement, scale = ££) {
 }
 
 riff organize(tolerance = niente, action = 'simplest', preserveBoundary = false, scale = ££) {
-  "Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out.\\
-  If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`.\\
+  "Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out. \\
+  If \`tolerance\` is given near-duplicates are coalesced instead using the given \`action\`. \\
   If \`preserveBoundary\` is \`true\` intervals close to unison and the equave are not eliminated.";
   equaveReduce(scale);
   if (tolerance == niente)
@@ -1005,4 +1010,7 @@ riff isodifferential(parts, interval=2) {
   }
   return isorescale(interval, parts::2*parts) al~ interval;
 }
-`;
+`
+  .replaceAll('riff', 'fn')
+  .replaceAll('  ', '')
+  .replaceAll('\n', '');

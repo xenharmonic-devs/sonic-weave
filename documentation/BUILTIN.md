@@ -522,7 +522,7 @@ Calculate the geometric difference of two intervals on a circle.
 Calculate the geometric distance of two intervals on a circle.
 
 ### coalesce(*tolerance = 3.5*, *action = "simplest"*, *preserveBoundary = false*, *scale = ££*)
-Obtain a copy of the popped/given scale where groups of intervals separated by `tolerance` are coalesced into one.  `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+Obtain a copy of the popped/given scale where groups of intervals separated by `tolerance` are coalesced into one. `action` is one of 'simplest', 'wilson', 'lowest', 'highest', 'avg', 'havg' or 'geoavg'. If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### colorsOf(*scale = $$*)
 Obtain an array of colors of the current/given scale.
@@ -633,7 +633,7 @@ Calculate the logarithm of x base 2.
 Obtain a copy of the popped/given scale with the given offset or polyoffset merged into it. `overflow` is one of 'keep', 'drop' or 'wrap' and controls what to do with offset intervals outside of current bounds.
 
 ### mos(*numberOfLargeSteps*, *numberOfSmallSteps*, *sizeOfLargeStep = 2*, *sizeOfSmallStep = 1*, *up = niente*, *down = niente*, *equave = 2*)
-Generate a Moment-Of-Symmetry scale with the given number number of large and small steps.   `up` defines the brightness of the mode i.e. the number of major intervals from the root.   Alternatively `down` defines the darkness of the mode i.e. the number of minor intervals from the root.   The default `equave` is the octave `2/1`.
+Generate a Moment-Of-Symmetry scale with the given number number of large and small steps. `up` defines the brightness of the mode i.e. the number of major intervals from the root. Alternatively `down` defines the darkness of the mode i.e. the number of minor intervals from the root. The default `equave` is the octave `2/1`.
 
 ### mtof(*index*)
 Convert MIDI note number to absolute frequency.
@@ -660,10 +660,10 @@ Generate all fractions with odd limit <= `limit` reduced to between 1 (exclusive
 Calculate the odd limit of x. Here 'odd' means not divisible by the equave.
 
 ### organize(*tolerance = niente*, *action = "simplest"*, *preserveBoundary = false*, *scale = ££*)
-Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out.  If `tolerance` is given near-duplicates are coalesced instead using the given `action`.  If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
+Obtain a copy of the popped/given scale reduced by its last interval, sorted and with duplicates filtered out. If `tolerance` is given near-duplicates are coalesced instead using the given `action`. If `preserveBoundary` is `true` intervals close to unison and the equave are not eliminated.
 
 ### parallelotope(*basis*, *ups = niente*, *downs = niente*, *equave = niente*, *basisSizeHints = niente*, *equaveSizeHint = niente*)
-Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros.  The size hints are used to get the correct period reduction when generating a preimage.
+Span a parallelotope by extending a basis combinatorically. `ups` defaults to all ones while `downs` defaults to all zeros. The size hints are used to get the correct period reduction when generating a preimage.
 
 ### POTE(*valsOrCommas*, *primeLimit = niente*)
 Create a naïve pure-equaves tuning by normalizing the Tenney-Euclid optimal temperament based on an array of vals or commas. Note: Comma lists will always use the full inferred prime limit, but a higher one or an explicit basis can be given.
@@ -681,7 +681,7 @@ Obtain a copy of the popped/given scale with random variance added.
 Obtain an array of integers from `start` to `stop - 1`. When only a single parameter is given `range(0, n)` is returned.
 
 ### rank2(*generator*, *up*, *down = 0*, *period = niente*, *numPeriods = 1*, *generatorSizeHint = niente*, *periodSizeHint = niente*)
-Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default).  `up` and `down` must be multiples of `numPeriods`. The size hints are used to get the correct period reduction when generating a preimage.
+Create a finite segment of a Rank-2 scale by stacking the given generator against the given period (or the octave by default). `up` and `down` must be multiples of `numPeriods`. The size hints are used to get the correct period reduction when generating a preimage.
 
 ### realizeWord(*word*, *sizes*, *equave = niente*)
 Realize a scale word like "LLsLLLs" as a concrete scale with the given step sizes such as `#{L: 9/8, s:256/243}`. One step size may be omitted and inferred based on the size of the `equave` (default `2`).
