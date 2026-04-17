@@ -1,4 +1,4 @@
-// The `replaceAll()` minification hacks are for bundlers like `vite`.
+// These source-level `replaceAll()` minification hacks are baked into dist during `prepare`.
 
 export const PRELUDE_VOLATILES = `
 (* XXX: This is only here to bypass scope optimization so that Scale Workshop can hook warn(). *)
