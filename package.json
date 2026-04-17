@@ -44,7 +44,7 @@
     "precompile": "npm run compile-parsers",
     "compile": "tsc",
     "fix": "gts fix",
-    "prepare": "npm run compile",
+    "prepare": "npm run compile && npm run bake-prelude",
     "pretest": "npm run compile",
     "posttest": "npm run lint",
     "test": "vitest",
@@ -56,7 +56,8 @@
     "preinspect-grammar": "npm run compile-sonic-weave-parser",
     "inspect-grammar": "node scripts/inspect-printable-ascii.js",
     "preinspect-random": "npm run compile-sonic-weave-parser",
-    "inspect-random": "node scripts/inspect-random-programs.js"
+    "inspect-random": "node scripts/inspect-random-programs.js",
+    "bake-prelude": "node scripts/bake-prelude.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
