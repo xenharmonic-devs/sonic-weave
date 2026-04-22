@@ -1882,6 +1882,15 @@ export class ExpressionVisitor {
       return this.intrinsicValBasisCall(left, right);
     } else if (left instanceof Temperament) {
       throw new Error('Temperaments have no intrinsic behavior.');
+    } else if (Array.isArray(left) && left.every(i => i instanceof Interval)) {
+      if (right instanceof Interval) {
+        return [...left, right];
+      } else if (
+        Array.isArray(right) &&
+        right.every(i => i instanceof Interval)
+      ) {
+        return [...left, ...right];
+      }
     }
     const ic = this.implicitCall.bind(this);
     return binaryBroadcast.bind(this)(left, right, ic);
@@ -1954,7 +1963,9 @@ export class ExpressionVisitor {
         callee.color = undefined;
         return callee;
     }
-    if (caller instanceof Interval || caller instanceof Val) {
+    if (caller instanceof Interval) {
+      return [callee, caller];
+    } else if (caller instanceof Val) {
       throw new Error('Undefined intrinsic call.');
     } else if (caller instanceof Color) {
       callee = callee.shallowClone();
@@ -1962,6 +1973,11 @@ export class ExpressionVisitor {
       return callee;
     } else if (caller instanceof ValBasis) {
       return caller.intrinsicCall(callee);
+    } else if (
+      Array.isArray(caller) &&
+      caller.every(i => i instanceof Interval)
+    ) {
+      return [callee, ...caller];
     }
     const ic = this.intrinsicIntervalCall.bind(this);
     return unaryBroadcast.bind(this)(caller, c => ic(callee, c));

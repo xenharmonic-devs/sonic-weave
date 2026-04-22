@@ -43,7 +43,8 @@ describe('Angle brackets vs. comparisons', () => {
   });
 
   it('parses deprecated quadruple semitwelfth', () => {
-    expect(() => evaluate('1\\2<3> 4')).toThrow('Undefined intrinsic call.');
+    const pair = evaluate('1\\2<3> 4');
+    expect(pair.toString()).toBe('1\\2<3>,4');
   });
 });
 
@@ -62,7 +63,7 @@ describe('Unit shadowing', () => {
 
 describe('Overloaded tokens', () => {
   it('confuses minimum and minor', () => {
-    expect(() => evaluate('1 min2')).toThrow('Undefined intrinsic call');
+    expect(evaluate('1 min2')?.toString()).toBe('1,min2');
     expect(evaluate('1 min 2')?.toString()).toBe('1');
   });
 });

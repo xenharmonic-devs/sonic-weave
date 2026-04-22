@@ -2102,10 +2102,10 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.totalCents()).toBe(1901.9);
   });
 
-  it('no longer has implicit elementwise product', () => {
-    expect(() => evaluate('[2, 3] [5, 7]')).toThrow(
-      'Undefined intrinsic call.',
-    );
+  it('has implicit array concatenation where sensible', () => {
+    const ps = evaluate('[2, 3] [5, 7]');
+    expect(ps).toHaveLength(4);
+    expect(ps?.toString()).toBe('2,3,5,7');
   });
 
   it('has implicit function calls', () => {
@@ -2118,12 +2118,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('1\\1<3/2>');
   });
 
-  it('has deprecated implicit multiplication', () => {
-    expect(() => parseSingle('(3) 5')).toThrow('Undefined intrinsic call.');
+  it('has replaced deprecated implicit multiplication with array construction', () => {
+    expect(evaluateExpression('(3) 5')?.toString()).toBe('3,5');
   });
 
-  it('has explicit deprecated intrinsic multiplication', () => {
-    expect(() => parseSingle('3(5)')).toThrow('Undefined intrinsic call.');
+  it('has explicit intrinsic array construction', () => {
+    expect(evaluateExpression('3(5)')?.toString()).toBe('3,5');
   });
 
   it("doesn't have negative literals for a good reason", () => {
@@ -2341,9 +2341,7 @@ describe('SonicWeave expression evaluator', () => {
   });
 
   it('evokes intrinsic behavior between PI and E', () => {
-    expect(() => evaluateExpression('PI(E)')).toThrow(
-      'Undefined intrinsic call.',
-    );
+    expect(Array.isArray(evaluateExpression('PI(E)'))).toBe(true);
   });
 
   it('normalizes zero (frequency)', () => {
@@ -2743,5 +2741,17 @@ describe('SonicWeave expression evaluator', () => {
   it.fails('represents a-92^10657', () => {
     const interval = evaluateExpression('a-92^10657');
     console.log(interval!.toString());
+  });
+
+  it('has inline scale construction', () => {
+    const scale = evaluateExpression('M3^5 3/2 Bb5^7 1200.');
+    expect(scale).toHaveLength(4);
+    expect(scale.join(';')).toBe('M3^5;3/2;Bb5^7;1200.');
+  });
+
+  it('has inline prepend and append', () => {
+    const ns = evaluateExpression('1 [2, 3] 4');
+    expect(ns).toHaveLength(4);
+    expect(ns?.toString()).toBe('1,2,3,4');
   });
 });

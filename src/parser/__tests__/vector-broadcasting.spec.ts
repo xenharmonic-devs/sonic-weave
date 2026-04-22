@@ -67,7 +67,7 @@ describe('SonicWeave vector broadcasting', () => {
   });
 
   it('refuses to mix arrays of different lengths together', () => {
-    expect(() => sw`[1, 2] [3, 4, 5]`).toThrow(
+    expect(() => sw`[1, 2] [red, green, blue]`).toThrow(
       'Unable to broadcast arrays together with lengths 2 and 3.',
     );
   });

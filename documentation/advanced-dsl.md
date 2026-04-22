@@ -587,17 +587,21 @@ The limitation is that non-radical reals like `PI` are not supported in basis pr
 Associating two values like `3/2 "fif"` invokes intrinsic behavior between the interval `3/2` and the string `"fif"` resulting in an interval with the value 3/2 and the label "fif".
 
 Semantics of the expression `left right` follow this matrix depending on the types of the operands. Booleans are converted to `0` or `1` and follow interval semantics. Question marks indicate undefined behavior. Exclamation marks indicate that previous behavior has been deprecated.
-| left↓ right→ | Niente        | String        | Color         | Interval       | Val            | Basis         | Function      |
-| ------------ | ------------- | ------------- | ------------- | -------------- | -------------- | ------------- | ------------- |
-| **Niente**   | ?             | ?             | ?             | bleach         | ?              | ?             | `right(left)` |
-| **String**   | ?             | concatenate   | ?             | label          | ?              | ?             | `right(left)` |
-| **Color**    | ?             | ?             | ?             | paint          | ?              | ?             | `right(left)` |
-| **Interval** | bleach        | label         | paint         | ?!             | ?!             | rebase        | `right(left)` |
-| **Val**      | ?             | ?             | ?             | ?!             | ?              | rebase        | `right(left)` |
-| **Basis**    | ?             | ?             | ?             | rebase         | rebase         | ?             | `right(left)` |
-| **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`  | `left(right)`  | `left(right)` | `left(right)` |
+| left↓ right→ | Niente        | String        | Color         | Interval        | Val            | Basis         | Function      |
+| ------------ | ------------- | ------------- | ------------- | --------------- | -------------- | ------------- | ------------- |
+| **Niente**   | ?             | ?             | ?             | bleach          | ?              | ?             | `right(left)` |
+| **String**   | ?             | concatenate   | ?             | label           | ?              | ?             | `right(left)` |
+| **Color**    | ?             | ?             | ?             | paint           | ?              | ?             | `right(left)` |
+| **Interval** | bleach        | label         | paint         | `[left, right]` | ?!             | rebase        | `right(left)` |
+| **Val**      | ?             | ?             | ?             | ?!              | ?              | rebase        | `right(left)` |
+| **Basis**    | ?             | ?             | ?             | rebase          | rebase         | ?             | `right(left)` |
+| **Function** | `left(right)` | `left(right)` | `left(right)` | `left(right)`   | `left(right)`  | `left(right)` | `left(right)` |
 
-Intrinsic behavior vectorizes and broadcasts like other binary operations.
+Arrays of intervals concatenate intrinsically e.g. `[2, 3] [5, 7, 11]` produces `[2, 3, 5, 7, 11]`.
+
+Arrays of intervals also prepend or append plain intervals e.g. `1 [2, 3] 4` produces `[1, 2, 3, 4]`.
+
+Otherwise intrinsic behavior vectorizes and broadcasts like other binary operations.
 
 Intrinsic behavior may be evoked explicitly by simply calling a value e.g. `3/2("fif")` and `"fif"(3/2)` both work.
 
