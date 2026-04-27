@@ -893,18 +893,24 @@ AdditiveExpression
 MiscOperator
   = ModCeilingToken / ModToken / ReduceCeilingToken / ReduceToken / EdToken
 
-WingedInlineOperator
-  = '~' callee: Identifier '~' {
-    return {inlineBinaryCall: callee.id};
-  }
-
 Term
   = head: MultiplicativeExpression tail: (
-      __ preferLeft: '~'? op: MiscOperator preferRight: '~'? _ right: MultiplicativeExpression {
-        return [preferLeft, op, preferRight, right];
-      }
-      / __ op: WingedInlineOperator _ right: MultiplicativeExpression {
-        return ['~', op, '~', right];
+      __ element: (
+        '~' winged: (
+          op: MiscOperator preferRight: '~'? _ right: MultiplicativeExpression {
+            return ['~', op, preferRight, right];
+          }
+          / callee: Identifier '~' _ right: MultiplicativeExpression {
+            return ['~', {inlineBinaryCall: callee.id}, '~', right];
+          }
+        ) {
+          return winged;
+        }
+        / op: MiscOperator preferRight: '~'? _ right: MultiplicativeExpression {
+          return [null, op, preferRight, right];
+        }
+      ) {
+        return element;
       }
     )* {
     return tail.reduce(operatorReducer, head); 
