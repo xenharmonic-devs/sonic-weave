@@ -864,6 +864,11 @@ describe('SonicWeave parser', () => {
     ]);
   });
 
+  it('can insert multiple intervals into a sorted scale', () => {
+    const scale = expand('5::10;insert([4/3, 3/2])');
+    expect(scale).toEqual(['6/5', '4/3', '7/5', '3/2', '8/5', '9/5', '10/5']);
+  });
+
   it('can enumerate cents', () => {
     const scale = expand('100.:200.:432.1');
     expect(scale).toEqual(['100.', '332.1']);
@@ -2332,5 +2337,15 @@ describe('SonicWeave parser', () => {
       'Maj6ms',
       'P7ms',
     ]);
+  });
+
+  it('can remove scale lines by value', () => {
+    const scale = expand('4::8;dislodge(3/2) and niente');
+    expect(scale).toEqual(['5/4', '7/4', '8/4']);
+  });
+
+  it('can remove multiple scale lines by value', () => {
+    const scale = expand('6::12;dislodge([4/3, 3/2]) and niente');
+    expect(scale).toEqual(['7/6', '10/6', '11/6', '12/6']);
   });
 });

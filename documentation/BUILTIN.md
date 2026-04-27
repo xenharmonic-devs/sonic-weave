@@ -100,7 +100,7 @@ Compute the determinant of a matrix. Domain is ignored, all values coerced to li
 Obtain the javascript representation of the value.
 
 ### dislodge(*element*, *scale = $$*)
-Remove and return the first element equal to the given one from the current/given scale.
+Remove and return the first element equal to the given one from the current/given scale or repeat for each element if an array is provided.
 
 ### distill(*tester*, *scale = $$*)
 Remove intervals from the given/current scale that evaluate to `false` according to the `tester` riff.
@@ -181,7 +181,7 @@ HSLA color (Hue range 0-360, Saturation range 0-100, Lightness range 0-100, Alph
 Calculate imul x.
 
 ### insert(*interval*, *scale = $$*)
-Insert an interval into the current/given scale keeping it sorted.
+Insert interval(s) into the current/given scale keeping it sorted.
 
 ### int(*interval*)
 Convert value to an integer. Throws an error if conversion is impossible.
