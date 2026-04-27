@@ -173,8 +173,6 @@ Program
   }
 
 AbsToken           = @'abs'      !IdentifierPart
-AlToken            = @'al'       !IdentifierPart
-AndToken           = @'and'      !IdentifierPart
 AsToken            = @'as'       !IdentifierPart
 BreakToken         = @'break'    !IdentifierPart
 ByToken            = @'by'       !IdentifierPart
@@ -183,7 +181,6 @@ ConstToken         = @'const'    !IdentifierPart
 ContinueToken      = @'continue' !IdentifierPart
 DeferToken         = @'defer'    !IdentifierPart
 DeleteToken        = @'del'      !IdentifierPart
-DotToken           = @'dot'      !IdentifierPart
 DropToken          = @'drop'     !IdentifierPart
 EdToken            = @'ed'       !IdentifierPart
 ElseToken          = @'else'     !IdentifierPart
@@ -194,27 +191,15 @@ ForToken           = @'for'      !IdentifierPart
 FromToken          = @'from'     !IdentifierPart
 IfToken            = @'if'       !IdentifierPart
 ImportToken        = @'import'   !IdentifierPart
-InToken            = @'in'       !IdentifierPart
 InfinityToken      = @'inf'      !IdentifierPart
 LogAbsToken        = @'labs'     !IdentifierPart
 LestToken          = @'lest'     !IdentifierPart
 LetToken           = @'let'      !IdentifierPart
 LiftToken          = @'lift'     !IdentifierPart
-MaxToken           = @'max'      !IdentifierPart
-MatrixDotToken     = @'mdot'     !IdentifierPart
-MinToken           = @'min'      !IdentifierPart
-ModToken           = @'mod'      !IdentifierPart
-ModCeilingToken    = @'modc'     !IdentifierPart
 ModuleToken        = @'module'   !IdentifierPart
 NotANumberToken    = @'nan'      !IdentifierPart
 NoneToken          = @'niente'   !IdentifierPart
 NotToken           = @'not'      !IdentifierPart
-OfToken            = @'of'       !IdentifierPart
-OrToken            = @'or'       !IdentifierPart
-PopScaleToken      = @'pop$'     !IdentifierPart
-PopParentToken     = @'pop$$'    !IdentifierPart
-ReduceToken        = @'rd'       !IdentifierPart
-ReduceCeilingToken = @'rdc'      !IdentifierPart
 ReturnToken        = @'return'   !IdentifierPart
 FunctionToken      = @'riff'     !IdentifierPart
 FunctionAliasToken = @'fn'       !IdentifierPart
@@ -225,12 +210,21 @@ ThrowToken         = @'throw'    !IdentifierPart
 ToToken            = @'to'       !IdentifierPart
 TryToken           = @'try'      !IdentifierPart
 TrueToken          = @'true'     !IdentifierPart
-VectorAndToken     = @'vand'     !IdentifierPart
-VectorDotToken     = @'vdot'     !IdentifierPart
 VectorNotToken     = @'vnot'     !IdentifierPart
-VectorOrToken      = @'vor'      !IdentifierPart
 WhereToken         = @'where'    !IdentifierPart
 WhileToken         = @'while'    !IdentifierPart
+
+AndTokenoid      = @$('v'? 'and')         !IdentifierPart
+AlTokenoid       = @$('al' '~'?)          !IdentifierPart
+OfInTokenoid     = @$('of' / 'in')        !IdentifierPart
+OrTokenoid       = @$('v'? 'or')          !IdentifierPart
+DotTokenoid      = @$([mv]? 'dot')        !IdentifierPart
+MinMaxTokenoid   = @$('m' ('in' / 'ax'))  !IdentifierPart
+ModTokenoid      = @$('mod' 'c'?)         !IdentifierPart
+ReduceTokenoid   = @$('rd' 'c'?)          !IdentifierPart
+SoftOfInTokenoid = @$('~'? ('of' / 'in')) !IdentifierPart
+
+PopScaleTokenoid = @$(('£' '£'?) / ('pop$' '$'?)) !IdentifierPart
 
 Statements
   = head: Statement tail: (_ @Statement)* {
@@ -277,14 +271,14 @@ ReassignmentTail
   }
 
 VariableManipulationStatement
-  = &SourceCharacter name: IdentifierArray _ '=' _ value: Expression EOS {
+  = &'[' name: IdentifierArray _ '=' _ value: Expression EOS {
     return {
       type: 'AssignmentStatement',
       name,
       value,
     };
   }
-  / &SourceCharacter name: AccessExpression tail: ReassignmentTail? EOS {
+  / !EOF name: AccessExpression tail: ReassignmentTail? EOS {
     if (!tail) {
       return {
         type: 'ExpressionStatement',
@@ -546,7 +540,7 @@ IfStatement
     }
   }
 
-IterationKind = OfToken / InToken
+IterationKind = OfInTokenoid
 
 IterationStatement
   = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
@@ -750,14 +744,14 @@ ConditionalExpression
     return result;
   }
 
-CoalescingOperator = 'al~' / AlToken / OrToken / VectorOrToken
+CoalescingOperator = AlTokenoid / OrTokenoid
 
 CoalescingExpression
   = head: ConjunctionExpression tail: (__ @CoalescingOperator _ @ConjunctionExpression)* {
     return tail.reduce(operatorReducerLite, head);
   }
 
-ConjunctOperator = AndToken / VectorAndToken
+ConjunctOperator = AndTokenoid
 
 Conjunct = NotExpression / RelationalExpression
 
@@ -773,24 +767,14 @@ NotExpression
 
 RelationalOperator 'relational operator'
   = '=='
-  / '<>'
-  / '~='
-  / '~<>'
-  / '<='
-  / '>='
-  / '<'
-  / '>'
-  / OfToken
-  / (NotToken __ OfToken) { return 'not of'; }
-  / $('~' OfToken)
-  / (NotToken __ '~' OfToken) { return 'not ~of'; }
-  / InToken
-  / (NotToken __ InToken) { return 'not in'; }
-  / $('~' InToken)
-  / (NotToken __ '~' InToken) { return 'not ~in'; }
+  / $('~' ('=' / '<>'))
+  / $('<' ('=' / '>')?)
+  / $('>' '='?)
+  / SoftOfInTokenoid
+  / (NotToken __ ofin: SoftOfInTokenoid { return `not ${ofin}`; })
 
 RelationTail
-  = __ leftOperator: ('<=' / '<') __ middle: RoundingExpression __ rightOperator: ('<=' / '<') _ right: RoundingExpression {
+  = __ leftOperator: $('<' '='?) __ middle: RoundingExpression __ rightOperator: ('<=' / '<') _ right: RoundingExpression {
     return {
       type: 'RangeRelation',
       leftOperator,
@@ -799,7 +783,7 @@ RelationTail
       right,
     };
   }
-  / __ leftOperator: ('>=' / '>') __ middle: RoundingExpression __ rightOperator: ('>=' / '>') _ right: RoundingExpression {
+  / __ leftOperator: $('>' '='?) __ middle: RoundingExpression __ rightOperator: ('>=' / '>') _ right: RoundingExpression {
     return {
       type: 'RangeRelation',
       leftOperator,
@@ -875,7 +859,7 @@ EnumeratedChord
   }
 
 ExtremumOperator
-  = MaxToken / MinToken
+  = MinMaxTokenoid
 
 ExtremumExpression
   = head: AdditiveExpression tail: (__ @'~'? @ExtremumOperator @'~'? _ @AdditiveExpression)* {
@@ -891,7 +875,7 @@ AdditiveExpression
   }
 
 MiscOperator
-  = ModCeilingToken / ModToken / ReduceCeilingToken / ReduceToken / EdToken
+  = ModTokenoid / ReduceTokenoid / EdToken
 
 Term
   = head: MultiplicativeExpression tail: (
@@ -917,7 +901,7 @@ Term
   }
 
 MultiplicativeOperator 'multiplicative operator'
-  = '*' / '×' / '%' / '÷' / '\\' / StepsOfToken / '·' / DotToken / MatrixDotToken / VectorDotToken / '⊗' / TensorToken / TemperToken
+  = '*' / '×' / '%' / '÷' / '\\' / StepsOfToken / '·' / DotTokenoid / '⊗' / TensorToken / TemperToken
 
 MultiplicativeExpression
   = head: UniformUnaryExpression tail: (__ @'~'? @MultiplicativeOperator @'~'? _ @UniformUnaryExpression)* {
@@ -943,7 +927,7 @@ UniformUnaryExpression
   }
 
 ExponentiationOperator 'exponentiation'
-  = '^/' / '^' / '/_' / '/^'
+  = $(('^' '/'?) / ('/' ('_' / '^')))
 
 ExponentiationExpression
   = head: FractionExpression tail: (__ @'~'? @ExponentiationOperator !(FJS / AbsoluteFJS) @'~'? _ @ExponentiationExpression)* {
@@ -1379,16 +1363,10 @@ ReciprocalLogarithmicHertzLiteral
   = '¶' { return { type: 'ReciprocalLogarithmicHertzLiteral' }; }
 
 PopScale
-  = ('££' / PopParentToken) {
+  = token: PopScaleTokenoid {
     return {
       type: 'PopScale',
-      parent: true,
-    };
-  }
-  / ('£' / PopScaleToken) {
-    return {
-      type: 'PopScale',
-      parent: false,
+      parent: [null, false, true, null, false, true][token.length],
     };
   }
 
