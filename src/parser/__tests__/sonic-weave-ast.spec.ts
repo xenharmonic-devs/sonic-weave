@@ -245,6 +245,20 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('parses ranges with optional commas around dots', () => {
+    const ast = parseSingle('[foo, bar, .., baz]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'Range',
+        start: {type: 'Identifier', id: 'foo'},
+        second: {type: 'Identifier', id: 'bar'},
+        penultimate: false,
+        end: {type: 'Identifier', id: 'baz'},
+      },
+    });
+  });
+
   it('parses a return statement', () => {
     const ast = parse('riff foo(){return;}');
     expect(ast).toEqual({
@@ -376,6 +390,21 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
           end: {type: 'IntegerLiteral', value: 2n},
         },
         key: {type: 'IntegerLiteral', value: 0n},
+      },
+    });
+  });
+
+  it('parses range access by variables', () => {
+    const ast = parseSingle('foo[bar, baz, .., quux]');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'ArraySlice',
+        object: {type: 'Identifier', id: 'foo'},
+        start: {type: 'Identifier', id: 'bar'},
+        second: {type: 'Identifier', id: 'baz'},
+        penultimate: false,
+        end: {type: 'Identifier', id: 'quux'},
       },
     });
   });

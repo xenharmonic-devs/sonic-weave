@@ -953,7 +953,7 @@ LabeledCommaDecimal
     return labels.reduce(operatorReducerLite, object);
   }
 
-RangeDotsPenultimate = '..' _ penultimate: '<'? {
+RangeDotsPenultimate = _ ','? _ '..' _ penultimate: '<'? _ ','? _ {
   return !!penultimate;
 }
 
