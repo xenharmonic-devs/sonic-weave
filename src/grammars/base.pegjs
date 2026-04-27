@@ -1,9 +1,3 @@
-{{
-  const ZS_RE = /\p{Zs}/u;
-  const ID_START_RE = /\p{ID_Start}/u;
-  const ID_CONTINUE_RE = /\p{ID_Continue}/u;
-}}
-
 UnderscoreDigits
   = num: $([_0-9]*) {
   if (num.endsWith('_')) {
@@ -128,12 +122,12 @@ HexDigit
   = [0-9a-f]i
 
 IdentifierStart
-  = ID_Start
+  = [\p{ID_Start}]
   / '$'
   / '_'
 
 IdentifierPart
-  = ID_Continue
+  = [\p{ID_Continue}]
   / '$'
   / '\u200C'
   / '\u200D'
@@ -161,10 +155,8 @@ WhiteSpace
   = '\t'
   / '\v'
   / '\f'
-  / ' '
-  / '\u00A0'
   / '\uFEFF'
-  / Zs
+  / [\p{Zs}]
 
 LineTerminator 'line break'
   = '\n'
@@ -179,29 +171,8 @@ LineTerminatorSequence 'line terminator'
   / '\u2029'
   / '\r\n'
 
-// Separator, Space
-Zs
-  = c: SourceCharacter &{ return ZS_RE.test(c); }
-
 SourceCharacter 'any character'
-  = SourceCharacterLow
-  / SourceCharacterHigh
-
-// Not surrogates
-SourceCharacterLow
-  = [\u0000-\uD7FF\uE000-\uFFFF]
-
-// Can be properly-matched surrogates or lone surrogates.
-SourceCharacterHigh
-  = $([\uD800-\uDBFF][\uDC00-\uDFFF]) // Surrogate pair
-  / [\uD800-\uDBFF] // Lone first surrogate
-  / [\uDC00-\uDFFF] // Lone second surrogate
-
-ID_Start
-  = c: SourceCharacter &{ return ID_START_RE.test(c); }
-
-ID_Continue
-  = c: SourceCharacter &{ return ID_CONTINUE_RE.test(c); }
+  = .
 
 Comment
   = '(*' ((!('(*' / '*)') SourceCharacter) / Comment)* '*)'
