@@ -2754,4 +2754,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(ns).toHaveLength(4);
     expect(ns?.toString()).toBe('1,2,3,4');
   });
+
+  it('preserves array shape when dislodging', () => {
+    const arr = evaluateExpression('6::12;dislodge([7/6, [3/2, 4/3]])');
+    expect(arr).toHaveLength(2);
+    expect(arr[1]).toHaveLength(2);
+    expect(arr[0]!.toString()).toBe('7/6');
+    expect(arr[1]!.toString()).toBe('9/6,8/6');
+  });
 });

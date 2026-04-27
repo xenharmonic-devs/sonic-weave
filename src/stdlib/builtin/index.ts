@@ -2065,9 +2065,16 @@ function insert(
   this: ExpressionVisitor,
   interval: SonicWeavePrimitive,
   scale?: SonicWeavePrimitive[],
-) {
+): void {
   requireParameters({interval});
   scale ??= this.currentScale;
+
+  if (isArrayOrRecord(interval)) {
+    const ins = insert.bind(this) as unknown as SonicWeaveFunction;
+    unaryBroadcast.bind(this)(interval, i => ins(i, scale));
+    return;
+  }
+
   const cmp = compare.bind(this.rootContext);
   for (let i = 0; i < scale.length; ++i) {
     if (cmp(interval, scale[i]) < 0) {
@@ -2078,14 +2085,14 @@ function insert(
   scale.push(interval);
 }
 insert.__doc__ =
-  'Insert an interval into the current/given scale keeping it sorted.';
+  'Insert interval(s) into the current/given scale keeping it sorted.';
 insert.__node__ = builtinNode(insert, PARENT_SCALE);
 
 function dislodge(
   this: ExpressionVisitor,
   element: SonicWeavePrimitive,
   scale?: SonicWeavePrimitive[],
-) {
+): SonicWeaveValue {
   requireParameters({element});
   scale ??= this.currentScale;
   if (element instanceof Interval) {
@@ -2102,10 +2109,16 @@ function dislodge(
       return scale.splice(i, 1)[0];
     }
   }
+
+  if (isArrayOrRecord(element)) {
+    const d = dislodge.bind(this);
+    return unaryBroadcast.bind(this)(element, e => d(e, scale));
+  }
+
   throw new Error('Failed to locate element to dislodge.');
 }
 dislodge.__doc__ =
-  'Remove and return the first element equal to the given one from the current/given scale.';
+  'Remove and return the first element equal to the given one from the current/given scale or repeat for each element if an array is provided.';
 dislodge.__node__ = builtinNode(dislodge, PARENT_SCALE);
 
 function extend(
