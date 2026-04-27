@@ -78,7 +78,7 @@ Equality/inclusion operators are non-associative. Two cannot be used in a row. C
 | `^`, `^/`, `/^`, `/_`                            | Exponentiation, recipropower, logdivision*                              |
 | `-x`, `%x`, `÷x`, `abs x`, `labs x`, `√x`        | Negation, inversion, absolute value, geometric absolute value, square root |
 | `*`, `×`, `%`, `÷`, `\`, `dot`, `·`, `tns`, `⊗`, `tmpr` | Multiplication, division, N-of-EDO, val-monzo product, array tensoring, tempering |
-| `mod`, `modc`, `rd`, `rdc`, `ed`                 | Modulo, ceiling modulo, reduction, ceiling reduction, octave projection |
+| `mod`, `modc`, `rd`, `rdc`, `ed`, `~identifier~` | Modulo, ceiling modulo, reduction, ceiling reduction, octave projection, inline binary call sugar (`x ~f~ y` = `f(x, y)`) |
 | `+`, `-`, `/+`, `⊕`, `/-`, `⊖`                   | Addition, subtraction, lens addition, lens subtraction                  |
 | `max`, `min`                                     | Maximum, minimum                                                        |
 | `x:y::z`, `/x::y:x`                              | Chord enumeration, reflected chord enumeration                          |

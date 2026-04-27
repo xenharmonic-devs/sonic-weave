@@ -110,6 +110,25 @@
     };
   }
 
+  function Argument(expression) {
+    return {
+      type: 'Argument',
+      spread: false,
+      expression,
+    };
+  }
+
+  function InlineBinaryCallExpression(callee, left, right) {
+    return {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        id: callee,
+      },
+      args: [Argument(left), Argument(right)],
+    };
+  }
+
   function prepend(head, tail) {
     return [head].concat(tail ?? []);
   }
@@ -117,6 +136,10 @@
   function operatorReducer(result, element) {
     const left = result;
     const [preferLeft, op, preferRight, right] = element;
+
+    if (preferLeft && preferRight && typeof op === 'object' && op?.inlineBinaryCall) {
+      return InlineBinaryCallExpression(op.inlineBinaryCall, left, right);
+    }
 
     return BinaryExpression(op, left, right, !!preferLeft, !!preferRight);
   }
@@ -871,7 +894,25 @@ MiscOperator
   = ModCeilingToken / ModToken / ReduceCeilingToken / ReduceToken / EdToken
 
 Term
-  = head: MultiplicativeExpression tail: (__ @'~'? @MiscOperator @'~'? _ @MultiplicativeExpression)* {
+  = head: MultiplicativeExpression tail: (
+      __ element: (
+        '~' winged: (
+          op: MiscOperator preferRight: '~'? _ right: MultiplicativeExpression {
+            return ['~', op, preferRight, right];
+          }
+          / callee: Identifier '~' _ right: MultiplicativeExpression {
+            return ['~', {inlineBinaryCall: callee.id}, '~', right];
+          }
+        ) {
+          return winged;
+        }
+        / op: MiscOperator preferRight: '~'? _ right: MultiplicativeExpression {
+          return [null, op, preferRight, right];
+        }
+      ) {
+        return element;
+      }
+    )* {
     return tail.reduce(operatorReducer, head); 
   }
 
