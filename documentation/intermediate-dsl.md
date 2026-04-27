@@ -840,6 +840,11 @@ domainOf(y)(linear(x) op linear(y))
 
 With tilde wings on both sides `x ~op~ y` evaluates to a linear quantity unless both operands are logarithmic.
 
+Double-tilde wings can also be used as inline binary call sugar with identifier callees:
+`x ~f~ y` desugars to `f(x, y)`.
+This sugar is parsed at the same precedence level as `mod`, `rd`, `ed` and other term-level operators, so
+`a + b ~f~ c * d` desugars like `a + f(b, c * d)`.
+
 The *wings of preference* also tries to format the result similar to the preferred operand. `P5 ~+ 3/2` formats as `P12` while `P5 +~ 3/2` formats as `6/2` trying to preserve the denominator between 3/2 and 6/2.
 
 The formatting rules of SonicWeave are too complicated to summarize here and there's no way to express them all in the language itself. Just know that the runtime is trying to be smart about the formatting of tilde'd operations.

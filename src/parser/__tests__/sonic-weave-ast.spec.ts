@@ -259,6 +259,73 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     expect(() => parseSingle('foo ~M3~ bar')).toThrow();
   });
 
+  it('binds winged inline calls tighter than additive and looser than multiplicative operators', () => {
+    const ast = parseSingle('foo + bar ~avg~ baz * qux');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'BinaryExpression',
+        operator: '+',
+        left: {type: 'Identifier', id: 'foo'},
+        right: {
+          type: 'CallExpression',
+          callee: {type: 'Identifier', id: 'avg'},
+          args: [
+            {
+              type: 'Argument',
+              spread: false,
+              expression: {type: 'Identifier', id: 'bar'},
+            },
+            {
+              type: 'Argument',
+              spread: false,
+              expression: {
+                type: 'BinaryExpression',
+                operator: '*',
+                left: {type: 'Identifier', id: 'baz'},
+                right: {type: 'Identifier', id: 'qux'},
+                preferLeft: false,
+                preferRight: false,
+              },
+            },
+          ],
+        },
+        preferLeft: false,
+        preferRight: false,
+      },
+    });
+  });
+
+  it('left-associates winged inline calls with other term-level operators', () => {
+    const ast = parseSingle('foo mod bar ~avg~ baz');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {type: 'Identifier', id: 'avg'},
+        args: [
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {
+              type: 'BinaryExpression',
+              operator: 'mod',
+              left: {type: 'Identifier', id: 'foo'},
+              right: {type: 'Identifier', id: 'bar'},
+              preferLeft: false,
+              preferRight: false,
+            },
+          },
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {type: 'Identifier', id: 'baz'},
+          },
+        ],
+      },
+    });
+  });
+
   it('parses ranges', () => {
     const ast = parseSingle('[1..10]');
     expect(ast).toEqual({

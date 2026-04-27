@@ -643,6 +643,21 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.color?.value).toBe('lime');
   });
 
+  it('evaluates double tilde inline calls with multiplicative precedence on the right', () => {
+    const {interval} = parseSingle('4 ~gcd~ 6 * 3');
+    expect(interval.valueOf()).toBe(2);
+  });
+
+  it('evaluates double tilde inline calls before additive operators', () => {
+    const {interval} = parseSingle('10 + 4 ~gcd~ 6 * 3');
+    expect(interval.valueOf()).toBe(12);
+  });
+
+  it('left-associates double tilde inline calls with other term-level operators', () => {
+    const {interval} = parseSingle('20 mod 7 ~gcd~ 8');
+    expect(interval.valueOf()).toBe(2);
+  });
+
   it('has infectious labels', () => {
     const {interval} = parseSingle('(8 "redtone") % (7 red)');
     expect(interval.color?.value).toBe('red');
