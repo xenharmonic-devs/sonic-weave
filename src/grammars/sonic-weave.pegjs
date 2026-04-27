@@ -894,8 +894,8 @@ MiscOperator
   = ModCeilingToken / ModToken / ReduceCeilingToken / ReduceToken / EdToken
 
 WingedInlineOperator
-  = '~' name: ValidIdentifierName '~' {
-    return {inlineBinaryCall: name};
+  = '~' callee: Identifier '~' {
+    return {inlineBinaryCall: callee.id};
   }
 
 Term

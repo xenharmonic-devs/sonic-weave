@@ -255,6 +255,10 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('rejects reserved patterns as double tilde inline call names', () => {
+    expect(() => parseSingle('foo ~M3~ bar')).toThrow();
+  });
+
   it('parses ranges', () => {
     const ast = parseSingle('[1..10]');
     expect(ast).toEqual({
