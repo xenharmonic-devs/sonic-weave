@@ -232,6 +232,29 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('supports double tilde inline binary call sugar', () => {
+    const ast = parseSingle('foo ~avg~ bar');
+    expect(ast).toEqual({
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'CallExpression',
+        callee: {type: 'Identifier', id: 'avg'},
+        args: [
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {type: 'Identifier', id: 'foo'},
+          },
+          {
+            type: 'Argument',
+            spread: false,
+            expression: {type: 'Identifier', id: 'bar'},
+          },
+        ],
+      },
+    });
+  });
+
   it('parses ranges', () => {
     const ast = parseSingle('[1..10]');
     expect(ast).toEqual({
