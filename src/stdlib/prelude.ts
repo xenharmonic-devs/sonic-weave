@@ -1010,6 +1010,22 @@ riff isodifferential(parts, interval=2) {
   }
   return isorescale(interval, parts::2*parts) al~ interval;
 }
+
+riff interpolate(divisions=2, scale=££) {
+  "Equally divide successive intervals in the scale replacing entries with \`divisions\` narrower copies.";
+  unstack(scale) ~^ (1 / divisions);
+  i => arrayRepeat(divisions, [i]);
+  return stack();
+}
+
+riff interpolateLinear(divisions=2, scale=££) {
+  "Linearly divide successive intervals in the scale replacing entries with \`divisions\` narrower copies.";
+  diff(scale ~- 1) ~/ divisions;
+  i => arrayRepeat(divisions, [i]);
+  stackLinear() ~+ 1;
+  (* Restore formatting *)
+  $[divisions - 1, 2 * divisions - 1 ..] = scale;
+}
 `
   .replaceAll('riff', 'fn')
   .replaceAll('  ', '')

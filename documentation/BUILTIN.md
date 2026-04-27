@@ -605,6 +605,12 @@ Convert interval to (relative) FJS using HEJI comma flavors.
 ### hypot(*...args*)
 Calculate the square root of the sum of squares of the arguments.
 
+### interpolate(*divisions = 2*, *scale = ££*)
+Equally divide successive intervals in the scale replacing entries with `divisions` narrower copies.
+
+### interpolateLinear(*divisions = 2*, *scale = ££*)
+Linearly divide successive intervals in the scale replacing entries with `divisions` narrower copies.
+
 ### isodifferential(*parts*, *interval = 2*)
 Generate an isodifferential chord of `parts` steps that divide an `interval` equally in linear domain. Usable as a scale.
 

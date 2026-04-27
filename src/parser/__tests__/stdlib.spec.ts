@@ -1829,4 +1829,58 @@ describe('SonicWeave standard library', () => {
       'Equave should be a relative interval.',
     );
   });
+
+  it('interpolates a harmonic segment geometrically', () => {
+    const scale = expand('5::10;interpolate()');
+    expect(scale).toEqual([
+      '6/5^1/2',
+      '6/5',
+      '42/25^1/2',
+      '7/5',
+      '56/25^1/2',
+      '8/5',
+      '72/25^1/2',
+      '9/5',
+      '18/5^1/2',
+      '2',
+    ]);
+  });
+
+  it('interpolates a subharmonic segment geometrically', () => {
+    const scale = expand('/6::3;interpolate(3)');
+    expect(scale).toEqual([
+      '6/5^1/3',
+      '6/5^2/3',
+      '6/5',
+      '54/25^1/3',
+      '27/10^1/3',
+      '3/2',
+      '9/2^1/3',
+      '6^1/3',
+      '2',
+    ]);
+  });
+
+  it('interpolates an equal temperament arithmetically', () => {
+    const scale = expand('tet(4);interpolateLinear()');
+    expect(scale).toHaveLength(8);
+    expect(parseFloat(scale[0])).toBeCloseTo(156.49);
+    expect(scale[1]).toBe('1\\4');
+    expect(parseFloat(scale[2])).toBeCloseTo(456.49);
+    expect(scale[3]).toBe('2\\4');
+    expect(parseFloat(scale[4])).toBeCloseTo(756.49);
+    expect(scale[5]).toBe('3\\4');
+    expect(parseFloat(scale[6])).toBeCloseTo(1056.49);
+    expect(scale[7]).toBe('4\\4');
+  });
+
+  it('interpolates harmonic segments arithmetically', () => {
+    const scale = expand('2::4;interpolateLinear(3)');
+    expect(scale).toEqual(['7/6', '8/6', '3/2', '10/6', '11/6', '4/2']);
+  });
+
+  it('produces 5afdt through intepolation', () => {
+    const scale = expand('3;interpolateLinear(5)');
+    expect(scale).toEqual(['7/5', '9/5', '11/5', '13/5', '3']);
+  });
 });
