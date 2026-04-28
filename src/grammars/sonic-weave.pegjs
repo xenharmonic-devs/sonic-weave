@@ -210,17 +210,17 @@ ThrowToken         = @'throw'    !IdentifierPart
 ToToken            = @'to'       !IdentifierPart
 TryToken           = @'try'      !IdentifierPart
 TrueToken          = @'true'     !IdentifierPart
-VectorNotToken     = @'vnot'     !IdentifierPart
 WhereToken         = @'where'    !IdentifierPart
 WhileToken         = @'while'    !IdentifierPart
 
 AndTokenoid      = @$('v'? 'and')         !IdentifierPart
 AlTokenoid       = @$('al' '~'?)          !IdentifierPart
-OfInTokenoid     = @$('of' / 'in')        !IdentifierPart
-OrTokenoid       = @$('v'? 'or')          !IdentifierPart
 DotTokenoid      = @$([mv]? 'dot')        !IdentifierPart
 MinMaxTokenoid   = @$('m' ('in' / 'ax'))  !IdentifierPart
 ModTokenoid      = @$('mod' 'c'?)         !IdentifierPart
+NotTokenoid      = @$('v'? 'not')         !IdentifierPart
+OfInTokenoid     = @$('of' / 'in')        !IdentifierPart
+OrTokenoid       = @$('v'? 'or')          !IdentifierPart
 ReduceTokenoid   = @$('rd' 'c'?)          !IdentifierPart
 SoftOfInTokenoid = @$('~'? ('of' / 'in')) !IdentifierPart
 
@@ -520,22 +520,13 @@ WhileStatement
 
 IfStatement
   = IfToken _ '(' _ test: Expression _ ')' _
-    consequent: Statement _
-    ElseToken _
-    alternate: Statement {
+    consequent: Statement alternate: (_ ElseToken _ @Statement)? {
     return {
       type: 'IfStatement',
       test,
       consequent,
-      alternate,
+      ...(alternate ? {alternate} : {}),
     };
-  }
-  / IfToken _ '(' _ test: Expression _ ')' _ consequent: Statement {
-    return {
-      type: 'IfStatement',
-      test,
-      consequent,
-    }
   }
 
 IterationKind = OfInTokenoid
@@ -739,7 +730,7 @@ ConjunctionExpression
   }
 
 NotExpression
-  = operators: (NotToken / VectorNotToken)|.., __| __ operand: RelationalExpression {
+  = operators: NotTokenoid|.., __| __ operand: RelationalExpression {
     return operators.reduce((result, operator) => UnaryExpression(operator, result, false), operand);
   }
 
