@@ -493,10 +493,10 @@ ThrowStatement
   }
 
 ReturnStatement
-  = ReturnToken _ argument: Expression EOS {
-    return { type: 'ReturnStatement', argument };
-  }
-  / ReturnToken EOS {
+  = ReturnToken _ argument: Expression? EOS {
+    if (argument) {
+      return { type: 'ReturnStatement', argument };
+    }
     return { type: 'ReturnStatement' };
   }
 
@@ -543,7 +543,9 @@ IfStatement
 IterationKind = OfInTokenoid
 
 IterationStatement
-  = ForToken _ '(' _ LetToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
+  = ForToken _ '(' _ mutable: (LetToken { return true; } / ConstToken { return false; })
+    _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')'
+    _ body: Statement tail: (_ ElseToken _ @Statement)? {
     return {
       type: 'IterationStatement',
       element,
@@ -551,42 +553,20 @@ IterationStatement
       container,
       body,
       tail,
-      mutable: true,
-    };
-  }
-  / ForToken _ '(' _ ConstToken _ element: (Parameter / ParameterArray) _ kind: IterationKind _ container: Expression _ ')' _ body: Statement tail: (_ ElseToken _ @Statement)? {
-    return {
-      type: 'IterationStatement',
-      element,
-      kind,
-      container,
-      body,
-      tail,
-      mutable: false,
+      mutable,
     };
   }
 
 TryStatement
-  = TryToken _ body: Statement _ handler: CatchClause _ finalizer: TryFinalizer {
+  = TryToken _ body: Statement _ handler: CatchClause? _ finalizer: TryFinalizer? {
+    if (!handler && !finalizer) {
+      expected('catch or finally clause');
+    }
     return {
       type: 'TryStatement',
       body,
-      handler,
-      finalizer,
-    };
-  }
-  / TryToken _ body: Statement _ handler: CatchClause {
-    return {
-      type: 'TryStatement',
-      body,
-      handler,
-    };
-  }
-  / TryToken _ body: Statement _ finalizer: TryFinalizer {
-    return {
-      type: 'TryStatement',
-      body,
-      finalizer,
+      ...(handler ? {handler} : {}),
+      ...(finalizer ? {finalizer} : {}),
     };
   }
 
