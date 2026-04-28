@@ -65,6 +65,14 @@ describe('SonicWeave standard library', () => {
     );
   });
 
+  it('generates GS-like MOS scales', () => {
+    const scale = parseSource('mos(9, 5, 2, 1, 1, niente, 5/1)');
+    expect(scale).toHaveLength(14);
+    expect(scale.map(i => i.toString()).join(';')).toBe(
+      '1\\23<5/1>;3\\23<5/1>;5\\23<5/1>;6\\23<5/1>;8\\23<5/1>;9\\23<5/1>;11\\23<5/1>;13\\23<5/1>;14\\23<5/1>;16\\23<5/1>;18\\23<5/1>;19\\23<5/1>;21\\23<5/1>;23\\23<5/1>',
+    );
+  });
+
   it('generates subharmonic segments', () => {
     const scale = parseSource('subharmonics(4, 8);');
     expect(scale).toHaveLength(4);

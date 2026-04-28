@@ -15,7 +15,7 @@ riff reduce(scale = ££) {
 `
   .replaceAll('riff', 'fn')
   .replaceAll('  ', '')
-  .replaceAll('\n', '');
+  .replaceAll('\n', ' ');
 
 export const PRELUDE_SOURCE = `
 (** Root context dependents **)
@@ -1029,4 +1029,4 @@ riff interpolateLinear(divisions=2, scale=££) {
 `
   .replaceAll('riff', 'fn')
   .replaceAll('  ', '')
-  .replaceAll('\n', '');
+  .replaceAll('\n', ' ');
