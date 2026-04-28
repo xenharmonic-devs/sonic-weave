@@ -493,12 +493,10 @@ ThrowStatement
   }
 
 ReturnStatement
-  = ReturnToken _ argument: Expression? EOS {
-    if (argument) {
-      return { type: 'ReturnStatement', argument };
-    }
-    return { type: 'ReturnStatement' };
-  }
+  = ReturnToken result:(
+    __ argument: Expression EOS { return { type: 'ReturnStatement', argument }; }
+    / EOS { return { type: 'ReturnStatement' }; }
+  ) { return result; }
 
 BreakStatement
   = BreakToken EOS {
