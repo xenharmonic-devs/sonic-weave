@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added geometric and arithmetic scale interpolation support.
 - Added broadcasting rules for `insert` and `dislodge`.
-- Added binary-operation inlining sugar for `~`.
+- Added binary function inlining sugar e.g. `3 ~avg~ 5`.
 
 ### Changed
 - Combined prefix handling in grammar rules for better parser efficiency.
