@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-04-28
+
+### Fixed
+- Fix issues stemming from over-aggressive prelude source minimization [#463].
+
 ## [0.14.0] - 2026-04-28
 
 ### Added
@@ -91,7 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed typos in user-facing error messages.
 
-[Unreleased]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/xenharmonic-devs/sonic-weave/compare/v0.12.1...v0.13.0
