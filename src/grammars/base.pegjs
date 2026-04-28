@@ -121,12 +121,12 @@ DecimalDigit
 HexDigit
   = [0-9a-f]i
 
-IdentifierStart
+IdentifierStart 'identifier'
   = [\p{ID_Start}]
   / '$'
   / '_'
 
-IdentifierPart
+IdentifierPart 'identifier'
   = [\p{ID_Continue}]
   / '$'
   / '\u200C'

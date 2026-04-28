@@ -1610,4 +1610,15 @@ describe('Negative tests', () => {
   it('rejects 01', () => {
     expect(() => parse('01')).toThrow();
   });
+
+  it('rejects reserved keywords as identifiers in declarations', () => {
+    expect(() => parseSingle('const mod = 4')).toThrow();
+  });
+
+  it('rejects reserved keywords as identifiers in arrow functions (parens)', () => {
+    expect(() => parseSingle('(mod) => 4')).toThrow();
+  });
+  it('rejects reserved keywords as identifiers in arrow functions', () => {
+    expect(() => parseSingle('mod => 4')).toThrow();
+  });
 });
