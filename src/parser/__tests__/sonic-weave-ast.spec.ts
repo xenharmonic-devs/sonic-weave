@@ -964,6 +964,39 @@ describe('SonicWeave Abstract Syntax Tree parser', () => {
     });
   });
 
+  it('has try..finally', () => {
+    const ast = parseSingle(
+      'try { throw "Recoverable" } finally { "cleanup" }',
+    );
+    expect(ast).toEqual({
+      type: 'TryStatement',
+      body: {
+        type: 'BlockStatement',
+        body: [
+          {
+            type: 'ThrowStatement',
+            argument: {
+              type: 'StringLiteral',
+              value: 'Recoverable',
+            },
+          },
+        ],
+      },
+      finalizer: {
+        type: 'BlockStatement',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'StringLiteral',
+              value: 'cleanup',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('supports multiple const initializers', () => {
     const ast = parseSingle('const a = 1, [b, c, d = 4] = [2, 3]');
     expect(ast).toEqual({
@@ -1546,6 +1579,12 @@ describe('Negative tests', () => {
 
   it('rejects potentially ambiguous harmonic segment concatenations', () => {
     expect(() => parse('4::7::16')).toThrow();
+  });
+
+  it('rejects try without catch or finally', () => {
+    expect(() => parse('try { "missing handlers" }')).toThrow(
+      /catch or finally clause/,
+    );
   });
 
   it('rejects inner ternary operator association', () => {
