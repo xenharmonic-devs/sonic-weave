@@ -701,7 +701,7 @@ export class Interval {
    */
   roundTo(other: Interval) {
     if (this.domain !== other.domain) {
-      const suggestedOperator = this.domain === 'logarithmic' ? '~to' : 'to~';
+      const suggestedOperator = this.domain === 'logarithmic' ? '~by' : 'by~';
       throw new Error(
         `Domains must match in rounding. Did you mean '${suggestedOperator}'?`,
       );
@@ -737,7 +737,13 @@ export class Interval {
    */
   mmod(other: Interval, ceiling = false) {
     if (this.domain !== other.domain) {
-      const suggestedOperator = this.domain === 'logarithmic' ? '~mod' : 'mod~';
+      const suggestedOperator = ceiling
+        ? this.domain === 'logarithmic'
+          ? '~rdc'
+          : 'rdc~'
+        : this.domain === 'logarithmic'
+          ? '~rd'
+          : 'rd~';
       throw new Error(
         `Domains must match in modulo. Did you mean '${suggestedOperator}'?`,
       );
