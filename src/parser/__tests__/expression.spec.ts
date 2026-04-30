@@ -85,6 +85,12 @@ describe('SonicWeave expression evaluator', () => {
     );
   });
 
+  it('guides toward logarithmic composition for mixed-domain subtraction', () => {
+    expect(() => evaluate('M3 - 81/80')).toThrow(
+      "Domains must match in subtraction. Did you mean '~%'?",
+    );
+  });
+
   it('guides toward logarithmic composition for mixed-domain rounding', () => {
     expect(() => evaluate('3/2 to 1.23')).toThrow(
       "Domains must match in rounding. Did you mean 'by~'?",
