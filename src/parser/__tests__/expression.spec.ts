@@ -79,6 +79,12 @@ describe('SonicWeave expression evaluator', () => {
     expect(interval.toString()).toBe('9420.069 Hz');
   });
 
+  it('guides toward logarithmic composition for mixed-domain addition', () => {
+    expect(() => evaluate('3/2 + 1.23')).toThrow(
+      "Domains must match in addition. Did you mean '*~'?",
+    );
+  });
+
   it('subtracts cents', () => {
     const {interval} = parseSingle('1.955 - 1c');
     expect(interval.totalCents()).toBeCloseTo(0.955);

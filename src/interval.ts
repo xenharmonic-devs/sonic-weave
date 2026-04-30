@@ -534,7 +534,10 @@ export class Interval {
    */
   add(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in addition.');
+      const suggestedOperator = this.domain === 'logarithmic' ? '~*' : '*~';
+      throw new Error(
+        `Domains must match in addition. Did you mean '${suggestedOperator}'?`,
+      );
     }
     if (this.domain === 'linear' && (this.steps || other.steps)) {
       throw new Error('Linear addition of steps is not allowed.');
@@ -564,7 +567,10 @@ export class Interval {
    */
   sub(other: Interval) {
     if (this.domain !== other.domain) {
-      throw new Error('Domains must match in subtraction.');
+      const suggestedOperator = this.domain === 'logarithmic' ? '~%' : '%~';
+      throw new Error(
+        `Domains must match in subtraction. Did you mean '${suggestedOperator}'?`,
+      );
     }
     if (this.domain === 'linear' && (this.steps || other.steps)) {
       throw new Error('Linear subtraction of steps is not allowed.');
