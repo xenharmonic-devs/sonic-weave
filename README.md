@@ -20,7 +20,7 @@ The `sonic-weave` package includes:
 - A [template-tag guide](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tag.md) for running SonicWeave programs inside JavaScript.
 - A [SonicWeave Interchange format reference](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/interchange.md) for `.swi` files.
 - A [technical overview](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/technical.md) that explains the language design and semantics.
-- Additional reference material for [tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md) and [extra comma flavors](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md).
+- Additional reference material for [tempering](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/tempering.md), [extra comma flavors](https://github.com/xenharmonic-devs/sonic-weave/blob/main/documentation/commas.md) and [API docs](https://xenharmonic-devs.github.io/sonic-weave/).
 
 ## Quick examples
 
